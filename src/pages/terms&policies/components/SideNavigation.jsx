@@ -19,38 +19,28 @@ export default function SideNavigation({
   }, [formattedActiveSection]);
 
   return (
-    <div className="relative">
+    <div className="relative shrink-0 overflow-hidden">
       <button
-        className="md:hidden p-4 sticky"
+        className="md:hidden p-2 sticky top-0"
         onClick={() => setIsOpen(!isOpen)}
       >
         ☰
       </button>
       <nav
-        className={`w-full p-4 border-r ${
-          isOpen ? "block" : "hidden"
-        } md:block`}
+        className={`md:w-full md:h-full pr-4 md:border-r sticky left-0 top-0 ${
+          isOpen ? "w-[130px] h-full border-r" : "w-0 h-0"
+        } overflow-hidden transition-[width] md:transition-none duration-300`}
       >
         <ul>
           {array[0].details?.map((item, index) => {
-            const heading = item.heading.replace(/\s+/g, "-").toLowerCase();
             return (
-              <li key={index} className="mb-2">
-                <NavLink
-                  to={`#${heading}`}
-                  className={`block p-2 rounded-md text-gray-700 hover:!bg-gold text-xs ${
-                    formattedActiveSection === heading
-                      ? "font-semibold !bg-gold"
-                      : ""
-                  }`}
-                  onClick={() => {
-                    setActiveSection(item.heading);
-                    setIsOpen(false);
-                  }}
-                >
-                  {item.heading}
-                </NavLink>
-              </li>
+              <NavItemLi
+                key={index}
+                heading={item.heading}
+                activeSection={formattedActiveSection}
+                setActiveSection={setActiveSection}
+                setIsOpen={setIsOpen}
+              />
             );
           })}
         </ul>
@@ -58,3 +48,23 @@ export default function SideNavigation({
     </div>
   );
 }
+
+const NavItemLi = ({ heading, activeSection, setActiveSection, setIsOpen }) => {
+  const formattedHeading = heading.replace(/\s+/g, "-").toLowerCase();
+  return (
+    <li className="mb-2">
+      <NavLink
+        to={`#${formattedHeading}`}
+        className={`block p-2 rounded-md text-gray-700 hover:!bg-gold text-xs ${
+          activeSection === formattedHeading ? "font-semibold !bg-gold" : ""
+        }`}
+        onClick={() => {
+          setActiveSection(formattedHeading);
+          setIsOpen(false);
+        }}
+      >
+        {heading}
+      </NavLink>
+    </li>
+  );
+};

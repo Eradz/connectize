@@ -10,7 +10,22 @@ const terms = [
     details: [
       {
         heading: "Definitions",
-        text: "'Connectize' refers to the platform, website, and all related services provided for networking and professional development. 'User', 'You', or 'Your' refers to any individual or entity that accesses or utilizes the Connectize platform. 'Content' includes all materials posted or shared within the platform, such as profiles, job postings, articles, messages, and other forms of communication. 'Services' refer to networking tools, job listings, professional development resources, and other features offered by Connectize.",
+        text: (
+          <>
+            'Connectize' refers to the platform, website, and all related
+            services provided for networking and professional development.{" "}
+            <strong className="text-black">'User'</strong>,{" "}
+            <strong className="text-black">'You'</strong>, or{" "}
+            <strong className="text-black">'Your'</strong> refers to any
+            individual or entity that accesses or utilizes the Connectize
+            platform. 'Content' includes all materials posted or shared within
+            the platform, such as profiles, job postings, articles, messages,
+            and other forms of communication.{" "}
+            <strong className="text-black">'Services'</strong> refer to
+            networking tools, job listings, professional development resources,
+            and other features offered by Connectize.
+          </>
+        ),
       },
       {
         heading: "Eligibility",
