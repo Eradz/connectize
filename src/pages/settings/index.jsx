@@ -33,16 +33,16 @@ const SettingsPage = () => {
         <h2 className="text-lg font-medium">Profile Information</h2>
         <section className="gap-2 flex flex-col pointer-events-none">
           <Input
-            value={user.first_name}
+            value={user?.first_name}
             placeholder="First name"
             className="mt-2"
           />
           <Input
-            value={user.last_name}
+            value={user?.last_name}
             placeholder="Last name"
             className="mt-2"
           />
-          <Input value={user.email} placeholder="Email" className="mt-2" />
+          <Input value={user?.email} placeholder="Email" className="mt-2" />
         </section>
       </section>
 
@@ -53,15 +53,20 @@ const SettingsPage = () => {
       </div> */}
 
       {/* Deactivate Account Section */}
-      <div className="border-t pt-4">
-        <h2 className="text-lg font-medium text-red-600">Deactivate Account</h2>
-        <LightParagraph>
-          Deactivated account will be deleted after 30days. You can apply for
-          reactivation of account within this 30days
-        </LightParagraph>
-        <Button colorScheme="red" onClick={onOpen} className="mt-4">
-          Deactivate
-        </Button>
+      <div className="border-t pt-4 flex flex-col gap-4 w-full">
+        {/* <h2 className="text-xl font-semibold">Danger zone</h2> */}
+        <section className="">
+          <h2 className="text-lg font-medium text-red-600">
+            Deactivate Account
+          </h2>
+          <LightParagraph>
+            Deactivated account will be deleted after 30days. You can apply for
+            reactivation of account within this 30days
+          </LightParagraph>
+          <Button colorScheme="red" onClick={onOpen} className="mt-4">
+            Deactivate
+          </Button>
+        </section>
       </div>
 
       {/* Deactivation Confirmation Modal */}
@@ -71,10 +76,15 @@ const SettingsPage = () => {
         primaryAction={handleDeactivate}
         title="Confirm Deactivation"
         secondaryText="Cancel"
+        primaryText="Deactivate"
       >
-        <p className="mb-2">
-          Are you sure you want to deactivate your account? This action is
-          irreversible.
+        <p className="mb-2 text-sm">
+          Deactivating your account means you lose temporary access to your
+          account. Deactivated account can be reactivated within 30days of
+          deactivation
+        </p>
+        <p className="mb-2 font-semibold text-black">
+          Please enter your password to continue
         </p>
         <Input
           type="password"
