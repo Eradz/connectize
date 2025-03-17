@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button, Input, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@chakra-ui/react";
-import { toast, Toaster } from "sonner";
+import { Button, Input, useDisclosure } from "@chakra-ui/react";
+import { toast } from "sonner";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import { useAuth } from "../../context/userContext";
