@@ -14,9 +14,7 @@ const useWebSocket = (url, params) => {
         : baseURL.replace("https", "wss");
 
     const socket = new WebSocket(
-      `${wsBaseUrl}/ws/${url}/${params ? params : "?"}token=${
-        session?.tokens?.access
-      }`
+      `${wsBaseUrl}/ws/${url}/${params ? params : "?"}token=${session?.tokens?.access}`
     );
 
     // socket.onopen = () => {
