@@ -1,9 +1,9 @@
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import {
-  ChartBar,
   CompanyIcon,
   HomeIcon,
   Message,
+  Setting,
   StoreIcon,
   UserGroup,
 } from "../../icon";
@@ -56,7 +56,8 @@ export const feedNavItems = [
     icon: BookmarkFilledIcon,
     smallNavigation: false,
   },
-  { name: "Analysis", to: "/analysis", icon: ChartBar, smallNavigation: false },
+  { name: "Settings", to: "/co/setting", icon: Setting, smallNavigation: false },
+  // { name: "Analysis", to: "/analysis", icon: ChartBar, smallNavigation: false },
 ];
 
 // index key for complete profile

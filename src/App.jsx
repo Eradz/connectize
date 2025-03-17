@@ -44,6 +44,7 @@ import { NotificationItem } from "./components/notifications";
 import TermsAndConditions from "./pages/terms&policies/terms";
 import PrivacyPolicy from "./pages/terms&policies/policy";
 import TermsLayout from "./pages/terms&policies/termsLayout";
+import SettingsPage from "./pages/settings";
 
 function App() {
   return (
@@ -85,6 +86,8 @@ function App() {
             <Route path="co/bookmarks" element={<BookMark />} />
             {/* User Profile */}
             <Route path="co/:userId" element={<UserProfile />} />
+            {/* Account Setting */}
+            <Route path="co/setting" element={<SettingsPage />} />
             {/* Company Profile */}
             <Route path="search" element={<Search />} />
             <Route path=":company" element={<CompanyProfile />} />
