@@ -27,6 +27,8 @@ const SettingsPage = () => {
       return;
     }
 
+    setLoading(true);
+
     const success = await deactivateAccount({ email: user?.email, password });
 
     if (success) {
@@ -34,6 +36,7 @@ const SettingsPage = () => {
       onClose();
       setTimeout(() => goToLogin(), 3000);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -95,6 +98,7 @@ const SettingsPage = () => {
         primaryText="Deactivate"
         colorScheme="red"
         disabled={!password || password.length < 6}
+        loading={loading}
       >
         <p className="mb-2 text-sm">
           Deactivating your account means you lose temporary access to your
