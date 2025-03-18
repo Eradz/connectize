@@ -15,6 +15,7 @@ import { NavigationSection } from "../NavigationSection";
 import NavbarDropdown from "../NavbarDropdown";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { useAuth } from "../../context/userContext";
+import { Setting } from "../../icon";
 
 const Navbar = () => {
   const { user: currentUser } = useAuth();
@@ -51,6 +52,9 @@ const Navbar = () => {
 
             <div className="flex items-center gap-3 xs:gap-5 md:gap-7 shrink-0">
               {currentUser?.user_type === CompanyUserType && <NavbarDropdown />}
+              <Link to="/co/settings" className="md:hidden">
+                <Setting  />
+              </Link>
               <NotificationPopOver />
               <JoinedUserCompanyImages />
             </div>

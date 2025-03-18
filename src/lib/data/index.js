@@ -56,7 +56,12 @@ export const feedNavItems = [
     icon: BookmarkFilledIcon,
     smallNavigation: false,
   },
-  { name: "Settings", to: "/co/setting", icon: Setting, smallNavigation: false },
+  {
+    name: "Settings",
+    to: "/co/settings",
+    icon: Setting,
+    smallNavigation: false,
+  },
   // { name: "Analysis", to: "/analysis", icon: ChartBar, smallNavigation: false },
 ];
 

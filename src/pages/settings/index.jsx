@@ -1,28 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, useDisclosure } from "@chakra-ui/react";
 import { toast } from "sonner";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import { useAuth } from "../../context/userContext";
 import ReusableModal from "../../components/custom/ResusableModal";
+import { goToLogin } from "../../lib/helpers";
+import { deactivateAccount } from "../../api-services/authentication";
+import CustomInput from "../../components/form/customInput";
 
 const SettingsPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [password, setPassword] = useState("");
-  const {user} = useAuth()
+  const [loading, setLoading] = useState(false);
+  const [errorText, setErrorText] = useState(null);
+  const { user } = useAuth();
 
-  const handleDeactivate = () => {
-    if (!password) {
-      toast.error("Please enter your password to proceed.");
+  const handleDeactivate = async () => {
+    if (!user?.email) {
+      goToLogin();
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    if (!password) {
+      setErrorText("Please enter your password to proceed.");
+      return;
+    }
+
+    const success = await deactivateAccount({ email: user?.email, password });
+
+    if (success) {
       toast.success("Your account has been deactivated successfully.");
       onClose();
-    }, 1500);
+      setTimeout(() => goToLogin(), 3000);
+    }
   };
+
+  useEffect(() => {
+    document.title = "Settings on connectize";
+  }, []);
 
   return (
     <main className="p-6 bg-white rounded-md min-h-[80vh] space-y-6">
@@ -31,7 +47,7 @@ const SettingsPage = () => {
       {/* User Information Section */}
       <section className="mb-6">
         <h2 className="text-lg font-medium">Profile Information</h2>
-        <section className="gap-2 flex flex-col pointer-events-none">
+        <section className="gap-2 lg:gap-4 flex max-lg:flex-col pointer-events-none">
           <Input
             value={user?.first_name}
             placeholder="First name"
@@ -53,7 +69,7 @@ const SettingsPage = () => {
       </div> */}
 
       {/* Deactivate Account Section */}
-      <div className="border-t pt-4 flex flex-col gap-4 w-full">
+      <section className="border-t pt-4 flex flex-col gap-4 w-full">
         {/* <h2 className="text-xl font-semibold">Danger zone</h2> */}
         <section className="">
           <h2 className="text-lg font-medium text-red-600">
@@ -67,7 +83,7 @@ const SettingsPage = () => {
             Deactivate
           </Button>
         </section>
-      </div>
+      </section>
 
       {/* Deactivation Confirmation Modal */}
       <ReusableModal
@@ -77,20 +93,25 @@ const SettingsPage = () => {
         title="Confirm Deactivation"
         secondaryText="Cancel"
         primaryText="Deactivate"
+        colorScheme="red"
+        disabled={!password || password.length < 6}
       >
         <p className="mb-2 text-sm">
           Deactivating your account means you lose temporary access to your
           account. Deactivated account can be reactivated within 30days of
           deactivation
         </p>
-        <p className="mb-2 font-semibold text-black">
+        <p className="mb-2 font-semibold text-black text-sm">
           Please enter your password to continue
         </p>
-        <Input
+
+        <CustomInput
           type="password"
           placeholder="Enter password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          fontSize="14"
+          onChange={(e) => setPassword(e.target.value.trim())}
+          error={errorText}
         />
       </ReusableModal>
     </main>

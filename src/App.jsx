@@ -87,7 +87,7 @@ function App() {
             {/* User Profile */}
             <Route path="co/:userId" element={<UserProfile />} />
             {/* Account Setting */}
-            <Route path="co/setting" element={<SettingsPage />} />
+            <Route path="co/settings" element={<SettingsPage />} />
             {/* Company Profile */}
             <Route path="search" element={<Search />} />
             <Route path=":company" element={<CompanyProfile />} />
