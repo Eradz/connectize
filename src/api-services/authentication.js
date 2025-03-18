@@ -28,3 +28,22 @@ export const authenticationService = async ({
     return false;
   }
 };
+
+export const loginUser = async ({ email, password, resetForm }) =>
+  await authenticationService({
+    values: {
+      username: email,
+      email,
+      password,
+    },
+    url: "login",
+    resetForm,
+    type: "login",
+  });
+
+export const deactivateAccount = async ({ email, password }) => {
+  return await authenticationService({
+    values: { email, password },
+    url: "deactivate-account",
+  });
+};

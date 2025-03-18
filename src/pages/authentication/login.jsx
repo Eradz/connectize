@@ -3,7 +3,10 @@ import { useEffect } from "react";
 import * as Yup from "yup";
 import Form from "../../components/form";
 import { useFormik } from "formik";
-import { authenticationService } from "../../api-services/authentication";
+import {
+  authenticationService,
+  loginUser,
+} from "../../api-services/authentication";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import HeadingText from "../../components/HeadingText";
 import { useAuth } from "../../context/userContext";
@@ -48,16 +51,7 @@ function Login() {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async ({ email, password }, { resetForm }) => {
-      const success = await authenticationService({
-        values: {
-          username: email,
-          email,
-          password,
-        },
-        url: "login",
-        resetForm,
-        type: "login",
-      });
+      const success = await loginUser({ email, password, resetForm });
 
       if (success) {
         setUser(await getCurrentUser());

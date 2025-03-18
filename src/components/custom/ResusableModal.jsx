@@ -9,7 +9,9 @@ import {
   ModalCloseButton,
   Button,
   Divider,
+  Spinner,
 } from "@chakra-ui/react";
+import clsx from "clsx";
 
 const ReusableModal = ({
   isOpen,
@@ -21,6 +23,9 @@ const ReusableModal = ({
   primaryAction,
   primaryText = "Proceed",
   secondaryText = "Close",
+  colorScheme = "",
+  disabled = false,
+  loading = false,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={size}>
@@ -41,23 +46,19 @@ const ReusableModal = ({
         <ModalFooter className="flex justify-end space-x-3">
           {footerContent || (
             <>
-              <Button
-                colorScheme=""
-                onClick={onClose}
-                className="px-4 !border !border-gold !text-black !text-sm hover:!text-opacity-60"
-              >
+              <Button onClick={onClose} className="!text-sm">
                 {secondaryText}
               </Button>
               {primaryAction && (
                 <Button
-                  colorScheme=""
-                  onClick={() => {
-                    primaryAction();
-                    onClose();
-                  }}
-                  className="px-4 py-1 !bg-gold !text-black !text-sm hover:!opacity-60"
+                  colorScheme={colorScheme}
+                  onClick={primaryAction}
+                  disabled={disabled}
+                  className={clsx("!text-sm", {
+                    "!bg-gold !text-black": !colorScheme,
+                  })}
                 >
-                  {primaryText}
+                  {loading ? <Spinner /> : primaryText}
                 </Button>
               )}
             </>
