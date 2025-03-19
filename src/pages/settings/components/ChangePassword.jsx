@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useNavigate } from "react-router-dom";
 import Form from "../../../components/form";
 import { authenticationService } from "../../../api-services/authentication";
 import clsx from "clsx";
+import { goToLogin } from "../../../lib/helpers";
 
 const validationSchema = Yup.object().shape({
   currentPassword: Yup.string().required("Current password is required"),
@@ -17,7 +17,6 @@ const validationSchema = Yup.object().shape({
 });
 
 function ChangePasswordPage() {
-  const navigate = useNavigate();
   const formValues = {
     currentPassword: "",
     newPassword: "",
@@ -31,12 +30,12 @@ function ChangePasswordPage() {
     validationSchema: validationSchema,
     onSubmit: async ({ currentPassword, newPassword }, { resetForm }) => {
       const success = await authenticationService({
-        values: { currentPassword, newPassword },
+        values: { old_password: currentPassword, new_password: newPassword },
         url: "change-password",
         resetForm,
       });
       if (success) {
-        navigate("/success");
+        setTimeout(() => goToLogin(), 3000);
       }
     },
   });
@@ -84,10 +83,12 @@ function ChangePasswordPage() {
         Change Password
       </h2>
 
-          <section className={clsx("transition-all duration-300 overflow-hidden",{
+      <section
+        className={clsx("transition-all duration-300 overflow-hidden", {
           "h-full mt-4": showForm,
-          "opacity-0 h-0": !showForm
-      })}>
+          "opacity-0 h-0": !showForm,
+        })}
+      >
         <Form
           formik={formik}
           status={"none"}
