@@ -4,6 +4,7 @@ import Logo from "../../components/logo";
 import useRedirect from "../../hooks/useRedirect";
 import {
   CONFIRM_RESET_PASSWORD_KEY,
+  REACTIVATE_ACCOUNT_KEY,
   RESET_PASSWORD_EMAIL_KEY,
   RESET_PASSWORD_KEY,
   SUCCESS_TYPE_KEY,
@@ -30,6 +31,8 @@ const SuccessPage = () => {
 
   const getMessage = () => {
     switch (hasSuccess) {
+      case REACTIVATE_ACCOUNT_KEY:
+        return "A mail on how to reactivate your account has been sent to your email address";
       case RESET_PASSWORD_KEY:
         return "A mail on how to reset your password has been sent to your email address";
       case CONFIRM_RESET_PASSWORD_KEY:
@@ -42,8 +45,10 @@ const SuccessPage = () => {
   };
   const getHeader = () => {
     switch (hasSuccess) {
+      case REACTIVATE_ACCOUNT_KEY:
+        return "Account Reactivation Instruction Sent";
       case RESET_PASSWORD_KEY:
-        return "Reset Instruction Sent";
+        return "Password Reset Instruction Sent";
       case CONFIRM_RESET_PASSWORD_KEY:
         return "Password Reset Successfully";
       case VERIFY_ACCOUNT_KEY:
@@ -56,14 +61,15 @@ const SuccessPage = () => {
   const getLink = () => {
     return hasSuccess === RESET_PASSWORD_KEY ||
       hasSuccess === REGISTER_EMAIL_KEY
-      ? `mailto:${email}`
+      ? `/login`
       : "/login";
   };
 
   const getLinkText = () => {
     return hasSuccess === RESET_PASSWORD_KEY ||
-      hasSuccess === REGISTER_EMAIL_KEY
-      ? "Check email"
+      hasSuccess === REGISTER_EMAIL_KEY ||
+      hasSuccess === REACTIVATE_ACCOUNT_KEY
+      ? "Ok"
       : "Login";
   };
 

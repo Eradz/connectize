@@ -45,6 +45,7 @@ import TermsAndConditions from "./pages/terms&policies/terms";
 import PrivacyPolicy from "./pages/terms&policies/policy";
 import TermsLayout from "./pages/terms&policies/termsLayout";
 import SettingsPage from "./pages/settings";
+import ReactivationPage from "./pages/authentication/reactivation";
 
 function App() {
   return (
@@ -123,6 +124,7 @@ function App() {
           <Route path="/" element={<AuthLayout />}>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reactivate-account" element={<ReactivationPage />} />
             <Route path="/verify-account" element={<VerifyAccount />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route
