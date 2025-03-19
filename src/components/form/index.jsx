@@ -102,7 +102,7 @@ export default function Form({
     return (
       <div key={index} className="w-full">
         {type === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-3">
             {renderGridInputs(gridInputs, disabled)}
           </div>
         ) : (
@@ -125,7 +125,7 @@ export default function Form({
           <button
             type={button.type || "submit"}
             className={clsx(
-              "w-full bg-black text-white rounded-full px-3 py-2.5 flex items-center justify-center transition-all duration-300",
+              "w-full max-w-[300px] mx-auto bg-black text-white rounded-full px-3 py-2.5 flex items-center justify-center transition-all duration-300",
               "hover:opacity-60 active:scale-90 disabled:cursor-not-allowed disabled:opacity-60",
               button.style
             )}

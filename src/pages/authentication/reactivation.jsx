@@ -6,7 +6,7 @@ import { authenticationService } from "../../api-services/authentication";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   SUCCESS_TYPE_KEY,
-  VERIFY_ACCOUNT_KEY,
+  REACTIVATE_ACCOUNT_KEY,
 } from "../../lib/data/authentication";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
@@ -18,7 +18,7 @@ const validationSchema = Yup.object().shape({
     .required("Fill in a valid email address"),
 });
 
-function VerifyAccount() {
+function ReactivateAccount() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const formValues = { email: "" };
@@ -32,7 +32,7 @@ function VerifyAccount() {
     onSubmit: async ({ email }, { resetForm }) => {
       await authenticationService({
         values: { email },
-        url: `resend_verification_email`,
+        url: "request-account-reactivation",
         method: "POST",
         resetForm,
       });
@@ -41,23 +41,24 @@ function VerifyAccount() {
 
   useEffect(() => {
     formik.setValues(formValues);
-    document.title = "Account Verification | connectize";
+    document.title = "Account Reactivation | Connectize";
 
     (async function checkForToken() {
-      await verifyAccount();
+      await reactivateAccount();
     })();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const verifyAccount = async () => {
+  const reactivateAccount = async () => {
     if (uid && token) {
       const success = await authenticationService({
-        url: `verify-account/${uid}/${token}`,
-        method: "GET",
+        url: `reactivate-account/${uid}/${token}`,
+        method: "POST",
       });
 
       if (success) {
-        localStorage.setItem(SUCCESS_TYPE_KEY, VERIFY_ACCOUNT_KEY);
+        localStorage.setItem(SUCCESS_TYPE_KEY, REACTIVATE_ACCOUNT_KEY);
         navigate("/success");
       }
 
@@ -70,16 +71,16 @@ function VerifyAccount() {
       name: "email",
       type: "email",
       label: "Email Address",
-      placeholder: "Enter the inactive email address",
+      placeholder: "Enter the deactivated account email address",
       validate: true,
     },
   ];
 
   return (
     <section className="space-y-4">
-      <HeadingText>Account Verification</HeadingText>
-      <LightParagraph className="text-custom_grey">
-        Please enter your email address to receive an account verification
+      <HeadingText>Account Reactivation</HeadingText>
+      <LightParagraph>
+        Please enter your email address to receive an account reactivation
         email.
       </LightParagraph>
       <Form
@@ -88,7 +89,7 @@ function VerifyAccount() {
         inputArray={fields}
         button={{
           type: "submit",
-          text: "Send verification email",
+          text: "Send reactivation email",
           submitText: "Checking email...",
           style: "!md:w-[60%] mt-4",
         }}
@@ -104,4 +105,4 @@ function VerifyAccount() {
   );
 }
 
-export default VerifyAccount;
+export default ReactivateAccount;

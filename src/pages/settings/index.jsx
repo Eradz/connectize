@@ -8,6 +8,7 @@ import ReusableModal from "../../components/custom/ResusableModal";
 import { goToLogin } from "../../lib/helpers";
 import { deactivateAccount } from "../../api-services/authentication";
 import CustomInput from "../../components/form/customInput";
+import ChangePassword from "./components/ChangePassword";
 
 const SettingsPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -47,47 +48,45 @@ const SettingsPage = () => {
     <main className="p-6 bg-white rounded-md min-h-[80vh] space-y-6">
       <HeadingText weight="semibold">Settings</HeadingText>
 
-      {/* User Information Section */}
-      <section className="mb-6">
-        <h2 className="text-lg font-medium">Profile Information</h2>
-        <section className="gap-2 lg:gap-4 flex max-lg:flex-col pointer-events-none">
-          <Input
-            value={user?.first_name}
-            placeholder="First name"
-            className="mt-2"
-          />
-          <Input
-            value={user?.last_name}
-            placeholder="Last name"
-            className="mt-2"
-          />
-          <Input value={user?.email} placeholder="Email" className="mt-2" />
+      <section className="space-y-8">
+        {/* User Information Section */}
+        <section className="mb-6">
+          <h2 className="text-lg font-medium">Profile Information</h2>
+          <section className="gap-2 lg:gap-4 flex max-lg:flex-col pointer-events-none">
+            <Input
+              value={user?.first_name}
+              placeholder="First name"
+              className="mt-2"
+            />
+            <Input
+              value={user?.last_name}
+              placeholder="Last name"
+              className="mt-2"
+            />
+            <Input value={user?.email} placeholder="Email" className="mt-2" />
+          </section>
+        </section>
+
+        {/* Change Password Section */}
+        <ChangePassword />
+
+        {/* Deactivate Account Section */}
+        <section className="border-t pt-4 flex flex-col gap-4 w-full">
+          {/* <h2 className="text-xl font-semibold">Danger zone</h2> */}
+          <section className="">
+            <h2 className="text-lg font-medium text-red-600">
+              Deactivate Account
+            </h2>
+            <LightParagraph>
+              Deactivated account will be deleted after 30days. You can apply
+              for reactivation of account within this 30days
+            </LightParagraph>
+            <Button colorScheme="red" onClick={onOpen} className="mt-4">
+              Deactivate
+            </Button>
+          </section>
         </section>
       </section>
-
-      {/* Change Password Section */}
-      {/* <div className="mb-6">
-        <h2 className="text-lg font-medium">Change Password</h2>
-        <Input type="password" placeholder="New Password" className="mt-2" />
-      </div> */}
-
-      {/* Deactivate Account Section */}
-      <section className="border-t pt-4 flex flex-col gap-4 w-full">
-        {/* <h2 className="text-xl font-semibold">Danger zone</h2> */}
-        <section className="">
-          <h2 className="text-lg font-medium text-red-600">
-            Deactivate Account
-          </h2>
-          <LightParagraph>
-            Deactivated account will be deleted after 30days. You can apply for
-            reactivation of account within this 30days
-          </LightParagraph>
-          <Button colorScheme="red" onClick={onOpen} className="mt-4">
-            Deactivate
-          </Button>
-        </section>
-      </section>
-
       {/* Deactivation Confirmation Modal */}
       <ReusableModal
         onClose={onClose}
