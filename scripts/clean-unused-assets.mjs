@@ -1,11 +1,17 @@
 import fs from "fs";
 import path from "path";
+import readline from "readline";
 
-// 🔹 Paths
+// 🔹 Setup user prompt for deletions
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
 const srcDir = path.join(process.cwd(), "src");
 const publicDir = path.join(process.cwd(), "public");
 
-// 🔹 Supported file extensions
+// 🔹 Supported file types
 const fileExtensions = [
   ".png",
   ".jpg",
@@ -29,11 +35,11 @@ const fileExtensions = [
   ".txt", // Other assets
 ];
 
-// 🔹 Store file references
+// 🔹 Map for storing used files
 const fileUsageMap = new Map();
 
 /**
- * 🔹 Scan src directory for asset references
+ * 🔍 Scan src directory for asset references
  */
 function scanDirectory(directory) {
   console.log(`🔍 Scanning: ${directory}`);
@@ -44,16 +50,19 @@ function scanDirectory(directory) {
     const stat = fs.statSync(fullPath);
 
     if (stat.isDirectory()) {
-      scanDirectory(fullPath); // Recursively scan subfolders
+      scanDirectory(fullPath); // Recursive scan
     } else if (/\.(js|jsx|ts|tsx|css|scss|json)$/i.test(file)) {
       console.log(`📄 Checking file: ${file}`);
       const content = fs.readFileSync(fullPath, "utf-8");
 
       fileExtensions.forEach((ext) => {
-        const regex = new RegExp(`public/([^"')]+\\${ext})`, "g");
+        const regex = new RegExp(
+          `(["'(\s])(?:public/|/)?([^"')]+\\${ext})`,
+          "g"
+        );
         let match;
         while ((match = regex.exec(content)) !== null) {
-          const fileName = match[1];
+          const fileName = match[2];
 
           if (!fileUsageMap.has(fileName)) {
             fileUsageMap.set(fileName, new Set());
@@ -66,9 +75,9 @@ function scanDirectory(directory) {
 }
 
 /**
- * 🔹 Find and delete unused files
+ * 🗑️ Find and delete unused files (with user confirmation)
  */
-function deleteUnusedFiles() {
+async function deleteUnusedFiles() {
   if (!fs.existsSync(publicDir)) {
     console.log("❌ No 'public' folder found.");
     return;
@@ -78,21 +87,26 @@ function deleteUnusedFiles() {
   const allFiles = getAllFiles(publicDir);
   const usedFiles = new Set(fileUsageMap.keys());
 
-  allFiles.forEach((filePath) => {
+  for (const filePath of allFiles) {
     const relativePath = path.relative(publicDir, filePath).replace(/\\/g, "/");
 
     if (usedFiles.has(relativePath)) {
-      const references = Array.from(fileUsageMap.get(relativePath)).join(
-        "\n   - "
-      );
-      console.log(`✅ Kept: ${relativePath} (Used in: \n   - ${references})`);
+      console.log(`✅ Kept: ${relativePath}`);
     } else {
       console.log(`🗑️ Unused: ${relativePath} (No references found in 'src')`);
-      fs.unlinkSync(filePath);
-    }
-  });
 
-  console.log("\n✅ Cleanup completed.");
+      // Ask user for confirmation
+      const confirm = await confirmDeletion(filePath);
+      if (confirm) {
+        fs.unlinkSync(filePath);
+        console.log(`🚮 Deleted: ${relativePath}`);
+      } else {
+        console.log(`🚫 Skipped: ${relativePath}`);
+      }
+    }
+  }
+
+  rl.close();
 }
 
 /**
@@ -133,9 +147,20 @@ function logDuplicateFiles() {
 }
 
 /**
+ * 🔹 Confirm deletion before removing files
+ */
+function confirmDeletion(filePath) {
+  return new Promise((resolve) => {
+    rl.question(`❗ Delete unused file: ${filePath}? (y/n) `, (answer) => {
+      resolve(answer.toLowerCase() === "y");
+    });
+  });
+}
+
+/**
  * 🔹 Run the public folder cleanup process
  */
-(function () {
+(async function () {
   console.log("\n🚀 Starting public folder cleanup...\n");
 
   if (!fs.existsSync(srcDir)) {
@@ -145,5 +170,5 @@ function logDuplicateFiles() {
 
   scanDirectory(srcDir);
   logDuplicateFiles();
-  deleteUnusedFiles();
+  await deleteUnusedFiles();
 })();
