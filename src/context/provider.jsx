@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { UserProvider } from "./userContext";
-import { NavProvider } from "./navContext";
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { HelmetProvider } from "react-helmet-async";
+import { NavProvider } from "./navContext";
 import { QueryProvider } from "./queryContext";
+import { UserProvider } from "./userContext";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient({
@@ -36,7 +37,9 @@ const MyProvider = ({ children }) => {
       <UserProvider>
         <NavProvider>
           <ChakraProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <HelmetProvider>{children}</HelmetProvider>
+            </QueryProvider>
           </ChakraProvider>
         </NavProvider>
       </UserProvider>

@@ -143,6 +143,7 @@ export async function makeApiRequest({
     if (error.status === 417) {
       toast("Account Deactivated", {
         description: error.response.errors[0].message,
+        duration: 10000,
         action: {
           label: "Reactivate Now",
           onClick: () => (window.location.href = "/reactivate-account"),

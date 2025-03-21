@@ -15,11 +15,9 @@ const SEO = ({
 
   const ogImage = image || frontendUrl() + "/default-image.png";
 
-  console.log({ currentUrl, ogImage });
-
   return (
-    <Helmet>
-      <title>{title}</title>
+    <Helmet async>
+      <title>{title} | connectize</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="author" content="Connectize Team - Clever Akanimoh" />
