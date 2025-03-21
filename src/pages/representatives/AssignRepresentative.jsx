@@ -1,20 +1,20 @@
-import React, { useState, useMemo, useEffect } from "react";
-import HeadingText from "../../components/HeadingText";
-import LightParagraph from "../../components/ParagraphText";
 import { useQuery } from "@tanstack/react-query";
-import { getAllUsers } from "../../api-services/users";
-import { useAuth } from "../../context/userContext";
-import { RepresentativesList } from "../../components/representatives/RepresentativesList";
-import { UserSearchInput } from "../../components/representatives/UserSearchInput";
-import { UserList } from "../../components/representatives/UserList";
+import React, { useEffect, useMemo, useState } from "react";
+import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import {
   getAllRepresentatives,
   getOrCreateRepresentativeCategory,
 } from "../../api-services/representatives";
-import { getCompanies } from "../../api-services/companies";
-import { useCustomQuery } from "../../context/queryContext";
-import { UserType } from "../../lib/helpers/types";
+import { getAllUsers } from "../../api-services/users";
+import HeadingText from "../../components/HeadingText";
+import LightParagraph from "../../components/ParagraphText";
+import { RepresentativesList } from "../../components/representatives/RepresentativesList";
+import { UserList } from "../../components/representatives/UserList";
+import { UserSearchInput } from "../../components/representatives/UserSearchInput";
 import Restricted from "../../components/Restricted";
+import { useCustomQuery } from "../../context/queryContext";
+import { useAuth } from "../../context/userContext";
+import { UserType } from "../../lib/helpers/types";
 
 export default function AssignRepresentative() {
   const [username, setUsername] = useState("");
@@ -29,7 +29,7 @@ export default function AssignRepresentative() {
 
   const { data: companies, isLoading: companyLoading } = useQuery({
     queryKey: ["companies"],
-    queryFn: getCompanies,
+    queryFn: getCompanyByIdOrEmail,
   });
 
   const company_id = companies?.[0]?.id;

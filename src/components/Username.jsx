@@ -1,7 +1,7 @@
+import clsx from "clsx";
 import React from "react";
 import { Link } from "react-router-dom";
 import { VerifiedIcon } from "../icon";
-import clsx from "clsx";
 
 export default function Username({ user, noClick = false }) {
   return (
@@ -12,7 +12,7 @@ export default function Username({ user, noClick = false }) {
           "pointer-events-none": noClick,
         })}
       >
-        {user?.first_name || "No"} {user?.last_name || "username"}
+        {user?.first_name || "No"} {user?.last_name || "Name"}
       </Link>
 
       {user?.verified && <VerifiedIcon color="black" />}

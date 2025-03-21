@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { UserGroup } from "../../icon";
-import clsx from "clsx";
-import { PlusIcon } from "@radix-ui/react-icons";
-import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { getCompanies } from "../../api-services/companies";
-import { assignRepresentative } from "../../api-services/representatives";
-import { toast } from "sonner";
 import { Spinner } from "@chakra-ui/react";
+import { PlusIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import React, { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { getCompanyByIdOrEmail } from "../../api-services/companies";
+import { assignRepresentative } from "../../api-services/representatives";
+import { UserGroup } from "../../icon";
 
 export default function RepRoleInput({ user, setCachedReps, cachedReps }) {
   const emptyRepsRole = "Representative role cannot be empty";
@@ -17,7 +17,7 @@ export default function RepRoleInput({ user, setCachedReps, cachedReps }) {
 
   const { data: companies } = useQuery({
     queryKey: ["companies"],
-    queryFn: () => getCompanies(),
+    queryFn: () => getCompanyByIdOrEmail(),
   });
 
   const memoizedCompanies = useMemo(() => companies, [companies]);

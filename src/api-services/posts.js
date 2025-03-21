@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
-import { getCompanies } from "./companies";
+import { getCompanyByIdOrEmail } from "./companies";
 
 export const getPosts = async () => {
   const { results: posts } = await makeApiRequest({
@@ -12,7 +12,7 @@ export const getPosts = async () => {
 };
 
 export const createPost = async (formData) => {
-  const companies = await getCompanies();
+  const companies = await getCompanyByIdOrEmail();
   const company = companies?.[0];
 
   formData.append("company", company?.id);

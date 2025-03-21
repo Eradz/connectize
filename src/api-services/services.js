@@ -1,8 +1,8 @@
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
 import { capitalizeFirst } from "../lib/utils";
+import { getCompanyByIdOrEmail } from "./companies";
 import { getCurrentUser } from "./users";
-import { getCompanies } from "./companies";
 
 // {
 //     "title": "",
@@ -54,7 +54,7 @@ export const createService = async (data, resetForm) => {
 
   const user = await getCurrentUser();
 
-  const company = await getCompanies();
+  const company = await getCompanyByIdOrEmail();
 
   const toastId = toast.info("Creating service...");
 

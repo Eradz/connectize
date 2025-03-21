@@ -1,20 +1,20 @@
 import React from "react";
 
+import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import { getServices } from "../../../api-services/services";
 import {
   getPeopleAssociatedForUser,
   getSuggestedUsersForCurrentUser,
 } from "../../../api-services/users";
-import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
+import { useAuth } from "../../../context/userContext";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
-import { Avatar } from "@chakra-ui/react";
 import { avatarStyle } from "../../ResponsiveNav";
-import { getServices } from "../../../api-services/services";
-import clsx from "clsx";
-import Username from "../../Username";
 import SeeMoreLink from "../../SeeMoreLink";
-import { useAuth } from "../../../context/userContext";
+import Username from "../../Username";
+import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
 
 const TopServiceSuggestions = () => {
   return (
@@ -85,7 +85,7 @@ export function Suggestions({
 
 export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
   const { user: currentUser } = useAuth();
-  const { data: suggestedUsers = [], isLoading } = useQuery({
+  const { data: shownUsers = [], isLoading } = useQuery({
     queryKey: [associated ? "associatedUsers" : "suggestedUsers"],
     queryFn: associated
       ? () => getPeopleAssociatedForUser(thisUser)
@@ -100,18 +100,20 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
           Array.from({ length: 6 }, (_, index) => (
             <CircleTitleSubtitleSkeleton key={index} />
           ))
-        ) : suggestedUsers?.length <= 0 ? (
+        ) : shownUsers?.length <= 0 ? (
           <LightParagraph>
-            {associated ? "No users associated yet" : "No suggested users"}
+            {associated ? "No users associated yet" : "No suggested users yet"}
           </LightParagraph>
         ) : (
-          suggestedUsers?.map((user) => {
+          shownUsers?.map((user) => {
             const { first_name, last_name, avatar, email: hashtag, id } = user;
+            console.log(associated, user);
+
             return (
               <li className="flex items-center gap-2.5 pt-2" key={id}>
                 <Avatar
                   src={avatar}
-                  name={`${first_name} ${last_name}`}
+                  name={first_name ? `${first_name} ${last_name}` : hashtag}
                   size="sm"
                   className={avatarStyle}
                 />
@@ -124,7 +126,7 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
           })
         )}
       </ul>
-      {hasSeeMore && suggestedUsers?.length > 10 && (
+      {hasSeeMore && shownUsers?.length > 10 && (
         <SeeMoreLink url="/representatives" />
       )}
     </section>

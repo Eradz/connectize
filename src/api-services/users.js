@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { goToLogin, makeApiRequest } from "../lib/helpers";
 import { capitalizeFirst } from "../lib/utils";
+import { getCompanyByIdOrEmail } from "./companies";
 import { getAllRepresentatives } from "./representatives";
 
 export const getAllUsers = async () => {
@@ -93,7 +94,7 @@ export const getSuggestedUsersForCurrentUser = async () => {
 export const getPeopleAssociatedForUser = async (thisUser) => {
   if (!thisUser) return [];
 
-  const professionalEmailDomains = [
+  const nonProfessionalEmailDomains = [
     "gmail.com",
     "yahoo.com",
     "hotmail.com",
@@ -108,22 +109,48 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
 
   const allUsers = await getAllUsers();
 
-  const representativesAssociated =
+  const representatives =
     (await getAllRepresentatives({
       company_id: thisUser?.companies?.[0],
     })) || [];
 
+  const representativesAssociated = await Promise.all(
+    representatives
+      // .filter((u) => u.id !== thisUser.id)
+      .map(async (reps) => {
+        console.log(reps);
+
+        let user = await getUserById(reps.user);
+
+        if (reps.user === thisUser.id) {
+          companyUser = getCompanyByIdOrEmail(reps.company);
+
+          console.log(companyUser);
+
+          user = await getUserById();
+        }
+
+        console.log(user);
+
+        return user;
+      })
+  );
+
   const allUsersAssociated = allUsers.filter((user) => {
     const userDomain = user.email.split("@")[1].toLowerCase();
     const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
-    const isProfessionalEmail = !professionalEmailDomains.includes(userDomain);
+    // const isProfessionalEmail =
+    //   !nonProfessionalEmailDomains.includes(userDomain);
+
     return (
       (user.first_name || user.last_name) &&
       thisUser.id !== user.id &&
-      isProfessionalEmail &&
+      // isProfessionalEmail &&
       userDomain === thisUserDomain
     );
   });
+
+  console.log([...representativesAssociated, ...allUsersAssociated]);
 
   return [...representativesAssociated, ...allUsersAssociated];
 };
