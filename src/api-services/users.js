@@ -118,19 +118,13 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
     representatives
       // .filter((u) => u.id !== thisUser.id)
       .map(async (reps) => {
-        console.log(reps);
-
         let user = await getUserById(reps.user);
 
-        if (reps.user === thisUser.id) {
-          companyUser = getCompanyByIdOrEmail(reps.company);
+        if (reps?.user === thisUser?.id) {
+          let companyUser = await getCompanyByIdOrEmail(reps.company);
 
-          console.log(companyUser);
-
-          user = await getUserById();
+          user = companyUser[0].user;
         }
-
-        console.log(user);
 
         return user;
       })
