@@ -1,13 +1,13 @@
-import { useEffect } from "react";
-import * as Yup from "yup";
-import Form from "../../components/form";
 import { useFormik } from "formik";
-import { authenticationService } from "../../api-services/authentication";
-import CheckAgreement from "../../components/form/checkAgreement";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import * as Yup from "yup";
+import { authenticationService } from "../../api-services/authentication";
+import Form from "../../components/form";
+import CheckAgreement from "../../components/form/checkAgreement";
+import HeadingText from "../../components/HeadingText";
 import { SUCCESS_TYPE_KEY } from "../../lib/data/authentication";
 import { REGISTER_EMAIL_KEY } from "../../lib/helpers";
-import HeadingText from "../../components/HeadingText";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -72,7 +72,6 @@ function Signup() {
 
   useEffect(() => {
     formik.setValues(formValues);
-    document.title = "Account Registration portal | connectize";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,9 +102,12 @@ function Signup() {
   ];
   return (
     <section className="space-y-4">
+      <SEO
+        title="User Registration"
+        description="Connect, Collaborate and Thrive with Connectize"
+      />
       <div>
         <HeadingText>Create new account</HeadingText>
-        
       </div>
       <Form
         formik={formik}

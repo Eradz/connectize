@@ -4,8 +4,8 @@ import { frontendUrl } from "../lib/helpers";
 
 const SEO = ({
   title = "Connectize - The Social Hub",
-  description = "Connectize helps you stay connected with your friends, share moments, and explore content.",
-  keywords = "social media, connect, chat, share, friends, networking",
+  description = "Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors. Network, collaborate on projects, share insights, and explore job opportunities in the energy sector. Join today!",
+  keywords = "social media, connect, chat, share, friends, networking, oil and gas networking, energy professionals, oil and gas social platform, energy industry collaboration, oil and gas jobs, upstream, midstream, downstream, energy sector networking, oil and gas suppliers, industry insights, oil and gas investments",
   image,
   url,
   type = "website",
@@ -13,11 +13,11 @@ const SEO = ({
   const location = useLocation();
   const currentUrl = url || `${frontendUrl()}${location.pathname}`;
 
-  const ogImage = image || frontendUrl() + "/default-image.png";
+  const ogImage = image || frontendUrl() + "/seo/default-image.png";
 
   return (
-    <Helmet async>
-      <title>{title} | connectize</title>
+    <Helmet async prioritizeSeoTags defaultTitle={title}>
+      <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="author" content="Connectize Team - Clever Akanimoh" />

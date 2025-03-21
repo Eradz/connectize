@@ -133,17 +133,16 @@ export async function makeApiRequest({
       return response.data;
     }
   } catch (error) {
-    // if (!error.response) {
-    //   toast.error("Network error. Please check your internet connection.");
-    //   console.error("Network error:", error);
-    //   return;
-    // }
-    console.log(error);
+    if (!navigator.onLine) {
+      toast.error("Network error. Please check your internet connection.");
+      console.error("Network error:", error);
+      return;
+    }
 
     if (error.status === 417) {
       toast("Account Deactivated", {
-        description: error.response.errors[0].message,
-        duration: 10000,
+        description: error.response.data.errors[0].message,
+        duration: 15000,
         action: {
           label: "Reactivate Now",
           onClick: () => (window.location.href = "/reactivate-account"),

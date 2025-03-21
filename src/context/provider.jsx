@@ -33,17 +33,17 @@ const MyProvider = ({ children }) => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <NavProvider>
-          <ChakraProvider>
-            <QueryProvider>
-              <HelmetProvider>{children}</HelmetProvider>
-            </QueryProvider>
-          </ChakraProvider>
-        </NavProvider>
-      </UserProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <UserProvider>
+          <NavProvider>
+            <ChakraProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </ChakraProvider>
+          </NavProvider>
+        </UserProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
