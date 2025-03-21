@@ -25,3 +25,20 @@ export const markAllNotificationsAsRead = async () => {
 
   return notifications;
 };
+
+export const deleteNotification = async (notificationId) => {
+  const notifications = await makeApiRequest({
+    url: `api/notifications/${notificationId}/delete/`,
+    method: "POST",
+  });
+
+  return notifications;
+};
+export const deleteAllNotifications = async () => {
+  const notifications = await makeApiRequest({
+    url: "api/notifications/delete-all/",
+    method: "POST",
+  });
+
+  return notifications;
+};

@@ -1,12 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getCompanies } from "../../api-services/companies";
+import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import LightParagraph from "../../components/ParagraphText";
-import { useAuth } from "../../context/userContext";
-import { UserType } from "../../lib/helpers/types";
 import Restricted from "../../components/Restricted";
+import { useAuth } from "../../context/userContext";
 import useRedirect from "../../hooks/useRedirect";
+import { UserType } from "../../lib/helpers/types";
 
 const CompanyLayout = () => {
   const { user: currentUser } = useAuth();
@@ -15,7 +15,7 @@ const CompanyLayout = () => {
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies"],
-    queryFn: () => getCompanies(),
+    queryFn: () => getCompanyByIdOrEmail(),
     enabled: !!currentUser,
   });
 

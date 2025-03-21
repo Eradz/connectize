@@ -1,23 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from "react";
-import { Heart } from "../../../icon";
-import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
-import {
-  DownloadIcon,
-  HeartIcon,
-  Pencil1Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
 import { MessageOutlined, ShareAltOutlined } from "@ant-design/icons";
-import clsx from "clsx";
-import { useQuery } from "@tanstack/react-query";
-import {
-  commentOnPost,
-  deletePost,
-  editPost,
-  getPosts,
-  likePost,
-} from "../../../api-services/posts";
-import { formatNumber, shareThis } from "../../../lib/utils";
 import {
   Avatar,
   Button,
@@ -26,21 +7,42 @@ import {
   Textarea,
   Tooltip,
 } from "@chakra-ui/react";
-import MoreOptions from "../../MoreOptions";
-import FormatPostText from "../../FormatPostText";
-import { useCustomQuery } from "../../../context/queryContext";
-import jsPDF from "jspdf";
-import { toast } from "sonner";
-import { useAuth } from "../../../context/userContext";
+import {
+  DownloadIcon,
+  HeartIcon,
+  Pencil1Icon,
+  TrashIcon,
+} from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import { motion } from "framer-motion";
+import jsPDF from "jspdf";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
-import { MarkdownComponent } from "../../MarkDownComponent";
 import { Link } from "react-router-dom";
-import TimeAgo from "../../TimeAgo";
+import { toast } from "sonner";
+import {
+  commentOnPost,
+  deletePost,
+  editPost,
+  getPosts,
+  likePost,
+} from "../../../api-services/posts";
+import { useCustomQuery } from "../../../context/queryContext";
+import { useAuth } from "../../../context/userContext";
+import { Heart } from "../../../icon";
+import { capitalizeFirst, formatNumber, shareThis } from "../../../lib/utils";
 import CompanyName from "../../company/CompanyName";
-import LightParagraph from "../../ParagraphText";
 import ReusableModal from "../../custom/ResusableModal";
+import FormatPostText from "../../FormatPostText";
+import { MarkdownComponent } from "../../MarkDownComponent";
+import MoreOptions from "../../MoreOptions";
+import LightParagraph from "../../ParagraphText";
 import PostImageCollage from "../../PostImageCollage";
+import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
+import SEO from "../../SEO";
+import TimeAgo from "../../TimeAgo";
+import PDFPreview from "../../PDFPreview";
 
 function DiscoverPosts({
   searchArray,
@@ -58,7 +60,7 @@ function DiscoverPosts({
   const finalArray = isSearch
     ? searchArray
     : companyName
-    ? posts.filter(
+    ? posts?.filter(
         (post) =>
           post.company.company_name.toLowerCase() === companyName.toLowerCase()
       )
@@ -99,7 +101,9 @@ export const DiscoverPostItem = ({
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
 
-
+  const postTitle = `Connectize Post by ${
+    postItem?.user?.first_name
+  } | ${capitalizeFirst(postItem?.company?.company_name)} Company`;
 
   const userHasLikedPost = postItem?.likes.find(
     (post) => post?.user?.id === currentUser?.id
@@ -126,7 +130,7 @@ export const DiscoverPostItem = ({
   };
   const shareUrlString = window.location.href + "posts/" + postItem.id;
   const shareData = {
-    title: "Connectize Post by - " + postItem?.company?.company_name,
+    title: postTitle,
     text: postItem.body,
     url: shareUrlString,
   };
@@ -138,25 +142,19 @@ export const DiscoverPostItem = ({
     // Add title and content to the PDF
     doc.setFont("Segoe UI", "bold");
     doc.setFontSize(16);
-    doc.text(
-      `Connectize Post by ${postItem?.user?.first_name} | ${postItem?.company?.company_name}`,
-      10,
-      10
-    );
+    doc.text(postTitle, 10, 10);
 
     doc.setFont("Segoe UI", "normal");
     doc.setFontSize(12);
     doc.text(postItem?.body, 10, 20, { maxWidth: 180 }); // Wraps text within 180mm
 
     // Save the PDF
-    doc.save(`Connectize_post_${postItem.id}.pdf`);
+    doc.save(`Connectize-post-${postItem.id}-${new Date().toUTCString()}.pdf`);
   };
 
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
-
-
 
   return (
     <motion.article
@@ -166,6 +164,7 @@ export const DiscoverPostItem = ({
         "py-3 px-1 xs:px-3 bg-white xs:hover:bg-transparent rounded-md transition-colors duration-300"
       )}
     >
+      <SEO title={postTitle} description={postItem?.body} />
       <header className="flex justify-between mb-2 gap-4 xs:gap-6 w-full overflow-hidden">
         <section className="flex xs:items-center gap-2">
           <Avatar
@@ -306,10 +305,11 @@ export const DiscoverPostItem = ({
             disabled={disabled}
             text={formatNumber(likes)}
           />
-          <ButtonWithTooltipIcon
-            IconName={DownloadIcon}
-            tip="Download post"
-            onClick={handlePostDownloadPDF}
+
+          <PDFPreview
+            postBody={postItem?.body}
+            postTitle={postTitle}
+            postImages={postItem.images}
           />
           <ButtonWithTooltipIcon
             IconName={ShareAltOutlined}
@@ -328,8 +328,6 @@ export const DiscoverPostItem = ({
     </motion.article>
   );
 };
-
-
 
 const CommentSection = ({
   showCommentSection,
@@ -464,7 +462,6 @@ export function ButtonWithTooltipIcon({
       label={loading ? "" : tip}
       fontSize="12"
       placement="auto"
-      
       className={clsx(
         "!rounded-md !bg-white !text-custom_blue border mx-3 text-sm",
         tooltipClassName

@@ -1,18 +1,18 @@
-import { motion } from "framer-motion";
-import { useAuth } from "../../context/userContext";
-import { getAllUsers } from "../../api-services/users";
-import { useQuery } from "@tanstack/react-query";
-import LightParagraph from "../ParagraphText";
-import { Link } from "react-router-dom";
-import clsx from "clsx";
-import TimeAgo from "../TimeAgo";
 import { Avatar } from "@chakra-ui/react";
-import { useEffect } from "react";
 import { ArrowDownIcon, CheckIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { getAllUsers } from "../../api-services/users";
+import { useAuth } from "../../context/userContext";
+import { baseURL } from "../../lib/helpers";
+import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
+import TimeAgo from "../TimeAgo";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { VoiceNotePlayer } from "./MessageControl";
-import { baseURL } from "../../lib/helpers";
 
 export default function MessageArea({ messages, messagesLoading }) {
   const { user: currentUser } = useAuth();

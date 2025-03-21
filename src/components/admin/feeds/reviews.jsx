@@ -1,11 +1,12 @@
+import { Avatar } from "@chakra-ui/react";
 import React from "react";
 import MoreOptions from "../../MoreOptions";
 import LightParagraph from "../../ParagraphText";
-import { Avatar } from "@chakra-ui/react";
+import ProfileSection from "../../userProfile/profile-section";
 
 export default function Reviews({ reviews = [] }) {
   return (
-    <section className="bg-white my-4 p-3 md:!px-2 rounded-md space-y-4">
+    <ProfileSection>
       <h1 className="p-2 text-xl md:text-lg font-bold">Reviews</h1>
       <section className="space-y-4 divide-y">
         {reviews.length > 0 ? (
@@ -22,7 +23,7 @@ export default function Reviews({ reviews = [] }) {
           <LightParagraph>No reviews yet</LightParagraph>
         )}
       </section>
-    </section>
+    </ProfileSection>
   );
 }
 

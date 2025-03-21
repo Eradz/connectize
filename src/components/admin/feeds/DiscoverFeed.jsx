@@ -1,19 +1,19 @@
-import React, { useEffect } from "react";
-import CreatePost from "./CreatePost";
-import DiscoverPostTabs from "./DiscoverPostTabs";
-import { Link } from "react-router-dom";
-import { useAuth } from "../../../context/userContext";
-import DiscoverPosts from "./DiscoverPosts";
-import { CompanyUserType } from "../../../lib/helpers/types";
-import { getCompanies } from "../../../api-services/companies";
 import { useQuery } from "@tanstack/react-query";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { getCompanyByIdOrEmail } from "../../../api-services/companies";
+import { useAuth } from "../../../context/userContext";
+import { CompanyUserType } from "../../../lib/helpers/types";
+import CreatePost from "./CreatePost";
+import DiscoverPosts from "./DiscoverPosts";
+import DiscoverPostTabs from "./DiscoverPostTabs";
 
 const DiscoverFeed = () => {
   const { user: currentUser, setUser } = useAuth();
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["companies"],
-    queryFn: () => getCompanies(),
+    queryFn: () => getCompanyByIdOrEmail(),
     enabled: !!currentUser,
   });
 

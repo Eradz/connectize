@@ -5,7 +5,7 @@ export default function ProfileSection({ title, children, className }) {
   return (
     <section
       className={clsx(
-        "p-4 border border-gray-200 rounded-xl space-y-2 shrink-0 bg-white",
+        "p-4 border border-gray-100 rounded-md space-y-2 shrink-0 bg-white",
         className
       )}
     >

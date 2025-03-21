@@ -1,20 +1,20 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import Logo from "../../logo";
-import clsx from "clsx";
-import { useNav } from "../../../context/navContext";
-import { useMediaQuery } from "react-responsive";
-import { useQuery } from "@tanstack/react-query";
-import { getAllCompanies, getCompanies } from "../../../api-services/companies";
-import LightParagraph from "../../ParagraphText";
-import CloseOverlay from "../../CloseOverlay";
-import { CircleTitleSubtitleSkeleton } from "../feeds/TopServiceSuggestions";
 import { Avatar } from "@chakra-ui/react";
-import { avatarStyle } from "../../ResponsiveNav";
-import FeedSearch from "../../custom/FeedSearch";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import React from "react";
+import { useMediaQuery } from "react-responsive";
+import { Link } from "react-router-dom";
+import { getAllCompanies } from "../../../api-services/companies";
+import { useNav } from "../../../context/navContext";
 import { useAuth } from "../../../context/userContext";
 import { capitalizeFirst } from "../../../lib/utils";
+import CloseOverlay from "../../CloseOverlay";
+import LightParagraph from "../../ParagraphText";
+import { avatarStyle } from "../../ResponsiveNav";
 import CompanyName from "../../company/CompanyName";
+import FeedSearch from "../../custom/FeedSearch";
+import Logo from "../../logo";
+import { CircleTitleSubtitleSkeleton } from "../feeds/TopServiceSuggestions";
 
 const Sidebar = () => {
   const { navOpen, toggleNav } = useNav();

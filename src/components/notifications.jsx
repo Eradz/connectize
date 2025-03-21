@@ -1,32 +1,31 @@
-import clsx from "clsx";
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
   Avatar,
   Badge,
+  Popover,
+  PopoverArrow,
+  PopoverContent,
+  PopoverTrigger,
 } from "@chakra-ui/react";
-import { Notification } from "../icon";
-import { avatarStyle } from "./ResponsiveNav";
+import { TrashIcon } from "@radix-ui/react-icons";
+import clsx from "clsx";
+import { motion } from "framer-motion";
+import { memo, useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  getNotificationsForUser,
+  deleteAllNotifications,
+  deleteNotification,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../api-services/notifications";
-import { useQuery } from "@tanstack/react-query";
-import TimeAgo from "./TimeAgo";
-import { useEffect, useState, useCallback, memo, useMemo } from "react";
-import { Link } from "react-router-dom";
-
-import { motion } from "framer-motion";
-import CustomTabs from "./custom/tabs";
-import { getAllCompanies } from "../api-services/companies";
-import { getAllUsers } from "../api-services/users";
+import { useCompanies, useNotifications, useUsers } from "../hooks";
+import { Notification } from "../icon";
+import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
 import CompanyName from "./company/CompanyName";
-import { useAuth } from "../context/userContext";
-import useWebSocket from "../hooks/useWebSocket";
+import CustomTabs from "./custom/tabs";
+import { avatarStyle } from "./ResponsiveNav";
 import SeeMoreLink from "./SeeMoreLink";
+import { NotificationsSkeleton } from "./skeletons/notification";
+import TimeAgo from "./TimeAgo";
 
 const generalNotificationType = [
   "like",
@@ -42,51 +41,33 @@ const generalNotificationType = [
 
 const promotionsNotificationType = ["promotions", "announcement"];
 
+const IndicatorBadge = ({ indicator, floating = false }) => {
+  return (
+    <>
+      {indicator > 0 && (
+        <Badge
+          className={clsx(
+            "size-4 !text-[.55rem] !bg-gold !rounded-full !flex !items-center justify-center",
+            {
+              "absolute -top-1.5 -right-1": floating,
+            }
+          )}
+        >
+          <span>{Number(indicator) > 10 ? "10+" : indicator}</span>
+        </Badge>
+      )}
+    </>
+  );
+};
+
 const NotificationPopOver = () => {
-  const { messages } = useWebSocket("notifications");
-  const { user: currentUser } = useAuth();
-
-  const { data: notificationsData } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: getNotificationsForUser,
-    enabled: !!currentUser,
-  });
-
-  const notifications = useMemo(() => {
-    const allNotifications = [...messages, ...(notificationsData || [])];
-    const uniqueNotifications = allNotifications.reduce((acc, notification) => {
-      if (!acc.some((n) => n.message === notification.message)) {
-        acc.push(notification);
-      }
-      return acc;
-    }, []);
-    return uniqueNotifications;
-  }, [messages, notificationsData]);
-
-  const notificationLengthNotRead = useMemo(
-    () =>
-      notifications?.filter((notification) => notification?.is_read === null)
-        ?.length || 0,
-    [notifications]
-  );
-
-  const [unReadNotificationLength, setUnReadNotificationLength] = useState(
-    notificationLengthNotRead
-  );
-
-  useEffect(() => {
-    setUnReadNotificationLength(notificationLengthNotRead);
-  }, [notificationLengthNotRead]);
+  const { notifications, notificationLengthNotRead } = useNotifications();
 
   return (
     <Popover>
       <PopoverTrigger>
         <button className="relative">
-          {unReadNotificationLength > 0 && (
-            <Badge className="absolute -top-1.5 -right-1 size-4 !text-[.6rem] !bg-gold !rounded-full grid place-items-center">
-              <span>{unReadNotificationLength}</span>
-            </Badge>
-          )}
+          <IndicatorBadge indicator={notificationLengthNotRead} floating />
           <Notification />
         </button>
       </PopoverTrigger>
@@ -100,58 +81,16 @@ const NotificationPopOver = () => {
 };
 
 export const NotificationItem = ({ isPopover = false }) => {
-  const { messages } = useWebSocket("notifications");
-  const { user: currentUser } = useAuth();
-
-  const { data: notificationsData, isLoading } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: getNotificationsForUser,
-    enabled: !!currentUser,
-  });
-
-  const notifications = useMemo(() => {
-    const allNotifications = [...messages, ...(notificationsData || [])];
-    const uniqueNotifications = allNotifications.reduce((acc, notification) => {
-      if (!acc.some((n) => n.message === notification.message)) {
-        acc.push(notification);
-      }
-      return acc;
-    }, []);
-    return uniqueNotifications;
-  }, [messages, notificationsData]);
-
-  const notificationLengthNotRead = useMemo(
-    () =>
-      notifications?.filter((notification) => notification?.is_read === null)
-        ?.length || 0,
-    [notifications]
-  );
-
-  const [unReadNotificationLength, setUnReadNotificationLength] = useState(
-    notificationLengthNotRead
-  );
-
-  useEffect(() => {
-    setUnReadNotificationLength(notificationLengthNotRead);
-  }, [notificationLengthNotRead]);
-
-  const { data: companies, isLoading: companiesLoading } = useQuery({
-    queryKey: ["allConnectizeCompanies"],
-    queryFn: getAllCompanies,
-    enabled: !!currentUser,
-  });
-
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: getAllUsers,
-    enabled: !!currentUser,
-  });
+  const { notifications, notificationLengthNotRead, setNotifications } =
+    useNotifications();
+  const { data: companies, isLoading: companiesLoading } = useCompanies();
+  const { data: users, isLoading: usersLoading } = useUsers();
 
   const tabsHeader = ["General", "Promotions"];
 
   const diffNotifications = isPopover
     ? notifications.slice(0, 10)
-    : notificationsData;
+    : notifications;
 
   const generalNotifications = useMemo(
     () =>
@@ -170,24 +109,42 @@ export const NotificationItem = ({ isPopover = false }) => {
   );
 
   const handleMarkAllAsRead = useCallback(async () => {
-    setUnReadNotificationLength(0);
     await markAllNotificationsAsRead();
   }, []);
+
+  const handleDeleteAllNotifications = useCallback(async () => {
+    setNotifications([]);
+    await deleteAllNotifications();
+  }, []);
+
   return (
     <>
-      {isLoading || companiesLoading || usersLoading ? (
+      {companiesLoading || usersLoading ? (
         <NotificationsSkeleton />
       ) : (
         <section className={clsx("bg-white rounded-md p-3 space-y-2 w-full")}>
           <header className="flex justify-between items-center gap-2 border-b border-gray-100 pb-1">
-            <h4 className="text-lg font-semibold">Notifications</h4>
-            {unReadNotificationLength > 0 && (
-              <button
-                className="text-black/90 bg-gold rounded-md hover:bg-opacity-60 transition-all duration-300 !text-xs disabled:cursor-not-allowed disabled:no-underline px-5 py-1"
-                onClick={handleMarkAllAsRead}
-              >
-                Mark all as read
-              </button>
+            <h4 className="text-lg font-semibold flex items-center gap-1">
+              <span>Notifications</span>
+              <IndicatorBadge indicator={notifications?.length} />
+            </h4>
+            <div>
+              {notificationLengthNotRead > 0 && (
+                <button
+                  className="text-black/90 bg-gold rounded-md hover:bg-opacity-60 transition-all duration-300 !text-xs disabled:cursor-not-allowed disabled:no-underline px-5 py-1"
+                  onClick={handleMarkAllAsRead}
+                >
+                  Mark all as read
+                </button>
+              )}
+            </div>
+
+            {notifications.length > 0 && (
+              <ButtonWithTooltipIcon
+                IconName={TrashIcon}
+                tip="Clear All Notifications"
+                onClick={handleDeleteAllNotifications}
+              />
             )}
           </header>
 
@@ -198,8 +155,6 @@ export const NotificationItem = ({ isPopover = false }) => {
                 key="general"
                 fallback="general"
                 notifications={generalNotifications}
-                setUnReadNotificationLength={setUnReadNotificationLength}
-                unReadNotificationLength={unReadNotificationLength}
                 companies={companies}
                 users={users}
                 isPopover={isPopover}
@@ -207,8 +162,6 @@ export const NotificationItem = ({ isPopover = false }) => {
               <NotificationsArray
                 key="promotions"
                 notifications={promotionsNotifications}
-                setUnReadNotificationLength={setUnReadNotificationLength}
-                unReadNotificationLength={unReadNotificationLength}
                 fallback="promotion"
                 companies={companies}
                 users={users}
@@ -217,7 +170,7 @@ export const NotificationItem = ({ isPopover = false }) => {
             ]}
           />
 
-          {isPopover && notificationsData?.length > 10 && (
+          {isPopover && notifications.length > 10 && (
             <SeeMoreLink url="/co/notifications" />
           )}
         </section>
@@ -227,15 +180,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 };
 
 const NotificationsArray = memo(
-  ({
-    notifications = [],
-    setUnReadNotificationLength,
-    unReadNotificationLength,
-    fallback,
-    companies,
-    users,
-    isPopover,
-  }) => {
+  ({ notifications, fallback, companies, users, isPopover }) => {
     return (
       <section
         className={clsx("space-y-2 divide-y divide-gray-100", {
@@ -261,8 +206,6 @@ const NotificationsArray = memo(
                 index={index}
                 company={company}
                 notification={notification}
-                unReadNotificationLength={unReadNotificationLength}
-                setUnReadNotificationLength={setUnReadNotificationLength}
               />
             );
           })
@@ -273,21 +216,36 @@ const NotificationsArray = memo(
 );
 
 const NotificationTile = memo(
-  ({
-    notification,
-    index,
-    setUnReadNotificationLength,
-    company,
-    unReadNotificationLength,
-  }) => {
+  ({ notification, index, company, unReadNotificationLength }) => {
     const [read, setRead] = useState(notification?.is_read ? true : false);
+    const { setNotifications } = useNotifications();
 
     const handleMarkAsRead = useCallback(async () => {
       if (read) return;
-      setUnReadNotificationLength((prev) => prev - 1);
+
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif.id === notification.id
+            ? { ...notif, is_read: new Date().toUTCString() }
+            : notif
+        )
+      );
+
       setRead(true);
       await markNotificationAsRead(notification?.id);
-    }, [read, notification?.id, setUnReadNotificationLength]);
+    }, [read, notification?.id, setNotifications]);
+
+    const handleDeleteNotification = useCallback(async () => {
+      setNotifications((prev) =>
+        prev.filter((notif) => notif.id !== notification.id)
+      );
+
+      try {
+        await deleteNotification(notification.id);
+      } catch (error) {
+        setNotifications((prev) => [...prev, notification]);
+      }
+    }, [notification.id, setNotifications]);
 
     return (
       <motion.div
@@ -295,7 +253,7 @@ const NotificationTile = memo(
         whileInView={{ x: 0, opacity: 1 }}
         transition={{ delay: index * 0.05 }}
         viewport={{ once: true }}
-        className="flex items-start gap-2 pt-2"
+        className="flex items-stretch gap-2 pt-2"
       >
         <Avatar
           src={company?.logo || "/images/default-company-logo.png"}
@@ -304,7 +262,7 @@ const NotificationTile = memo(
           name={company?.company_name}
           className={avatarStyle}
         />
-        <div className="space-y-0">
+        <div className="space-y-0 flex-1">
           <CompanyName
             name={company?.company_name}
             verified={company?.verify}
@@ -334,35 +292,16 @@ const NotificationTile = memo(
             )}
           </div>
         </div>
+
+        <ButtonWithTooltipIcon
+          IconName={TrashIcon}
+          onClick={handleDeleteNotification}
+          tip="Remove notification"
+        />
       </motion.div>
     );
   }
 );
 
-const NotificationsSkeleton = () => {
-  return (
-    <div
-      className={clsx("bg-white rounded p-3 space-y-4 w-full min-w-[300px]")}
-    >
-      <header className="flex justify-between items-center gap-2 border-b border-gray-100 pb-1">
-        <div className="h-5 w-32 rounded skeleton" />
-        <div className="h-4 w-24 rounded skeleton" />
-      </header>
-      <div className="space-y-4 overflow-y-auto max-h-[70vh]">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex items-start gap-2">
-            <div className="rounded-full size-8 shrink-0 skeleton" />
-            <div className="space-y-1 w-full">
-              <div className="h-3 w-3/5 rounded skeleton" />
-              <div className="h-2.5 w-full rounded skeleton" />
-              <div className="h-2.5 w-4/5 rounded skeleton" />
-              <div className="h-2 w-20 rounded skeleton" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export { NotificationPopOver, NotificationsArray };
+

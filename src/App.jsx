@@ -1,55 +1,57 @@
-import { Routes, Route } from "react-router-dom";
-import Signup from "./pages/authentication/signup";
-import Login from "./pages/authentication/login";
-import Profile from "./components/profile/profile";
-import Home from "./components/profile/home";
-import Contact from "./components/profile/contact";
+import { Route, Routes } from "react-router-dom";
+import SEO from "./components/SEO";
+import { NotificationItem } from "./components/notifications";
 import Address from "./components/profile/address";
 import Bio from "./components/profile/bio";
-import SuccessPage from "./pages/authentication/successpage";
-import Overview from "./components/profile/overview";
-import Services from "./pages/service/service";
-import ServiceOverView from "./pages/service/serviceOverview";
-import ServiceAdmin from "./pages/service/serviceAdmin";
-import Market from "./pages/market/market";
-import Product from "./pages/market/product";
-import Analysis from "./pages/market/analysis";
-import Listing from "./pages/market/listing";
-import UserProfile from "./pages/feed/userProfile";
-import NewsFeed from "./pages/feed/newsFeed";
-import AuthLayout from "./pages/authentication/AuthLayout";
-import ResetPasswordPage from "./pages/authentication/reset-password";
+import Contact from "./components/profile/contact";
+import Home from "./components/profile/home";
 import ProfileLayout from "./components/profile/layout";
-import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
+import Overview from "./components/profile/overview";
+import Profile from "./components/profile/profile";
+import FeedLayout from "./pages/FeedLayout";
 import MarketPlaceLayout from "./pages/MarketPlaceLayout";
-import CompanyLayout from "./pages/company/layout";
+import AuthLayout from "./pages/authentication/AuthLayout";
+import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
+import Login from "./pages/authentication/login";
+import ReactivationPage from "./pages/authentication/reactivation";
+import ResetPasswordPage from "./pages/authentication/reset-password";
+import Signup from "./pages/authentication/signup";
+import SuccessPage from "./pages/authentication/successpage";
+import VerifyAccount from "./pages/authentication/verify-account";
+import BookMark from "./pages/bookmark";
+import CompaniesPage from "./pages/companies";
 import CreateCompany from "./pages/company";
 import CompanyDocuments from "./pages/company/CompanyDocuments";
 import CompanyInformation from "./pages/company/CompanyInformation";
-import SinglePostPage from "./pages/posts/singlePostPage";
-import FeedLayout from "./pages/FeedLayout";
-import VerifyAccount from "./pages/authentication/verify-account";
+import CompanyLayout from "./pages/company/layout";
 import CompanyProfile from "./pages/feed/companyProfile";
-import NotFound from "./pages/not-found";
+import NewsFeed from "./pages/feed/newsFeed";
+import UserProfile from "./pages/feed/userProfile";
+import Analysis from "./pages/market/analysis";
+import Listing from "./pages/market/listing";
+import Market from "./pages/market/market";
+import Product from "./pages/market/product";
 import MessagesPage from "./pages/messages";
-import RepresentativesPage from "./pages/representatives";
-import CompaniesPage from "./pages/companies";
-import Search from "./pages/search";
-import AssignRepresentative from "./pages/representatives/AssignRepresentative";
-import BookMark from "./pages/bookmark";
-import AcceptRepresentation from "./pages/representatives/AcceptRepresentation";
 import MessagesLayout from "./pages/messages/layout";
 import MessagingPage from "./pages/messages/messaging";
-import { NotificationItem } from "./components/notifications";
-import TermsAndConditions from "./pages/terms&policies/terms";
-import PrivacyPolicy from "./pages/terms&policies/policy";
-import TermsLayout from "./pages/terms&policies/termsLayout";
+import NotFound from "./pages/not-found";
+import SinglePostPage from "./pages/posts/singlePostPage";
+import RepresentativesPage from "./pages/representatives";
+import AcceptRepresentation from "./pages/representatives/AcceptRepresentation";
+import AssignRepresentative from "./pages/representatives/AssignRepresentative";
+import Search from "./pages/search";
+import Services from "./pages/service/service";
+import ServiceAdmin from "./pages/service/serviceAdmin";
+import ServiceOverView from "./pages/service/serviceOverview";
 import SettingsPage from "./pages/settings";
-import ReactivationPage from "./pages/authentication/reactivation";
+import PrivacyPolicy from "./pages/terms&policies/policy";
+import TermsAndConditions from "./pages/terms&policies/terms";
+import TermsLayout from "./pages/terms&policies/termsLayout";
 
 function App() {
   return (
     <>
+      <SEO />
       <Routes>
         <Route>
           <Route path="*" element={<NotFound />} />

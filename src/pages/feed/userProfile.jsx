@@ -1,27 +1,30 @@
-import React, { useEffect, useMemo } from "react";
-import { getUserById } from "../../api-services/users";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
-import NoPage from "../../components/NoPage";
-import PageLoading from "../../components/PageLoading";
-import Header from "../../components/userProfile/header";
-import UserProfileHeadings from "../../components/userProfile/user-profile-heading";
-import ProfileSection from "../../components/userProfile/profile-section";
-import LightParagraph from "../../components/ParagraphText";
-import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import {
   CalendarOutlined,
   MailOutlined,
   PhoneOutlined,
   TagOutlined,
 } from "@ant-design/icons";
-import { VerifiedIcon } from "../../icon";
 import { Badge } from "@chakra-ui/react";
+import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
+import React, { useMemo } from "react";
+import { useParams } from "react-router-dom";
+import { getUserById } from "../../api-services/users";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
+import NoPage from "../../components/NoPage";
+import PageLoading from "../../components/PageLoading";
+import LightParagraph from "../../components/ParagraphText";
+import SEO from "../../components/SEO";
+import Header from "../../components/userProfile/header";
+import ProfileSection from "../../components/userProfile/profile-section";
+import UserProfileHeadings from "../../components/userProfile/user-profile-heading";
 import { useAuth } from "../../context/userContext";
+import { VerifiedIcon } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst } from "../../lib/utils";
+
+const emptyWord = "Not Added";
 
 export default function UserProfile() {
   const { userId } = useParams();
@@ -32,15 +35,6 @@ export default function UserProfile() {
     queryFn: () => getUserById(userId),
     enabled: !!userId && !!currentUser,
   });
-
-  useEffect(() => {
-    if (paramUser) {
-      document.title = `${paramUser.first_name || paramUser.email || ""} ${
-        paramUser.last_name || ""
-      } on Connectize`;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!paramUser, !!currentUser]);
 
   const headerProps = useMemo(
     () => ({
@@ -70,6 +64,11 @@ export default function UserProfile() {
 
   return (
     <section className="rounded-md overflow-hidden">
+      <SEO
+        title={`${paramUser.first_name || paramUser.email || ""} ${
+          paramUser.last_name || ""
+        } on connectize`}
+      />
       <Header {...headerProps} />
 
       <section className="mt-8 container !px-0 space-y-6">
@@ -81,10 +80,12 @@ export default function UserProfile() {
             <CreateNewLink text="Create company" url="/create-company" />
           )}
 
-        <section className="flex max-lg:flex-col gap-y-6 gap-x-3 w-full">
-          <section className="space-y-6 lg:w-[65.5%] shrink-0">
+        <section className="flex max-lg:flex-col gap-y-4 gap-x-3 w-full">
+          <section className="space-y-4 lg:w-[65.5%] shrink-0">
             <ProfileSection title="Short Bio">
-              <LightParagraph>{bio} </LightParagraph>
+              <LightParagraph>
+                {bio || "User have not added a bio"}
+              </LightParagraph>
             </ProfileSection>
             <ProfileSection title="about">
               <ul className="space-y-4 divide-y">
@@ -101,7 +102,7 @@ export default function UserProfile() {
                           </Badge>
                         </>
                       ) : (
-                        "N/A"
+                        emptyWord
                       )
                     }
                   />
@@ -119,7 +120,7 @@ export default function UserProfile() {
                           </Badge>
                         </>
                       ) : (
-                        "N/A"
+                        emptyWord
                       )
                     }
                   />
@@ -127,7 +128,7 @@ export default function UserProfile() {
                 <ProfileAboutList
                   Icon={TagOutlined}
                   title="Role"
-                  value={capitalizeFirst(role)}
+                  value={role ? capitalizeFirst(role) : emptyWord}
                 />
                 <ProfileAboutList
                   Icon={LocationOnOutlined}
@@ -137,7 +138,7 @@ export default function UserProfile() {
                       ? `${address || ""} ${city || ""} ${region || ""} ${
                           country || ""
                         }`
-                      : "N/A"
+                      : emptyWord
                   }
                 />
                 <ProfileAboutList
@@ -155,10 +156,12 @@ export default function UserProfile() {
 
             <ProfileSection title="Badges">
               <section className="flex flex-wrap gap-x-4 gap-y-2">
-                {verified && (
+                {verified ? (
                   <ProfileBadge text="Identity Verified" color="black" />
+                ) : (
+                  <LightParagraph>No badge yet...</LightParagraph>
                 )}
-                <ProfileBadge text="Premium" />
+                {/* <ProfileBadge text="Premium" /> */}
               </section>
             </ProfileSection>
           </section>
@@ -178,7 +181,7 @@ export const ProfileAboutList = ({ title, value, Icon }) => {
       <Icon className="!size-6 xs:!size-5" />
       <div className="flex gap-x-1 items-baseline max-xs:flex-col">
         <strong className="leading-none">{title}:</strong>
-        <LightParagraph>{value || "N/A"} </LightParagraph>
+        <LightParagraph>{value || emptyWord} </LightParagraph>
       </div>
     </li>
   );

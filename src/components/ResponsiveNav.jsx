@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useNav } from "../context/navContext";
+import { Avatar } from "@chakra-ui/react";
 import { ChevronLeft, Menu } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getCompanyByIdOrEmail } from "../api-services/companies";
+import { useNav } from "../context/navContext";
+import { useAuth } from "../context/userContext";
 import { ChartBar, Setting } from "../icon";
+import { CompanyUserType } from "../lib/helpers/types";
+import { ConjoinedAvatarSkeleton } from "./admin/feeds/DiscoverPosts";
 import FeedSearch from "./custom/FeedSearch";
 import { NotificationPopOver } from "./notifications";
 import { LinkWithTooltipIcon } from "./userProfile/Navbar";
-import { Avatar } from "@chakra-ui/react";
-import { useAuth } from "../context/userContext";
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getCompanies } from "../api-services/companies";
-import { ConjoinedAvatarSkeleton } from "./admin/feeds/DiscoverPosts";
-import { CompanyUserType } from "../lib/helpers/types";
 
 function ResponsiveNav() {
   const { toggleNav } = useNav();
@@ -48,7 +48,7 @@ export const JoinedUserCompanyImages = () => {
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ["companies"],
-    queryFn: () => getCompanies(),
+    queryFn: () => getCompanyByIdOrEmail(),
   });
 
   const [headingImages, setHeadingImages] = useState([]);

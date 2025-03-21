@@ -1,9 +1,9 @@
+import { redirect } from "react-router-dom";
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
-import { capitalizeFirst } from "../lib/utils";
 import { getSession } from "../lib/session";
-import { getCompanies } from "./companies";
-import { redirect } from "react-router-dom";
+import { capitalizeFirst } from "../lib/utils";
+import { getCompanyByIdOrEmail } from "./companies";
 
 // {
 //     "title": "",
@@ -57,7 +57,7 @@ export const createProduct = async (data, resetForm) => {
 
   const { user } = getSession();
 
-  const company = await getCompanies();
+  const company = await getCompanyByIdOrEmail();
 
   if (!company) {
     toast.error("Please create a company first before you add a product");

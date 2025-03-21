@@ -28,7 +28,7 @@ export const getAllCompanies = async () => {
   return companies ;
 };
 
-export const getCompanies = async (id) => {
+export const getCompanyByIdOrEmail = async (id) => {
   const currentUser = await getCurrentUser();
   const params = id ? { id } : { profile: currentUser?.email };
   const { results: companies } = await makeApiRequest({
