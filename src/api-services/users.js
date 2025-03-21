@@ -133,8 +133,8 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
   const allUsersAssociated = allUsers.filter((user) => {
     const userDomain = user.email.split("@")[1].toLowerCase();
     const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
-    // const isProfessionalEmail =
-    //   !nonProfessionalEmailDomains.includes(userDomain);
+    const isProfessionalEmail =
+      !nonProfessionalEmailDomains.includes(userDomain);
 
     return (
       (user.first_name || user.last_name) &&
