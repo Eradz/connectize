@@ -3,11 +3,13 @@ import React from "react";
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
+import { useEffect } from "react";
 import { getServices } from "../../../api-services/services";
 import {
   getPeopleAssociatedForUser,
   getSuggestedUsersForCurrentUser,
 } from "../../../api-services/users";
+import { queryClient } from "../../../context/provider";
 import { useAuth } from "../../../context/userContext";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
@@ -85,13 +87,26 @@ export function Suggestions({
 
 export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
   const { user: currentUser } = useAuth();
+
+  const queryKey = [
+    associated ? "associatedUsers" : "suggestedUsers",
+    thisUser?.id,
+  ];
+
   const { data: shownUsers = [], isLoading } = useQuery({
-    queryKey: [associated ? "associatedUsers" : "suggestedUsers"],
+    queryKey,
     queryFn: associated
       ? () => getPeopleAssociatedForUser(thisUser)
       : getSuggestedUsersForCurrentUser,
-    enabled: !!currentUser,
+    enabled: !!currentUser && !!thisUser?.id,
+    keepPreviousData: true,
   });
+
+  useEffect(() => {
+    if (thisUser?.id) {
+      queryClient.invalidateQueries({ queryKey });
+    }
+  }, [thisUser?.id, queryClient]);
 
   return (
     <section className="">
@@ -102,12 +117,13 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
           ))
         ) : shownUsers?.length <= 0 ? (
           <LightParagraph>
-            {associated ? "No users associated yet" : "No suggested users yet"}
+            {associated
+              ? "No users associated yet. Connect more to see user associated"
+              : "No suggested users yet"}
           </LightParagraph>
         ) : (
           shownUsers?.map((user) => {
             const { first_name, last_name, avatar, email: hashtag, id } = user;
-            console.log(associated, user);
 
             return (
               <li className="flex items-center gap-2.5 pt-2" key={id}>

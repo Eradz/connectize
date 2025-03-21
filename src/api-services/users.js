@@ -94,7 +94,7 @@ export const getSuggestedUsersForCurrentUser = async () => {
 export const getPeopleAssociatedForUser = async (thisUser) => {
   if (!thisUser) return [];
 
-  const nonProfessionalEmailDomains = [
+  const nonProfessionalEmailDomains = new Set([
     "gmail.com",
     "yahoo.com",
     "hotmail.com",
@@ -105,48 +105,44 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
     "zoho.com",
     "admin.com",
     "superadmin.com",
-  ];
+  ]);
 
-  const allUsers = await getAllUsers();
+  const [allUsers, representatives] = await Promise.all([
+    getAllUsers(),
+    getAllRepresentatives({ company_id: thisUser?.companies?.[0] }),
+  ]);
 
-  const representatives =
-    (await getAllRepresentatives({
-      company_id: thisUser?.companies?.[0],
-    })) || [];
-
+  // Fetch representatives' associated users
   const representativesAssociated = await Promise.all(
-    representatives
-      // .filter((u) => u.id !== thisUser.id)
-      .map(async (reps) => {
-        let user = await getUserById(reps.user);
-
-        if (reps?.user === thisUser?.id) {
-          let companyUser = await getCompanyByIdOrEmail(reps.company);
-
-          user = companyUser[0].user;
-        }
-
-        return user;
-      })
+    representatives.map(async (rep) => {
+      if (rep.user === thisUser.id) {
+        const companyUser = await getCompanyByIdOrEmail(rep.company);
+        return companyUser?.[0]?.user || null;
+      }
+      return getUserById(rep.user);
+    })
   );
 
-  const allUsersAssociated = allUsers.filter((user) => {
-    const userDomain = user.email.split("@")[1].toLowerCase();
-    const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
-    const isProfessionalEmail =
-      !nonProfessionalEmailDomains.includes(userDomain);
+  // Filter valid users & ensure uniqueness
+  const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
+  const allUsersAssociated = allUsers.filter(
+    ({ id, email, first_name, last_name }) => {
+      if (!first_name && !last_name) return false;
+      if (id === thisUser.id) return false;
 
-    return (
-      (user.first_name || user.last_name) &&
-      thisUser.id !== user.id &&
-      // isProfessionalEmail &&
-      userDomain === thisUserDomain
-    );
-  });
+      const userDomain = email.split("@")[1].toLowerCase();
+      return (
+        userDomain === thisUserDomain &&
+        !nonProfessionalEmailDomains.has(userDomain)
+      );
+    }
+  );
 
-  console.log([...representativesAssociated, ...allUsersAssociated]);
+  const uniqueUsers = new Set(
+    [...representativesAssociated, ...allUsersAssociated].filter(Boolean)
+  );
 
-  return [...representativesAssociated, ...allUsersAssociated];
+  return Array.from(uniqueUsers);
 };
 
 // get and create user

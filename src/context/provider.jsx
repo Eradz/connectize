@@ -7,7 +7,7 @@ import { QueryProvider } from "./queryContext";
 import { UserProvider } from "./userContext";
 
 // Create a new QueryClient instance
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: { refetchInterval: 600000 },
   },

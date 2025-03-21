@@ -64,7 +64,11 @@ export default function UserProfile() {
 
   return (
     <section className="rounded-md overflow-hidden">
-      <SEO title={paramUser.first_name || paramUser.email || ""} />
+      <SEO
+        title={`${paramUser.first_name || paramUser.email || ""} ${
+          paramUser.last_name || ""
+        } on connectize`}
+      />
       <Header {...headerProps} />
 
       <section className="mt-8 container !px-0 space-y-6">
