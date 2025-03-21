@@ -1,17 +1,24 @@
-import React from "react";
+import { EllipsisOutlined } from "@ant-design/icons";
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
   Button,
+  Popover,
+  PopoverArrow,
+  PopoverContent,
+  PopoverTrigger,
 } from "@chakra-ui/react";
-import { MoreHoriz } from "@mui/icons-material";
 import clsx from "clsx";
+import React from "react";
 
-const MoreOptions = ({ children, className, triggerStyle, isOpen }) => {
+const MoreOptions = ({
+  children,
+  className,
+  triggerStyle,
+  isOpen,
+  onOpen,
+  onClose,
+}) => {
   return (
-    <Popover isOpen={isOpen}>
+    <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
       <PopoverTrigger>
         <Button
           className={clsx(
@@ -19,7 +26,7 @@ const MoreOptions = ({ children, className, triggerStyle, isOpen }) => {
             triggerStyle
           )}
         >
-          <MoreHoriz />
+          <EllipsisOutlined />
         </Button>
       </PopoverTrigger>
 

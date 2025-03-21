@@ -1,9 +1,9 @@
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { motion } from "framer-motion";
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Logo from "../../components/logo";
 import { getSession } from "../../lib/session";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { motion } from "framer-motion";
 
 function AuthLayout({ redirectUrl = "/" }) {
   const session = getSession();
@@ -22,7 +22,7 @@ function AuthLayout({ redirectUrl = "/" }) {
           <motion.section
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.05 }}
             className="flex flex-col-reverse gap-2"
             key={pathname + "section"}
           >
@@ -31,7 +31,7 @@ function AuthLayout({ redirectUrl = "/" }) {
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.25 }}
               className="max-w-screen-md text-[1.9rem] leading-tight font-bold"
               key={pathname + "heading"}
             >

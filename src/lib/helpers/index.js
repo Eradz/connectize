@@ -11,6 +11,8 @@ export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export const frontendUrl = () => window.location.origin;
+
 export function goToLogin() {
   removeSession();
   const pathname = window.location.pathname;
@@ -18,10 +20,11 @@ export function goToLogin() {
 }
 
 // Configure Axios Defaults
-export const baseURL = process.env.NODE_ENV === "development"
+export const baseURL =
+  process.env.NODE_ENV === "development"
     ? "http://127.0.0.1:8000"
     : "https://about.connectize.co";
-    
+
 axios.defaults.withCredentials = true;
 
 // Mutex for Refresh Token
@@ -130,6 +133,11 @@ export async function makeApiRequest({
       return response.data;
     }
   } catch (error) {
+    if (!error.response) {
+      toast.error("Network error. Please check your internet connection.");
+      console.error("Network error:", error);
+      return;
+    }
     const errorCode = error?.response?.data?.code;
 
     if (errorCode === "token_not_valid") {
