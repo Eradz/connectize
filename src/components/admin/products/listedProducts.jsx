@@ -1,13 +1,14 @@
+import { ShareAltOutlined } from "@ant-design/icons";
 import React from "react";
 import { Heart, StarFilledIcon, StarOutlinedIcon } from "../../../icon";
-import { ShareAltOutlined } from "@ant-design/icons";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 import { formatNumber, shareThis } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
+import ProfileSection from "../../userProfile/profile-section";
+import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 
 const ListedProducts = ({ company }) => {
   return (
-    <section className="bg-white p-3 md:!px-2 rounded-md">
+    <ProfileSection>
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-xl md:text-lg font-semibold">Listed Products</h4>
         {/* <MoreOptions>
@@ -30,7 +31,7 @@ const ListedProducts = ({ company }) => {
           })
         )}
       </section>
-    </section>
+    </ProfileSection>
   );
 };
 

@@ -1,24 +1,24 @@
-import React, { useEffect, useMemo } from "react";
-import Reviews from "../../components/admin/feeds/reviews";
-import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
-import Summary from "../../components/admin/feeds/summary";
-import ListedProducts from "../../components/admin/products/listedProducts";
-import Header from "../../components/userProfile/header";
-import { Link, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getSingleCompany } from "../../api-services/companies";
-import { capitalizeFirst, formatNumber } from "../../lib/utils";
-import NoPage from "../../components/NoPage";
-import PageLoading from "../../components/PageLoading";
-import ProfileSection from "../../components/userProfile/profile-section";
-import { ProfileAboutList } from "./userProfile";
-import LightParagraph from "../../components/ParagraphText";
+import { MailOutlined } from "@ant-design/icons";
 import { LocationOnOutlined } from "@mui/icons-material";
 import { GlobeIcon, Link1Icon } from "@radix-ui/react-icons";
-import { MailOutlined } from "@ant-design/icons";
-import { useAuth } from "../../context/userContext";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
+import React, { useEffect, useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
+import { getSingleCompany } from "../../api-services/companies";
+import Reviews from "../../components/admin/feeds/reviews";
+import Summary from "../../components/admin/feeds/summary";
+import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
+import ListedProducts from "../../components/admin/products/listedProducts";
+import NoPage from "../../components/NoPage";
+import PageLoading from "../../components/PageLoading";
+import LightParagraph from "../../components/ParagraphText";
+import Header from "../../components/userProfile/header";
+import ProfileSection from "../../components/userProfile/profile-section";
+import { useAuth } from "../../context/userContext";
 import { CompanyUserType } from "../../lib/helpers/types";
+import { capitalizeFirst, formatNumber } from "../../lib/utils";
+import { ProfileAboutList } from "./userProfile";
 
 const CompanyProfile = React.memo(() => {
   const { company: companyName } = useParams();
@@ -57,9 +57,9 @@ const CompanyProfile = React.memo(() => {
             <ManageRepresentativesLink main />
           )}
         <ProductSidebar company={company} />
-        <section className="grid grid-cols-1 gap-2 max-lg:py-2">
+        <ProfileSection className="grid grid-cols-1 gap-2 max-lg:py-2 flex-1">
           <Summary company={company} />
-        </section>
+        </ProfileSection>
       </section>
     </section>
   );
@@ -132,7 +132,7 @@ const ProductSidebar = React.memo(({ company }) => {
         </ul>
       </ProfileSection>
       <ProfileSection title="People Associated" className="h-fit">
-        <SuggestionList hasSeeMore />
+        <SuggestionList hasSeeMore associated thisUser={company.user} />
       </ProfileSection>
       <ListedProducts company={company} />
       <Reviews reviews={company?.reviews} />
