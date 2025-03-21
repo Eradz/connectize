@@ -7,7 +7,6 @@ import ReusableModal from "./custom/ResusableModal";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
-
 export default function PDFPreview({ postTitle, postBody, postImages = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -27,6 +26,7 @@ export default function PDFPreview({ postTitle, postBody, postImages = [] }) {
       />
       <ReusableModal
         isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
         title="Post PDF Preview"
         size="xl"
         primaryAction={() => {
@@ -37,7 +37,7 @@ export default function PDFPreview({ postTitle, postBody, postImages = [] }) {
             a.click();
           }
         }}
-        primaryText="Download Post"
+        primaryText="Download"
         secondaryText="Close"
         disabled={!pdfUrl}
       >

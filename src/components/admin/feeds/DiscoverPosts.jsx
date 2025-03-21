@@ -305,11 +305,6 @@ export const DiscoverPostItem = ({
             disabled={disabled}
             text={formatNumber(likes)}
           />
-          {/* <ButtonWithTooltipIcon
-            IconName={DownloadIcon}
-            tip="Download post"
-            onClick={handlePostDownloadPDF}
-          /> */}
 
           <PDFPreview
             postBody={postItem?.body}

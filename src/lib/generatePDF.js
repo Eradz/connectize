@@ -8,16 +8,16 @@ export const generatePDF = (
   saveTitle = `Connectize-post-${new Date().toISOString()}.pdf`
 ) => {
   const doc = new jsPDF();
-  let yOffset = 10; // Vertical offset for content placement
+  let yOffset = 10;
 
   // Title
-  doc.setFont("Segoe UI", "bold");
+  doc.setFont("Nunito", "bold");
   doc.setFontSize(16);
   doc.text(title, 10, yOffset);
   yOffset += 10;
 
   // Set Body
-  doc.setFont("Segoe UI", "normal");
+  doc.setFont("Nunito", "normal");
   doc.setFontSize(12);
   const textHeight = doc.splitTextToSize(body, 180);
   doc.text(textHeight, 10, yOffset);
