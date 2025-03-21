@@ -93,36 +93,37 @@ export const getSuggestedUsersForCurrentUser = async () => {
 export const getPeopleAssociatedForUser = async (thisUser) => {
   if (!thisUser) return [];
 
-    const professionalEmailDomains = [
-      "gmail.com",
-      "yahoo.com",
-      "hotmail.com",
-      "aol.com",
-      "outlook.com",
-      "icloud.com",
-      "mail.com",
-      "zoho.com",
-    ];
+  const professionalEmailDomains = [
+    "gmail.com",
+    "yahoo.com",
+    "hotmail.com",
+    "aol.com",
+    "outlook.com",
+    "icloud.com",
+    "mail.com",
+    "zoho.com",
+    "admin.com",
+    "superadmin.com",
+  ];
 
-    const allUsers = await getAllUsers();
+  const allUsers = await getAllUsers();
 
-    const representativesAssociated =
-      (await getAllRepresentatives({
-        company_id: thisUser?.companies?.[0],
-      })) || [];
+  const representativesAssociated =
+    (await getAllRepresentatives({
+      company_id: thisUser?.companies?.[0],
+    })) || [];
 
-    const allUsersAssociated = allUsers.filter((user) => {
-      const userDomain = user.email.split("@")[1];
-      const thisUserDomain = thisUser.email.split("@")[1];
-      const isProfessionalEmail =
-        !professionalEmailDomains.includes(userDomain);
-      return (
-        thisUser.id !== user.id &&
-        user.first_name &&
-        isProfessionalEmail &&
-        userDomain === thisUserDomain
-      );
-    });
+  const allUsersAssociated = allUsers.filter((user) => {
+    const userDomain = user.email.split("@")[1].toLowerCase();
+    const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
+    const isProfessionalEmail = !professionalEmailDomains.includes(userDomain);
+    return (
+      (user.first_name || user.last_name) &&
+      thisUser.id !== user.id &&
+      isProfessionalEmail &&
+      userDomain === thisUserDomain
+    );
+  });
 
   return [...representativesAssociated, ...allUsersAssociated];
 };

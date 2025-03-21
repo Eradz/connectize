@@ -1,7 +1,6 @@
 import {
   Avatar,
   Badge,
-  Button,
   Popover,
   PopoverArrow,
   PopoverContent,
@@ -13,6 +12,8 @@ import { motion } from "framer-motion";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  deleteAllNotifications,
+  deleteNotification,
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../api-services/notifications";
@@ -21,7 +22,6 @@ import { Notification } from "../icon";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
 import CompanyName from "./company/CompanyName";
 import CustomTabs from "./custom/tabs";
-import MoreOptions from "./MoreOptions";
 import { avatarStyle } from "./ResponsiveNav";
 import SeeMoreLink from "./SeeMoreLink";
 import { NotificationsSkeleton } from "./skeletons/notification";
@@ -114,7 +114,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 
   const handleDeleteAllNotifications = useCallback(async () => {
     setNotifications([]);
-    // await deleteAllNotifications();
+    await deleteAllNotifications();
   }, []);
 
   return (
@@ -139,11 +139,13 @@ export const NotificationItem = ({ isPopover = false }) => {
               )}
             </div>
 
-            <ButtonWithTooltipIcon
-              IconName={TrashIcon}
-              tip="Clear All Notifications"
-              onClick={handleDeleteAllNotifications}
-            />
+            {notifications.length > 0 && (
+              <ButtonWithTooltipIcon
+                IconName={TrashIcon}
+                tip="Clear All Notifications"
+                onClick={handleDeleteAllNotifications}
+              />
+            )}
           </header>
 
           <CustomTabs
@@ -178,7 +180,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 };
 
 const NotificationsArray = memo(
-  ({ notifications = [], fallback, companies, users, isPopover }) => {
+  ({ notifications, fallback, companies, users, isPopover }) => {
     return (
       <section
         className={clsx("space-y-2 divide-y divide-gray-100", {
@@ -216,7 +218,7 @@ const NotificationsArray = memo(
 const NotificationTile = memo(
   ({ notification, index, company, unReadNotificationLength }) => {
     const [read, setRead] = useState(notification?.is_read ? true : false);
-    const { notifications, setNotifications } = useNotifications();
+    const { setNotifications } = useNotifications();
 
     const handleMarkAsRead = useCallback(async () => {
       if (read) return;
@@ -224,7 +226,7 @@ const NotificationTile = memo(
       setNotifications((prevNotifications) =>
         prevNotifications.map((notif) =>
           notif.id === notification.id
-            ? { ...notif, is_read: new Date().toUTCString }
+            ? { ...notif, is_read: new Date().toUTCString() }
             : notif
         )
       );
@@ -234,10 +236,16 @@ const NotificationTile = memo(
     }, [read, notification?.id, setNotifications]);
 
     const handleDeleteNotification = useCallback(async () => {
-      setNotifications((prev) => prev.filter((notif) => notif.id !== notification.id));
+      setNotifications((prev) =>
+        prev.filter((notif) => notif.id !== notification.id)
+      );
 
-      // await deleteNotification(notification.id);
-    }, [notifications]);
+      try {
+        await deleteNotification(notification.id);
+      } catch (error) {
+        setNotifications((prev) => [...prev, notification]);
+      }
+    }, [notification.id, setNotifications]);
 
     return (
       <motion.div
@@ -245,7 +253,7 @@ const NotificationTile = memo(
         whileInView={{ x: 0, opacity: 1 }}
         transition={{ delay: index * 0.05 }}
         viewport={{ once: true }}
-        className="flex items-start gap-2 pt-2"
+        className="flex items-stretch gap-2 pt-2"
       >
         <Avatar
           src={company?.logo || "/images/default-company-logo.png"}
@@ -254,7 +262,7 @@ const NotificationTile = memo(
           name={company?.company_name}
           className={avatarStyle}
         />
-        <div className="space-y-0">
+        <div className="space-y-0 flex-1">
           <CompanyName
             name={company?.company_name}
             verified={company?.verify}
@@ -274,34 +282,26 @@ const NotificationTile = memo(
               <TimeAgo time={notification?.timestamp} />
             </small>
 
-            {/* {!read && unReadNotificationLength > 0 && (
+            {!read && unReadNotificationLength > 0 && (
               <button
                 onClick={handleMarkAsRead}
                 className="text-xs disabled:cursor-not-allowed"
               >
                 Mark as read
               </button>
-            )} */}
+            )}
           </div>
         </div>
 
-        <MoreOptions className="!w-fit !text-xs">
-          <div className="flex items-center gap-4">
-            {!read && unReadNotificationLength > 0 && (
-              <Button fontSize="12" h="30" onClick={handleMarkAsRead}>
-                Mark as Read
-              </Button>
-            )}
-            <ButtonWithTooltipIcon
-              IconName={TrashIcon}
-              onClick={handleDeleteNotification}
-              tip="Remove notification"
-            />
-          </div>
-        </MoreOptions>
+        <ButtonWithTooltipIcon
+          IconName={TrashIcon}
+          onClick={handleDeleteNotification}
+          tip="Remove notification"
+        />
       </motion.div>
     );
   }
 );
 
 export { NotificationPopOver, NotificationsArray };
+
