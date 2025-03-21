@@ -7,13 +7,15 @@ const SEO = ({
   description = "Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors. Network, collaborate on projects, share insights, and explore job opportunities in the energy sector. Join today!",
   keywords = "social media, connect, chat, share, friends, networking, oil and gas networking, energy professionals, oil and gas social platform, energy industry collaboration, oil and gas jobs, upstream, midstream, downstream, energy sector networking, oil and gas suppliers, industry insights, oil and gas investments",
   image,
+  relativeImagePath,
   url,
   type = "website",
 }) => {
   const location = useLocation();
   const currentUrl = url || `${frontendUrl()}${location.pathname}`;
 
-  const ogImage = image || frontendUrl() + "/seo/default-image.png";
+  const ogImage =
+    image || frontendUrl() + (relativeImagePath || "/seo/default-image.png");
 
   return (
     <Helmet async prioritizeSeoTags defaultTitle={title}>
