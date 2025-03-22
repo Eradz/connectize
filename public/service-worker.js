@@ -19,6 +19,8 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
   if (!navigator.onLine) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
@@ -26,26 +28,20 @@ self.addEventListener("fetch", (event) => {
       })
     );
   }
-  if (navigator.onLine) {
-    if (event.request.url.includes("/api/")) {
-      event.respondWith(
-        caches.open(CACHE_NAME).then((cache) => {
-          return fetch(event.request)
-            .then((response) => {
+
+  if (navigator.onLine && event.request.url.includes("/api/")) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return fetch(event.request)
+          .then((response) => {
+            if (response.ok) {
               cache.put(event.request, response.clone());
-              return response;
-            })
-            .catch(() => caches.match(event.request));
-        })
-      );
-      console.log(
-        "Caching request: ",
-        event.request.url,
-        " with cache name ",
-        CACHE_NAME
-      );
-      
-    }
+            }
+            return response;
+          })
+          .catch(() => caches.match(event.request));
+      })
+    );
   }
 });
 
