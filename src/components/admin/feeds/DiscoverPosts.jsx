@@ -140,11 +140,11 @@ export const DiscoverPostItem = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={clsx(
-        "py-3 px-1 xs:px-3 bg-white rounded-md transition-colors duration-300"
+        "py-4 px-1 xs:px-3 bg-white rounded-md transition-colors duration-300"
       )}
     >
       {isSinglePost && <SEO title={postTitle} description={postItem?.body} />}
-      <header className="flex justify-between mb-2 gap-4 xs:gap-6 w-full overflow-hidden">
+      <header className="flex justify-between mb-2 gap-5 xs:gap-6 w-full overflow-hidden">
         <section className="flex xs:items-center gap-2">
           <Avatar
             name={postItem?.company?.company_name}
