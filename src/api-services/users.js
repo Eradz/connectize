@@ -182,7 +182,6 @@ export const logOutCurrentUser = async () => {
   if (success) goToLogin();
 };
 
-
 export const connectWithUser = async (id, hasConnected) => {
   if (hasConnected) {
     return await makeApiRequest({
