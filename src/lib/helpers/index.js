@@ -6,6 +6,15 @@ import { getSession, removeSession, setSession } from "../session";
 export const REGISTER_EMAIL_KEY = "register_email";
 export const EMAIL_VERIFIED_KEY = "email_verified";
 
+const toastExtras = ({ error, label, urlTo = "/" }) => ({
+  description: error.response.data.errors[0].message,
+  duration: 15000,
+  action: {
+    label,
+    onClick: () => (window.location.href = urlTo),
+  },
+});
+
 // Utility Function
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -141,12 +150,21 @@ export async function makeApiRequest({
 
     if (error.status === 417) {
       toast("Account Deactivated", {
-        description: error.response.data.errors[0].message,
-        duration: 15000,
-        action: {
+        ...toastExtras({
+          error,
           label: "Reactivate Now",
-          onClick: () => (window.location.href = "/reactivate-account"),
-        },
+          urlTo: "/reactivate-account",
+        }),
+      });
+      return;
+    }
+    if (error.status === 418) {
+      toast("Account Reactivated", {
+        ...toastExtras({
+          error,
+          label: "Login",
+          urlTo: "/login",
+        }),
       });
       return;
     }

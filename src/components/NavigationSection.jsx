@@ -1,12 +1,12 @@
+import { LogoutOutlined } from "@ant-design/icons";
+import clsx from "clsx";
+import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { logOutCurrentUser } from "../api-services/users";
 import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";
-import { getSession } from "../lib/session";
-import { useState } from "react";
-import { logOutCurrentUser } from "../api-services/users";
-import clsx from "clsx";
 import { feedNavItems } from "../lib/data";
-import { LogoutOutlined } from "@ant-design/icons";
+import { getSession } from "../lib/session";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
@@ -16,89 +16,87 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   const { toggleNav } = useNav();
   const { user: currentUser } = useAuth();
   const session = getSession();
+  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [isOpen, setIsOpen] = useState(false);
+  const navigators = useMemo(
+    () => (isSmallNavigation ? feedNavItems.slice(0, 5) : feedNavItems),
+    [isSmallNavigation]
+  );
 
   const handleLogout = async () => {
     setLoading(true);
-
-    logOutCurrentUser();
+    await logOutCurrentUser();
     setLoading(false);
   };
-
-  const navigators = isSmallNavigation
-    ? feedNavItems.slice(0, 5)
-    : feedNavItems;
 
   return (
     <ul
       className={clsx("xs:text-sm", {
-        "flex items-baseline justify-between": hasHeader,
-        "bg-background rounded p-2 mb-6 space-y-1": !hasHeader,
+        "flex items-center justify-between h-12": hasHeader,
+        "bg-background rounded p-2 mb-6 space-y-1":
+          !hasHeader && !isSmallNavigation,
       })}
     >
-      {navigators.map((item, index) => (
-        <li key={index}>
-          <Link
-            to={item.to}
-            onClick={() => toggleNav(false)}
-            className={clsx(
-              "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5  xs:hover:!text-mid_grey",
-              {
-                "bg-mid_grey pointer-events-none": item.to === pathname,
-                "!text-gold rounded": item.to === pathname && !hasHeader,
-                "!text-white": item.to === pathname && hasHeader,
-                "!text-gray-500": item.to !== pathname,
-                "flex-col text-xs xs:text-[.65rem] ": hasHeader,
-              }
-            )}
-          >
-            <ButtonWithTooltipIcon
-              IconName={item.icon}
-              tip={item.name}
-              iconClassName={clsx(
-                "hover:!text-mid_grey text-xl !size-5 xs:!size-4",
+      {navigators.map(({ to, icon, name }, index) => {
+        const isActive = to === pathname;
+        return (
+          <li key={index}>
+            <Link
+              to={to}
+              onClick={() => toggleNav(false)}
+              className={clsx(
+                "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey",
                 {
-                  "!text-gold rounded": item.to === pathname && !hasHeader,
-                  "!text-white": item.to === pathname && hasHeader,
-                  "!text-gray-500": item.to !== pathname,
+                  "bg-mid_grey pointer-events-none": isActive,
+                  "!text-gold rounded": isActive && !hasHeader,
+                  "!text-gray-500": !isActive,
+                  "flex-col text-xs xs:text-[.65rem]": hasHeader,
                 }
               )}
-            />
-            <span className="max-sm:sr-only">{item.name}</span>
-          </Link>
-        </li>
-      ))}
+            >
+              <ButtonWithTooltipIcon
+                IconName={icon}
+                tip={name}
+                iconClassName={clsx("hover:!text-gold text-xl !size-5", {
+                  "!text-gold rounded": isActive,
+                  "!text-gray-500": !isActive,
+                  "!text-white": !isActive && isSmallNavigation,
+                })}
+              />
+              <span className="max-sm:sr-only">{name}</span>
+            </Link>
+          </li>
+        );
+      })}
       {currentUser && session && (
         <>
           <ReusableModal
             onClose={() => setIsOpen(false)}
             isOpen={isOpen}
             primaryAction={handleLogout}
-            title="Are you sure you want logout?"
+            title="Are you sure you want to log out?"
             secondaryText="Cancel"
           >
             <LightParagraph>
-              You are about to make your current session invalid
+              You are about to end your current session.
             </LightParagraph>
           </ReusableModal>
           <li>
             <button
               className={clsx(
-                "flex gap-2 items-center transition-colors duration-300 p-2 rounded  hover:text-red-600 text-gray-600 disabled:cursor-not-allowed disabled:text-red-600",
+                "flex gap-2 items-center transition-colors duration-300 p-2 rounded hover:!text-red-600 text-gray-600 disabled:cursor-not-allowed disabled:text-red-300",
                 {
                   "flex-col": hasHeader,
+                  "!text-white": isSmallNavigation,
                 }
               )}
               onClick={() => setIsOpen(true)}
               disabled={loading}
             >
-              <LogoutOutlined className="xs:text-xs" />
+              <LogoutOutlined className="!text-lg" />
               <span
-                className={clsx({
-                  "text-[.65rem] max-sm:sr-only": hasHeader,
-                })}
+                className={clsx({ "text-[.65rem] max-sm:sr-only": hasHeader })}
               >
                 {loading ? "Logging out..." : "Logout"}
               </span>

@@ -7,16 +7,10 @@ import {
   Textarea,
   Tooltip,
 } from "@chakra-ui/react";
-import {
-  DownloadIcon,
-  HeartIcon,
-  Pencil1Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
+import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import jsPDF from "jspdf";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import { Link } from "react-router-dom";
@@ -38,11 +32,11 @@ import FormatPostText from "../../FormatPostText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import MoreOptions from "../../MoreOptions";
 import LightParagraph from "../../ParagraphText";
+import PDFPreview from "../../PDFPreview";
 import PostImageCollage from "../../PostImageCollage";
 import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
 import SEO from "../../SEO";
 import TimeAgo from "../../TimeAgo";
-import PDFPreview from "../../PDFPreview";
 
 function DiscoverPosts({
   searchArray,
@@ -68,9 +62,9 @@ function DiscoverPosts({
   const postLoading = isSearch ? searchLoading : isLoading;
 
   return (
-    <section className="space-y-4 mt-4">
+    <section className="md:space-y-6 mt-6 max-md:divide-y">
       {postLoading ? (
-        Array.from({ length: 5 }, (_, index) => (
+        Array.from({ length: 6 }, (_, index) => (
           <DiscoverPostSkeleton key={index} />
         ))
       ) : finalArray?.length < 1 ? (
@@ -136,21 +130,6 @@ export const DiscoverPostItem = ({
   };
 
   const sharePost = async () => await shareThis({ shareUrlString, shareData });
-  const handlePostDownloadPDF = () => {
-    const doc = new jsPDF();
-
-    // Add title and content to the PDF
-    doc.setFont("Segoe UI", "bold");
-    doc.setFontSize(16);
-    doc.text(postTitle, 10, 10);
-
-    doc.setFont("Segoe UI", "normal");
-    doc.setFontSize(12);
-    doc.text(postItem?.body, 10, 20, { maxWidth: 180 }); // Wraps text within 180mm
-
-    // Save the PDF
-    doc.save(`Connectize-post-${postItem.id}-${new Date().toUTCString()}.pdf`);
-  };
 
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
@@ -161,11 +140,11 @@ export const DiscoverPostItem = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={clsx(
-        "py-3 px-1 xs:px-3 bg-white xs:hover:bg-transparent rounded-md transition-colors duration-300"
+        "py-4 px-1 xs:px-3 bg-white rounded-md transition-colors duration-300"
       )}
     >
-      <SEO title={postTitle} description={postItem?.body} />
-      <header className="flex justify-between mb-2 gap-4 xs:gap-6 w-full overflow-hidden">
+      {isSinglePost && <SEO title={postTitle} description={postItem?.body} />}
+      <header className="flex justify-between mb-2 gap-5 xs:gap-6 w-full overflow-hidden">
         <section className="flex xs:items-center gap-2">
           <Avatar
             name={postItem?.company?.company_name}

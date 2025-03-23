@@ -1,10 +1,10 @@
-import React from "react";
-import Navbar from "../components/userProfile/Navbar";
-import Sidebar from "../components/admin/markets/sidebar";
-import { Outlet, useLocation } from "react-router-dom";
 import clsx from "clsx";
+import React from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import Sidebar from "../components/admin/markets/sidebar";
+import Navbar from "../components/userProfile/Navbar";
 
-const MarketPlaceLayout = () => {
+const AppLayout = () => {
   const { pathname } = useLocation();
   const isChatRoom = pathname.startsWith("/messages/room_");
   return (
@@ -14,7 +14,7 @@ const MarketPlaceLayout = () => {
       })}
     >
       <Navbar />
-      <section className="max-md:container flex flex-col items-start md:flex-row p-3 gap-4 xl:!gap-5">
+      <section className="flex flex-col items-start md:flex-row gap-4 xl:!gap-5">
         <Sidebar />
         <section className="grid grid-cols-1 md:px-0 gap-2 w-full max-md:mb-16">
           <Outlet />
@@ -24,4 +24,4 @@ const MarketPlaceLayout = () => {
   );
 };
 
-export default MarketPlaceLayout;
+export default AppLayout;

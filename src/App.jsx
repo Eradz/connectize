@@ -8,8 +8,8 @@ import Home from "./components/profile/home";
 import ProfileLayout from "./components/profile/layout";
 import Overview from "./components/profile/overview";
 import Profile from "./components/profile/profile";
+import AppLayout from "./pages/AppLayout";
 import FeedLayout from "./pages/FeedLayout";
-import MarketPlaceLayout from "./pages/MarketPlaceLayout";
 import AuthLayout from "./pages/authentication/AuthLayout";
 import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
 import Login from "./pages/authentication/login";
@@ -56,7 +56,7 @@ function App() {
         <Route>
           <Route path="*" element={<NotFound />} />
           {/* Market place */}
-          <Route path="/" element={<MarketPlaceLayout />}>
+          <Route path="/" element={<AppLayout />}>
             {/* Landing page */}
             <Route path="/" element={<FeedLayout />}>
               <Route path="/" element={<NewsFeed />} />

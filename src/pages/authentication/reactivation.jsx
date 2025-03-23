@@ -1,16 +1,17 @@
-import { useEffect } from "react";
-import * as Yup from "yup";
-import Form from "../../components/form";
 import { useFormik } from "formik";
-import { authenticationService } from "../../api-services/authentication";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  SUCCESS_TYPE_KEY,
-  REACTIVATE_ACCOUNT_KEY,
-} from "../../lib/data/authentication";
+import * as Yup from "yup";
+import { authenticationService } from "../../api-services/authentication";
+import Form from "../../components/form";
 import HeadingText from "../../components/HeadingText";
-import LightParagraph from "../../components/ParagraphText";
 import PageLoading from "../../components/PageLoading";
+import LightParagraph from "../../components/ParagraphText";
+import SEO from "../../components/SEO";
+import {
+  REACTIVATE_ACCOUNT_KEY,
+  SUCCESS_TYPE_KEY,
+} from "../../lib/data/authentication";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -19,12 +20,15 @@ const validationSchema = Yup.object().shape({
 });
 
 function ReactivateAccount() {
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const formValues = { email: "" };
 
   const uid = searchParams.get("uid");
   const token = searchParams.get("token");
+  const emailInRequest = searchParams.get("email") || "";
+
+  const formValues = { email: emailInRequest };
 
   const formik = useFormik({
     initialValues: formValues,
@@ -41,17 +45,10 @@ function ReactivateAccount() {
 
   useEffect(() => {
     formik.setValues(formValues);
-    document.title = "Account Reactivation | Connectize";
 
-    (async function checkForToken() {
-      await reactivateAccount();
-    })();
+    (async () => {
+      if (!uid && !token) return;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const reactivateAccount = async () => {
-    if (uid && token) {
       const success = await authenticationService({
         url: `reactivate-account/${uid}/${token}`,
         method: "POST",
@@ -61,10 +58,10 @@ function ReactivateAccount() {
         localStorage.setItem(SUCCESS_TYPE_KEY, REACTIVATE_ACCOUNT_KEY);
         navigate("/success");
       }
+    })();
+  }, [uid, token]);
 
-      return <PageLoading />;
-    }
-  };
+  if (loading) <PageLoading />;
 
   const fields = [
     {
@@ -78,6 +75,7 @@ function ReactivateAccount() {
 
   return (
     <section className="space-y-4">
+      <SEO title="Account Reactivation | Connectize" />
       <HeadingText>Account Reactivation</HeadingText>
       <LightParagraph>
         Please enter your email address to receive an account reactivation

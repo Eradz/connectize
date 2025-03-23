@@ -1,21 +1,21 @@
 import React from "react";
-import Logo from "../logo";
 import Headroom from "react-headroom";
+import Logo from "../logo";
 
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-import FeedSearch from "../custom/FeedSearch";
-import { NotificationPopOver } from "../../components/notifications";
-import { Link } from "react-router-dom";
-import clsx from "clsx";
-import { JoinedUserCompanyImages } from "../ResponsiveNav";
 import { Tooltip } from "@chakra-ui/react";
-import { NavigationSection } from "../NavigationSection";
-import NavbarDropdown from "../NavbarDropdown";
-import { CompanyUserType } from "../../lib/helpers/types";
+import clsx from "clsx";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { Setting } from "../../icon";
+import { CompanyUserType } from "../../lib/helpers/types";
+import FeedSearch from "../custom/FeedSearch";
+import NavbarDropdown from "../NavbarDropdown";
+import { NavigationSection } from "../NavigationSection";
+import { NotificationPopOver } from "../notifications";
+import { JoinedUserCompanyImages } from "../ResponsiveNav";
 
 const Navbar = () => {
   const { user: currentUser } = useAuth();
@@ -52,10 +52,15 @@ const Navbar = () => {
 
             <div className="flex items-center gap-3 xs:gap-5 md:gap-7 shrink-0">
               {currentUser?.user_type === CompanyUserType && <NavbarDropdown />}
-              <Link to="/co/settings" className="md:hidden">
-                <Setting  />
-              </Link>
+
               <NotificationPopOver />
+
+              <LinkWithTooltipIcon
+                IconName={Setting}
+                className="md:hidden"
+                tip="settings"
+                to="/co/settings"
+              />
               <JoinedUserCompanyImages />
             </div>
           </section>
@@ -63,9 +68,9 @@ const Navbar = () => {
       </Headroom>
 
       <motion.nav
-        className="md:hidden bg-gold fixed bottom-0 left-0 w-full z-[99999]"
+        className="md:hidden bg-mid_grey fixed bottom-0 left-0 w-full z-[99999]"
         initial={{ y: 0 }}
-        animate={{ y: showBottomNav ? 0 : 120 }}
+        animate={{ y: showBottomNav ? 0 : 100 }}
       >
         <section className="container">
           <NavigationSection hasHeader isSmallNavigation />
