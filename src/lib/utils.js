@@ -37,7 +37,9 @@ export function timeAgo(timestamp) {
   return "just now"; // Default for timestamps very close to the current time
 }
 
-export function formatNumber(num) {
+export function formatNumber(value) {
+  let num = Number(value);
+  if (num < 0) return "0";
   if (num >= 1e12) return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "T";
   if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
   if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, "") + "M";

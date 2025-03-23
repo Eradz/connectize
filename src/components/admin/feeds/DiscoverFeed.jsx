@@ -20,9 +20,11 @@ const DiscoverFeed = () => {
   useEffect(() => {
     setUser(currentUser);
   }, [currentUser, setUser]);
+
+
   return (
-    <section className="space-y-4 max-md:container">
-      <div className="flex items-baseline gap-2">
+    <section className="space-y-6">
+      <div className="flex items-baseline gap-2  max-md:container mt-4">
         <h1 className="text-3xl font-semibold">Discover</h1>
         {(currentUser || !isLoading) &&
           currentUser?.user_type === CompanyUserType &&

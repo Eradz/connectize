@@ -1,23 +1,23 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Bookmark, VerifiedIcon } from "../../../icon";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
-import { useMediaQuery } from "react-responsive";
-import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
-import { Link } from "react-router-dom";
-import { bookmarkService, getServices } from "../../../api-services/services";
-import { useAuth } from "../../../context/userContext";
+import { Avatar } from "@chakra-ui/react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { bookmarkProduct, getProducts } from "../../../api-services/products";
-import { MarkdownComponent } from "../../MarkDownComponent";
 import { motion } from "framer-motion";
+import React, { useCallback, useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
+import { Link } from "react-router-dom";
+import { Autoplay, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { bookmarkProduct, getProducts } from "../../../api-services/products";
+import { bookmarkService, getServices } from "../../../api-services/services";
+import { useAuth } from "../../../context/userContext";
+import { Bookmark, VerifiedIcon } from "../../../icon";
+import CustomTabs from "../../custom/tabs";
+import { MarkdownComponent } from "../../MarkDownComponent";
+import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
 import {
   ButtonWithTooltipIcon,
   ConjoinedAvatarSkeleton,
 } from "./DiscoverPosts";
-import CustomTabs from "../../custom/tabs";
-import { Avatar } from "@chakra-ui/react";
 
 const DiscoverPostTabs = () => {
   const { data: products, isLoading: productsLoading } = useQuery({
@@ -58,6 +58,9 @@ const DiscoverPostTabs = () => {
 
   return (
     <CustomTabs
+      variant="unstyled"
+      tabsStyle=""
+      className="max-md:container"
       tabsHeading={["Products", "Services"]}
       tabsPanels={[
         <PostSlider

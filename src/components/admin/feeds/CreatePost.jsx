@@ -13,31 +13,29 @@ import { createPost } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
+import CustomErrorMessage from "../../CustomErrorMessage";
 import GifPicker from "../../GifPicker";
+import ValidImages from "../../ValidImages";
 import { largeFileText, unSupportedText } from "../listing/newListing";
 
-import CustomErrorMessage from "../../CustomErrorMessage";
-import ValidImages from "../../ValidImages";
+const imageTypes = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+];
+const imageSize = 4 * 1024 * 1024; // 4MB
 
-const isImageFile = (files) => {
-  const imageTypes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-    "image/avif",
-  ];
-  return Array.isArray(files)
+const isImageFile = (files) =>
+  Array.isArray(files)
     ? files.every((file) => imageTypes.includes(file.type.toLowerCase()))
     : imageTypes.includes(files.type.toLowerCase());
-};
 
-const isImageSize = (files) => {
-  const imageSize = 4 * 1024 * 1024; // 4MB
-  return Array.isArray(files)
+const isImageSize = (files) =>
+  Array.isArray(files)
     ? files.every((file) => file.size <= imageSize)
     : files.size <= imageSize;
-};
 
 function CreatePost() {
   const { setRefetchInterval } = useCustomQuery();
@@ -72,7 +70,6 @@ function CreatePost() {
 
   const onEmojiClick = useCallback((emojiObject) => {
     setMessage((prevText) => prevText + emojiObject.emoji);
-    // setShowEmojiPicker(false);
   }, []);
 
   const onGifSelect = useCallback((gifUrl) => {
@@ -106,17 +103,8 @@ function CreatePost() {
       setIsLoading(true);
       const formData = new FormData();
       formData.append("body", message);
-      validImages.forEach((image) => {
-        formData.append("images", image);
-      });
-      if (selectedGif) {
-        formData.append("gif", selectedGif);
-      }
-
-      console.log(validImages);
-      validImages.forEach((image) => {
-        console.log("Image:", image, "Type:", typeof image);
-      });
+      validImages.forEach((image) => formData.append("images", image));
+      if (selectedGif) formData.append("gif", selectedGif);
 
       const newPost = await createPost(formData);
 
@@ -162,7 +150,7 @@ function CreatePost() {
   );
 
   return (
-    <section className="bg-white w-full px-4 py-4 rounded border-b-[4px] border-gold relative">
+    <section className="bg-white w-full py-4 rounded border-b-[4px] border-gold relative max-md:container">
       <div className="size-full">
         <textarea
           type="text"
@@ -192,7 +180,6 @@ function CreatePost() {
         <CustomErrorMessage errorMessage={errorMessage} />
       </div>
 
-      {/* valid images */}
       <ValidImages setValidImages={setValidImages} validImages={validImages} />
 
       {selectedGif && (
