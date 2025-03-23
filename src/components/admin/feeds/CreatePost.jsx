@@ -233,7 +233,7 @@ function CreatePost() {
         </div>
 
         <button
-          className="text-sm xs:w-72 self-center lg:self-end rounded-full bg-gold hover:bg-gold/60 py-2.5 px-8 transition-all duration-300 md:w-fit disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="text-sm xs:w-60 self-center lg:self-end rounded-full bg-gold hover:bg-gold/60 py-2.5 px-8 transition-all duration-300 md:w-fit disabled:bg-gray-300 disabled:cursor-not-allowed"
           onClick={handleCreatePost}
           disabled={isLoading}
         >

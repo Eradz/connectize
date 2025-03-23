@@ -1,5 +1,5 @@
-import Cookies from "js-cookie";
 import CryptoJS from "crypto-js";
+import Cookies from "js-cookie";
 
 export const AUTH_SESSION_COOKIE = "connectize_spicy_auth_cookie";
 
@@ -30,18 +30,17 @@ export const setSession = (value, expiresInDays = 7) => {
 export const getSession = () => {
   try {
     const encryptedSession = Cookies.get(AUTH_SESSION_COOKIE);
-    if (!encryptedSession) return null; // Return null if no session cookie exists
+    if (!encryptedSession) return null;
 
     const decryptedSession = decryptData(encryptedSession);
     const session = JSON.parse(decryptedSession);
 
-    // Optionally refresh the session expiration by resetting the cookie
     setSession(session);
 
     return session;
   } catch (error) {
     console.error("Error reading or decrypting session cookie:", error);
-    return null; // Return null on decryption or parsing error
+    return null;
   }
 };
 

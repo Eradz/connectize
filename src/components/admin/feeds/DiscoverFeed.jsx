@@ -21,7 +21,7 @@ const DiscoverFeed = () => {
     setUser(currentUser);
   }, [currentUser, setUser]);
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 max-md:container">
       <div className="flex items-baseline gap-2">
         <h1 className="text-3xl font-semibold">Discover</h1>
         {(currentUser || !isLoading) &&

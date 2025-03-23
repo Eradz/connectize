@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { goToLogin, makeApiRequest } from "../lib/helpers";
+import { getSession } from "../lib/session";
 import { capitalizeFirst } from "../lib/utils";
 import { getCompanyByIdOrEmail } from "./companies";
 import { getAllRepresentatives } from "./representatives";
@@ -163,7 +164,23 @@ export const getOrCreateGender = async (gender) => {
   });
 };
 
-export const logOutCurrentUser = () => goToLogin();
+export const logOutCurrentUser = async () => {
+  const session = getSession();
+
+  if (!session) {
+    return goToLogin();
+  }
+
+  const refresh = session.tokens.refresh;
+
+  const success = await makeApiRequest({
+    url: "logout",
+    method: "POST",
+    data: { refresh },
+  });
+  if (success) goToLogin();
+};
+
 
 export const connectWithUser = async (id, hasConnected) => {
   if (hasConnected) {
