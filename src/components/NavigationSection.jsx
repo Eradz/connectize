@@ -77,6 +77,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             primaryAction={handleLogout}
             title="Are you sure you want to log out?"
             secondaryText="Cancel"
+            loading={loading}
           >
             <LightParagraph>
               You are about to end your current session.

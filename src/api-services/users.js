@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { goToLogin, makeApiRequest } from "../lib/helpers";
 import { getSession } from "../lib/session";
 import { capitalizeFirst } from "../lib/utils";
+import { authenticationService } from "./authentication";
 import { getCompanyByIdOrEmail } from "./companies";
 import { getAllRepresentatives } from "./representatives";
 
@@ -173,10 +174,10 @@ export const logOutCurrentUser = async () => {
 
   const refresh = session.tokens.refresh;
 
-  const success = await makeApiRequest({
+  const success = await authenticationService({
     url: "logout",
     method: "POST",
-    data: { refresh },
+    values: { refresh },
   });
   if (success) goToLogin();
 };
