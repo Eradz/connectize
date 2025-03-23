@@ -5,64 +5,83 @@ import { NAVIGATION_BUTTONS } from "../lib/slide_button";
 import { Button } from "@chakra-ui/react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import Logo from "./logo";
 
 const getImageSrc = (src) => (src.startsWith("http") ? src : baseURL + src);
 
-const getImageClassName = (images, index) => {
-  if (images.length === 3 && index === 0) return "col-span-2 row-span-2";
-  if (images.length === 4 && index > 1) return "aspect-square";
-  return "aspect-video";
+const getAspectRatio = (src) => {
+  const img = new Image();
+  img.src = getImageSrc(src);
+  return new Promise((resolve) => {
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      resolve(aspectRatio);
+    };
+  });
+};
+
+const arrangeImages = async (images) => {
+  const aspectRatios = await Promise.all(images.map((src) => getAspectRatio(src)));
+  return images.map((src, index) => ({
+    src,
+    aspectRatio: aspectRatios[index],
+    type: aspectRatios[index] > 1 ? "landscape" : "portrait",
+  }));
 };
 
 const PostImageCollage = ({ images }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const swiperRef = useRef(null);
+  const [processedImages, setProcessedImages] = useState([]);
 
-  // Memoized navigation handler
+  React.useEffect(() => {
+    arrangeImages(images).then(setProcessedImages);
+  }, [images]);
+
   const handleNavigation = useCallback((action) => {
     const swiperInstance = swiperRef.current;
     if (swiperInstance) {
-      action === "prev"
-        ? swiperInstance.slidePrev()
-        : swiperInstance.slideNext();
+      action === "prev" ? swiperInstance.slidePrev() : swiperInstance.slideNext();
       setActiveSlideIndex(swiperInstance.activeIndex);
     }
   }, []);
-  if (images.length <= 0) return <></>;
+
+  if (!processedImages.length) return null;
 
   return (
     <>
       <section
         className={`mt-3 grid gap-2 rounded-lg overflow-hidden ${
-          images.length === 1
+          processedImages.length === 1
             ? "grid-cols-1"
-            : images.length === 2
+            : processedImages.length === 2
             ? "grid-cols-2"
-            : "grid-cols-2 md:grid-cols-3"
+            : processedImages.length === 3
+            ? "grid-cols-2 grid-rows-2"
+            : "grid-cols-2 grid-rows-2"
         }`}
       >
-        {images.slice(0, 3).map((src, index) => (
-          <PostImage src={src} index={index} key={index} />
+        {processedImages.slice(0, 4).map((img, index) => (
+          <PostImage src={img.src} key={index} type={img.type} />
         ))}
 
-        {images.length > 3 && (
+        {processedImages.length > 4 && (
           <div
             className="relative size-full flex text-white text-lg font-bold rounded-lg cursor-pointer overflow-hidden"
             onClick={() => setIsOpen(true)}
           >
             <span className="z-10 size-full min-h-24 bg-black/40 hover:bg-black/60 transition-all duration-300 flex items-center justify-center">
-              +{images.length - 4}
+              +{processedImages.length - 4} More
             </span>
             <img
-              src={getImageSrc(images[4])}
-              className="z-0 absolute rounded-md object-contain"
+              src={getImageSrc(processedImages[4].src)}
+              className="z-0 absolute rounded-md object-cover"
               alt="open more images"
             />
           </div>
         )}
       </section>
+
       <ReusableModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -70,8 +89,8 @@ const PostImageCollage = ({ images }) => {
           <div className="flex gap-4 items-center justify-between">
             <div className="flex text-xs gap-1 items-center">
               <strong>
-                {activeSlideIndex + 1} / {images.length - 4} image
-                {images.length > 1 ? "s" : ""}
+                {activeSlideIndex + 1} / {processedImages.length - 4} image
+                {processedImages.length > 1 ? "s" : ""}
               </strong>
             </div>
             <div className="flex items-center">
@@ -79,7 +98,7 @@ const PostImageCollage = ({ images }) => {
                 <Button
                   key={button.id}
                   onClick={() => handleNavigation(button.action)}
-                  disabled={images.length === 1}
+                  disabled={processedImages.length === 1}
                   className="!bg-transparent hover:!text-custom_blue !text-gray-600 first:flex-row-reverse active:scale-95 !text-sm xs:!text-xs"
                 >
                   <span>{button.text}</span>
@@ -101,13 +120,10 @@ const PostImageCollage = ({ images }) => {
           spaceBetween={10}
           className="!z-0"
         >
-          {images.slice(3, images.length - 1).map((src, index) => (
-            <SwiperSlide
-              key={index}
-              className="!h-auto rounded-md overflow-hidden"
-            >
+          {processedImages.slice(4).map((img, index) => (
+            <SwiperSlide key={index} className="!h-auto rounded-md overflow-hidden">
               <img
-                src={getImageSrc(src)}
+                src={getImageSrc(img.src)}
                 className="!size-full block cursor-pointer"
                 alt="Images for post"
               />
@@ -121,42 +137,30 @@ const PostImageCollage = ({ images }) => {
 
 export default PostImageCollage;
 
-const ImageModal = ({ isOpen, onClose, src }) => {
-  return (
-    <ReusableModal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="xl"
-      title="Post image"
-    >
-      <img src={src} alt="Post-image" className="size-full rounded-md" />
-    </ReusableModal>
-  );
-};
-
-const PostImage = ({ src, index }) => {
+const PostImage = ({ src, type }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <div
-        className={`relative overflow-hidden rounded-lg cursor-pointer ${getImageClassName(
-          src,
-          index
-        )}`}
+        className={`relative overflow-hidden rounded-lg cursor-pointer ${
+          type === "landscape" ? "col-span-2 row-span-1" : "col-span-1 row-span-2"
+        }`}
       >
         <img
           src={getImageSrc(src)}
-          alt={`Post-image ${index + 1}`}
+          alt="Post-image"
           className="size-full object-cover rounded-md"
           onClick={() => setIsOpen(true)}
         />
       </div>
 
-      <ImageModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        src={getImageSrc(src)}
-      />
+      <ImageModal isOpen={isOpen} onClose={() => setIsOpen(false)} src={getImageSrc(src)} />
     </>
   );
 };
+
+const ImageModal = ({ isOpen, onClose, src }) => (
+  <ReusableModal isOpen={isOpen} onClose={onClose} size="xl" title="Post image">
+    <img src={src} alt="Post-image" className="size-full rounded-md" />
+  </ReusableModal>
+);

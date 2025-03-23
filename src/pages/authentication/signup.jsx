@@ -8,6 +8,7 @@ import CheckAgreement from "../../components/form/checkAgreement";
 import HeadingText from "../../components/HeadingText";
 import { SUCCESS_TYPE_KEY } from "../../lib/data/authentication";
 import { REGISTER_EMAIL_KEY } from "../../lib/helpers";
+import SEO from "../../components/SEO";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
