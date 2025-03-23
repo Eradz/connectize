@@ -1,24 +1,23 @@
+import { CloseButton } from "@chakra-ui/react";
+import EmojiPicker from "emoji-picker-react";
 import React, {
-  useEffect,
-  useState,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
-import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
-import { createPost } from "../../../api-services/posts";
-import { toast } from "sonner";
-import { CloseButton } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import EmojiPicker from "emoji-picker-react";
-import GifPicker from "../../GifPicker";
-import { largeFileText, unSupportedText } from "../listing/newListing";
+import { toast } from "sonner";
+import { createPost } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
+import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
+import GifPicker from "../../GifPicker";
+import { largeFileText, unSupportedText } from "../listing/newListing";
 
-import { motion } from "framer-motion";
-import ValidImages from "../../ValidImages";
 import CustomErrorMessage from "../../CustomErrorMessage";
+import ValidImages from "../../ValidImages";
 
 const isImageFile = (files) => {
   const imageTypes = [
@@ -163,7 +162,7 @@ function CreatePost() {
   );
 
   return (
-    <section className="bg-white w-full px-4 py-4 rounded border-b-[5px] border-gold relative">
+    <section className="bg-white w-full px-4 py-4 rounded border-b-[4px] border-gold relative">
       <div className="size-full">
         <textarea
           type="text"
@@ -233,16 +232,15 @@ function CreatePost() {
           />
         </div>
 
-        {(showEmojiPicker || showGifPicker) && renderEmojiGifPickers}
-
         <button
-          className="text-sm rounded-full bg-gold hover:bg-gold/60 py-2.5 px-8 transition-all duration-300 md:w-fit disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="text-sm xs:w-72 self-center lg:self-end rounded-full bg-gold hover:bg-gold/60 py-2.5 px-8 transition-all duration-300 md:w-fit disabled:bg-gray-300 disabled:cursor-not-allowed"
           onClick={handleCreatePost}
           disabled={isLoading}
         >
           {isLoading ? "Creating Post" : "Create Post"}
         </button>
       </div>
+      {(showEmojiPicker || showGifPicker) && renderEmojiGifPickers}
     </section>
   );
 }
