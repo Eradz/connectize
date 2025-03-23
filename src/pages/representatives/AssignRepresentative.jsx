@@ -99,7 +99,7 @@ export default function AssignRepresentative() {
   return currentUser?.user_type === UserType ? (
     <Restricted fallback="assigning new representatives" />
   ) : (
-    <section>
+    <section className="max-md:container p-3">
       <section className="space-y-6">
         <div className="">
           <HeadingText>Assign Representatives</HeadingText>

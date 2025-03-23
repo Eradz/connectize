@@ -109,8 +109,8 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
   }, [thisUser?.id, queryClient]);
 
   return (
-    <section className="">
-      <ul className="space-y-2 divide-y divide-gray-100 p-0">
+    <section className="max-md:container p-3">
+      <ul className="space-y-2 divide-y divide-gray-100  max-md:container p-3">
         {isLoading ? (
           Array.from({ length: 6 }, (_, index) => (
             <CircleTitleSubtitleSkeleton key={index} />

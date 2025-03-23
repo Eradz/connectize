@@ -1,11 +1,9 @@
+import { useFormik } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";
 import Form from "../../components/form";
-import { useFormik } from "formik";
 
-import HeadingText from "../HeadingText";
-import LightParagraph from "../ParagraphText";
-import StepButton from "./StepButton";
+import { useAuth } from "../../context/userContext";
 import {
   ageKey,
   currentProfileIndexKey,
@@ -15,22 +13,24 @@ import {
   roleKey,
 } from "../../lib/data";
 import { customFormikFieldValidator } from "../../lib/utils";
-import { useAuth } from "../../context/userContext";
+import HeadingText from "../HeadingText";
+import LightParagraph from "../ParagraphText";
+import StepButton from "./StepButton";
 
 const validationSchema = Yup.object().shape({
-  first_name: Yup.string().trim().required("This field is required"),
-  last_name: Yup.string().trim().required("This field is required"),
+  first_name: Yup.string().trim().required("first name is required"),
+  last_name: Yup.string().trim().required("last name is required"),
   role: Yup.string().trim().required("This field is required"),
   gender: Yup.string().trim().required("This field is required"),
   age: Yup.string()
-    .required("This field is required")
-    .test("compare-age", "You have to be at least 18 years", function (value) {
+    .required("Age is required, not less than 16 years")
+    .test("compare-age", "You have to be at least 16 years", function (value) {
       const inputDate = new Date(value);
 
       const today = new Date();
       const seventeenYearsAgo = new Date();
 
-      seventeenYearsAgo.setFullYear(today.getFullYear() - 17);
+      seventeenYearsAgo.setFullYear(today.getFullYear() - 16);
 
       today.setHours(0, 0, 0, 0);
       seventeenYearsAgo.setHours(0, 0, 0, 0);

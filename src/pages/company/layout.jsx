@@ -1,3 +1,4 @@
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Outlet } from "react-router-dom";
@@ -23,12 +24,20 @@ const CompanyLayout = () => {
     <main className="container mx-auto max-w-screen-md max-xs:space-y-4">
       <section className="min-h-[90vh] mb-8 w-full max-w-screen-md flex items-center justify-center">
         {currentUser?.user_type === UserType ? (
-          <Restricted fallback="company" />
+          <Restricted fallback="creating a company" />
         ) : companies.length >= 1 ? (
-          <LightParagraph center>
-            You have reached the maximum number of companies per company for
-            your subscription
-          </LightParagraph>
+          <div className="flex flex-col items-center space-y-4">
+            <DotLottieReact
+              src="/lottie/notification.lottie"
+              loop
+              autoplay
+              className="size-10/12 xs:size-1/2 md:size-56  aspect-square"
+            />
+            <LightParagraph center>
+              You have reached the maximum number of companies per company for
+              your subscription
+            </LightParagraph>
+          </div>
         ) : (
           <Outlet />
         )}

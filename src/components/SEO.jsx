@@ -15,7 +15,8 @@ const SEO = ({
   const currentUrl = url || `${frontendUrl()}${location.pathname}`;
 
   const ogImage =
-    image || frontendUrl() + (relativeImagePath || "/seo/default-image.png");
+    image ||
+    frontendUrl() + "/seo/" + (relativeImagePath || "default-image.png");
 
   return (
     <Helmet async prioritizeSeoTags defaultTitle={title}>

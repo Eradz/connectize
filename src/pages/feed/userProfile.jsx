@@ -63,7 +63,7 @@ export default function UserProfile() {
   } = paramUser;
 
   return (
-    <section className="rounded-md overflow-hidden">
+    <section className="rounded-md overflow-hidden max-md:container p-3">
       <SEO
         title={`${paramUser.first_name || paramUser.email || ""} ${
           paramUser.last_name || ""

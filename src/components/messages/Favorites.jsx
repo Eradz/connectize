@@ -1,15 +1,15 @@
-import React from "react";
-import { useAuth } from "../../context/userContext";
+import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import React from "react";
+import { Link } from "react-router-dom";
 import { getAllCompanies } from "../../api-services/companies";
 import { getAllUsers } from "../../api-services/users";
+import { useAuth } from "../../context/userContext";
 import HeadingText from "../HeadingText";
-import { Avatar } from "@chakra-ui/react";
-import { avatarStyle } from "../ResponsiveNav";
-import { Link } from "react-router-dom";
-import RoomName from "./RoomName";
 import LightParagraph from "../ParagraphText";
-import { motion } from "framer-motion";
+import { avatarStyle } from "../ResponsiveNav";
+import RoomName from "./RoomName";
 
 export default function Favorites() {
   const { user: currentUser } = useAuth();
@@ -31,7 +31,7 @@ export default function Favorites() {
     ?.slice(0, 10);
 
   return (
-    <section className="space-y-2">
+    <section className="space-y-2  max-md:container p-3">
       <HeadingText heading="sub-heading" weight="semibold">
         Favorites
       </HeadingText>

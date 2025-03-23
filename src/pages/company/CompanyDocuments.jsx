@@ -1,13 +1,14 @@
+import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import * as Yup from "yup";
+import { createCompany } from "../../api-services/companies";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import Form from "../../components/form";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import StepButton from "../../components/profile/StepButton";
 import { ImageSelect } from "../../components/form/customInput";
-import { createCompany } from "../../api-services/companies";
-import { toast } from "sonner";
+import StepButton from "../../components/profile/StepButton";
 import { customFormikFieldValidator } from "../../lib/utils";
 
 const FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -37,15 +38,16 @@ export function checkFileSize(value) {
 }
 
 const validationSchema = Yup.object().shape({
-  document_type: Yup.string().required("Field cannot be empty"),
+  document_type: Yup.string().optional(),
   company_document: Yup.mixed()
-    .required("Field cannot be empty")
+    .optional()
     .test("file-size", largeFileText, checkFileSize)
     .test("file-format", unSupportedText, checkFileFormat),
 });
 
 const CompanyDocuments = () => {
   const [newCompanyName, setNewCompanyName] = useState("");
+  const navigate = useNavigate();
   const initialValues = {
     // create company
     company_name: localStorage.getItem("company_name") || "",
@@ -81,7 +83,7 @@ const CompanyDocuments = () => {
     if (!isValidFields) return false;
 
     const toastId = toast.info(
-      `Onboarding ${formik.values.company_name} to connectize...`
+      `Onboarding ${formik.values.company_name} to the connectize platform`
     );
 
     const newCompany = await createCompany(formik.values);
@@ -91,6 +93,7 @@ const CompanyDocuments = () => {
         localStorage.removeItem(value);
       }
       toast.dismiss(toastId);
+      navigate(`/${newCompany.company_name}`);
       setNewCompanyName(newCompany.company_name);
       return true;
     }

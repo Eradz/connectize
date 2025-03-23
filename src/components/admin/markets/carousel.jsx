@@ -1,14 +1,14 @@
+import { PlusIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import React, { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import HeadingText from "../../HeadingText";
-import { PostSlider } from "../feeds/DiscoverPostTabs";
 import { SwiperSlide } from "swiper/react";
-import { ChatSellerLink, ListCardSkeleton } from "./newlyListed";
-import { useQuery } from "@tanstack/react-query";
 import { getRecommendedProducts } from "../../../api-services/products";
-import { PlusIcon } from "@radix-ui/react-icons";
+import HeadingText from "../../HeadingText";
 import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { PostSlider } from "../feeds/DiscoverPostTabs";
+import { ChatSellerLink, ListCardSkeleton } from "./newlyListed";
 
 // Memoize Card component to avoid unnecessary re-renders
 const Card = memo(({ product }) => {
@@ -90,7 +90,7 @@ export const CreateNewLink = ({
   return (
     <Link
       to={url}
-      className="p-3 rounded-md flex items-center gap-2 bg-black hover:bg-opacity-70 hover:scale-90 transition-all duration-300 fixed bottom-12 right-5 z-[999999]"
+      className="p-3 rounded-md flex items-center gap-2 bg-black hover:bg-opacity-70 hover:scale-90 transition-all duration-300 fixed bottom-16 right-5 z-[999999]"
       onClick={onClick}
     >
       <ButtonWithTooltipIcon

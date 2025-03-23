@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 function NoPage() {
   return (
     <section className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-3">
+      
       <HeadingText>404 No content found</HeadingText>
       <div className="flex gap-2">
         <button

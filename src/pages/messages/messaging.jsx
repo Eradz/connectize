@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo } from "react";
-import MessageControl from "../../components/messages/MessageControl";
-import MessageArea from "../../components/messages/MessageArea";
 import { useQuery } from "@tanstack/react-query";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   getMessagesForUser,
   markMessageAsRead,
 } from "../../api-services/messaging";
+import MessageArea from "../../components/messages/MessageArea";
+import MessageControl from "../../components/messages/MessageControl";
 import { useAuth } from "../../context/userContext";
 import useWebSocket from "../../hooks/useWebSocket";
 
@@ -74,7 +74,7 @@ export default function MessagingPage() {
   ]);
 
   return (
-    <section className="h-[79vh] lg:h-[85vh] flex flex-col">
+    <section className="h-[79vh] lg:h-[85vh] flex flex-col  max-md:container p-3">
       <MessageArea messages={allMessages} messagesLoading={isLoading} />
       <MessageControl
         loading={isLoading}

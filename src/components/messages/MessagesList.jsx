@@ -1,17 +1,17 @@
-import React, { useMemo } from "react";
-import HeadingText from "../HeadingText";
+import { Avatar, Badge } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { getMessagesForUser } from "../../api-services/messaging";
 import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
-import LightParagraph from "../ParagraphText";
-import { motion } from "framer-motion";
-import { Avatar, Badge } from "@chakra-ui/react";
-import { avatarStyle } from "../ResponsiveNav";
-import { Link } from "react-router-dom";
-import Username from "../Username";
-import TimeAgo from "../TimeAgo";
 import useWebSocket from "../../hooks/useWebSocket";
+import HeadingText from "../HeadingText";
+import LightParagraph from "../ParagraphText";
+import { avatarStyle } from "../ResponsiveNav";
+import TimeAgo from "../TimeAgo";
+import Username from "../Username";
 
 export default function MessagesList() {
   const { user: currentUser } = useAuth();
@@ -48,7 +48,7 @@ export default function MessagesList() {
   }, [allMessages]);
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4  max-md:container p-3">
       <HeadingText heading="sub-heading" weight="semibold">
         Recent Chats
       </HeadingText>

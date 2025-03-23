@@ -48,7 +48,7 @@ const CompanyProfile = React.memo(() => {
   if (!company) return <NoPage />;
 
   return (
-    <section className="rounded-md overflow-hidden w-full">
+    <section className="rounded-md overflow-hidden w-full  max-md:container p-3">
       <Header {...headerProps} />
 
       <section className="mt-11 md:mt-14 flex max-lg:flex-col items-start gap-2 relative">

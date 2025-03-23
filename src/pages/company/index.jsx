@@ -1,23 +1,24 @@
+import { getCountries } from "@loophq/country-state-list";
+import { useFormik } from "formik";
 import React, { useEffect } from "react";
+import * as Yup from "yup";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
+import SEO from "../../components/SEO";
 import Form from "../../components/form";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import StepButton from "../../components/profile/StepButton";
-import { getCountries } from "@loophq/country-state-list";
 
 const validationSchema = Yup.object().shape({
-  company_name: Yup.string().required("Field cannot be empty"),
-  company_tagline: Yup.string().required("Field cannot be empty"),
-  company_email: Yup.string().required("Field cannot be empty"),
-  company_website: Yup.string().required("Field cannot be empty"),
-  company_address: Yup.string().required("Field cannot be empty"),
-  country: Yup.string().required("Field cannot be empty"),
-  city: Yup.string().required("Field cannot be empty"),
-  company_category: Yup.string().required("Field cannot be empty"),
-  company_size: Yup.string().required("Field cannot be empty"),
-  company_description: Yup.string().required("Field cannot be empty"),
+  company_name: Yup.string().required("Company name cannot be empty"),
+  company_tagline: Yup.string().required("Company tagline cannot be empty"),
+  company_email: Yup.string().required("Company email cannot be empty"),
+  company_address: Yup.string().required("Company address cannot be empty"),
+  country: Yup.string().required("Country cannot be empty"),
+  city: Yup.string().required("City cannot be empty"),
+  company_website: Yup.string().optional(),
+  company_category: Yup.string().required("Company category cannot be empty"),
+  company_size: Yup.string().required("Company size cannot be empty"),
+  company_description: Yup.string().optional(),
 });
 
 const CreateCompany = () => {
@@ -60,7 +61,6 @@ const CreateCompany = () => {
   };
 
   useEffect(() => {
-    document.title = "Create Company | Connectize";
     formik.setValues(initialValues);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,7 +152,12 @@ const CreateCompany = () => {
   ];
   return (
     <section className="space-y-8">
-      <div className="w-full">
+      <SEO
+        title="Create Company | Connectize"
+        description="Create a company profile on Connectize, the leading social platform for the oil and gas industry. Showcase your business, connect with professionals, attract investors, and collaborate on industry projects. Build your network and grow your brand today!"
+        relativeImagePath="create-company.png"
+      />
+      <div className="w-full mt-4">
         <HeadingText>
           Help us with brief information about your company
         </HeadingText>

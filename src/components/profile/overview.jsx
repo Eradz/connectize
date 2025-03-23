@@ -1,6 +1,10 @@
+import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
-import HeadingText from "../HeadingText";
-import LightParagraph from "../ParagraphText";
+import { toast } from "sonner";
+import * as Yup from "yup";
+import { updateCurrentUserInfo } from "../../api-services/users";
+import { useAuth } from "../../context/userContext";
+import useRedirect from "../../hooks/useRedirect";
 import {
   bioKey,
   company_addressKey,
@@ -12,18 +16,14 @@ import {
   roleKey,
   stateKey,
 } from "../../lib/data";
-import Form from "../form";
-import { useFormik } from "formik";
-import StepButton from "./StepButton";
 import { overviewFields, overviewFormValues } from "../../lib/data/overview";
 import { getLocalData } from "../../lib/helpers/overview";
-import { updateCurrentUserInfo } from "../../api-services/users";
-import * as Yup from "yup";
-import { AvatarUpload } from "../form/customInput";
-import { toast } from "sonner";
-import useRedirect from "../../hooks/useRedirect";
 import { customFormikFieldValidator } from "../../lib/utils";
-import { useAuth } from "../../context/userContext";
+import Form from "../form";
+import { AvatarUpload } from "../form/customInput";
+import HeadingText from "../HeadingText";
+import LightParagraph from "../ParagraphText";
+import StepButton from "./StepButton";
 
 const FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const SUPPORTED_FORMATS = [
@@ -54,16 +54,23 @@ function Overview() {
 
   const validationSchema = Yup.object().shape({
     image: Yup.mixed()
-      .required("Image is required")
+      .optional()
       .test(
         "file-size",
         "File size is too large, only images less than 4mb are allowed",
-        (value) => value && value.size <= FILE_SIZE
+        (value) => {
+          if (!value) return true;
+
+          return value && value.size <= FILE_SIZE;
+        }
       )
       .test(
         "file-format",
         "Unsupported file format, only AVIFs, WEBPs, PNGs, JPEGs, and JPGs are allowed",
-        (value) => value && SUPPORTED_FORMATS.includes(value.type)
+        (value) => {
+          if (!value) return true;
+          return value && SUPPORTED_FORMATS.includes(value.type);
+        }
       ),
   });
 
