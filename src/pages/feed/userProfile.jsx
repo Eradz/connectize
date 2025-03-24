@@ -63,11 +63,11 @@ export default function UserProfile() {
   } = paramUser;
 
   return (
-    <section className="rounded-md overflow-hidden max-md:container p-3">
+    <section className="rounded-md overflow-hidden">
       <SEO
         title={`${paramUser.first_name || paramUser.email || ""} ${
           paramUser.last_name || ""
-        } on connectize`}
+        } | connectize`}
       />
       <Header {...headerProps} />
 

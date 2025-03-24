@@ -1,11 +1,10 @@
-import DiscoverPosts from "./DiscoverPosts";
+import CustomTabs from "../../custom/tabs";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
-import CreatePost from "./CreatePost";
-import Reviews from "./reviews";
-import { PostCard } from "./DiscoverPostTabs";
 import { ProductListCard } from "../markets/newlyListed";
-import CustomTabs from "../../custom/tabs";
+import CreatePost from "./CreatePost";
+import DiscoverPosts from "./DiscoverPosts";
+import { PostCard } from "./DiscoverPostTabs";
 
 function Summary({ company }) {
   return (

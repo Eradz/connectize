@@ -140,7 +140,7 @@ export const DiscoverPostItem = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={clsx(
-        "py-4 px-1 xs:px-3 bg-white rounded-md transition-colors duration-300"
+        "py-4 px-4 xs:px-6 md:px-3 bg-white rounded-md transition-colors duration-300"
       )}
     >
       {isSinglePost && <SEO title={postTitle} description={postItem?.body} />}

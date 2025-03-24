@@ -48,7 +48,7 @@ const CompanyProfile = React.memo(() => {
   if (!company) return <NoPage />;
 
   return (
-    <section className="rounded-md overflow-hidden w-full  max-md:container p-3">
+    <section className="rounded-md overflow-hidden w-full">
       <Header {...headerProps} />
 
       <section className="mt-11 md:mt-14 flex max-lg:flex-col items-start gap-2 relative">
@@ -57,7 +57,7 @@ const CompanyProfile = React.memo(() => {
             <ManageRepresentativesLink main />
           )}
         <ProductSidebar company={company} />
-        <ProfileSection className="grid grid-cols-1 gap-2 max-lg:py-2 flex-1">
+        <ProfileSection className="max-md:w-full grid grid-cols-1 gap-2 max-lg:py-2 flex-1">
           <Summary company={company} />
         </ProfileSection>
       </section>

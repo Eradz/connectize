@@ -1,101 +1,102 @@
-import React from "react";
-import LightParagraph from "./ParagraphText";
 import DOMPurify from "dompurify";
+import Markdown from "markdown-to-jsx";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import LightParagraph from "./ParagraphText";
+
+const CustomLink = ({ children, ...props }) => (
+  <a
+    {...props}
+    className="text-gold underline"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    {children}
+  </a>
+);
+
+const CustomHeading = ({ children, ...props }) => (
+  <span {...props} className="!text-bold !text-lg !text-black !block">
+    {children}
+  </span>
+);
+
+const CustomParagraph = ({ children, ...props }) => (
+  <p {...props} className="!text-black">
+    {children}
+  </p>
+);
+
+const CustomEmphasis = ({ children, ...props }) => (
+  <em {...props} className="!text-black">
+    {children}
+  </em>
+);
+
+const CustomStrong = ({ children, ...props }) => (
+  <strong {...props} className="!text-black">
+    {children}
+  </strong>
+);
+
+const CustomHashTag = ({ children, ...props }) => {
+  const navigate = useNavigate();
+  const searchQuery = children.slice(1).trim();
+
+  return (
+    <span
+      {...props}
+      className="text-gold font-semibold cursor-pointer"
+      onClick={() => navigate(`/search?search_query=${searchQuery}`)}
+    >
+      {children}
+    </span>
+  );
+};
 
 const FormatPostText = ({ text, isSinglePost = false, postId }) => {
   const navigate = useNavigate();
-  // Split the text into parts, keeping hashtags separate
-  // Regex to detect spaces, #hashtags, ##large text, **bold**, and *italic*
-  const parts = DOMPurify.sanitize(text)
-    .split(/(\s+|##?[^#\s]+|[*]{1,2}[^*]+[*]{1,2})/g)
-    .map((part, index) => {
-      if (part.includes("\n\n")) {
-        return (
-          <React.Fragment key={index}>
-            <br />
-            <br />
-          </React.Fragment>
-        );
-      }
-      if (part.includes("\n")) {
-        return <br key={index} />;
-      }
 
-      if (part.startsWith("##")) {
-        return (
-          <span key={index} className="!text-bold !text-lg !text-black !block">
-            {part.slice(2).trim()}
-          </span>
-        );
-      }
+  const options = {
+    overrides: {
+      a: {
+        component: CustomLink,
+      },
+      h1: {
+        component: CustomHeading,
+      },
+      h2: {
+        component: CustomHeading,
+      },
+      p: {
+        component: CustomParagraph,
+      },
+      em: {
+        component: CustomEmphasis,
+      },
+      strong: {
+        component: CustomStrong,
+      },
+      span: {
+        component: CustomHashTag,
+      },
+    },
+  };
 
-      if (part.startsWith("#")) {
-        return (
-          <span key={index} className="text-blue-400 font-semibold">
-            {part}
-          </span>
-        );
-      }
-
-      if (part.startsWith("**") && part.endsWith("**")) {
-        const innerParts = part
-          .slice(2, -2)
-          .split(/(#[^#\s]+)/g)
-          .map((innerPart, innerIndex) => {
-            if (innerPart.startsWith("#")) {
-              return (
-                <span key={innerIndex} className="text-blue-400">
-                  {innerPart}
-                </span>
-              );
-            }
-            return innerPart;
-          });
-
-        return (
-          <strong key={index} className="!text-black">
-            {innerParts}
-          </strong>
-        );
-      }
-
-      if (part.startsWith("*") && part.endsWith("*")) {
-        // Handle single asterisk for emphasis
-
-        const innerParts = part
-          .slice(1, -1)
-          .split(/(#[^#\s]+)/g)
-          .map((innerPart, innerIndex) => {
-            if (innerPart.startsWith("#")) {
-              return (
-                <span key={innerIndex} className="text-blue-400">
-                  {innerPart}
-                </span>
-              );
-            }
-            return innerPart;
-          });
-        return (
-          <em key={index}>
-            {innerParts} {/* Remove * */}
-          </em>
-        );
-      }
-
-      return part;
-    });
+  const sanitizedText = DOMPurify.sanitize(
+    typeof text === "string" ? text : String(text)
+  );
 
   return (
     <LightParagraph>
       {isSinglePost ? (
-        parts
+        <Markdown options={options}>{sanitizedText}</Markdown>
       ) : (
         <div
-          className={"line-clamp-5 cursor-pointer"}
+          className="line-clamp-5 cursor-pointer"
           onClick={() => navigate(`/posts/${postId}`)}
         >
-          {parts}
+          <Markdown options={options}>{sanitizedText}</Markdown>
         </div>
       )}
     </LightParagraph>
