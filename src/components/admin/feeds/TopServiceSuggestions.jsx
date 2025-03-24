@@ -20,7 +20,7 @@ import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
 
 const TopServiceSuggestions = () => {
   return (
-    <section className="h-fit w-full flex items-start flex-col sm:flex-row md:flex-col lg:flex-row xl:flex-col gap-4 lg:sticky lg:top-0 lg:right-4">
+    <section className="max-md:container p-3  h-fit w-full flex items-start flex-col sm:flex-row md:flex-col lg:flex-row xl:flex-col gap-4 lg:sticky lg:top-0 lg:right-4">
       <TopServices />
 
       <Suggestions />
@@ -109,8 +109,8 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
   }, [thisUser?.id, queryClient]);
 
   return (
-    <section className="">
-      <ul className="space-y-2 divide-y divide-gray-100  max-md:container p-3">
+    <section>
+      <ul className="space-y-2 divide-y divide-gray-100">
         {isLoading ? (
           Array.from({ length: 6 }, (_, index) => (
             <CircleTitleSubtitleSkeleton key={index} />
