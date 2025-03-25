@@ -10,7 +10,6 @@ import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import ListedProducts from "../../components/admin/products/listedProducts";
-import MoreOptions from "../../components/MoreOptions";
 import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
@@ -106,7 +105,7 @@ const ProductSidebar = React.memo(({ company }) => {
         </div>
       </section>
       <ProfileSection title="About" className="!relative">
-        <MoreOptions className="!absolute !right-0 !top-0"></MoreOptions>
+        {/* <MoreOptions className="!absolute !right-0 !top-0"></MoreOptions> */}
         <LightParagraph>{company?.about}</LightParagraph>
         <ul className="space-y-4 divide-y">
           <ProfileAboutList
