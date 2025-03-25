@@ -109,10 +109,11 @@ const Header = ({ banner, name, logo }) => {
             href={newBanner}
             target="_blank"
             rel="noreferrer"
-            className="w-full h-64 max-h-[45vh] aspect-auto object-cover bg-center block relative"
+            className="w-full h-64 max-h-[45vh] aspect-auto bg-center block relative"
             style={{
               backgroundImage: `url(${newBanner})`,
               backgroundRepeat: "no-repeat",
+              objectFit: "cover",
             }}
           >
             <div className="absolute inset-0 bg-dark opacity-60 hover:opacity-0 transition-all duration-500" />
@@ -167,14 +168,14 @@ const Header = ({ banner, name, logo }) => {
         size="xl"
         className={clsx(
           avatarStyle,
-          "!absolute !left-[7%] md:!left-[3%] !size-[90px] lg:!size-[120px]",
+          "!absolute !left-[7%] md:!left-[3%] !size-[90px] lg:!size-[120px] group",
           {
             "!bottom-10": newBanner,
             "!-bottom-8": !newBanner,
           }
         )}
       >
-        <form onSubmit={logoFormik.handleSubmit} className="relative">
+        <form onSubmit={logoFormik.handleSubmit} className="relative ">
           <input
             type="file"
             id="logo"
@@ -183,7 +184,7 @@ const Header = ({ banner, name, logo }) => {
             onChange={(e) => handleFileChange(e, "logo", logoFormik)}
           />
           <ButtonWithTooltipIcon
-            className="absolute !bg-gold !text-dark p-1 rounded-full"
+            className="absolute !bg-gold !text-dark p-1 -translate-x-6 translate-y-4 rounded-full opacity-0 group-hover:opacity-100"
             tip={newLogo ? "Change Image" : "Add Image"}
             onClick={() => document.getElementById("logo").click()}
             IconName={CameraIcon}
@@ -193,7 +194,7 @@ const Header = ({ banner, name, logo }) => {
               type="submit"
               tip="Upload image"
               IconName={CloudUploadOutlined}
-              className="absolute !bottom-1 !bg-dark !text-white p-1 rounded-full"
+              className="absolute !bottom-1 !bg-dark !text-white p-1 -translate-x-2 translate-y-4 rounded-full"
             />
           )}
         </form>

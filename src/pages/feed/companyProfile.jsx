@@ -1,18 +1,21 @@
 import { MailOutlined } from "@ant-design/icons";
+import { Button } from "@chakra-ui/react";
 import { LocationOnOutlined } from "@mui/icons-material";
 import { GlobeIcon, Link1Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getSingleCompany } from "../../api-services/companies";
 import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import ListedProducts from "../../components/admin/products/listedProducts";
+import ReusableModal from "../../components/custom/ResusableModal";
 import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
+import SEO from "../../components/SEO";
 import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
@@ -30,10 +33,6 @@ const CompanyProfile = React.memo(() => {
     enabled: !!companyName && !!currentUser,
   });
 
-  useEffect(() => {
-    document.title = `${company?.company_name || ""} | Companies in Connectize`;
-  }, [company?.company_name]);
-
   const headerProps = useMemo(
     () => ({
       banner: company?.banner || "",
@@ -49,6 +48,7 @@ const CompanyProfile = React.memo(() => {
 
   return (
     <section className="rounded-md overflow-hidden w-full">
+      <SEO title={`${company?.company_name || ""} | Connectize Companies`} />
       <Header {...headerProps} />
 
       <section className="mt-11 md:mt-14 flex max-lg:flex-col items-start gap-2 relative">
@@ -92,12 +92,25 @@ const ProductSidebar = React.memo(({ company }) => {
     [company]
   );
 
+  const { user: currentUser } = useAuth();
+
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const isCurrentUser = currentUser.id === company.user.id;
+
   return (
     <section className="space-y-8 max-lg:mb-4 w-full lg:max-w-[350px] xl:max-w-[400px] shrink-0">
       <section className="space-y-6">
-        <h1 className="text-3xl md:text-2xl font-bold">
-          {capitalizeFirst(company?.company_name)}
-        </h1>
+        <div>
+          <h1 className="text-3xl md:text-2xl font-bold capitalize">
+            {company?.company_name}
+          </h1>
+          {company?.tag_line && (
+            <small className="text-gray-500 truncate block">
+              {capitalizeFirst(company?.tag_line)}
+            </small>
+          )}
+        </div>
         <div className="flex gap-2 overflow-x-auto scrollbar-hidden">
           {stats.map((text, index) => (
             <StatsText key={index} text={text} />
@@ -105,7 +118,33 @@ const ProductSidebar = React.memo(({ company }) => {
         </div>
       </section>
       <ProfileSection title="About" className="!relative">
-        {/* <MoreOptions className="!absolute !right-0 !top-0"></MoreOptions> */}
+        {isCurrentUser && (
+          <>
+            <ReusableModal
+              isOpen={isOpen}
+              onClose={() => setIsOpen(false)}
+              title="Edit Company Information"
+            >
+              <form></form>
+            </ReusableModal>
+            <Button
+              position="absolute"
+              top="2"
+              right="2"
+              size="sm"
+              variant="link"
+              padding="2"
+              _hover={{
+                color: "black",
+                backgroundColor: "gray.100",
+              }}
+              onClick={() => setIsOpen(true)}
+            >
+              Edit Information
+            </Button>
+          </>
+        )}
+
         <LightParagraph>{company?.about}</LightParagraph>
         <ul className="space-y-4 divide-y">
           <ProfileAboutList
@@ -122,7 +161,7 @@ const ProductSidebar = React.memo(({ company }) => {
           />
           <ProfileAboutList
             Icon={MailOutlined}
-            title="Email"
+            title="Company Email"
             value={company?.email || "No Email"}
           />
           <ProfileAboutList
