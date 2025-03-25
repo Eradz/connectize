@@ -109,13 +109,13 @@ const Header = ({ banner, name, logo }) => {
             href={newBanner}
             target="_blank"
             rel="noreferrer"
-            className="w-full h-64 max-h-[45vh] aspect-auto object-cover block relative"
+            className="w-full h-64 max-h-[45vh] aspect-auto object-cover bg-center block relative"
+            style={{
+              backgroundImage: `url(${newBanner})`,
+              backgroundRepeat: "no-repeat",
+            }}
           >
-            <img
-              src={newBanner}
-              alt={`${name?.trim()}'s banner`}
-              className="size-full aspect-auto object-cover "
-            />
+            <div className="absolute inset-0 bg-dark opacity-60 hover:opacity-0 transition-all duration-500" />
           </a>
         ) : (
           <div className="w-full h-48 bg-gradient-to-r from-gold to-transparent from-70%" />
