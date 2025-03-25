@@ -72,7 +72,7 @@ export const ManageRepresentativesLink = ({ main = false }) => {
       className={clsx(
         "bg-gold hover:bg-opacity-70 text-sm xs:text-xs lg:text-sm font-semibold py-1.5 px-4 rounded-full",
         {
-          "absolute right-0 -top-9 md:-top-12": main,
+          "absolute right-0 -top-9 md:-top-14": main,
         }
       )}
     >
