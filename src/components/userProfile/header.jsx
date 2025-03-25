@@ -191,6 +191,7 @@ const Header = ({ banner, name, logo }) => {
           {newLogo !== logo && (
             <ButtonWithTooltipIcon
               type="submit"
+              tip="Upload image"
               IconName={CloudUploadOutlined}
               className="absolute !bottom-1 !bg-dark !text-white p-1 rounded-full"
             />
