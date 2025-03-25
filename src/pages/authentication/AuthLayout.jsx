@@ -31,7 +31,7 @@ function AuthLayout({ redirectUrl = "/" }) {
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
+              transition={{ delay: 0.15 }}
               className="max-w-screen-md text-[1.9rem] leading-tight font-bold"
               key={pathname + "heading"}
             >
@@ -54,7 +54,7 @@ function AuthLayout({ redirectUrl = "/" }) {
           <motion.section
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: 0.35 }}
             className="size-full mt-4"
             key={pathname + "outlet"}
           >

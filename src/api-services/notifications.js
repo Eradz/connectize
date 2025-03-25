@@ -23,6 +23,8 @@ export const markAllNotificationsAsRead = async () => {
     method: "POST",
   });
 
+  window.location.reload();
+
   return notifications;
 };
 
@@ -39,6 +41,8 @@ export const deleteAllNotifications = async () => {
     url: "api/notifications/delete-all/",
     method: "POST",
   });
+
+  window.location.reload();
 
   return notifications;
 };

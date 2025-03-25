@@ -25,7 +25,7 @@ export const getAllCompanies = async () => {
     method: "GET",
   });
 
-  return companies ;
+  return companies;
 };
 
 export const getCompanyByIdOrEmail = async (id) => {
@@ -41,7 +41,7 @@ export const getCompanyByIdOrEmail = async (id) => {
 
 export const getSingleCompany = async (companyName) => {
   const singleCompany = await makeApiRequest({
-    url: `api/companies/${companyName}`,
+    url: `api/companies/${companyName}/`,
     method: "GET",
   });
   return singleCompany;
@@ -168,7 +168,6 @@ export const getOrCreateCompanyDocumentTypes = async (type, name) => {
   });
 };
 
-
 export const connectWithCompany = async (id, hasConnected) => {
   if (hasConnected) {
     return await makeApiRequest({
@@ -180,4 +179,24 @@ export const connectWithCompany = async (id, hasConnected) => {
     url: `api/companies/${id}/follow/`,
     method: "POST",
   });
+};
+
+export const uploadCompanyBanner = async (companyName, file) => {
+  const company = await makeApiRequest({
+    url: `api/companies/${companyName}/`,
+    method: "PATCH",
+    data: { banner: file },
+    contentType: "multipart/form-data",
+  });
+  if (company.banner) window.location.reload();
+};
+
+export const uploadCompanyLogo = async (companyName, file) => {
+  const company = await makeApiRequest({
+    url: `api/companies/${companyName}/`,
+    method: "PATCH",
+    data: { logo: file },
+    contentType: "multipart/form-data",
+  });
+  if (company.banner) window.location.reload();
 };
