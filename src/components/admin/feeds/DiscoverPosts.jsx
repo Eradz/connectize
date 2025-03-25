@@ -435,6 +435,7 @@ export function ButtonWithTooltipIcon({
   disabled = false,
   thisKey,
   hasArrow = false,
+  type = "button",
 }) {
   return (
     <Tooltip
@@ -449,6 +450,7 @@ export function ButtonWithTooltipIcon({
       colorScheme="whiteAlpha"
     >
       <button
+        type={type}
         onClick={onClick}
         disabled={loading || disabled}
         className={clsx(

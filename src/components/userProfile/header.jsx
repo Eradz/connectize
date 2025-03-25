@@ -1,54 +1,85 @@
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { Avatar, Button } from "@chakra-ui/react";
-import { ImageIcon } from "@radix-ui/react-icons";
+import { CameraIcon, ImageIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { useFormik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as yup from "yup";
-import { uploadCompanyBanner } from "../../api-services/companies";
+import {
+  uploadCompanyBanner,
+  uploadCompanyLogo,
+} from "../../api-services/companies";
 import { avatarStyle } from "../ResponsiveNav";
+import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+
+const fileSchema = yup
+  .mixed()
+  .test(
+    "fileSize",
+    "File size must be less than 4MB",
+    (file) => file && file.size <= 4 * 1024 * 1024
+  )
+  .test(
+    "fileType",
+    "Only image files are allowed",
+    (file) =>
+      file &&
+      ["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
+        file.type
+      )
+  );
 
 const schema = yup.object().shape({
-  banner: yup
-    .mixed()
-    .test("fileSize", "File size must be less than 4MB", (file) => {
-      return file && file.size <= 4 * 1024 * 1024;
-    })
-    .test("fileType", "Only image files are allowed", (file) => {
-      return (
-        file &&
-        ["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
-          file.type
-        )
-      );
-    }),
+  banner: fileSchema,
+  logo: fileSchema,
 });
 
 const Header = ({ banner, name, logo }) => {
   const [newBanner, setNewBanner] = useState(banner);
-  const formik = useFormik({
+  const [newLogo, setNewLogo] = useState(logo);
+
+  const bannerFormik = useFormik({
     initialValues: { banner },
-    validationSchema: schema,
+    validationSchema: yup.object().shape({ banner: fileSchema }),
     onSubmit: async (values) => {
-      toast.promise(uploadCompanyBanner(name, values.banner), {
-        loading: "Uploading banner...",
-        success: "Banner uploaded successfully",
-        error: "Failed to upload banner",
-      });
+      if (values.banner !== banner) {
+        toast.promise(uploadCompanyBanner(name, values.banner), {
+          loading: "Uploading banner...",
+          success: "Banner uploaded successfully",
+          error: "Failed to upload banner",
+        });
+      }
     },
   });
 
-  const handleFileChange = (event) => {
+  const logoFormik = useFormik({
+    initialValues: { logo },
+    validationSchema: yup.object().shape({ logo: fileSchema }),
+    onSubmit: async (values) => {
+      if (values.logo !== logo) {
+        toast.promise(uploadCompanyLogo(name, values.logo), {
+          loading: "Uploading logo...",
+          success: "Logo uploaded successfully",
+          error: "Failed to upload logo",
+        });
+      }
+    },
+  });
+
+  const handleFileChange = (event, field, formik) => {
     const file = event.currentTarget.files[0];
-    formik.setFieldValue("banner", file);
+    formik.setFieldValue(field, file);
 
     if (!file) return;
 
     const fileSizeError = file.size > 4 * 1024 * 1024;
-    const fileTypeError = !["image/jpeg", "image/png", "image/gif"].includes(
-      file.type
-    );
+    const fileTypeError = ![
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/avif",
+    ].includes(file.type);
 
     if (fileSizeError || fileTypeError) {
       const errorMessage = fileSizeError
@@ -58,41 +89,52 @@ const Header = ({ banner, name, logo }) => {
       return;
     }
 
-    setNewBanner(URL.createObjectURL(file));
+    if (field === "banner") {
+      setNewBanner(URL.createObjectURL(file));
+    } else if (field === "logo") {
+      setNewLogo(URL.createObjectURL(file));
+    }
   };
 
-  useState(() => {
+  useEffect(() => {
     setNewBanner(banner);
-  }, [banner]);
+    setNewLogo(logo);
+  }, [banner, logo]);
+
   return (
-    <section className="relative bg-red-200">
+    <section className="relative bg-gold/30">
       <section className="w-full relative">
         {newBanner ? (
-          <a href={newBanner} target="_blank" rel="noreferrer">
+          <a
+            href={newBanner}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full h-64 max-h-[45vh] aspect-auto object-cover block relative"
+          >
             <img
               src={newBanner}
               alt={`${name?.trim()}'s banner`}
-              className="w-full h-64 max-h-[45vh] aspect-auto object-cover"
+              className="size-full aspect-auto object-cover "
             />
           </a>
         ) : (
           <div className="w-full h-48 bg-gradient-to-r from-gold to-transparent from-70%" />
         )}
 
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={bannerFormik.handleSubmit}>
           <input
             type="file"
             id="banner"
             accept="image/*"
             hidden
-            onChange={handleFileChange}
+            onChange={(e) => handleFileChange(e, "banner", bannerFormik)}
           />
           <Button
             type="button"
             position="absolute"
             top="1"
             right="1"
-            opacity={newBanner !== banner ? 1 : 0.5}
+            opacity={newBanner !== banner ? 1 : 0.75}
             height="8"
             _hover={{ opacity: 1 }}
             fontSize="xs"
@@ -120,18 +162,41 @@ const Header = ({ banner, name, logo }) => {
       </section>
 
       <Avatar
-        src={logo}
+        src={newLogo}
         name={name}
         size="xl"
         className={clsx(
           avatarStyle,
-          "!absolute !left-[7%] md:!left-[3%]  !size-[90px] lg:!size-[120px]",
+          "!absolute !left-[7%] md:!left-[3%] !size-[90px] lg:!size-[120px]",
           {
             "!bottom-10": newBanner,
             "!-bottom-8": !newBanner,
           }
         )}
-      />
+      >
+        <form onSubmit={logoFormik.handleSubmit} className="relative">
+          <input
+            type="file"
+            id="logo"
+            accept="image/*"
+            hidden
+            onChange={(e) => handleFileChange(e, "logo", logoFormik)}
+          />
+          <ButtonWithTooltipIcon
+            className="absolute !bg-gold !text-dark p-1 rounded-full"
+            tip={newLogo ? "Change Image" : "Add Image"}
+            onClick={() => document.getElementById("logo").click()}
+            IconName={CameraIcon}
+          />
+          {newLogo !== logo && (
+            <ButtonWithTooltipIcon
+              type="submit"
+              IconName={CloudUploadOutlined}
+              className="absolute !bottom-1 !bg-dark !text-white p-1 rounded-full"
+            />
+          )}
+        </form>
+      </Avatar>
     </section>
   );
 };

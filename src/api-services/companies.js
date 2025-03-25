@@ -198,5 +198,5 @@ export const uploadCompanyLogo = async (companyName, file) => {
     data: { logo: file },
     contentType: "multipart/form-data",
   });
-  if (company.banner) window.location.reload();
+  if (company.logo) window.location.reload();
 };
