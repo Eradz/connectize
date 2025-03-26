@@ -181,6 +181,15 @@ export const connectWithCompany = async (id, hasConnected) => {
   });
 };
 
+export const editCompanyInformation = async (id, data) => {
+  const company = await makeApiRequest({
+    url: `api/companies/${id}/`,
+    method: "PATCH",
+    data,
+  });
+  if (company.logo) window.location.reload();
+};
+
 export const uploadCompanyBanner = async (companyName, file) => {
   const company = await makeApiRequest({
     url: `api/companies/${companyName}/`,
@@ -200,3 +209,4 @@ export const uploadCompanyLogo = async (companyName, file) => {
   });
   if (company.logo) window.location.reload();
 };
+
