@@ -65,7 +65,7 @@ export default function EditCompanyForm({ company }) {
       });
 
       if (update.id) {
-        navigate(`/${company.company_name}`);
+        navigate(`/${update.company_name}`);
       }
     } catch (err) {
       toast.error("Failed to update profile information", { id: toastId });
