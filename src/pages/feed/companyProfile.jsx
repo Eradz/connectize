@@ -117,7 +117,6 @@ const ProductSidebar = React.memo(({ company }) => {
         {isCurrentUser && (
           <>
             <Link
-              
               to={`/${company?.company_name || ""}/edit-profile`}
               className="absolute top-2 right-2 text-sm !text-gray-500 hover:!text-black hover:bg-gray-100 px-2 py-1 rounded"
             >

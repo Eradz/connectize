@@ -1,9 +1,21 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import React from "react";
+import { Button } from "@chakra-ui/react";
+import { getCountries } from "@loophq/country-state-list";
+import { UpdateIcon } from "@radix-ui/react-icons";
+import { useFormik } from "formik";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import * as Yup from "yup";
-import SEO from "../../SEO";
+import { editCompanyInformation } from "../../../api-services/companies";
+import cities from "../../../lib/data/cities.json";
+import Form from "../../form";
+import ProfileSection from "../../userProfile/profile-section";
 
 export default function EditCompanyForm({ company }) {
+  const countries = getCountries();
+
+  const navigate = useNavigate();
+
   const initialValues = {
     company_name: company?.company_name || "",
     email: company?.email || "",
@@ -25,17 +37,55 @@ export default function EditCompanyForm({ company }) {
     office_address: Yup.string().optional(),
     country: Yup.string().required("Country is required"),
     state: Yup.string().required("State is required"),
-    city: Yup.string().required("City is required"),
+    city: Yup.string().optional(),
     tag_line: Yup.string().optional(),
     organization_type: Yup.string().required("Organization type is required"),
   });
 
-  const handleSubmit = (values) => {
-    console.log("Updated Company Info:", values);
-    // Add your update logic here
+  const [loading, setLoading] = useState(false);
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+  });
+
+  const handleSubmit = async () => {
+    setLoading(true);
+
+    const toastId = toast.loading("Updating company information");
+
+    try {
+      const update = await editCompanyInformation(
+        company.company_name,
+        formik.values
+      );
+
+      toast.success("Updated profile information Successfully", {
+        id: toastId,
+      });
+
+      if (update.id) {
+        navigate(`/${company.company_name}`);
+      }
+    } catch (err) {
+      toast.error("Failed to update profile information", { id: toastId });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const listingFields = [
+  const countriesString = countries.map((country) => country.name);
+
+  const stateForCountry =
+    countries.find((country) => country.name === formik.values["country"])
+      ?.states || [];
+
+  const citiesForState =
+    cities
+      .filter((city) => city.state_name === formik.values["state"])
+      .map((city) => city.name) || [];
+
+  const companyFields = [
     {
       type: "grid",
       gridInputs: [
@@ -46,25 +96,25 @@ export default function EditCompanyForm({ company }) {
           placeholder: "E.g The Large Company",
         },
         {
-          name: "company_tagline",
+          name: "tag_line",
           type: "text",
           label: "Company's tagline",
           placeholder: "E.g best in production...",
         },
         {
-          name: "company_email",
+          name: "email",
           type: "email",
           label: "Company's email",
           placeholder: "E.g me@yourcompany.com",
         },
         {
-          name: "company_website",
+          name: "website",
           type: "url",
           label: "Company's website",
           placeholder: "E.g https://www.yourcompany.com",
         },
         {
-          name: "company_address",
+          name: "office_address",
           type: "text",
           label: "Office Address",
           placeholder: "E.g 24 Larkin Smith, Eket Akwa Ibom State",
@@ -77,14 +127,21 @@ export default function EditCompanyForm({ company }) {
           options: countriesString,
         },
         {
+          name: "state",
+          type: "select",
+          label: "State",
+          placeholder: "Select state",
+          options: stateForCountry,
+        },
+        {
           name: "city",
           type: "select",
           label: "Region/City",
           placeholder: "Select city",
-          options: stateForCountry,
+          options: citiesForState,
         },
         {
-          name: "company_category",
+          name: "organization_type",
           type: "select",
           label: "Company type",
           placeholder: "Select company type",
@@ -100,19 +157,9 @@ export default function EditCompanyForm({ company }) {
             "Oil Refining",
           ],
         },
+
         {
-          name: "company_size",
-          type: "select",
-          label: "Company's size",
-          placeholder: "Select range",
-          options: [
-            "0-10 employees",
-            "11-50 employees",
-            "50 and above employees",
-          ],
-        },
-        {
-          name: "company_description",
+          name: "about",
           type: "textarea",
           label: "Short description",
           placeholder: "write a short description of your company here...",
@@ -121,87 +168,30 @@ export default function EditCompanyForm({ company }) {
     },
   ];
 
+  useEffect(() => {
+    formik.setValues(initialValues);
+  }, []);
+
   return (
-    <>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <div>
-              <label htmlFor="company_name">Company Name</label>
-              <Field type="text" name="company_name" id="company_name" />
-              <ErrorMessage
-                name="company_name"
-                component="div"
-                className="error"
-              />
-            </div>
-            <div>
-              <label htmlFor="email">Email</label>
-              <Field type="email" name="email" id="email" />
-              <ErrorMessage name="email" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="about">About</label>
-              <Field as="textarea" name="about" id="about" />
-              <ErrorMessage name="about" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="website">Website</label>
-              <Field type="url" name="website" id="website" />
-              <ErrorMessage name="website" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="office_address">Office Address</label>
-              <Field type="text" name="office_address" id="office_address" />
-              <ErrorMessage
-                name="office_address"
-                component="div"
-                className="error"
-              />
-            </div>
-            <div>
-              <label htmlFor="country">Country</label>
-              <Field type="text" name="country" id="country" />
-              <ErrorMessage name="country" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="state">State</label>
-              <Field type="text" name="state" id="state" />
-              <ErrorMessage name="state" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="city">City</label>
-              <Field type="text" name="city" id="city" />
-              <ErrorMessage name="city" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="tag_line">Tag Line</label>
-              <Field type="text" name="tag_line" id="tag_line" />
-              <ErrorMessage name="tag_line" component="div" className="error" />
-            </div>
-            <div>
-              <label htmlFor="organization_type">Organization Type</label>
-              <Field
-                type="text"
-                name="organization_type"
-                id="organization_type"
-              />
-              <ErrorMessage
-                name="organization_type"
-                component="div"
-                className="error"
-              />
-            </div>
-            <button type="submit" disabled={isSubmitting}>
-              Update Company
-            </button>
-          </Form>
-        )}
-      </Formik>
-    </>
+    <ProfileSection title="">
+      <Form
+        formik={formik}
+        status={"none"}
+        inputArray={companyFields}
+        hasButton={false}
+      />
+
+      <div className="flex justify-between mb-6 mt-20">
+        <div></div>
+        <Button
+          className="!bg-gold hover:!bg-opacity-60"
+          disabled={loading}
+          onClick={handleSubmit}
+          leftIcon={<UpdateIcon className={loading ? "animate-spin" : ""} />}
+        >
+          Update Information
+        </Button>
+      </div>
+    </ProfileSection>
   );
 }
