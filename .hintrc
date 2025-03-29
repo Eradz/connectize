@@ -20,7 +20,8 @@
         ]
       }
     ],
-    "manifest-file-extension": "off"
+    "manifest-file-extension": "off",
+    "no-inline-styles": "off"
   },
   "browserslist": [
     "defaults",

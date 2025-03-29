@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
 import { Button, Input, useDisclosure } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { deactivateAccount } from "../../api-services/authentication";
+import ReusableModal from "../../components/custom/ResusableModal";
+import CustomInput from "../../components/form/customInput";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import { useAuth } from "../../context/userContext";
-import ReusableModal from "../../components/custom/ResusableModal";
 import { goToLogin } from "../../lib/helpers";
-import { deactivateAccount } from "../../api-services/authentication";
-import CustomInput from "../../components/form/customInput";
 import ChangePassword from "./components/ChangePassword";
 
 const SettingsPage = () => {
