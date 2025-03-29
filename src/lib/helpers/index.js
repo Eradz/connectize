@@ -20,7 +20,13 @@ export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-a
+export const frontendUrl = () => window.location.origin;
+
+export function goToLogin() {
+  removeSession();
+  const pathname = window.location.pathname;
+  window.location.replace("/login?next=" + pathname);
+}
 
 // Configure Axios Defaults
 export const baseURL =
