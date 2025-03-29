@@ -14,28 +14,26 @@ const assetsToCache = ["/", OFFLINE_URL, "/logo192.png", "/logo512.png"];
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  if (!navigator.onLine) {
-    event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        return cachedResponse || fetch(event.request);
-      })
-    );
-  }
+event.respondWith(
+  caches.match(event.request).then((cachedResponse) => {
+    return cachedResponse || fetch(event.request);
+  })
+);
 
-  if (navigator.onLine && event.request.url.includes("/api/")) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return fetch(event.request)
-          .then((response) => {
-            if (response.ok) {
-              cache.put(event.request, response.clone());
-            }
-            return response;
-          })
-          .catch(() => caches.match(event.request));
-      })
-    );
-  }
+if (event.request.url.includes("/api/")) {
+  event.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      return fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            cache.put(event.request, response.clone());
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request));
+    })
+  );
+}
 });
 
 self.addEventListener("activate", (event) => {
