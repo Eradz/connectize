@@ -13,7 +13,6 @@ const SEO = ({
 }) => {
   const location = useLocation();
   const currentUrl = url || `${frontendUrl()}${location.pathname}`;
-console.log(currentUrl);
 
   const ogImage =
     image ||

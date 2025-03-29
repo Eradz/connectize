@@ -32,11 +32,11 @@ root.render(
 
 registerSW({ immediate: true });
 
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker.register("/service-worker.js").catch((error) => {
-//       if (process.env.NODE_ENV === "development")
-//         console.error("Service Worker registration failed:", error);
-//     });
-//   });
-// }
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js").catch((error) => {
+      if (process.env.NODE_ENV === "development")
+        console.error("Service Worker registration failed:", error);
+    });
+  });
+}
