@@ -56,13 +56,14 @@
     "tailwindcss-animate": "^1.0.7",
     "vite": "^6.0.7",
     "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-pwa": "^0.21.2",
     "web-vitals": "^4.0.0",
     "yup": "^1.4.0"
   },
   "scripts": {
-    "start": "vite",
-    "predeploy": "npm run build ",
-    "build": "vite build && node ./scripts/generate-sitemap.mjs",
+    "dev": "vite",
+    "predeploy": "npm run build",
+    "build": "vite build && npm run generate-sitemap",
     "generate-sitemap": "node ./scripts/generate-sitemap.mjs",
     "generate-routes": "node ./scripts/generate-app-routes.mjs",
     "routes": "node ./scripts/structured-app-routes.mjs",
