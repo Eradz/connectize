@@ -1,14 +1,8 @@
 const CACHE_NAME = "connectize-cache-v1";
 const OFFLINE_URL = "/offline.html";
 
-const assetsToCache = [
-  "/",
-  "/index.html",
-  OFFLINE_URL,
-  "/styles.css",
-  "/logo192.png",
-  "/logo512.png",
-];
+const assetsToCache = ["/", OFFLINE_URL, "/logo192.png", "/logo512.png"];
+
 
 // self.addEventListener("install", (event) => {
 //   event.waitUntil(
