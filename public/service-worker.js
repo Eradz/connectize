@@ -3,7 +3,6 @@ const OFFLINE_URL = "/offline.html";
 
 const assetsToCache = ["/", OFFLINE_URL, "/logo192.png", "/logo512.png"];
 
-
 // self.addEventListener("install", (event) => {
 //   event.waitUntil(
 //     caches.open(CACHE_NAME).then((cache) => {

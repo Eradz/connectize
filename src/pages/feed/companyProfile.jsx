@@ -1,5 +1,4 @@
 import { MailOutlined } from "@ant-design/icons";
-import { Button } from "@chakra-ui/react";
 import { LocationOnOutlined } from "@mui/icons-material";
 import { GlobeIcon, Link1Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -11,7 +10,6 @@ import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import ListedProducts from "../../components/admin/products/listedProducts";
-import ReusableModal from "../../components/custom/ResusableModal";
 import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
@@ -94,8 +92,6 @@ const ProductSidebar = React.memo(({ company }) => {
 
   const { user: currentUser } = useAuth();
 
-  const [isOpen, setIsOpen] = React.useState(false);
-
   const isCurrentUser = currentUser.id === company.user.id;
 
   return (
@@ -120,28 +116,12 @@ const ProductSidebar = React.memo(({ company }) => {
       <ProfileSection title="About" className="!relative">
         {isCurrentUser && (
           <>
-            <ReusableModal
-              isOpen={isOpen}
-              onClose={() => setIsOpen(false)}
-              title="Edit Company Information"
-            >
-              <form></form>
-            </ReusableModal>
-            <Button
-              position="absolute"
-              top="2"
-              right="2"
-              size="sm"
-              variant="link"
-              padding="2"
-              _hover={{
-                color: "black",
-                backgroundColor: "gray.100",
-              }}
-              onClick={() => setIsOpen(true)}
+            <Link
+              to={`/${company?.company_name || ""}/edit-profile`}
+              className="absolute top-2 right-2 text-sm !text-gray-500 hover:!text-black hover:bg-gray-100 px-2 py-1 rounded"
             >
               Edit Information
-            </Button>
+            </Link>
           </>
         )}
 

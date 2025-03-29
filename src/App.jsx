@@ -23,6 +23,7 @@ import CompaniesPage from "./pages/companies";
 import CreateCompany from "./pages/company";
 import CompanyDocuments from "./pages/company/CompanyDocuments";
 import CompanyInformation from "./pages/company/CompanyInformation";
+import EditCompanyPage from "./pages/company/edit";
 import CompanyLayout from "./pages/company/layout";
 import CompanyProfile from "./pages/feed/companyProfile";
 import NewsFeed from "./pages/feed/newsFeed";
@@ -94,6 +95,7 @@ function App() {
             {/* Company Profile */}
             <Route path="search" element={<Search />} />
             <Route path=":company" element={<CompanyProfile />} />
+            <Route path=":company/edit-profile" element={<EditCompanyPage />} />
             <Route path="analysis" element={<Analysis />} />
             <Route
               path="/co/representatives"

@@ -1,13 +1,13 @@
 import { Textarea } from "@chakra-ui/react";
+import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
+import clsx from "clsx";
+import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import CustomInput, {
   CustomSelect,
   CustomTextArea,
   inputClassNames,
 } from "./customInput";
 import FormikErrorResponse from "./formError";
-import clsx from "clsx";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
-import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 
 export default function Form({
   formik,
@@ -30,12 +30,11 @@ export default function Form({
     helpText,
   }) => {
     return (
-      <div className="w-full my-2.5" key={name}>
+      <section className="w-full my-2.5 md:my-3" key={name}>
         <label htmlFor={name} className="font-medium flex gap-1 items-center">
           <span>{label}</span>
           {helpText && (
             <ButtonWithTooltipIcon
-              // hasArrow
               tip={helpText}
               iconClassName="size-4 !text-gray-400 hover:!text-black"
               tooltipClassName="!p-3 !text-[.925rem]"
@@ -89,7 +88,7 @@ export default function Form({
           name={name}
           validate={validate || false}
         />
-      </div>
+      </section>
     );
   };
 
