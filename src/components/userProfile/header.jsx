@@ -102,20 +102,21 @@ const Header = ({ banner, name, logo }) => {
   }, [banner, logo]);
 
   return (
-    <section className="relative bg-gold/30">
+    <section className="relative bg-gradient-to-r from-gold to-transparent from-70%">
       <section className="w-full relative">
         {newBanner ? (
           <a
             href={newBanner}
             target="_blank"
             rel="noreferrer"
-            className="w-full h-64 max-h-[45vh] aspect-auto bg-center block relative"
-            style={{
-              backgroundImage: `url(${newBanner})`,
-              backgroundRepeat: "no-repeat",
-              objectFit: "cover",
-            }}
+            className="w-full h-64 max-h-[45vh] block relative"
           >
+            <div
+              className="absolute inset-0 bg-center bg-cover"
+              style={{
+                backgroundImage: `url(${newBanner})`,
+              }}
+            />
             <div className="absolute inset-0 bg-dark opacity-60 hover:opacity-0 transition-all duration-500" />
           </a>
         ) : (

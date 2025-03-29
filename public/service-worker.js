@@ -10,13 +10,13 @@ const assetsToCache = [
   "/logo512.png",
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(assetsToCache);
-    })
-  );
-});
+// self.addEventListener("install", (event) => {
+//   event.waitUntil(
+//     caches.open(CACHE_NAME).then((cache) => {
+//       return cache.addAll(assetsToCache);
+//     })
+//   );
+// });
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;

@@ -20,13 +20,7 @@ export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export const frontendUrl = () => window.location.origin;
-
-export function goToLogin() {
-  removeSession();
-  const pathname = window.location.pathname;
-  window.location.replace("/login?next=" + pathname);
-}
+a
 
 // Configure Axios Defaults
 export const baseURL =
@@ -74,7 +68,7 @@ export async function refreshToken() {
       });
 
       accessToken = newTokens.access;
-      accessTokenExpiry = Date.now() + 15 * 60 * 1000; // Assuming access token is valid for 15 minutes
+      accessTokenExpiry = Date.now() + 15 * 60 * 1000; 
 
       return "Bearer " + newTokens.access;
     })();

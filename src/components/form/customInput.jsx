@@ -8,14 +8,14 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
+import ReactQuill from "react-quill";
 import { ImageIcon } from "../../icon";
 import FormikErrorResponse from "./formError";
-import ReactQuill from "react-quill";
 
-import "react-quill/dist/quill.snow.css";
-import { MarkdownComponent } from "../MarkDownComponent";
-import { capitalizeFirst } from "../../lib/utils";
 import { motion } from "framer-motion";
+import "react-quill/dist/quill.snow.css";
+import { capitalizeFirst } from "../../lib/utils";
+import { MarkdownComponent } from "../MarkDownComponent";
 
 import clsx from "clsx";
 
@@ -46,7 +46,7 @@ export default function CustomInput({
         autoComplete="true"
         className={clsx(className, inputClassNames, "focus:!outline-none", {
           "!border-green-800 !bg-green-50/50": validate && !error,
-          "!border-[#9e3818] !bg-[#9e3818]/5": error,
+          "!border-[#9e3818] !bg-[#9e3818]/5 animate-shake": error,
         })}
         type={type === "password" ? passwordType : type}
         placeholder={placeholder}
@@ -247,7 +247,7 @@ export const CustomSelect = ({ formik, name, placeholder, options = [""] }) => (
       formik.handleChange(e);
     }}
     value={formik.values[`${name}`]}
-    className="!w-full !bg-background px-3 !text-sm  border-gray-100"
+    className="!w-full !bg-background px-3 !text-sm mt-2 border-gray-100"
   >
     {options?.map((option, index) => (
       <option key={index} value={option}>

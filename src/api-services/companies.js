@@ -187,7 +187,9 @@ export const editCompanyInformation = async (id, data) => {
     method: "PATCH",
     data,
   });
-  if (company.logo) window.location.reload();
+  console.log(company);
+
+  return company;
 };
 
 export const uploadCompanyBanner = async (companyName, file) => {
