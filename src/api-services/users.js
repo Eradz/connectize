@@ -25,12 +25,12 @@ export const getUserById = async (id) => {
 };
 
 export const getCurrentUser = async () => {
-  const currentUser = await makeApiRequest({
+  const user = await makeApiRequest({
     url: `api/current-user/`,
     method: "GET",
   });
 
-  return currentUser || null;
+  return user || null;
 };
 
 export const updateCurrentUserInfo = async (values) => {
@@ -193,4 +193,15 @@ export const connectWithUser = async (id, hasConnected) => {
     url: `api/users/${id}/follow/`,
     method: "POST",
   });
+};
+
+export const uploadDisplayPicture = async (file) => {
+  const currentUser = await getCurrentUser();
+  const company = await makeApiRequest({
+    url: `api/users/${currentUser.id}/`,
+    method: "PATCH",
+    data: { logo: file },
+    contentType: "multipart/form-data",
+  });
+  if (company.logo) window.location.reload();
 };

@@ -69,7 +69,7 @@ export default function UserProfile() {
           paramUser.last_name || ""
         } | connectize`}
       />
-      <Header {...headerProps} />
+      <Header type="user" {...headerProps} />
 
       <section className="mt-8 container !px-0 space-y-6">
         <UserProfileHeadings {...paramUser} />

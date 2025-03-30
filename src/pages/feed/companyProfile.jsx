@@ -92,7 +92,7 @@ const ProductSidebar = React.memo(({ company }) => {
 
   const { user: currentUser } = useAuth();
 
-  const isCurrentUser = currentUser.id === company.user.id;
+  const isCurrentUser = currentUser?.id === company?.user?.id;
 
   return (
     <section className="space-y-8 max-lg:mb-4 w-full lg:max-w-[350px] xl:max-w-[400px] shrink-0">

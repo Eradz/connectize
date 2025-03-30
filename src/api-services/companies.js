@@ -182,19 +182,22 @@ export const connectWithCompany = async (id, hasConnected) => {
 };
 
 export const editCompanyInformation = async (id, data) => {
+  const currentUserCompany = await getCompanyByIdOrEmail();
   const company = await makeApiRequest({
-    url: `api/companies/${id}/`,
+    url: `api/companies/${currentUserCompany[0].company_name}/`,
     method: "PATCH",
     data,
   });
-  console.log(company);
 
   return company;
 };
 
-export const uploadCompanyBanner = async (companyName, file) => {
+export const uploadCompanyBanner = async (file) => {
+  const currentUserCompany = await getCompanyByIdOrEmail();
+
+  console.log({ currentUserCompany });
   const company = await makeApiRequest({
-    url: `api/companies/${companyName}/`,
+    url: `api/companies/${currentUserCompany[0].company_name}/`,
     method: "PATCH",
     data: { banner: file },
     contentType: "multipart/form-data",
@@ -202,9 +205,12 @@ export const uploadCompanyBanner = async (companyName, file) => {
   if (company.banner) window.location.reload();
 };
 
-export const uploadCompanyLogo = async (companyName, file) => {
+export const uploadCompanyLogo = async (file) => {
+  const currentUserCompany = await getCompanyByIdOrEmail();
+  console.log({ currentUserCompany });
+
   const company = await makeApiRequest({
-    url: `api/companies/${companyName}/`,
+    url: `api/companies/${currentUserCompany[0].company_name}/`,
     method: "PATCH",
     data: { logo: file },
     contentType: "multipart/form-data",

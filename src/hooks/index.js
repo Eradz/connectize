@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { getAllCompanies } from "../api-services/companies";
+import {
+  getAllCompanies,
+  getCompanyByIdOrEmail,
+} from "../api-services/companies";
 import { getNotificationsForUser } from "../api-services/notifications";
 import { getAllUsers } from "../api-services/users";
 import { useAuth } from "../context/userContext";
@@ -24,9 +27,9 @@ export const useNotifications = () => {
     //   }
     //   return acc;
     // }, []);
-      // return uniqueNotifications;
-      
-      return allNotifications
+    // return uniqueNotifications;
+
+    return allNotifications;
   }, [messages, notificationsData]);
 
   const [notifications, setNotifications] = useState(newNotifications);
@@ -59,6 +62,15 @@ export const useUsers = () => {
   return useQuery({
     queryKey: ["users"],
     queryFn: getAllUsers,
+    enabled: !!currentUser,
+  });
+};
+
+export const useGetCurrentCompany = () => {
+  const { user: currentUser } = useAuth();
+  return useQuery({
+    queryKey: ["companies"],
+    queryFn: () => getCompanyByIdOrEmail(),
     enabled: !!currentUser,
   });
 };

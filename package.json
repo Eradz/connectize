@@ -62,6 +62,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "start": "vite preview",
     "predeploy": "npm run build",
     "build": "vite build && npm run generate-sitemap",
     "generate-sitemap": "node ./scripts/generate-sitemap.mjs",

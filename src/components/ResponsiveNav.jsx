@@ -13,6 +13,7 @@ import { ConjoinedAvatarSkeleton } from "./admin/feeds/DiscoverPosts";
 import FeedSearch from "./custom/FeedSearch";
 import { NotificationPopOver } from "./notifications";
 import { LinkWithTooltipIcon } from "./userProfile/Navbar";
+import { useGetCurrentCompany } from "../hooks";
 
 function ResponsiveNav() {
   const { toggleNav } = useNav();
@@ -46,10 +47,7 @@ export const avatarStyle = "!bg-gold !text-black border-2 border-white";
 export const JoinedUserCompanyImages = () => {
   const { user: currentUser } = useAuth();
 
-  const { data: companies, isLoading } = useQuery({
-    queryKey: ["companies"],
-    queryFn: () => getCompanyByIdOrEmail(),
-  });
+  const { data: companies, isLoading } = useGetCurrentCompany()
 
   const [headingImages, setHeadingImages] = useState([]);
 
