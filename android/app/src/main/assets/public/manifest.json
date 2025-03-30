@@ -1,52 +1,61 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Connectize",
+  "name": "Connectize - The Leading Social Platform for the Oil & Gas Industry",
+  "description": "Connectize connects oil and gas professionals, engineers, suppliers, and investors. Network, collaborate, share insights, and explore job opportunities in the energy sector. Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors. Network, collaborate on projects, share insights, and explore job opportunities in the energy sector. Join today!",
   "icons": [
     {
       "src": "../icons/icon-48.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "48x48",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-72.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "72x72",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-96.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "96x96",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-128.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "128x128",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-192.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-256.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "256x256",
       "purpose": "any maskable"
     },
     {
       "src": "../icons/icon-512.webp",
-      "type": "image/png",
+      "type": "image/webp",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#F7F7F7 ",
+  "screenshots": [
+    {
+      "src": "../public/seo/default-image.png",
+      "type": "image/webp",
+      "sizes": "1080x1920"
+    }
+  ]
 }
