@@ -203,5 +203,5 @@ export const uploadDisplayPicture = async (file) => {
     data: { avatar: file },
     contentType: "multipart/form-data",
   });
-  if (company.logo) window.location.reload();
+  if (company.avatar) window.location.reload();
 };
