@@ -3,10 +3,14 @@ import { defineConfig } from "vite";
 import compression from "vite-plugin-compression";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    compression(),
+    compression({
+      algorithm: "gzip",
+      threshold: 10240,
+      deleteOriginalAssets: mode === "capacitor",
+    }),
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["/connectizelogo.png", "/offline.html"],
@@ -73,4 +77,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
