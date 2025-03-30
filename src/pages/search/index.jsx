@@ -1,22 +1,22 @@
+import { Avatar } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import { motion } from "framer-motion";
 import React from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { getAllCompanies } from "../../api-services/companies";
+import { getSearchResults } from "../../api-services/search";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
 import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
 import { ProductListCard } from "../../components/admin/markets/newlyListed";
-import { CompaniesArray } from "../companies";
-import CustomTabs from "../../components/custom/tabs";
-import { useQuery } from "@tanstack/react-query";
-import { getSearchResults } from "../../api-services/search";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Avatar } from "@chakra-ui/react";
-import Username from "../../components/Username";
 import ConnectButton from "../../components/ConnectButton";
-import { avatarStyle } from "../../components/ResponsiveNav";
+import CustomTabs from "../../components/custom/tabs";
 import LightParagraph from "../../components/ParagraphText";
-import useRedirect from "../../hooks/useRedirect";
+import { avatarStyle } from "../../components/ResponsiveNav";
+import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
-import clsx from "clsx";
-import { getAllCompanies } from "../../api-services/companies";
+import useRedirect from "../../hooks/useRedirect";
+import { CompaniesArray } from "../companies";
 
 export default function Search() {
   return (
@@ -48,7 +48,13 @@ export const SearchTab = () => {
     enabled: !!searchQuery && !!currentUser,
   });
 
-  const tabsHeading = ["Posts", "Companies", "People", "Products", "Services"];
+  const tabsHeading = [
+    data?.posts.length + " Posts",
+    data?.companies.length + " Companies",
+    data?.users.length + " People",
+    data?.products.length + " Products",
+    data?.services.length + " Services",
+  ];
   const tabsPanels = [
     <DiscoverPosts
       isSearch

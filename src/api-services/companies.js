@@ -189,7 +189,8 @@ export const editCompanyInformation = async (data) => {
     data,
   });
 
-  return company;
+ if (company.id)
+   window.location.href = `/${currentUserCompany[0].company_name}`;
 };
 
 export const uploadCompanyBanner = async (file) => {

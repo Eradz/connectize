@@ -11,7 +11,7 @@ export default function CustomTabs({
   tabPanelsStyle,
   className,
   selectedStyle,
-  tabsStyle = "w-full rounded-full font-medium !text-xs lg:!text-sm",
+  tabsStyle = "w-full rounded-full font-medium !text-xs lg:!text-sm text-nowrap",
   variant = "solid-rounded",
 }) {
   const getSelectedStyle = (variant) => {

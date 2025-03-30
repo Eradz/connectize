@@ -55,17 +55,15 @@ export default function EditCompanyForm({ company }) {
     const toastId = toast.loading("Updating company information");
 
     try {
-      const update = await editCompanyInformation(
-        formik.values
-      );
+      await editCompanyInformation(formik.values);
 
       toast.success("Updated profile information Successfully", {
         id: toastId,
       });
 
-      if (update.id) {
-        navigate(`/${update.company_name}`);
-      }
+      // if (update.id) {
+      //   navigate(`/${update.company_name}`);
+      // }
     } catch (err) {
       toast.error("Failed to update profile information", { id: toastId });
     } finally {
@@ -169,7 +167,7 @@ export default function EditCompanyForm({ company }) {
 
   useEffect(() => {
     formik.setValues(initialValues);
-  }, []);
+  }, [!!company]);
 
   return (
     <ProfileSection title="">

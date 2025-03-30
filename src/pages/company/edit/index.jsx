@@ -1,24 +1,17 @@
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { getSingleCompany } from "../../../api-services/companies";
 import EditCompanyForm from "../../../components/company/form/edit-company";
 import HeadingText from "../../../components/HeadingText";
 import NoPage from "../../../components/NoPage";
 import PageLoading from "../../../components/PageLoading";
 import SEO from "../../../components/SEO";
-import { useAuth } from "../../../context/userContext";
+import { useGetCurrentCompany } from "../../../hooks";
 
 function EditCompanyPage() {
   const { company: companyName } = useParams();
-  const { user: currentUser } = useAuth();
 
-  const { data: company, isLoading } = useQuery({
-    queryKey: ["companies", companyName],
-    queryFn: () => getSingleCompany(companyName),
-    enabled: !!companyName && !!currentUser,
-  });
+  const { data: company, isLoading } = useGetCurrentCompany();
 
   if (isLoading) return <PageLoading hasLogo={false} />;
 
@@ -40,7 +33,7 @@ function EditCompanyPage() {
 
       <HeadingText>Edit Company Information</HeadingText>
 
-      <EditCompanyForm company={company} />
+      <EditCompanyForm company={company?.[0]} />
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import HeadingText from "./HeadingText";
@@ -5,6 +6,12 @@ import HeadingText from "./HeadingText";
 function NoPage() {
   return (
     <section className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-3">
+      <DotLottieReact
+        src="/lottie/notfound.lottie"
+        loop
+        autoplay
+        className="size-10/12 xs:size-1/2 md:size-56 overflow-hidden scale-150 aspect-square"
+      />
       <HeadingText>404 No content found</HeadingText>
       <div className="flex gap-2">
         <button
