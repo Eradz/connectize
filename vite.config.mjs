@@ -9,13 +9,7 @@ export default defineConfig({
     compression(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: [
-        "/favicon.svg",
-        "/logo192.png",
-        "/logo512.png",
-        "/connectizelogo.png",
-        "/offline.html",
-      ],
+      includeAssets: ["/connectizelogo.png", "/offline.html"],
       manifest: {
         name: "Connectize",
         short_name: "Connectize",
@@ -36,6 +30,30 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,svg}"],
+        maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.connectize\.co\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 }, // 1 day
+            },
+          },
+          {
+            urlPattern: /.*\.(?:png|jpg|jpeg|svg|gif|woff2|ttf|ico)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "assets-cache",
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 }, // 7 days
+            },
+          },
+          {
+            urlPattern: /\/offline\.html$/,
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "offline-cache" },
+          },
+        ],
       },
     }),
   ],
