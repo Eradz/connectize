@@ -56,7 +56,6 @@ export default function EditCompanyForm({ company }) {
 
     try {
       const update = await editCompanyInformation(
-        company.company_name,
         formik.values
       );
 

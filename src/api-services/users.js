@@ -200,7 +200,7 @@ export const uploadDisplayPicture = async (file) => {
   const company = await makeApiRequest({
     url: `api/users/${currentUser.id}/`,
     method: "PATCH",
-    data: { logo: file },
+    data: { avatar: file },
     contentType: "multipart/form-data",
   });
   if (company.logo) window.location.reload();

@@ -11,6 +11,7 @@ import {
   uploadCompanyBanner,
   uploadCompanyLogo,
 } from "../../api-services/companies";
+import { uploadDisplayPicture } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
 import { useGetCurrentCompany } from "../../hooks";
 import { avatarStyle } from "../ResponsiveNav";
@@ -46,7 +47,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
 
   const isCurrentUserById = Number(currentUser?.id) === Number(paramsId);
   const isCurrentUserByCompany =
-    currentCompany[0]?.company_name?.toLowerCase() ===
+    currentCompany?.[0]?.company_name?.toLowerCase() ===
     paramsCompany?.toLowerCase();
 
   const isCurrentUser = isCurrentUserByCompany || isCurrentUserById;
@@ -70,11 +71,20 @@ const Header = ({ banner, name, logo, type = "company" }) => {
     validationSchema: yup.object().shape({ logo: fileSchema }),
     onSubmit: async (values) => {
       if (values.logo !== logo) {
-        toast.promise(uploadCompanyLogo(values.logo), {
-          loading: "Uploading logo...",
-          success: "Logo uploaded successfully",
-          error: "Failed to upload logo",
-        });
+        toast.promise(
+          isCompanyHeader
+            ? uploadCompanyLogo(values.logo)
+            : uploadDisplayPicture(values.logo),
+          {
+            loading: `Uploading ${
+              isCompanyHeader ? "logo" : "display image"
+            }...`,
+            success:
+              (isCompanyHeader ? "Logo" : "Display image") +
+              " uploaded successfully",
+            error: "Failed to upload logo",
+          }
+        );
       }
     },
   });
@@ -153,6 +163,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                 opacity={newBanner !== banner ? 1 : 0.75}
                 height="8"
                 _hover={{ opacity: 1 }}
+                disabled={bannerFormik.isSubmitting}
                 fontSize="xs"
                 onClick={() => document.getElementById("banner").click()}
                 leftIcon={<ImageIcon />}
@@ -167,6 +178,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                 top="10"
                 right="1"
                 height="8"
+                disabled={bannerFormik.isSubmitting}
                 _hover={{ opacity: 1 }}
                 fontSize="xs"
                 leftIcon={<CloudUploadOutlined />}
@@ -202,10 +214,19 @@ const Header = ({ banner, name, logo, type = "company" }) => {
               onChange={(e) => handleFileChange(e, "logo", logoFormik)}
             />
             <ButtonWithTooltipIcon
-              className="absolute !bg-gold !text-dark p-1 -translate-x-6 translate-y-4 rounded-full opacity-0 group-hover:opacity-100"
-              tip={newLogo ? "Change Image" : "Add Image"}
+              className="absolute !bg-white !text-dark p-1 -translate-x-6 translate-y-4 rounded-full opacity-0 group-hover:opacity-100"
+              tip={
+                newLogo
+                  ? isCompanyHeader
+                    ? "Change logo"
+                    : "Change display picture"
+                  : isCompanyHeader
+                  ? "Add logo"
+                  : "Add display picture"
+              }
               onClick={() => document.getElementById("logo").click()}
               IconName={CameraIcon}
+              disabled={logoFormik.isSubmitting}
             />
             {newLogo !== logo && (
               <ButtonWithTooltipIcon
@@ -213,6 +234,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                 tip="Upload image"
                 IconName={CloudUploadOutlined}
                 className="absolute !bottom-1 !bg-dark !text-white p-1 -translate-x-2 translate-y-4 rounded-full"
+                disabled={logoFormik.isSubmitting}
               />
             )}
           </form>

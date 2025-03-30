@@ -181,7 +181,7 @@ export const connectWithCompany = async (id, hasConnected) => {
   });
 };
 
-export const editCompanyInformation = async (id, data) => {
+export const editCompanyInformation = async (data) => {
   const currentUserCompany = await getCompanyByIdOrEmail();
   const company = await makeApiRequest({
     url: `api/companies/${currentUserCompany[0].company_name}/`,
@@ -195,7 +195,6 @@ export const editCompanyInformation = async (id, data) => {
 export const uploadCompanyBanner = async (file) => {
   const currentUserCompany = await getCompanyByIdOrEmail();
 
-  console.log({ currentUserCompany });
   const company = await makeApiRequest({
     url: `api/companies/${currentUserCompany[0].company_name}/`,
     method: "PATCH",
@@ -207,7 +206,6 @@ export const uploadCompanyBanner = async (file) => {
 
 export const uploadCompanyLogo = async (file) => {
   const currentUserCompany = await getCompanyByIdOrEmail();
-  console.log({ currentUserCompany });
 
   const company = await makeApiRequest({
     url: `api/companies/${currentUserCompany[0].company_name}/`,
@@ -217,4 +215,3 @@ export const uploadCompanyLogo = async (file) => {
   });
   if (company.logo) window.location.reload();
 };
-
