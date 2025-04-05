@@ -18,7 +18,7 @@ const AppLayout = () => {
       <Navbar />
       <section
         className={clsx(
-          "flex flex-col items-start md:flex-row gap-4 xl:!gap-5",
+          "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4",
           {
             "max-md:container p-3": !isSinglePostRoute && !isHomeRoute,
           }

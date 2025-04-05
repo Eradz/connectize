@@ -1,6 +1,6 @@
 import { MailOutlined } from "@ant-design/icons";
 import { LocationOnOutlined } from "@mui/icons-material";
-import { GlobeIcon, Link1Icon } from "@radix-ui/react-icons";
+import { GlobeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useMemo } from "react";
@@ -49,7 +49,7 @@ const CompanyProfile = React.memo(() => {
       <SEO title={`${company?.company_name || ""} | Connectize Companies`} />
       <Header {...headerProps} />
 
-      <section className="mt-11 md:mt-14 flex max-lg:flex-col items-start gap-2 relative">
+      <section className="mt-12 md:mt-20 flex max-lg:flex-col items-start gap-2 relative">
         {currentUser?.email === company?.profile &&
           currentUser?.user_type === CompanyUserType && (
             <ManageRepresentativesLink main />
@@ -118,37 +118,45 @@ const ProductSidebar = React.memo(({ company }) => {
           <>
             <Link
               to={`/${company?.company_name || ""}/edit-profile`}
-              className="absolute top-2 right-2 text-sm !text-gray-500 hover:!text-black hover:bg-gray-100 px-2 py-1 rounded"
+              className="absolute top-3.5 right-2.5 text-sm !text-gray-500 hover:!text-black hover:bg-gray-100 px-2 py-1 rounded"
             >
               Edit Information
             </Link>
           </>
         )}
 
-        <LightParagraph>{company?.about}</LightParagraph>
+        <LightParagraph>
+          {company?.about || "No about added yet"}
+        </LightParagraph>
         <ul className="space-y-4 divide-y">
-          <ProfileAboutList
-            Icon={LocationOnOutlined}
-            title="Location"
-            value={`${company?.office_address || "No office address"} ${
-              company?.city || ""
-            }, ${company?.state || ""}. ${company?.country || ""}`}
-          />
-          <ProfileAboutList
-            Icon={GlobeIcon}
-            title="Website"
-            value={company?.website || "No website added"}
-          />
-          <ProfileAboutList
-            Icon={MailOutlined}
-            title="Company Email"
-            value={company?.email || "No Email"}
-          />
-          <ProfileAboutList
+          {company?.office_address && (
+            <ProfileAboutList
+              Icon={LocationOnOutlined}
+              title="Location"
+              value={`${company?.office_address || "No office address"} ${
+                company?.city || ""
+              }, ${company?.state || ""}. ${company?.country || ""}`}
+            />
+          )}
+          {company?.website && (
+            <ProfileAboutList
+              Icon={GlobeIcon}
+              title="Website"
+              value={company?.website || "No website added"}
+            />
+          )}
+          {company?.email && (
+            <ProfileAboutList
+              Icon={MailOutlined}
+              title="Company Email"
+              value={company?.email || "No Email"}
+            />
+          )}
+          {/* <ProfileAboutList
             Icon={Link1Icon}
             title="Links"
-            value={company?.email || "No Links"}
-          />
+            value={`${company?.website } ${company?.email}` || "No Links"}
+          /> */}
         </ul>
       </ProfileSection>
       <ProfileSection title="People Associated" className="h-fit">

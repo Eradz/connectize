@@ -179,9 +179,17 @@ export const ProfileAboutList = ({ title, value, Icon }) => {
   return (
     <li className="flex gap-2 items-start pt-4">
       <Icon className="!size-6 xs:!size-5" />
-      <div className="flex gap-x-1 items-baseline max-xs:flex-col">
+      <div className="flex gap-1 items-baseline max-sm:flex-col">
         <strong className="leading-none">{title}:</strong>
-        <LightParagraph>{value || emptyWord} </LightParagraph>
+        <LightParagraph>
+          {title.toLowerCase() === "website" ? (
+            <a href={value} target="__blank" className="!underline">
+              {value}
+            </a>
+          ) : (
+            value || emptyWord
+          )}{" "}
+        </LightParagraph>
       </div>
     </li>
   );

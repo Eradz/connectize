@@ -150,7 +150,7 @@ function CreatePost() {
   );
 
   return (
-    <section className="bg-white w-full py-4 rounded border-b-[4px] border-gold relative max-md:container">
+    <section className="bg-white !w-[90%] px-4 md:px-6 py-4 rounded border-b-[4px] border-gold relative max-md:container">
       <div className="size-full">
         <textarea
           type="text"

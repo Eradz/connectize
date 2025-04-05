@@ -70,7 +70,7 @@ function AuthLayout({ redirectUrl = "/" }) {
               whileInView={{ opacity: 1 }}
               transition={{ delay: 0.45 }}
               viewport={{ once: true }}
-              className="container flex items-center justify-center gap-2 font-bold text-black mt-12 mb-8"
+              className="container flex items-center justify-center gap-2 font-semibold text-black mt-12 mb-8"
               key={pathname + "endorsement"}
             >
               <img src="/images/nuprc-logo.png" className="h-10 md:h-14" />
