@@ -3,7 +3,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
-import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import MyProvider from "./context/provider";
 
@@ -30,7 +29,7 @@ root.render(
   </BrowserRouter>
 );
 
-registerSW({ immediate: true });
+// registerSW({ immediate: true });
 
 // if ("serviceWorker" in navigator) {
 //   window.addEventListener("load", () => {
