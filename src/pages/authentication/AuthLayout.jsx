@@ -29,7 +29,7 @@ function AuthLayout({ redirectUrl = "/" }) {
             className="flex flex-col-reverse gap-2"
             key={pathname + "section"}
           >
-            <Logo />
+            <Logo url="/login" />
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -73,7 +73,7 @@ function AuthLayout({ redirectUrl = "/" }) {
               className="container flex items-center justify-center gap-2 font-bold text-black mt-12 mb-8"
               key={pathname + "endorsement"}
             >
-              <img src="/images/nuprc-logo.png" className="h-8" />
+              <img src="/images/nuprc-logo.png" className="h-10 md:h-14" />
               <small className="">Endorsed by NUPRC</small>
             </motion.section>
           )}
@@ -86,7 +86,6 @@ function AuthLayout({ redirectUrl = "/" }) {
           loop
           autoplay
           className="size-full aspect-square"
-          
         />
       </section>
     </main>
