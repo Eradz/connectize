@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Logo from "../../components/logo";
-import LightParagraph from "../../components/ParagraphText";
 import { getSession } from "../../lib/session";
 
 function AuthLayout({ redirectUrl = "/" }) {
@@ -65,16 +64,19 @@ function AuthLayout({ redirectUrl = "/" }) {
             <Outlet />
           </motion.section>
 
-          <motion.section
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ delay: 0.45 }}
-            className="container flex items-center justify-center gap-2 font-bold mt-8"
-            key={pathname + "endorsement"}
-          >
-            <img src="/images/nuprc-logo.png" className="h-8" />
-            <LightParagraph>Endorsed by NUPRC</LightParagraph>
-          </motion.section>
+          {isLoginOrRegister && (
+            <motion.section
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.45 }}
+              viewport={{ once: true }}
+              className="container flex items-center justify-center gap-2 font-bold text-black mt-12 mb-8"
+              key={pathname + "endorsement"}
+            >
+              <img src="/images/nuprc-logo.png" className="h-8" />
+              <small className="">Endorsed by NUPRC</small>
+            </motion.section>
+          )}
         </section>
       </section>
 
@@ -84,6 +86,7 @@ function AuthLayout({ redirectUrl = "/" }) {
           loop
           autoplay
           className="size-full aspect-square"
+          
         />
       </section>
     </main>
