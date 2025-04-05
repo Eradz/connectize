@@ -2,6 +2,7 @@
 	"appId": "com.connectize.app",
 	"appName": "connectize",
 	"webDir": "build",
+	"android": {},
 	"plugins": {
 		"SplashScreen": {
 			"launchShowDuration": 0,
