@@ -1,9 +1,9 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
 } from "react";
 import { getCurrentUser } from "../api-services/users";
 import { refreshToken } from "../lib/helpers";
@@ -33,7 +33,6 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCurrentUser();
-    // Dependency array excludes user intentionally; prevent re-fetch on updates.
   }, [fetchCurrentUser]);
 
   const contextValue = React.useMemo(
