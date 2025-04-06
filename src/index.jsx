@@ -13,7 +13,7 @@ import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <>
+  <BrowserRouter>
     <React.StrictMode>
       <MyProvider>
         <App />
@@ -26,7 +26,7 @@ root.render(
       />
       <Analytics />
     </React.StrictMode>
-  </>
+  </BrowserRouter>
 );
 
 // registerSW({ immediate: true });
