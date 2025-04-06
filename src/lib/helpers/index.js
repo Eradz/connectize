@@ -198,7 +198,6 @@ export async function makeApiRequest({
       }
     }
 
-    // Handle general errors
     const errorResponse = error?.response?.data;
 
     const errorMsg = extractErrorMessage(errorResponse);
