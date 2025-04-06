@@ -64,7 +64,7 @@
     "dev": "vite",
     "start": "vite preview",
     "predeploy": "npm run build",
-    "build": "vite build && npm run generate-sitemap",
+    "build": "vite build",
     "generate-sitemap": "node ./scripts/generate-sitemap.mjs",
     "generate-routes": "node ./scripts/generate-app-routes.mjs",
     "routes": "node ./scripts/structured-app-routes.mjs",

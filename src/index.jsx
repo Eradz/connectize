@@ -13,8 +13,8 @@ import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <BrowserRouter>
-    <React.StrictMode>
+  <React.StrictMode>
+    <BrowserRouter>
       <MyProvider>
         <App />
       </MyProvider>
@@ -25,8 +25,8 @@ root.render(
         pauseWhenPageIsHidden
       />
       <Analytics />
-    </React.StrictMode>
-  </BrowserRouter>
+    </BrowserRouter>
+  </React.StrictMode>
 );
 
 // registerSW({ immediate: true });
