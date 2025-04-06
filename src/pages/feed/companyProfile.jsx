@@ -23,7 +23,7 @@ import { ProfileAboutList } from "./userProfile";
 
 const CompanyProfile = React.memo(() => {
   const { company: companyName } = useParams();
-  const { user: currentUser, loading } = useAuth();
+  const { user: currentUser } = useAuth();
 
   const { data: company, isLoading } = useQuery({
     queryKey: ["companies", companyName],
