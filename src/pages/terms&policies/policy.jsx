@@ -18,7 +18,7 @@ const policies = [
       },
       {
         heading: "Data Sharing",
-        text: "We do not sell or rent your personal information to third parties. However, we may share information with service providers or legal entities as required by law or to fulfill service obligations.",
+        text: "We do not sell or rent your personal information to third parties.",
       },
       {
         heading: "Data Security",
