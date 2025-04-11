@@ -7,6 +7,7 @@ import {
   StoreIcon,
   UserGroup,
 } from "../../icon";
+import { webRoutes } from "../webRoutes";
 
 export const months = [
   "January",
@@ -32,37 +33,45 @@ export const days = [
   "Sunday",
 ];
 
-// const session = getSession();
-
 export const feedNavItems = [
-  { name: "Home", to: "/", icon: HomeIcon, smallNavigation: true },
-  { name: "Messages", to: "/messages", icon: Message, smallNavigation: true },
+  { name: "Home", to: webRoutes.feed, icon: HomeIcon, smallNavigation: true },
+  {
+    name: "Messages",
+    to: webRoutes.messages,
+    icon: Message,
+    smallNavigation: true,
+  },
   {
     name: "Representatives",
-    to: "/co/representatives",
+    to: webRoutes.representatives,
     icon: UserGroup,
     smallNavigation: true,
   },
   {
     name: "Companies",
-    to: "/companies",
+    to: webRoutes.companies,
     icon: CompanyIcon,
     smallNavigation: true,
   },
-  { name: "Market", to: "/market", icon: StoreIcon, smallNavigation: true },
+  {
+    name: "Market",
+    to: webRoutes.market,
+    icon: StoreIcon,
+    smallNavigation: true,
+  },
   {
     name: "Bookmarks",
-    to: "/co/bookmarks",
+    to: webRoutes.bookmarks,
     icon: BookmarkFilledIcon,
     smallNavigation: false,
   },
   {
     name: "Settings",
-    to: "/co/settings",
+    to: webRoutes.settings,
     icon: Setting,
     smallNavigation: false,
   },
-  // { name: "Analysis", to: "/analysis", icon: ChartBar, smallNavigation: false },
+  // { name: "Analysis", to: webRoutes.analysis, icon: ChartBar, smallNavigation: false },
 ];
 
 // index key for complete profile

@@ -1,17 +1,17 @@
-import React from "react";
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   Divider,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spinner,
 } from "@chakra-ui/react";
 import clsx from "clsx";
+import React from "react";
 
 const ReusableModal = ({
   isOpen,
@@ -28,7 +28,7 @@ const ReusableModal = ({
   loading = false,
 }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={size}>
+    <Modal isOpen={isOpen} onClose={onClose} size={size} isCentered>
       <ModalOverlay />
       <ModalContent className="rounded-lg shadow-lg !mx-2 max-h-[77vh] md:max-h-[90vh]">
         {title && (
