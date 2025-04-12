@@ -1,6 +1,6 @@
 import { Avatar } from "@chakra-ui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { ArrowDownIcon, CheckIcon } from "@radix-ui/react-icons";
+import { CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -13,7 +13,6 @@ import { webRoutes } from "../../lib/webRoutes";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { VoiceNotePlayer } from "./MessageControl";
 
 export default function MessageArea({ messages, messagesLoading }) {
@@ -141,7 +140,12 @@ export default function MessageArea({ messages, messagesLoading }) {
                           {messageContent.length > readMoreLimit && (
                             <>
                               ...{" "}
-                              <span className="text-xs text-gold inline-block cursor-pointer hover:text-black transition-colors duration-300" onClick={()=>setReadMoreLimit(prev => prev+400)}>
+                              <span
+                                className="text-xs text-gold inline-block cursor-pointer hover:text-black transition-colors duration-300"
+                                onClick={() =>
+                                  setReadMoreLimit((prev) => prev + 400)
+                                }
+                              >
                                 read more
                               </span>
                             </>
@@ -210,14 +214,6 @@ export default function MessageArea({ messages, messagesLoading }) {
             </section>
           ))
       )}
-      {
-        <ButtonWithTooltipIcon
-          IconName={ArrowDownIcon}
-          tip="scroll down"
-          onClick={scrollToBottom}
-          className="fixed top-20 right-5 hover:bg-gray-200 rounded-full p-1.5"
-        />
-      }
     </section>
   );
 }

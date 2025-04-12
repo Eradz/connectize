@@ -1,12 +1,15 @@
 import {
-  DownOutlined,
   PaperClipOutlined,
   PauseCircleFilled,
   PlayCircleFilled,
 } from "@ant-design/icons";
 import { CloseButton } from "@chakra-ui/react";
 import { Mic, MicExternalOn } from "@mui/icons-material";
-import { PaperPlaneIcon, TrashIcon } from "@radix-ui/react-icons";
+import {
+  ArrowDownIcon,
+  PaperPlaneIcon,
+  TrashIcon,
+} from "@radix-ui/react-icons";
 import EmojiPicker from "emoji-picker-react";
 import React, {
   useCallback,
@@ -154,30 +157,24 @@ export default function MessageControl({ loading, recipientId, senderId }) {
     [handleSendMessage]
   );
 
-  const handleScroll = useCallback(() => {
-    if (chatContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } =
-        chatContainerRef.current;
-      setShowScrollDown(scrollTop + clientHeight < scrollHeight - 10);
-    }
-  }, []);
+  const scrollToBottom = () => {
+    const chatContainer = document.querySelector(".chat-container");
 
-  const scrollToBottom = useCallback(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, []);
-
-  useEffect(() => {
-    const chatContainer = chatContainerRef.current;
     if (chatContainer) {
-      chatContainer.addEventListener("scroll", handleScroll);
-      return () => chatContainer.removeEventListener("scroll", handleScroll);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-  }, [handleScroll]);
+  };
 
   useEffect(() => {
+    const chatContainer = document.querySelector(".chat-container");
+
+    chatContainer.onscroll = () => {
+      setShowScrollDown(
+        chatContainer.scrollTop + chatContainer.clientHeight <
+          chatContainer.scrollHeight
+      );
+    };
+
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -185,7 +182,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
   }, [message]);
 
   return (
-    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300">
+    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 lg:bottom-4">
       {/* valid images */}
       {validImages && (
         <ValidImages
@@ -251,17 +248,18 @@ export default function MessageControl({ loading, recipientId, senderId }) {
             onClick={handleSendMessage}
             disabled={loading}
           />
+
+          {showScrollDown && (
+            <ButtonWithTooltipIcon
+              IconName={ArrowDownIcon}
+              tip="scroll down"
+              onClick={scrollToBottom}
+              className="!bg-black !text-white ml-2 hover:bg-gray-200 rounded-full p-1.5"
+            />
+          )}
         </div>
       </section>
       <CustomErrorMessage errorMessage={errorMessage} />
-      {showScrollDown && (
-        <button
-          onClick={scrollToBottom}
-          className="fixed bottom-4 right-4 p-2 bg-black text-white rounded-full"
-        >
-          <DownOutlined />
-        </button>
-      )}
     </section>
   );
 }

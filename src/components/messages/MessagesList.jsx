@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useGetMessages, useUsers } from "../../hooks";
 import useWebSocket from "../../hooks/useWebSocket";
+import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
@@ -39,9 +40,27 @@ export default function MessagesList() {
       {isLoading || usersLoading ? (
         <MessagesListSkeleton />
       ) : messagesList?.length <= 0 ? (
-        <LightParagraph>
-          No messages yet, click on the plus icon to start new chat
-        </LightParagraph>
+        <div className="min-h-40 py-2 mt-2 space-y-4">
+          <HeadingText>
+            Connectize is more interesting when you{" "}
+            <span className="text-gold border-b-4 border-gold">connect</span>
+          </HeadingText>
+          <LightParagraph>
+            Please use the corner right plus icon to start messaging
+          </LightParagraph>
+
+          {/* <div className="">
+            <FormLabel htmlFor="userId" className="block -mb-4">
+              Enter a user Id to start connecting immediately
+            </FormLabel>
+            <CustomInput
+              name="userId"
+              placeholder=""
+              onChange={() => {}}
+              className="!w-[98%]"
+            />
+          </div> */}
+        </div>
       ) : (
         messagesList.map((message) => {
           const currentUserId =
@@ -71,20 +90,25 @@ const MessagesListTile = React.memo(({ message, user }) => {
       className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
     >
       <Link to={`/co/${user?.id}`}>
-        <Avatar name={name} src={`${user?.avatar}`} className={avatarStyle} />
+        <Avatar
+          name={name}
+          src={`${user?.avatar}`}
+          className={avatarStyle}
+          size="sm"
+        />
       </Link>
 
       <Link
         to={`/messages/?room_name=${message?.room_name}`}
-        className="flex-1"
+        className="flex-1 text-sm"
       >
         <Username user={user} noClick />
         <div className="line-clamp-1 text-ellipsis">
-          <LightParagraph>{message?.content} </LightParagraph>
+          <LightParagraph>{message?.content}</LightParagraph>
         </div>
       </Link>
-      <div className="flex flex-col justify-end items-end text-[.7rem] text-gray-400 gap-2">
-        {!message.read_at && <Badge className="!text-[.6rem]">Unread</Badge>}
+      <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2">
+        {!message.read_at && <Badge className="!text-[.55rem]">Unread</Badge>}
         <TimeAgo time={message?.timestamp} />
       </div>
     </motion.section>

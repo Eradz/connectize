@@ -12,7 +12,7 @@ import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestion
 function MessageHeader({ user, isLoading }) {
   const navigate = useNavigate();
   return (
-    <header className="flex items-center justify-between bg-white p-2 pr-4 rounded-t-md gap-2">
+    <header className="flex items-center justify-between bg-white p-2 pr-4 rounded-t-md gap-2 sticky">
       <ButtonWithTooltipIcon
         IconName={ChevronLeftRounded}
         iconClassName="text-lg"
@@ -35,8 +35,13 @@ function MessageHeader({ user, isLoading }) {
             />
             <div className="text-sm leading-0">
               <Username user={user} />
-              <Text color="green.500" fontSize="small" fontWeight="600">
-                Online
+              <Text
+                color="green.500"
+                fontSize="small"
+                fontWeight="600"
+                isTruncated
+              >
+                {user?.role}
               </Text>
             </div>
           </>
