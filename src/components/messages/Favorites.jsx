@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { getAllCompanies } from "../../api-services/companies";
 import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
-import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import RoomName from "./RoomName";
@@ -31,48 +30,42 @@ export default function Favorites() {
     ?.slice(0, 10);
 
   return (
-    <section className="space-y-2  max-md:container p-3">
-      <HeadingText heading="sub-heading" weight="semibold">
-        Favorites
-      </HeadingText>
+    <section className="flex gap-6 py-3 overflow-x-auto scroll-smooth scrollbar-hidden">
+      {companiesLoading || usersLoading ? (
+        <CardSkeletonList />
+      ) : filteredUsers?.length <= 0 ? (
+        <LightParagraph>No favorites yet</LightParagraph>
+      ) : (
+        filteredUsers?.map((user) => {
+          const company = companies?.results?.find(
+            (company) => company?.profile === user?.email
+          );
+          return (
+            <motion.div
+              key={user?.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 py-6 bg-background rounded-md text-center space-y-3 min-w-[180px] flex flex-col shrink-0"
+            >
+              <Link to={`/${company?.company_name || ""}`}>
+                <Avatar
+                  className={avatarStyle}
+                  src={company?.logo || "/images/default-company-logo.png"}
+                  size="lg"
+                />
+              </Link>
 
-      <section className="flex overflow-x-auto gap-2 scrollbar-hidden scroll-smooth">
-        {companiesLoading || usersLoading ? (
-          <CardSkeletonList />
-        ) : filteredUsers?.length <= 0 ? (
-          <LightParagraph>No favorites yet</LightParagraph>
-        ) : (
-          filteredUsers?.map((user) => {
-            const company = companies?.results?.find(
-              (company) => company?.profile === user?.email
-            );
-            return (
-              <motion.div
-                key={user?.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-2 py-4 bg-white rounded-md text-center space-y-3 !w-[150px] flex flex-col shrink-0"
-              >
-                <Link to={`/${company?.company_name || ""}`}>
-                  <Avatar
-                    className={avatarStyle}
-                    src={company?.logo || "/images/default-company-logo.png"}
-                    size="lg"
-                  />
-                </Link>
-
-                <RoomName user={user} />
-              </motion.div>
-            );
-          })
-        )}
-      </section>
+              <RoomName user={user} />
+            </motion.div>
+          );
+        })
+      )}
     </section>
   );
 }
 
 const CardSkeletonList = () => {
-  return Array.from({ length: 5 }, (_, index) => (
+  return Array.from({ length: 6 }, (_, index) => (
     <div
       key={index}
       className="p-2 py-4 bg-white rounded-md text-center space-y-3 w-[100px] flex flex-col shrink-0"

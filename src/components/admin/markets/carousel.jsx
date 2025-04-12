@@ -90,7 +90,7 @@ export const CreateNewLink = ({
   return (
     <Link
       to={url}
-      className="p-3 rounded-md flex items-center gap-2 bg-black hover:bg-opacity-70 hover:scale-90 transition-all duration-300 fixed bottom-16 right-5 z-[999999]"
+      className="p-3 rounded-md flex items-center gap-2 bg-black hover:opacity-100 opacity-50 hover:scale-100 scale-90 transition-all duration-300 fixed bottom-16 right-5 z-[999999]"
       onClick={onClick}
     >
       <ButtonWithTooltipIcon

@@ -7,7 +7,6 @@ import { getMessagesForUser } from "../../api-services/messaging";
 import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
 import useWebSocket from "../../hooks/useWebSocket";
-import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
@@ -48,35 +47,27 @@ export default function MessagesList() {
   }, [allMessages]);
 
   return (
-    <section className="space-y-4  max-md:container p-3">
-      <HeadingText heading="sub-heading" weight="semibold">
-        Recent Chats
-      </HeadingText>
-
-      <section className="flex flex-col gap-2 divide-y divide-gray-200/70">
-        {isLoading || usersLoading ? (
-          <MessagesListSkeleton />
-        ) : messagesList.length === 0 ? (
-          <LightParagraph>
-            No messages yet, click on the plus icon to start new chat
-          </LightParagraph>
-        ) : (
-          messagesList.map((message) => {
-            const currentUserId =
-              currentUser?.id === message?.recipient
-                ? message?.sender
-                : message?.recipient;
-            const user = users?.find((user) => user?.id === currentUserId);
-            return (
-              <MessagesListTile
-                key={message?.id}
-                message={message}
-                user={user}
-              />
-            );
-          })
-        )}
-      </section>
+    <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
+      {isLoading || usersLoading ? (
+        <MessagesListSkeleton />
+      ) : messagesList.length === 0 ? (
+        <LightParagraph>
+          No messages yet, click on the plus icon to start new chat
+        </LightParagraph>
+      ) : (
+        messagesList.map((message) => {
+          const currentUserId =
+            String(message?.user) === String(message?.recipient)
+              ? message?.sender
+              : message?.recipient;
+          const user = users?.find(
+            (user) => String(user?.id) === String(currentUserId)
+          );
+          return (
+            <MessagesListTile key={message?.id} message={message} user={user} />
+          );
+        })
+      )}
     </section>
   );
 }
@@ -86,18 +77,21 @@ const MessagesListTile = React.memo(({ message, user }) => {
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       key={message?.id}
-      className="flex gap-2 pt-2 px-2"
+      className="flex gap-2 p-2 hover:bg-background rounded-md"
     >
       <Link to={`/co/${user?.id}`}>
         <Avatar name={name} src={`${user?.avatar}`} className={avatarStyle} />
       </Link>
 
-      <Link to={`/messages/${message?.room_name}`} className="flex-1">
+      <Link
+        to={`/messages/?room_name=${message?.room_name}`}
+        className="flex-1"
+      >
         <Username user={user} noClick />
-        <div className="line-clamp-2">
+        <div className="line-clamp-1 text-ellipsis">
           <LightParagraph>{message?.content} </LightParagraph>
         </div>
       </Link>

@@ -5,7 +5,7 @@ import {
   getCompanyByIdOrEmail,
 } from "../api-services/companies";
 import { getNotificationsForUser } from "../api-services/notifications";
-import { getAllUsers } from "../api-services/users";
+import { getAllUsers, getUserById } from "../api-services/users";
 import { useAuth } from "../context/userContext";
 import useWebSocket from "./useWebSocket";
 
@@ -57,6 +57,15 @@ export const useCompanies = () => {
   });
 };
 
+export const useGetSingleUser = (id) => {
+  const { user: currentUser } = useAuth();
+
+  return useQuery({
+    queryKey: ["users", id],
+    queryFn: () => getUserById(id),
+    enabled: !!currentUser,
+  });
+};
 export const useUsers = () => {
   const { user: currentUser } = useAuth();
   return useQuery({

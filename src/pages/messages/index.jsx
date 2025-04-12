@@ -1,25 +1,31 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { Avatar, useDisclosure } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import React, { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getAllUsers } from "../../api-services/users";
+import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
+import { CreateNewLink } from "../../components/admin/markets/carousel";
+import { ChatSellerLink } from "../../components/admin/markets/newlyListed";
+import ReusableModal from "../../components/custom/ResusableModal";
+import CustomTabs from "../../components/custom/tabs";
+import HeadingText from "../../components/HeadingText";
 import Favorites from "../../components/messages/Favorites";
 import MessagesList from "../../components/messages/MessagesList";
-import { CreateNewLink } from "../../components/admin/markets/carousel";
-import { useAuth } from "../../context/userContext";
-import { useQuery } from "@tanstack/react-query";
-import { getAllUsers } from "../../api-services/users";
-import ReusableModal from "../../components/custom/ResusableModal";
 import LightParagraph from "../../components/ParagraphText";
-import { Avatar } from "@chakra-ui/react";
+import { UserSearchInput } from "../../components/representatives/UserSearchInput";
 import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
-import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
-import { ChatSellerLink } from "../../components/admin/markets/newlyListed";
-import { UserSearchInput } from "../../components/representatives/UserSearchInput";
-import { motion } from "framer-motion";
+import { useAuth } from "../../context/userContext";
 
 export default function MessagesPage() {
   const { user: currentUser } = useAuth();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, onClose, onOpen } = useDisclosure();
   const [username, setUsername] = useState("");
+
+  const [searchParams] = useSearchParams();
+  const room_name = searchParams.get("room_name");
 
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["users"],
@@ -48,22 +54,18 @@ export default function MessagesPage() {
     );
   }, [users, username, currentUser?.id]);
 
-  useEffect(() => {
-    document.title = "Messaging in connectize";
-  });
   return (
     <>
-      <CreateNewLink
-        text="Start new chat"
-        url=""
-        onClick={() => setIsOpen(true)}
+      <HeadingText heading="sub-heading">Messages</HeadingText>
+      <CustomTabs
+        tabsHeading={["Recent Chats", "Favorites"]}
+        tabsPanels={[<MessagesList />, <Favorites />]}
       />
-      <Favorites />
-      <MessagesList />
 
+      <CreateNewLink text="Start new chat" url="" onClick={onOpen} />
       <ReusableModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        isOpen={room_name ? !room_name : isOpen}
+        onClose={onClose}
         footerContent={<></>}
         title="Start New Chat"
       >

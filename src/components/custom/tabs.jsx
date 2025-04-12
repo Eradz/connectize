@@ -62,7 +62,7 @@ export default function CustomTabs({
       </TabList>
 
       <TabPanels className={clsx("!w-full", tabPanelsStyle)}>
-        {tabsPanels.map((panels, index) => (
+        {tabsPanels?.map((panels, index) => (
           <TabPanel className={clsx("!p-0 !w-full")} key={index}>
             {panels}
           </TabPanel>

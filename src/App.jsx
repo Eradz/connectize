@@ -33,9 +33,7 @@ import Analysis from "./pages/market/analysis";
 import Listing from "./pages/market/listing";
 import Market from "./pages/market/market";
 import Product from "./pages/market/product";
-import MessagesPage from "./pages/messages";
 import MessagesLayout from "./pages/messages/layout";
-import MessagingPage from "./pages/messages/messaging";
 import NotFound from "./pages/not-found";
 import SinglePostPage from "./pages/posts/singlePostPage";
 import RepresentativesPage from "./pages/representatives";
@@ -101,10 +99,9 @@ function App() {
             element={<EditCompanyPage />}
           />
           <Route path={webRoutes.market} element={<Market />} />
-          <Route path={webRoutes.messages} element={<MessagesLayout />}>
-            <Route path={webRoutes.messages} element={<MessagesPage />} />
-            <Route path={webRoutes.messagesRoom} element={<MessagingPage />} />
-          </Route>
+
+          <Route path={webRoutes.messages} element={<MessagesLayout />} />
+
           <Route path={webRoutes.productDetails} element={<Product />} />
           <Route path={webRoutes.productListing} element={<Listing />} />
           <Route

@@ -1,13 +1,14 @@
-import React, { useMemo } from "react";
 import { ChevronRight } from "@mui/icons-material";
-import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { getProducts } from "../../../api-services/products";
-import { getAllCompanies } from "../../../api-services/companies";
 import clsx from "clsx";
-import CustomTabs from "../../custom/tabs";
+import { motion } from "framer-motion";
+import React, { useMemo } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { getAllCompanies } from "../../../api-services/companies";
+import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
+import { webRoutes } from "../../../lib/webRoutes";
+import CustomTabs from "../../custom/tabs";
 
 function NewlyListed() {
   const [searchParams] = useSearchParams();
@@ -138,8 +139,9 @@ export const ListCardSkeleton = () => (
 
 export const ChatSellerLink = ({ text = "Chat seller", to, recipientId }) => {
   const { user: currentUser } = useAuth();
+
   const url = recipientId
-    ? `/messages/room_${currentUser?.id}_${recipientId}`
+    ? `${webRoutes.messages}/?room_name=room_${currentUser?.id}_${recipientId}`
     : to;
   return (
     <>

@@ -1,4 +1,5 @@
 import { Avatar } from "@chakra-ui/react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -8,6 +9,7 @@ import { Link } from "react-router-dom";
 import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
 import { baseURL } from "../../lib/helpers";
+import { webRoutes } from "../../lib/webRoutes";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
@@ -24,7 +26,7 @@ export default function MessageArea({ messages, messagesLoading }) {
   });
 
   const groupMessagesByDate = (messages) => {
-    return messages.reduce((acc, message) => {
+    return messages?.reduce((acc, message) => {
       const formattedDate = new Date(message.timestamp);
 
       const date = formattedDate.toLocaleDateString();
@@ -55,18 +57,24 @@ export default function MessageArea({ messages, messagesLoading }) {
     <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">
       {messagesLoading || usersLoading ? (
         <SkeletonChatMessages />
-      ) : messages?.length <= 0 ? (
+      ) : messages?.length >= 0 ? (
         <div className="h-full flex items-center justify-center flex-col gap-2">
+          <DotLottieReact
+            src="/lottie/notification.lottie"
+            loop
+            autoplay
+            className="size-40 aspect-square"
+          />
           <LightParagraph>No messages yet</LightParagraph>
           <Link
-            to="/messages"
-            className="!text-sm bg-gold px-4 py-1 rounded-full hover:bg-opacity-60"
+            to={webRoutes.messages}
+            className="!text-sm bg-gold px-4 py-1 rounded-full hover:bg-opacity-60 lg:hidden"
           >
-            See all messages
+            Back to messages
           </Link>
         </div>
       ) : (
-        Object.keys(groupedMessages)
+        Object?.keys(groupedMessages)
           .sort((a, b) => a.localeCompare(b))
           .map((date) => (
             <section key={date} id={date}>

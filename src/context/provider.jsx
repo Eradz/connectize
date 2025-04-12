@@ -6,7 +6,6 @@ import { NavProvider } from "./navContext";
 import { QueryProvider } from "./queryContext";
 import { UserProvider } from "./userContext";
 
-// Create a new QueryClient instance
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: { refetchInterval: 600000 },
