@@ -64,7 +64,7 @@ export default function MessageArea({ messages, messagesLoading }) {
             src="/lottie/notification.lottie"
             loop
             autoplay
-            className="size-40 aspect-square"
+            className="size-40 shrink-0  pointer-events-none"
           />
           <LightParagraph>No messages yet</LightParagraph>
           <Link
