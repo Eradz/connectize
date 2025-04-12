@@ -57,7 +57,7 @@ export default function MessageArea({ messages, messagesLoading }) {
     <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">
       {messagesLoading || usersLoading ? (
         <SkeletonChatMessages />
-      ) : messages?.length >= 0 ? (
+      ) : messages?.length <= 0 ? (
         <div className="h-full flex items-center justify-center flex-col gap-2">
           <DotLottieReact
             src="/lottie/notification.lottie"
