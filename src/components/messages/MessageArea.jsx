@@ -3,7 +3,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowDownIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
@@ -20,6 +20,8 @@ export default function MessageArea({ messages, messagesLoading }) {
   const { user: currentUser } = useAuth();
 
   const { data: users, isLoading: usersLoading } = useUsers();
+
+  const [readMoreLimit, setReadMoreLimit] = useState(200);
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {
@@ -109,6 +111,8 @@ export default function MessageArea({ messages, messagesLoading }) {
 
                   const user = isCurrentUser ? currentUser : recipient;
 
+                  const messageContent = String(message?.content);
+
                   return (
                     <motion.div
                       key={index}
@@ -129,9 +133,19 @@ export default function MessageArea({ messages, messagesLoading }) {
                           "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 flex flex-col"
                         )}
                       >
-                        <h1 className="mb-1 font-medium capitalize">{`${user?.first_name} ${user?.last_name}`}</h1>
-                        <p className="text-gray-600 hover:text-gray-800">
-                          {message?.content}
+                        <h1 className="mb-1 font-semibold capitalize">{`${
+                          user?.first_name || ""
+                        } ${user?.last_name || ""}`}</h1>
+                        <p className="text-gray-600 hover:text-gray-800 transition-all duration-300 min-h-10">
+                          {messageContent.substring(0, readMoreLimit)}
+                          {messageContent.length > readMoreLimit && (
+                            <>
+                              ...{" "}
+                              <span className="text-xs text-gold inline-block cursor-pointer hover:text-black transition-colors duration-300" onClick={()=>setReadMoreLimit(prev => prev+400)}>
+                                read more
+                              </span>
+                            </>
+                          )}
                         </p>
 
                         {message.audio_file && (
