@@ -49,7 +49,8 @@ export default function MessagingPage() {
     [messages, ws_messages]
   );
 
-  const { data: user } = useGetSingleUser(checkUserId);
+  const { data: user, isLoading: userIsLoading } =
+    useGetSingleUser(checkUserId);
 
   useEffect(() => {
     allMessages.forEach((message) => {
@@ -76,7 +77,7 @@ export default function MessagingPage() {
 
   return (
     <section className="h-full flex flex-col">
-      <MessageHeader user={user} />
+      <MessageHeader user={user} isLoading={userIsLoading} />
       <MessageArea messages={allMessages} messagesLoading={isLoading} />
       <MessageControl
         loading={isLoading}

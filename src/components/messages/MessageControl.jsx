@@ -1,3 +1,13 @@
+import {
+  DownOutlined,
+  PaperClipOutlined,
+  PauseCircleFilled,
+  PlayCircleFilled,
+} from "@ant-design/icons";
+import { CloseButton } from "@chakra-ui/react";
+import { Mic, MicExternalOn } from "@mui/icons-material";
+import { PaperPlaneIcon, TrashIcon } from "@radix-ui/react-icons";
+import EmojiPicker from "emoji-picker-react";
 import React, {
   useCallback,
   useEffect,
@@ -5,25 +15,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
-import {
-  PaperClipOutlined,
-  PauseCircleFilled,
-  PlayCircleFilled,
-  SmileFilled,
-  DownOutlined,
-} from "@ant-design/icons";
-import { PaperPlaneIcon, TrashIcon } from "@radix-ui/react-icons";
-import { Mic, MicExternalOn } from "@mui/icons-material";
-import EmojiPicker from "emoji-picker-react";
-import { CloseButton } from "@chakra-ui/react";
 import { toast } from "sonner";
-import { largeFileText } from "../admin/listing/newListing";
-import { motion } from "framer-motion";
 import { messageUser } from "../../api-services/messaging";
-import ValidImages from "../ValidImages";
 import { useAuth } from "../../context/userContext";
+import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
+import ValidImages from "../ValidImages";
 
 const isImageSize = (files) => {
   const imageSize = 4 * 1024 * 1024; // 4MB
@@ -182,7 +180,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
   }, [message]);
 
   return (
-    <section className="bg-white p-2 px-4 rounded-md flex flex-col gap-2 transition-all duration-300">
+    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300">
       {/* valid images */}
       {validImages && (
         <ValidImages
@@ -223,19 +221,19 @@ export default function MessageControl({ loading, recipientId, senderId }) {
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="flex-1 text-sm border-0 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed scrollbar-hidden resize-none bg-transparent max-h-10"
+            className="flex-1 text-sm border-0 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed scrollbar-hidden resize-none bg-transparent max-h-32 rounded-md transition-all duration-300 pt-3"
             placeholder="Type a message here..."
             disabled={loading}
           />
         )}
         <div className="flex items-center">
-          <ButtonWithTooltipIcon
+          {/* <ButtonWithTooltipIcon
             IconName={SmileFilled}
             onClick={() => setShowEmojiPicker(true)}
             tip="Emoji"
             className="hover:!bg-gray-100 !text-black p-2 rounded-full mx-2"
             disabled={loading}
-          />
+          /> */}
           {/* <VoiceNoteRecorderIcon
             setAudioURL={setAudioURL}
             setAudioBlob={setAudioBlob}
@@ -243,7 +241,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
           <ButtonWithTooltipIcon
             IconName={PaperPlaneIcon}
             className="!bg-black !text-gray-300 p-1.5 rounded-full"
-            iconClassName="size-3.5"
+            iconClassName="size-3.5 hover:!rotate-[-40deg] transition-all duration-300"
             tip="Send"
             onClick={handleSendMessage}
             disabled={loading}

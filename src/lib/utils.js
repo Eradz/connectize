@@ -12,20 +12,33 @@ export function capitalizeFirst(value) {
     .replace(/^\w/, (c) => c.toUpperCase());
 }
 
-export function timeAgo(timestamp) {
+export function timeAgo(timestamp, format = "") {
   const now = new Date();
   const past = new Date(timestamp);
   const seconds = Math.floor((now - past) / 1000);
 
   const intervals = {
-    year: 31536000, // seconds in a year
-    month: 2592000, // seconds in a month
-    week: 604800, // seconds in a week
-    day: 86400, // seconds in a day
-    hour: 3600, // seconds in an hour
-    minute: 60, // seconds in a minute
-    second: 1, // seconds in a second
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1,
   };
+
+  if (format === "day") {
+    const nowDate = new Date(now.toDateString());
+    const pastDate = new Date(past.toDateString());
+
+    const dayDiff = Math.floor((nowDate - pastDate) / (1000 * 60 * 60 * 24));
+
+    if (dayDiff === 0) return "Today";
+    if (dayDiff === 1) return "Yesterday";
+    if (dayDiff <= 6) {
+      return past.toLocaleDateString(undefined, { weekday: "long" });
+    }
+  }
 
   for (const [unit, value] of Object.entries(intervals)) {
     const count = Math.floor(seconds / value);
@@ -34,7 +47,7 @@ export function timeAgo(timestamp) {
     }
   }
 
-  return "just now"; // Default for timestamps very close to the current time
+  return "just now";
 }
 
 export function formatNumber(value) {

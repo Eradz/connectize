@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
 import { baseURL } from "../../lib/helpers";
+import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
@@ -78,9 +79,9 @@ export default function MessageArea({ messages, messagesLoading }) {
           .sort((a, b) => a.localeCompare(b))
           .map((date) => (
             <section key={date} id={date}>
-              <div className="text-center my-2 sticky top-0 flex justify-center">
+              <div className="text-center my-2 sticky top-0 flex justify-center border-b">
                 <button
-                  className="bg-white/50 rounded-md p-1 text-gray-500 text-sm hover:shadow"
+                  className="bg-background rounded-md p-1 px-2 text-gray-500 text-xs translate-y-3.5"
                   onClick={() => {
                     const dateEl = document.getElementById(date);
                     if (dateEl) {
@@ -88,7 +89,7 @@ export default function MessageArea({ messages, messagesLoading }) {
                     }
                   }}
                 >
-                  {date}
+                  {timeAgo(date, "day")}
                 </button>
               </div>
               {groupedMessages[date]
@@ -118,10 +119,7 @@ export default function MessageArea({ messages, messagesLoading }) {
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={clsx("w-full p-3 flex gap-2.5", {
-                        "self-end flex-row-reverse": isCurrentUser,
-                        "items-end": !isCurrentUser,
-                      })}
+                      className={clsx("w-full p-1 pt-4 flex gap-2.5")}
                     >
                       <Link to={`/co/${user?.id}`} className="h-fit">
                         <Avatar
@@ -133,13 +131,13 @@ export default function MessageArea({ messages, messagesLoading }) {
                       </Link>
                       <div
                         className={clsx(
-                          "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 flex flex-col",
-                          {
-                            "items-end": isCurrentUser,
-                          }
+                          "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 flex flex-col"
                         )}
                       >
-                        <p>{message?.content}</p>
+                        <h1 className="mb-1 font-medium capitalize">{`${user?.first_name} ${user?.last_name}`}</h1>
+                        <p className="text-gray-600 hover:text-gray-800">
+                          {message?.content}
+                        </p>
 
                         {message.audio_file && (
                           <VoiceNotePlayer audioURL={message.audio_file} />
