@@ -87,17 +87,28 @@ export const CreateNewLink = ({
   text = "Add new product",
   onClick,
 }) => {
+  const sharedClassName =
+    "p-3 rounded-md flex items-center gap-2 bg-black hover:opacity-100 opacity-50 hover:scale-100 scale-90 transition-all duration-300 fixed bottom-16 right-5 z-[999999]";
   return (
-    <Link
-      to={url}
-      className="p-3 rounded-md flex items-center gap-2 bg-black hover:opacity-100 opacity-50 hover:scale-100 scale-90 transition-all duration-300 fixed bottom-16 right-5 z-[999999]"
-      onClick={onClick}
-    >
-      <ButtonWithTooltipIcon
-        tip={text}
-        IconName={PlusIcon}
-        iconClassName="!text-white"
-      />
-    </Link>
+    <>
+      {url === "null" ? (
+        <div className={sharedClassName} onClick={onClick}>
+          <ButtonWithTooltipIcon
+            tip={text}
+            IconName={PlusIcon}
+            iconClassName="!text-white"
+          />
+        </div>
+      ) : (
+        <Link to={url} className={sharedClassName}>
+          <ButtonWithTooltipIcon
+            tip={text}
+            IconName={PlusIcon}
+            iconClassName="!text-white"
+            onClick={onClick}
+          />
+        </Link>
+      )}
+    </>
   );
 };

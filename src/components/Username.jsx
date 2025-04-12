@@ -12,7 +12,7 @@ export default function Username({ user, noClick = false }) {
           "pointer-events-none": noClick,
         })}
       >
-        {user?.first_name || "No"} {user?.last_name || "Name"}
+        {user?.first_name || ""} {user?.last_name || ""}
       </Link>
 
       {user?.verified && <VerifiedIcon color="black" />}

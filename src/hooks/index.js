@@ -4,10 +4,13 @@ import {
   getAllCompanies,
   getCompanyByIdOrEmail,
 } from "../api-services/companies";
+import { getMessagesForUser } from "../api-services/messaging";
 import { getNotificationsForUser } from "../api-services/notifications";
 import { getAllUsers, getUserById } from "../api-services/users";
 import { useAuth } from "../context/userContext";
 import useWebSocket from "./useWebSocket";
+
+export const messagesQueryKey = ["messages"];
 
 export const useNotifications = () => {
   const { messages } = useWebSocket("notifications");
@@ -80,6 +83,15 @@ export const useGetCurrentCompany = () => {
   return useQuery({
     queryKey: ["companies"],
     queryFn: () => getCompanyByIdOrEmail(),
+    enabled: !!currentUser,
+  });
+};
+
+export const useGetMessages = () => {
+  const { user: currentUser } = useAuth();
+  return useQuery({
+    queryKey: messagesQueryKey,
+    queryFn: getMessagesForUser,
     enabled: !!currentUser,
   });
 };

@@ -1,13 +1,12 @@
 import { Avatar } from "@chakra-ui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { ArrowDownIcon, CheckIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
+import { useUsers } from "../../hooks";
 import { baseURL } from "../../lib/helpers";
 import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
@@ -20,11 +19,7 @@ import { VoiceNotePlayer } from "./MessageControl";
 export default function MessageArea({ messages, messagesLoading }) {
   const { user: currentUser } = useAuth();
 
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: getAllUsers,
-    enabled: !!currentUser,
-  });
+  const { data: users, isLoading: usersLoading } = useUsers();
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {

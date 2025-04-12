@@ -18,8 +18,8 @@ import React, {
 import { toast } from "sonner";
 import { messageUser } from "../../api-services/messaging";
 import { useAuth } from "../../context/userContext";
+import { messagesQueryKey } from "../../hooks";
 import { useCrudCreate } from "../../hooks/useCrud";
-import { messagesQueryKey } from "../../pages/messages/messaging";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";

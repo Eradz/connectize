@@ -28,6 +28,7 @@ function MessageHeader({ user, isLoading }) {
           <>
             <Avatar
               src={user?.avatar}
+              name={user?.first_name + " " + user?.last_name}
               className={avatarStyle}
               width="40px"
               height="40px"

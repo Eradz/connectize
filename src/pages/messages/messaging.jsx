@@ -1,18 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  getMessagesForUser,
-  markMessageAsRead,
-} from "../../api-services/messaging";
+import { markMessageAsRead } from "../../api-services/messaging";
 import MessageArea from "../../components/messages/MessageArea";
 import MessageControl from "../../components/messages/MessageControl";
 import MessageHeader from "../../components/messages/MessageHeader";
 import { useAuth } from "../../context/userContext";
-import { useGetSingleUser } from "../../hooks";
+import { useGetMessages, useGetSingleUser } from "../../hooks";
 import useWebSocket from "../../hooks/useWebSocket";
-
-export const messagesQueryKey = ["messages"];
 
 export default function MessagingPage() {
   const { user: currentUser } = useAuth();
@@ -21,11 +16,7 @@ export default function MessagingPage() {
 
   const navigate = useNavigate();
 
-  const { data: messages = [], isLoading } = useQuery({
-    queryKey: messagesQueryKey,
-    queryFn: () => getMessagesForUser({ room_name }),
-    enabled: !!room_name && !!currentUser,
-  });
+  const { data: messages = [], isLoading } = useGetMessages();
 
   const [, userId, recipientId] = room_name?.split("_");
 
@@ -78,7 +69,12 @@ export default function MessagingPage() {
   return (
     <section className="h-full flex flex-col">
       <MessageHeader user={user} isLoading={userIsLoading} />
-      <MessageArea messages={allMessages} messagesLoading={isLoading} />
+      <MessageArea
+        messages={allMessages.filter(
+          (message) => message.room_name === room_name
+        )}
+        messagesLoading={isLoading}
+      />
       <MessageControl
         loading={isLoading}
         recipientId={recipientId}

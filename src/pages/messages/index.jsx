@@ -2,7 +2,7 @@ import { Avatar, useDisclosure } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getAllUsers } from "../../api-services/users";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
@@ -17,12 +17,15 @@ import { UserSearchInput } from "../../components/representatives/UserSearchInpu
 import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
+import { webRoutes } from "../../lib/webRoutes";
 
 export default function MessagesPage() {
   const { user: currentUser } = useAuth();
 
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [username, setUsername] = useState("");
+
+  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name");
@@ -62,7 +65,14 @@ export default function MessagesPage() {
         tabsPanels={[<MessagesList />, <Favorites />]}
       />
 
-      <CreateNewLink text="Start new chat" url="" onClick={onOpen} />
+      <CreateNewLink
+        text="Start new chat"
+        url="null"
+        onClick={() => {
+          navigate(webRoutes.messages);
+          onOpen();
+        }}
+      />
       <ReusableModal
         isOpen={room_name ? !room_name : isOpen}
         onClose={onClose}

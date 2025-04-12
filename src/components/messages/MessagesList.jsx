@@ -1,11 +1,8 @@
 import { Avatar, Badge } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { getMessagesForUser } from "../../api-services/messaging";
-import { getAllUsers } from "../../api-services/users";
-import { useAuth } from "../../context/userContext";
+import { useGetMessages, useUsers } from "../../hooks";
 import useWebSocket from "../../hooks/useWebSocket";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
@@ -13,18 +10,9 @@ import TimeAgo from "../TimeAgo";
 import Username from "../Username";
 
 export default function MessagesList() {
-  const { user: currentUser } = useAuth();
-  const { data: messages = [], isLoading } = useQuery({
-    queryKey: ["messages"],
-    queryFn: getMessagesForUser,
-    enabled: !!currentUser,
-  });
+  const { data: messages = [], isLoading } = useGetMessages();
 
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: getAllUsers,
-    enabled: !!currentUser,
-  });
+  const { data: users, isLoading: usersLoading } = useUsers();
 
   const { messages: ws_messages } = useWebSocket(`chat`);
 
@@ -50,7 +38,7 @@ export default function MessagesList() {
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
       {isLoading || usersLoading ? (
         <MessagesListSkeleton />
-      ) : messagesList.length === 0 ? (
+      ) : messagesList?.length <= 0 ? (
         <LightParagraph>
           No messages yet, click on the plus icon to start new chat
         </LightParagraph>
@@ -80,7 +68,7 @@ const MessagesListTile = React.memo(({ message, user }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       key={message?.id}
-      className="flex gap-2 p-2 hover:bg-background rounded-md"
+      className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
     >
       <Link to={`/co/${user?.id}`}>
         <Avatar name={name} src={`${user?.avatar}`} className={avatarStyle} />
