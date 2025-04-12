@@ -174,12 +174,24 @@ export default function MessageArea({ messages, messagesLoading }) {
                           <small className="shrink-0">
                             <TimeAgo time={message.timestamp} />
                           </small>
-                          <div
-                            className={clsx("flex items-center", {
-                              "text-gold": message.read_at,
-                            })}
-                          >
-                            <CheckIcon />
+                          <div className="flex items-center">
+                            <div
+                              className={clsx("flex items-center", {
+                                "text-gold": message.read_at,
+                              })}
+                            >
+                              <CheckIcon />
+                            </div>
+                            <div
+                              className={clsx(
+                                "flex items-center -translate-x-2",
+                                {
+                                  "text-gold": message.read_at,
+                                }
+                              )}
+                            >
+                              <CheckIcon />
+                            </div>
                           </div>
                         </div>
                       </div>

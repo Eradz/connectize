@@ -18,6 +18,8 @@ import React, {
 import { toast } from "sonner";
 import { messageUser } from "../../api-services/messaging";
 import { useAuth } from "../../context/userContext";
+import { useCrudCreate } from "../../hooks/useCrud";
+import { messagesQueryKey } from "../../pages/messages/messaging";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
@@ -34,6 +36,8 @@ const emptyMessageValue = "Message field does not have any text";
 
 export default function MessageControl({ loading, recipientId, senderId }) {
   const { user: currentUser } = useAuth();
+
+  const sendMessageMutation = useCrudCreate(messagesQueryKey, messageUser);
 
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -112,7 +116,8 @@ export default function MessageControl({ loading, recipientId, senderId }) {
         });
       }
 
-      await messageUser(formData);
+      // await messageUser(formData);
+      sendMessageMutation.mutate(formData);
       // setCachedMessages((prev) => [newMessage, ...prev]);
       setMessage("");
       setValidImages([]);

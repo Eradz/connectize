@@ -12,7 +12,7 @@ import { useAuth } from "../../context/userContext";
 import { useGetSingleUser } from "../../hooks";
 import useWebSocket from "../../hooks/useWebSocket";
 
-const messagesQueryKey = ["messages"];
+export const messagesQueryKey = ["messages"];
 
 export default function MessagingPage() {
   const { user: currentUser } = useAuth();
