@@ -30,9 +30,9 @@ export function goToLogin() {
 
 // Configure Axios Defaults
 export const baseURL = "https://about.connectize.co";
-  // process.env.NODE_ENV === "development"
-  //   ? "http://127.0.0.1:8000"
-  //   : "https://about.connectize.co";
+// process.env.NODE_ENV === "development"
+//   ? "http://127.0.0.1:8000"
+//   : "https://about.connectize.co";
 
 axios.defaults.withCredentials = true;
 
@@ -74,7 +74,7 @@ export async function refreshToken() {
       });
 
       accessToken = newTokens.access;
-      accessTokenExpiry = Date.now() + 15 * 60 * 1000; 
+      accessTokenExpiry = Date.now() + 15 * 60 * 1000;
 
       return "Bearer " + newTokens.access;
     })();
@@ -201,7 +201,7 @@ export async function makeApiRequest({
     const errorResponse = error?.response?.data;
 
     const errorMsg = extractErrorMessage(errorResponse);
-    if (errorMsg) {
+    if (errorMsg && method.toLowercase() !== "get") {
       toast.error(errorMsg);
       console.error("API request failed:", error);
     }

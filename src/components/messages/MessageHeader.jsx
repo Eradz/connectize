@@ -22,7 +22,7 @@ function MessageHeader({ user, isLoading }) {
       />
 
       <div className="flex-1 flex items-center gap-2">
-        {!isLoading ? (
+        {isLoading ? (
           <CircleTitleSubtitleSkeleton />
         ) : (
           <>
