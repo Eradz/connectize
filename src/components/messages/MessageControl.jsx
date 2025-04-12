@@ -3,11 +3,23 @@ import {
   PauseCircleFilled,
   PlayCircleFilled,
 } from "@ant-design/icons";
-import { CloseButton } from "@chakra-ui/react";
-import { Mic, MicExternalOn } from "@mui/icons-material";
+import {
+  Button,
+  CloseButton,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+} from "@chakra-ui/react";
+import { Mic, MicExternalOn, MusicNote } from "@mui/icons-material";
 import {
   ArrowDownIcon,
+  CameraIcon,
+  FileIcon,
+  ImageIcon,
   PaperPlaneIcon,
+  PersonIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
 import EmojiPicker from "emoji-picker-react";
@@ -174,7 +186,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
           chatContainer.scrollHeight
       );
     };
-
+    scrollToBottom();
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -193,21 +205,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
       )}
       <section className="flex items-center gap-2">
         {showEmojiPicker && renderEmojiGifPickers}
-        <input
-          type="file"
-          name="attachment"
-          id="attachment"
-          multiple
-          hidden
-          onChange={handleFileChange}
-        />
-        <ButtonWithTooltipIcon
-          IconName={PaperClipOutlined}
-          tip="Attachment"
-          className="hover:!bg-gray-100 !text-black p-2 rounded-full"
-          onClick={() => document.getElementById("attachment").click()}
-          disabled={loading}
-        />
+        <ChooseAttachment handleFileChange={handleFileChange} />
         {audioURL ? (
           <VoiceNotePlayer
             audioURL={audioURL}
@@ -497,5 +495,72 @@ export const VoiceNotePlayer = ({ audioURL, className, trashOnClick }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+const iconButtons = [
+  { Icon: CameraIcon, tip: "camera", label: "Camera" },
+  { Icon: ImageIcon, tip: "image", label: "Image" },
+  { Icon: FileIcon, tip: "document", label: "Document" },
+  { Icon: MusicNote, tip: "audio", label: "Audio" },
+  { Icon: PersonIcon, tip: "profile", label: "Contact" },
+];
+
+export const ChooseAttachment = ({ handleFileChange }) => {
+  const handleClick = (tip) => {
+    const input = document.getElementById(tip);
+    if (input) input.click();
+  };
+  return (
+    <>
+      {iconButtons.map((icons, idx) => {
+        return (
+          <input
+            type="file"
+            key={idx}
+            name={icons.tip}
+            id={icons.tip}
+            multiple
+            hidden
+            onChange={handleFileChange}
+          />
+        );
+      })}
+      {/*  onClick={() => document.getElementById("attachment").click()} */}
+      <Popover placement="bottom-start">
+        <PopoverTrigger>
+          <div>
+            <ButtonWithTooltipIcon
+              IconName={PaperClipOutlined}
+              tip="Attachment"
+              className="hover:!bg-gray-100 !text-black p-2 rounded-full"
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent w="15rem" p="4" bg="white" boxShadow="md">
+          <PopoverArrow />
+          <PopoverBody className="w-full min-h-40 bg-white rounded-md grid grid-cols-3 gap-4">
+            {iconButtons.map(({ Icon, tip, label }, index) => (
+              <div key={index} className="flex flex-col items-center gap-2">
+                <Button
+                  bg="transparent"
+                  className="hover:!bg-gray-100 !text-black p-2 rounded-full"
+                  onClick={() => handleClick(tip)}
+                  disabled={tip !== "image"}
+                >
+                  <Icon />
+                </Button>
+                <span
+                  className="text-xs text-gray-700 cursor-pointer"
+                  onClick={handleClick}
+                >
+                  {label}
+                </span>
+              </div>
+            ))}
+          </PopoverBody>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 };

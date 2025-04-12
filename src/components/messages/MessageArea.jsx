@@ -3,7 +3,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
@@ -38,18 +38,6 @@ export default function MessageArea({ messages, messagesLoading }) {
 
   const groupedMessages = groupMessagesByDate(messages);
 
-  const scrollToBottom = () => {
-    const chatContainer = document.querySelector(".chat-container");
-
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   return (
     <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">
       {messagesLoading || usersLoading ? (
@@ -75,7 +63,7 @@ export default function MessageArea({ messages, messagesLoading }) {
           .sort((a, b) => a.localeCompare(b))
           .map((date) => (
             <section key={date} id={date}>
-              <div className="text-center my-2 sticky top-0 flex justify-center border-b">
+              <div className="text-center my-2 flex justify-center sticky top-0">
                 <button
                   className="bg-background rounded-md p-1 px-2 text-gray-500 text-xs translate-y-3.5"
                   onClick={() => {
