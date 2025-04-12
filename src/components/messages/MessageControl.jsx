@@ -511,6 +511,7 @@ export const ChooseAttachment = ({ handleFileChange }) => {
     const input = document.getElementById(tip);
     if (input) input.click();
   };
+
   return (
     <>
       {iconButtons.map((icons, idx) => {
