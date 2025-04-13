@@ -28,7 +28,7 @@ export const messageUser = async (formData) => {
 };
 
 export const markMessageAsRead = async (room_name, user_id, isReadLength) => {
-  if (isReadLength <= 0) return "no query";
+  // if (isReadLength <= 0) return "no query";
 
   const message = await makeApiRequest({
     url: "api/messages/mark-all-as-read/",

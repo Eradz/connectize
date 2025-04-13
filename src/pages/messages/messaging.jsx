@@ -7,6 +7,7 @@ import MessageControl from "../../components/messages/MessageControl";
 import MessageHeader from "../../components/messages/MessageHeader";
 import { useAuth } from "../../context/userContext";
 import { useGetMessages, useUsers } from "../../hooks";
+import { useCrudCreate } from "../../hooks/useCrud";
 import useWebSocket from "../../hooks/useWebSocket";
 
 export default function MessagingPage() {
@@ -42,16 +43,20 @@ export default function MessagingPage() {
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
+  const markReadMutation = useCrudCreate(["message"], markMessageAsRead);
+
   useEffect(() => {
     allMessages.forEach((message) => {
       if (!message?.read_at) {
+        const checkNotUser =
+          Number(currentUser?.id) !== Number(userId)
+            ? Number(recipientId)
+            : Number(userId);
+        markReadMutation.mutate(room_name, checkNotUser);
         sendCommand({
           command: "mark_as_read",
           message_id: message?.id,
-          user_id:
-            Number(currentUser?.id) !== Number(userId)
-              ? Number(recipientId)
-              : Number(userId),
+          user_id: checkNotUser,
         });
       }
     });
