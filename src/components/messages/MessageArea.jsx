@@ -86,12 +86,12 @@ export default function MessageArea({ messages, messagesLoading }) {
                 })
                 .map((message, index) => {
                   const currentUserId =
-                    currentUser?.id === message?.recipient
+                    currentUser?.id !== message?.recipient
                       ? message?.recipient
                       : message?.sender;
 
                   const recipient = users?.find(
-                    (user) => user?.id !== currentUserId
+                    (user) => user?.id === currentUserId
                   );
 
                   const isCurrentUser = currentUser?.id === message?.user;
@@ -123,7 +123,7 @@ export default function MessageArea({ messages, messagesLoading }) {
                         <h1 className="mb-1 font-semibold capitalize">{`${
                           user?.first_name || ""
                         } ${user?.last_name || ""}`}</h1>
-                        <p className="text-gray-600 hover:text-gray-800 transition-all duration-300 min-h-10">
+                        <p className="text-gray-600 hover:text-gray-800 transition-all duration-300">
                           {messageContent.substring(0, readMoreLimit)}
                           {messageContent.length > readMoreLimit && (
                             <>

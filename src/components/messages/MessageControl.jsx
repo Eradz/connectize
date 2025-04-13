@@ -61,7 +61,6 @@ export default function MessageControl({ loading, recipientId, senderId }) {
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioURL, setAudioURL] = useState(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
-  const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
 
   const handleFileChange = useCallback((event) => {
@@ -257,7 +256,11 @@ export default function MessageControl({ loading, recipientId, senderId }) {
           )}
         </div>
       </section>
-      <CustomErrorMessage errorMessage={errorMessage} />
+      {sendMessageMutation.isPending ? (
+        <p className="text-gray-400 text-xs">Sending message</p>
+      ) : (
+        <CustomErrorMessage errorMessage={errorMessage} />
+      )}
     </section>
   );
 }
