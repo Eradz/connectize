@@ -60,14 +60,15 @@ export const useCompanies = () => {
   });
 };
 
-export const useGetSingleUser = (id) => {
+export const useGetSingleUser = () => {
   const { user: currentUser } = useAuth();
 
-  return useQuery({
-    queryKey: ["users", id],
-    queryFn: () => getUserById(id),
-    enabled: !!currentUser,
-  });
+  return (id) =>
+    useQuery({
+      queryKey: ["users", id],
+      queryFn: () => getUserById(id),
+      enabled: !!currentUser,
+    });
 };
 export const useUsers = () => {
   const { user: currentUser } = useAuth();

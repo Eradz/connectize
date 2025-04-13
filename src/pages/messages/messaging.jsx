@@ -6,7 +6,7 @@ import MessageArea from "../../components/messages/MessageArea";
 import MessageControl from "../../components/messages/MessageControl";
 import MessageHeader from "../../components/messages/MessageHeader";
 import { useAuth } from "../../context/userContext";
-import { useGetMessages, useGetSingleUser } from "../../hooks";
+import { useGetMessages, useUsers } from "../../hooks";
 import useWebSocket from "../../hooks/useWebSocket";
 
 export default function MessagingPage() {
@@ -40,8 +40,7 @@ export default function MessagingPage() {
     [messages, ws_messages]
   );
 
-  const { data: user, isLoading: userIsLoading } =
-    useGetSingleUser(checkUserId);
+  const { data: users, isLoading: usersLoading } = useUsers();
 
   useEffect(() => {
     allMessages.forEach((message) => {
@@ -68,7 +67,10 @@ export default function MessagingPage() {
 
   return (
     <section className="h-full flex flex-col">
-      <MessageHeader user={user} isLoading={userIsLoading} />
+      <MessageHeader
+        user={users?.find((user) => user?.id === checkUserId)}
+        isLoading={usersLoading}
+      />
       <MessageArea
         messages={allMessages.filter(
           (message) => message.room_name === room_name
