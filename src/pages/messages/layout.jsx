@@ -17,7 +17,7 @@ export default function MessagesLayout() {
   const room_name = searchParams.get("room_name");
   const { user: currentUser, loading } = useAuth();
   return (
-    <section className="w-full flex gap-4 h-screen overflow-hidden">
+    <section className="w-full h-fit flex gap-4">
       <SEO
         title={
           room_name ? "Room messaging in connectize" : "Messaging in connectize"
@@ -35,7 +35,7 @@ export default function MessagesLayout() {
       </section>
       <section
         className={clsx(
-          "w-full flex-1 space-y-6 h-screen border border-gray-100 rounded-md",
+          "w-full flex-1 h-screen border border-gray-100 rounded-md",
           {
             "max-lg:hidden": !room_name,
           }
