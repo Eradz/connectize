@@ -39,14 +39,15 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
       })}
     >
       {navigators.map(({ to, icon, name }, index) => {
-      const isActive = to === "/" ? pathname === "/" : pathname.startsWith(to);
+        const isActive =
+          to === "/" ? pathname === "/" : pathname.startsWith(to);
         return (
           <li key={index}>
             <Link
               to={to}
               onClick={() => toggleNav(false)}
               className={clsx(
-                "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey",
+                "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm",
                 {
                   "bg-mid_grey pointer-events-none": isActive,
                   "!text-gold rounded": isActive && !hasHeader,
@@ -58,13 +59,16 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
               <ButtonWithTooltipIcon
                 IconName={icon}
                 tip={name}
-                iconClassName={clsx("hover:!text-gold text-xl !size-5", {
-                  "!text-gold rounded": isActive,
-                  "!text-gray-500": !isActive,
-                  "!text-white": !isActive && isSmallNavigation,
-                })}
+                iconClassName={clsx(
+                  "hover:!text-gold text-xl !size-5 lg:!size-4",
+                  {
+                    "!text-gold rounded": isActive,
+                    "!text-gray-500": !isActive,
+                    "!text-white": !isActive && isSmallNavigation,
+                  }
+                )}
               />
-              <span className="max-sm:sr-only">{name}</span>
+              <span className="max-sm:sr-only lg:!text-sm">{name}</span>
             </Link>
           </li>
         );
