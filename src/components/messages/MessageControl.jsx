@@ -173,6 +173,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
 
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
+
     }
   };
 

@@ -39,7 +39,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
       })}
     >
       {navigators.map(({ to, icon, name }, index) => {
-        const isActive = to === pathname;
+      const isActive = to === "/" ? pathname === "/" : pathname.startsWith(to);
         return (
           <li key={index}>
             <Link
