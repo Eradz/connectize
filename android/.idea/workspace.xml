@@ -6,52 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="802c8292-9a71-4f6e-83aa-b0937d8a6fed" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/md5-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/md5-checksums.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/sha1-checksums.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/my-release-key.jks" beforeDir="false" afterPath="$PROJECT_DIR$/app/my-release-key.jks" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/capacitor.config.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/capacitor.config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/asset-manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/favicon.ico" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/Ellipse1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/Ellipse2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/Ellipse3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/Ellipsewww.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/company1.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/company2.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/company3.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/dangotelogo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/drum2.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/drum3.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/ellipse4.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/ellipse5.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/ellipse6.PNG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/images/signup-image.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/public/images/signup-image.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/public/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/assets/public/robots.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/css/main.28fd4d0c.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/css/main.28fd4d0c.css.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/239.604c1b7e.chunk.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/239.604c1b7e.chunk.js.LICENSE.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/239.604c1b7e.chunk.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/455.35f564a2.chunk.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/455.35f564a2.chunk.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/644.beb72c53.chunk.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/644.beb72c53.chunk.js.LICENSE.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/644.beb72c53.chunk.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/main.1ea78677.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/main.1ea78677.js.LICENSE.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/assets/public/static/js/main.1ea78677.js.map" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../capacitor.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../capacitor.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/lib/helpers/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../src/lib/helpers/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,6 +66,7 @@
     "git-widget-placeholder": "clever-dev-v2",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Crush_Clever/software_development/MD/flutter_apps/freedom-driver-app",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>

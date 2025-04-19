@@ -20,7 +20,7 @@ import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
 
 const TopServiceSuggestions = () => {
   return (
-    <section className="max-md:container p-3  h-fit w-full flex items-start flex-col sm:flex-row md:flex-col lg:flex-row xl:flex-col gap-4 lg:sticky lg:top-0 lg:right-4">
+    <section className="max-md:container p-3 lg:p-4 h-fit w-full xl:w-[45%] flex items-start flex-col sm:flex-row md:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:right-4">
       <TopServices />
 
       <Suggestions />
