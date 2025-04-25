@@ -73,8 +73,8 @@ function AuthLayout({ redirectUrl = "/" }) {
               className="container flex items-center justify-center gap-2 font-semibold text-black mt-12 mb-8"
               key={pathname + "endorsement"}
             >
-              <img src="/images/nuprc-logo.png" className="h-10 md:h-14" />
-              <small className="">Endorsed by NUPRC</small>
+              <img src="/images/nuprc-logo.png" className="h-8 md:h-10" />
+              <small className="font-bold text-xs">Endorsed by NUPRC</small>
             </motion.section>
           )}
         </section>
