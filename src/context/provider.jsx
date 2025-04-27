@@ -1,16 +1,11 @@
 import { ChakraProvider } from "@chakra-ui/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { HelmetProvider } from "react-helmet-async";
+import { queryClient } from "../lib/utils";
 import { NavProvider } from "./navContext";
 import { QueryProvider } from "./queryContext";
 import { UserProvider } from "./userContext";
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchInterval: 600000 },
-  },
-});
 
 const MyProvider = ({ children }) => {
   const [pageLoaded, setPageLoaded] = useState(false);

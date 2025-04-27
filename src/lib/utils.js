@@ -1,3 +1,4 @@
+import { QueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
@@ -5,6 +6,12 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchInterval: 600000 },
+  },
+});
 
 export function capitalizeFirst(value) {
   return String(value)

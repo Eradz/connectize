@@ -23,7 +23,7 @@ export const markAllNotificationsAsRead = async () => {
     method: "POST",
   });
 
-  window.location.reload();
+  // window.location.reload();
 
   return notifications;
 };
@@ -42,7 +42,7 @@ export const deleteAllNotifications = async () => {
     method: "POST",
   });
 
-  window.location.reload();
+  // window.location.reload();
 
   return notifications;
 };

@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryClient } from "../context/provider";
+import { queryClient } from "../lib/utils";
 
 export const useCrudQuery = (key, fetchFn) => {
   return useQuery({

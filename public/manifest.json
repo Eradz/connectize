@@ -53,7 +53,7 @@
   "background_color": "#F7F7F7 ",
   "screenshots": [
     {
-      "src": "/public/seo/default-image.png",
+      "src": "/seo/default-image.png",
       "type": "image/webp",
       "sizes": "1080x1920"
     }

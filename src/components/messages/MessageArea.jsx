@@ -117,13 +117,17 @@ export default function MessageArea({ messages, messagesLoading }) {
                       </Link>
                       <div
                         className={clsx(
-                          "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 flex flex-col"
+                          "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
                         )}
                       >
-                        <h1 className="mb-1 font-semibold capitalize">{`${
-                          user?.first_name || ""
-                        } ${user?.last_name || ""}`}</h1>
-                        <p className="text-gray-600 hover:text-gray-800 transition-all duration-300">
+                        <h1 className="mb-1 font-semibold capitalize text-gray-500 text-xs">
+                          {isCurrentUser
+                            ? "You"
+                            : `${user?.first_name || ""} ${
+                                user?.last_name || ""
+                              }`}
+                        </h1>
+                        <p className="text-gray-700 hover:text-gray-900 transition-all duration-300">
                           {messageContent.substring(0, readMoreLimit)}
                           {messageContent.length > readMoreLimit && (
                             <>

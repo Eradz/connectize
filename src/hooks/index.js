@@ -6,24 +6,26 @@ import {
 } from "../api-services/companies";
 import { getMessagesForUser } from "../api-services/messaging";
 import { getNotificationsForUser } from "../api-services/notifications";
+import { getPosts } from "../api-services/posts";
 import { getAllUsers, getUserById } from "../api-services/users";
 import { useAuth } from "../context/userContext";
-import useWebSocket from "./useWebSocket";
 
 export const messagesQueryKey = ["messages"];
 
 export const useNotifications = () => {
-  const { messages } = useWebSocket("notifications");
+  // const { messages } = useWebSocket("notifications");
   const { user: currentUser } = useAuth();
 
   const { data: notificationsData } = useQuery({
     queryKey: ["notifications"],
     queryFn: getNotificationsForUser,
     enabled: !!currentUser,
+    refetchInterval: 3000,
   });
 
   const newNotifications = useMemo(() => {
-    const allNotifications = [...messages, ...(notificationsData || [])];
+    // ...messages,
+    const allNotifications = [...(notificationsData || [])];
     // const uniqueNotifications = allNotifications.reduce((acc, notification) => {
     //   if (!acc.some((n) => n.message === notification.message)) {
     //     acc.push(notification);
@@ -33,7 +35,7 @@ export const useNotifications = () => {
     // return uniqueNotifications;
 
     return allNotifications;
-  }, [messages, notificationsData]);
+  }, [notificationsData]);
 
   const [notifications, setNotifications] = useState(newNotifications);
 
@@ -94,5 +96,14 @@ export const useGetMessages = () => {
     queryKey: messagesQueryKey,
     queryFn: getMessagesForUser,
     enabled: !!currentUser,
+    refetchInterval: 1000,
+  });
+};
+
+export const usePosts = () => {
+  return useQuery({
+    queryKey: ["posts"],
+    queryFn: getPosts,
+    refetchInterval: 3000,
   });
 };

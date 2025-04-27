@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@chakra-ui/react";
-import { TrashIcon } from "@radix-ui/react-icons";
+import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useMemo, useState } from "react";
@@ -141,7 +141,8 @@ export const NotificationItem = ({ isPopover = false }) => {
 
             {notifications.length > 0 && (
               <ButtonWithTooltipIcon
-                IconName={TrashIcon}
+                IconName={DeleteForever}
+                iconClassName="text-red-600 !size-4"
                 tip="Clear All Notifications"
                 onClick={handleDeleteAllNotifications}
               />
@@ -294,7 +295,8 @@ const NotificationTile = memo(
         </div>
 
         <ButtonWithTooltipIcon
-          IconName={TrashIcon}
+          IconName={RemoveCircle}
+          iconClassName="text-red-600 !size-3"
           onClick={handleDeleteNotification}
           tip="Remove notification"
         />
@@ -302,6 +304,5 @@ const NotificationTile = memo(
     );
   }
 );
-
 export { NotificationPopOver, NotificationsArray };
 
