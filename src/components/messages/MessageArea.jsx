@@ -120,7 +120,7 @@ export default function MessageArea({ messages, messagesLoading }) {
                           "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
                         )}
                       >
-                        <h1 className="mb-1 font-semibold capitalize text-gray-500 text-xs">
+                        <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
                           {isCurrentUser
                             ? "You"
                             : `${user?.first_name || ""} ${
