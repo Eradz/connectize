@@ -258,7 +258,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
         </div>
       </section>
       {sendMessageMutation.isPending ? (
-        <p className="text-gray-400 text-xs">Sending message</p>
+        <p className="text-gray-700 text-xs animate-pulse">Sending message</p>
       ) : (
         <CustomErrorMessage errorMessage={errorMessage} />
       )}
