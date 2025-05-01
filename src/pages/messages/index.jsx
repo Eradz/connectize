@@ -65,58 +65,62 @@ export default function MessagesPage() {
         tabsPanels={[<MessagesList />, <Favorites />]}
       />
 
-      <CreateNewLink
-        text="Start new chat"
-        url="null"
-        onClick={() => {
-          navigate(webRoutes.messages);
-          onOpen();
-        }}
-      />
-      <ReusableModal
-        isOpen={room_name ? !room_name : isOpen}
-        onClose={onClose}
-        footerContent={<></>}
-        title="Start New Chat"
-      >
-        <UserSearchInput username={username} setUsername={setUsername} />
-        {usersLoading ? (
-          Array.from({ length: 5 }, (_, index) => (
-            <div key={index}>
-              <CircleTitleSubtitleSkeleton />
-            </div>
-          ))
-        ) : filteredUsers?.length <= 0 ? (
-          <div className="mt-4 mx-2">
-            <LightParagraph>No user found</LightParagraph>
-          </div>
-        ) : (
-          filteredUsers.map((user, index) => {
-            const { first_name, last_name, avatar, email: hashtag } = user;
-            return (
-              <motion.li
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 pt-2"
-                key={index}
-              >
-                <Avatar
-                  src={avatar}
-                  name={`${first_name} ${last_name}`}
-                  size="sm"
-                  className={avatarStyle}
-                />
-                <div className="flex-1">
-                  <Username user={user} />
-                  <p className="text-sm text-gray-400 m-0">{hashtag}</p>
+      {!room_name && (
+        <>
+          <CreateNewLink
+            text="Start new chat"
+            url="null"
+            onClick={() => {
+              navigate(webRoutes.messages);
+              onOpen();
+            }}
+          />
+          <ReusableModal
+            isOpen={room_name ? !room_name : isOpen}
+            onClose={onClose}
+            footerContent={<></>}
+            title="Start New Chat"
+          >
+            <UserSearchInput username={username} setUsername={setUsername} />
+            {usersLoading ? (
+              Array.from({ length: 5 }, (_, index) => (
+                <div key={index}>
+                  <CircleTitleSubtitleSkeleton />
                 </div>
+              ))
+            ) : filteredUsers?.length <= 0 ? (
+              <div className="mt-4 mx-2">
+                <LightParagraph>No user found</LightParagraph>
+              </div>
+            ) : (
+              filteredUsers.map((user, index) => {
+                const { first_name, last_name, avatar, email: hashtag } = user;
+                return (
+                  <motion.li
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2.5 pt-2"
+                    key={index}
+                  >
+                    <Avatar
+                      src={avatar}
+                      name={`${first_name} ${last_name}`}
+                      size="sm"
+                      className={avatarStyle}
+                    />
+                    <div className="flex-1">
+                      <Username user={user} />
+                      <p className="text-sm text-gray-400 m-0">{hashtag}</p>
+                    </div>
 
-                <ChatSellerLink text="Chat" recipientId={user?.id} />
-              </motion.li>
-            );
-          })
-        )}
-      </ReusableModal>
+                    <ChatSellerLink text="Chat" recipientId={user?.id} />
+                  </motion.li>
+                );
+              })
+            )}
+          </ReusableModal>
+        </>
+      )}
     </>
   );
 }

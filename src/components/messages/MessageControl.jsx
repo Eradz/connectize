@@ -31,10 +31,8 @@ import React, {
   useState,
 } from "react";
 import { toast } from "sonner";
-import { messageUser } from "../../api-services/messaging";
 import { useAuth } from "../../context/userContext";
-import { messagesQueryKey } from "../../hooks";
-import { useCrudCreate } from "../../hooks/useCrud";
+import { useMessagesStore } from "../../stores/messagesStore";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
@@ -51,8 +49,7 @@ const emptyMessageValue = "Message field does not have any text";
 
 export default function MessageControl({ loading, recipientId, senderId }) {
   const { user: currentUser } = useAuth();
-
-  const sendMessageMutation = useCrudCreate(messagesQueryKey, messageUser);
+  const { sendMessage } = useMessagesStore();
 
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -130,14 +127,31 @@ export default function MessageControl({ loading, recipientId, senderId }) {
         });
       }
 
-      // await messageUser(formData);
-      sendMessageMutation.mutate(formData);
-      // setCachedMessages((prev) => [newMessage, ...prev]);
+      const messageData = {
+        recipient: Number(recipientId),
+        sender: Number(senderId),
+        user: currentUser?.id,
+        room_name: `room_${senderId}_${recipientId}`,
+        content:
+          message.trim().length < 1
+            ? audioBlob
+              ? "Audio conversation"
+              : validImages?.length > 0
+              ? "Sent with attachment"
+              : ""
+            : message,
+        images: validImages?.map((image) => URL.createObjectURL(image)) || [],
+        audio: audioBlob ? URL.createObjectURL(audioBlob) : null,
+      };
+
       setMessage("");
       setValidImages([]);
       setAudioBlob(null);
       setAudioURL(null);
       setErrorMessage(null);
+
+      scrollToBottom();
+      await sendMessage(formData, messageData);
     } catch (error) {
       console.error(error);
       toast.info("An error occurred while sending message");
@@ -173,7 +187,6 @@ export default function MessageControl({ loading, recipientId, senderId }) {
 
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
-
     }
   };
 
@@ -257,11 +270,11 @@ export default function MessageControl({ loading, recipientId, senderId }) {
           )}
         </div>
       </section>
-      {sendMessageMutation.isPending ? (
+      {/* {sendMessageMutation.isPending ? (
         <p className="text-gray-700 text-xs animate-pulse">Sending message</p>
       ) : (
-        <CustomErrorMessage errorMessage={errorMessage} />
-      )}
+      )} */}
+      <CustomErrorMessage errorMessage={errorMessage} />
     </section>
   );
 }

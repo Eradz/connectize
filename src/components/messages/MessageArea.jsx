@@ -1,6 +1,7 @@
 import { Avatar } from "@chakra-ui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { CheckIcon } from "@radix-ui/react-icons";
+import { ErrorOutline } from "@mui/icons-material";
+import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import { useUsers } from "../../hooks";
 import { baseURL } from "../../lib/helpers";
 import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
+import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
@@ -179,25 +181,35 @@ export default function MessageArea({ messages, messagesLoading }) {
                           <small className="shrink-0">
                             <TimeAgo time={message.timestamp} />
                           </small>
-                          <div className="flex items-center">
-                            <div
-                              className={clsx("flex items-center", {
-                                "text-gold": message.read_at,
-                              })}
-                            >
-                              <CheckIcon />
-                            </div>
-                            <div
-                              className={clsx(
-                                "flex items-center -translate-x-2",
-                                {
+                          {message?.optimistic ? (
+                            <CheckboxIcon className="size-3.5  text-gray-300" />
+                          ) : message?.error ? (
+                            <ButtonWithTooltipIcon
+                              IconName={ErrorOutline}
+                              tip="This message did not send"
+                              iconClassName="!size-3 text-red-600"
+                            />
+                          ) : (
+                            <div className="flex items-center">
+                              <div
+                                className={clsx("flex items-center", {
                                   "text-gold": message.read_at,
-                                }
-                              )}
-                            >
-                              <CheckIcon />
+                                })}
+                              >
+                                <CheckIcon />
+                              </div>
+                              <div
+                                className={clsx(
+                                  "flex items-center -translate-x-2",
+                                  {
+                                    "text-gold": message.read_at,
+                                  }
+                                )}
+                              >
+                                <CheckIcon />
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </motion.div>
