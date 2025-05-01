@@ -34,8 +34,8 @@ function SinglePostPage() {
   return (
     <section className="space-y-4">
       <Button
-        variant="unstyled"
-        className="!text-sm !flex items-center"
+        variant="solid"
+        className="!text-sm !flex items-center max-lg:ml-4 max-lg:mt-4"
         onClick={() => window.history.back()}
       >
         <ArrowBackIos fontSize="10" />

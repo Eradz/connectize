@@ -6,15 +6,10 @@ import Navbar from "../components/userProfile/Navbar";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
-  const isChatRoom = pathname.startsWith("/messages/room_");
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/";
   return (
-    <main
-      className={clsx("bg-background min-h-screen", {
-        "lg:h-screen overflow-hidden": isChatRoom,
-      })}
-    >
+    <main className="bg-background min-h-screen">
       <Navbar />
       <section
         className={clsx(

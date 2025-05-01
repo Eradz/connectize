@@ -6,9 +6,8 @@ import MessageArea from "../../components/messages/MessageArea";
 import MessageControl from "../../components/messages/MessageControl";
 import MessageHeader from "../../components/messages/MessageHeader";
 import { useAuth } from "../../context/userContext";
-import { useGetMessages, useUsers } from "../../hooks";
+import { messagesQueryKey, useGetMessages, useUsers } from "../../hooks";
 import { useCrudCreate } from "../../hooks/useCrud";
-import useWebSocket from "../../hooks/useWebSocket";
 
 export default function MessagingPage() {
   const { user: currentUser } = useAuth();
@@ -26,38 +25,36 @@ export default function MessagingPage() {
       ? Number(recipientId)
       : Number(userId);
 
-  useQuery({
-    queryKey: ["mark-messages-as-read", room_name],
-    queryFn: () => markMessageAsRead(room_name),
-    enabled: !!room_name && !!currentUser && !!messages,
-  });
+  // useQuery({
+  //   queryKey: ["mark-messages-as-read", room_name],
+  //   queryFn: () => markMessageAsRead(room_name),
+  //   enabled: !!room_name && !!currentUser && !!messages,
+  // });
 
-  const { messages: ws_messages, sendCommand } = useWebSocket(
-    `chat/${room_name}`
-  );
+  // const { messages: ws_messages, sendCommand } = useWebSocket(
+  //   `chat/${room_name}`
+  // );
 
-  const allMessages = useMemo(
-    () => [...messages, ...ws_messages],
-    [messages, ws_messages]
-  );
+  const allMessages = useMemo(() => [...messages], [messages]);
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
-  const markReadMutation = useCrudCreate(["message"], markMessageAsRead);
+  const markReadMutation = useCrudCreate(messagesQueryKey, markMessageAsRead);
 
   useEffect(() => {
     allMessages.forEach((message) => {
-      if (!message?.read_at) {
-        const checkNotUser =
-          Number(currentUser?.id) !== Number(userId)
-            ? Number(recipientId)
-            : Number(userId);
+      const checkNotUser =
+        Number(currentUser?.id) !== Number(userId)
+          ? Number(recipientId)
+          : Number(userId);
+      if (!message?.read_at && checkNotUser !== currentUser?.id) {
+        console.log(message?.read_at, message?.id);
         markReadMutation.mutate(room_name, checkNotUser);
-        sendCommand({
-          command: "mark_as_read",
-          message_id: message?.id,
-          user_id: checkNotUser,
-        });
+        // sendCommand({
+        //   command: "mark_as_read",
+        //   message_id: message?.id,
+        //   user_id: checkNotUser,
+        // });
       }
     });
   }, [
@@ -66,7 +63,6 @@ export default function MessagingPage() {
     currentUser?.id,
     navigate,
     recipientId,
-    sendCommand,
     userId,
   ]);
 

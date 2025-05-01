@@ -201,9 +201,10 @@ export async function makeApiRequest({
     const errorResponse = error?.response?.data;
 
     const errorMsg = extractErrorMessage(errorResponse);
-    if (errorMsg && method.toLowercase() !== "get") {
+
+    if (errorMsg && method?.toLowerCase() !== "get") {
       toast.error(errorMsg);
-      console.error("API request failed:", error);
+      // console.error("API request failed:", error);
     }
   }
 }

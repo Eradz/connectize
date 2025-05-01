@@ -8,7 +8,6 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import React, { memo, useCallback, useEffect, useState } from "react";
@@ -19,11 +18,11 @@ import {
   commentOnPost,
   deletePost,
   editPost,
-  getPosts,
   likePost,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
+import { usePosts } from "../../../hooks";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber, shareThis } from "../../../lib/utils";
 import CompanyName from "../../company/CompanyName";
@@ -44,12 +43,7 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { refetchInterval } = useCustomQuery();
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ["posts"],
-    queryFn: getPosts,
-    refetchInterval,
-  });
+  const { data: posts, isLoading } = usePosts();
 
   const finalArray = isSearch
     ? searchArray

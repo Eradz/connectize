@@ -9,8 +9,8 @@ import {
   getPeopleAssociatedForUser,
   getSuggestedUsersForCurrentUser,
 } from "../../../api-services/users";
-import { queryClient } from "../../../context/provider";
 import { useAuth } from "../../../context/userContext";
+import { queryClient } from "../../../lib/utils";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
 import { avatarStyle } from "../../ResponsiveNav";
