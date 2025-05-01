@@ -236,7 +236,7 @@ const NotificationTile = memo(({ notification, index, company }) => {
   const handleMarkAsRead = async () => {
     markAsRead(notification?.id);
     try {
-      await markNotificationAsRead(id);
+      await markNotificationAsRead(notification?.id);
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
     }
