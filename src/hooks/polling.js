@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getNotificationsForUser } from "../api-services/notifications";
 import { useCompaniesStore } from "../stores/companiesStore";
 import { useMessagesStore } from "../stores/messagesStore";
@@ -6,57 +6,45 @@ import { useNotificationsStore } from "../stores/notificationsStore";
 import { usePostsStore } from "../stores/postsStore";
 import { useUsersStore } from "../stores/usersStore";
 
-export const usePollPosts = (interval = 3000) => {
-  const { posts, fetchPosts } = usePostsStore();
+export const useSafePoll = (callback, interval, deps = []) => {
+  const cancelled = useRef(false);
 
   useEffect(() => {
-    let isCancelled = false;
+    cancelled.current = false;
 
     const poll = async () => {
       try {
-        await fetchPosts();
+        await callback();
       } catch (err) {
-        console.error("Polling posts failed", err);
+        console.error("Polling failed", err);
       }
 
-      if (!isCancelled) {
+      if (!cancelled.current) {
         setTimeout(poll, interval);
       }
     };
 
     poll();
-    return () => {
-      isCancelled = true;
-    };
-  }, [interval]);
 
-  return { posts };
+    return () => {
+      cancelled.current = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interval, ...deps]);
+};
+
+export const usePollPosts = (interval = 3000) => {
+  const { posts, fetchPosts, loading } = usePostsStore();
+
+  useSafePoll(fetchPosts, interval);
+
+  return { posts, loading };
 };
 
 export const usePollMessages = (interval = 1000, params = {}) => {
   const { messages, fetchMessages } = useMessagesStore();
 
-  useEffect(() => {
-    let isCancelled = false;
-
-    const poll = async () => {
-      try {
-        await fetchMessages(params);
-      } catch (error) {
-        console.error("Polling messages failed", error);
-      }
-
-      if (!isCancelled) {
-        setTimeout(poll, interval); // wait before retrying
-      }
-    };
-
-    poll(); // initial fetch
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [interval, JSON.stringify(params)]);
+  useSafePoll(() => fetchMessages(params), interval, [JSON.stringify(params)]);
 
   return { messages };
 };
@@ -89,7 +77,7 @@ export const usePollCompanies = (interval = 5000) => {
   return { companies };
 };
 
-export const usePollCurrentCompany = (interval = 5000) => {
+export const usePollCurrentCompany = (interval = 50000) => {
   const { currentCompany, fetchCurrentCompany } = useCompaniesStore();
 
   useEffect(() => {
@@ -117,7 +105,7 @@ export const usePollCurrentCompany = (interval = 5000) => {
   return { currentCompany };
 };
 
-export const usePollUsers = (interval = 5000) => {
+export const usePollUsers = (interval = 50000) => {
   const { users, fetchUsers } = useUsersStore();
 
   useEffect(() => {
@@ -175,33 +163,15 @@ export const usePollUserById = (id, interval = 5000) => {
   return { user: selectedUser };
 };
 
-export const usePollNotifications = (intervalMs = 10000) => {
+export const usePollNotifications = (intervalMs = 5000) => {
   const setNotifications = useNotificationsStore((s) => s.setNotifications);
 
-  useEffect(() => {
-    let isCancelled = false;
+  const fetch = async () => {
+    const data = await getNotificationsForUser();
+    if (Array.isArray(data)) setNotifications(data);
+  };
 
-    const poll = async () => {
-      try {
-        const data = await getNotificationsForUser();
-        if (!isCancelled && Array.isArray(data)) {
-          setNotifications(data);
-        }
-      } catch (err) {
-        console.error("Polling notifications failed", err);
-      }
-
-      if (!isCancelled) {
-        setTimeout(poll, intervalMs);
-      }
-    };
-
-    poll();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [setNotifications, intervalMs]);
+  useSafePoll(fetch, intervalMs);
 
   const notifications = useNotificationsStore((s) => s.notifications);
   const unreadCount = useNotificationsStore((s) => s.unreadCount());
