@@ -9,7 +9,7 @@ import {
 import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   deleteAllNotifications,
@@ -17,8 +17,10 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../api-services/notifications";
-import { useCompanies, useNotifications, useUsers } from "../hooks";
+import { useCompanies, useUsers } from "../hooks";
+import { usePollNotifications } from "../hooks/polling";
 import { Notification } from "../icon";
+import { useNotificationsStore } from "../stores/notificationsStore";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
 import CompanyName from "./company/CompanyName";
 import CustomTabs from "./custom/tabs";
@@ -61,7 +63,7 @@ const IndicatorBadge = ({ indicator, floating = false }) => {
 };
 
 const NotificationPopOver = () => {
-  const { notifications, notificationLengthNotRead } = useNotifications();
+  const { unreadCount: notificationLengthNotRead } = useNotificationsStore();
 
   return (
     <Popover>
@@ -81,8 +83,10 @@ const NotificationPopOver = () => {
 };
 
 export const NotificationItem = ({ isPopover = false }) => {
-  const { notifications, notificationLengthNotRead, setNotifications } =
-    useNotifications();
+  const { notifications, unreadCount: notificationLengthNotRead } =
+    usePollNotifications();
+
+  const { markAllAsRead, deleteAll } = useNotificationsStore();
   const { data: companies, isLoading: companiesLoading } = useCompanies();
   const { data: users, isLoading: usersLoading } = useUsers();
 
@@ -109,12 +113,21 @@ export const NotificationItem = ({ isPopover = false }) => {
   );
 
   const handleMarkAllAsRead = useCallback(async () => {
-    await markAllNotificationsAsRead();
+    markAllAsRead();
+    try {
+      await markAllNotificationsAsRead();
+    } catch (err) {
+      console.error("Failed to mark all notifications:", err);
+    }
   }, []);
 
   const handleDeleteAllNotifications = useCallback(async () => {
-    setNotifications([]);
-    await deleteAllNotifications();
+    deleteAll();
+    try {
+      await deleteAllNotifications();
+    } catch (err) {
+      console.error("Failed to delete all notifications:", err);
+    }
   }, []);
 
   return (
@@ -139,10 +152,10 @@ export const NotificationItem = ({ isPopover = false }) => {
               )}
             </div>
 
-            {notifications.length > 0 && (
+            {notifications?.length > 0 && (
               <ButtonWithTooltipIcon
                 IconName={DeleteForever}
-                iconClassName="text-red-600 !size-4"
+                iconClassName="text-red-400 !size-4"
                 tip="Clear All Notifications"
                 onClick={handleDeleteAllNotifications}
               />
@@ -171,7 +184,7 @@ export const NotificationItem = ({ isPopover = false }) => {
             ]}
           />
 
-          {isPopover && notifications.length > 10 && (
+          {isPopover && notifications?.length > 10 && (
             <SeeMoreLink url="/co/notifications" />
           )}
         </section>
@@ -216,93 +229,79 @@ const NotificationsArray = memo(
   }
 );
 
-const NotificationTile = memo(
-  ({ notification, index, company, unReadNotificationLength }) => {
-    const [read, setRead] = useState(notification?.is_read ? true : false);
-    const { setNotifications } = useNotifications();
+const NotificationTile = memo(({ notification, index, company }) => {
+  const { markAsRead, deleteNotification: deleteThis } =
+    useNotificationsStore();
 
-    const handleMarkAsRead = useCallback(async () => {
-      if (read) return;
-
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notif) =>
-          notif.id === notification.id
-            ? { ...notif, is_read: new Date().toUTCString() }
-            : notif
-        )
-      );
-
-      setRead(true);
+  const handleMarkAsRead = async () => {
+    markAsRead(notification?.id);
+    try {
       await markNotificationAsRead(notification?.id);
-    }, [read, notification?.id, setNotifications]);
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
 
-    const handleDeleteNotification = useCallback(async () => {
-      setNotifications((prev) =>
-        prev.filter((notif) => notif.id !== notification.id)
-      );
+  const handleDeleteNotification = async () => {
+    deleteThis(notification?.id);
+    try {
+      await deleteNotification(notification?.id);
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
+    }
+  };
 
-      try {
-        await deleteNotification(notification.id);
-      } catch (error) {
-        setNotifications((prev) => [...prev, notification]);
-      }
-    }, [notification.id, setNotifications]);
+  return (
+    <motion.div
+      initial={{ x: 10, opacity: 0 }}
+      whileInView={{ x: 0, opacity: 1 }}
+      transition={{ delay: index * 0.05 }}
+      viewport={{ once: true }}
+      className="flex items-stretch gap-2 pt-2"
+    >
+      <Avatar
+        src={company?.logo || "/images/default-company-logo.png"}
+        alt={company?.company_name}
+        size="sm"
+        name={company?.company_name}
+        className={avatarStyle}
+      />
+      <div className="space-y-0 flex-1">
+        <CompanyName name={company?.company_name} verified={company?.verify} />
+        <Link
+          to={notification?.link}
+          onClick={handleMarkAsRead}
+          className="text-[.825rem] !text-gray-600 leading-none block"
+        >
+          {notification?.message}{" "}
+          <Badge className="!text-[.6rem]">
+            {notification?.is_read ? "" : "Unread"}
+          </Badge>
+        </Link>
+        <div className="flex items-center gap-2">
+          <small className="text-gray-400 text-[.69rem]">
+            <TimeAgo time={notification?.timestamp} />
+          </small>
 
-    return (
-      <motion.div
-        initial={{ x: 10, opacity: 0 }}
-        whileInView={{ x: 0, opacity: 1 }}
-        transition={{ delay: index * 0.05 }}
-        viewport={{ once: true }}
-        className="flex items-stretch gap-2 pt-2"
-      >
-        <Avatar
-          src={company?.logo || "/images/default-company-logo.png"}
-          alt={company?.company_name}
-          size="sm"
-          name={company?.company_name}
-          className={avatarStyle}
-        />
-        <div className="space-y-0 flex-1">
-          <CompanyName
-            name={company?.company_name}
-            verified={company?.verify}
-          />
-          <Link
-            to={notification?.link}
-            onClick={handleMarkAsRead}
-            className="text-[.825rem] !text-gray-600 leading-none block"
-          >
-            {notification?.message}{" "}
-            <Badge className="!text-[.6rem]">
-              {read || unReadNotificationLength === 0 ? "" : "Unread"}
-            </Badge>
-          </Link>
-          <div className="flex items-center gap-2">
-            <small className="text-gray-400 text-[.69rem]">
-              <TimeAgo time={notification?.timestamp} />
-            </small>
-
-            {!read && unReadNotificationLength > 0 && (
-              <button
-                onClick={handleMarkAsRead}
-                className="text-xs disabled:cursor-not-allowed"
-              >
-                Mark as read
-              </button>
-            )}
-          </div>
+          {!notification?.is_read && (
+            <button
+              onClick={handleMarkAsRead}
+              className="text-xs disabled:cursor-not-allowed"
+            >
+              Mark as read
+            </button>
+          )}
         </div>
+      </div>
 
-        <ButtonWithTooltipIcon
-          IconName={RemoveCircle}
-          iconClassName="text-red-600 !size-3"
-          onClick={handleDeleteNotification}
-          tip="Remove notification"
-        />
-      </motion.div>
-    );
-  }
-);
+      <ButtonWithTooltipIcon
+        IconName={RemoveCircle}
+        iconClassName="text-red-600 !size-3"
+        onClick={handleDeleteNotification}
+        tip="Remove notification"
+      />
+    </motion.div>
+  );
+});
 export { NotificationPopOver, NotificationsArray };
 

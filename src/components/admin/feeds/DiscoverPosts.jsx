@@ -22,7 +22,7 @@ import {
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
-import { usePosts } from "../../../hooks";
+import { usePollPosts } from "../../../hooks/polling";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber, shareThis } from "../../../lib/utils";
 import CompanyName from "../../company/CompanyName";
@@ -43,7 +43,7 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { data: posts, isLoading } = usePosts();
+  const { posts, loading: isLoading } = usePollPosts();
 
   const finalArray = isSearch
     ? searchArray

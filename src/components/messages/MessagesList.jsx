@@ -1,9 +1,10 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
-import { Link } from "react-router-dom";
-import { useGetMessages, useUsers } from "../../hooks";
-import useWebSocket from "../../hooks/useWebSocket";
+import { Link, useSearchParams } from "react-router-dom";
+import { useUsers } from "../../hooks";
+import { usePollMessages } from "../../hooks/polling";
+import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
@@ -11,16 +12,11 @@ import TimeAgo from "../TimeAgo";
 import Username from "../Username";
 
 export default function MessagesList() {
-  const { data: messages = [], isLoading } = useGetMessages();
+  const { messages } = usePollMessages();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
-  const { messages: ws_messages } = useWebSocket(`chat`);
-
-  const allMessages = useMemo(
-    () => [...ws_messages, ...(messages || [])],
-    [messages, ws_messages]
-  );
+  const allMessages = useMemo(() => [...(messages || [])], [messages]);
 
   const messagesList = useMemo(() => {
     const uniqueRecipients = new Set();
@@ -37,7 +33,7 @@ export default function MessagesList() {
 
   return (
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
-      {isLoading || usersLoading ? (
+      {usersLoading ? (
         <MessagesListSkeleton />
       ) : messagesList?.length <= 0 ? (
         <div className="min-h-40 py-2 mt-2 space-y-4">
@@ -82,11 +78,22 @@ export default function MessagesList() {
 const MessagesListTile = React.memo(({ message, user }) => {
   const name = `${user?.first_name} ${user?.last_name}`;
 
+  const { markAllAsRead } = useMessagesStore();
+  const [searchParams] = useSearchParams();
+
+  const room_name = searchParams.get("room_name");
+
+  const handleMarkAsRead = async () => {
+    console.log(message?.read_at, user?.id);
+    await markAllAsRead(room_name, user?.id);
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       key={message?.id}
+      onClick={handleMarkAsRead}
       className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
     >
       <Link to={`/co/${user?.id}`}>
