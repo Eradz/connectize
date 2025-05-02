@@ -4,13 +4,14 @@ import { ErrorOutline } from "@mui/icons-material";
 import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
 import { baseURL } from "../../lib/helpers";
 import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
+import { useMessagesStore } from "../../stores/messagesStore";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
@@ -19,6 +20,8 @@ import { VoiceNotePlayer } from "./MessageControl";
 
 export default function MessageArea({ messages, messagesLoading }) {
   const { user: currentUser } = useAuth();
+
+  const { markAllAsRead } = useMessagesStore();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
@@ -39,6 +42,8 @@ export default function MessageArea({ messages, messagesLoading }) {
   };
 
   const groupedMessages = groupMessagesByDate(messages);
+
+  useEffect(() => {}, []);
 
   return (
     <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">

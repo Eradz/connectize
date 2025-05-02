@@ -1,9 +1,10 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useUsers } from "../../hooks";
 import { usePollMessages } from "../../hooks/polling";
+import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
@@ -77,11 +78,22 @@ export default function MessagesList() {
 const MessagesListTile = React.memo(({ message, user }) => {
   const name = `${user?.first_name} ${user?.last_name}`;
 
+  const { markAllAsRead } = useMessagesStore();
+  const [searchParams] = useSearchParams();
+
+  const room_name = searchParams.get("room_name");
+
+  const handleMarkAsRead = async () => {
+    console.log(message?.read_at, user?.id);
+    await markAllAsRead(room_name, user?.id);
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       key={message?.id}
+      onClick={handleMarkAsRead}
       className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
     >
       <Link to={`/co/${user?.id}`}>

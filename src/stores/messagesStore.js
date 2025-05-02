@@ -1,7 +1,11 @@
 import isEqual from "lodash/isEqual";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
-import { getMessagesForUser, messageUser } from "../api-services/messaging";
+import {
+  getMessagesForUser,
+  markMessageAsRead,
+  messageUser,
+} from "../api-services/messaging";
 
 export const useMessagesStore = create((set, get) => ({
   messages: [],
@@ -25,8 +29,6 @@ export const useMessagesStore = create((set, get) => ({
       optimistic: true,
       error,
     };
-
-    console.log(optimisticMessage);
 
     set((state) => {
       return {
@@ -59,13 +61,15 @@ export const useMessagesStore = create((set, get) => ({
 
   markAllAsRead: async (room_name, user_id) => {
     set((state) => ({
-      messages: state.messages.map((m) => ({
-        ...m,
-        read_at: new Date().toUTCString(),
-      })),
+      messages: state.messages
+        .filter((m) => m.room_name === room_name)
+        .map((m) => ({
+          ...m,
+          read_at: new Date().toUTCString(),
+        })),
     }));
     try {
-      return await markMessageAsRead(room_name, user_id);
+      await markMessageAsRead(room_name, user_id);
     } catch (err) {
       console.error("Failed to mark messages as read", err);
     }
