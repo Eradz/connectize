@@ -1,15 +1,15 @@
 import { Avatar } from "@chakra-ui/react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { bookmarkProduct, getProducts } from "../../../api-services/products";
-import { bookmarkService, getServices } from "../../../api-services/services";
+import { bookmarkProduct } from "../../../api-services/products";
+import { bookmarkService } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";
+import { usePollProducts, usePollServices } from "../../../hooks/polling";
 import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";
@@ -20,20 +20,15 @@ import {
 } from "./DiscoverPosts";
 
 const DiscoverPostTabs = () => {
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,
-  });
+  const { data: products, isLoading: productsLoading } = usePollProducts();
 
-  const { data: services, isLoading: servicesLoading } = useQuery({
-    queryKey: ["services"],
-    queryFn: getServices,
-  });
+  const { data: services, isLoading: servicesLoading } = usePollServices();
 
   const productsForSlider = products?.map((product) => {
     return {
       isService: false,
       title: product?.title,
+      image: product?.images?.[0]?.image,
       summary: product?.description,
       companyName: product?.company,
       logo: product?.logo,
@@ -146,6 +141,7 @@ export const PostSlider = ({
 export const PostCard = ({
   isService,
   title,
+  image,
   summary,
   companyName,
   logo,
@@ -178,13 +174,22 @@ export const PostCard = ({
         ))}
       </div> */}
 
-      <div className="my-4 line-clamp-3 shrink-0">
-        <MarkdownComponent
-          markdownContent={
-            summary ||
-            "This is a tweet. It can be long, or short. Depends on what you have to say. It can have some hashtags too."
-          }
+      <div className="my-4 flex gap-2">
+        <img
+          src={image}
+          alt={title}
+          width="25%"
+          height="auto"
+          className="rounded-md"
         />
+        <div className="line-clamp-3 shrink-0 w-[75%]">
+          <MarkdownComponent
+            markdownContent={
+              summary ||
+              "This is a tweet. It can be long, or short. Depends on what you have to say. It can have some hashtags too."
+            }
+          />
+        </div>
       </div>
 
       <div className="h-full" />

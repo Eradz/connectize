@@ -1,5 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { getNotificationsForUser } from "../api-services/notifications";
+import { getProducts } from "../api-services/products";
+import { getServices } from "../api-services/services";
 import { useCompaniesStore } from "../stores/companiesStore";
 import { useMessagesStore } from "../stores/messagesStore";
 import { useNotificationsStore } from "../stores/notificationsStore";
@@ -177,4 +180,20 @@ export const usePollNotifications = (intervalMs = 5000) => {
   const unreadCount = useNotificationsStore((s) => s.unreadCount());
 
   return { notifications, unreadCount };
+};
+
+export const usePollProducts = (refetchInterval = 5000) => {
+  return useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+    refetchInterval,
+  });
+};
+
+export const usePollServices = (refetchInterval = 5000) => {
+  return useQuery({
+    queryKey: ["services"],
+    queryFn: getServices,
+    refetchInterval,
+  });
 };

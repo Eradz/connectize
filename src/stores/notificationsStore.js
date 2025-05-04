@@ -1,15 +1,22 @@
 import { create } from "zustand";
+import { markNotificationAsRead } from "../api-services/notifications";
 
 export const useNotificationsStore = create((set, get) => ({
   notifications: [],
   setNotifications: (newNotifications) =>
     set({ notifications: newNotifications }),
 
-  markAsRead: (id) => {
+  markAsRead: async (id) => {
     const updated = get().notifications.map((notif) =>
       notif.id === id ? { ...notif, is_read: true } : notif
     );
     set({ notifications: updated });
+
+    try {
+      await markNotificationAsRead(notification?.id);
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
   },
 
   markAllAsRead: () => {
