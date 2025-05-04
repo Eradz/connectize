@@ -13,7 +13,7 @@ export const useNotificationsStore = create((set, get) => ({
     set({ notifications: updated });
 
     try {
-      await markNotificationAsRead(notification?.id);
+      await markNotificationAsRead(id);
     } catch (err) {
       console.error("Failed to mark notification as read:", err);
     }

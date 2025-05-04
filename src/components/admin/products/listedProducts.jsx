@@ -1,5 +1,6 @@
 import { ShareAltOutlined } from "@ant-design/icons";
 import React from "react";
+import { useProductImages } from "../../../hooks/useProduct";
 import { Heart, StarFilledIcon, StarOutlinedIcon } from "../../../icon";
 import { formatNumber, shareThis } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
@@ -25,7 +26,7 @@ const ListedProducts = ({ company }) => {
                 key={product.id}
                 title={product.title}
                 likes={product.likes.length || "0"}
-                src={product?.images?.[0]?.image}
+                id={product.id}
               />
             );
           })
@@ -35,22 +36,23 @@ const ListedProducts = ({ company }) => {
   );
 };
 
-function ListedProduct({ src, title, likes }) {
+function ListedProduct({ id, title, likes }) {
+  const { productImage } = useProductImages(id);
   return (
     <div className="bg-background p-2.5 rounded-md flex max-sm:flex-col gap-2 sm:gap-4 relative">
-      <picture className="bg-white sm:w-1/3 p-4 sm:p-1 rounded-md sm:h-fit">
-        <img
-          src={src || "/images/drum1.PNG"}
-          className="w-3/4 sm:w-full mx-auto"
-          alt={title || "oil barrels"}
-        />
-      </picture>
+      {productImage?.[0]?.image && (
+        <picture className="bg-white sm:w-1/3 p-2 sm:p-1 sm:h-fit flex">
+          <img
+            src={productImage?.[0]?.image}
+            className="max-h-40 sm:w-full rounded-md mx-auto"
+            alt={title || "No title"}
+          />
+        </picture>
+      )}
 
       <div className="sm:w-2/3">
         <div className="sm:flex justify-between items-start border-b pb-2 pt-2">
-          <h4 className="max-md:text-xl font-bold">
-            {title || "Premium Black Gold Reserve"}
-          </h4>
+          <h4 className="max-md:text-xl font-bold">{title || ""}</h4>
           {/* <div className="max-md:absolute top-4 right-4">
             <MoreOptions>
               <div>more options</div>
@@ -58,7 +60,7 @@ function ListedProduct({ src, title, likes }) {
           </div> */}
         </div>
 
-        <div className="flex mt-2.5 md:mt-3.5">
+        <div className="flex mt-3 md:mt-3.5">
           {[1, 2, 3].map((_, index) => (
             <StarFilledIcon key={index} />
           ))}

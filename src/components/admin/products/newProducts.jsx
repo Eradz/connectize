@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { useMediaQuery } from "react-responsive";
+import { SwiperSlide } from "swiper/react";
 import { getProducts } from "../../../api-services/products";
 import HeadingText from "../../HeadingText";
-import { ProductListCard } from "../markets/newlyListed";
 import { PostSlider } from "../feeds/DiscoverPostTabs";
-import { SwiperSlide } from "swiper/react";
-import { useMediaQuery } from "react-responsive";
+import { ProductListCard } from "../markets/newlyListed";
 
 export default function NewProducts() {
   const { data: products } = useQuery({
@@ -31,7 +31,6 @@ export default function NewProducts() {
             return (
               <SwiperSlide key={product?.id}>
                 <ProductListCard
-                  image={product?.images[index]?.image}
                   title={product?.title}
                   subtitle={product?.category}
                   companyName={product?.company}

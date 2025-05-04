@@ -56,9 +56,9 @@ function DiscoverPosts({
   const postLoading = isSearch ? searchLoading : isLoading;
 
   return (
-    <section className="md:space-y-6 mt-6 max-md:divide-y">
+    <section className="space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
-        Array.from({ length: 6 }, (_, index) => (
+        Array.from({ length: 5 }, (_, index) => (
           <DiscoverPostSkeleton key={index} />
         ))
       ) : finalArray?.length < 1 ? (

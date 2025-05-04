@@ -1,6 +1,5 @@
-import { MailOutlined } from "@ant-design/icons";
 import { LocationOnOutlined } from "@mui/icons-material";
-import { GlobeIcon } from "@radix-ui/react-icons";
+import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useMemo } from "react";
@@ -147,7 +146,7 @@ const ProductSidebar = React.memo(({ company }) => {
           )}
           {company?.email && (
             <ProfileAboutList
-              Icon={MailOutlined}
+              Icon={EnvelopeClosedIcon}
               title="Company Email"
               value={company?.email || "No Email"}
             />

@@ -196,7 +196,7 @@ const NotificationsArray = memo(
     return (
       <section
         className={clsx("space-y-2 divide-y divide-gray-100", {
-          "overflow-y-auto overflow-x-hidden max-h-[55vh] scrollbar-hidden":
+          "overflow-y-auto overflow-x-hidden max-h-[32vh] scrollbar-hidden":
             isPopover,
         })}
       >
@@ -267,9 +267,9 @@ const NotificationTile = memo(({ notification, index, company }) => {
           className="text-[.825rem] !text-gray-600 leading-none block"
         >
           {notification?.message}{" "}
-          <Badge className="!text-[.6rem]">
-            {notification?.is_read ? "" : "Unread"}
-          </Badge>
+          {!notification?.is_read && (
+            <Badge className="!text-[.55rem]">Unread</Badge>
+          )}
         </Link>
         <div className="flex items-center gap-2">
           <small className="text-gray-400 text-[.69rem]">

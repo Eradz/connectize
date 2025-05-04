@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { getAllCompanies } from "../api-services/companies";
 import { getNotificationsForUser } from "../api-services/notifications";
 import { getProducts } from "../api-services/products";
 import { getServices } from "../api-services/services";
@@ -106,6 +107,14 @@ export const usePollCurrentCompany = (interval = 50000) => {
   }, [interval]);
 
   return { currentCompany };
+};
+
+export const usePollAllCompanies = (interval = 5000) => {
+  return useQuery({
+    queryKey: ["allConnectizeCompanies"],
+    queryFn: getAllCompanies,
+    refetchInterval: interval,
+  });
 };
 
 export const usePollUsers = (interval = 50000) => {

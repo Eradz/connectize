@@ -141,7 +141,10 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
   );
 
   const uniqueUsers = new Set(
-    [...representativesAssociated, ...allUsersAssociated].filter(Boolean)
+    [
+      ...representativesAssociated.map((ra) => ({ ...ra, rep: true })),
+      ...allUsersAssociated.map((du) => ({ ...du, domain: true })),
+    ].filter(Boolean)
   );
 
   return Array.from(uniqueUsers);

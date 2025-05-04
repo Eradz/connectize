@@ -182,8 +182,17 @@ export const ProfileAboutList = ({ title, value, Icon }) => {
       <div className="flex gap-1 items-baseline max-sm:flex-col">
         <strong className="leading-none">{title}:</strong>
         <LightParagraph>
-          {title.toLowerCase() === "website" ? (
+          {value?.toLowerCase()?.includes("http") ? (
             <a href={value} target="__blank" className="!underline">
+              {value}
+            </a>
+          ) : title.toLowerCase().includes("email") &&
+            value?.toLowerCase()?.includes("@") ? (
+            <a
+              href={`mailto:${value}`}
+              target="__blank"
+              className="!text-gold font-bold hover:!underline"
+            >
               {value}
             </a>
           ) : (
