@@ -67,7 +67,7 @@ export const ManageRepresentativesLink = ({ main = false }) => {
     <Link
       to="/co/representatives/manage"
       className={clsx(
-        "bg-gold hover:bg-opacity-70 text-sm xs:text-xs lg:text-sm font-semibold py-1.5 px-4 rounded-full",
+        "bg-gold hover:bg-opacity-60 text-sm xs:text-xs lg:text-sm font-semibold py-1.5 px-4 rounded-full block shrink-0",
         {
           "absolute right-0 -top-9 md:-top-14": main,
         }

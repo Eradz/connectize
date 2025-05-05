@@ -1,16 +1,16 @@
-import React from "react";
-import HeadingText from "../../components/HeadingText";
 import { useQuery } from "@tanstack/react-query";
-import { getAllUsers } from "../../api-services/users";
-import { getAllCompanies } from "../../api-services/companies";
+import React from "react";
 import {
   getAllRepresentatives,
   getOrCreateRepresentativeCategory,
 } from "../../api-services/representatives";
-import RepresentativeCard from "../../components/representatives/RepresentativeCard";
+import { getAllUsers } from "../../api-services/users";
+import HeadingText from "../../components/HeadingText";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
-import { useEffect } from "react";
+import RepresentativeCard from "../../components/representatives/RepresentativeCard";
+import SEO from "../../components/SEO";
+import { usePollAllCompanies } from "../../hooks/polling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 
 export default function RepresentativesPage() {
@@ -19,11 +19,7 @@ export default function RepresentativesPage() {
     queryFn: getAllUsers,
   });
 
-  const { data: companies, isLoading: companyLoading } = useQuery({
-    queryKey: ["allCompanies"],
-    queryFn: getAllCompanies,
-    // refetchInterval: 2000,
-  });
+  const { data: companies, isLoading: companyLoading } = usePollAllCompanies();
 
   const { data: representatives, isLoading: repsLoading } = useQuery({
     queryKey: ["representatives"],
@@ -36,16 +32,13 @@ export default function RepresentativesPage() {
       queryFn: getOrCreateRepresentativeCategory,
     });
 
-  useEffect(() => {
-    document.title = "Representatives | Connectize";
-  }, []);
-
   if (isLoading || companyLoading || repsLoading || repsCatLoading)
     return <PageLoading hasLogo={false} />;
 
   return (
     <section className="space-y-4">
-      <section className="flex justify-between gap-4">
+      <SEO title="Representatives | Connectize" />
+      <section className="flex flex-wrap justify-between gap-4">
         <HeadingText>Representatives</HeadingText>
 
         <ManageRepresentativesLink />

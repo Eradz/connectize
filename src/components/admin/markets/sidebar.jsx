@@ -1,18 +1,18 @@
-import React from "react";
-import clsx from "clsx";
-import { useAuth } from "../../../context/userContext";
 import { Avatar } from "@chakra-ui/react";
-import { NavigationSection } from "../../NavigationSection";
-import { avatarStyle } from "../../ResponsiveNav";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { getProductCategories } from "../../../api-services/products";
+import { getServiceCategories } from "../../../api-services/services";
+import { useAuth } from "../../../context/userContext";
 import { CategoryIcon, VerifiedIcon } from "../../../icon";
 import { capitalizeFirst } from "../../../lib/utils";
-import { Link, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getServiceCategories } from "../../../api-services/services";
-import { getProductCategories } from "../../../api-services/products";
 import HeadingText from "../../HeadingText";
-import { CircleTitleSubtitleSkeleton } from "../feeds/TopServiceSuggestions";
+import { NavigationSection } from "../../NavigationSection";
 import LightParagraph from "../../ParagraphText";
+import { avatarStyle } from "../../ResponsiveNav";
+import { CircleTitleSubtitleSkeleton } from "../feeds/TopServiceSuggestions";
 
 function Sidebar() {
   const { user: currentUser, loading } = useAuth();

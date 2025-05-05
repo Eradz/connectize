@@ -9,7 +9,7 @@ const AppLayout = () => {
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/";
   return (
-    <main className="bg-background min-h-screen">
+    <main className="bg-background h-screen">
       <Navbar />
       <section
         className={clsx(
