@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import DOMPurify from "dompurify";
-import ReusableModal from "./custom/ResusableModal";
 import { useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import ReusableModal from "./custom/ResusableModal";
 
 export const MarkdownComponent = ({
   markdownContent = "",
@@ -20,7 +20,7 @@ export const MarkdownComponent = ({
     <section>
       <div
         className={clsx(
-          "prose space-y-1",
+          "prose space-y-1 !leading-tight max-md:prose-sm prose-p:text-sm  prose-p:text-gray-600 prose-a:text-gold prose-a:no-underline prose-a:transition-colors prose-a:duration-200 prose-a:hover:text-gold prose-img:rounded-lg prose-img:max-w-full",
           {
             "md:line-clamp-5": isDescription,
           },

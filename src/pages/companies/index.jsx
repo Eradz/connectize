@@ -1,28 +1,26 @@
-import React from "react";
-import Heading from "../../components/company/Heading";
-import { useQuery } from "@tanstack/react-query";
-import { getAllCompanies } from "../../api-services/companies";
-import PageLoading from "../../components/PageLoading";
 import { Avatar, Button } from "@chakra-ui/react";
+import { LocationOnOutlined } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
+import React from "react";
+import { getAllCompanies } from "../../api-services/companies";
+import ConnectButton from "../../components/ConnectButton";
+import PageLoading from "../../components/PageLoading";
+import LightParagraph from "../../components/ParagraphText";
 import { avatarStyle, ConJoinedImages } from "../../components/ResponsiveNav";
 import CompanyName from "../../components/company/CompanyName";
-import { LocationOnOutlined } from "@mui/icons-material";
-import LightParagraph from "../../components/ParagraphText";
+import Heading from "../../components/company/Heading";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
-import ConnectButton from "../../components/ConnectButton";
 
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/userContext";
+import { usePollAllCompanies } from "../../hooks/polling";
 import { CompanyUserType } from "../../lib/helpers/types";
 
 const sortOptions = ["company name", "company type", "products", "country"];
 
 export default function CompaniesPage() {
-  const { data: companiesList, isLoading } = useQuery({
-    queryKey: ["companiesList"],
-    queryFn: getAllCompanies,
-  });
+  const { data: companiesList, isLoading } = usePollAllCompanies()
 
   const { user: currentUser } = useAuth();
 

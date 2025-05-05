@@ -68,7 +68,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   }
                 )}
               />
-              <span className="max-sm:sr-only lg:!text-sm">{name}</span>
+              <span className="max-md:sr-only lg:!text-sm">{name}</span>
             </Link>
           </li>
         );
@@ -101,7 +101,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             >
               <LogoutOutlined className="!text-lg" />
               <span
-                className={clsx({ "text-[.65rem] max-sm:sr-only": hasHeader })}
+                className={clsx({ "text-[.65rem] max-md:sr-only": hasHeader })}
               >
                 {loading ? "Logging out..." : "Logout"}
               </span>

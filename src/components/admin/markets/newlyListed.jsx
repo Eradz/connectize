@@ -4,9 +4,10 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { getAllCompanies } from "../../../api-services/companies";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
+import { usePollAllCompanies } from "../../../hooks/polling";
+import { useProductImages } from "../../../hooks/useProduct";
 import { webRoutes } from "../../../lib/webRoutes";
 import CustomTabs from "../../custom/tabs";
 
@@ -58,7 +59,6 @@ function NewlyListed() {
                   <ProductListCard
                     key={product.id}
                     id={product.id}
-                    image={product.images[0]?.image || "/images/Rectangle5.png"}
                     title={product.title}
                     subtitle={product.category}
                     companyName={product?.company}
@@ -81,15 +81,13 @@ export const ProductListCard = ({
   isSummary = false,
   companyName,
 }) => {
-  const { user: currentUser } = useAuth();
-  const { data: companies } = useQuery({
-    queryKey: ["allConnectizeCompanies"],
-    queryFn: getAllCompanies,
-    enabled: !!currentUser,
-  });
+  const { data: companies } = usePollAllCompanies();
   const company = companies?.results?.find(
     (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
   );
+
+  const { productImage } = useProductImages(id);
+  const imageUrl = productImage?.[0]?.image || image || "";
 
   return (
     <motion.div
@@ -104,7 +102,7 @@ export const ProductListCard = ({
       )}
     >
       <img
-        src={image || "/images/Rectangle5.png"}
+        src={imageUrl}
         className={clsx("w-full h-[300px] rounded-lg", {
           "md:h-[200px]": isSummary,
         })}

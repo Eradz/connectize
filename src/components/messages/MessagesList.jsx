@@ -84,7 +84,6 @@ const MessagesListTile = React.memo(({ message, user }) => {
   const room_name = searchParams.get("room_name");
 
   const handleMarkAsRead = async () => {
-    console.log(message?.read_at, user?.id);
     await markAllAsRead(room_name, user?.id);
   };
 

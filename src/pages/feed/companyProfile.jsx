@@ -1,6 +1,5 @@
-import { MailOutlined } from "@ant-design/icons";
 import { LocationOnOutlined } from "@mui/icons-material";
-import { GlobeIcon } from "@radix-ui/react-icons";
+import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useMemo } from "react";
@@ -68,7 +67,7 @@ export const ManageRepresentativesLink = ({ main = false }) => {
     <Link
       to="/co/representatives/manage"
       className={clsx(
-        "bg-gold hover:bg-opacity-70 text-sm xs:text-xs lg:text-sm font-semibold py-1.5 px-4 rounded-full",
+        "bg-gold hover:bg-opacity-60 text-sm xs:text-xs lg:text-sm font-semibold py-1.5 px-4 rounded-full block shrink-0",
         {
           "absolute right-0 -top-9 md:-top-14": main,
         }
@@ -147,7 +146,7 @@ const ProductSidebar = React.memo(({ company }) => {
           )}
           {company?.email && (
             <ProfileAboutList
-              Icon={MailOutlined}
+              Icon={EnvelopeClosedIcon}
               title="Company Email"
               value={company?.email || "No Email"}
             />

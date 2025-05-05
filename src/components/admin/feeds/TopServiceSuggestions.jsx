@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Avatar } from "@chakra-ui/react";
+import { Avatar, Badge } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useEffect } from "react";
@@ -102,6 +102,8 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
     keepPreviousData: true,
   });
 
+  console.log(shownUsers);
+
   useEffect(() => {
     if (thisUser?.id) {
       queryClient.invalidateQueries({ queryKey });
@@ -123,7 +125,15 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
           </LightParagraph>
         ) : (
           shownUsers?.map((user) => {
-            const { first_name, last_name, avatar, email: hashtag, id } = user;
+            const {
+              first_name,
+              last_name,
+              avatar,
+              email: hashtag,
+              id,
+              rep,
+              domain,
+            } = user;
 
             return (
               <li className="flex items-center gap-2.5 pt-2" key={id}>
@@ -134,8 +144,15 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
                   className={avatarStyle}
                 />
                 <div>
-                  <Username user={user} />
-                  <p className="text-sm text-gray-400 m-0">{hashtag}</p>
+                  <div className="flex items-center gap-1">
+                    <Username user={user} />
+                    {(rep || domain) && (
+                      <Badge className="!text-[.6rem]">
+                        {rep ? "Representative" : "Domain"}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400 -mt-1">{hashtag}</p>
                 </div>
               </li>
             );

@@ -61,8 +61,6 @@ function SummaryTabs({ company }) {
           key={index}
           title={product.title}
           subtitle={product.company}
-          // image={product.}
-          // url={`/products/${product.id}`}
           isSummary
         />
       ))}

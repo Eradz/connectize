@@ -15,7 +15,6 @@ import {
   deleteAllNotifications,
   deleteNotification,
   markAllNotificationsAsRead,
-  markNotificationAsRead,
 } from "../api-services/notifications";
 import { useCompanies, useUsers } from "../hooks";
 import { usePollNotifications } from "../hooks/polling";
@@ -63,13 +62,13 @@ const IndicatorBadge = ({ indicator, floating = false }) => {
 };
 
 const NotificationPopOver = () => {
-  const { unreadCount: notificationLengthNotRead } = useNotificationsStore();
+  const { unreadCount } = usePollNotifications();
 
   return (
     <Popover>
       <PopoverTrigger>
         <button className="relative">
-          <IndicatorBadge indicator={notificationLengthNotRead} floating />
+          <IndicatorBadge indicator={unreadCount} floating />
           <Notification />
         </button>
       </PopoverTrigger>
@@ -83,8 +82,7 @@ const NotificationPopOver = () => {
 };
 
 export const NotificationItem = ({ isPopover = false }) => {
-  const { notifications, unreadCount: notificationLengthNotRead } =
-    usePollNotifications();
+  const { notifications, unreadCount } = usePollNotifications();
 
   const { markAllAsRead, deleteAll } = useNotificationsStore();
   const { data: companies, isLoading: companiesLoading } = useCompanies();
@@ -142,7 +140,7 @@ export const NotificationItem = ({ isPopover = false }) => {
               <IndicatorBadge indicator={notifications?.length} />
             </h4>
             <div>
-              {notificationLengthNotRead > 0 && (
+              {unreadCount > 0 && (
                 <button
                   className="text-black/90 bg-gold rounded-md hover:bg-opacity-60 transition-all duration-300 !text-xs disabled:cursor-not-allowed disabled:no-underline px-5 py-1"
                   onClick={handleMarkAllAsRead}
@@ -198,7 +196,7 @@ const NotificationsArray = memo(
     return (
       <section
         className={clsx("space-y-2 divide-y divide-gray-100", {
-          "overflow-y-auto overflow-x-hidden max-h-[55vh] scrollbar-hidden":
+          "overflow-y-auto overflow-x-hidden max-h-[32vh] scrollbar-hidden":
             isPopover,
         })}
       >
@@ -234,12 +232,7 @@ const NotificationTile = memo(({ notification, index, company }) => {
     useNotificationsStore();
 
   const handleMarkAsRead = async () => {
-    markAsRead(notification?.id);
-    try {
-      await markNotificationAsRead(notification?.id);
-    } catch (err) {
-      console.error("Failed to mark notification as read:", err);
-    }
+    await markAsRead(notification?.id);
   };
 
   const handleDeleteNotification = async () => {
@@ -274,9 +267,9 @@ const NotificationTile = memo(({ notification, index, company }) => {
           className="text-[.825rem] !text-gray-600 leading-none block"
         >
           {notification?.message}{" "}
-          <Badge className="!text-[.6rem]">
-            {notification?.is_read ? "" : "Unread"}
-          </Badge>
+          {!notification?.is_read && (
+            <Badge className="!text-[.55rem]">Unread</Badge>
+          )}
         </Link>
         <div className="flex items-center gap-2">
           <small className="text-gray-400 text-[.69rem]">
@@ -303,5 +296,6 @@ const NotificationTile = memo(({ notification, index, company }) => {
     </motion.div>
   );
 });
+
 export { NotificationPopOver, NotificationsArray };
 
