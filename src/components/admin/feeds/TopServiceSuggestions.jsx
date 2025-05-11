@@ -102,8 +102,6 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
     keepPreviousData: true,
   });
 
-  console.log(shownUsers);
-
   useEffect(() => {
     if (thisUser?.id) {
       queryClient.invalidateQueries({ queryKey });

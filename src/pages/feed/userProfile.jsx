@@ -175,19 +175,21 @@ export default function UserProfile() {
   );
 }
 
-export const ProfileAboutList = ({ title, value, Icon }) => {
+export const ProfileAboutList = ({ title = "", value = "", Icon }) => {
+  const formattedTitle = title.toString().toLowerCase();
+  const formattedValue = value.toString().toLowerCase();
   return (
     <li className="flex gap-2 items-start pt-4">
       <Icon className="!size-6 xs:!size-5" />
       <div className="flex gap-1 items-baseline max-sm:flex-col">
         <strong className="leading-none">{title}:</strong>
         <LightParagraph>
-          {value?.toLowerCase()?.includes("http") ? (
+          {value && formattedValue?.includes("http") ? (
             <a href={value} target="__blank" className="!underline">
               {value}
             </a>
-          ) : title?.toLowerCase()?.includes("email") &&
-            value?.toLowerCase()?.includes("@") ? (
+          ) : formattedTitle?.includes("email") &&
+            formattedValue?.includes("@") ? (
             <a
               href={`mailto:${value}`}
               target="__blank"
