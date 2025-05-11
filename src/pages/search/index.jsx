@@ -1,4 +1,5 @@
 import { Avatar } from "@chakra-ui/react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
@@ -174,5 +175,19 @@ export const SearchTab = () => {
 
   const tabsPanels = filteredTabs.map((tab) => tab.content);
 
-  return <CustomTabs tabsHeading={tabsHeading} tabsPanels={tabsPanels} />;
+  return tabsHeading.length <= 0 ? (
+    <section className="flex items-center flex-col gap-4">
+      <DotLottieReact
+        src="/lottie/notification.lottie"
+        loop
+        autoplay
+        className="size-40 shrink-0 pointer-events-none"
+      />
+      <LightParagraph center>
+        We couldn't find any result for <b>{searchQuery}</b>
+      </LightParagraph>
+    </section>
+  ) : (
+    <CustomTabs tabsHeading={tabsHeading} tabsPanels={tabsPanels} />
+  );
 };
