@@ -22,6 +22,7 @@ function AuthLayout({ redirectUrl = "/" }) {
     <main className="flex justify-center h-screen p-4">
       <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center lg:!w-1/2 shrink-0 scrollbar-hidden">
         <section className="w-full max-xs:h-full  py-4 max-w-sm lg:max-w-md">
+          <Logo url="/login" />
           <motion.section
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -29,8 +30,6 @@ function AuthLayout({ redirectUrl = "/" }) {
             className="flex flex-col-reverse gap-2"
             key={pathname + "section"}
           >
-            <Logo url="/login" />
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
