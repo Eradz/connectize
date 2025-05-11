@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getAllCompanies,
   getCompanyByIdOrEmail,
+  getSingleCompany,
 } from "../api-services/companies";
 import { getMessagesForUser } from "../api-services/messaging";
 import { getPosts } from "../api-services/posts";
@@ -43,6 +44,14 @@ export const useGetCurrentCompany = () => {
   return useQuery({
     queryKey: ["companies"],
     queryFn: () => getCompanyByIdOrEmail(),
+    enabled: !!currentUser,
+  });
+};
+export const useGetSingleCompany = (name) => {
+  const { user: currentUser } = useAuth();
+  return useQuery({
+    queryKey: ["company", name],
+    queryFn: () => getSingleCompany(name),
     enabled: !!currentUser,
   });
 };

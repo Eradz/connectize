@@ -175,7 +175,7 @@ export const SearchTab = () => {
 
   const tabsPanels = filteredTabs.map((tab) => tab.content);
 
-  return tabsHeading.length <= 0 ? (
+  return tabsHeading?.length <= 0 ? (
     <section className="flex items-center flex-col gap-4">
       <DotLottieReact
         src="/lottie/notification.lottie"
@@ -184,7 +184,7 @@ export const SearchTab = () => {
         className="size-40 shrink-0 pointer-events-none"
       />
       <LightParagraph center>
-        We couldn't find any result for <b>{searchQuery}</b>
+        We couldn't find any result for <b>{searchQuery}</b>.
       </LightParagraph>
     </section>
   ) : (
