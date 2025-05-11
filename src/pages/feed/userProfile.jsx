@@ -186,7 +186,7 @@ export const ProfileAboutList = ({ title, value, Icon }) => {
             <a href={value} target="__blank" className="!underline">
               {value}
             </a>
-          ) : title.toLowerCase().includes("email") &&
+          ) : title?.toLowerCase()?.includes("email") &&
             value?.toLowerCase()?.includes("@") ? (
             <a
               href={`mailto:${value}`}
