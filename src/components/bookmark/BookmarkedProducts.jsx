@@ -1,16 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { bookmarkProduct, getProducts } from "../../api-services/products";
-import PageLoading from "../PageLoading";
-import { useEffect, useState } from "react";
-import LightParagraph from "../ParagraphText";
-import { Link } from "react-router-dom";
-import { ChatSellerLink } from "../admin/markets/newlyListed";
-import { motion } from "framer-motion";
-import { LinkWithTooltipIcon } from "../userProfile/Navbar";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { Link1Icon, Share1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { shareThis } from "../../lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { bookmarkProduct, getProducts } from "../../api-services/products";
 import { useAuth } from "../../context/userContext";
+import { shareThis } from "../../lib/utils";
+import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import PageLoading from "../PageLoading";
+import LightParagraph from "../ParagraphText";
+import { LinkWithTooltipIcon } from "../userProfile/Navbar";
 
 export const BookmarkedProducts = () => {
   const { user: currentUser } = useAuth();
@@ -30,8 +29,6 @@ export const BookmarkedProducts = () => {
 
   useEffect(() => {
     setCachedProducts(bookmarkedProducts);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!bookmarkedProducts]);
 
   if (isLoading) return <PageLoading hasLogo={false} />;
@@ -73,17 +70,18 @@ const BookmarkedProductsCard = ({
       cachedProducts?.filter((cacheProduct) => cacheProduct.id !== product?.id)
     );
   };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       className="flex justify-between max-sm:flex-col relative"
     >
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <img
-          src={product?.images?.[0]?.image || "/images/produc_drum.jpeg"}
+          src={product?.images?.[0]?.image || ""}
           alt={product?.images?.[0]?.caption || ""}
-          className="size-20 sm:size-24 rounded-md overflow-hidden shrink-0"
+          className="size-16 sm:size-20 rounded-md overflow-hidden shrink-0"
         />
 
         <div className="flex flex-col justify-between">
@@ -98,7 +96,7 @@ const BookmarkedProductsCard = ({
               {product?.category}
             </small>
           </div>
-          <ChatSellerLink text="Chat seller" to={`/messages/${product?.id}`} />
+          {/* <ChatSellerLink text="Chat seller" recipientId={5} /> */}
         </div>
       </div>
 

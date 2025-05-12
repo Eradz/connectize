@@ -2,6 +2,7 @@ import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
 import { usePollMessages } from "../../hooks/polling";
 import { useMessagesStore } from "../../stores/messagesStore";
@@ -13,6 +14,7 @@ import Username from "../Username";
 
 export default function MessagesList() {
   const { messages } = usePollMessages();
+  const { user: currentUser } = useAuth();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
@@ -60,14 +62,19 @@ export default function MessagesList() {
       ) : (
         messagesList.map((message) => {
           const currentUserId =
-            String(message?.user) === String(message?.recipient)
-              ? message?.sender
-              : message?.recipient;
-          const user = users?.find(
-            (user) => String(user?.id) === String(currentUserId)
-          );
+            currentUser?.id !== message?.recipient
+              ? message?.recipient
+              : message?.sender;
+
+          const recipient = users?.find((user) => user?.id === currentUserId);
+          console.log(recipient);
+
           return (
-            <MessagesListTile key={message?.id} message={message} user={user} />
+            <MessagesListTile
+              key={message?.id}
+              message={message}
+              user={recipient}
+            />
           );
         })
       )}

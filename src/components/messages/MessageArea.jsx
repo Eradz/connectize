@@ -11,7 +11,6 @@ import { useUsers } from "../../hooks";
 import { baseURL } from "../../lib/helpers";
 import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
-import { useMessagesStore } from "../../stores/messagesStore";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
@@ -20,8 +19,6 @@ import { VoiceNotePlayer } from "./MessageControl";
 
 export default function MessageArea({ messages, messagesLoading }) {
   const { user: currentUser } = useAuth();
-
-  const { markAllAsRead } = useMessagesStore();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 

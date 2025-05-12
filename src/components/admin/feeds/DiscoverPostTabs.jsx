@@ -153,7 +153,7 @@ export const PostCard = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-4 lg:!px-3 !w-full bg-white rounded-md flex flex-col h-72 shrink-0"
+      className="p-4 lg:!px-3 !w-full bg-white rounded-md flex flex-col min-h-72 shrink-0"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-bold capitalize text-lg line-clamp-1">
