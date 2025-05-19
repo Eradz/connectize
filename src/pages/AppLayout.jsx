@@ -8,17 +8,14 @@ const AppLayout = () => {
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/";
   return (
-    <main
-      className={clsx("bg-background h-screen", {
-        "md:container": isHomeRoute,
-      })}
-    >
+    <main className={"bg-background h-screen"}>
       <Navbar />
       <section
         className={clsx(
           "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4",
           {
             "max-md:container p-3": !isSinglePostRoute && !isHomeRoute,
+            "md:container": isHomeRoute,
           }
         )}
       >

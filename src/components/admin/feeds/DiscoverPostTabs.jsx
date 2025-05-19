@@ -55,7 +55,7 @@ const DiscoverPostTabs = () => {
     <CustomTabs
       variant="unstyled"
       tabsStyle=""
-      className="max-md:container"
+      className="sm:container md:!p-0"
       tabsHeading={["Products", "Services"]}
       tabsPanels={[
         <PostSlider

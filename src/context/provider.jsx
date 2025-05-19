@@ -1,6 +1,5 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { queryClient } from "../lib/utils";
 import { NavProvider } from "./navContext";
@@ -8,24 +7,6 @@ import { QueryProvider } from "./queryContext";
 import { UserProvider } from "./userContext";
 
 const MyProvider = ({ children }) => {
-  const [pageLoaded, setPageLoaded] = useState(false);
-
-  useEffect(() => {
-    setPageLoaded(true);
-  }, [pageLoaded]);
-
-  if (!pageLoaded) {
-    return (
-      <></>
-      // <main className="h-screen flex bg-background items-center justify-center">
-      //   <section className="flex flex-col justify-center items-center">
-      //     <img src="/images/logo.png" alt="" className="size-10" />
-      //     <h2 className="font-bold text-lg ">Connectize</h2>
-      //   </section>
-      // </main>
-    );
-  }
-
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>

@@ -1,4 +1,3 @@
-import React from "react";
 import Headroom from "react-headroom";
 import Logo from "../logo";
 
@@ -44,7 +43,7 @@ const Navbar = () => {
     <>
       <Headroom>
         <nav className="w-full h-16 flex items-center bg-white z-[99999]">
-          <section className="container w-full py-2 md:px-4 flex items-center justify-between !gap-2 lg:!gap-10 xl:!gap-14">
+          <section className="sm:container max-xs:px-2 max-sm:px-4 w-full py-2 flex items-center justify-between !gap-2 lg:!gap-10 xl:!gap-14 shadow">
             <div className={weirdFlex}>
               <Logo size="50px" />
               <FeedSearch />
