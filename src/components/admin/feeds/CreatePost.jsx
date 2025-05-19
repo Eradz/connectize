@@ -1,12 +1,6 @@
 import { CloseButton } from "@chakra-ui/react";
 import EmojiPicker from "emoji-picker-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { createPost } from "../../../api-services/posts";
@@ -150,7 +144,7 @@ function CreatePost() {
   );
 
   return (
-    <section className="bg-white max-xl:!w-[90%] px-4 md:px-6 py-4 rounded border-b-[4px] border-gold relative max-md:container">
+    <section className="bg-white px-4 md:px-6 py-4 rounded border-b-[4px] border-gold relative">
       <div className="size-full">
         <textarea
           type="text"

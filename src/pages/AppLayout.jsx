@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/admin/markets/sidebar";
 import Navbar from "../components/userProfile/Navbar";
@@ -9,7 +8,11 @@ const AppLayout = () => {
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/";
   return (
-    <main className="bg-background h-screen">
+    <main
+      className={clsx("bg-background h-screen", {
+        "md:container": isHomeRoute,
+      })}
+    >
       <Navbar />
       <section
         className={clsx(

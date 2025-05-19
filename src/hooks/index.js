@@ -42,7 +42,7 @@ export const useUsers = () => {
 export const useGetCurrentCompany = () => {
   const { user: currentUser } = useAuth();
   return useQuery({
-    queryKey: ["companies"],
+    queryKey: ["myCompanies"],
     queryFn: () => getCompanyByIdOrEmail(),
     enabled: !!currentUser,
   });
