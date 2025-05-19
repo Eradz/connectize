@@ -1,7 +1,6 @@
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getProductCategories } from "../../../api-services/products";
 import { getServiceCategories } from "../../../api-services/services";
@@ -23,7 +22,7 @@ function Sidebar() {
   return (
     <nav
       className={clsx(
-        "max-md:hidden bg-white rounded-md py-4 px-2 shrink-0 max-w-[300px] md:w-[240px] lg:w-[260px] 2xl:w-[280px] h-screen scrollbar-hidden max-md:!py-6 max-md:shadow md:sticky md:top-2 overflow-y-auto md:max-h-screen space-y-4"
+        "max-md:hidden bg-white rounded-md py-4 px-2 shrink-0 max-w-[300px] sm:w-[280px] lg:w-[300px] 2xl:w-[320px] h-screen scrollbar-hidden max-md:!py-6 max-md:shadow md:sticky md:top-2 overflow-y-auto md:max-h-screen space-y-4"
       )}
     >
       {!loading && currentUser ? (
