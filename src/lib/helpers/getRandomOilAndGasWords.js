@@ -1,4 +1,4 @@
-function getRandomOilAndGasKeyword() {
+export function getRandomOilAndGasKeyword() {
   const keywords = [
     // Upstream
     "exploration",

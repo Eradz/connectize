@@ -1,9 +1,10 @@
-import { Avatar } from "@chakra-ui/react";
+import { Avatar, Button } from "@chakra-ui/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { getSearchResults } from "../../api-services/search";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
 import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
@@ -15,6 +16,8 @@ import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
 import { usePollAllCompanies } from "../../hooks/polling";
+import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
+import { getRandomOilAndGasKeyword } from "../../lib/helpers/getRandomOilAndGasWords";
 import { CompaniesArray } from "../companies";
 
 export default function Search() {
@@ -26,13 +29,24 @@ export default function Search() {
 }
 
 export const SearchTab = () => {
-  const [searchParams] = useSearchParams();
   const { user: currentUser } = useAuth();
   const { data: companies } = usePollAllCompanies();
-  const { pathname } = useLocation();
   const navigate = useNavigate();
 
+  const [randKeyWord, setRandKeyWord] = useState(getRandomOilAndGasKeyword());
+
+  const { updateSearchParams, searchParams, pathname } =
+    useCustomSearchParams();
+
   const searchQuery = searchParams.get("search_query");
+
+  const isSearchPage = pathname === "/search";
+
+  useEffect(() => {
+    if (searchQuery?.toLowerCase() === randKeyWord?.toLowerCase()) {
+      setRandKeyWord(getRandomOilAndGasKeyword());
+    }
+  }, [searchQuery, randKeyWord]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["search", searchQuery],
@@ -179,7 +193,14 @@ export const SearchTab = () => {
   const tabsPanels = filteredTabs.map((tab) => tab.content);
 
   return tabsHeading?.length <= 0 ? (
-    <section className="flex items-center flex-col gap-4">
+    <section
+      className={clsx(
+        "flex items-center justify-center flex-col gap-4 px-4 py-6",
+        {
+          "h-[60vh]": isSearchPage,
+        }
+      )}
+    >
       <DotLottieReact
         src="/lottie/notification.lottie"
         loop
@@ -189,17 +210,28 @@ export const SearchTab = () => {
       <LightParagraph center>
         We couldn't find any result for{" "}
         {searchQuery ? (
-          <b>{searchQuery}</b>
+          <b className="!text-black break-keep">{searchQuery}</b>
         ) : (
-          <>
-            your search. Try searching{" "}
-            <button>
-              <b>Oil and Gas</b>
-            </button>
-          </>
+          <>your search.</>
         )}
-        .
+        . Try searching for{" "}
+        <button
+          onClick={() =>
+            updateSearchParams({ search_query: randKeyWord?.toLowerCase() })
+          }
+        >
+          <b className="capitalize !text-gold">{randKeyWord}.</b>
+        </button>
       </LightParagraph>
+
+      <div className="flex gap-4 items-center mt-2">
+        <Button variant="solid" className="!bg-gold" size="sm">
+          <Link to="/"> Go Home</Link>
+        </Button>
+        <Button variant="outline" size="sm">
+          <Link to="/market">Check Products</Link>
+        </Button>
+      </div>
     </section>
   ) : (
     <CustomTabs tabsHeading={tabsHeading} tabsPanels={tabsPanels} />
