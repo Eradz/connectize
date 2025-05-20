@@ -1,5 +1,3 @@
-import React from "react";
-
 import MessagingPage from "../messages/messaging";
 
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -20,12 +18,12 @@ export default function MessagesLayout() {
     <section className="w-full h-fit flex gap-4">
       <SEO
         title={
-          room_name ? "Room messaging in connectize" : "Messaging in connectize"
+          room_name ? "Peer messaging in connectize" : "Messaging in connectize"
         }
       />
       <section
         className={clsx(
-          "lg:max-w-[300px] xl:max-w-[400px] w-full 2xl:max-w-[500px] space-y-6 bg-white h-screen p-4 rounded-md overflow-hidden",
+          "lg:max-w-[300px] xl:max-w-[400px] w-full 2xl:max-w-[500px] space-y-6 bg-white h-[97vh] p-4 rounded-md overflow-hidden",
           {
             "max-lg:hidden": room_name,
           }
@@ -35,7 +33,7 @@ export default function MessagesLayout() {
       </section>
       <section
         className={clsx(
-          "w-full flex-1 h-screen border border-gray-100 rounded-md",
+          "w-full flex-1 h-[97vh] border border-gray-100 rounded-md",
           {
             "max-lg:hidden": !room_name,
           }

@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 import { useAuth } from "../../../context/userContext";
+import { useGetCurrentCompany } from "../../../hooks";
 import { CompanyUserType } from "../../../lib/helpers/types";
 import CreatePost from "./CreatePost";
 import DiscoverPosts from "./DiscoverPosts";
@@ -11,20 +10,15 @@ import DiscoverPostTabs from "./DiscoverPostTabs";
 const DiscoverFeed = () => {
   const { user: currentUser, setUser } = useAuth();
 
-  const { data: companies = [], isLoading } = useQuery({
-    queryKey: ["companies"],
-    queryFn: () => getCompanyByIdOrEmail(),
-    enabled: !!currentUser,
-  });
+  const { data: companies = [], isLoading } = useGetCurrentCompany();
 
   useEffect(() => {
     setUser(currentUser);
   }, [currentUser, setUser]);
 
-
   return (
     <section className="space-y-6">
-      <div className="flex items-baseline gap-2  max-md:container mt-4">
+      <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-4">
         <h1 className="text-3xl font-semibold">Discover</h1>
         {(currentUser || !isLoading) &&
           currentUser?.user_type === CompanyUserType &&
@@ -44,7 +38,7 @@ const DiscoverFeed = () => {
                 : "Create Company"}
             </Link>
           )}
-      </div>
+      </section>
       {currentUser?.user_type === CompanyUserType && <CreatePost />}
       <DiscoverPostTabs />
       <DiscoverPosts />

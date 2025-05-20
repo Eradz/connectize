@@ -47,8 +47,18 @@ export function timeAgo(timestamp, format = "") {
     }
   }
 
+  if (format === "long") {
+    const longDate = new Date(timestamp).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    return longDate;
+  }
+
   for (const [unit, value] of Object.entries(intervals)) {
     const count = Math.floor(seconds / value);
+
     if (count > 0) {
       return count === 1 ? `a ${unit} ago` : `${count} ${unit}s ago`;
     }

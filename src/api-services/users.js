@@ -12,7 +12,7 @@ export const getAllUsers = async () => {
     method: "GET",
   });
 
-  return results;
+  return results?.filter((user) => user?.first_name && user?.last_name);
 };
 
 export const getUserById = async (id) => {

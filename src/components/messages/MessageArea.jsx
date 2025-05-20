@@ -4,7 +4,7 @@ import { ErrorOutline } from "@mui/icons-material";
 import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
@@ -22,25 +22,20 @@ export default function MessageArea({ messages, messagesLoading }) {
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
-  const [readMoreLimit, setReadMoreLimit] = useState(200);
+  const [readMoreLimit, setReadMoreLimit] = useState(300);
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {
-      const formattedDate = new Date(message.timestamp);
-
-      const date = formattedDate.toLocaleDateString();
-      if (!acc[date]) {
-        acc[date] = [];
+      const dateKey = new Date(message.timestamp).toISOString().split("T")[0]; // e.g., '2025-05-20'
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
       }
-      acc[date].push(message);
-
+      acc[dateKey].push(message);
       return acc;
     }, {});
   };
 
   const groupedMessages = groupMessagesByDate(messages);
-
-  useEffect(() => {}, []);
 
   return (
     <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">
@@ -63,8 +58,8 @@ export default function MessageArea({ messages, messagesLoading }) {
           </Link>
         </div>
       ) : (
-        Object?.keys(groupedMessages)
-          .sort((a, b) => a.localeCompare(b))
+        Object.keys(groupedMessages)
+          .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
           .map((date) => (
             <section key={date} id={date}>
               <div className="text-center my-2 flex justify-center sticky top-0">
@@ -81,13 +76,7 @@ export default function MessageArea({ messages, messagesLoading }) {
                 </button>
               </div>
               {groupedMessages[date]
-                .sort((a, b) => {
-                  const formattedDate = (date) =>
-                    date.replace("+00:00", "Z").replace(" ", "T");
-                  return formattedDate(a.timestamp).localeCompare(
-                    formattedDate(b.timestamp)
-                  );
-                })
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
                 .map((message, index) => {
                   const currentUserId =
                     currentUser?.id !== message?.recipient
@@ -109,7 +98,9 @@ export default function MessageArea({ messages, messagesLoading }) {
                       key={index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={clsx("w-full p-1 pt-4 flex gap-2.5")}
+                      className={clsx(
+                        "w-full p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2"
+                      )}
                     >
                       <Link to={`/co/${user?.id}`} className="h-fit">
                         <Avatar

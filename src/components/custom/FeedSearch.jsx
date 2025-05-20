@@ -1,10 +1,9 @@
 import { SearchOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import React from "react";
-import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
-import ReusableModal from "./ResusableModal";
-import { SearchTab } from "../../pages/search";
 import { Link } from "react-router-dom";
+import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
+import { SearchTab } from "../../pages/search";
+import ReusableModal from "./ResusableModal";
 
 function FeedSearch({ className }) {
   const { updateSearchParams, searchParams, pathname } =
@@ -48,7 +47,7 @@ function FeedSearch({ className }) {
             <span>Search Results for</span>{" "}
             <Link
               to={`/search?search_query=${searchQuery}`}
-              className="!underline"
+              className="!underline !text-gray-500"
             >
               {searchQuery}
             </Link>

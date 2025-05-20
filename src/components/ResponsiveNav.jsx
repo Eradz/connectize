@@ -1,19 +1,17 @@
 import { Avatar } from "@chakra-ui/react";
 import { ChevronLeft, Menu } from "@mui/icons-material";
-import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getCompanyByIdOrEmail } from "../api-services/companies";
 import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";
+import { useGetCurrentCompany } from "../hooks";
 import { ChartBar, Setting } from "../icon";
 import { CompanyUserType } from "../lib/helpers/types";
 import { ConjoinedAvatarSkeleton } from "./admin/feeds/DiscoverPosts";
 import FeedSearch from "./custom/FeedSearch";
 import { NotificationPopOver } from "./notifications";
 import { LinkWithTooltipIcon } from "./userProfile/Navbar";
-import { useGetCurrentCompany } from "../hooks";
 
 function ResponsiveNav() {
   const { toggleNav } = useNav();
@@ -47,7 +45,7 @@ export const avatarStyle = "!bg-gold !text-black border-2 border-white";
 export const JoinedUserCompanyImages = () => {
   const { user: currentUser } = useAuth();
 
-  const { data: companies, isLoading } = useGetCurrentCompany()
+  const { data: companies, isLoading } = useGetCurrentCompany();
 
   const [headingImages, setHeadingImages] = useState([]);
 
@@ -66,7 +64,7 @@ export const JoinedUserCompanyImages = () => {
     }
   }, [currentUser?.user_type, companies]);
 
-  return isLoading ? (
+  return !currentUser || isLoading ? (
     <ConjoinedAvatarSkeleton length={2} />
   ) : (
     <div className="relative h-fit w-fit">
