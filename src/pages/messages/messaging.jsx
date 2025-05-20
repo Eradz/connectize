@@ -25,7 +25,7 @@ export default function MessagingPage() {
   const { data: users, isLoading: usersLoading } = useUsers();
 
   return (
-    <section className="flex flex-col relative h-[97vh] xs:px-2 sm:container md:!p-0 bg-red-700">
+    <section className="flex flex-col relative h-[97vh] xs:px-2 sm:container md:!p-0">
       <MessageHeader
         user={users?.find((user) => user?.id === checkUserId)}
         isLoading={usersLoading}
