@@ -6,7 +6,7 @@ import Navbar from "../components/userProfile/Navbar";
 const AppLayout = () => {
   const { pathname } = useLocation();
   const isSinglePostRoute = pathname.startsWith("/posts/");
-  const isHomeRoute = pathname === "/";
+  const isHomeRoute = pathname === "/" || pathname.startsWith("/messages");
   return (
     <main className="bg-background h-screen">
       <Navbar />

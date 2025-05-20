@@ -23,13 +23,7 @@ import {
   TrashIcon,
 } from "@radix-ui/react-icons";
 import EmojiPicker from "emoji-picker-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../../context/userContext";
 import { useMessagesStore } from "../../stores/messagesStore";

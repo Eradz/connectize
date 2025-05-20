@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import MessageArea from "../../components/messages/MessageArea";
 import MessageControl from "../../components/messages/MessageControl";
@@ -25,7 +25,7 @@ export default function MessagingPage() {
   const { data: users, isLoading: usersLoading } = useUsers();
 
   return (
-    <section className="flex flex-col relative h-screen">
+    <section className="flex flex-col relative h-[97vh] xs:px-2 sm:container md:!p-0">
       <MessageHeader
         user={users?.find((user) => user?.id === checkUserId)}
         isLoading={usersLoading}
