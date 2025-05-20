@@ -97,6 +97,8 @@ export async function refreshToken() {
   }
 }
 
+let hasNotifiedOffline = false;
+
 export async function getAuthorizationHeader() {
   if (accessToken && Date.now() < accessTokenExpiry) {
     return { Authorization: "Bearer " + accessToken };
@@ -132,17 +134,24 @@ export async function makeApiRequest({
       params,
     });
 
+    hasNotifiedOffline = false;
+
     if (response.status >= 200 && response.status <= 204) {
       resetForm?.();
       const responseMessage = response.data.message;
 
-      if (response.data.success && responseMessage) {
+      if (
+        response.data.success &&
+        responseMessage &&
+        !url.includes("notification")
+      ) {
         toast.success(responseMessage);
       }
       return response.data;
     }
   } catch (error) {
-    if (!navigator.onLine) {
+    if (!navigator.onLine && !hasNotifiedOffline) {
+      hasNotifiedOffline = true;
       toast.error("Network error. Please check your internet connection.");
       console.error("Network error:", error);
       return;

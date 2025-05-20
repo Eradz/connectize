@@ -7,7 +7,7 @@ import {
 import { Badge } from "@chakra-ui/react";
 import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getUserById } from "../../api-services/users";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
@@ -29,6 +29,8 @@ const emptyWord = "Not Added";
 export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
+
+  console.log(userId);
 
   const { data: paramUser, isLoading } = useQuery({
     queryKey: ["users", userId],
@@ -65,8 +67,8 @@ export default function UserProfile() {
   return (
     <section className="rounded-md overflow-hidden">
       <SEO
-        title={`${paramUser.first_name || paramUser.email || ""} ${
-          paramUser.last_name || ""
+        title={`${paramUser?.first_name || paramUser?.email || ""} ${
+          paramUser?.last_name || ""
         } | connectize`}
       />
       <Header type="user" {...headerProps} />
