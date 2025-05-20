@@ -201,7 +201,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
   }, [message]);
 
   return (
-    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 md:bottom-0">
+    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 md:bottom-4">
       {/* valid images */}
       {validImages && (
         <ValidImages
