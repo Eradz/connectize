@@ -1,7 +1,7 @@
 import { PlusIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import React, { memo } from "react";
+import { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { SwiperSlide } from "swiper/react";
 import { getRecommendedProducts } from "../../../api-services/products";
@@ -10,25 +10,22 @@ import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 import { PostSlider } from "../feeds/DiscoverPostTabs";
 import { ChatSellerLink, ListCardSkeleton } from "./newlyListed";
 
-// Memoize Card component to avoid unnecessary re-renders
 const Card = memo(({ product }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative overflow-hidden rounded-lg"
+      className="relative overflow-hidden rounded-lg max-w-[500px]"
     >
       <img
         src={product.images[0]?.image || ""}
-        className="w-full h-[300px] scale-105"
+        className="w-full max-h-[350px] "
         alt={product.images[0]?.caption || "Product"}
       />
       <div className="absolute top-2 left-3 bg-custom_grey/70 rounded-full size-5 border-2" />
       <div className="text-white flex items-center justify-between absolute left-0 bottom-0 pl-4 pr-1 pb-4 pt-8 gap-2 bg-gradient-to-t from-black/70 to-transparent w-full">
-        <h3 className="max-w-[60%]">
-          {product?.title || "Efficiency Unlashed: Mid-Tier Blend"}
-        </h3>
+        <h3 className="max-w-[60%]">{product?.title || ""}</h3>
         <ChatSellerLink text="Visit store" to={`/products/${product?.id}`} />
       </div>
     </motion.div>
@@ -53,7 +50,7 @@ function Carousel() {
 
   return (
     <section className="space-y-4 max-md:container">
-      <div className="mx-auto flex items-center justify-center gap-1 bg-tabs p-1 w-fit rounded-full">
+      <div className="mx-auto flex items-center justify-center gap-1 bg-tabs p-1 w-fit rounded-full text-sm">
         <button className="bg-white rounded-full px-4 py-1">Market</button>
         <button
           onClick={() => navigate("/services")}

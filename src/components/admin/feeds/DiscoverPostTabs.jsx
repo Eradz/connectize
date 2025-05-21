@@ -99,7 +99,7 @@ export const PostSlider = ({
   return arrayLoading || loading ? (
     <PostCardSkeleton />
   ) : array.length <= 0 ? (
-    <div className="w-full h-20 flex items-center justify-center">
+    <div className="w-full h-24 flex items-center justify-center">
       <p className="text-gray-500 text-sm">
         No {fallback} available at the moment.
       </p>

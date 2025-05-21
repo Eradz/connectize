@@ -2,7 +2,6 @@ import { Avatar, Button } from "@chakra-ui/react";
 import { LocationOnOutlined } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React from "react";
 import { getAllCompanies } from "../../api-services/companies";
 import ConnectButton from "../../components/ConnectButton";
 import PageLoading from "../../components/PageLoading";
@@ -20,7 +19,7 @@ import { CompanyUserType } from "../../lib/helpers/types";
 const sortOptions = ["company name", "company type", "products", "country"];
 
 export default function CompaniesPage() {
-  const { data: companiesList, isLoading } = usePollAllCompanies()
+  const { data: companiesList, isLoading } = usePollAllCompanies();
 
   const { user: currentUser } = useAuth();
 
@@ -118,12 +117,12 @@ export const CompaniesArray = ({
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               key={index}
-              className={clsx("p-2 rounded-md h-72 flex flex-col", {
+              className={clsx("p-2 rounded-md flex flex-col", {
                 "bg-white": !isSearch,
                 "bg-background": isSearch,
               })}
             >
-              <div className="flex gap-2 items-center">
+              <div className="flex md:flex-col gap-4 items-center">
                 <Avatar
                   className={avatarStyle}
                   size="xl"
@@ -131,14 +130,14 @@ export const CompaniesArray = ({
                   name={company?.company_name}
                 />
 
-                <div>
+                <div className="md:w-full md:flex flex-col md:items-center">
                   <CompanyName
                     name={company?.company_name}
                     verified={company?.verify}
                     size="md"
                   />
                   {company?.organization_type && (
-                    <div className="flex mb-1">
+                    <div className="flex mb-1 md:items-center">
                       <span className="!line-clamp-1 xs:text-sm sm:text-xs">
                         {company?.organization_type}
                       </span>
@@ -154,14 +153,21 @@ export const CompaniesArray = ({
                 </div>
               </div>
 
-              <div className="line-clamp-3 p-2 shrink-0">
+              <div className="line-clamp-3 p-2 shrink-0 md:text-center ">
                 <LightParagraph>{company?.about} </LightParagraph>
               </div>
 
               <div className="h-full" />
 
-              <div className="py-4 border-t mt-4 flex items-center justify-between">
-                {company?.reviews ? (
+              <div
+                className={clsx(
+                  "py-4 border-t mt-4 px-4 flex items-center justify-between",
+                  {
+                    "md:!justify-center": company?.reviews?.length <= 0,
+                  }
+                )}
+              >
+                {company?.reviews && (
                   <ConJoinedImages
                     size={30}
                     sizeVariant="sm"
@@ -171,8 +177,6 @@ export const CompaniesArray = ({
                       href: `/co/${post?.user?.id}`,
                     }))}
                   />
-                ) : (
-                  <div />
                 )}
                 {currentUser?.email !== company?.profile && (
                   <ConnectButton
