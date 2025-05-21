@@ -163,7 +163,7 @@ export const CompaniesArray = ({
                 className={clsx(
                   "py-4 border-t mt-4 px-4 flex items-center justify-between",
                   {
-                    "!md:justify-center": company?.reviews?.length <= 0,
+                    "md:!justify-center": company?.reviews?.length <= 0,
                   }
                 )}
               >
