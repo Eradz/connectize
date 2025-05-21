@@ -2,7 +2,7 @@ import { ChevronRight } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
@@ -20,7 +20,6 @@ function NewlyListed() {
 
   const productCategory = searchParams.get("category") || "";
 
-  // Memoize filtered and sliced products
   const filteredProducts = useMemo(
     () =>
       productCategory
@@ -43,31 +42,33 @@ function NewlyListed() {
   );
 
   return (
-    <CustomTabs
-      tabsHeading={tabs.map((tab) => tab.label)}
-      tabsPanels={tabs.map((tab, index) => (
-        <div
-          key={index}
-          className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-        >
-          {isLoading
-            ? Array.from({ length: 6 }, (_, index) => (
-                <ListCardSkeleton key={index} />
-              ))
-            : tab.products.map((product) => {
-                return (
-                  <ProductListCard
-                    key={product.id}
-                    id={product.id}
-                    title={product.title}
-                    subtitle={product.category}
-                    companyName={product?.company}
-                  />
-                );
-              })}
-        </div>
-      ))}
-    />
+    <section className="container">
+      <CustomTabs
+        tabsHeading={tabs.map((tab) => tab.label)}
+        tabsPanels={tabs.map((tab, index) => (
+          <div
+            key={index}
+            className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4"
+          >
+            {isLoading
+              ? Array.from({ length: 6 }, (_, index) => (
+                  <ListCardSkeleton key={index} />
+                ))
+              : tab.products.map((product) => {
+                  return (
+                    <ProductListCard
+                      key={product.id}
+                      id={product.id}
+                      title={product.title}
+                      subtitle={product.category}
+                      companyName={product?.company}
+                    />
+                  );
+                })}
+          </div>
+        ))}
+      />
+    </section>
   );
 }
 
