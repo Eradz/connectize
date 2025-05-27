@@ -35,6 +35,7 @@ export default function MessagingPage() {
           (message) => message.room_name === room_name
         )}
         messagesLoading={usersLoading}
+        senderId={userId}
       />
       <MessageControl
         loading={usersLoading}

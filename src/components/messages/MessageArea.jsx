@@ -4,7 +4,7 @@ import { ErrorOutline } from "@mui/icons-material";
 import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
@@ -17,12 +17,14 @@ import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
 import { VoiceNotePlayer } from "./MessageControl";
 
-export default function MessageArea({ messages, messagesLoading }) {
+export default function MessageArea({ messages, messagesLoading, senderId }) {
   const { user: currentUser } = useAuth();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
   const [readMoreLimit, setReadMoreLimit] = useState(300);
+
+  const scrollSavedList = useRef({});
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {
@@ -35,10 +37,68 @@ export default function MessageArea({ messages, messagesLoading }) {
     }, {});
   };
 
+  const chatContainerRef = useRef(null);
+
+  const scrollToLastScrolled = () => {
+    // const chatContainer = document.querySelector(".chat-container");
+
+    if (!chatContainerRef.current) return;
+
+    let senderLastScrollPosition = scrollSavedList.current[senderId];
+    let senderLastScrollPositionByNumber = scrollSavedList.current[6];
+    let senderLastScrollPositionByString = scrollSavedList.current["6"];
+
+    console.log(senderLastScrollPosition, scrollSavedList.current);
+
+    if (
+      senderLastScrollPosition == undefined ||
+      typeof senderLastScrollPosition !== "number"
+    ) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+      console.log(
+        "has scolled to bottom for ",
+        senderId,
+        typeof senderId,
+        {
+          senderLastScrollPositionByString,
+          senderLastScrollPositionByNumber,
+        },
+        scrollSavedList.current
+      );
+    } else {
+      console.log("has scolled to position for ", senderId);
+      chatContainerRef.current.scrollTop = senderLastScrollPosition;
+    }
+  };
+
   const groupedMessages = groupMessagesByDate(messages);
 
+  useEffect(() => {}, [senderId]);
+
+  useEffect(() => {
+    if (messagesLoading || !messages?.length) return;
+
+    function scrollEventHandler(e) {
+      // console.log("Scrolled container", e.target.scrollTop);
+      scrollSavedList.current[senderId] = e.target.scrollTop;
+    }
+    chatContainerRef.current?.addEventListener("scroll", scrollEventHandler);
+
+    scrollToLastScrolled();
+    return () => {
+      chatContainerRef.current?.removeEventListener(
+        "scroll",
+        scrollEventHandler
+      );
+    };
+  }, [senderId, messagesLoading, messages.length]);
+
   return (
-    <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">
+    <section
+      ref={chatContainerRef}
+      className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth"
+    >
       {messagesLoading || usersLoading ? (
         <SkeletonChatMessages />
       ) : messages?.length <= 0 ? (
