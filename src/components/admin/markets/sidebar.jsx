@@ -17,12 +17,15 @@ function Sidebar() {
   const { user: currentUser, loading } = useAuth();
   const { pathname } = useLocation();
 
+  const isMessagesRoute = pathname.startsWith("/messages");
+
   const isMarketPages = /^\/(market|product|service)/.test(pathname);
 
   return (
     <nav
       className={clsx(
-        "max-md:hidden bg-white rounded-md py-4 px-2 shrink-0 max-w-[300px] sm:w-[280px] lg:w-[300px] 2xl:w-[350px] h-[97vh] scrollbar-hidden max-md:!py-6 max-md:shadow md:sticky md:top-2 overflow-y-auto space-y-4"
+        "max-md:hidden bg-white rounded-md py-4 px-2 shrink-0 max-w-[300px] sm:w-[280px] lg:w-[300px] 2xl:w-[350px] max-h-[97vh] scrollbar-hidden max-md:!py-6 max-md:shadow md:sticky md:top-2 overflow-y-auto space-y-4",
+        { "h-[97vh]": !isMessagesRoute, "h-full": isMessagesRoute }
       )}
     >
       {!loading && currentUser ? (

@@ -298,4 +298,3 @@ const NotificationTile = memo(({ notification, index, company }) => {
 });
 
 export { NotificationPopOver, NotificationsArray };
-

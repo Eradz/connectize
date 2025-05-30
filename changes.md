@@ -1,9 +1,9 @@
-added the @ symbol to the login password validation logic
+# Fixes
 
-#problems
+- Removed the unecessary empty field validation from the messages textbox
+- The whole page no longer scrolls when u try to scroll the messages panel
+- The messages panel no longer scrolls to its bottom when ever you start typing on the textbox
 
-- Using @ symbol in the login password field causes the validation to fail
-  --solution: updated the validation logic in the login page to accept the @ sign
+# Note
 
-- The messages panel does not auto scroll to the bottom(latest messages) when you open a chat
-  -- solution: The chat panel now keeps track of your scroll position in a chat and returns back to that position whenever you return to the chat. if you are just opening the chat (asing the messages page just loaded) you would be scrolled to the bottom.
+i had to change some tailwind styling not just in the messages page to fix some scrolling issues. Some safe css styling and js hacks were used to solve some scroll issues because it was easier to do that than to "rewrite the whole stying of the site"

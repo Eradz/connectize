@@ -39,7 +39,7 @@ const isImageSize = (files) => {
     : files.size <= imageSize;
 };
 
-const emptyMessageValue = "Message field does not have any text";
+// const emptyMessageValue = "Message field does not have any text";
 
 export default function MessageControl({ loading, recipientId, senderId }) {
   const { user: currentUser } = useAuth();
@@ -94,7 +94,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
 
   const handleSendMessage = useCallback(async () => {
     if (message.trim().length < 1 && !audioBlob && validImages.length < 1) {
-      setErrorMessage(emptyMessageValue);
+      // setErrorMessage(emptyMessageValue);
       return;
     }
 
@@ -156,9 +156,11 @@ export default function MessageControl({ loading, recipientId, senderId }) {
     const trimmedMessage = e.target.value.trim();
     if (trimmedMessage.length >= 1) {
       setErrorMessage(null);
-    } else if (trimmedMessage.length < 1) {
-      setErrorMessage(emptyMessageValue);
     }
+    // else if (trimmedMessage.length < 1) {
+    //   // setErrorMessage(emptyMessageValue);
+    //   return;
+    // }
     setMessage(e.target.value);
   }, []);
 
@@ -193,7 +195,7 @@ export default function MessageControl({ loading, recipientId, senderId }) {
           chatContainer.scrollHeight
       );
     };
-    scrollToBottom();
+    // scrollToBottom();
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;

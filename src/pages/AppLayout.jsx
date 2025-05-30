@@ -7,19 +7,27 @@ const AppLayout = () => {
   const { pathname } = useLocation();
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/" || pathname.startsWith("/messages");
+  const isMessagesRoute = pathname.startsWith("/messages");
   return (
-    <main className="bg-background h-screen">
+    <main className="bg-background h-screen flex flex-col">
       <Navbar />
+
       <section
         className={clsx(
           "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4 md:container",
           {
             "py-6 px-2": !isSinglePostRoute && !isHomeRoute,
+            "flex-1 h-[calc(100%_-_64px)]": isMessagesRoute,
           }
         )}
       >
         <Sidebar />
-        <section className="grid grid-cols-1 md:px-0 gap-2 w-full max-md:mb-16">
+        <section
+          className={clsx(
+            "md:px-0 gap-2 w-full max-md:mb-16 h-full",
+            !isMessagesRoute && "grid grid-cols-1"
+          )}
+        >
           <Outlet />
         </section>
       </section>

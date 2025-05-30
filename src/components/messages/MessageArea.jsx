@@ -45,10 +45,6 @@ export default function MessageArea({ messages, messagesLoading, senderId }) {
     if (!chatContainerRef.current) return;
 
     let senderLastScrollPosition = scrollSavedList.current[senderId];
-    let senderLastScrollPositionByNumber = scrollSavedList.current[6];
-    let senderLastScrollPositionByString = scrollSavedList.current["6"];
-
-    console.log(senderLastScrollPosition, scrollSavedList.current);
 
     if (
       senderLastScrollPosition == undefined ||
@@ -56,31 +52,28 @@ export default function MessageArea({ messages, messagesLoading, senderId }) {
     ) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
-      console.log(
-        "has scolled to bottom for ",
-        senderId,
-        typeof senderId,
-        {
-          senderLastScrollPositionByString,
-          senderLastScrollPositionByNumber,
-        },
-        scrollSavedList.current
-      );
     } else {
-      console.log("has scolled to position for ", senderId);
+      // console.log("has scolled to position for ", senderId);
       chatContainerRef.current.scrollTop = senderLastScrollPosition;
     }
   };
 
   const groupedMessages = groupMessagesByDate(messages);
 
-  useEffect(() => {}, [senderId]);
+  // this useEffect is a hack that stops the whole page from scrolling when the chat panel is opened. There were other ways to do it but they required too many modificatio to the design of the website. This pattern is actually safe and solid too.
+  useEffect(() => {
+    document.body.classList.add("messages-opened");
+    document.body.scrollTop = 0;
+
+    return () => {
+      document.body?.classList.remove("messages-opened");
+    };
+  }, []);
 
   useEffect(() => {
     if (messagesLoading || !messages?.length) return;
 
     function scrollEventHandler(e) {
-      // console.log("Scrolled container", e.target.scrollTop);
       scrollSavedList.current[senderId] = e.target.scrollTop;
     }
     chatContainerRef.current?.addEventListener("scroll", scrollEventHandler);
