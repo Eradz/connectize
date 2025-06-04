@@ -214,7 +214,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
               onChange={(e) => handleFileChange(e, "logo", logoFormik)}
             />
             <ButtonWithTooltipIcon
-              className="absolute !bg-white !text-dark p-1 -translate-x-6 translate-y-4 rounded-full opacity-0 group-hover:opacity-100"
+              className="absolute !bg-white !text-dark p-2 -translate-x-8 translate-y-2 rounded-full opacity-0 group-hover:opacity-100"
               tip={
                 newLogo
                   ? isCompanyHeader
@@ -225,6 +225,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                   : "Add display picture"
               }
               onClick={() => document.getElementById("logo").click()}
+              iconClassName={"size-5"}
               IconName={CameraIcon}
               disabled={logoFormik.isSubmitting}
             />

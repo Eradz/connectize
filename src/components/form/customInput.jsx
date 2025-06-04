@@ -51,7 +51,7 @@ export default function CustomInput({
         type={type === "password" ? passwordType : type}
         placeholder={placeholder}
         onChange={(e) => {
-          localStorage.setItem(name, e.target.value);
+          // localStorage.setItem(name, e.target.value);
           onChange(e);
         }}
         onBlur={onBlur}

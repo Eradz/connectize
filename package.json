@@ -49,6 +49,7 @@
     "react-quill": "^2.0.0",
     "react-responsive": "^10.0.0",
     "react-router-dom": "^6.30.0",
+    "react-share": "^5.2.2",
     "recharts": "^2.15.0",
     "sitemap": "^8.0.0",
     "sonner": "^1.7.2",

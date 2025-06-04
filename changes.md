@@ -1,9 +1,7 @@
-# Fixes
+Fixes
 
-- Removed the unecessary empty field validation from the messages textbox
-- The whole page no longer scrolls when u try to scroll the messages panel
-- The messages panel no longer scrolls to its bottom when ever you start typing on the textbox
-
-# Note
-
-i had to change some tailwind styling not just in the messages page to fix some scrolling issues. Some safe css styling and js hacks were used to solve some scroll issues because it was easier to do that than to "rewrite the whole stying of the site"
+- Back button in the 2nd step of profile edit no longer goes to a 404 page. It now correctly takes u the first (previous) step
+- The share button on posts in the home (Discover) page no longer automatically opens facebook. It now asks you to select a social media and also gives you an option to copy the link
+- Changes to the password/sensitive fields in the login and change password pages no longer gets stored in localstorage
+- Made the change profile image button a little bit bigger
+- added a empty message to the services section in marketing page when there are no services

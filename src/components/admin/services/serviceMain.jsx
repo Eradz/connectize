@@ -29,27 +29,33 @@ export const PostCardWrapper = ({ isOverview = false }) => {
     <section
       className={clsx("bg-white rounded-md p-2 grid gap-x-3 gap-y-4 ", {
         "sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3":
-          !isOverview,
+          !isOverview && services.length,
         // "max-lg:hidden": isOverview,
       })}
     >
-      {isLoading
-        ? Array.from({ length: 6 }, (_, index) => (
-            <PostCardSkeleton key={index} />
-          ))
-        : services?.map((service, index) => (
-            <PostCard
-              key={index}
-              companyName={service.company}
-              verified={service?.companyInfo?.verified}
-              logo={service?.companyInfo?.logo}
-              title={service.title}
-              summary={service.sub_title}
-              url={`/services/${service.id}`}
-              whole={service}
-              isService
-            />
-          ))}
+      {isLoading ? (
+        Array.from({ length: 6 }, (_, index) => (
+          <PostCardSkeleton key={index} />
+        ))
+      ) : !services?.length ? (
+        <p className="text-sm text-gray-400 text-center my-5">
+          No services to show
+        </p>
+      ) : (
+        services?.map((service, index) => (
+          <PostCard
+            key={index}
+            companyName={service.company}
+            verified={service?.companyInfo?.verified}
+            logo={service?.companyInfo?.logo}
+            title={service.title}
+            summary={service.sub_title}
+            url={`/services/${service.id}`}
+            whole={service}
+            isService
+          />
+        ))
+      )}
     </section>
   );
 };

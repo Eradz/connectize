@@ -28,3 +28,7 @@ yarn-error.log*
 
 # keystore
 keystore.properties
+
+
+# ignoring bun.lock because the project actually uses yarn but i use bun. I did not notice that yarn was being used before i used bun though.
+bun.lock

@@ -105,3 +105,27 @@ export const shareThis = async ({ shareUrlString, shareData }) => {
     window.open(shareUrl, "_blank");
   }
 };
+
+export function openInNewTab(url) {
+  window.open(url, "_blank");
+}
+export async function attemptNavigatorShare(shareData) {
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      console.log("Error sharing: ", error);
+      toast.error("An error occurred while sharing");
+    } finally {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export async function copyTextToClipboard(text) {
+  if (navigator.clipboard) {
+    await navigator.clipboard.writeText(text);
+  }
+}

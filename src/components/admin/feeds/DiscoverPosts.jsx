@@ -37,6 +37,9 @@ import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
 import SEO from "../../SEO";
 import TimeAgo from "../../TimeAgo";
 
+import SocialShareModal from "../../CustomShareButton";
+import CustomShareButton from "../../CustomShareButton";
+
 function DiscoverPosts({
   searchArray,
   isSearch,
@@ -102,6 +105,7 @@ export const DiscoverPostItem = ({
   const [liked, setLiked] = useState(userHasLikedPost);
   const [likes, setLikes] = useState(postItem?.likes?.length);
   const [disabled, setDisabled] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     setLikes(postItem?.likes?.length);
@@ -120,10 +124,10 @@ export const DiscoverPostItem = ({
   const shareData = {
     title: postTitle,
     text: postItem.body,
-    url: shareUrlString,
+    // url: shareUrlString,
   };
 
-  const sharePost = async () => await shareThis({ shareUrlString, shareData });
+  // const sharePost = async () => await shareThis({ shareUrlString, shareData });
 
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
@@ -251,6 +255,14 @@ export const DiscoverPostItem = ({
 
       {hasImage && <PostImageCollage images={postItem.images} />}
 
+      <SocialShareModal
+        isOpen={isSharing}
+        onClose={() => setIsSharing(false)}
+        title={`Share to`}
+        url={""}
+        // footerContent={<></>}
+      ></SocialShareModal>
+
       <div className="flex items-center gap-2 justify-between mt-4">
         <ConJoinedImages
           size={30}
@@ -284,11 +296,19 @@ export const DiscoverPostItem = ({
             postTitle={postTitle}
             postImages={postItem.images}
           />
-          <ButtonWithTooltipIcon
-            IconName={ShareAltOutlined}
-            tip="Share post"
-            onClick={sharePost}
-          />
+
+          <CustomShareButton
+            shareData={shareData}
+            url={shareUrlString}
+            modalTitle="Share post to"
+          >
+            <ButtonWithTooltipIcon
+              IconName={ShareAltOutlined}
+              tip="Share post"
+              // onClick={sharePost}
+              // onClick={() => setIsSharing(true)}
+            />
+          </CustomShareButton>
         </div>
       </div>
 
