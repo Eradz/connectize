@@ -28,11 +28,14 @@ export default function AssignRepresentative() {
   });
 
   const { data: companies, isLoading: companyLoading } = useQuery({
-    queryKey: ["companies"],
-    queryFn: getCompanyByIdOrEmail,
+    // gets its own unique queryKey in order to not collide with other similar queries cause that was causing a bug before
+    queryKey: ["companies", "assign-reps"],
+    queryFn: async () => getCompanyByIdOrEmail(undefined, true),
   });
 
   const company_id = companies?.[0]?.id;
+
+  // console.log("Company id", company_id, companies);
 
   const { data: representatives, isLoading: repsLoading } = useQuery({
     queryKey: ["representatives", company_id],
@@ -96,6 +99,7 @@ export default function AssignRepresentative() {
     };
   });
 
+  // console.log("Com", company_id, "Reps", representatives);
   return currentUser?.user_type === UserType ? (
     <Restricted fallback="assigning new representatives" />
   ) : (
@@ -111,6 +115,8 @@ export default function AssignRepresentative() {
             </strong>
           </LightParagraph>
         </div>
+        {/* Company ID{company_id} <br />
+        Re{JSON.stringify(representatives?.length)} */}
         <UserSearchInput username={username} setUsername={setUsername} />
         <UserList
           isLoading={isLoading}

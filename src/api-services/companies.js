@@ -28,14 +28,26 @@ export const getAllCompanies = async () => {
   return companies;
 };
 
-export const getCompanyByIdOrEmail = async (id) => {
+export const getCompanyByIdOrEmail = async (id, ext) => {
   const currentUser = await getCurrentUser();
   const params = id ? { id } : { profile: currentUser?.email };
+
+  if (ext) {
+    params.profile = undefined;
+    params.hasExt = "yeah";
+  }
   const { results: companies } = await makeApiRequest({
     url: `api/companies/`,
     method: "GET",
     params,
   });
+
+  // console.log("from getCompanyByIdOrEmail", {
+  //   id,
+  //   params,
+  //   currentUser,
+  //   companies,
+  // });
   return companies || [];
 };
 
@@ -189,8 +201,8 @@ export const editCompanyInformation = async (data) => {
     data,
   });
 
- if (company.id)
-   window.location.href = `/${currentUserCompany[0].company_name}`;
+  if (company.id)
+    window.location.href = `/${currentUserCompany[0].company_name}`;
 };
 
 export const uploadCompanyBanner = async (file) => {

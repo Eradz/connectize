@@ -1,7 +1,7 @@
 import { Avatar, useDisclosure } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getAllUsers } from "../../api-services/users";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
@@ -18,6 +18,7 @@ import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
+import { baseURL } from "../../lib/helpers";
 
 export default function MessagesPage() {
   const { user: currentUser } = useAuth();

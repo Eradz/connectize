@@ -60,23 +60,25 @@ export default function MessagesList() {
           </div> */}
         </div>
       ) : (
-        messagesList.map((message) => {
-          const currentUserId =
-            currentUser?.id !== message?.recipient
-              ? message?.recipient
-              : message?.sender;
+        <>
+          {messagesList.map((message) => {
+            const currentUserId =
+              currentUser?.id !== message?.recipient
+                ? message?.recipient
+                : message?.sender;
 
-          const recipient = users?.find((user) => user?.id === currentUserId);
-          console.log(recipient);
+            const recipient = users?.find((user) => user?.id === currentUserId);
+            // console.log(recipient);
 
-          return (
-            <MessagesListTile
-              key={message?.id}
-              message={message}
-              user={recipient}
-            />
-          );
-        })
+            return (
+              <MessagesListTile
+                key={message?.id}
+                message={message}
+                user={recipient}
+              />
+            );
+          })}
+        </>
       )}
     </section>
   );
@@ -91,7 +93,10 @@ const MessagesListTile = React.memo(({ message, user }) => {
   const room_name = searchParams.get("room_name");
 
   const handleMarkAsRead = async () => {
-    await markAllAsRead(room_name, user?.id);
+    let chattingWith = user?.id;
+    // alert("Chatting with: " + chattingWith + " " + user.id);
+    await markAllAsRead(undefined, chattingWith);
+    // await markAllAsRead(room_name,user?.id);
   };
 
   return (

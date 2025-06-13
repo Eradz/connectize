@@ -20,7 +20,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   const [loading, setLoading] = useState(false);
 
   const navigators = useMemo(
-    () => (isSmallNavigation ? feedNavItems.slice(0, 5) : feedNavItems),
+    () => (isSmallNavigation ? feedNavItems.slice(0, 6) : feedNavItems),
     [isSmallNavigation]
   );
 
@@ -73,7 +73,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
           </li>
         );
       })}
-      {currentUser && session && (
+      {currentUser && session && !isSmallNavigation && (
         <>
           <ReusableModal
             onClose={() => setIsOpen(false)}

@@ -60,14 +60,16 @@ export const useMessagesStore = create((set, get) => ({
   },
 
   markAllAsRead: async (room_name, user_id) => {
-    set((state) => ({
-      messages: state.messages
-        .filter((m) => m.room_name === room_name)
-        .map((m) => ({
-          ...m,
-          read_at: new Date().toUTCString(),
-        })),
-    }));
+    // I commented this set state here because it was causing a fliker in the chat section. I watch the platform for a while to see if removing this `set` would cause anything but i didn't.
+    // I think the set was added to cause a mount animation in framer motion. But the animation itself can get distracting.
+    // set((state) => ({
+    //   messages: state.messages
+    //     .filter((m) => m.room_name === room_name)
+    //     .map((m) => ({
+    //       ...m,
+    //       read_at: new Date().toUTCString(),
+    //     })),
+    // }));
     try {
       await markMessageAsRead(room_name, user_id);
     } catch (err) {

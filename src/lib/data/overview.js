@@ -89,6 +89,9 @@ export const overviewFields = [
   },
 ];
 
+/**
+ * @type {ProfileOverviewFields}
+ */
 export const overviewFormValues = {
   first_name: getLocalData(first_nameKey),
   last_name: getLocalData(last_nameKey),

@@ -22,12 +22,22 @@ export const RepresentativesList = ({
       <section className="border-b pb-2">
         <HeadingText weight="semibold">Manage Representatives</HeadingText>
       </section>
-      <section className="flex items-center gap-4 justify-between">
-        {["Representative", "Category", "Status"].map((heading, index) => (
+      <section className="flex justify-between gap-4">
+        {/* {["Representative", "Category", "Status"].map((heading, index) => (
           <h2 key={index} className="font-semibold even:max-lg:hidden">
             {heading}
           </h2>
-        ))}
+        ))} */}
+
+        <h2 className="font-semibold even:max-lg:hidden flex-1">
+          Representative
+        </h2>
+        <h2 className="font-semibold even:max-lg:hidden flex-1 text-center">
+          Category
+        </h2>
+        <h2 className="font-semibold even:max-lg:hidden flex-1 text-right">
+          Status
+        </h2>
       </section>
       <section className="divide-y divide-gray-200/70">
         {isLoading ? (
@@ -74,9 +84,9 @@ const RepsTile = ({
       key={id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between gap-4 mb-10 lg:mb-4 pt-4 relative"
+      className="grid grid-cols-4 lg:grid-cols-5 gap-4 mb-10 lg:mb-4 pt-4 relative"
     >
-      <div className="flex items-center">
+      <div className="flex items-center w-full col-span-2">
         <ConJoinedImages
           animate={false}
           array={[
@@ -114,21 +124,19 @@ const RepsTile = ({
         </div>
       </div>
 
-      <div className="max-lg:absolute max-lg:-bottom-8 max-lg:left-2 lg:flex-1 items-center justify-center">
+      <div className="col-span-1 max-lg:absolute max-lg:-bottom-8 max-lg:left-2 lg:flex lg:flex-1 items-center justify-center">
         <Badge className="!w-fit">{role}</Badge>
       </div>
 
-      {invited ? (
-        <div className="">
+      <div className="col-span-2 flex items-center justify-end">
+        {invited ? (
           <Switch
             id={`rep_${user?.id}`}
             isChecked={isChecked}
             onChange={handleToggle}
           />
-        </div>
-      ) : (
-        <div />
-      )}
+        ) : null}
+      </div>
     </motion.section>
   );
 };

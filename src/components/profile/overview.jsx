@@ -24,6 +24,7 @@ import { AvatarUpload } from "../form/customInput";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
+import { useOutletContext } from "react-router-dom";
 
 const FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const SUPPORTED_FORMATS = [
@@ -35,7 +36,14 @@ const SUPPORTED_FORMATS = [
 ];
 
 function Overview() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, forceFullySetUser } = useAuth();
+
+  /**
+   * @type {{uploadedProfileImage: File | null, setUploadedProfileImage}} ctx
+   */
+  const ctx = useOutletContext();
+
+  console.log("ctx", ctx);
   // Redirect if condition fails
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 4),
@@ -60,6 +68,7 @@ function Overview() {
         "File size is too large, only images less than 4mb are allowed",
         (value) => {
           if (!value) return true;
+          if (typeof value === "string") return true;
 
           return value && value.size <= FILE_SIZE;
         }
@@ -69,19 +78,31 @@ function Overview() {
         "Unsupported file format, only AVIFs, WEBPs, PNGs, JPEGs, and JPGs are allowed",
         (value) => {
           if (!value) return true;
+          if (typeof value === "string") return true;
           return value && SUPPORTED_FORMATS.includes(value.type);
         }
       ),
   });
 
+  const getDefaultImage = () =>
+    ctx.uploadedProfileImage
+      ? ctx.uploadedProfileImage
+      : currentUser?.avatar || null;
   const formik = useFormik({
-    initialValues: { ...overviewFormValues },
+    initialValues: {
+      ...overviewFormValues,
+      image: getDefaultImage(),
+    },
+
     validationSchema,
     enableReinitialize: true, // Ensures formik reinitializes when initialValues change
   });
 
   const loadLocalStorageData = () => {
-    const updatedValues = { ...overviewFormValues };
+    const updatedValues = {
+      ...overviewFormValues,
+      image: getDefaultImage(),
+    };
     Object.keys(updatedValues).forEach((key) => {
       const storedValue = getLocalData(key);
       if (storedValue) {
@@ -102,11 +123,12 @@ function Overview() {
     const response = await updateCurrentUserInfo(formik.values);
 
     if (response && response.id) {
-      // setNewUserId(response?.id);
+      forceFullySetUser(response);
       Object.keys(formik.values).forEach((key) => localStorage.removeItem(key));
       toast.success("User profile has been updated successfully", {
         id: toastId,
       });
+
       return true;
     }
 
@@ -114,6 +136,14 @@ function Overview() {
     setLoading(false);
     return false;
   };
+
+  // i wish i did not have to use this method. Using a different method might cause too much code refactoring.
+  // this useEffect just updates the uploadedProfileImage in the layout.jsx anytime the form.values.image changes
+
+  useEffect(() => {
+    ctx.setUploadedProfileImage(formik.values.image);
+    console.log("Setting uploaded image profile");
+  }, [formik.values.image]);
 
   useEffect(() => {
     loadLocalStorageData(); // Load data from local storage when the page is loaded

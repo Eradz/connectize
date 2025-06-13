@@ -33,6 +33,11 @@ export const getCurrentUser = async () => {
   return user || null;
 };
 
+/**
+ *
+ * @param {ProfileOverviewFields} values
+
+ */
 export const updateCurrentUserInfo = async (values) => {
   const currentUser = await getCurrentUser();
 
@@ -70,7 +75,9 @@ export const updateCurrentUserInfo = async (values) => {
       region: values.state,
       phone_number: values.phone_number,
       address: values.company_address,
-      avatar: values.image,
+      website_url: values.website_url,
+      social_media_url: values.social_media_url,
+      avatar: values.image instanceof File ? values.image : undefined,
     },
   });
 };

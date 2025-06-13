@@ -132,6 +132,7 @@ export function ImageSelect({
   );
 }
 
+const defaultAvatarPath = "/images/passportOne.png";
 export function AvatarUpload({ formik, name, label, className }) {
   const imageValue = formik.values[`${name}`];
 
@@ -139,14 +140,24 @@ export function AvatarUpload({ formik, name, label, className }) {
     formik.setFieldValue(name, e.currentTarget.files[0]);
   };
 
+  function getImageToShow() {
+    if (!imageValue) return defaultAvatarPath;
+
+    if (typeof imageValue === "string") return imageValue;
+
+    if (imageValue instanceof File) return URL.createObjectURL(imageValue);
+
+    // if for some weird reason image is neither a string or an instance of file
+    return defaultAvatarPath;
+  }
+
   return (
     <div className={className}>
       <label>
         <img
           src={
-            imageValue
-              ? URL.createObjectURL(imageValue)
-              : "/images/passportTwo.png"
+            getImageToShow()
+            // : "/images/passportTwo.png"
           }
           alt="upload"
           className={clsx("size-20 mx-auto transition-all duration-300", {

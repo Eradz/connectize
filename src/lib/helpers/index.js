@@ -106,6 +106,10 @@ export async function getAuthorizationHeader() {
   return await refreshToken();
 }
 
+let networkErrorToastState = {
+  isOpen: false,
+  toastId: "",
+};
 export async function makeApiRequest({
   url,
   method,
@@ -152,7 +156,12 @@ export async function makeApiRequest({
   } catch (error) {
     if (!navigator.onLine && !hasNotifiedOffline) {
       hasNotifiedOffline = true;
+
+      //
       toast.error("Network error. Please check your internet connection.");
+
+      // this set timeout helps to allow network error to still show up once in a while. Instead of showing once and never again.
+      setTimeout(() => (hasNotifiedOffline = false), 30000);
       console.error("Network error:", error);
       return;
     }

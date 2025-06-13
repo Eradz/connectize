@@ -37,7 +37,11 @@ export const useSafePoll = (callback, interval, deps = []) => {
   }, [interval, ...deps]);
 };
 
-export const usePollPosts = (interval = 3000) => {
+const tenMinutesInterval = 60000 * 10;
+const fiveMinutesInterval = 60000 * 5;
+const threeMinutesInterval = 60000 * 3;
+
+export const usePollPosts = (interval = threeMinutesInterval) => {
   const { posts, fetchPosts, loading } = usePostsStore();
 
   useSafePoll(fetchPosts, interval);
@@ -53,7 +57,7 @@ export const usePollMessages = (interval = 1000, params = {}) => {
   return { messages };
 };
 
-export const usePollCompanies = (interval = 5000) => {
+export const usePollCompanies = (interval = tenMinutesInterval) => {
   const { companies, fetchCompanies } = useCompaniesStore();
 
   useEffect(() => {
@@ -81,7 +85,7 @@ export const usePollCompanies = (interval = 5000) => {
   return { companies };
 };
 
-export const usePollCurrentCompany = (interval = 50000) => {
+export const usePollCurrentCompany = (interval = threeMinutesInterval) => {
   const { currentCompany, fetchCurrentCompany } = useCompaniesStore();
 
   useEffect(() => {
@@ -109,7 +113,7 @@ export const usePollCurrentCompany = (interval = 50000) => {
   return { currentCompany };
 };
 
-export const usePollAllCompanies = (interval = 5000) => {
+export const usePollAllCompanies = (interval = tenMinutesInterval) => {
   return useQuery({
     queryKey: ["allConnectizeCompanies"],
     queryFn: getAllCompanies,
@@ -117,7 +121,7 @@ export const usePollAllCompanies = (interval = 5000) => {
   });
 };
 
-export const usePollUsers = (interval = 50000) => {
+export const usePollUsers = (interval = tenMinutesInterval) => {
   const { users, fetchUsers } = useUsersStore();
 
   useEffect(() => {
@@ -191,7 +195,7 @@ export const usePollNotifications = (intervalMs = 5000) => {
   return { notifications, unreadCount };
 };
 
-export const usePollProducts = (refetchInterval = 5000) => {
+export const usePollProducts = (refetchInterval = fiveMinutesInterval) => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
@@ -199,7 +203,7 @@ export const usePollProducts = (refetchInterval = 5000) => {
   });
 };
 
-export const usePollServices = (refetchInterval = 5000) => {
+export const usePollServices = (refetchInterval = fiveMinutesInterval) => {
   return useQuery({
     queryKey: ["services"],
     queryFn: getServices,

@@ -16,8 +16,8 @@ export default function RepRoleInput({ user, setCachedReps, cachedReps }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: companies } = useQuery({
-    queryKey: ["companies"],
-    queryFn: () => getCompanyByIdOrEmail(),
+    queryKey: ["companies", "assign-reps"],
+    queryFn: () => getCompanyByIdOrEmail(undefined, true),
   });
 
   const memoizedCompanies = useMemo(() => companies, [companies]);
@@ -43,13 +43,13 @@ export default function RepRoleInput({ user, setCachedReps, cachedReps }) {
 
     try {
       const value = await assignRepresentative(repsData);
-      console.log(value);
 
       if (value?.user) {
         setRepresentativeRole("");
         setRoleError(null);
         setCachedReps(cachedReps?.push(repsData));
-      }
+        toast.success("Invitation sent successfully");
+      } else toast.error("Could not set user as " + repsData.role);
     } catch (error) {
       console.error(`Representative error ${error}`);
     } finally {

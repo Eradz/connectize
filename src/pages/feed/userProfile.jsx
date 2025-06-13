@@ -30,7 +30,7 @@ export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
 
-  console.log(userId);
+  // console.log(userId);
 
   const { data: paramUser, isLoading } = useQuery({
     queryKey: ["users", userId],
