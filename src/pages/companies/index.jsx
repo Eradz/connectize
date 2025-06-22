@@ -13,7 +13,7 @@ import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/userContext";
-import { usePollAllCompanies } from "../../hooks/polling";
+import { usePollAllCompanies } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
 
 const sortOptions = ["company name", "company type", "products", "country"];

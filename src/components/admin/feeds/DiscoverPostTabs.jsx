@@ -9,7 +9,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { bookmarkProduct } from "../../../api-services/products";
 import { bookmarkService } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";
-import { usePollProducts, usePollServices } from "../../../hooks/polling";
+import { usePollProducts, usePollServices } from "../../../hooks/usePolling";
 import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";

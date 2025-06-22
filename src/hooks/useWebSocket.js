@@ -17,9 +17,9 @@ const useWebSocket = (url, params) => {
       `${wsBaseUrl}/ws/${url}/${params ? params : "?"}token=${session?.tokens?.access}`
     );
 
-    // socket.onopen = () => {
-    //   console.log("WebSocket Connected");
-    // };
+    socket.onopen = () => {
+      console.log("WebSocket Connected");
+    };
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);

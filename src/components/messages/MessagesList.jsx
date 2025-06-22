@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
-import { usePollMessages } from "../../hooks/polling";
+import { usePollMessages } from "../../hooks/usePolling";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";

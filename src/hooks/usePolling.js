@@ -37,7 +37,7 @@ export const useSafePoll = (callback, interval, deps = []) => {
   }, [interval, ...deps]);
 };
 
-export const usePollPosts = (interval = 3000) => {
+export const usePollPosts = (interval = 9000000000000000) => {
   const { posts, fetchPosts, loading } = usePostsStore();
 
   useSafePoll(fetchPosts, interval);
@@ -45,7 +45,7 @@ export const usePollPosts = (interval = 3000) => {
   return { posts, loading };
 };
 
-export const usePollMessages = (interval = 1000, params = {}) => {
+export const usePollMessages = (interval = 9000000000000000, params = {}) => {
   const { messages, fetchMessages } = useMessagesStore();
 
   useSafePoll(() => fetchMessages(params), interval, [JSON.stringify(params)]);
@@ -53,7 +53,7 @@ export const usePollMessages = (interval = 1000, params = {}) => {
   return { messages };
 };
 
-export const usePollCompanies = (interval = 5000) => {
+export const usePollCompanies = (interval = 9000000000000000) => {
   const { companies, fetchCompanies } = useCompaniesStore();
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export const usePollCompanies = (interval = 5000) => {
   return { companies };
 };
 
-export const usePollCurrentCompany = (interval = 50000) => {
+export const usePollCurrentCompany = (interval = 9000000000000000) => {
   const { currentCompany, fetchCurrentCompany } = useCompaniesStore();
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export const usePollCurrentCompany = (interval = 50000) => {
   return { currentCompany };
 };
 
-export const usePollAllCompanies = (interval = 5000) => {
+export const usePollAllCompanies = (interval = 9000000000000000) => {
   return useQuery({
     queryKey: ["allConnectizeCompanies"],
     queryFn: getAllCompanies,
@@ -117,7 +117,7 @@ export const usePollAllCompanies = (interval = 5000) => {
   });
 };
 
-export const usePollUsers = (interval = 50000) => {
+export const usePollUsers = (interval = 9000000000000000) => {
   const { users, fetchUsers } = useUsersStore();
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export const usePollUsers = (interval = 50000) => {
   return { users };
 };
 
-export const usePollUserById = (id, interval = 5000) => {
+export const usePollUserById = (id, interval = 9000000000000000) => {
   const { selectedUser, fetchUserById } = useUsersStore();
 
   useEffect(() => {
@@ -175,7 +175,7 @@ export const usePollUserById = (id, interval = 5000) => {
   return { user: selectedUser };
 };
 
-export const usePollNotifications = (intervalMs = 5000) => {
+export const usePollNotifications = (intervalMs = 9000000000000000) => {
   const setNotifications = useNotificationsStore((s) => s.setNotifications);
 
   const fetch = async () => {
@@ -191,7 +191,7 @@ export const usePollNotifications = (intervalMs = 5000) => {
   return { notifications, unreadCount };
 };
 
-export const usePollProducts = (refetchInterval = 5000) => {
+export const usePollProducts = (refetchInterval = 9000000000000000) => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
@@ -199,7 +199,7 @@ export const usePollProducts = (refetchInterval = 5000) => {
   });
 };
 
-export const usePollServices = (refetchInterval = 5000) => {
+export const usePollServices = (refetchInterval = 9000000000000000) => {
   return useQuery({
     queryKey: ["services"],
     queryFn: getServices,

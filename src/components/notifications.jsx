@@ -17,7 +17,7 @@ import {
   markAllNotificationsAsRead,
 } from "../api-services/notifications";
 import { useCompanies, useUsers } from "../hooks";
-import { usePollNotifications } from "../hooks/polling";
+import { usePollNotifications } from "../hooks/usePolling";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";

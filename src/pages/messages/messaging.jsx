@@ -5,7 +5,7 @@ import MessageControl from "../../components/messages/MessageControl";
 import MessageHeader from "../../components/messages/MessageHeader";
 import { useAuth } from "../../context/userContext";
 import { useUsers } from "../../hooks";
-import { usePollMessages } from "../../hooks/polling";
+import { usePollMessages } from "../../hooks/usePolling";
 
 export default function MessagingPage() {
   const { user: currentUser } = useAuth();
