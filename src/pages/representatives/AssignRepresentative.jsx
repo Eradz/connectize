@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import {
   getAllRepresentatives,
@@ -12,6 +12,7 @@ import { RepresentativesList } from "../../components/representatives/Representa
 import { UserList } from "../../components/representatives/UserList";
 import { UserSearchInput } from "../../components/representatives/UserSearchInput";
 import Restricted from "../../components/Restricted";
+import SEO from "../../components/SEO";
 import { useCustomQuery } from "../../context/queryContext";
 import { useAuth } from "../../context/userContext";
 import { UserType } from "../../lib/helpers/types";
@@ -74,7 +75,6 @@ export default function AssignRepresentative() {
   const [cachedReps, setCachedReps] = useState([]);
 
   useEffect(() => {
-    document.title = "Manage Representatives | Connectize";
     setCachedReps(representatives);
   }, [representatives]);
 
@@ -96,33 +96,39 @@ export default function AssignRepresentative() {
     };
   });
 
-  return currentUser?.user_type === UserType ? (
-    <Restricted fallback="assigning new representatives" />
-  ) : (
-    <section className="max-md:container p-3">
-      <section className="space-y-6">
-        <div className="">
-          <HeadingText>Assign Representatives</HeadingText>
-          <LightParagraph>
-            Assign representatives to manage your company on connectize and
-            specify the role of representation{" "}
-            <strong className="text-black">
-              (e.g human resources, technical, commercial)
-            </strong>
-          </LightParagraph>
-        </div>
-        <UserSearchInput username={username} setUsername={setUsername} />
-        <UserList
-          isLoading={isLoading}
-          filteredUsers={filteredUsers}
-          setCachedReps={setCachedReps}
-        />
-        <RepresentativesList
-          isLoading={repsLoading || companyLoading || repsCatLoading}
-          representatives={memoizedRepresentatives}
-          setCachedReps={setCachedReps}
-        />
-      </section>
-    </section>
+  return (
+    <>
+      <SEO
+        title="Manage Representatives | Connectize"
+        description="Assign, manage and request representation for your organization on connectize on connectize"
+      />
+      {currentUser?.user_type === UserType ? (
+        <Restricted fallback="assigning new representatives" />
+      ) : (
+        <section className="space-y-6 max-md:container p-3 sm:p-6 bg-white rounded-md h-screen overflow-y-auto">
+          <div className="">
+            <HeadingText>Assign Representatives</HeadingText>
+            <LightParagraph>
+              Assign representatives to manage your company on connectize and
+              specify the role of representation{" "}
+              <strong className="text-black">
+                (e.g human resources, technical, commercial)
+              </strong>
+            </LightParagraph>
+          </div>
+          <UserSearchInput username={username} setUsername={setUsername} />
+          <UserList
+            isLoading={isLoading}
+            filteredUsers={filteredUsers}
+            setCachedReps={setCachedReps}
+          />
+          <RepresentativesList
+            isLoading={repsLoading || companyLoading || repsCatLoading}
+            representatives={memoizedRepresentatives}
+            setCachedReps={setCachedReps}
+          />
+        </section>
+      )}
+    </>
   );
 }

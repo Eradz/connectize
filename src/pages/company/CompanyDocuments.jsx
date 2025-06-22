@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
@@ -117,7 +117,7 @@ const CompanyDocuments = () => {
     },
   ];
   return (
-    <section className="space-y-8">
+    <section className="space-y-8 w-full">
       <div className="w-full">
         <HeadingText>Upload a VALID document of your company</HeadingText>
         <LightParagraph>Please fill in the details below</LightParagraph>

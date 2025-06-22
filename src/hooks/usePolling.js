@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { getAllCompanies } from "../api-services/companies";
+import { getAllCompanies, getSingleCompany } from "../api-services/companies";
 import { getNotificationsForUser } from "../api-services/notifications";
 import { getProducts } from "../api-services/products";
 import { getServices } from "../api-services/services";
@@ -27,8 +27,7 @@ export const useSafePoll = (callback, interval, deps = []) => {
         setTimeout(poll, interval);
       }
     };
-
-    poll();
+    if (interval > 1000) poll();
 
     return () => {
       cancelled.current = true;
@@ -37,7 +36,7 @@ export const useSafePoll = (callback, interval, deps = []) => {
   }, [interval, ...deps]);
 };
 
-export const usePollPosts = (interval = 9000000000000000) => {
+export const usePollPosts = (interval = 0) => {
   const { posts, fetchPosts, loading } = usePostsStore();
 
   useSafePoll(fetchPosts, interval);
@@ -45,7 +44,7 @@ export const usePollPosts = (interval = 9000000000000000) => {
   return { posts, loading };
 };
 
-export const usePollMessages = (interval = 9000000000000000, params = {}) => {
+export const usePollMessages = (interval = 0, params = {}) => {
   const { messages, fetchMessages } = useMessagesStore();
 
   useSafePoll(() => fetchMessages(params), interval, [JSON.stringify(params)]);
@@ -53,7 +52,7 @@ export const usePollMessages = (interval = 9000000000000000, params = {}) => {
   return { messages };
 };
 
-export const usePollCompanies = (interval = 9000000000000000) => {
+export const usePollCompanies = (interval = 0) => {
   const { companies, fetchCompanies } = useCompaniesStore();
 
   useEffect(() => {
@@ -81,43 +80,23 @@ export const usePollCompanies = (interval = 9000000000000000) => {
   return { companies };
 };
 
-export const usePollCurrentCompany = (interval = 9000000000000000) => {
-  const { currentCompany, fetchCurrentCompany } = useCompaniesStore();
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    const poll = async () => {
-      try {
-        await fetchCurrentCompany();
-      } catch (err) {
-        console.error("Polling current company failed", err);
-      }
-
-      if (!isCancelled) {
-        setTimeout(poll, interval);
-      }
-    };
-
-    poll();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [interval]);
-
-  return { currentCompany };
-};
-
-export const usePollAllCompanies = (interval = 9000000000000000) => {
+export const usePollCurrentCompany = (companyName, interval = 0) => {
   return useQuery({
-    queryKey: ["allConnectizeCompanies"],
-    queryFn: getAllCompanies,
-    refetchInterval: interval,
+    queryKey: ["companies", companyName],
+    queryFn: () => getSingleCompany(companyName?.replaceAll(" ", "-")),
+    enabled: !!companyName,
   });
 };
 
-export const usePollUsers = (interval = 9000000000000000) => {
+export const usePollAllCompanies = (interval = 0) => {
+  return useQuery({
+    queryKey: ["allConnectizeCompanies"],
+    queryFn: getAllCompanies,
+    // refetchInterval: interval,
+  });
+};
+
+export const usePollUsers = (interval = 0) => {
   const { users, fetchUsers } = useUsersStore();
 
   useEffect(() => {
@@ -145,7 +124,7 @@ export const usePollUsers = (interval = 9000000000000000) => {
   return { users };
 };
 
-export const usePollUserById = (id, interval = 9000000000000000) => {
+export const usePollUserById = (id, interval = 0) => {
   const { selectedUser, fetchUserById } = useUsersStore();
 
   useEffect(() => {
@@ -175,7 +154,7 @@ export const usePollUserById = (id, interval = 9000000000000000) => {
   return { user: selectedUser };
 };
 
-export const usePollNotifications = (intervalMs = 9000000000000000) => {
+export const usePollNotifications = (intervalMs = 0) => {
   const setNotifications = useNotificationsStore((s) => s.setNotifications);
 
   const fetch = async () => {
@@ -191,18 +170,18 @@ export const usePollNotifications = (intervalMs = 9000000000000000) => {
   return { notifications, unreadCount };
 };
 
-export const usePollProducts = (refetchInterval = 9000000000000000) => {
+export const usePollProducts = (refetchInterval = 0) => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
-    refetchInterval,
+    // refetchInterval,
   });
 };
 
-export const usePollServices = (refetchInterval = 9000000000000000) => {
+export const usePollServices = (refetchInterval = 0) => {
   return useQuery({
     queryKey: ["services"],
     queryFn: getServices,
-    refetchInterval,
+    // refetchInterval,
   });
 };

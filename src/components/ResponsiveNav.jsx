@@ -56,9 +56,7 @@ export const JoinedUserCompanyImages = () => {
           src: companies?.[0]?.logo || "/images/default-company-logo.png",
           name: companies?.[0]?.company_name || "",
           href:
-            companies?.length > 0
-              ? `/${companies[0].company_name}`
-              : "/create-company",
+            companies?.length > 0 ? `/${companies[0].slug}` : "/create-company",
         },
       ]);
     }

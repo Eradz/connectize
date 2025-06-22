@@ -260,7 +260,11 @@ const NotificationTile = memo(({ notification, index, company }) => {
         className={avatarStyle}
       />
       <div className="space-y-0 flex-1">
-        <CompanyName name={company?.company_name} verified={company?.verify} />
+        <CompanyName
+          slug={company?.slug}
+          name={company?.company_name}
+          verified={company?.verify}
+        />
         <Link
           to={notification?.link
             .replace("/room", "/?room_name=room")

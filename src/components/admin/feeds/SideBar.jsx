@@ -1,7 +1,6 @@
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React from "react";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
 import { getAllCompanies } from "../../../api-services/companies";
@@ -84,11 +83,11 @@ export function CompaniesList({ queryFn = getAllCompanies }) {
 }
 
 function CompanyListItem({ company }) {
-  const { company_name, logo, tag_line, verify } = company;
+  const { company_name, logo, tag_line, verify, slug } = company;
 
   return (
     <li className="flex items-center gap-2 pt-2">
-      <Link to={`/${company_name}`}>
+      <Link to={`/${slug}`}>
         <Avatar
           src={logo}
           name={company_name}
@@ -97,7 +96,7 @@ function CompanyListItem({ company }) {
         />
       </Link>
       <div>
-        <CompanyName name={company_name} verified={verify} size="md" />
+        <CompanyName slug={slug} name={company_name} verified={verify} size="md" />
         <small className="text-gray-400 text-xs line-clamp-1">
           {capitalizeFirst(tag_line) || "Tag line goes here"}
         </small>
