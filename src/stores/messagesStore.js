@@ -10,7 +10,9 @@ import {
 export const useMessagesStore = create((set, get) => ({
   messages: [],
   lastMessages: [],
+  openedMessage: null,
   messagesLoading: false,
+
   fetchMessages: async (params) => {
     set({ messagesLoading: true });
     try {
@@ -37,6 +39,19 @@ export const useMessagesStore = create((set, get) => ({
     } finally {
       set({ messagesLoading: false });
     }
+  },
+
+  setOpenedMessage: async (message, room_name) => {
+    if (room_name && get().lastMessages.length === 0) {
+      set({ loading: true });
+      await get().getLastMessages();
+      set({ loading: false });
+    }
+    const activeMessage = room_name
+      ? get().lastMessages.find((m) => m.room_name === room_name)
+      : message;
+
+    set({ openedMessage: activeMessage });
   },
 
   addOptimisticMessage: (message, error = false) => {

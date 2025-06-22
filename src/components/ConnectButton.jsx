@@ -25,7 +25,6 @@ export default function ConnectButton({
     if (followingList) {
       const isConnected = followingList.includes(id);
       setHasConnected(isConnected);
-      console.log(followingList, id, hasConnected, isConnected);
     }
   }, [currentUser, currentCompany, id, type]);
 

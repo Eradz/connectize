@@ -41,9 +41,11 @@ const isImageSize = (files) => {
 
 const emptyMessageValue = "Message field does not have any text";
 
-export default function MessageControl({ loading, recipientId, senderId }) {
+export default function MessageControl() {
   const { user: currentUser } = useAuth();
-  const { sendMessage } = useMessagesStore();
+  const sendMessage = useMessagesStore((state) => state.sendMessage);
+  const openedMessage = useMessagesStore((state) => state.openedMessage);
+  const loading = useMessagesStore((state) => state.loading);
 
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -100,17 +102,17 @@ export default function MessageControl({ loading, recipientId, senderId }) {
 
     try {
       const formData = new FormData();
-      formData.append("recipient", recipientId);
-      formData.append("sender", senderId);
+      formData.append("recipient", openedMessage?.other_user?.id);
       formData.append("content", message);
-      formData.append("user", currentUser?.id);
       if (audioBlob) {
         if (message.trim().length < 1)
           formData.append("content", "Audio conversation");
         formData.append(
           "audio_file",
           audioBlob,
-          `voice-note-in-room_${senderId}_${recipientId}-${new Date().getTime()}.webm`
+          `voice-note-in-room_${currentUser?.id}_${
+            openedMessage?.other_user?.id
+          }-${new Date().getTime()}.webm`
         );
       }
       if (validImages) {
@@ -122,10 +124,8 @@ export default function MessageControl({ loading, recipientId, senderId }) {
       }
 
       const messageData = {
-        recipient: Number(recipientId),
-        sender: Number(senderId),
-        user: currentUser?.id,
-        room_name: `room_${senderId}_${recipientId}`,
+        recipient: Number(openedMessage?.other_user?.id),
+        sender: Number(currentUser?.id),
         content:
           message.trim().length < 1
             ? audioBlob
@@ -150,7 +150,13 @@ export default function MessageControl({ loading, recipientId, senderId }) {
       console.error(error);
       toast.info("An error occurred while sending message");
     }
-  }, [audioBlob, currentUser?.id, message, recipientId, senderId, validImages]);
+  }, [
+    audioBlob,
+    currentUser?.id,
+    message,
+    openedMessage?.other_user?.id,
+    validImages,
+  ]);
 
   const handleInputChange = useCallback((e) => {
     const trimmedMessage = e.target.value.trim();

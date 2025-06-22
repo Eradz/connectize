@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getAllCompanies, getSingleCompany } from "../api-services/companies";
+import { getMessagesForUser } from "../api-services/messaging";
 import { getNotificationsForUser } from "../api-services/notifications";
+import { getPosts } from "../api-services/posts";
 import { getProducts } from "../api-services/products";
 import { getServices } from "../api-services/services";
 import { useCompaniesStore } from "../stores/companiesStore";
-import { useMessagesStore } from "../stores/messagesStore";
-import { useNotificationsStore } from "../stores/notificationsStore";
-import { usePostsStore } from "../stores/postsStore";
 import { useUsersStore } from "../stores/usersStore";
 
 export const useSafePoll = (callback, interval, deps = []) => {
@@ -36,20 +36,23 @@ export const useSafePoll = (callback, interval, deps = []) => {
   }, [interval, ...deps]);
 };
 
-export const usePollPosts = (interval = 0) => {
-  const { posts, fetchPosts, loading } = usePostsStore();
-
-  useSafePoll(fetchPosts, interval);
-
-  return { posts, loading };
+export const usePollPosts = (interval = 10000000) => {
+  return useQuery({
+    queryKey: ["posts"],
+    queryFn: getPosts,
+    refetchInterval: interval,
+  });
 };
 
-export const usePollMessages = (interval = 0, params = {}) => {
-  const { messages, fetchMessages } = useMessagesStore();
-
-  useSafePoll(() => fetchMessages(params), interval, [JSON.stringify(params)]);
-
-  return { messages };
+export const usePollMessages = (interval = 2000) => {
+  const [searchParams] = useSearchParams();
+  const room_name = searchParams.get("room_name");
+  return useQuery({
+    queryKey: ["messages", room_name],
+    queryFn: () => getMessagesForUser({ room_name }),
+    enabled: !!room_name,
+    refetchInterval: interval,
+  });
 };
 
 export const usePollCompanies = (interval = 0) => {
@@ -154,20 +157,12 @@ export const usePollUserById = (id, interval = 0) => {
   return { user: selectedUser };
 };
 
-export const usePollNotifications = (intervalMs = 0) => {
-  const setNotifications = useNotificationsStore((s) => s.setNotifications);
-
-  const fetch = async () => {
-    const data = await getNotificationsForUser();
-    if (Array.isArray(data)) setNotifications(data);
-  };
-
-  useSafePoll(fetch, intervalMs);
-
-  const notifications = useNotificationsStore((s) => s.notifications);
-  const unreadCount = useNotificationsStore((s) => s.unreadCount());
-
-  return { notifications, unreadCount };
+export const usePollNotifications = (intervalMs = 3000) => {
+  return useQuery({
+    queryKey: ["notifications"],
+    queryFn: getNotificationsForUser,
+    refetchInterval: intervalMs,
+  });
 };
 
 export const usePollProducts = (refetchInterval = 0) => {

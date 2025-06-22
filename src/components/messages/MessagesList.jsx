@@ -2,7 +2,6 @@ import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/userContext";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
@@ -55,18 +54,17 @@ export default function MessagesList() {
 }
 
 const MessagesListTile = React.memo(({ message }) => {
-  const { other_user } = message;
+  const { other_user, unread_count } = message;
   const name = `${other_user?.first_name} ${other_user?.last_name}`;
 
   const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
+  const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
+
   const room_name = message?.room_name;
 
-  const { user: currentUser } = useAuth();
-
-  const isRecipient = message.recipient_id === currentUser?.id;
-
   const handleMarkAsRead = async () => {
-    // if (!isRecipient) return;
+    setOpenedMessage(message);
+    if (unread_count <= 0) return;
     await markAllAsRead(room_name);
   };
 

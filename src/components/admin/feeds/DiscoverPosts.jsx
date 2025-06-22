@@ -43,7 +43,7 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { posts, loading: isLoading } = usePollPosts();
+  const { data: posts, isLoading } = usePollPosts();
 
   const finalArray = isSearch
     ? searchArray
