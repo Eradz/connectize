@@ -48,7 +48,7 @@ const CompanyProfile = React.memo(() => {
       <SEO title={`${company?.company_name || ""} | Connectize Companies`} />
       <Header {...headerProps} />
 
-      <section className="mt-12 md:mt-20 flex max-lg:flex-col items-start gap-2 relative">
+      <section className="mt-12 md:mt-20 flex max-lg:flex-col items-start gap-2 relative sm:px-2">
         {currentUser?.email === company?.profile &&
           currentUser?.user_type === CompanyUserType && (
             <ManageRepresentativesLink main />
