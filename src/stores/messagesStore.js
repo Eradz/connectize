@@ -78,7 +78,7 @@ export const useMessagesStore = create((set, get) => ({
     }
   },
 
-  markAllAsRead: async (room_name, user_id) => {
+  markAllAsRead: async (room_name) => {
     set((state) => ({
       messages: state.messages
         .filter((m) => m.room_name === room_name)
@@ -88,7 +88,7 @@ export const useMessagesStore = create((set, get) => ({
         })),
     }));
     try {
-      await markMessageAsRead(room_name, user_id);
+      await markMessageAsRead(room_name);
     } catch (err) {
       console.error("Failed to mark messages as read", err);
     }

@@ -2,6 +2,7 @@ import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/userContext";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
@@ -16,7 +17,7 @@ export default function MessagesList() {
 
   useEffect(() => {
     (async () => await fetchLastMessages())();
-  }, [lastMessages]);
+  }, []);
 
   return (
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
@@ -45,9 +46,9 @@ export default function MessagesList() {
           </div> */}
         </div>
       ) : (
-        lastMessages.map((message) => {
-          return <MessagesListTile key={message?.id} message={message} />;
-        })
+        lastMessages.map((message) => (
+          <MessagesListTile key={message?.id} message={message} />
+        ))
       )}
     </section>
   );
@@ -60,8 +61,13 @@ const MessagesListTile = React.memo(({ message }) => {
   const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
   const room_name = message?.room_name;
 
+  const { user: currentUser } = useAuth();
+
+  const isRecipient = message.recipient_id === currentUser?.id;
+
   const handleMarkAsRead = async () => {
-    await markAllAsRead(room_name, other_user?.id);
+    // if (!isRecipient) return;
+    await markAllAsRead(room_name);
   };
 
   return (
@@ -91,8 +97,10 @@ const MessagesListTile = React.memo(({ message }) => {
         </div>
       </Link>
       <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2">
-        {message?.is_read_by_other_user && (
-          <Badge className="!text-[.55rem]">Unread</Badge>
+        {message.unread_count > 0 && (
+          <Badge className="!text-[.55rem]">
+            {message.unread_count} Unread
+          </Badge>
         )}
         <TimeAgo time={message?.timestamp} />
       </div>

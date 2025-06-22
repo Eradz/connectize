@@ -180,9 +180,13 @@ export default function MessageControl({ loading, recipientId, senderId }) {
     const chatContainer = document.querySelector(".chat-container");
 
     if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      chatContainer.scrollTop = chatContainer.scrollHeight + 20;
     }
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, []);
 
   useEffect(() => {
     const chatContainer = document.querySelector(".chat-container");
