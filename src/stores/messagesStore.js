@@ -9,7 +9,10 @@ import {
 
 export const useMessagesStore = create((set, get) => ({
   messages: [],
+  lastMessages: [],
+  messagesLoading: false,
   fetchMessages: async (params) => {
+    set({ messagesLoading: true });
     try {
       const data = await getMessagesForUser(params);
       if (!isEqual(data, get().messages)) {
@@ -17,6 +20,22 @@ export const useMessagesStore = create((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to fetch messages", err);
+    } finally {
+      set({ messagesLoading: false });
+    }
+  },
+
+  getLastMessages: async () => {
+    set({ messagesLoading: true });
+    try {
+      const data = await getMessagesForUser({ last_chats: true });
+      if (!isEqual(data, get().lastMessages)) {
+        set({ lastMessages: data });
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages", err);
+    } finally {
+      set({ messagesLoading: false });
     }
   },
 

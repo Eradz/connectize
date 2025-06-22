@@ -10,15 +10,6 @@ export const getMessagesForUser = async (params) => {
   return messages;
 };
 
-export const getLastMessagesForUser = async () => {
-  const { results: messages } = await makeApiRequest({
-    url: "api/messages/?last_chats=true",
-    method: "GET",
-  });
-
-  return messages;
-};
-
 export const messageUser = async (formData) => {
   const message = await makeApiRequest({
     url: "api/messages/",
