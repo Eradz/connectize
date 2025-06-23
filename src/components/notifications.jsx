@@ -9,7 +9,7 @@ import {
 import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   deleteAllNotifications,
@@ -17,7 +17,7 @@ import {
   markAllNotificationsAsRead,
 } from "../api-services/notifications";
 import { useCompanies, useUsers } from "../hooks";
-import { usePollNotifications } from "../hooks/polling";
+import { usePollNotifications } from "../hooks/usePolling";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
@@ -82,16 +82,25 @@ const NotificationPopOver = () => {
 };
 
 export const NotificationItem = ({ isPopover = false }) => {
-  const { notifications, unreadCount } = usePollNotifications();
+  const { data: notifications, isLoading: notificationsLoading } =
+    usePollNotifications();
+
+  const unreadCount = useNotificationsStore((s) => s.unreadCount);
+
+  const setNotifications = useNotificationsStore((s) => s.setNotifications);
 
   const { markAllAsRead, deleteAll } = useNotificationsStore();
   const { data: companies, isLoading: companiesLoading } = useCompanies();
   const { data: users, isLoading: usersLoading } = useUsers();
 
+  useEffect(() => {
+    setNotifications(notifications);
+  }, [notifications, notificationsLoading]);
+
   const tabsHeader = ["General", "Promotions"];
 
   const diffNotifications = isPopover
-    ? notifications.slice(0, 10)
+    ? notifications?.slice(0, 10)
     : notifications;
 
   const generalNotifications = useMemo(
@@ -130,7 +139,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 
   return (
     <>
-      {companiesLoading || usersLoading ? (
+      {companiesLoading || usersLoading || notificationsLoading ? (
         <NotificationsSkeleton />
       ) : (
         <section className={clsx("bg-white rounded-md p-3 space-y-2 w-full")}>
@@ -260,7 +269,11 @@ const NotificationTile = memo(({ notification, index, company }) => {
         className={avatarStyle}
       />
       <div className="space-y-0 flex-1">
-        <CompanyName name={company?.company_name} verified={company?.verify} />
+        <CompanyName
+          slug={company?.slug}
+          name={company?.company_name}
+          verified={company?.verify}
+        />
         <Link
           to={notification?.link
             .replace("/room", "/?room_name=room")
@@ -300,4 +313,3 @@ const NotificationTile = memo(({ notification, index, company }) => {
 });
 
 export { NotificationPopOver, NotificationsArray };
-

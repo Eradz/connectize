@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
 import {
   getAllRepresentatives,
   getOrCreateRepresentativeCategory,
@@ -10,7 +9,7 @@ import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
 import RepresentativeCard from "../../components/representatives/RepresentativeCard";
 import SEO from "../../components/SEO";
-import { usePollAllCompanies } from "../../hooks/polling";
+import { usePollAllCompanies } from "../../hooks/usePolling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 
 export default function RepresentativesPage() {

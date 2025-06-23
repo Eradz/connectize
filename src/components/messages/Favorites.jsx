@@ -1,7 +1,6 @@
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import React from "react";
 import { Link } from "react-router-dom";
 import { getAllCompanies } from "../../api-services/companies";
 import { getAllUsers } from "../../api-services/users";
@@ -47,7 +46,7 @@ export default function Favorites() {
               animate={{ opacity: 1, y: 0 }}
               className="p-4 py-6 bg-background rounded-md text-center space-y-3 min-w-[180px] flex flex-col shrink-0"
             >
-              <Link to={`/${company?.company_name || ""}`}>
+              <Link to={`/${company?.slug || ""}`}>
                 <Avatar
                   className={avatarStyle}
                   src={company?.logo || "/images/default-company-logo.png"}

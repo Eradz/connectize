@@ -1,10 +1,7 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "../../context/userContext";
-import { useUsers } from "../../hooks";
-import { usePollMessages } from "../../hooks/polling";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
@@ -13,31 +10,19 @@ import TimeAgo from "../TimeAgo";
 import Username from "../Username";
 
 export default function MessagesList() {
-  const { messages } = usePollMessages();
-  const { user: currentUser } = useAuth();
+  const fetchLastMessages = useMessagesStore((state) => state.getLastMessages);
+  const lastMessages = useMessagesStore((state) => state.lastMessages);
+  const messagesLoading = useMessagesStore((state) => state.messagesLoading);
 
-  const { data: users, isLoading: usersLoading } = useUsers();
-
-  const allMessages = useMemo(() => [...(messages || [])], [messages]);
-
-  const messagesList = useMemo(() => {
-    const uniqueRecipients = new Set();
-    return allMessages?.filter((msg) => {
-      const recipient = msg?.room_name;
-      if (uniqueRecipients.has(recipient)) {
-        return false;
-      } else {
-        uniqueRecipients.add(recipient);
-        return true;
-      }
-    });
-  }, [allMessages]);
+  useEffect(() => {
+    (async () => await fetchLastMessages())();
+  }, []);
 
   return (
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
-      {usersLoading ? (
+      {messagesLoading ? (
         <MessagesListSkeleton />
-      ) : messagesList?.length <= 0 ? (
+      ) : lastMessages?.length <= 0 ? (
         <div className="min-h-40 py-2 mt-2 space-y-4">
           <HeadingText>
             Connectize is more interesting when you{" "}
@@ -60,38 +45,27 @@ export default function MessagesList() {
           </div> */}
         </div>
       ) : (
-        messagesList.map((message) => {
-          const currentUserId =
-            currentUser?.id !== message?.recipient
-              ? message?.recipient
-              : message?.sender;
-
-          const recipient = users?.find((user) => user?.id === currentUserId);
-          console.log(recipient);
-
-          return (
-            <MessagesListTile
-              key={message?.id}
-              message={message}
-              user={recipient}
-            />
-          );
-        })
+        lastMessages.map((message) => (
+          <MessagesListTile key={message?.id} message={message} />
+        ))
       )}
     </section>
   );
 }
 
-const MessagesListTile = React.memo(({ message, user }) => {
-  const name = `${user?.first_name} ${user?.last_name}`;
+const MessagesListTile = React.memo(({ message }) => {
+  const { other_user, unread_count } = message;
+  const name = `${other_user?.first_name} ${other_user?.last_name}`;
 
-  const { markAllAsRead } = useMessagesStore();
-  const [searchParams] = useSearchParams();
+  const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
+  const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
 
-  const room_name = searchParams.get("room_name");
+  const room_name = message?.room_name;
 
   const handleMarkAsRead = async () => {
-    await markAllAsRead(room_name, user?.id);
+    setOpenedMessage(message);
+    if (unread_count <= 0) return;
+    await markAllAsRead(room_name);
   };
 
   return (
@@ -102,10 +76,10 @@ const MessagesListTile = React.memo(({ message, user }) => {
       onClick={handleMarkAsRead}
       className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
     >
-      <Link to={`/co/${user?.id}`}>
+      <Link to={`/co/${other_user?.id}`}>
         <Avatar
           name={name}
-          src={`${user?.avatar}`}
+          src={`${other_user?.avatar}`}
           className={avatarStyle}
           size="sm"
         />
@@ -115,13 +89,17 @@ const MessagesListTile = React.memo(({ message, user }) => {
         to={`/messages/?room_name=${message?.room_name}`}
         className="flex-1 text-sm"
       >
-        <Username user={user} noClick />
+        <Username user={other_user} noClick />
         <div className="line-clamp-1 text-ellipsis">
           <LightParagraph>{message?.content}</LightParagraph>
         </div>
       </Link>
       <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2">
-        {!message.read_at && <Badge className="!text-[.55rem]">Unread</Badge>}
+        {message.unread_count > 0 && (
+          <Badge className="!text-[.55rem]">
+            {message.unread_count} Unread
+          </Badge>
+        )}
         <TimeAgo time={message?.timestamp} />
       </div>
     </motion.section>

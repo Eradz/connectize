@@ -1,20 +1,20 @@
-import React, { useRef, useState, useCallback } from "react";
-import { ChatSellerLink } from "../markets/newlyListed";
-import HeadingText from "../../HeadingText";
-import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { Avatar, Button, Divider } from "@chakra-ui/react";
-import { MarkdownComponent } from "../../MarkDownComponent";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
-import { useAuth } from "../../../context/userContext";
-import { bookmarkProduct } from "../../../api-services/products";
-import { Bookmark } from "../../../icon";
-import { Link } from "react-router-dom";
+import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { Autoplay, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { getSingleCompany } from "../../../api-services/companies";
+import { bookmarkProduct } from "../../../api-services/products";
+import { useAuth } from "../../../context/userContext";
+import { Bookmark } from "../../../icon";
 import { NAVIGATION_BUTTONS } from "../../../lib/slide_button";
-import { avatarStyle } from "../../ResponsiveNav";
 import { ProductDetailSkeleton } from "../../../pages/market/product";
+import HeadingText from "../../HeadingText";
+import { MarkdownComponent } from "../../MarkDownComponent";
+import { avatarStyle } from "../../ResponsiveNav";
+import { ChatSellerLink } from "../markets/newlyListed";
 
 function Productdetails({ product }) {
   const swiperRef = useRef(null);
@@ -160,7 +160,7 @@ function Productdetails({ product }) {
             />
             <div className="flex flex-col">
               <Link
-                to={`/${product?.company}`}
+                to={`/${product?.company?.replace(" ", "-")}`}
                 className="font-bold capitalize"
               >
                 {product?.company || ""}

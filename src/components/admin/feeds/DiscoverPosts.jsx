@@ -10,7 +10,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import React, { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ import {
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
-import { usePollPosts } from "../../../hooks/polling";
+import { usePollPosts } from "../../../hooks/usePolling";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber, shareThis } from "../../../lib/utils";
 import CompanyName from "../../company/CompanyName";
@@ -43,7 +43,7 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { posts, loading: isLoading } = usePollPosts();
+  const { data: posts, isLoading } = usePollPosts();
 
   const finalArray = isSearch
     ? searchArray

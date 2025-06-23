@@ -1,19 +1,19 @@
-import React, { useEffect } from "react";
-import HeadingText from "../HeadingText";
-import LightParagraph from "../ParagraphText";
+import { useFormik } from "formik";
+import { useEffect } from "react";
+import * as Yup from "yup";
+import { useAuth } from "../../context/userContext";
+import useRedirect from "../../hooks/useRedirect";
 import {
   bioKey,
   currentProfileIndexKey,
   social_media_urlKey,
   website_urlKey,
 } from "../../lib/data";
-import Form from "../form";
-import * as Yup from "yup";
-import { useFormik } from "formik";
-import StepButton from "./StepButton";
 import { customFormikFieldValidator } from "../../lib/utils";
-import useRedirect from "../../hooks/useRedirect";
-import { useAuth } from "../../context/userContext";
+import Form from "../form";
+import HeadingText from "../HeadingText";
+import LightParagraph from "../ParagraphText";
+import StepButton from "./StepButton";
 
 const validationSchema = Yup.object().shape({
   bio: Yup.string().trim().required("This field is required"),
@@ -69,12 +69,6 @@ function Bio() {
       type: "grid",
       gridInputs: [
         {
-          name: bioKey,
-          type: "textarea",
-          label: "Bio",
-          placeholder: "say something",
-        },
-        {
           name: website_urlKey,
           type: "text",
           label: "Website link",
@@ -87,6 +81,12 @@ function Bio() {
           placeholder: "e.g linkedin",
         },
       ],
+    },
+    {
+      name: bioKey,
+      type: "textarea",
+      label: "Bio",
+      placeholder: "say something",
     },
   ];
   return (

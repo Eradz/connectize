@@ -1,10 +1,8 @@
 import { LocationOnOutlined } from "@mui/icons-material";
 import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getSingleCompany } from "../../api-services/companies";
 import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
@@ -16,6 +14,7 @@ import SEO from "../../components/SEO";
 import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
+import { usePollCurrentCompany } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
 import { ProfileAboutList } from "./userProfile";
@@ -24,11 +23,7 @@ const CompanyProfile = React.memo(() => {
   const { company: companyName } = useParams();
   const { user: currentUser } = useAuth();
 
-  const { data: company, isLoading } = useQuery({
-    queryKey: ["companies", companyName],
-    queryFn: () => getSingleCompany(companyName),
-    enabled: !!companyName && !!currentUser,
-  });
+  const { data: company, isLoading } = usePollCurrentCompany(companyName);
 
   const headerProps = useMemo(
     () => ({
@@ -39,7 +34,8 @@ const CompanyProfile = React.memo(() => {
     [company]
   );
 
-  if (isLoading) return <PageLoading hasLogo={false} />;
+  if (isLoading)
+    return <PageLoading text="Getting profile ready..." hasLogo={false} />;
 
   if (!company) return <NoPage />;
 
@@ -48,13 +44,13 @@ const CompanyProfile = React.memo(() => {
       <SEO title={`${company?.company_name || ""} | Connectize Companies`} />
       <Header {...headerProps} />
 
-      <section className="mt-12 md:mt-20 flex max-lg:flex-col items-start gap-2 relative">
+      <section className="mt-12 md:mt-20 flex max-xl:flex-col items-start gap-2 relative sm:px-2">
         {currentUser?.email === company?.profile &&
           currentUser?.user_type === CompanyUserType && (
             <ManageRepresentativesLink main />
           )}
         <ProductSidebar company={company} />
-        <ProfileSection className="max-md:w-full grid grid-cols-1 gap-2 max-lg:py-2 flex-1">
+        <ProfileSection className="max-xl:w-full grid grid-cols-1 gap-2 max-lg:py-2 flex-1">
           <Summary company={company} />
         </ProfileSection>
       </section>
@@ -94,7 +90,7 @@ const ProductSidebar = React.memo(({ company }) => {
   const isCurrentUser = currentUser?.id === company?.user?.id;
 
   return (
-    <section className="space-y-8 max-lg:mb-4 w-full lg:max-w-[350px] xl:max-w-[400px] shrink-0">
+    <section className="space-y-8 max-lg:mb-4 w-full xl:max-w-[350px] 2xl:max-w-[400px] shrink-0">
       <section className="space-y-6">
         <div>
           <h1 className="text-3xl md:text-2xl font-bold capitalize">
@@ -116,7 +112,7 @@ const ProductSidebar = React.memo(({ company }) => {
         {isCurrentUser && (
           <>
             <Link
-              to={`/${company?.company_name || ""}/edit-profile`}
+              to={`/${company?.slug || ""}/edit-profile`}
               className="absolute top-3.5 right-2.5 text-sm !text-gray-500 hover:!text-black hover:bg-gray-100 px-2 py-1 rounded"
             >
               Edit Information

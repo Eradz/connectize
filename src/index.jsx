@@ -24,8 +24,8 @@ root.render(
         duration={5000}
         pauseWhenPageIsHidden
       />
-      <Analytics />
     </BrowserRouter>
+    <Analytics />
   </React.StrictMode>
 );
 

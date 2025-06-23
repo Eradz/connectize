@@ -4,10 +4,9 @@ import { ErrorOutline } from "@mui/icons-material";
 import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/userContext";
-import { useUsers } from "../../hooks";
+import { usePollMessages } from "../../hooks/usePolling";
 import { baseURL } from "../../lib/helpers";
 import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
@@ -17,10 +16,10 @@ import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
 import { VoiceNotePlayer } from "./MessageControl";
 
-export default function MessageArea({ messages, messagesLoading }) {
-  const { user: currentUser } = useAuth();
+export default function MessageArea() {
+  const { data: messageList = [], isLoading } = usePollMessages();
 
-  const { data: users, isLoading: usersLoading } = useUsers();
+  const messages = useMemo(() => [...messageList], [messageList]);
 
   const [readMoreLimit, setReadMoreLimit] = useState(300);
 
@@ -39,7 +38,7 @@ export default function MessageArea({ messages, messagesLoading }) {
 
   return (
     <section className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-4 relative scroll-smooth">
-      {messagesLoading || usersLoading ? (
+      {isLoading ? (
         <SkeletonChatMessages />
       ) : messages?.length <= 0 ? (
         <div className="h-full flex items-center justify-center flex-col gap-2">
@@ -78,34 +77,20 @@ export default function MessageArea({ messages, messagesLoading }) {
               {groupedMessages[date]
                 .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
                 .map((message, index) => {
-                  const currentUserId =
-                    currentUser?.id !== message?.recipient
-                      ? message?.recipient
-                      : message?.sender;
-
-                  const recipient = users?.find(
-                    (user) => user?.id === currentUserId
-                  );
-
-                  const isCurrentUser = currentUser?.id === message?.user;
-
-                  const user = isCurrentUser ? currentUser : recipient;
-
-                  const messageContent = String(message?.content);
-
+                  const { sender_info, is_current_user } = message;
                   return (
                     <motion.div
-                      key={index}
+                      key={message?.id || index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       className={clsx(
                         "w-full p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2"
                       )}
                     >
-                      <Link to={`/co/${user?.id}`} className="h-fit">
+                      <Link to={`/co/${sender_info?.id}`} className="h-fit">
                         <Avatar
-                          name={`${user?.first_name} ${user?.last_name}`}
-                          src={user?.avatar}
+                          name={`${sender_info?.first_name} ${sender_info?.last_name}`}
+                          src={sender_info?.avatar}
                           size="sm"
                           className={avatarStyle}
                         />
@@ -116,15 +101,15 @@ export default function MessageArea({ messages, messagesLoading }) {
                         )}
                       >
                         <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
-                          {isCurrentUser
+                          {is_current_user
                             ? "You"
-                            : `${user?.first_name || ""} ${
-                                user?.last_name || ""
+                            : `${sender_info?.first_name || ""} ${
+                                sender_info?.last_name || ""
                               }`}
                         </h1>
                         <p className="text-gray-700 hover:text-gray-900 transition-all duration-300">
-                          {messageContent.substring(0, readMoreLimit)}
-                          {messageContent.length > readMoreLimit && (
+                          {message?.content.substring(0, readMoreLimit)}
+                          {message?.content.length > readMoreLimit && (
                             <>
                               ...{" "}
                               <span

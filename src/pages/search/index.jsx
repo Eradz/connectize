@@ -15,8 +15,8 @@ import LightParagraph from "../../components/ParagraphText";
 import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
-import { usePollAllCompanies } from "../../hooks/polling";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
+import { usePollAllCompanies } from "../../hooks/usePolling";
 import { getRandomOilAndGasKeyword } from "../../lib/helpers/getRandomOilAndGasWords";
 import { CompaniesArray } from "../companies";
 

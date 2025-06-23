@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
-import { usePollAllCompanies } from "../../../hooks/polling";
+import { usePollAllCompanies } from "../../../hooks/usePolling";
 import { useProductImages } from "../../../hooks/useProduct";
 import { webRoutes } from "../../../lib/webRoutes";
 import CustomTabs from "../../custom/tabs";

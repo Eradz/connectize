@@ -1,6 +1,5 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
-import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Logo from "../../components/logo";
 import { getSession } from "../../lib/session";
@@ -20,8 +19,8 @@ function AuthLayout({ redirectUrl = "/" }) {
 
   return (
     <main className="flex justify-center h-screen p-4">
-      <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center lg:!w-1/2 shrink-0 scrollbar-hidden">
-        <section className="w-full max-xs:h-full  py-4 max-w-sm lg:max-w-md">
+      <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center  lg:!w-1/2 shrink-0 scrollbar-hidden">
+        <section className="w-full max-xs:h-ful flex-1 flex flex-col justify-center py-4 max-w-xl lg:max-w-md">
           <Logo url="/login" />
           <motion.section
             initial={{ opacity: 0, y: -20 }}

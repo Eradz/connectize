@@ -9,7 +9,12 @@ import {
 
 export const useMessagesStore = create((set, get) => ({
   messages: [],
+  lastMessages: [],
+  openedMessage: null,
+  messagesLoading: false,
+
   fetchMessages: async (params) => {
+    set({ messagesLoading: true });
     try {
       const data = await getMessagesForUser(params);
       if (!isEqual(data, get().messages)) {
@@ -17,7 +22,36 @@ export const useMessagesStore = create((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to fetch messages", err);
+    } finally {
+      set({ messagesLoading: false });
     }
+  },
+
+  getLastMessages: async () => {
+    set({ messagesLoading: true });
+    try {
+      const data = await getMessagesForUser({ last_chats: true });
+      if (!isEqual(data, get().lastMessages)) {
+        set({ lastMessages: data });
+      }
+    } catch (err) {
+      console.error("Failed to fetch messages", err);
+    } finally {
+      set({ messagesLoading: false });
+    }
+  },
+
+  setOpenedMessage: async (message, room_name) => {
+    if (room_name && get().lastMessages.length === 0) {
+      set({ loading: true });
+      await get().getLastMessages();
+      set({ loading: false });
+    }
+    const activeMessage = room_name
+      ? get().lastMessages.find((m) => m.room_name === room_name)
+      : message;
+
+    set({ openedMessage: activeMessage });
   },
 
   addOptimisticMessage: (message, error = false) => {
@@ -59,7 +93,7 @@ export const useMessagesStore = create((set, get) => ({
     }
   },
 
-  markAllAsRead: async (room_name, user_id) => {
+  markAllAsRead: async (room_name) => {
     set((state) => ({
       messages: state.messages
         .filter((m) => m.room_name === room_name)
@@ -69,7 +103,7 @@ export const useMessagesStore = create((set, get) => ({
         })),
     }));
     try {
-      await markMessageAsRead(room_name, user_id);
+      await markMessageAsRead(room_name);
     } catch (err) {
       console.error("Failed to mark messages as read", err);
     }

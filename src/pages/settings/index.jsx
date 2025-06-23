@@ -1,11 +1,12 @@
 import { Button, Input, useDisclosure } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { deactivateAccount } from "../../api-services/authentication";
 import ReusableModal from "../../components/custom/ResusableModal";
 import CustomInput from "../../components/form/customInput";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
+import SEO from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 import { goToLogin } from "../../lib/helpers";
 import ChangePassword from "./components/ChangePassword";
@@ -35,17 +36,15 @@ const SettingsPage = () => {
     if (success) {
       toast.success("Your account has been deactivated successfully.");
       onClose();
-      setTimeout(() => goToLogin(), 3000);
+      localStorage.clear();
+      setTimeout(goToLogin, 2000);
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    document.title = "Settings on connectize";
-  }, []);
-
   return (
-    <main className="p-6 bg-white rounded-md min-h-[80vh] space-y-6">
+    <main className="p-6 bg-white rounded-md h-screen space-y-6 overflow-y-auto">
+      <SEO title="Settings | connectize" />
       <HeadingText weight="semibold">Settings</HeadingText>
 
       <section className="space-y-8">

@@ -21,7 +21,7 @@ export default function RepresentativeCard({ user, company, role }) {
           {
             name: `${company?.company_name}`,
             src: company?.logo || "/images/default-company-logo.png",
-            href: `/${company?.company_name}`,
+            href: `/${company?.slug}`,
           },
           {
             name: `${user?.first_name} ${user?.last_name}`,
@@ -39,10 +39,7 @@ export default function RepresentativeCard({ user, company, role }) {
         </small>
         <small className="text-gray-400 line-clamp-2">
           {capitalizeFirst(role)} representative at{" "}
-          <Link
-            to={`/${company?.company_name}`}
-            className="!text-black keep-all"
-          >
+          <Link to={`/${company?.slug}`} className="!text-black keep-all">
             {company?.company_name}
           </Link>
         </small>

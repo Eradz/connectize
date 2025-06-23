@@ -1,6 +1,6 @@
 import { getCountries } from "@loophq/country-state-list";
 import { useFormik } from "formik";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import * as Yup from "yup";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
@@ -141,26 +141,24 @@ const CreateCompany = () => {
             "50 and above employees",
           ],
         },
-        {
-          name: "company_description",
-          type: "textarea",
-          label: "Short description",
-          placeholder: "write a short description of your company here...",
-        },
       ],
+    },
+    {
+      name: "company_description",
+      type: "textarea",
+      label: "Short description",
+      placeholder: "write a short description of your company here...",
     },
   ];
   return (
-    <section className="space-y-8">
+    <section className="space-y-8 w-full">
       <SEO
-        title="Create Company | Connectize"
+        title="Create a Company | Connectize"
         description="Create a company profile on Connectize, the leading social platform for the oil and gas industry. Showcase your business, connect with professionals, attract investors, and collaborate on industry projects. Build your network and grow your brand today!"
         relativeImagePath="create-company.png"
       />
-      <div className="w-full mt-4">
-        <HeadingText>
-          Help us with brief information about your company
-        </HeadingText>
+      <div>
+        <HeadingText>Provide information about your company</HeadingText>
         <LightParagraph>Please fill in the details below</LightParagraph>
       </div>
 

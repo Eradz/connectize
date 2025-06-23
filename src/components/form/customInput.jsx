@@ -7,7 +7,7 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import ReactQuill from "react-quill";
 import { ImageIcon } from "../../icon";
 import FormikErrorResponse from "./formError";
@@ -146,7 +146,7 @@ export function AvatarUpload({ formik, name, label, className }) {
           src={
             imageValue
               ? URL.createObjectURL(imageValue)
-              : "/images/passportTwo.png"
+              : "/images/passportOne.png"
           }
           alt="upload"
           className={clsx("size-20 mx-auto transition-all duration-300", {
