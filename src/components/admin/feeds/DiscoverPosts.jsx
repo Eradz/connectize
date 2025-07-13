@@ -356,7 +356,7 @@ const CommentSection = ({
 
   return (
     <section
-      className={clsx("overflow-hidden transition-all duration-300", {
+      className={clsx("transition-all duration-300", {
         "mt-4": showCommentSection,
         "h-0 opacity-0": !showCommentSection,
       })}
@@ -383,6 +383,7 @@ const CommentSection = ({
           onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
           theme="snow"
           placeholder="Type your comment here"
+          // style={{ height: "200px" }}
         />
         <button
           className="absolute bottom-1.5 right-2 bg-gray-300 disabled:skeleton hover:bg-gray-400 text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"

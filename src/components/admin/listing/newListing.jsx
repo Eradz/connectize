@@ -109,7 +109,7 @@ export default function NewListing() {
           name: "product_title",
           type: "text",
           label: "Product Title",
-          placeholder: "Should not be more that 250 characters",
+          placeholder: "Should not be more than 250 characters",
         },
         {
           name: "subtitle",

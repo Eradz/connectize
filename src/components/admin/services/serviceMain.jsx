@@ -29,7 +29,7 @@ export const PostCardWrapper = ({ isOverview = false }) => {
     <section
       className={clsx("bg-white rounded-md p-2 grid gap-x-3 gap-y-4 ", {
         "sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3":
-          !isOverview && services.length,
+          !isOverview && services?.length,
         // "max-lg:hidden": isOverview,
       })}
     >

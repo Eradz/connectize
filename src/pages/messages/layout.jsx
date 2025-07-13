@@ -10,41 +10,11 @@ import SEO from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 
 import MessagesPage from "../messages";
-import { useEffect, useRef } from "react";
-import { baseURL } from "../../lib/helpers";
-
-// function connectWs() {
-//   const ref = useRef(false);
-//   useEffect(() => {
-//     if (ref.current == true) return;
-
-//     const ws = new WebSocket(baseURL + "/ws/chat");
-
-//     ref.current = true
-
-//     ws.addEventListener("close", (ev) => {
-//       console.log("Closed", ev);
-//     });
-//     ws.addEventListener("open", (ev) => {
-//       console.log("opened", ev);
-//     });
-
-//     ws.addEventListener("error", (ev) => {
-//       console.log("ws error", ev);
-//     });
-
-//     ws.addEventListener("message", (ev) => {
-//       console.log("message", ev);
-//     });
-//   }, []);
-// }
 
 export default function MessagesLayout() {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name");
   const { user: currentUser, loading } = useAuth();
-
-  // connectWs();
 
   return (
     <section className="w-full h-full flex gap-4">

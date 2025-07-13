@@ -54,12 +54,12 @@ const Navbar = () => {
 
               <NotificationPopOver />
 
-              <LinkWithTooltipIcon
+              {/* <LinkWithTooltipIcon
                 IconName={Setting}
                 className="md:hidden"
                 tip="settings"
                 to="/co/settings"
-              />
+              /> */}
               <JoinedUserCompanyImages />
             </div>
           </section>

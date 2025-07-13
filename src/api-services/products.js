@@ -84,7 +84,7 @@ export const createProduct = async (data, resetForm) => {
       category: productCategoryData,
       description: data.description,
       featured: false,
-      company: company?.[0].company_name || "",
+      company: company?.[0]?.company_name || "",
     },
     resetForm,
   });

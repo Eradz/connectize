@@ -75,6 +75,30 @@ export const Check = ({
   </svg>
 );
 
+export const User = ({
+  width = "18",
+  height = "18",
+  className,
+  color = "currentColor",
+}) => (
+  <svg
+    width={width}
+    height={height}
+    className={className}
+    fill={color}
+    viewBox={`0 0 ${width} ${height}`}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M10 9C11.6569 9 13 7.65685 13 6C13 4.34315 11.6569 3 10 3C8.34315 3 7 4.34315 7 6C7 7.65685 8.34315 9 10 9Z"
+      fill={color || "#262626"}
+    />
+    <path
+      d="M3 18C3 14.134 6.13401 11 10 11C13.866 11 17 14.134 17 18H3Z"
+      fill={color || "#262626"}
+    />
+  </svg>
+);
 export const Linkedin = ({
   width = "18",
   height = "18",

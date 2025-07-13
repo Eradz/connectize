@@ -106,10 +106,6 @@ export async function getAuthorizationHeader() {
   return await refreshToken();
 }
 
-let networkErrorToastState = {
-  isOpen: false,
-  toastId: "",
-};
 export async function makeApiRequest({
   url,
   method,
