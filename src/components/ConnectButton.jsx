@@ -12,7 +12,7 @@ export default function ConnectButton({
   setCachedConnections,
 }) {
   const { user: currentUser } = useAuth();
-  const { data: currentCompany, isLoading } = useGetCurrentCompany();
+  const { data: currentCompany, isLoading } = useGetCurrentCompany(id);
 
   const [hasConnected, setHasConnected] = useState(false);
 
@@ -20,8 +20,7 @@ export default function ConnectButton({
     const followingList =
       type === "users"
         ? currentUser?.followings
-        : currentCompany?.[0]?.following?.map((c) => c.company_following.id);
-
+        : currentCompany?.[0]?.followers?.map((follower => follower.company_following.id)).filter(Boolean);
     if (followingList) {
       const isConnected = followingList.includes(id);
       setHasConnected(isConnected);
