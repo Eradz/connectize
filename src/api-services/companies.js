@@ -25,7 +25,7 @@ export const getAllCompanies = async () => {
     method: "GET",
   });
 
-  return companies;
+  return companies || [];
 };
 
 export const getCompanyByIdOrEmail = async (id) => {
