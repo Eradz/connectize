@@ -20,9 +20,9 @@ export default function ConnectButton({
     const followingList =
       type === "users"
         ? currentUser?.followings
-        : currentCompany?.[0]?.followers?.map((follower => follower.company_following.id)).filter(Boolean);
+        : currentCompany?.[0]?.followers?.flatMap(follower => [follower.company_follower.id, follower.user_follower.id]).filter(Boolean);
     if (followingList) {
-      const isConnected = followingList.includes(id);
+      const isConnected = followingList.includes(currentUser?.id);
       setHasConnected(isConnected);
     }
   }, [currentUser, currentCompany, id, type]);
