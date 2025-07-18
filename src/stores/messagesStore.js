@@ -42,16 +42,52 @@ export const useMessagesStore = create((set, get) => ({
   },
 
   setOpenedMessage: async (message, room_name) => {
-    if (room_name && get().lastMessages.length === 0) {
-      set({ loading: true });
-      await get().getLastMessages();
-      set({ loading: false });
+    // If we have a specific message, set it directly
+    if (message) {
+      set({ openedMessage: message });
+      return;
     }
-    const activeMessage = room_name
-      ? get().lastMessages.find((m) => m.room_name === room_name)
-      : message;
 
-    set({ openedMessage: activeMessage });
+    // Handle room_name case
+    if (room_name) {
+      // First check if we already have this room in lastMessages
+      const existingMessage = get().lastMessages.find((m) => m.room_name === room_name);
+      if (existingMessage) {
+        set({ openedMessage: existingMessage });
+        return;
+      }
+
+      // If no existing message found, parse room_name to get recipient info
+      // room_name format: "room_currentUserId_recipientId"
+      const roomParts = room_name.split('_');
+      if (roomParts.length === 3 && roomParts[0] === 'room') {
+        const currentUserId = parseInt(roomParts[1]);
+        const recipientId = parseInt(roomParts[2]);
+        
+        // Create a minimal openedMessage for new chats
+        set({ 
+          openedMessage: {
+            room_name: room_name,
+            other_user: { id: recipientId },
+            // Add other required fields as needed
+          }
+        });
+        return;
+      }
+
+      // Fallback: try to fetch lastMessages only if we don't have any
+      if (get().lastMessages.length === 0) {
+        set({ messagesLoading: true });
+        await get().getLastMessages();
+        set({ messagesLoading: false });
+        
+        // Try again to find the message
+        const foundMessage = get().lastMessages.find((m) => m.room_name === room_name);
+        if (foundMessage) {
+          set({ openedMessage: foundMessage });
+        }
+      }
+    }
   },
 
   addOptimisticMessage: (message, error = false) => {
