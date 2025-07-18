@@ -69,19 +69,16 @@ export const useMessagesStore = create((set, get) => ({
           openedMessage: {
             room_name: room_name,
             other_user: { id: recipientId },
-            // Add other required fields as needed
           }
         });
         return;
       }
 
-      // Fallback: try to fetch lastMessages only if we don't have any
       if (get().lastMessages.length === 0) {
         set({ messagesLoading: true });
         await get().getLastMessages();
         set({ messagesLoading: false });
-        
-        // Try again to find the message
+
         const foundMessage = get().lastMessages.find((m) => m.room_name === room_name);
         if (foundMessage) {
           set({ openedMessage: foundMessage });
