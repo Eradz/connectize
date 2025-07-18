@@ -147,4 +147,41 @@ export const useMessagesStore = create((set, get) => ({
       messages: state.messages.filter((m) => m.id !== tempId),
     }));
   },
+
+  addRealtimeMessage: (newMessage) => {
+    set((state) => {
+      // Check if message already exists to avoid duplicates
+      const messageExists = state.messages.some(m => m.id === newMessage.id);
+      if (messageExists) return state;
+
+      return {
+        messages: [...state.messages, newMessage]
+      };
+    });
+  },
+
+  updateLastMessages: (newMessage) => {
+    set((state) => {
+      const existingIndex = state.lastMessages.findIndex(
+        m => m.room_name === newMessage.room_name
+      );
+
+      if (existingIndex >= 0) {
+        // Update existing conversation
+        const updatedLastMessages = [...state.lastMessages];
+        updatedLastMessages[existingIndex] = {
+          ...updatedLastMessages[existingIndex],
+          content: newMessage.content,
+          timestamp: newMessage.timestamp,
+          unread_count: updatedLastMessages[existingIndex].unread_count + 1
+        };
+        return { lastMessages: updatedLastMessages };
+      } else {
+        // Add new conversation to the top
+        return {
+          lastMessages: [newMessage, ...state.lastMessages]
+        };
+      }
+    });
+  },
 }));

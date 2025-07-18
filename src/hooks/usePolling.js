@@ -44,7 +44,7 @@ export const usePollPosts = (interval = 10000000) => {
   });
 };
 
-export const usePollMessages = (interval = 2000) => {
+export const usePollMessages = (interval = 30000) => {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name");
   return useQuery({

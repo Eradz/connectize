@@ -2,6 +2,7 @@ import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
@@ -10,13 +11,19 @@ import TimeAgo from "../TimeAgo";
 import Username from "../Username";
 
 export default function MessagesList() {
+  // Use WebSocket for real-time updates
+  useMessagingWebSocket();
+  
   const fetchLastMessages = useMessagesStore((state) => state.getLastMessages);
   const lastMessages = useMessagesStore((state) => state.lastMessages);
   const messagesLoading = useMessagesStore((state) => state.messagesLoading);
 
   useEffect(() => {
-    (async () => await fetchLastMessages())();
-  }, []);
+    // Only fetch initially if we don't have any messages
+    if (lastMessages.length === 0) {
+      (async () => await fetchLastMessages())();
+    }
+  }, [fetchLastMessages, lastMessages.length]);
 
   return (
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">

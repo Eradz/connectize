@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
+import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
+import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
 import { timeAgo } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
@@ -17,9 +19,20 @@ import TimeAgo from "../TimeAgo";
 import { VoiceNotePlayer } from "./MessageControl";
 
 export default function MessageArea() {
-  const { data: messageList = [], isLoading } = usePollMessages();
-
-  const messages = useMemo(() => [...messageList], [messageList]);
+  // Use WebSocket for real-time updates
+  useMessagingWebSocket();
+  
+  // Reduce polling frequency since WebSocket handles real-time updates
+  const { data: messageList = [], isLoading } = usePollMessages(30000); // Poll every 30 seconds as fallback
+  
+  // Get messages from store (updated by WebSocket)
+  const storeMessages = useMessagesStore((state) => state.messages);
+  
+  // Use store messages if available, otherwise fall back to polling data
+  const messages = useMemo(() => 
+    storeMessages.length > 0 ? storeMessages : messageList, 
+    [storeMessages, messageList]
+  );
 
   const [readMoreLimit, setReadMoreLimit] = useState(300);
 
