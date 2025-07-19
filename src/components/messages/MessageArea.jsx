@@ -4,8 +4,8 @@ import { ErrorOutline } from "@mui/icons-material";
 import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
 import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
@@ -19,20 +19,31 @@ import TimeAgo from "../TimeAgo";
 import { VoiceNotePlayer } from "./MessageControl";
 
 export default function MessageArea() {
-  // Use WebSocket for real-time updates
   useMessagingWebSocket();
   
   // Reduce polling frequency since WebSocket handles real-time updates
-  const { data: messageList = [], isLoading } = usePollMessages(30000); // Poll every 30 seconds as fallback
+  const { data: messageList = [], isLoading } = usePollMessages(30000);
   
   // Get messages from store (updated by WebSocket)
   const storeMessages = useMessagesStore((state) => state.messages);
+  const fetchMessages = useMessagesStore((state) => state.fetchMessages);
+  
+  const [searchParams] = useSearchParams();
+  const room_name = searchParams.get("room_name");
   
   // Use store messages if available, otherwise fall back to polling data
   const messages = useMemo(() => 
     storeMessages.length > 0 ? storeMessages : messageList, 
     [storeMessages, messageList]
   );
+  
+  // Only fetch initial messages if store is empty
+  useEffect(() => {
+    if (room_name && storeMessages.length === 0) {
+      console.log("🔄 Fetching initial messages for room:", room_name);
+      fetchMessages({ room_name });
+    }
+  }, [room_name, storeMessages.length, fetchMessages]);
 
   const [readMoreLimit, setReadMoreLimit] = useState(300);
 

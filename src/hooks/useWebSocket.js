@@ -13,27 +13,32 @@ const useWebSocket = (url, params) => {
         ? baseURL.replace("http", "ws")
         : baseURL.replace("https", "wss");
 
-    const socket = new WebSocket(
-      `${wsBaseUrl}/ws/${url}/${params ? params : "?"}token=${session?.tokens?.access}`
-    );
+    // Construct WebSocket URL based on endpoint type
+    let wsUrl;
+    if (url === "chat" && !params) {
+      // All chats endpoint: ws/chat/
+      wsUrl = `${wsBaseUrl}/ws/chat/?token=${session?.tokens?.access}`;
+    } else if (url === "chat" && params) {
+      // Specific chat room endpoint: ws/chat/<room_name>/
+      wsUrl = `${wsBaseUrl}/ws/chat/${params}/?token=${session?.tokens?.access}`;
+    } else if (url === "group" && params) {
+      // Group chat endpoint: ws/group/<room_name>/
+      wsUrl = `${wsBaseUrl}/ws/group/${params}/?token=${session?.tokens?.access}`;
+    } else {
+      // Fallback for other endpoints (notifications, etc.)
+      wsUrl = `${wsBaseUrl}/ws/${url}/${params ? params : "?"}token=${session?.tokens?.access}`;
+    }
+
+    const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
-      console.log("WebSocket Connected");
+      console.log("WebSocket Connected to:", wsUrl);
     };
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
       setMessages((prevMessages) => [...prevMessages, data]);
     };
-
-    // socket.onerror = (error) => {
-    //   console.error("WebSocket Error:", error);
-    // };
-
-    // socket.onclose = () => {
-    //   console.log("WebSocket Disconnected");
-    // };
 
     setWs(socket);
 

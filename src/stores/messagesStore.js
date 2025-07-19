@@ -6,6 +6,7 @@ import {
   markMessageAsRead,
   messageUser,
 } from "../api-services/messaging";
+import { getUserById } from "../api-services/users";
 
 export const useMessagesStore = create((set, get) => ({
   messages: [],
@@ -14,14 +15,26 @@ export const useMessagesStore = create((set, get) => ({
   messagesLoading: false,
 
   fetchMessages: async (params) => {
+    console.log("🔄 Fetching messages with params:", params);
     set({ messagesLoading: true });
+    
     try {
       const data = await getMessagesForUser(params);
-      if (!isEqual(data, get().messages)) {
-        set({ messages: data });
-      }
+      console.log("✅ Fetched messages:", data);
+      
+      // Only set messages if we don't have any, to avoid clearing WebSocket messages
+      set((state) => {
+        if (state.messages.length === 0) {
+          console.log("✅ Setting initial messages, count:", data?.length || 0);
+          return { messages: data || [] };
+        } else {
+          console.log("⚠️ Skipping message replacement, already have messages:", state.messages.length);
+          return state;
+        }
+      });
     } catch (err) {
-      console.error("Failed to fetch messages", err);
+      console.error("❌ Failed to fetch messages:", err);
+      set({ messages: [] });
     } finally {
       set({ messagesLoading: false });
     }
@@ -31,9 +44,49 @@ export const useMessagesStore = create((set, get) => ({
     set({ messagesLoading: true });
     try {
       const data = await getMessagesForUser({ last_chats: true });
-      if (!isEqual(data, get().lastMessages)) {
-        set({ lastMessages: data });
-      }
+      console.log("🔍 Raw lastMessages from API:", data);
+      
+      // Process the data to ensure complete other_user info
+      const processedData = await Promise.all(
+        (data || []).map(async (message) => {
+          if (!message.other_user || !message.other_user.first_name) {
+            console.log("🔧 Processing incomplete other_user for message:", message.id);
+            
+            // Try to get user info from the message structure
+            const currentUserId = JSON.parse(localStorage.getItem('session'))?.user?.id;
+            const otherUserId = message.sender === currentUserId ? message.recipient : message.sender;
+            
+            try {
+              const userInfo = await getUserById(otherUserId);
+              return {
+                ...message,
+                other_user: {
+                  id: otherUserId,
+                  first_name: userInfo.first_name,
+                  last_name: userInfo.last_name,
+                  avatar: userInfo.avatar,
+                  role: userInfo.role,
+                  email: userInfo.email
+                }
+              };
+            } catch (error) {
+              console.error("Failed to fetch user info for:", otherUserId);
+              return {
+                ...message,
+                other_user: {
+                  id: otherUserId,
+                  first_name: "Unknown",
+                  last_name: "User"
+                }
+              };
+            }
+          }
+          return message;
+        })
+      );
+      
+      console.log("✅ Processed lastMessages:", processedData);
+      set({ lastMessages: processedData });
     } catch (err) {
       console.error("Failed to fetch messages", err);
     } finally {
@@ -42,46 +95,71 @@ export const useMessagesStore = create((set, get) => ({
   },
 
   setOpenedMessage: async (message, room_name) => {
+    console.log("🔍 setOpenedMessage called with:", { message, room_name });
+    
     // If we have a specific message, set it directly
     if (message) {
+      console.log("✅ Setting opened message directly:", message);
       set({ openedMessage: message });
       return;
     }
 
     // Handle room_name case
     if (room_name) {
+      console.log("🔍 Handling room_name:", room_name);
+      
       // First check if we already have this room in lastMessages
       const existingMessage = get().lastMessages.find((m) => m.room_name === room_name);
+      console.log("🔍 Existing message found:", existingMessage);
+      
       if (existingMessage) {
+        console.log("✅ Using existing message from lastMessages");
         set({ openedMessage: existingMessage });
         return;
       }
 
-      // If no existing message found, parse room_name to get recipient info
-      // room_name format: "room_currentUserId_recipientId"
+      // Parse room_name to get recipient info
       const roomParts = room_name.split('_');
+      console.log("🔍 Room parts:", roomParts);
+      
       if (roomParts.length === 3 && roomParts[0] === 'room') {
         const currentUserId = parseInt(roomParts[1]);
         const recipientId = parseInt(roomParts[2]);
+        console.log("🔍 Parsed IDs - current:", currentUserId, "recipient:", recipientId);
         
-        // Create a minimal openedMessage for new chats
-        set({ 
-          openedMessage: {
+        try {
+          console.log("🔄 Fetching user data for ID:", recipientId);
+          const recipientUser = await getUserById(recipientId);
+          console.log("✅ Fetched user data:", recipientUser);
+          
+          const openedMessageData = {
             room_name: room_name,
-            other_user: { id: recipientId },
-          }
-        });
-        return;
-      }
-
-      if (get().lastMessages.length === 0) {
-        set({ messagesLoading: true });
-        await get().getLastMessages();
-        set({ messagesLoading: false });
-
-        const foundMessage = get().lastMessages.find((m) => m.room_name === room_name);
-        if (foundMessage) {
-          set({ openedMessage: foundMessage });
+            other_user: {
+              id: recipientId,
+              first_name: recipientUser.first_name,
+              last_name: recipientUser.last_name,
+              avatar: recipientUser.avatar,
+              role: recipientUser.role,
+              email: recipientUser.email
+            },
+          };
+          
+          console.log("✅ Setting openedMessage with fetched data:", openedMessageData);
+          set({ openedMessage: openedMessageData });
+          return;
+        } catch (error) {
+          console.error("❌ Failed to fetch recipient user data:", error);
+          set({ 
+            openedMessage: {
+              room_name: room_name,
+              other_user: { 
+                id: recipientId,
+                first_name: "Unknown",
+                last_name: "User"
+              },
+            }
+          });
+          return;
         }
       }
     }
@@ -127,18 +205,34 @@ export const useMessagesStore = create((set, get) => ({
   },
 
   markAllAsRead: async (room_name) => {
-    set((state) => ({
-      messages: state.messages
-        .filter((m) => m.room_name === room_name)
-        .map((m) => ({
-          ...m,
-          read_at: new Date().toUTCString(),
-        })),
-    }));
+    console.log("📖 Marking all as read for room:", room_name);
+    
+    set((state) => {
+      const updatedMessages = state.messages.map((m) => 
+        m.room_name === room_name 
+          ? { ...m, read_at: new Date().toISOString() }
+          : m
+      );
+      
+      const updatedLastMessages = state.lastMessages.map((m) =>
+        m.room_name === room_name
+          ? { ...m, unread_count: 0 }
+          : m
+      );
+      
+      console.log("✅ Updated unread counts for room:", room_name);
+      
+      return {
+        messages: updatedMessages,
+        lastMessages: updatedLastMessages
+      };
+    });
+    
     try {
       await markMessageAsRead(room_name);
+      console.log("✅ Backend mark as read successful");
     } catch (err) {
-      console.error("Failed to mark messages as read", err);
+      console.error("❌ Failed to mark messages as read:", err);
     }
   },
 
@@ -148,38 +242,88 @@ export const useMessagesStore = create((set, get) => ({
     }));
   },
 
-  addRealtimeMessage: (newMessage) => {
-    set((state) => {
-      // Check if message already exists to avoid duplicates
-      const messageExists = state.messages.some(m => m.id === newMessage.id);
-      if (messageExists) return state;
+  setLastMessages: (newLastMessages) => {
+    set({ lastMessages: newLastMessages });
+  },
 
+  addRealtimeMessage: (newMessage) => {
+    console.log("📨 Adding realtime message:", newMessage);
+    
+    set((state) => {
+      console.log("🔍 Current messages count:", state.messages.length);
+      
+      // Check if message already exists
+      const messageExists = state.messages.some(m => m.id === newMessage.id);
+      if (messageExists) {
+        console.log("⚠️ Message already exists, skipping:", newMessage.id);
+        return state;
+      }
+
+      // Ensure sender_info is complete
+      const enhancedMessage = {
+        ...newMessage,
+        sender_info: newMessage.sender_info || {
+          id: newMessage.sender,
+          first_name: newMessage.sender_info?.first_name || "Unknown",
+          last_name: newMessage.sender_info?.last_name || "User"
+        }
+      };
+
+      const newMessages = [...state.messages, enhancedMessage];
+      console.log("✅ Adding message. New count:", newMessages.length);
+      
       return {
-        messages: [...state.messages, newMessage]
+        messages: newMessages
       };
     });
   },
 
   updateLastMessages: (newMessage) => {
     set((state) => {
+      const currentUserId = JSON.parse(localStorage.getItem('session'))?.user?.id;
       const existingIndex = state.lastMessages.findIndex(
         m => m.room_name === newMessage.room_name
       );
 
       if (existingIndex >= 0) {
-        // Update existing conversation
+        // Update existing conversation while preserving other_user info
         const updatedLastMessages = [...state.lastMessages];
+        const existingMessage = updatedLastMessages[existingIndex];
+        
         updatedLastMessages[existingIndex] = {
-          ...updatedLastMessages[existingIndex],
+          ...existingMessage,
           content: newMessage.content,
           timestamp: newMessage.timestamp,
-          unread_count: updatedLastMessages[existingIndex].unread_count + 1
+          // Reset unread count to 0 when user sends a message
+          unread_count: newMessage.sender === currentUserId 
+            ? 0
+            : (existingMessage.unread_count || 0) + 1
         };
         return { lastMessages: updatedLastMessages };
       } else {
-        // Add new conversation to the top
+        // For new conversations, determine the other user
+        const otherUserId = newMessage.sender === currentUserId ? newMessage.recipient : newMessage.sender;
+        const otherUserInfo = newMessage.sender === currentUserId 
+          ? newMessage.recipient_info 
+          : newMessage.sender_info;
+        
+        // Create new conversation entry
+        const newConversation = {
+          ...newMessage,
+          other_user: {
+            id: otherUserId,
+            first_name: otherUserInfo?.first_name || "Unknown",
+            last_name: otherUserInfo?.last_name || "User",
+            avatar: otherUserInfo?.avatar,
+            role: otherUserInfo?.role,
+            email: otherUserInfo?.email
+          },
+          // Only set unread count if message is from someone else
+          unread_count: newMessage.sender === currentUserId ? 0 : 1
+        };
+        
         return {
-          lastMessages: [newMessage, ...state.lastMessages]
+          lastMessages: [newConversation, ...state.lastMessages]
         };
       }
     });

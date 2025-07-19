@@ -1,8 +1,8 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
+import { Link, useNavigate } from "react-router-dom";
+import useAllChatsWebSocket from "../../hooks/useAllChatsWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
@@ -11,8 +11,8 @@ import TimeAgo from "../TimeAgo";
 import Username from "../Username";
 
 export default function MessagesList() {
-  // Use WebSocket for real-time updates
-  useMessagingWebSocket();
+  // Use WebSocket for real-time sidebar updates
+  useAllChatsWebSocket();
   
   const fetchLastMessages = useMessagesStore((state) => state.getLastMessages);
   const lastMessages = useMessagesStore((state) => state.lastMessages);
@@ -62,7 +62,11 @@ export default function MessagesList() {
 
 const MessagesListTile = React.memo(({ message }) => {
   const { other_user, unread_count } = message;
-  const name = `${other_user?.first_name} ${other_user?.last_name}`;
+  const navigate = useNavigate();
+  
+  const firstName = other_user?.first_name || 'Unknown';
+  const lastName = other_user?.last_name || 'User';
+  const name = `${firstName} ${lastName}`;
 
   const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
@@ -70,9 +74,15 @@ const MessagesListTile = React.memo(({ message }) => {
   const room_name = message?.room_name;
 
   const handleMarkAsRead = async () => {
+    console.log("🔍 Clicking on message tile:", { message, unread_count });
     setOpenedMessage(message);
-    if (unread_count <= 0) return;
-    await markAllAsRead(room_name);
+    
+    // Navigate to the chat room
+    navigate(`/messages/?room_name=${room_name}`);
+    
+    if (unread_count > 0) {
+      await markAllAsRead(room_name);
+    }
   };
 
   return (
@@ -81,30 +91,28 @@ const MessagesListTile = React.memo(({ message }) => {
       animate={{ opacity: 1, y: 0 }}
       key={message?.id}
       onClick={handleMarkAsRead}
-      className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
+      className="flex gap-2 p-2 hover:bg-background hover:rounded-md cursor-pointer"
     >
-      <Link to={`/co/${other_user?.id}`}>
+      <div className="flex-shrink-0">
         <Avatar
           name={name}
           src={`${other_user?.avatar}`}
           className={avatarStyle}
           size="sm"
         />
-      </Link>
+      </div>
 
-      <Link
-        to={`/messages/?room_name=${message?.room_name}`}
-        className="flex-1 text-sm"
-      >
-        <Username user={other_user} noClick />
-        <div className="line-clamp-1 text-ellipsis">
-          <LightParagraph>{message?.content}</LightParagraph>
+      <div className="flex-1 text-sm min-w-0">
+        <div className="font-medium text-gray-900">{name}</div>
+        <div className="line-clamp-1 text-ellipsis text-gray-600">
+          {message?.content}
         </div>
-      </Link>
-      <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2">
-        {message.unread_count > 0 && (
+      </div>
+      
+      <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2 flex-shrink-0">
+        {unread_count > 0 && (
           <Badge className="!text-[.55rem]">
-            {message.unread_count} Unread
+            {unread_count} Unread
           </Badge>
         )}
         <TimeAgo time={message?.timestamp} />
