@@ -26,7 +26,9 @@ const useWebSocket = (url, params) => {
       wsUrl = `${wsBaseUrl}/ws/group/${params}/?token=${session?.tokens?.access}`;
     } else {
       // Fallback for other endpoints (notifications, etc.)
-      wsUrl = `${wsBaseUrl}/ws/${url}/${params ? params : "?"}token=${session?.tokens?.access}`;
+      wsUrl = params
+        ? `${wsBaseUrl}/ws/${url}/${params}/?token=${session?.tokens?.access}`
+        : `${wsBaseUrl}/ws/${url}/?token=${session?.tokens?.access}`;
     }
 
     const socket = new WebSocket(wsUrl);

@@ -8,6 +8,16 @@ import {
 } from "../api-services/messaging";
 import { getUserById } from "../api-services/users";
 
+function getCurrentUserId() {
+  try {
+    const session = JSON.parse(localStorage.getItem('session'));
+    return session?.user?.id;
+  } catch (e) {
+    console.warn("Failed to parse session from localStorage:", e);
+    return undefined;
+  }
+}
+
 export const useMessagesStore = create((set, get) => ({
   messages: [],
   lastMessages: [],
@@ -53,7 +63,7 @@ export const useMessagesStore = create((set, get) => ({
             console.log("🔧 Processing incomplete other_user for message:", message.id);
             
             // Try to get user info from the message structure
-            const currentUserId = JSON.parse(localStorage.getItem('session'))?.user?.id;
+            const currentUserId = getCurrentUserId();
             const otherUserId = message.sender === currentUserId ? message.recipient : message.sender;
             
             try {
@@ -210,7 +220,7 @@ export const useMessagesStore = create((set, get) => ({
     set((state) => {
       const updatedMessages = state.messages.map((m) => 
         m.room_name === room_name 
-          ? { ...m, read_at: new Date().toISOString() }
+          ? { ...m, read_at: new Date().toUTCString() }
           : m
       );
       
