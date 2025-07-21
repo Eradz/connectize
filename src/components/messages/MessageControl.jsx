@@ -102,7 +102,13 @@ export default function MessageControl() {
 
     try {
       const formData = new FormData();
-      formData.append("recipient", openedMessage?.other_user?.id);
+      const recipientId = openedMessage?.other_user?.id;
+      if (!recipientId) {
+        console.error("Recipient ID is undefined");
+        return;
+      }
+      formData.append("recipient", recipientId);
+      formData.append("sender", currentUser?.id);
       formData.append("content", message);
       if (audioBlob) {
         if (message.trim().length < 1)
@@ -156,6 +162,7 @@ export default function MessageControl() {
     message,
     openedMessage?.other_user?.id,
     validImages,
+    sendMessage,
   ]);
 
   const handleInputChange = useCallback((e) => {

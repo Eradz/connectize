@@ -17,9 +17,10 @@ import {
   markAllNotificationsAsRead,
 } from "../api-services/notifications";
 import { useCompanies, useUsers } from "../hooks";
-import { usePollNotifications } from "../hooks/usePolling";
+import useNotificationWebSocket from "../hooks/useNotificationWebSocket";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
+import { useAuth } from "../context/userContext";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
 import CompanyName from "./company/CompanyName";
 import CustomTabs from "./custom/tabs";
@@ -62,7 +63,10 @@ const IndicatorBadge = ({ indicator, floating = false }) => {
 };
 
 const NotificationPopOver = () => {
-  const { unreadCount } = usePollNotifications();
+  // Get unread count from the store
+  const unreadCount = useNotificationsStore((s) =>
+    typeof s.unreadCount === "function" ? s.unreadCount() : 0
+  );
 
   return (
     <Popover>
@@ -82,20 +86,17 @@ const NotificationPopOver = () => {
 };
 
 export const NotificationItem = ({ isPopover = false }) => {
-  const { data: notifications, isLoading: notificationsLoading } =
-    usePollNotifications();
+  const { user } = useAuth();
+  useNotificationWebSocket();
 
-  const unreadCount = useNotificationsStore((s) => s.unreadCount);
-
-  const setNotifications = useNotificationsStore((s) => s.setNotifications);
+  const notifications = useNotificationsStore((s) => s.notifications);
+  const unreadCount = useNotificationsStore((s) =>
+    typeof s.unreadCount === "function" ? s.unreadCount() : 0
+  );
 
   const { markAllAsRead, deleteAll } = useNotificationsStore();
   const { data: companies, isLoading: companiesLoading } = useCompanies();
   const { data: users, isLoading: usersLoading } = useUsers();
-
-  useEffect(() => {
-    setNotifications(notifications);
-  }, [notifications, notificationsLoading]);
 
   const tabsHeader = ["General", "Promotions"];
 
@@ -139,7 +140,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 
   return (
     <>
-      {companiesLoading || usersLoading || notificationsLoading ? (
+      {companiesLoading || usersLoading ? (
         <NotificationsSkeleton />
       ) : (
         <section className={clsx("bg-white rounded-md p-3 space-y-2 w-full")}>
