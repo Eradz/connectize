@@ -4,7 +4,7 @@ import { ErrorOutline } from "@mui/icons-material";
 import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useMemo, useEffect, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
 import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
@@ -49,7 +49,7 @@ function converthourTo12hrFormat(hour) {
   };
 }
 
-export default function MessageArea({ messages, messagesLoading }) {
+export default function MessageArea() {
   useMessagingWebSocket();
 
   // Reduce polling frequency since WebSocket handles real-time updates
@@ -98,11 +98,12 @@ export default function MessageArea({ messages, messagesLoading }) {
   const chatContainerRef = useRef(null);
 
   const scrollToLastScrolled = () => {
+    if (!room_name) return;
     // const chatContainer = document.querySelector(".chat-container");
 
     if (!chatContainerRef.current) return;
 
-    let senderLastScrollPosition = scrollSavedList.current[senderId];
+    let senderLastScrollPosition = scrollSavedList.current[room_name];
 
     if (
       senderLastScrollPosition == undefined ||
@@ -111,7 +112,7 @@ export default function MessageArea({ messages, messagesLoading }) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     } else {
-      // console.log("has scolled to position for ", senderId);
+      // console.log("has scolled to position for ", room_name);
       chatContainerRef.current.scrollTop = senderLastScrollPosition;
     }
   };
@@ -129,10 +130,10 @@ export default function MessageArea({ messages, messagesLoading }) {
   }, []);
 
   useEffect(() => {
-    if (messagesLoading || !messages?.length) return;
+    if (isLoading || !messages?.length) return;
 
     function scrollEventHandler(e) {
-      scrollSavedList.current[senderId] = e.target.scrollTop;
+      scrollSavedList.current[room_name] = e.target.scrollTop;
     }
     chatContainerRef.current?.addEventListener("scroll", scrollEventHandler);
 
@@ -143,7 +144,7 @@ export default function MessageArea({ messages, messagesLoading }) {
         scrollEventHandler
       );
     };
-  }, [senderId, messagesLoading, messages.length]);
+  }, [room_name, isLoading, messages.length]);
 
   return (
     <section
@@ -234,8 +235,8 @@ export default function MessageArea({ messages, messagesLoading }) {
                                 }`}
                           </h1>
                           <p className="text-gray-700 hover:text-gray-900 transition-all duration-300">
-                            {messageContent.substring(0, readMoreLimit)}
-                            {messageContent.length > readMoreLimit && (
+                            {message?.content.substring(0, readMoreLimit)}
+                            {message?.content.length > readMoreLimit && (
                               <>
                                 ...{" "}
                                 <span

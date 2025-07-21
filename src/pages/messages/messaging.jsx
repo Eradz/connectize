@@ -4,7 +4,7 @@ import MessageHeader from "../../components/messages/MessageHeader";
 
 export default function MessagingPage() {
   return (
-    <section className="flex flex-col relative h-[97vh] xs:px-2 sm:container md:!p-0">
+    <section className="flex flex-col relative h-full xs:px-2 sm:container md:!p-0">
       <MessageHeader />
       <MessageArea />
       <MessageControl />

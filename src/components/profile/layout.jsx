@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { getSession } from "../../lib/session";
 import useRedirect from "../../hooks/useRedirect";
-import { getSession } from "../../lib/session";
+import { Outlet } from "react-router-dom";
 
 function ProfileLayout() {
   const currentYear = new Date().getFullYear();
