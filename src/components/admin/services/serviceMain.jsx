@@ -52,6 +52,9 @@ export const PostCardWrapper = ({ isOverview = false }) => {
             summary={service.sub_title}
             url={`/services/${service.id}`}
             whole={service}
+            slug={
+              service?.companyId ? `co/${service?.companyId}` : "services/#"
+            }
             isService
           />
         ))

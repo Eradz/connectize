@@ -141,7 +141,6 @@ export const PostSlider = ({
 export const PostCard = ({
   isService,
   title,
-  image,
   summary,
   companyName,
   slug,
@@ -154,7 +153,7 @@ export const PostCard = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-4 lg:!px-3 !w-full bg-white rounded-md flex flex-col min-h-72 shrink-0"
+      className="p-4 lg:!px-3 !w-full bg-background transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-bold capitalize text-lg line-clamp-1">
@@ -175,14 +174,7 @@ export const PostCard = ({
         ))}
       </div> */}
 
-      <div className="my-4 flex gap-2">
-        <img
-          src={image}
-          alt={title}
-          width="20%"
-          height="auto"
-          className="rounded-md"
-        />
+      <div className="my-3 flex gap-2 flex-1">
         <div className="line-clamp-3 shrink-0 w-[70%]">
           <MarkdownComponent
             markdownContent={
@@ -193,8 +185,8 @@ export const PostCard = ({
         </div>
       </div>
 
-      <div className="h-full" />
-
+      {/* <div className="h-full" /> */}
+      {/* 
       {whole?.likes && (
         <ConJoinedImages
           size={30}
@@ -206,7 +198,7 @@ export const PostCard = ({
             href: `/co/${post?.user?.id}`,
           }))}
         />
-      )}
+      )} */}
 
       <div className="flex items-center justify-between gap-4 mt-4 py-3 border-t">
         <div className="flex gap-2 items-center">
@@ -231,7 +223,7 @@ export const PostCard = ({
         <Link
           to={url || ""}
           replace
-          className="bg-gold hover:opacity-60 rounded-full py-2 px-4 text-sm"
+          className="bg-gold hover:opacity-60 rounded-full py-2 px-6 text-sm"
         >
           View
         </Link>
