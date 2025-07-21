@@ -1,16 +1,16 @@
-import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
-import HeadingText from "../HeadingText";
-import LightParagraph from "../ParagraphText";
-import { motion } from "framer-motion";
-import { ConJoinedImages } from "../ResponsiveNav";
-import Username from "../Username";
 import { Badge, Switch } from "@chakra-ui/react";
-import { capitalizeFirst } from "../../lib/utils";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import {
   cancelOrDeclineRepRequest,
   changeRepStatus,
 } from "../../api-services/representatives";
+import { capitalizeFirst } from "../../lib/utils";
+import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
+import HeadingText from "../HeadingText";
+import LightParagraph from "../ParagraphText";
+import { ConJoinedImages } from "../ResponsiveNav";
+import Username from "../Username";
 
 export const RepresentativesList = ({
   representatives,
@@ -93,7 +93,7 @@ const RepsTile = ({
             {
               name: `${company?.company_name}`,
               src: company?.logo || "/images/default-company-logo.png",
-              href: `/${company?.company_name}`,
+              href: `/${company?.slug}`,
             },
             {
               name: `${user?.first_name} ${user?.last_name}`,

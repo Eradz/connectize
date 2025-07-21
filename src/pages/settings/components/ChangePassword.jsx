@@ -1,9 +1,9 @@
+import clsx from "clsx";
+import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
-import { useFormik } from "formik";
-import Form from "../../../components/form";
 import { authenticationService } from "../../../api-services/authentication";
-import clsx from "clsx";
+import Form from "../../../components/form";
 import { goToLogin } from "../../../lib/helpers";
 
 const validationSchema = Yup.object().shape({
@@ -23,7 +23,7 @@ function ChangePasswordPage() {
     confirmPassword: "",
   };
 
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(true);
 
   const formik = useFormik({
     initialValues: formValues,

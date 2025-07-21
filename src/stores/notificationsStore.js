@@ -6,6 +6,15 @@ export const useNotificationsStore = create((set, get) => ({
   setNotifications: (newNotifications) =>
     set({ notifications: newNotifications }),
 
+  addNotification: (notification) =>
+    set((state) => {
+      // Only add if not already present
+      if (state.notifications.some((n) => n.id === notification.id)) {
+        return {};
+      }
+      return { notifications: [notification, ...state.notifications] };
+    }),
+
   markAsRead: async (id) => {
     const updated = get().notifications.map((notif) =>
       notif.id === id ? { ...notif, is_read: true } : notif

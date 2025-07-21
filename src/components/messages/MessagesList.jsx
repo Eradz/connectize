@@ -1,10 +1,8 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "../../context/userContext";
-import { useUsers } from "../../hooks";
-import { usePollMessages } from "../../hooks/polling";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import useAllChatsWebSocket from "../../hooks/useAllChatsWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
@@ -13,31 +11,25 @@ import TimeAgo from "../TimeAgo";
 import Username from "../Username";
 
 export default function MessagesList() {
-  const { messages } = usePollMessages();
-  const { user: currentUser } = useAuth();
+  // Use WebSocket for real-time sidebar updates
+  useAllChatsWebSocket();
 
-  const { data: users, isLoading: usersLoading } = useUsers();
+  const fetchLastMessages = useMessagesStore((state) => state.getLastMessages);
+  const lastMessages = useMessagesStore((state) => state.lastMessages);
+  const messagesLoading = useMessagesStore((state) => state.messagesLoading);
 
-  const allMessages = useMemo(() => [...(messages || [])], [messages]);
-
-  const messagesList = useMemo(() => {
-    const uniqueRecipients = new Set();
-    return allMessages?.filter((msg) => {
-      const recipient = msg?.room_name;
-      if (uniqueRecipients.has(recipient)) {
-        return false;
-      } else {
-        uniqueRecipients.add(recipient);
-        return true;
-      }
-    });
-  }, [allMessages]);
+  useEffect(() => {
+    // Only fetch initially if we don't have any messages
+    if (lastMessages.length === 0) {
+      (async () => await fetchLastMessages())();
+    }
+  }, [fetchLastMessages, lastMessages.length]);
 
   return (
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
-      {usersLoading ? (
+      {messagesLoading ? (
         <MessagesListSkeleton />
-      ) : messagesList?.length <= 0 ? (
+      ) : lastMessages?.length <= 0 ? (
         <div className="min-h-40 py-2 mt-2 space-y-4">
           <HeadingText>
             Connectize is more interesting when you{" "}
@@ -60,43 +52,37 @@ export default function MessagesList() {
           </div> */}
         </div>
       ) : (
-        <>
-          {messagesList.map((message) => {
-            const currentUserId =
-              currentUser?.id !== message?.recipient
-                ? message?.recipient
-                : message?.sender;
-
-            const recipient = users?.find((user) => user?.id === currentUserId);
-            // console.log(recipient);
-
-            return (
-              <MessagesListTile
-                key={message?.id}
-                message={message}
-                user={recipient}
-              />
-            );
-          })}
-        </>
+        lastMessages.map((message) => (
+          <MessagesListTile key={message?.id} message={message} />
+        ))
       )}
     </section>
   );
 }
 
-const MessagesListTile = React.memo(({ message, user }) => {
-  const name = `${user?.first_name} ${user?.last_name}`;
+const MessagesListTile = React.memo(({ message }) => {
+  const { other_user, unread_count } = message;
+  const navigate = useNavigate();
 
-  const { markAllAsRead } = useMessagesStore();
-  const [searchParams] = useSearchParams();
+  const firstName = other_user?.first_name || "Unknown";
+  const lastName = other_user?.last_name || "User";
+  const name = `${firstName} ${lastName}`;
 
-  const room_name = searchParams.get("room_name");
+  const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
+  const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
+
+  const room_name = message?.room_name;
 
   const handleMarkAsRead = async () => {
-    let chattingWith = user?.id;
-    // alert("Chatting with: " + chattingWith + " " + user.id);
-    await markAllAsRead(undefined, chattingWith);
-    // await markAllAsRead(room_name,user?.id);
+    console.log("🔍 Clicking on message tile:", { message, unread_count });
+    setOpenedMessage(message);
+
+    // Navigate to the chat room
+    navigate(`/messages/?room_name=${room_name}`);
+
+    if (unread_count > 0) {
+      await markAllAsRead(room_name);
+    }
   };
 
   return (
@@ -105,12 +91,12 @@ const MessagesListTile = React.memo(({ message, user }) => {
       animate={{ opacity: 1, y: 0 }}
       key={message?.id}
       onClick={handleMarkAsRead}
-      className="flex gap-2 p-2 hover:bg-background hover:rounded-md"
+      className="flex gap-2 p-2 hover:bg-background hover:rounded-md cursor-pointer"
     >
-      <Link to={`/co/${user?.id}`}>
+      <Link to={`/co/${other_user?.id}`} className="flex-shrink-0">
         <Avatar
           name={name}
-          src={`${user?.avatar}`}
+          src={`${other_user?.avatar}`}
           className={avatarStyle}
           size="sm"
         />
@@ -118,15 +104,18 @@ const MessagesListTile = React.memo(({ message, user }) => {
 
       <Link
         to={`/messages/?room_name=${message?.room_name}`}
-        className="flex-1 text-sm"
+        className="flex-1 text-sm min-w-0"
       >
-        <Username user={user} noClick />
-        <div className="line-clamp-1 text-ellipsis">
-          <LightParagraph>{message?.content}</LightParagraph>
+        <div className="font-medium text-gray-900">{name}</div>
+        <div className="line-clamp-1 text-ellipsis text-gray-600">
+          {message?.content}
         </div>
       </Link>
-      <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2">
-        {!message.read_at && <Badge className="!text-[.55rem]">Unread</Badge>}
+
+      <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2 flex-shrink-0">
+        {unread_count > 0 && (
+          <Badge className="!text-[.55rem]">{unread_count} Unread</Badge>
+        )}
         <TimeAgo time={message?.timestamp} />
       </div>
     </motion.section>

@@ -11,8 +11,6 @@ export const getMessagesForUser = async (params) => {
 };
 
 export const messageUser = async (formData) => {
-
-
   const message = await makeApiRequest({
     url: "api/messages/",
     method: "POST",
@@ -23,11 +21,11 @@ export const messageUser = async (formData) => {
   return message;
 };
 
-export const markMessageAsRead = async (room_name, user_id) => {
+export const markMessageAsRead = async (room_name) => {
   const message = await makeApiRequest({
     url: "api/messages/mark-all-as-read/",
     method: "POST",
-    data: { room_name, user_id },
+    data: { room_name },
     contentType: "multipart/form-data",
   });
 

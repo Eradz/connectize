@@ -1,5 +1,3 @@
-import React from "react";
-
 import { Avatar, Badge } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -20,7 +18,7 @@ import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
 
 const TopServiceSuggestions = () => {
   return (
-    <section className="max-md:container p-3 lg:p-4 h-fit w-full xl:w-[45%] flex items-start flex-col sm:flex-row md:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:right-4">
+    <section className="max-md:container !p-0 lg:p-4 h-fit w-full xl:w-[45%] flex items-start flex-col sm:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:right-4">
       <TopServices />
 
       <Suggestions />
@@ -64,7 +62,10 @@ export function TopServices() {
           />
         </>
       ) : (
-        <></>
+        <div className={clsx("bg-white rounded p-4 space-y-4 w-full h-fit")}>
+          <h2 className="text-xl font-bold">Recent Services</h2>
+          <LightParagraph>No recent services yet</LightParagraph>
+        </div>
       )}
     </section>
   );

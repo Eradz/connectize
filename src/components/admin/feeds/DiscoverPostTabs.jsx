@@ -9,7 +9,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { bookmarkProduct } from "../../../api-services/products";
 import { bookmarkService } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";
-import { usePollProducts, usePollServices } from "../../../hooks/polling";
+import { usePollProducts, usePollServices } from "../../../hooks/usePolling";
 import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";
@@ -144,6 +144,7 @@ export const PostCard = ({
   image,
   summary,
   companyName,
+  slug,
   logo,
   verified,
   url,
@@ -209,7 +210,7 @@ export const PostCard = ({
 
       <div className="flex items-center justify-between gap-4 mt-4 py-3 border-t">
         <div className="flex gap-2 items-center">
-          <Link to={`/${companyName}`} className="relative">
+          <Link to={`/${slug}`} className="relative">
             <Avatar
               src={logo || "images/default-company-logo.png"}
               alt={companyName}
@@ -220,7 +221,7 @@ export const PostCard = ({
             {verified && <VerifiedIcon className="absolute bottom-0 right-0" />}
           </Link>
           <Link
-            to={`/${companyName}`}
+            to={`/${slug}`}
             className="text-sm font-bold capitalize line-clamp-1"
           >
             {companyName || "West Land Oil"}

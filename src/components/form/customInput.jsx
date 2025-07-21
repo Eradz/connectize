@@ -7,7 +7,7 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import ReactQuill from "react-quill";
 import { ImageIcon } from "../../icon";
 import FormikErrorResponse from "./formError";

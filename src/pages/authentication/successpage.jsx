@@ -1,6 +1,9 @@
-import React, { useEffect } from "react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import HeadingText from "../../components/HeadingText";
 import Logo from "../../components/logo";
+import LightParagraph from "../../components/ParagraphText";
 import useRedirect from "../../hooks/useRedirect";
 import {
   CONFIRM_RESET_PASSWORD_KEY,
@@ -10,10 +13,7 @@ import {
   SUCCESS_TYPE_KEY,
   VERIFY_ACCOUNT_KEY,
 } from "../../lib/data/authentication";
-import HeadingText from "../../components/HeadingText";
 import { REGISTER_EMAIL_KEY } from "../../lib/helpers";
-import LightParagraph from "../../components/ParagraphText";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const SuccessPage = () => {
   // const year = new Date().getFullYear();
@@ -78,7 +78,7 @@ const SuccessPage = () => {
       <header className="w-full self-start container">
         <Logo />
       </header>
-      <section className="p-4 flex flex-col items-center justify-center max-w-lg gap-4">
+      <section className="p-4 flex flex-1 flex-col items-center justify-center max-w-lg gap-4">
         <div className="h-36 overflow-hidden flex items-center justify-center">
           <DotLottieReact
             src="/lottie/success.lottie"

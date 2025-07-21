@@ -25,7 +25,7 @@ export const getAllCompanies = async () => {
     method: "GET",
   });
 
-  return companies;
+  return companies || [];
 };
 
 export const getCompanyByIdOrEmail = async (id, ext) => {
@@ -180,15 +180,15 @@ export const getOrCreateCompanyDocumentTypes = async (type, name) => {
   });
 };
 
-export const connectWithCompany = async (id, hasConnected) => {
+export const connectWithCompany = async (slug, hasConnected) => {
   if (hasConnected) {
     return await makeApiRequest({
-      url: `api/companies/${id}/unfollow/`,
+      url: `api/companies/${slug}/unfollow/`,
       method: "POST",
     });
   }
   return await makeApiRequest({
-    url: `api/companies/${id}/follow/`,
+    url: `api/companies/${slug}/follow/`,
     method: "POST",
   });
 };

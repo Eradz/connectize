@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { updateCurrentUserInfo } from "../../api-services/users";
@@ -160,7 +160,7 @@ function Overview() {
           Please confirm that your details are correct
         </LightParagraph>
       </div>
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-4 mb-4">
         <AvatarUpload
           formik={formik}
           name="image"

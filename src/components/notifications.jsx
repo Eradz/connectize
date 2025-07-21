@@ -9,7 +9,7 @@ import {
 import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   deleteAllNotifications,
@@ -17,9 +17,10 @@ import {
   markAllNotificationsAsRead,
 } from "../api-services/notifications";
 import { useCompanies, useUsers } from "../hooks";
-import { usePollNotifications } from "../hooks/polling";
+import useNotificationWebSocket from "../hooks/useNotificationWebSocket";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
+import { useAuth } from "../context/userContext";
 import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
 import CompanyName from "./company/CompanyName";
 import CustomTabs from "./custom/tabs";
@@ -62,7 +63,10 @@ const IndicatorBadge = ({ indicator, floating = false }) => {
 };
 
 const NotificationPopOver = () => {
-  const { unreadCount } = usePollNotifications();
+  // Get unread count from the store
+  const unreadCount = useNotificationsStore((s) =>
+    typeof s.unreadCount === "function" ? s.unreadCount() : 0
+  );
 
   return (
     <Popover>
@@ -82,7 +86,13 @@ const NotificationPopOver = () => {
 };
 
 export const NotificationItem = ({ isPopover = false }) => {
-  const { notifications, unreadCount } = usePollNotifications();
+  const { user } = useAuth();
+  useNotificationWebSocket();
+
+  const notifications = useNotificationsStore((s) => s.notifications);
+  const unreadCount = useNotificationsStore((s) =>
+    typeof s.unreadCount === "function" ? s.unreadCount() : 0
+  );
 
   const { markAllAsRead, deleteAll } = useNotificationsStore();
   const { data: companies, isLoading: companiesLoading } = useCompanies();
@@ -91,7 +101,7 @@ export const NotificationItem = ({ isPopover = false }) => {
   const tabsHeader = ["General", "Promotions"];
 
   const diffNotifications = isPopover
-    ? notifications.slice(0, 10)
+    ? notifications?.slice(0, 10)
     : notifications;
 
   const generalNotifications = useMemo(
@@ -260,9 +270,15 @@ const NotificationTile = memo(({ notification, index, company }) => {
         className={avatarStyle}
       />
       <div className="space-y-0 flex-1">
-        <CompanyName name={company?.company_name} verified={company?.verify} />
+        <CompanyName
+          slug={company?.slug}
+          name={company?.company_name}
+          verified={company?.verify}
+        />
         <Link
-          to={notification?.link}
+          to={notification?.link
+            .replace("/room", "/?room_name=room")
+            .replace("/representatives", "/co/representatives")}
           onClick={handleMarkAsRead}
           className="text-[.825rem] !text-gray-600 leading-none block"
         >
