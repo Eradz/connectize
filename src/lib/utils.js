@@ -13,6 +13,38 @@ export const queryClient = new QueryClient({
   },
 });
 
+/**
+ *
+ * @param {*} hour 24 hours format i.e 0-23 hours not 1-24 hours
+ * @returns {{hour:number, meridiem: string}}
+ */
+export function converthourTo12hrFormat(hour) {
+  const isPm = hour - 1 >= 12;
+  return {
+    hour: isPm ? hour - 1 - 12 : hour,
+    meridiem: isPm ? "PM" : "AM",
+  };
+}
+
+const monthToStr = {
+  0: "January",
+  1: "February",
+  2: "March",
+  3: "April",
+  4: "May",
+  5: "June",
+  6: "July",
+  7: "August",
+  8: "September",
+  9: "October",
+  10: "November",
+  11: "December",
+};
+
+export function getMonthFromNumber(num) {
+  return monthToStr[num];
+}
+
 export function capitalizeFirst(value) {
   return String(value)
     .toLowerCase()

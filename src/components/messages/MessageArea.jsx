@@ -10,7 +10,11 @@ import { usePollMessages } from "../../hooks/usePolling";
 import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
-import { timeAgo } from "../../lib/utils";
+import {
+  converthourTo12hrFormat,
+  getMonthFromNumber,
+  timeAgo,
+} from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import LightParagraph from "../ParagraphText";
@@ -21,52 +25,29 @@ import { LoadImageAttachment } from "./AttachmentLoader";
 
 //
 
-const monthToStr = {
-  0: "January",
-  1: "February",
-  2: "March",
-  3: "April",
-  4: "May",
-  5: "June",
-  6: "July",
-  7: "August",
-  8: "September",
-  9: "October",
-  10: "November",
-  11: "December",
-};
-
-/**
- *
- * @param {*} hour 24 hours format i.e 0-23 hours not 1-24 hours
- * @returns {{hour:number, meridiem: string}}
- */
-function converthourTo12hrFormat(hour) {
-  const isPm = hour - 1 >= 12;
-  return {
-    hour: isPm ? hour - 1 - 12 : hour,
-    meridiem: isPm ? "PM" : "AM",
-  };
-}
-
+const defaultEmptyMessages = [];
 export default function MessageArea() {
-  useMessagingWebSocket();
+  const [searchParams] = useSearchParams();
+  const room_name = searchParams.get("room_name") || "";
+
+  useMessagingWebSocket({ room_name });
 
   // Reduce polling frequency since WebSocket handles real-time updates
-  const { data: messageList = [], isLoading } = usePollMessages(30000);
+  // const { data: messageList = [], isLoading } = usePollMessages(30000);
+  const isLoading = useMessagesStore((state) => state.messagesLoading);
 
   // Get messages from store (updated by WebSocket)
-  const storeMessages = useMessagesStore((state) => state.messages);
+  const storeMessages = useMessagesStore(
+    (state) => state.messages[room_name] || defaultEmptyMessages
+  );
+  const messages = storeMessages;
   const fetchMessages = useMessagesStore((state) => state.fetchMessages);
 
-  const [searchParams] = useSearchParams();
-  const room_name = searchParams.get("room_name");
-
   // Use store messages if available, otherwise fall back to polling data
-  const messages = useMemo(
-    () => (storeMessages.length > 0 ? storeMessages : messageList),
-    [storeMessages, messageList]
-  );
+  // const messages = useMemo(
+  //   () => (storeMessages.length > 0 ? storeMessages : messageList),
+  //   [storeMessages, messageList]
+  // );
 
   // Only fetch initial messages if store is empty
   useEffect(() => {
@@ -74,7 +55,8 @@ export default function MessageArea() {
       console.log("🔄 Fetching initial messages for room:", room_name);
       fetchMessages({ room_name });
     }
-  }, [room_name, storeMessages.length, fetchMessages]);
+  }, [room_name, storeMessages.length]);
+
   const [readMoreLimit, setReadMoreLimit] = useState(300);
 
   const scrollSavedList = useRef({});
@@ -83,9 +65,9 @@ export default function MessageArea() {
     return messages?.reduce((acc, message) => {
       const msgDate = new Date(message.timestamp);
 
-      const dateToStr = `${
-        monthToStr[msgDate.getMonth()]
-      } ${msgDate.getDate()}, ${msgDate.getFullYear()}`;
+      const dateToStr = `${getMonthFromNumber(
+        msgDate.getMonth()
+      )} ${msgDate.getDate()}, ${msgDate.getFullYear()}`;
       // const dateKey = new Date(message.timestamp).toISOString().split("T")[0]; // e.g., '2025-05-20'
       if (!acc[dateToStr]) {
         acc[dateToStr] = [];

@@ -1,6 +1,6 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAllChatsWebSocket from "../../hooks/useAllChatsWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
@@ -9,25 +9,33 @@ import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";
 import Username from "../Username";
+import {
+  converthourTo12hrFormat,
+  getMonthFromNumber,
+  timeAgo,
+} from "../../lib/utils";
 
 export default function MessagesList() {
   // Use WebSocket for real-time sidebar updates
-  useAllChatsWebSocket();
+  // useAllChatsWebSocket();
 
   const fetchLastMessages = useMessagesStore((state) => state.getLastMessages);
   const lastMessages = useMessagesStore((state) => state.lastMessages);
-  const messagesLoading = useMessagesStore((state) => state.messagesLoading);
+  const lastMessagesLoading = useMessagesStore(
+    (state) => state.lastMessagesLoading
+  );
 
   useEffect(() => {
     // Only fetch initially if we don't have any messages
     if (lastMessages.length === 0) {
-      (async () => await fetchLastMessages())();
+      // (async () => await fetchLastMessages())();
+      fetchLastMessages();
     }
-  }, [fetchLastMessages, lastMessages.length]);
+  }, [lastMessages.length]);
 
   return (
     <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
-      {messagesLoading ? (
+      {lastMessagesLoading ? (
         <MessagesListSkeleton />
       ) : lastMessages?.length <= 0 ? (
         <div className="min-h-40 py-2 mt-2 space-y-4">
@@ -61,7 +69,30 @@ export default function MessagesList() {
 }
 
 const MessagesListTile = React.memo(({ message }) => {
-  const { other_user, unread_count } = message;
+  const room_name = message?.room_name;
+
+  const lastMsgInChat = useMessagesStore((state) => {
+    if (!room_name) return null;
+    const msgs = state.messages[room_name];
+
+    if (!msgs || !msgs.length) return null;
+    return msgs.at(-1);
+  });
+
+  const msgToDisplay = useMemo(() => {
+    if (!lastMsgInChat) return message;
+    return {
+      uread_count: 0,
+      other_user: message.other_user,
+      is_read_by_other_user: message.is_read_by_other_user,
+      ...lastMsgInChat,
+      room_name: message.room_name,
+      sender_info: undefined,
+      id: message.id,
+    };
+  }, [lastMsgInChat]);
+
+  const { other_user, unread_count } = msgToDisplay;
   const navigate = useNavigate();
 
   const firstName = other_user?.first_name || "Unknown";
@@ -70,8 +101,6 @@ const MessagesListTile = React.memo(({ message }) => {
 
   const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
-
-  const room_name = message?.room_name;
 
   const handleMarkAsRead = async () => {
     console.log("🔍 Clicking on message tile:", { message, unread_count });
@@ -85,11 +114,23 @@ const MessagesListTile = React.memo(({ message }) => {
     }
   };
 
+  const msgDate = new Date(msgToDisplay?.timestamp);
+  const dateTimeAgo = timeAgo(msgDate, "day");
+  const hourFmt = converthourTo12hrFormat(msgDate.getHours());
+
+  // if it's today, set to `6:20 PM` otherwise set to `02/12/2024`
+  let dateToDisplay =
+    dateTimeAgo == "Today"
+      ? `${hourFmt.hour}:${msgDate.getMinutes()} ${hourFmt.meridiem}`
+      : `${getMonthFromNumber(
+          msgDate.getMonth()
+        )} ${msgDate.getDate()}, ${msgDate.getFullYear()}`;
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      key={message?.id}
+      key={msgToDisplay?.id}
       onClick={handleMarkAsRead}
       className="flex gap-2 p-2 hover:bg-background hover:rounded-md cursor-pointer"
     >
@@ -103,12 +144,12 @@ const MessagesListTile = React.memo(({ message }) => {
       </Link>
 
       <Link
-        to={`/messages/?room_name=${message?.room_name}`}
+        to={`/messages/?room_name=${msgToDisplay?.room_name}`}
         className="flex-1 text-sm min-w-0"
       >
         <div className="font-medium text-gray-900">{name}</div>
         <div className="line-clamp-1 text-ellipsis text-gray-600">
-          {message?.content}
+          {msgToDisplay?.content}
         </div>
       </Link>
 
@@ -116,7 +157,8 @@ const MessagesListTile = React.memo(({ message }) => {
         {unread_count > 0 && (
           <Badge className="!text-[.55rem]">{unread_count} Unread</Badge>
         )}
-        <TimeAgo time={message?.timestamp} />
+        {dateToDisplay}
+        {/* <TimeAgo intervalInMs={10000} time={msgToDisplay?.timestamp} /> */}
       </div>
     </motion.section>
   );

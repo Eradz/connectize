@@ -31,6 +31,7 @@ import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
 import ValidImages from "../ValidImages";
+import { useSearchParams } from "react-router-dom";
 
 const isImageSize = (files) => {
   const imageSize = 4 * 1024 * 1024; // 4MB
@@ -43,6 +44,9 @@ const isImageSize = (files) => {
 
 export default function MessageControl() {
   const { user: currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  const room_name = searchParams.get("room_name") || "";
   const sendMessage = useMessagesStore((state) => state.sendMessage);
   const openedMessage = useMessagesStore((state) => state.openedMessage);
   const loading = useMessagesStore((state) => state.loading);
@@ -151,7 +155,7 @@ export default function MessageControl() {
       setErrorMessage(null);
 
       scrollToBottom();
-      await sendMessage(formData, messageData);
+      await sendMessage(room_name, formData, messageData);
     } catch (error) {
       console.error(error);
       toast.info("An error occurred while sending message");
