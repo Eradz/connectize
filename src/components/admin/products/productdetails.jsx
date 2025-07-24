@@ -22,8 +22,8 @@ function Productdetails({ product }) {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const { data: company, isLoading } = useQuery({
-    queryKey: ["companies", product?.company],
-    queryFn: () => getSingleCompany(product?.company),
+    queryKey: ["companies", product?.company?.company_name],
+    queryFn: () => getSingleCompany(product?.company?.company_name),
     enabled: !!product?.company,
   });
 
@@ -109,13 +109,13 @@ function Productdetails({ product }) {
         <div className="space-y-4 lg:w-1/2 shrink-0">
           <div className="space-y-2">
             <HeadingText>{product.title}</HeadingText>
-            <h5>{product.sub_title}</h5>
+            <h5>{product?.sub_title}</h5>
           </div>
           <Divider />
           <div className="space-y-2">
             <h6 className="text-xl font-bold">Description</h6>
             <MarkdownComponent
-              markdownContent={product.description}
+              markdownContent={product?.description}
               markdownTitle="Product description"
               isDescription
             />
@@ -156,14 +156,14 @@ function Productdetails({ product }) {
               src={company?.logo || "/images/default-company-logo.png"}
               className={avatarStyle}
               size="lg"
-              name={product?.company}
+              name={product?.company?.company_name}
             />
             <div className="flex flex-col">
               <Link
-                to={`/${product?.company?.replace(" ", "-")}`}
+                to={`/${product?.company?.company_name?.replace(" ", "-")}`}
                 className="font-bold capitalize"
               >
-                {product?.company || ""}
+                {product?.company?.company_name || ""}
               </Link>
               <span className="text-gray-400 text-sm">
                 since{" "}

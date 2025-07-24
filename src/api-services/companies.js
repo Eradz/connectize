@@ -29,13 +29,19 @@ export const getAllCompanies = async () => {
 };
 
 export const getCompanyByIdOrEmail = async (id, ext) => {
-  const currentUser = await getCurrentUser();
-  const params = id ? { id } : { profile: currentUser?.email };
+  let params;
 
-  if (ext) {
-    params.profile = undefined;
-    params.hasExt = "yeah";
+  if (id) {
+    params = { id };
+  } else {
+    const currentUser = await getCurrentUser();
+    params = { profile: currentUser?.email };
   }
+
+  // if (ext) {
+  //   params.profile = undefined;
+  //   params.hasExt = "yeah";
+  // }
   const { results: companies } = await makeApiRequest({
     url: `api/companies/`,
     method: "GET",

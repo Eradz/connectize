@@ -17,6 +17,7 @@ export default function Form({
   className,
   topCustomComponents,
   bottomCustomComponents,
+  gridClassName,
   hasButton = true,
 }) {
   const renderInput = ({
@@ -101,7 +102,13 @@ export default function Form({
     return (
       <div key={index} className="w-full">
         {type === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-3">
+          <div
+            className={clsx(
+              "grid",
+              gridClassName ||
+                "grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-3"
+            )}
+          >
             {renderGridInputs(gridInputs, disabled)}
           </div>
         ) : (

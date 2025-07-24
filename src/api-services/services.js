@@ -47,7 +47,7 @@ export const getSingleService = async (id) => {
   return service;
 };
 
-export const createService = async (data, resetForm) => {
+export const createService = async (data, resetForm, editId) => {
   const serviceCategory = capitalizeFirst(
     data.service_category.trim().toLowerCase()
   );
@@ -56,7 +56,9 @@ export const createService = async (data, resetForm) => {
 
   const company = await getCompanyByIdOrEmail();
 
-  const toastId = toast.info("Creating service...");
+  const toastId = toast.info(
+    editId ? "Updating service" : "Creating service..."
+  );
 
   if (!user && (!data || !serviceCategory)) {
     toast.error("No User session or service data or service category found", {
@@ -70,6 +72,7 @@ export const createService = async (data, resetForm) => {
   const service = await makeApiRequest({
     url: `api/services/`,
     method: "POST",
+    params: editId ? { edit: editId } : undefined,
     data: {
       title: capitalizeFirst(data.service_title),
       sub_title: data.service_subtitle,
@@ -81,9 +84,14 @@ export const createService = async (data, resetForm) => {
   });
 
   if (service)
-    toast.success(`${service.title} has been created successfully!`, {
-      id: toastId,
-    });
+    toast.success(
+      `${service.title} has been ${
+        editId ? "updated" : "created"
+      } successfully!`,
+      {
+        id: toastId,
+      }
+    );
 
   return service;
 };

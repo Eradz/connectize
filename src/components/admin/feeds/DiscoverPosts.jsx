@@ -47,13 +47,13 @@ function DiscoverPosts({
   companyName = null,
 }) {
   const { data: posts, isLoading } = usePollPosts();
-
   const finalArray = isSearch
     ? searchArray
     : companyName
     ? posts?.filter(
         (post) =>
-          post.company.company_name.toLowerCase() === companyName.toLowerCase()
+          post?.company?.company_name?.toLowerCase() ===
+          companyName?.toLowerCase()
       )
     : posts;
   const postLoading = isSearch ? searchLoading : isLoading;
