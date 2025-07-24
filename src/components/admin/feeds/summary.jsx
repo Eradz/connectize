@@ -38,13 +38,13 @@ function SummaryTabs({ company }) {
             </div> */}
       <CreatePost />
       {/* <RecommendedProducts /> */}
-      <DiscoverPosts companyName={company.company_name} />
+      <DiscoverPosts companyName={company?.company_name} />
     </section>,
     <div className="grid gap-x-3 gap-y-4">
       {company?.services?.map((service, index) => (
         <PostCard
           key={index}
-          companyName={service?.company}
+          companyName={service?.company?.company_name}
           verified={service?.companyInfo?.verified}
           logo={service?.companyInfo?.logo}
           title={service?.title}
@@ -60,7 +60,7 @@ function SummaryTabs({ company }) {
         <ProductListCard
           key={index}
           title={product.title}
-          subtitle={product.company}
+          subtitle={product.company?.company_name}
           isSummary
         />
       ))}

@@ -53,10 +53,11 @@ export function TopServices() {
 
           <PostCard
             whole={service}
-            companyName={service?.company}
+            companyName={service?.company.company_name}
             logo={service?.avatar}
             summary={service?.description}
             url={"/services/" + service?.id}
+            slug={`services/${service?.company?.id}`}
             title={service?.title}
             verified={service?.featured}
           />

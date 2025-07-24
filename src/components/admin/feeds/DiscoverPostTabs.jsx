@@ -30,10 +30,11 @@ const DiscoverPostTabs = () => {
       title: product?.title,
       image: product?.images?.[0]?.image,
       summary: product?.description,
-      companyName: product?.company,
+      companyName: product?.company?.company_name,
       logo: product?.logo,
       verified: product?.featured,
       url: "/products/" + product.id,
+      slug: `co/${product?.company?.id}`,
       whole: product,
     };
   });
@@ -43,10 +44,11 @@ const DiscoverPostTabs = () => {
       isService: true,
       title: service?.title,
       summary: service?.description,
-      companyName: service?.company,
+      companyName: service?.company?.company_name,
       logo: service?.logo,
       verified: service?.featured,
       url: "/services/" + service.id,
+      slug: `co/${service?.company?.id}`,
       whole: service,
     };
   });
@@ -206,7 +208,7 @@ export const PostCard = ({
             <Avatar
               src={logo || "images/default-company-logo.png"}
               alt={companyName}
-              name={companyName}
+              name={companyName || ""}
               className={avatarStyle}
               size="md"
             />

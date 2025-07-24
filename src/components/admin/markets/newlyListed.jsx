@@ -61,7 +61,7 @@ function NewlyListed() {
                       id={product.id}
                       title={product.title}
                       subtitle={product.category}
-                      companyName={product?.company}
+                      companyName={product?.company?.company_name || ""}
                     />
                   );
                 })}
