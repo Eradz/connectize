@@ -102,13 +102,15 @@ export const ProductListCard = ({
         }
       )}
     >
-      <img
-        src={imageUrl}
-        className={clsx("w-full h-[300px] rounded-lg", {
-          "md:h-[200px]": isSummary,
-        })}
-        alt={title || "Product"}
-      />
+      <Link to={"/products/" + id}>
+        <img
+          src={imageUrl}
+          className={clsx("w-full h-[300px] rounded-lg", {
+            "md:h-[200px]": isSummary,
+          })}
+          alt={title || "Product"}
+        />
+      </Link>
       <div className="flex sm:flex-col items-start justify-between gap-4 sm:!gap-2 w-full">
         <div>
           <Link

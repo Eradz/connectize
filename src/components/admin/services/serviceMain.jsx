@@ -45,6 +45,7 @@ export const PostCardWrapper = ({ isOverview = false }) => {
         services?.map((service, index) => (
           <PostCard
             key={index}
+            className={"bg-background"}
             companyName={service?.company?.company_name}
             verified={service?.companyInfo?.verified}
             logo={service?.company?.logo}
@@ -52,9 +53,6 @@ export const PostCardWrapper = ({ isOverview = false }) => {
             summary={service.sub_title}
             url={`/services/${service.id}`}
             whole={service}
-            slug={
-              service?.company.id ? `co/${service?.company.id}` : "services/#"
-            }
             isService
           />
         ))

@@ -209,12 +209,14 @@ export default function ServiceAdminMain({ serviceToEdit, onCloseEditMode }) {
     <section>
       <div className="bg-white p-3 rounded-md space-y-4 mb-8">
         <div className="flex items-center">
-          <Link
-            to={`/services/${editId}`}
-            className="mr-2 flex items-center justify-center rounded-full size-8 bg-light_grey/50"
-          >
-            <ArrowLeft className={"size-6"} />
-          </Link>
+          {editId && (
+            <Link
+              to={`/services/${editId}`}
+              className="mr-2 flex items-center justify-center rounded-full size-8 bg-light_grey/50"
+            >
+              <ArrowLeft className={"size-6"} />
+            </Link>
+          )}
           <HeadingText>
             {serviceToEdit ? "Edit Service" : "List new Services"}
           </HeadingText>
