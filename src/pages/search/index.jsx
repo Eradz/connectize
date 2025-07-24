@@ -147,7 +147,7 @@ export const SearchTab = () => {
                   subtitle={product?.sub_title}
                   title={product?.title}
                   companies={companies}
-                  companyName={product?.company}
+                  companyName={product?.company?.company_name}
                 />
               );
             })

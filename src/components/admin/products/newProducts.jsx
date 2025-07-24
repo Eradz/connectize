@@ -33,7 +33,7 @@ export default function NewProducts() {
                 <ProductListCard
                   title={product?.title}
                   subtitle={product?.category}
-                  companyName={product?.company}
+                  companyName={product?.company?.company_name}
                   id={product?.id}
                 />
               </SwiperSlide>
