@@ -18,6 +18,22 @@ function MessageHeader() {
   const loading = useMessagesStore((state) => state.loading);
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
 
+  let nameToDisplay;
+
+  if (
+    openedMessage?.other_user?.first_name &&
+    openedMessage?.other_user?.last_name
+  ) {
+    nameToDisplay = `${openedMessage?.other_user?.first_name} ${openedMessage?.other_user?.last_name}`;
+  } else {
+    nameToDisplay =
+      openedMessage?.other_user?.first_name ||
+      openedMessage?.other_user?.last_name;
+
+    // if (!nameToDisplay) nameToDisplay = "";
+  }
+  console.log({ nameToDisplay });
+
   useEffect(() => {
     if (!openedMessage && room_name) {
       (async () => await setOpenedMessage(null, room_name))();
@@ -40,17 +56,28 @@ function MessageHeader() {
           <>
             <Avatar
               src={openedMessage?.other_user?.avatar}
-              name={
-                openedMessage?.other_user?.first_name +
-                " " +
-                openedMessage?.other_user?.last_name
-              }
+              // name={
+              //   openedMessage?.other_user?.first_name +
+              //   " " +
+              //   openedMessage?.other_user?.last_name
+              // }
+              name={nameToDisplay}
               className={avatarStyle}
               width="40px"
               height="40px"
             />
             <div className="text-sm leading-0">
-              <Username user={openedMessage?.other_user} />
+              <Username
+                user={
+                  nameToDisplay
+                    ? openedMessage?.other_user
+                    : {
+                        ...openedMessage?.other_user,
+                        first_name: "Unknown",
+                        last_name: "User",
+                      }
+                }
+              />
               <Text
                 color="green.500"
                 fontSize="small"

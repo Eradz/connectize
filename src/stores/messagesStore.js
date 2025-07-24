@@ -18,25 +18,55 @@ function getCurrentUserId() {
   }
 }
 
+/**
+ * @typedef {} ChatMessage
+ * @property {}
+ *
+ */
+
 export const useMessagesStore = create((set, get) => ({
-  messages: [],
+  /**
+   * @type {Record<String, ChatMessage[]>}
+   */
+  messages: {},
+  // messages: [],
+  // chatMessages: {},
   lastMessages: [],
   openedMessage: null,
   messagesLoading: false,
+  lastMessagesLoading: false,
 
+  /**
+   *
+   * @param {{room_name:string}} params
+   */
   fetchMessages: async (params) => {
+    if (!params.room_name) return;
+
     console.log("🔄 Fetching messages with params:", params);
     set({ messagesLoading: true });
 
     try {
+      //
       const data = await getMessagesForUser(params);
+      //
       console.log("✅ Fetched messages:", data);
 
+      const sortedMessages = (data || []).sort(
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+      );
+      //
+      //
       // Only set messages if we don't have any, to avoid clearing WebSocket messages
       set((state) => {
-        if (state.messages.length === 0) {
+        if ((state.messages[params.room_name] || []).length === 0) {
           console.log("✅ Setting initial messages, count:", data?.length || 0);
-          return { messages: data || [] };
+          return {
+            messages: {
+              ...state.messages,
+              [params.room_name]: sortedMessages,
+            },
+          };
         } else {
           console.log(
             "⚠️ Skipping message replacement, already have messages:",
@@ -47,70 +77,89 @@ export const useMessagesStore = create((set, get) => ({
       });
     } catch (err) {
       console.error("❌ Failed to fetch messages:", err);
-      set({ messages: [] });
+      set({ messages: {} });
     } finally {
       set({ messagesLoading: false });
     }
   },
 
   getLastMessages: async () => {
-    set({ messagesLoading: true });
+    // prevent multiple fetches (especially in dev mode)
+    if (get().lastMessagesLoading) {
+      return;
+    }
     try {
+      set({ lastMessagesLoading: true });
       const data = await getMessagesForUser({ last_chats: true });
+
+      let processedData = data;
+      // log;
       console.log("🔍 Raw lastMessages from API:", data);
 
       // Process the data to ensure complete other_user info
-      const processedData = await Promise.all(
-        (data || []).map(async (message) => {
-          if (!message.other_user || !message.other_user.first_name) {
-            console.log(
-              "🔧 Processing incomplete other_user for message:",
-              message.id
-            );
+      // const processedData = await Promise.all(
+      //   (data || []).map(async (message) => {
+      //     if (!message.other_user || !message.other_user.first_name) {
+      //       console.log(
+      //         "🔧 Processing incomplete other_user for message:",
+      //         message.id
+      //       );
 
-            // Try to get user info from the message structure
-            const currentUserId = getCurrentUserId();
-            const otherUserId =
-              message.sender === currentUserId
-                ? message.recipient
-                : message.sender;
+      //       // Try to get user info from the message structure
+      //       const currentUserId = getCurrentUserId();
+      //       const otherUserId =
+      //         message.sender === currentUserId
+      //           ? message.recipient
+      //           : message.sender;
 
-            try {
-              const userInfo = await getUserById(otherUserId);
-              return {
-                ...message,
-                other_user: {
-                  id: otherUserId,
-                  first_name: userInfo.first_name,
-                  last_name: userInfo.last_name,
-                  avatar: userInfo.avatar,
-                  role: userInfo.role,
-                  email: userInfo.email,
-                },
-              };
-            } catch (error) {
-              console.error("Failed to fetch user info for:", otherUserId);
-              return {
-                ...message,
-                other_user: {
-                  id: otherUserId,
-                  first_name: "Unknown",
-                  last_name: "User",
-                },
-              };
-            }
-          }
-          return message;
-        })
-      );
+      //       try {
+      //         const userInfo = await getUserById(otherUserId);
+      //         return {
+      //           ...message,
+      //           other_user: {
+      //             id: otherUserId,
+      //             first_name: userInfo.first_name,
+      //             last_name: userInfo.last_name,
+      //             avatar: userInfo.avatar,
+      //             role: userInfo.role,
+      //             email: userInfo.email,
+      //           },
+      //         };
+      //       } catch (error) {
+      //         console.error("Failed to fetch user info for:", otherUserId);
+      //         return {
+      //           ...message,
+      //           other_user: {
+      //             id: otherUserId,
+      //             first_name: "Unknown",
+      //             last_name: "User",
+      //           },
+      //         };
+      //       }
+      //     }
+      //     return message;
+      //   })
+      // );
 
       console.log("✅ Processed lastMessages:", processedData);
       set({ lastMessages: processedData });
     } catch (err) {
       console.error("Failed to fetch messages", err);
     } finally {
-      set({ messagesLoading: false });
+      set({ lastMessagesLoading: false });
     }
+  },
+
+  /**
+   *
+   * @param {string} room_name
+   * @param {ChatMessage | undefined} fallbackMsg
+   * @returns {ChatMessage | undefined}
+   */
+  getLastMsgInChatRoom: (room_name, fallbackMsg) => {
+    if (!room_name) return fallbackMsg;
+    const roomMsgs = get().messages[room_name] || [];
+    return roomMsgs.at(-1) || fallbackMsg;
   },
 
   setOpenedMessage: async (message, room_name) => {
@@ -194,7 +243,7 @@ export const useMessagesStore = create((set, get) => ({
     }
   },
 
-  addOptimisticMessage: (message, error = false) => {
+  addOptimisticMessage: (room_name, message, error = false) => {
     const tempId = uuidv4();
     const optimisticMessage = {
       ...message,
@@ -205,31 +254,49 @@ export const useMessagesStore = create((set, get) => ({
     };
 
     set((state) => {
+      const newMsgs = [...(state.messages[room_name] || []), optimisticMessage];
       return {
-        messages: [...state.messages, optimisticMessage],
+        messages: { ...state.messages, [room_name]: newMsgs },
+        // messages: [...state.messages, optimisticMessage],
       };
     });
 
     return tempId;
   },
 
-  replaceOptimisticMessage: (tempId, confirmedMessage) => {
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === tempId ? { ...confirmedMessage, optimistic: false } : msg
-      ),
-    }));
+  replaceOptimisticMessage: (room_name, tempId, confirmedMessage) => {
+    set((state) => {
+      const newMsgs = (state.messages[room_name] || []).map((msg) => {
+        return msg.id === tempId
+          ? { ...confirmedMessage, optimistic: false }
+          : msg;
+      });
+      return {
+        messages: { ...state.messages, [room_name]: newMsgs },
+      };
+    });
   },
 
-  sendMessage: async (formData, message) => {
-    const tempId = get().addOptimisticMessage(message);
+  /**
+   *
+   * @param {string} room_name
+   * @param {*} formData
+   * @param {*} message
+   */
+  sendMessage: async (room_name, formData, message) => {
+    if (!room_name) return;
+
+    const tempId = get().addOptimisticMessage(room_name, message);
 
     try {
       const confirmed = await messageUser(formData);
-      get().replaceOptimisticMessage(tempId, confirmed);
+      get().replaceOptimisticMessage(room_name, tempId, confirmed);
     } catch (err) {
       console.error("Failed to send message", err);
-      get().replaceOptimisticMessage(tempId, { ...message, error: true });
+      get().replaceOptimisticMessage(room_name, tempId, {
+        ...message,
+        error: true,
+      });
     }
   },
 
@@ -237,7 +304,10 @@ export const useMessagesStore = create((set, get) => ({
     console.log("📖 Marking all as read for room:", room_name);
 
     set((state) => {
-      const updatedMessages = state.messages.map((m) =>
+      const room_msgs = state.messages[room_name] || [];
+
+      const updatedMessages = room_msgs.map((m) =>
+        // there is probably not need for this check any more since all the messages are already for this room_name
         m.room_name === room_name
           ? { ...m, read_at: new Date().toUTCString() }
           : m
@@ -263,9 +333,15 @@ export const useMessagesStore = create((set, get) => ({
     }
   },
 
-  removeMessage: (tempId) => {
+  /**
+   *
+   * @param {string} room_name
+   * @param {(string | number)} tempId
+   */
+  removeMessage: (room_name, tempId) => {
+    const room_msgs = state.messages[room_name] || [];
     set((state) => ({
-      messages: state.messages.filter((m) => m.id !== tempId),
+      messages: room_msgs.filter((m) => m.id !== tempId),
     }));
   },
 
@@ -273,14 +349,21 @@ export const useMessagesStore = create((set, get) => ({
     set({ lastMessages: newLastMessages });
   },
 
-  addRealtimeMessage: (newMessage) => {
+  /**
+   *
+   * @param {string} room_name
+   * @param {Record<string, any>} newMessage
+   */
+  addRealtimeMessage: (room_name, newMessage) => {
+    if (!room_name) return;
     console.log("📨 Adding realtime message:", newMessage);
 
     set((state) => {
-      console.log("🔍 Current messages count:", state.messages.length);
+      let room_msgs = state.messages[room_name] || [];
+      console.log("🔍 Current messages count:", room_msgs.length);
 
       // Check if message already exists
-      const messageExists = state.messages.some((m) => m.id === newMessage.id);
+      const messageExists = room_msgs.some((m) => m.id === newMessage.id);
       if (messageExists) {
         console.log("⚠️ Message already exists, skipping:", newMessage.id);
         return state;
@@ -296,7 +379,7 @@ export const useMessagesStore = create((set, get) => ({
         },
       };
 
-      const newMessages = [...state.messages, enhancedMessage];
+      const newMessages = { [room_name]: [...room_msgs, enhancedMessage] };
       console.log("✅ Adding message. New count:", newMessages.length);
 
       return {

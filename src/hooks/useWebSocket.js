@@ -1,10 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { baseURL } from "../lib/helpers";
 import { getSession } from "../lib/session";
 
-const useWebSocket = (url, params) => {
+/**
+ *
+ * @param {*} url
+ * @param {*} params
+ * @param {{onMessage: (event:Record<any,any>) => void}} opts
+ * @returns
+ */
+const useWebSocket = (url, params, opts) => {
   const [messages, setMessages] = useState([]);
-  const [ws, setWs] = useState(null);
+  // const [ws, setWs] = useState(null);
+  const wsRef = useRef(null);
   const session = getSession();
 
   useEffect(() => {
@@ -31,22 +39,32 @@ const useWebSocket = (url, params) => {
         : `${wsBaseUrl}/ws/${url}/?token=${session?.tokens?.access}`;
     }
 
-    const socket = new WebSocket(wsUrl);
+    if (wsRef.current) {
+      wsRef.current?.close();
+    }
 
-    socket.onopen = () => {
+    //
+    wsRef.current = new WebSocket(wsUrl);
+
+    wsRef.current.onopen = () => {
       console.log("WebSocket Connected to:", wsUrl);
     };
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setMessages((prevMessages) => [...prevMessages, data]);
+    wsRef.current.onclose = () => {
+      console.warn("WebSocket Connection Closed:", wsUrl);
     };
 
-    setWs(socket);
+    wsRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      opts?.onMessage?.(data);
+      // setMessages((prevMessages) => [...prevMessages, data]);
+    };
+
+    // setWs(socket);
 
     return () => {
-      socket.close();
-      setWs(null);
+      wsRef.current?.close();
+      wsRef.current = null;
     };
   }, [params, session?.tokens?.access, url]);
 
