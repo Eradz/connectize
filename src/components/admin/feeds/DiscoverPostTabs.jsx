@@ -18,6 +18,7 @@ import {
   ButtonWithTooltipIcon,
   ConjoinedAvatarSkeleton,
 } from "./DiscoverPosts";
+import { cn } from "../../../lib/utils";
 
 const DiscoverPostTabs = () => {
   const { data: products, isLoading: productsLoading } = usePollProducts();
@@ -31,10 +32,10 @@ const DiscoverPostTabs = () => {
       image: product?.images?.[0]?.image,
       summary: product?.description,
       companyName: product?.company?.company_name,
-      logo: product?.logo,
+      logo: product?.company?.logo,
       verified: product?.featured,
       url: "/products/" + product.id,
-      slug: `co/${product?.company?.id}`,
+      slug: `${product?.company?.company_name}`,
       whole: product,
     };
   });
@@ -45,10 +46,10 @@ const DiscoverPostTabs = () => {
       title: service?.title,
       summary: service?.description,
       companyName: service?.company?.company_name,
-      logo: service?.logo,
+      logo: service?.company?.logo,
       verified: service?.featured,
       url: "/services/" + service.id,
-      slug: `co/${service?.company?.id}`,
+      slug: `${service?.company?.company_name}`,
       whole: service,
     };
   });
@@ -150,12 +151,16 @@ export const PostCard = ({
   verified,
   url,
   whole,
+  className,
 }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-4 lg:!px-3 !w-full bg-background transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0"
+      className={cn(
+        "p-4 lg:!px-3 !w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0",
+        className
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-bold capitalize text-lg line-clamp-1">
@@ -204,7 +209,7 @@ export const PostCard = ({
 
       <div className="flex items-center justify-between gap-4 mt-4 py-3 border-t">
         <div className="flex gap-2 items-center">
-          <Link to={`/${slug}`} className="relative">
+          <Link to={`/${slug || companyName}`} className="relative">
             <Avatar
               src={logo || "images/default-company-logo.png"}
               alt={companyName}
@@ -215,7 +220,7 @@ export const PostCard = ({
             {verified && <VerifiedIcon className="absolute bottom-0 right-0" />}
           </Link>
           <Link
-            to={`/${slug}`}
+            to={`/${slug || companyName}`}
             className="text-sm font-bold capitalize line-clamp-1"
           >
             {companyName || "West Land Oil"}

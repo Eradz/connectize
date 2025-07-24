@@ -6,6 +6,7 @@ import { formatNumber, shareThis } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
 import ProfileSection from "../../userProfile/profile-section";
 import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { Link } from "react-router-dom";
 
 const ListedProducts = ({ company }) => {
   return (
@@ -42,23 +43,28 @@ function ListedProduct({ id, title, likes }) {
     <div className="bg-background p-2.5 rounded-md flex max-sm:flex-col gap-2 sm:gap-4 relative">
       {productImage?.[0]?.image && (
         <picture className="bg-white sm:w-1/3 p-2 sm:p-1 sm:h-fit flex">
-          <img
-            src={productImage?.[0]?.image}
-            className="max-h-40 sm:w-full rounded-md mx-auto"
-            alt={title || "No title"}
-          />
+          <Link to={"/products/" + id}>
+            <img
+              src={productImage?.[0]?.image}
+              className="max-h-40 sm:w-full rounded-md mx-auto"
+              alt={title || "No title"}
+            />
+          </Link>
         </picture>
       )}
 
       <div className="sm:w-2/3">
-        <div className="sm:flex justify-between items-start border-b pb-2 pt-2">
+        <Link
+          to={"/products/" + id}
+          className="sm:flex justify-between items-start border-b pb-2 pt-2"
+        >
           <h4 className="max-md:text-xl font-bold">{title || ""}</h4>
           {/* <div className="max-md:absolute top-4 right-4">
             <MoreOptions>
               <div>more options</div>
             </MoreOptions>
           </div> */}
-        </div>
+        </Link>
 
         <div className="flex mt-3 md:mt-3.5">
           {[1, 2, 3].map((_, index) => (

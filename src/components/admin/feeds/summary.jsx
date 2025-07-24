@@ -46,7 +46,7 @@ function SummaryTabs({ company }) {
           key={index}
           companyName={service?.company?.company_name}
           verified={service?.companyInfo?.verified}
-          logo={service?.companyInfo?.logo}
+          logo={service?.company?.logo}
           title={service?.title}
           summary={service?.sub_title}
           url={`/services/${service?.id}`}
@@ -59,6 +59,7 @@ function SummaryTabs({ company }) {
       {company?.products?.map((product, index) => (
         <ProductListCard
           key={index}
+          image={product?.image}
           title={product.title}
           subtitle={product.company?.company_name}
           isSummary
