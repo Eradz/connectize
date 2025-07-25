@@ -66,15 +66,16 @@ export const getSingleCompany = async (companyName) => {
 };
 
 export const createCompany = async (data, resetForm) => {
-  await getOrCreateCompanyCategories(data.company_category);
+  // await getOrCreateCompanyCategories(data.company_category);
 
-  await getOrCreateCompanySize(data.company_size);
+  // await getOrCreateCompanySize(data.company_size);
 
   if (!data.company_category === undefined || data.company_size === undefined) {
     toast.error("Incomplete data was provided");
     return;
   }
 
+  // console.log("form data", data);
   const company = await makeApiRequest({
     url: `api/companies/`,
     method: "POST",
