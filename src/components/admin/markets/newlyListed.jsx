@@ -59,6 +59,7 @@ function NewlyListed() {
                     <ProductListCard
                       key={product.id}
                       id={product.id}
+                      image={product?.images?.[0]?.image}
                       title={product.title}
                       subtitle={product.category}
                       companyName={product?.company?.company_name || ""}
@@ -87,8 +88,8 @@ export const ProductListCard = ({
     (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
   );
 
-  const { productImage } = useProductImages(id);
-  const imageUrl = productImage?.[0]?.image || image || "";
+  // const { productImage } = useProductImages(id);
+  // const imageUrl = productImage?.[0]?.image || image || "";
 
   return (
     <motion.div
@@ -103,7 +104,7 @@ export const ProductListCard = ({
       )}
     >
       <img
-        src={imageUrl}
+        src={image}
         className={clsx("w-full h-[300px] rounded-lg", {
           "md:h-[200px]": isSummary,
         })}

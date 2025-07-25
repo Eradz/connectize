@@ -66,15 +66,19 @@ export const getSingleCompany = async (companyName) => {
 };
 
 export const createCompany = async (data, resetForm) => {
-  await getOrCreateCompanyCategories(data.company_category);
+  // await getOrCreateCompanyCategories(data.company_category);
 
-  await getOrCreateCompanySize(data.company_size);
+  // await getOrCreateCompanySize(data.company_size);
 
   if (!data.company_category === undefined || data.company_size === undefined) {
     toast.error("Incomplete data was provided");
     return;
   }
 
+  const registration_date = (data.company_registration_date || "")
+    .split("-")
+    .reverse()
+    .join("-");
   const company = await makeApiRequest({
     url: `api/companies/`,
     method: "POST",
@@ -94,7 +98,7 @@ export const createCompany = async (data, resetForm) => {
       slug: data.company_name.toString().replaceAll(" ", "-"),
       website: data.company_website,
       registration_number: data.company_registration_no,
-      registration_date: data.company_registration_date,
+      registration_date,
       annual_revenue: data.company_annual_revenue,
     },
   });
