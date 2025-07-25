@@ -70,9 +70,9 @@ export const createService = async (data, resetForm, editId) => {
   await getOrCreateServiceCategories(serviceCategory);
 
   const service = await makeApiRequest({
-    url: `api/services/`,
-    method: "POST",
-    params: editId ? { edit: editId } : undefined,
+    url: `api/services/${editId ? editId + "/" : ""}`,
+    method: editId ? "PUT" : "POST",
+    // params: editId ? { edit: editId } : undefined,
     data: {
       title: capitalizeFirst(data.service_title),
       sub_title: data.service_subtitle,
@@ -85,9 +85,9 @@ export const createService = async (data, resetForm, editId) => {
 
   if (service)
     toast.success(
-      `${service.title} has been ${
-        editId ? "updated" : "created"
-      } successfully!`,
+      editId
+        ? "Service has successfully been edited."
+        : `${service.title} has been created successfully!`,
       {
         id: toastId,
       }

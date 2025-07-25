@@ -159,7 +159,7 @@ const fields = [
   },
 ];
 
-export default function ServiceAdminMain({ serviceToEdit, onCloseEditMode }) {
+export default function ServiceAdminMain({ serviceToEdit }) {
   const navigate = useNavigate();
 
   const editId = serviceToEdit?.id;
@@ -185,13 +185,13 @@ export default function ServiceAdminMain({ serviceToEdit, onCloseEditMode }) {
     initialValues,
     validationSchema: validationSchema,
     onSubmit: async (values, { resetForm }) => {
-      const service = await createService(values, resetForm);
+      const service = await createService(values, resetForm, editId);
       if (service) {
         for (let value in values) {
           localStorage.removeItem(value);
         }
 
-        navigate(editId ? `/services/${editId}` : "/services");
+        navigate("/services");
         return;
       }
     },
