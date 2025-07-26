@@ -1,74 +1,151 @@
 import { ChevronRight } from "@mui/icons-material";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
 import { usePollAllCompanies } from "../../../hooks/usePolling";
 import { useProductImages } from "../../../hooks/useProduct";
 import { webRoutes } from "../../../lib/webRoutes";
 import CustomTabs from "../../custom/tabs";
+import PrimaryButton from "../../PrimaryButton";
 
 function NewlyListed() {
-  const [searchParams] = useSearchParams();
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,
-  });
-
-  const productCategory = searchParams.get("category") || "";
-
-  const filteredProducts = useMemo(
-    () =>
-      productCategory
-        ? products.filter(
-            (product) =>
-              product.category.toLowerCase() === productCategory.toLowerCase()
-          )
-        : products,
-    [productCategory, products]
-  );
-
-  const newlyListedProducts = useMemo(() => products?.slice(0, 6), [products]);
-
-  const tabs = useMemo(
-    () => [
-      { label: "All Products", products: filteredProducts },
-      { label: "Newly Listed", products: newlyListedProducts },
-    ],
-    [filteredProducts, newlyListedProducts]
-  );
-
   return (
     <section className="container">
       <CustomTabs
-        tabsHeading={tabs.map((tab) => tab.label)}
-        tabsPanels={tabs.map((tab, index) => (
-          <div
-            key={index}
-            className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4"
-          >
-            {isLoading
-              ? Array.from({ length: 6 }, (_, index) => (
-                  <ListCardSkeleton key={index} />
-                ))
-              : tab.products.map((product) => {
-                  return (
-                    <ProductListCard
-                      key={product.id}
-                      id={product.id}
-                      title={product.title}
-                      subtitle={product.category}
-                      companyName={product?.company?.company_name || ""}
-                    />
-                  );
-                })}
-          </div>
-        ))}
+        tabsHeading={["All Products", "Newly Listed"]}
+        tabsPanels={[<DisplayAllProducts />, <DisplayNewlyListedProducts />]}
       />
     </section>
+  );
+}
+
+function DisplayAllProducts() {
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["products", "all"],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      return await getProducts({ page_size: 2, page: pageParam }, true);
+    },
+
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || !lastPage.next) return;
+
+      const lastPageUrl = new URL(lastPage.next);
+
+      let nextPage = lastPageUrl.searchParams.get("page");
+
+      if (!nextPage) return;
+      let nextPageAsNumber = parseInt(nextPage);
+
+      if (!nextPageAsNumber) return;
+
+      return nextPageAsNumber;
+    },
+  });
+
+  // these might be needed later or even better moved to the backend
+  // const [searchParams] = useSearchParams();
+  // const productCategory = searchParams.get("category") || "";
+
+  // const filteredProducts = useMemo(
+  //   () =>
+  //     productCategory
+  //       ? products.filter(
+  //           (product) =>
+  //             product.category.toLowerCase() === productCategory.toLowerCase()
+  //         )
+  //       : products,
+  //   [productCategory, products]
+  // );
+
+  return (
+    <div className="">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
+        {isLoading ? (
+          <DefaultSkelecton />
+        ) : (
+          data?.pages?.map((group) => {
+            return group?.data?.map((product) => {
+              return (
+                <ProductListCard
+                  key={product.id}
+                  id={product.id}
+                  title={product.title}
+                  subtitle={product.category}
+                  companyName={product?.company?.company_name || ""}
+                />
+              );
+            });
+          })
+        )}
+
+        {isFetching && isFetchingNextPage && <DefaultSkelecton length={4} />}
+      </div>
+
+      {hasNextPage && !isFetching && !isFetchingNextPage && (
+        <div className="mt-10 flex justify-center">
+          <PrimaryButton
+            onClick={fetchNextPage}
+            disabled={!hasNextPage || isFetching}
+          >
+            Load More
+          </PrimaryButton>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DefaultSkelecton({ length = 6 }) {
+  return Array.from({ length }, (_, index) => <ListCardSkeleton key={index} />);
+}
+function DisplayNewlyListedProducts() {
+  /**
+   * @todo Make a request to get real newly listed data from the server when that feature has been implemented on the server. And also find a way to prevent this component from fething products when it has not been mounted.
+   */
+  const { data, isLoading } = useInfiniteQuery({
+    queryKey: ["products", "all"],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      return await getProducts({ page_size: 2, page: pageParam }, true);
+    },
+    getNextPageParam: () => {
+      return;
+    },
+  });
+  // the products used right now in this section is the same thing with thoses in the `DisplayAllProducts. This is because the feature of getting newly listed products as not been implemented on the server yet. So to avoid making an entirely new request i decided to make this component share requests with `DisplayAllProducts` Component.
+
+  const newlyListedProducts = data?.pages?.[0]?.data;
+  // const newlyListedProducts = useMemo(() => products?.slice(0, 6), [products]);
+
+  return (
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
+      {isLoading ? (
+        <DefaultSkelecton />
+      ) : (
+        newlyListedProducts?.map((product) => {
+          return (
+            <ProductListCard
+              key={product.id}
+              id={product.id}
+              title={product.title}
+              subtitle={product.category}
+              companyName={product?.company?.company_name || ""}
+            />
+          );
+        })
+      )}
+    </div>
   );
 }
 

@@ -15,27 +15,31 @@ import { getCompanyByIdOrEmail } from "./companies";
 //     "company": null
 // }
 
-export const getProducts = async () => {
-  const { results: products } = await makeApiRequest({
+export const getProducts = async (params, returnFullRes = false) => {
+  const { results: products, next } = await makeApiRequest({
     url: `api/products/`,
     method: "GET",
-  });
-  let mergedProductWIthImage = [];
-
-  const productImages = await getOrCreateProductImages(undefined, "get");
-
-  products?.forEach((product) => {
-    const productImage = productImages?.filter(
-      (image) => product.id === image.product
-    );
-
-    mergedProductWIthImage.push({
-      ...product,
-      images: productImage,
-    });
+    params,
   });
 
-  return mergedProductWIthImage || [];
+  // let mergedProductWIthImage = [];
+
+  // const productImages = await getOrCreateProductImages(undefined, "get");
+
+  // products?.forEach((product) => {
+  //   const productImage = productImages?.filter(
+  //     (image) => product.id === image.product
+  //   );
+
+  //   mergedProductWIthImage.push({
+  //     ...product,
+  //     images: productImage,
+  //   });
+  // });
+
+  if (returnFullRes) return { data: products, next };
+
+  return products || [];
 };
 
 export const getRecommendedProducts = async () => {

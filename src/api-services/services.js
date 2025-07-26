@@ -14,28 +14,33 @@ import { getCurrentUser } from "./users";
 //     "company": null
 // }
 
-export const getServices = async () => {
-  const { results: services } = await makeApiRequest({
+export const getServices = async (params, returnFullRes = false) => {
+  const { results: services, next } = await makeApiRequest({
     url: `api/services/`,
     method: "GET",
+    params,
   });
 
-  let mergedServicesWIthImage = [];
+  if (returnFullRes) return { data: services, next };
 
-  const serviceImages = await getServiceImages();
+  return services;
 
-  services?.forEach((service) => {
-    const serviceImage = serviceImages?.filter(
-      (image) => service.id === image.product
-    );
+  // let mergedServicesWIthImage = [];
 
-    mergedServicesWIthImage.push({
-      ...service,
-      images: serviceImage,
-    });
-  });
+  // const serviceImages = await getServiceImages();
 
-  return mergedServicesWIthImage;
+  // services?.forEach((service) => {
+  //   const serviceImage = serviceImages?.filter(
+  //     (image) => service.id === image.product
+  //   );
+
+  //   mergedServicesWIthImage.push({
+  //     ...service,
+  //     images: serviceImage,
+  //   });
+  // });
+
+  // return mergedServicesWIthImage;
 };
 
 export const getSingleService = async (id) => {
