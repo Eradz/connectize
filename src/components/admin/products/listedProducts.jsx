@@ -6,6 +6,7 @@ import { formatNumber, shareThis } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
 import ProfileSection from "../../userProfile/profile-section";
 import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { Link } from "react-router-dom";
 
 const ListedProducts = ({ company }) => {
   return (
@@ -32,6 +33,13 @@ const ListedProducts = ({ company }) => {
           })
         )}
       </section>
+
+      <Link
+        to={`/market?company=${company.id}---${company.slug}`}
+        className="mt-10 flex justify-center"
+      >
+        View more
+      </Link>
     </ProfileSection>
   );
 };

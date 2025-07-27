@@ -5,14 +5,23 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import CustomTabs from "../../custom/tabs";
 import PrimaryButton from "../../PrimaryButton";
 
-function ServiceMain({ isOverview }) {
+function ServiceMain({ isOverview, companyId }) {
   return (
     <CustomTabs
       tabsHeading={["Featured", "Most Recent", "Best Matches"]}
       tabsPanels={[
-        <PostCardWrapper isOverview={isOverview} />,
-        <PostCardWrapper isOverview={isOverview} />,
-        <PostCardWrapper isOverview={isOverview} />,
+        <PostCardWrapper
+          isOverview={isOverview}
+          companyId={companyId || undefined}
+        />,
+        <PostCardWrapper
+          isOverview={isOverview}
+          companyId={companyId || undefined}
+        />,
+        <PostCardWrapper
+          isOverview={isOverview}
+          companyId={companyId || undefined}
+        />,
       ]}
     />
   );
@@ -20,7 +29,7 @@ function ServiceMain({ isOverview }) {
 
 export default ServiceMain;
 
-export const PostCardWrapper = ({ isOverview = false }) => {
+export const PostCardWrapper = ({ isOverview = false, companyId }) => {
   const {
     data,
     isLoading,
@@ -29,10 +38,13 @@ export const PostCardWrapper = ({ isOverview = false }) => {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["services", "all"],
+    queryKey: ["services", "all", { companyId }],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
-      return await getServices({ page_size: 2, page: pageParam }, true);
+      return await getServices(
+        { page_size: 2, page: pageParam, company: companyId },
+        true
+      );
     },
 
     getNextPageParam: (lastPage) => {
@@ -99,11 +111,15 @@ export const PostCardWrapper = ({ isOverview = false }) => {
         {isFetching && isFetchingNextPage && <DefaultSkelecton length={4} />}
       </section>
 
-      {hasNextPage && !isFetching && !isFetchingNextPage && (
-        <div className="mt-10 flex justify-center">
+      {hasNextPage && !isFetchingNextPage && (
+        <div
+          className={clsx("mt-10 flex justify-center", {
+            "animate-pulse": isFetching,
+          })}
+        >
           <PrimaryButton
             onClick={fetchNextPage}
-            disabled={!hasNextPage || isFetching}
+            disabled={!hasNextPage || isFetching || isFetchingNextPage}
           >
             Load More
           </PrimaryButton>

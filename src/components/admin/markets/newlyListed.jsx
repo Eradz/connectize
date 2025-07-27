@@ -2,7 +2,7 @@ import { ChevronRight } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
 import { usePollAllCompanies } from "../../../hooks/usePolling";
@@ -11,18 +11,22 @@ import { webRoutes } from "../../../lib/webRoutes";
 import CustomTabs from "../../custom/tabs";
 import PrimaryButton from "../../PrimaryButton";
 
-function NewlyListed() {
+function NewlyListed({ companyId }) {
   return (
     <section className="container">
       <CustomTabs
         tabsHeading={["All Products", "Newly Listed"]}
-        tabsPanels={[<DisplayAllProducts />, <DisplayNewlyListedProducts />]}
+        tabsPanels={[
+          // used `|| undefined` because if the `companyId` is an empty string it would still be falsy, and it would be sent to the server as an empty string i.e `?company=""`
+          <DisplayAllProducts companyId={companyId || undefined} />,
+          <DisplayNewlyListedProducts companyId={companyId || undefined} />,
+        ]}
       />
     </section>
   );
 }
 
-function DisplayAllProducts() {
+function DisplayAllProducts({ companyId }) {
   const {
     data,
     isLoading,
@@ -31,10 +35,13 @@ function DisplayAllProducts() {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["products", "all"],
+    queryKey: ["products", "all", { companyId }],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
-      return await getProducts({ page_size: 2, page: pageParam }, true);
+      return await getProducts(
+        { page_size: 2, page: pageParam, company: companyId || undefined },
+        true
+      );
     },
 
     getNextPageParam: (lastPage) => {
@@ -92,11 +99,15 @@ function DisplayAllProducts() {
         {isFetching && isFetchingNextPage && <DefaultSkelecton length={4} />}
       </div>
 
-      {hasNextPage && !isFetching && !isFetchingNextPage && (
-        <div className="mt-10 flex justify-center">
+      {hasNextPage && !isFetchingNextPage && (
+        <div
+          className={clsx("mt-10 flex justify-center", {
+            "animate-pulse": isFetching,
+          })}
+        >
           <PrimaryButton
             onClick={fetchNextPage}
-            disabled={!hasNextPage || isFetching}
+            disabled={!hasNextPage || isFetching || isFetchingNextPage}
           >
             Load More
           </PrimaryButton>
@@ -109,15 +120,18 @@ function DisplayAllProducts() {
 function DefaultSkelecton({ length = 6 }) {
   return Array.from({ length }, (_, index) => <ListCardSkeleton key={index} />);
 }
-function DisplayNewlyListedProducts() {
+function DisplayNewlyListedProducts({ companyId }) {
   /**
    * @todo Make a request to get real newly listed data from the server when that feature has been implemented on the server. And also find a way to prevent this component from fething products when it has not been mounted.
    */
   const { data, isLoading } = useInfiniteQuery({
-    queryKey: ["products", "all"],
+    queryKey: ["products", "all", { companyId }],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
-      return await getProducts({ page_size: 2, page: pageParam }, true);
+      return await getProducts(
+        { page_size: 2, page: pageParam, company: companyId || undefined },
+        true
+      );
     },
     getNextPageParam: () => {
       return;

@@ -47,12 +47,12 @@ export const useGetCurrentCompany = (id) => {
     enabled: !!currentUser,
   });
 };
-export const useGetSingleCompany = (name) => {
+export const useGetSingleCompany = (name, { enabled = true }) => {
   const { user: currentUser } = useAuth();
   return useQuery({
     queryKey: ["company", name],
     queryFn: () => getSingleCompany(name),
-    enabled: !!currentUser,
+    enabled: !!currentUser && enabled,
   });
 };
 
