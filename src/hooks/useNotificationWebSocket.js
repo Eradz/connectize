@@ -8,11 +8,20 @@ import { useNotificationsStore } from "../stores/notificationsStore";
 const useNotificationWebSocket = () => {
   // Adjust the URL/params as needed for your backend's websocket endpoint
   // Example: url = "notifications", params = userId
-  const { messages } = useWebSocket("notifications");
-
   const setNotifications = useNotificationsStore((s) => s.setNotifications);
   const addNotification = useNotificationsStore((s) => s.addNotification);
+  const { messages } = useWebSocket("notifications", undefined, {
+    onMessage: handleNewEvent,
+  });
 
+  function handleNewEvent(event) {
+    if (event?.eventName !== "notification_received") {
+      return;
+    }
+
+    addNotification(event.payload);
+    console.log("Event from Notification socket", event);
+  }
   useEffect(() => {
     if (!messages || messages.length === 0) return;
 

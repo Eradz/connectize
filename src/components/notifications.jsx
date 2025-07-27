@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import {
   deleteAllNotifications,
   deleteNotification,
+  getNotificationsForUser,
   markAllNotificationsAsRead,
 } from "../api-services/notifications";
 import { useCompanies, useUsers } from "../hooks";
@@ -28,6 +29,7 @@ import { avatarStyle } from "./ResponsiveNav";
 import SeeMoreLink from "./SeeMoreLink";
 import { NotificationsSkeleton } from "./skeletons/notification";
 import TimeAgo from "./TimeAgo";
+// import { getNotificationsForUser } from "../hooks/usePolling";
 
 const generalNotificationType = [
   "like",
@@ -94,7 +96,9 @@ export const NotificationItem = ({ isPopover = false }) => {
     typeof s.unreadCount === "function" ? s.unreadCount() : 0
   );
 
-  const { markAllAsRead, deleteAll } = useNotificationsStore();
+  const fetchNotifications = useNotificationsStore((s) => s.fetchNotifications);
+  const markAllAsRead = useNotificationsStore((s) => s.markAllAsRead);
+  const deleteAll = useNotificationsStore((s) => s.deleteAll);
   const { data: companies, isLoading: companiesLoading } = useCompanies();
   const { data: users, isLoading: usersLoading } = useUsers();
 
@@ -136,6 +140,14 @@ export const NotificationItem = ({ isPopover = false }) => {
     } catch (err) {
       console.error("Failed to delete all notifications:", err);
     }
+  }, []);
+
+  useEffect(() => {
+    console.log({ notifications });
+  }, [notifications]);
+
+  useEffect(() => {
+    fetchNotifications();
   }, []);
 
   return (

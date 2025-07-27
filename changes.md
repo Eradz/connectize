@@ -6,3 +6,8 @@
 - Made description text in product details page clear with a tempoary hack
 - The product edit and creation now only needs backend fix
 - Resolved merge conflicts with pagination, service update, product update and company_creation
+
+.
+
+- Notifications are now loaded when you first open the site
+- Websocket is now used to update and load new notifications
