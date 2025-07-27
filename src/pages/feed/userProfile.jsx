@@ -178,8 +178,8 @@ export default function UserProfile() {
 }
 
 export const ProfileAboutList = ({ title = "", value = "", Icon }) => {
-  const formattedTitle = title.toString().toLowerCase();
-  const formattedValue = value.toString().toLowerCase();
+  const formattedTitle = title?.toString().toLowerCase();
+  const formattedValue = value?.toString().toLowerCase();
   return (
     <li className="flex gap-2 items-start pt-4">
       <Icon className="!size-6 xs:!size-5" />

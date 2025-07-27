@@ -50,16 +50,6 @@ function Carousel() {
 
   return (
     <section className="space-y-4 max-md:container">
-      <div className="mx-auto flex items-center justify-center gap-1 bg-tabs p-1 w-fit rounded-full text-sm">
-        <button className="bg-white rounded-full px-4 py-1">Market</button>
-        <button
-          onClick={() => navigate("/services")}
-          className="text-decoration-none text-black px-4 py-1"
-        >
-          Services
-        </button>
-      </div>
-
       <section className="space-y-2">
         <div className="flex items-center justify-between">
           <HeadingText>Recommended</HeadingText>

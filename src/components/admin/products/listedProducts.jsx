@@ -33,6 +33,13 @@ const ListedProducts = ({ company }) => {
           })
         )}
       </section>
+
+      <Link
+        to={`/market?company=${company.id}---${company.slug}`}
+        className="mt-10 flex justify-center"
+      >
+        View more
+      </Link>
     </ProfileSection>
   );
 };

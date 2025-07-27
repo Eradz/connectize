@@ -1,1 +1,5 @@
-- You can now edit services as long as you were the creator
+- Added pagination to the services and products page
+- The tabs in the market page now link back to the services page
+- You can now view company specific products and services from the markets page.
+- The products and and services section in the summary section on the company details page now gives you the ablity to view more.
+- The listed products section also now has a view more button.
