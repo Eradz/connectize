@@ -143,10 +143,6 @@ export const NotificationItem = ({ isPopover = false }) => {
   }, []);
 
   useEffect(() => {
-    console.log({ notifications });
-  }, [notifications]);
-
-  useEffect(() => {
     fetchNotifications();
   }, []);
 
