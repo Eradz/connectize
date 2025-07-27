@@ -7,9 +7,41 @@ import Restricted from "../../components/Restricted";
 import { useAuth } from "../../context/userContext";
 import useRedirect from "../../hooks/useRedirect";
 import { UserType } from "../../lib/helpers/types";
+import { getIndexInitialValues, validationSchema as indexVSchema } from ".";
+import {
+  getInitialValues as getCompanyInfoInitValues,
+  validationSchema as companyInfoVSchema,
+} from "./CompanyInformation";
+import {
+  getInitialValues as getCompanyDocInitValues,
+  validationSchema as companyDocVSchema,
+} from "./CompanyDocuments";
+import { FormikCtx } from "./context";
+import { useFormik } from "formik";
 
 const CompanyLayout = () => {
   const { user: currentUser } = useAuth();
+
+  const initialValues = getIndexInitialValues();
+
+  const indexFormik = useFormik({
+    initialValues,
+    validationSchema: indexVSchema,
+  });
+
+  const companyInfoFormik = useFormik({
+    initialValues: getCompanyInfoInitValues(),
+    validationSchema: companyInfoVSchema,
+  });
+  const companyDocFormik = useFormik({
+    initialValues: getCompanyDocInitValues(),
+    validationSchema: companyDocVSchema,
+  });
+  const formiks = {
+    indexFormik,
+    companyInfoFormik,
+    companyDocFormik,
+  };
 
   useRedirect(currentUser?.user_type === UserType, `/co/${currentUser?.id}`);
 
@@ -37,7 +69,9 @@ const CompanyLayout = () => {
           </LightParagraph>
         </div>
       ) : (
-        <Outlet />
+        <FormikCtx.Provider value={formiks}>
+          <Outlet />
+        </FormikCtx.Provider>
       )}
     </section>
   );

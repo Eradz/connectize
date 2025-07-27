@@ -1,19 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import Form from "../../components/form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import StepButton from "../../components/profile/StepButton";
+import { FormikCtx } from "./context";
 
-const validationSchema = Yup.object().shape({
+export const validationSchema = Yup.object().shape({
   company_registration_no: Yup.string().required("Field cannot be empty"),
   company_registration_date: Yup.string().required("Field cannot be empty"),
   company_annual_revenue: Yup.string().required("Field cannot be empty"),
 });
 
-const CompanyInformation = () => {
-  const initialValues = {
+export function getInitialValues() {
+  return {
     company_registration_no:
       localStorage.getItem("company_registration_no") || "",
     company_registration_date:
@@ -21,11 +22,12 @@ const CompanyInformation = () => {
     company_annual_revenue:
       localStorage.getItem("company_annual_revenue") || "",
   };
+}
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-  });
+const CompanyInformation = () => {
+  const formiks = useContext(FormikCtx);
+
+  const formik = formiks?.companyInfoFormik;
 
   const doStepChange = async () => {
     const errors = await formik.validateForm(formik.values);
@@ -41,8 +43,6 @@ const CompanyInformation = () => {
 
   useEffect(() => {
     document.title = "Create Company | Connectize";
-    formik.setValues(initialValues);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const listingFields = [

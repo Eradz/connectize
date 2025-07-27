@@ -1,3 +1,2 @@
-- Correct more wrong linking
-- Products in the company details page can now be clicked on to go the product details
-- most products listing including those in the market section and those in the "You may also like" section in the market details page now link to the product details when you click on the image no just the title. This is just a little UX improvement
+- You can now actually create a company from the website
+- account creation now uses the new structure the server expects
