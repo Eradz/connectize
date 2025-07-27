@@ -15,12 +15,39 @@ function NewlyListed({ companyId }) {
   return (
     <section className="container">
       <CustomTabs
+<<<<<<< HEAD
         tabsHeading={["All Products", "Newly Listed"]}
         tabsPanels={[
           // used `|| undefined` because if the `companyId` is an empty string it would still be falsy, and it would be sent to the server as an empty string i.e `?company=""`
           <DisplayAllProducts companyId={companyId || undefined} />,
           <DisplayNewlyListedProducts companyId={companyId || undefined} />,
         ]}
+=======
+        tabsHeading={tabs.map((tab) => tab.label)}
+        tabsPanels={tabs.map((tab, index) => (
+          <div
+            key={index}
+            className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4"
+          >
+            {isLoading
+              ? Array.from({ length: 6 }, (_, index) => (
+                  <ListCardSkeleton key={index} />
+                ))
+              : tab.products.map((product) => {
+                  return (
+                    <ProductListCard
+                      key={product.id}
+                      id={product.id}
+                      image={product?.images?.[0]?.image}
+                      title={product.title}
+                      subtitle={product.category}
+                      companyName={product?.company?.company_name || ""}
+                    />
+                  );
+                })}
+          </div>
+        ))}
+>>>>>>> fix/product_update
       />
     </section>
   );
@@ -199,6 +226,7 @@ export const ProductListCard = ({
         }
       )}
     >
+<<<<<<< HEAD
       <Link to={"/products/" + id} className="w-full">
         <img
           src={image}
@@ -208,6 +236,15 @@ export const ProductListCard = ({
           alt={title || "Product"}
         />
       </Link>
+=======
+      <img
+        src={image}
+        className={clsx("w-full h-[300px] rounded-lg", {
+          "md:h-[200px]": isSummary,
+        })}
+        alt={title || "Product"}
+      />
+>>>>>>> fix/product_update
       <div className="flex sm:flex-col items-start justify-between gap-4 sm:!gap-2 w-full">
         <div>
           <Link
