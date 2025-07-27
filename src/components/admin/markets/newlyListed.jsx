@@ -87,9 +87,11 @@ function DisplayAllProducts({ companyId }) {
                 <ProductListCard
                   key={product.id}
                   id={product.id}
+                  image={product?.images?.[0].image}
                   title={product.title}
                   subtitle={product.category}
                   companyName={product?.company?.company_name || ""}
+                  company={product?.company}
                 />
               );
             });
@@ -151,10 +153,13 @@ function DisplayNewlyListedProducts({ companyId }) {
           return (
             <ProductListCard
               key={product.id}
+              image={product?.images?.[0].image}
               id={product.id}
               title={product.title}
               subtitle={product.category}
               companyName={product?.company?.company_name || ""}
+              company={product?.company}
+              // company={product?.company}
             />
           );
         })
@@ -172,14 +177,15 @@ export const ProductListCard = ({
   id,
   isSummary = false,
   companyName,
+  company,
 }) => {
-  const { data: companies } = usePollAllCompanies();
-  const company = companies?.results?.find(
-    (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
-  );
+  // const { data: companies } = usePollAllCompanies();
+  // const company = companies?.results?.find(
+  //   (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
+  // );
 
-  const { productImage } = useProductImages(id);
-  const imageUrl = productImage?.[0]?.image || image || "";
+  // const { productImage } = useProductImages(id);
+  // const imageUrl = productImage?.[0]?.image || image || "";
 
   return (
     <motion.div
@@ -193,10 +199,10 @@ export const ProductListCard = ({
         }
       )}
     >
-      <Link to={"/products/" + id}>
+      <Link to={"/products/" + id} className="w-full">
         <img
-          src={imageUrl}
-          className={clsx("w-full h-[300px] rounded-lg", {
+          src={image}
+          className={clsx("w-full h-[300px] rounded-lg object-cover", {
             "md:h-[200px]": isSummary,
           })}
           alt={title || "Product"}

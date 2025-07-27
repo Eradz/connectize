@@ -47,6 +47,7 @@ function SummaryTabs({ company }) {
         {company?.services?.map((service, index) => (
           <PostCard
             key={index}
+            //  image={product?.images?.[0].image}
             companyName={service?.company?.company_name}
             verified={service?.companyInfo?.verified}
             logo={service?.company?.logo}
@@ -59,22 +60,35 @@ function SummaryTabs({ company }) {
         ))}
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <Link to={`/market?s=services&company=${company.id}---${company.slug}`}>
-          <PrimaryButton>View more services</PrimaryButton>
-        </Link>
-      </div>
+      {company?.services?.length ? (
+        <div className="mt-6 flex justify-center">
+          <Link
+            to={`/market?s=services&company=${company.id}---${company.slug}`}
+          >
+            <PrimaryButton>View more services</PrimaryButton>
+          </Link>
+        </div>
+      ) : null}
     </div>,
-    <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-      {company?.products?.map((product, index) => (
-        <ProductListCard
-          key={index}
-          image={product?.image}
-          title={product.title}
-          subtitle={product.company?.company_name}
-          isSummary
-        />
-      ))}
+    <div className="">
+      <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+        {company?.products?.map((product, index) => (
+          <ProductListCard
+            key={index}
+            image={product?.images?.[0].image}
+            title={product.title}
+            subtitle={product.company?.company_name}
+            isSummary
+          />
+        ))}
+      </div>
+      {company?.products?.length ? (
+        <div className="mt-6 flex justify-center">
+          <Link to={`/market?company=${company.id}---${company.slug}`}>
+            <PrimaryButton>View more products</PrimaryButton>
+          </Link>
+        </div>
+      ) : null}
     </div>,
   ];
 
