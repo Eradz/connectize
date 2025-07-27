@@ -54,7 +54,7 @@ export const getRecommendedProducts = async () => {
   return featuredProducts.slice(0, 5) || [];
 };
 
-export const createProduct = async (data, resetForm) => {
+export const createProduct = async (data, resetForm, editId) => {
   const productCategoryData = capitalizeFirst(
     data.product_category.trim().toLowerCase()
   );
@@ -62,6 +62,11 @@ export const createProduct = async (data, resetForm) => {
   const { user } = getSession();
 
   const company = await getCompanyByIdOrEmail();
+
+  if (!data.images.length) {
+    toast.error("Upload at least one image");
+    return;
+  }
 
   if (!company) {
     toast.error("Please create a company first before you add a product");
@@ -80,10 +85,11 @@ export const createProduct = async (data, resetForm) => {
   await getOrCreateProductCategories(productCategoryData);
 
   const product = await makeApiRequest({
-    url: `api/products/`,
-    method: "POST",
+    url: `api/products${editId ? editId : ""}/`,
+    method: editId ? "PUT" : "POST",
     data: {
       title: capitalizeFirst(data.product_title),
+      images: data.images,
       sub_title: data.subtitle,
       category: productCategoryData,
       description: data.description,
@@ -93,14 +99,16 @@ export const createProduct = async (data, resetForm) => {
     resetForm,
   });
 
-  const image1 = await getOrCreateProductImages(
-    {
-      image: data.image_1,
-      caption: data?.image_caption1 || data?.product_title,
-      product: product.id,
-    },
-    product
-  );
+  if (data.image_1) {
+    const image1 = await getOrCreateProductImages(
+      {
+        image: data.image_1,
+        caption: data?.image_caption1 || data?.product_title,
+        product: product.id,
+      },
+      product
+    );
+  }
 
   if (data.image_2)
     await getOrCreateProductImages(
@@ -132,10 +140,16 @@ export const createProduct = async (data, resetForm) => {
     );
   }
 
-  if (product && image1) {
-    toast.success(`${product.title} has been created successfully!`, {
-      id: toastId,
-    });
+  // if (product && image1) {
+  if (product) {
+    toast.success(
+      editId
+        ? "Product has been edit successfully"
+        : `${product.title} has been created successfully!`,
+      {
+        id: toastId,
+      }
+    );
 
     redirect("/market");
   }

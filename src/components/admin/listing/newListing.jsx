@@ -8,11 +8,12 @@ import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { Divider, Input } from "@chakra-ui/react";
 import { createProduct } from "../../../api-services/products";
 import { ImageSelect, inputClassNames } from "../../form/customInput";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import axios from "axios";
 import { Close } from "@mui/icons-material";
-import { ImageIcon } from "../../../icon";
+import { ArrowLeft, ImageIcon } from "../../../icon";
+import { toast } from "sonner";
 
 const FILE_SIZE = 4 * 1024 * 1024; // 4MB
 export const SUPPORTED_FORMATS = [
@@ -40,22 +41,22 @@ export function checkFileSize(value) {
 }
 
 const validationSchema = Yup.object().shape({
-  image_1: Yup.mixed()
-    .required("Please select an image")
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
-  image_2: Yup.mixed()
-    .optional()
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
-  image_3: Yup.mixed()
-    .optional()
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
-  image_4: Yup.mixed()
-    .optional()
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
+  // image_1: Yup.mixed()
+  //   .required("Please select an image")
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
+  // image_2: Yup.mixed()
+  //   .optional()
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
+  // image_3: Yup.mixed()
+  //   .optional()
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
+  // image_4: Yup.mixed()
+  //   .optional()
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
   image_caption1: Yup.string().optional(),
   image_caption2: Yup.string().optional(),
   image_caption3: Yup.string().optional(),
@@ -98,7 +99,21 @@ export default function NewListing({ productToEdit }) {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async (values, { resetForm }) => {
-      const product = await createProduct(values, resetForm);
+      const newImages = [];
+      for (const image of images) {
+        if (!image.link) {
+          toast.error("Some images failed to upload or are still uploading.");
+          return;
+        }
+
+        image.push({ link: image.link, caption: image.caption });
+      }
+
+      const product = await createProduct(
+        { ...values, images: newImages },
+        resetForm,
+        editId
+      );
       if (product) {
         for (let value in values) {
           localStorage.removeItem(value);
@@ -214,33 +229,10 @@ export default function NewListing({ productToEdit }) {
   }, []);
   return (
     <section className="bg-white p-4 mb-8 rounded-md w-full shrink-0">
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-        {images.map((image, index) => {
-          return (
-            <UploadedImage
-              removeImage={() => {
-                removeImage(index);
-              }}
-              saveLink={(link) => saveLink(image.id, link)}
-              key={image.newId}
-              image={image}
-              changeCaption={(c) => changeCaption(id, c)}
-              index={index}
-            />
-          );
-        })}
-        {images.length < 4 && (
-          <ImageUpload
-            setFile={(f) => {
-              addImage(f);
-            }}
-          />
-        )}
-      </div> */}
       <div className="flex items-center mb-4">
         {editId && (
           <Link
-            to={`/services/${editId}`}
+            to={`/products/${editId}`}
             className="mr-2 flex items-center justify-center rounded-full size-8 bg-light_grey/50"
           >
             <ArrowLeft className={"size-6"} />
@@ -253,7 +245,32 @@ export default function NewListing({ productToEdit }) {
           <LightParagraph>Upload at least 1 image</LightParagraph>
         </div>
       </div>
+      <Divider className="my-4" />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+        {images.map((image, index) => {
+          return (
+            <UploadedImage
+              removeImage={() => {
+                removeImage(index);
+              }}
+              saveLink={(link) => saveLink(image.id, link)}
+              key={image.id}
+              image={image}
+              changeCaption={(c) => changeCaption(image.id, c)}
+              index={index}
+            />
+          );
+        })}
+        {images.length < 4 && (
+          <ImageUpload
+            setFile={(f) => {
+              addImage(f);
+            }}
+          />
+        )}
+      </div>
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         <ImageSelect
           name="image_1"
           captionName="image_caption1"
@@ -274,8 +291,7 @@ export default function NewListing({ productToEdit }) {
           captionName="image_caption4"
           formik={formik}
         />
-      </div>
-      <Divider className="my-4" />
+      </div> */}
       <Form
         formik={formik}
         status={"none"}
@@ -377,6 +393,7 @@ function UploadedImage({ image, index, removeImage, saveLink, changeCaption }) {
       </div>
 
       <Input
+        value={image.caption}
         onChange={(e) => changeCaption(e.target.value)}
         placeholder="Enter caption for image (optional)"
         className={`${inputClassNames} placeholder:text-xs placeholder:text-gray-400 !border-gray-200`}

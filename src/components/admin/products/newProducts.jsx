@@ -27,11 +27,12 @@ export default function NewProducts() {
             isDesktopScreen ? 4 : isLaptopScreen ? 3 : isBigMobile ? 2 : 1
           }
         >
-          {products?.slice(0, 4).map((product, index) => {
+          {products?.slice(0, 4).map((product) => {
             return (
               <SwiperSlide key={product?.id}>
                 <ProductListCard
                   title={product?.title}
+                  image={product?.images?.[0]?.image}
                   subtitle={product?.category}
                   companyName={product?.company?.company_name}
                   id={product?.id}

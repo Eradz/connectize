@@ -2,30 +2,48 @@ import { Avatar, Button, Divider } from "@chakra-ui/react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { getSingleCompany } from "../../../api-services/companies";
 import { bookmarkProduct } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
-import { Bookmark } from "../../../icon";
+import { Bookmark, Pencil } from "../../../icon";
 import { NAVIGATION_BUTTONS } from "../../../lib/slide_button";
 import { ProductDetailSkeleton } from "../../../pages/market/product";
 import HeadingText from "../../HeadingText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import { avatarStyle } from "../../ResponsiveNav";
 import { ChatSellerLink } from "../markets/newlyListed";
+import { useGetCurrentCompany } from "../../../hooks";
+import NewListing from "../listing/newListing";
+import NoPage from "../../NoPage";
+import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 
 function Productdetails({ product }) {
   const swiperRef = useRef(null);
   const { user: currentUser } = useAuth();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
+  const { data: userCompanies, isLoading: isLoadingUserCompanies } =
+    useGetCurrentCompany();
   const { data: company, isLoading } = useQuery({
     queryKey: ["companies", product?.company?.company_name],
     queryFn: () => getSingleCompany(product?.company?.company_name),
     enabled: !!product?.company,
   });
+
+  const [searchParams] = useSearchParams();
+
+  const isEditing = searchParams.get("edit");
+
+  const userCompanyDetails =
+    product?.id && currentUser?.id && userCompanies?.length
+      ? userCompanies?.find(
+          (c) =>
+            c?.id == product?.company?.id && currentUser?.id === c?.user?.id
+        )
+      : null;
 
   // Memoized navigation handler
   const handleNavigation = useCallback((action) => {
@@ -44,6 +62,15 @@ function Productdetails({ product }) {
   );
 
   if (isLoading) return <ProductDetailSkeleton />;
+
+  if (!isLoading && !product) return <NoPage />;
+
+  if (isEditing && product)
+    return (
+      <section className="w-full col-span-3">
+        <NewListing productToEdit={product} />
+      </section>
+    );
 
   return (
     <>
@@ -108,16 +135,30 @@ function Productdetails({ product }) {
 
         <div className="space-y-4 lg:w-1/2 shrink-0">
           <div className="space-y-2">
-            <HeadingText>{product.title}</HeadingText>
+            <div className="flex items-center">
+              <div className="flex-1">
+                <HeadingText>{product.title}</HeadingText>
+              </div>
+              {userCompanyDetails && (
+                <Link to={`/products/${product.id}?edit=1`} className="ml-5">
+                  <ButtonWithTooltipIcon
+                    tip={`Edit Product`}
+                    IconName={Pencil}
+                    iconClassName="!size-8 xs:!size-7"
+                  />
+                </Link>
+              )}
+            </div>
             <h5>{product?.sub_title}</h5>
           </div>
           <Divider />
-          <div className="space-y-2">
+          <div className="space-y-1">
             <h6 className="text-xl font-bold">Description</h6>
             <MarkdownComponent
               markdownContent={product?.description}
               markdownTitle="Product description"
               isDescription
+              className={"text-dark"}
             />
           </div>
           <div className="flex gap-4 items-center">

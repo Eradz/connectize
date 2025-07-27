@@ -75,6 +75,7 @@ function SummaryTabs({ company }) {
         {company?.products?.map((product, index) => (
           <ProductListCard
             key={index}
+            id={product.id}
             image={product?.images?.[0].image}
             title={product.title}
             subtitle={product.company?.company_name}
