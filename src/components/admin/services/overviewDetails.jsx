@@ -7,17 +7,19 @@ import NoPage from "../../NoPage";
 import { BookMarkButton } from "../feeds/DiscoverPostTabs";
 import LightParagraph from "../../ParagraphText";
 import { MarkdownComponent } from "../../MarkDownComponent";
-import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 import ServiceAdminMain from "./serviceAdminMain";
 import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 import { useAuth } from "../../../context/userContext";
+import { useGetCurrentCompany } from "../../../hooks";
 
 export default function OverviewDetails() {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: isLoadingUser } = useAuth();
+
+  const { data: userCompanies, isLoading: isLoadingUserCompanies } =
+    useGetCurrentCompany();
 
   const params = useParams();
 
-  // const d = getSingleCompany
   const { data: service, isLoading } = useQuery({
     queryKey: ["service", params.id], // Scoped key for caching per service
     queryFn: () => getSingleService(params.id),
@@ -25,21 +27,17 @@ export default function OverviewDetails() {
     staleTime: 300000, // Cache data for 5 minutes
   });
 
-  // get the details of the company that created the service
-  const { data: companyDetails, isLoadingCompany } = useQuery({
-    queryKey: ["service", service?.company?.id], // Scoped key for caching per service
-    queryFn: async () => {
-      const data = await getCompanyByIdOrEmail(service?.company?.id);
-
-      return data?.at?.(0);
-    },
-
-    enabled: !!service?.company?.id, // Prevent unnecessary queries
-    // staleTime: 300000, // Cache data for 5 minutes
-  });
   const [searchParams] = useSearchParams();
 
   const isEditing = searchParams.get("edit");
+
+  const userCompanyDetails =
+    service?.id && currentUser?.id && userCompanies?.length
+      ? userCompanies?.find(
+          (c) =>
+            c?.id == service?.company?.id && currentUser?.id === c?.user?.id
+        )
+      : null;
 
   useEffect(() => {
     document.title = `${service?.title + " | " || ""}Services - Connectize`;
@@ -72,8 +70,8 @@ export default function OverviewDetails() {
             <div className="flex items-center gap-1">
               <Location className="w-5 shrink-0" />
               <p className="text-gray-500 text-sm">
-                {isLoadingCompany ? (
-                  <div className="animate-pulse w-6 h-6 bg-gray-200 rounded" />
+                {isLoadingUserCompanies || isLoadingUser ? (
+                  <div className="animate-pulse w-48 h-4 bg-gray-200 rounded" />
                 ) : (
                   service?.company?.company_name
                 )}
@@ -84,7 +82,7 @@ export default function OverviewDetails() {
           <div className="flex">
             <BookMarkButton service={service} />
 
-            {currentUser?.id && currentUser?.id == companyDetails?.user?.id && (
+            {userCompanyDetails && (
               <Link to={`/services/${service.id}?edit=1`} className="ml-5">
                 <ButtonWithTooltipIcon
                   tip={`Edit Service`}

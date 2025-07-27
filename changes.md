@@ -1,2 +1,1 @@
-- You can now actually create a company from the website
-- account creation now uses the new structure the server expects
+- You can now edit services as long as you were the creator
