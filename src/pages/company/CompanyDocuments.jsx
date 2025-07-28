@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
@@ -10,6 +10,7 @@ import Form from "../../components/form";
 import { ImageSelect } from "../../components/form/customInput";
 import StepButton from "../../components/profile/StepButton";
 import { customFormikFieldValidator } from "../../lib/utils";
+import { FormikCtx } from "./context";
 
 const FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export const SUPPORTED_FORMATS = [
@@ -37,7 +38,7 @@ export function checkFileSize(value) {
   return value && value.size <= FILE_SIZE;
 }
 
-const validationSchema = Yup.object().shape({
+export const validationSchema = Yup.object().shape({
   document_type: Yup.string().optional(),
   company_document: Yup.mixed()
     .optional()
@@ -45,37 +46,38 @@ const validationSchema = Yup.object().shape({
     .test("file-format", unSupportedText, checkFileFormat),
 });
 
-const CompanyDocuments = () => {
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const navigate = useNavigate();
-  const initialValues = {
+export function getInitialValues() {
+  return {
     // create company
-    company_name: localStorage.getItem("company_name") || "",
-    company_address: localStorage.getItem("company_address") || "",
-    country: localStorage.getItem("country") || "",
-    city: localStorage.getItem("city") || "",
-    company_category: localStorage.getItem("company_category") || "",
-    company_size: localStorage.getItem("company_size") || "",
-    company_description: localStorage.getItem("company_description") || "",
-    company_tagline: localStorage.getItem("company_tagline") || "",
+    // company_name: localStorage.getItem("company_name") || "",
+    // company_address: localStorage.getItem("company_address") || "",
+    // country: localStorage.getItem("country") || "",
+    // city: localStorage.getItem("city") || "",
+    // company_category: localStorage.getItem("company_category") || "",
+    // company_size: localStorage.getItem("company_size") || "",
+    // company_description: localStorage.getItem("company_description") || "",
+    // company_tagline: localStorage.getItem("company_tagline") || "",
 
     // company information
-    company_registration_no:
-      localStorage.getItem("company_registration_no") || "",
-    company_registration_date:
-      localStorage.getItem("company_registration_date") || "",
-    company_annual_revenue:
-      localStorage.getItem("company_annual_revenue") || "",
+    // company_registration_no:
+    //   localStorage.getItem("company_registration_no") || "",
+    // company_registration_date:
+    //   localStorage.getItem("company_registration_date") || "",
+    // company_annual_revenue:
+    // localStorage.getItem("company_annual_revenue") || "",
 
     // company documents
     document_type: localStorage.getItem("document_type") || "",
     company_document: "",
   };
+}
+const CompanyDocuments = () => {
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const navigate = useNavigate();
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-  });
+  const formiks = useContext(FormikCtx);
+
+  const formik = formiks?.companyDocFormik;
 
   const doStepChange = async () => {
     const isValidFields = await customFormikFieldValidator(formik);
@@ -83,10 +85,14 @@ const CompanyDocuments = () => {
     if (!isValidFields) return false;
 
     const toastId = toast.info(
-      `Onboarding ${formik.values.company_name} to the connectize platform`
+      `Onboarding ${formiks.indexFormik.values.company_name} to the connectize platform`
     );
 
-    const newCompany = await createCompany(formik.values);
+    const newCompany = await createCompany({
+      ...formiks.indexFormik.values,
+      ...formiks.companyInfoFormik.values,
+      ...formik.values,
+    });
 
     if (newCompany) {
       for (let value in formik.values) {
@@ -103,7 +109,7 @@ const CompanyDocuments = () => {
 
   useEffect(() => {
     document.title = "Upload Documents | Connectize";
-    formik.setValues(initialValues);
+    // formik.setValues(initialValues);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

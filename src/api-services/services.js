@@ -14,28 +14,33 @@ import { getCurrentUser } from "./users";
 //     "company": null
 // }
 
-export const getServices = async () => {
-  const { results: services } = await makeApiRequest({
+export const getServices = async (params, returnFullRes = false) => {
+  const { results: services, next } = await makeApiRequest({
     url: `api/services/`,
     method: "GET",
+    params,
   });
 
-  let mergedServicesWIthImage = [];
+  if (returnFullRes) return { data: services, next };
 
-  const serviceImages = await getServiceImages();
+  return services;
 
-  services?.forEach((service) => {
-    const serviceImage = serviceImages?.filter(
-      (image) => service.id === image.product
-    );
+  // let mergedServicesWIthImage = [];
 
-    mergedServicesWIthImage.push({
-      ...service,
-      images: serviceImage,
-    });
-  });
+  // const serviceImages = await getServiceImages();
 
-  return mergedServicesWIthImage;
+  // services?.forEach((service) => {
+  //   const serviceImage = serviceImages?.filter(
+  //     (image) => service.id === image.product
+  //   );
+
+  //   mergedServicesWIthImage.push({
+  //     ...service,
+  //     images: serviceImage,
+  //   });
+  // });
+
+  // return mergedServicesWIthImage;
 };
 
 export const getSingleService = async (id) => {
@@ -70,9 +75,9 @@ export const createService = async (data, resetForm, editId) => {
   await getOrCreateServiceCategories(serviceCategory);
 
   const service = await makeApiRequest({
-    url: `api/services/`,
-    method: "POST",
-    params: editId ? { edit: editId } : undefined,
+    url: `api/services/${editId ? editId + "/" : ""}`,
+    method: editId ? "PUT" : "POST",
+    // params: editId ? { edit: editId } : undefined,
     data: {
       title: capitalizeFirst(data.service_title),
       sub_title: data.service_subtitle,
@@ -85,9 +90,9 @@ export const createService = async (data, resetForm, editId) => {
 
   if (service)
     toast.success(
-      `${service.title} has been ${
-        editId ? "updated" : "created"
-      } successfully!`,
+      editId
+        ? "Service has successfully been edited."
+        : `${service.title} has been created successfully!`,
       {
         id: toastId,
       }

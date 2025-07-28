@@ -16,6 +16,7 @@ const useWebSocket = (url, params, opts) => {
   const session = getSession();
 
   useEffect(() => {
+    console.log("Reconneding");
     const wsBaseUrl =
       process.env.NODE_ENV === "development"
         ? baseURL.replace("http", "ws")

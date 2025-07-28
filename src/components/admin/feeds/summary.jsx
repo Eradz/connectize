@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
 import CustomTabs from "../../custom/tabs";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
+import PrimaryButton from "../../PrimaryButton";
 import { ProductListCard } from "../markets/newlyListed";
 import CreatePost from "./CreatePost";
 import DiscoverPosts from "./DiscoverPosts";
@@ -40,31 +42,54 @@ function SummaryTabs({ company }) {
       {/* <RecommendedProducts /> */}
       <DiscoverPosts companyName={company?.company_name} />
     </section>,
-    <div className="grid gap-x-3 gap-y-4">
-      {company?.services?.map((service, index) => (
-        <PostCard
-          key={index}
-          companyName={service?.company?.company_name}
-          verified={service?.companyInfo?.verified}
-          logo={service?.company?.logo}
-          title={service?.title}
-          summary={service?.sub_title}
-          url={`/services/${service?.id}`}
-          whole={service}
-          isService
-        />
-      ))}
+    <div className="">
+      <div className="grid gap-x-3 gap-y-4">
+        {company?.services?.map((service, index) => (
+          <PostCard
+            key={index}
+            //  image={product?.images?.[0].image}
+            companyName={service?.company?.company_name}
+            verified={service?.companyInfo?.verified}
+            logo={service?.company?.logo}
+            title={service?.title}
+            summary={service?.sub_title}
+            url={`/services/${service?.id}`}
+            whole={service}
+            isService
+          />
+        ))}
+      </div>
+
+      {company?.services?.length ? (
+        <div className="mt-6 flex justify-center">
+          <Link
+            to={`/market?s=services&company=${company.id}---${company.slug}`}
+          >
+            <PrimaryButton>View more services</PrimaryButton>
+          </Link>
+        </div>
+      ) : null}
     </div>,
-    <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-      {company?.products?.map((product, index) => (
-        <ProductListCard
-          key={index}
-          image={product?.image}
-          title={product.title}
-          subtitle={product.company?.company_name}
-          isSummary
-        />
-      ))}
+    <div className="">
+      <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+        {company?.products?.map((product, index) => (
+          <ProductListCard
+            key={index}
+            id={product.id}
+            image={product?.images?.[0].image}
+            title={product.title}
+            subtitle={product.company?.company_name}
+            isSummary
+          />
+        ))}
+      </div>
+      {company?.products?.length ? (
+        <div className="mt-6 flex justify-center">
+          <Link to={`/market?company=${company.id}---${company.slug}`}>
+            <PrimaryButton>View more products</PrimaryButton>
+          </Link>
+        </div>
+      ) : null}
     </div>,
   ];
 

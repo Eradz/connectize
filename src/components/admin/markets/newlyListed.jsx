@@ -1,74 +1,168 @@
 import { ChevronRight } from "@mui/icons-material";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
-import { usePollAllCompanies } from "../../../hooks/usePolling";
-import { useProductImages } from "../../../hooks/useProduct";
 import { webRoutes } from "../../../lib/webRoutes";
 import CustomTabs from "../../custom/tabs";
+import PrimaryButton from "../../PrimaryButton";
 
-function NewlyListed() {
-  const [searchParams] = useSearchParams();
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,
-  });
-
-  const productCategory = searchParams.get("category") || "";
-
-  const filteredProducts = useMemo(
-    () =>
-      productCategory
-        ? products.filter(
-            (product) =>
-              product.category.toLowerCase() === productCategory.toLowerCase()
-          )
-        : products,
-    [productCategory, products]
-  );
-
-  const newlyListedProducts = useMemo(() => products?.slice(0, 6), [products]);
-
-  const tabs = useMemo(
-    () => [
-      { label: "All Products", products: filteredProducts },
-      { label: "Newly Listed", products: newlyListedProducts },
-    ],
-    [filteredProducts, newlyListedProducts]
-  );
-
+function NewlyListed({ companyId }) {
   return (
     <section className="container">
       <CustomTabs
-        tabsHeading={tabs.map((tab) => tab.label)}
-        tabsPanels={tabs.map((tab, index) => (
-          <div
-            key={index}
-            className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4"
-          >
-            {isLoading
-              ? Array.from({ length: 6 }, (_, index) => (
-                  <ListCardSkeleton key={index} />
-                ))
-              : tab.products.map((product) => {
-                  return (
-                    <ProductListCard
-                      key={product.id}
-                      id={product.id}
-                      title={product.title}
-                      subtitle={product.category}
-                      companyName={product?.company?.company_name || ""}
-                    />
-                  );
-                })}
-          </div>
-        ))}
+        tabsHeading={["All Products", "Newly Listed"]}
+        tabsPanels={[
+          // used `|| undefined` because if the `companyId` is an empty string it would still be falsy, and it would be sent to the server as an empty string i.e `?company=""`
+          <DisplayAllProducts companyId={companyId || undefined} />,
+          <DisplayNewlyListedProducts companyId={companyId || undefined} />,
+        ]}
       />
     </section>
+  );
+}
+
+function DisplayAllProducts({ companyId }) {
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["products", "all", { companyId }],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      return await getProducts(
+        { page_size: 2, page: pageParam, company: companyId || undefined },
+        true
+      );
+    },
+
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || !lastPage.next) return;
+
+      const lastPageUrl = new URL(lastPage.next);
+
+      let nextPage = lastPageUrl.searchParams.get("page");
+
+      if (!nextPage) return;
+      let nextPageAsNumber = parseInt(nextPage);
+
+      if (!nextPageAsNumber) return;
+
+      return nextPageAsNumber;
+    },
+  });
+
+  // these might be needed later or even better moved to the backend
+  // const [searchParams] = useSearchParams();
+  // const productCategory = searchParams.get("category") || "";
+
+  // const filteredProducts = useMemo(
+  //   () =>
+  //     productCategory
+  //       ? products.filter(
+  //           (product) =>
+  //             product.category.toLowerCase() === productCategory.toLowerCase()
+  //         )
+  //       : products,
+  //   [productCategory, products]
+  // );
+
+  return (
+    <div className="">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
+        {isLoading ? (
+          <DefaultSkelecton />
+        ) : (
+          data?.pages?.map((group) => {
+            return group?.data?.map((product) => {
+              return (
+                <ProductListCard
+                  key={product.id}
+                  id={product.id}
+                  image={product?.images?.[0].image}
+                  title={product.title}
+                  subtitle={product.category}
+                  companyName={product?.company?.company_name || ""}
+                  company={product?.company}
+                />
+              );
+            });
+          })
+        )}
+
+        {isFetching && isFetchingNextPage && <DefaultSkelecton length={4} />}
+      </div>
+
+      {hasNextPage && !isFetchingNextPage && (
+        <div
+          className={clsx("mt-10 flex justify-center", {
+            "animate-pulse": isFetching,
+          })}
+        >
+          <PrimaryButton
+            onClick={fetchNextPage}
+            disabled={!hasNextPage || isFetching || isFetchingNextPage}
+          >
+            Load More
+          </PrimaryButton>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DefaultSkelecton({ length = 6 }) {
+  return Array.from({ length }, (_, index) => <ListCardSkeleton key={index} />);
+}
+function DisplayNewlyListedProducts({ companyId }) {
+  /**
+   * @todo Make a request to get real newly listed data from the server when that feature has been implemented on the server. And also find a way to prevent this component from fething products when it has not been mounted.
+   */
+  const { data, isLoading } = useInfiniteQuery({
+    queryKey: ["products", "all", { companyId }],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      return await getProducts(
+        { page_size: 2, page: pageParam, company: companyId || undefined },
+        true
+      );
+    },
+    getNextPageParam: () => {
+      return;
+    },
+  });
+  // the products used right now in this section is the same thing with thoses in the `DisplayAllProducts. This is because the feature of getting newly listed products as not been implemented on the server yet. So to avoid making an entirely new request i decided to make this component share requests with `DisplayAllProducts` Component.
+
+  const newlyListedProducts = data?.pages?.[0]?.data;
+  // const newlyListedProducts = useMemo(() => products?.slice(0, 6), [products]);
+
+  return (
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
+      {isLoading ? (
+        <DefaultSkelecton />
+      ) : (
+        newlyListedProducts?.map((product) => {
+          return (
+            <ProductListCard
+              key={product.id}
+              image={product?.images?.[0].image}
+              id={product.id}
+              title={product.title}
+              subtitle={product.category}
+              companyName={product?.company?.company_name || ""}
+              company={product?.company}
+              // company={product?.company}
+            />
+          );
+        })
+      )}
+    </div>
   );
 }
 
@@ -81,14 +175,17 @@ export const ProductListCard = ({
   id,
   isSummary = false,
   companyName,
+  company,
 }) => {
-  const { data: companies } = usePollAllCompanies();
-  const company = companies?.results?.find(
-    (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
-  );
+  // const { data: companies } = usePollAllCompanies();
+  // const company = companies?.results?.find(
+  //   (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
+  // );
 
-  const { productImage } = useProductImages(id);
-  const imageUrl = productImage?.[0]?.image || image || "";
+  // const { productImage } = useProductImages(id);
+  // const imageUrl = productImage?.[0]?.image || image || "";
+  // const { productImage } = useProductImages(id);
+  // const imageUrl = productImage?.[0]?.image || image || "";
 
   return (
     <motion.div
@@ -102,10 +199,10 @@ export const ProductListCard = ({
         }
       )}
     >
-      <Link to={"/products/" + id}>
+      <Link to={"/products/" + id} className="w-full">
         <img
-          src={imageUrl}
-          className={clsx("w-full h-[300px] rounded-lg", {
+          src={image}
+          className={clsx("w-full h-[300px] rounded-lg object-cover", {
             "md:h-[200px]": isSummary,
           })}
           alt={title || "Product"}

@@ -1,14 +1,15 @@
 import { getCountries } from "@loophq/country-state-list";
 import { useFormik } from "formik";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import * as Yup from "yup";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import SEO from "../../components/SEO";
 import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
+import { FormikCtx } from "./context";
 
-const validationSchema = Yup.object().shape({
+export const validationSchema = Yup.object().shape({
   company_name: Yup.string().required("Company name cannot be empty"),
   company_tagline: Yup.string().required("Company tagline cannot be empty"),
   company_email: Yup.string().required("Company email cannot be empty"),
@@ -21,10 +22,8 @@ const validationSchema = Yup.object().shape({
   company_description: Yup.string().optional(),
 });
 
-const CreateCompany = () => {
-  const countries = getCountries();
-
-  const initialValues = {
+export function getIndexInitialValues() {
+  return {
     company_name: localStorage.getItem("company_name") || "",
     company_tagline: localStorage.getItem("company_tagline") || "",
     company_email: localStorage.getItem("company_email") || "",
@@ -36,11 +35,14 @@ const CreateCompany = () => {
     company_size: localStorage.getItem("company_size") || "",
     company_description: localStorage.getItem("company_description") || "",
   };
+}
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-  });
+const CreateCompany = () => {
+  const countries = getCountries();
+
+  const formiks = useContext(FormikCtx);
+
+  const formik = formiks?.indexFormik;
 
   const countriesString = countries.map((country) => country.name);
 
@@ -61,8 +63,7 @@ const CreateCompany = () => {
   };
 
   useEffect(() => {
-    formik.setValues(initialValues);
-
+    // formik.setValues(getIndexInitialValues());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const listingFields = [

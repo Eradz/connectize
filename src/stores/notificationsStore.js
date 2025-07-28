@@ -1,8 +1,25 @@
 import { create } from "zustand";
-import { markNotificationAsRead } from "../api-services/notifications";
+import {
+  getNotificationsForUser,
+  markNotificationAsRead,
+} from "../api-services/notifications";
 
 export const useNotificationsStore = create((set, get) => ({
   notifications: [],
+
+  fetchNotifications: async () => {
+    const notifications = await getNotificationsForUser();
+
+    if (get().notifications.length) {
+      console.log(
+        "Skipped setting notifications because notification is not empty "
+      );
+
+      return;
+    }
+
+    set({ notifications });
+  },
   setNotifications: (newNotifications) =>
     set({ notifications: newNotifications }),
 

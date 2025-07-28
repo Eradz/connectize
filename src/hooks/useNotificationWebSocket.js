@@ -8,25 +8,34 @@ import { useNotificationsStore } from "../stores/notificationsStore";
 const useNotificationWebSocket = () => {
   // Adjust the URL/params as needed for your backend's websocket endpoint
   // Example: url = "notifications", params = userId
-  const { messages } = useWebSocket("notifications");
-
   const setNotifications = useNotificationsStore((s) => s.setNotifications);
   const addNotification = useNotificationsStore((s) => s.addNotification);
+  useWebSocket("notifications", undefined, {
+    onMessage: handleNewEvent,
+  });
 
-  useEffect(() => {
-    if (!messages || messages.length === 0) return;
-
-    // Assuming each message is a notification or an array of notifications
-    const lastMessage = messages[messages.length - 1];
-
-    // If the backend sends a full notification list, replace; if single, add if not present
-    if (Array.isArray(lastMessage)) {
-      setNotifications(lastMessage);
-    } else if (lastMessage && lastMessage.id) {
-      addNotification(lastMessage);
+  function handleNewEvent(event) {
+    if (event?.eventName !== "notification_received") {
+      return;
     }
-    // You may need to adjust this logic based on your backend's message format
-  }, [messages, setNotifications, addNotification]);
+
+    addNotification(event.payload);
+    // console.log("Event from Notification socket", event);
+  }
+  // useEffect(() => {
+  //   if (!messages || messages.length === 0) return;
+
+  //   // Assuming each message is a notification or an array of notifications
+  //   const lastMessage = messages[messages.length - 1];
+
+  //   // If the backend sends a full notification list, replace; if single, add if not present
+  //   if (Array.isArray(lastMessage)) {
+  //     setNotifications(lastMessage);
+  //   } else if (lastMessage && lastMessage.id) {
+  //     addNotification(lastMessage);
+  //   }
+  //   // You may need to adjust this logic based on your backend's message format
+  // }, [messages, setNotifications, addNotification]);
 };
 
 export default useNotificationWebSocket;

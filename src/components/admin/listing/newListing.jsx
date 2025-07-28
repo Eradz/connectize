@@ -1,14 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
 import Form from "../../form";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
-import { Divider } from "@chakra-ui/react";
+import { Divider, Input } from "@chakra-ui/react";
 import { createProduct } from "../../../api-services/products";
-import { ImageSelect } from "../../form/customInput";
-import { useNavigate } from "react-router-dom";
+import { ImageSelect, inputClassNames } from "../../form/customInput";
+import { Link, useNavigate } from "react-router-dom";
+import clsx from "clsx";
+import axios from "axios";
+import { Close } from "@mui/icons-material";
+import { ArrowLeft, ImageIcon } from "../../../icon";
+import { toast } from "sonner";
 
 const FILE_SIZE = 4 * 1024 * 1024; // 4MB
 export const SUPPORTED_FORMATS = [
@@ -36,22 +41,22 @@ export function checkFileSize(value) {
 }
 
 const validationSchema = Yup.object().shape({
-  image_1: Yup.mixed()
-    .required("Please select an image")
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
-  image_2: Yup.mixed()
-    .optional()
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
-  image_3: Yup.mixed()
-    .optional()
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
-  image_4: Yup.mixed()
-    .optional()
-    .test("file-size", largeFileText, checkFileSize)
-    .test("file-format", unSupportedText, checkFileFormat),
+  // image_1: Yup.mixed()
+  //   .required("Please select an image")
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
+  // image_2: Yup.mixed()
+  //   .optional()
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
+  // image_3: Yup.mixed()
+  //   .optional()
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
+  // image_4: Yup.mixed()
+  //   .optional()
+  //   .test("file-size", largeFileText, checkFileSize)
+  //   .test("file-format", unSupportedText, checkFileFormat),
   image_caption1: Yup.string().optional(),
   image_caption2: Yup.string().optional(),
   image_caption3: Yup.string().optional(),
@@ -68,7 +73,11 @@ const validationSchema = Yup.object().shape({
     .required("Field cannot be empty"),
 });
 
-export default function NewListing() {
+export default function NewListing({ productToEdit }) {
+  const editId = productToEdit?.id;
+
+  const [images, setImages] = useState([]);
+
   const formValues = {
     image_1: "",
     image_2: "",
@@ -90,7 +99,21 @@ export default function NewListing() {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async (values, { resetForm }) => {
-      const product = await createProduct(values, resetForm);
+      const newImages = [];
+      for (const image of images) {
+        if (!image.link) {
+          toast.error("Some images failed to upload or are still uploading.");
+          return;
+        }
+
+        image.push({ link: image.link, caption: image.caption });
+      }
+
+      const product = await createProduct(
+        { ...values, images: newImages },
+        resetForm,
+        editId
+      );
       if (product) {
         for (let value in values) {
           localStorage.removeItem(value);
@@ -165,19 +188,89 @@ export default function NewListing() {
     },
   ];
 
+  function addImage(file) {
+    if (images.length >= 4 || !(file instanceof File)) return;
+
+    const newId = `${file.name}-${Date.now()}-${file.size}`;
+    setImages((p) => [...p, { id: newId, link: "", file, caption: "" }]);
+  }
+
+  function removeImage(index) {
+    let newImages = images.filter((_, i) => i !== index);
+
+    setImages(newImages);
+  }
+
+  function changeCaption(id, caption) {
+    setImages((p) =>
+      p.map((image) => {
+        if (image.id !== id) return image;
+        return { ...image, caption };
+      })
+    );
+  }
+
+  function saveLink(id, link) {
+    setImages((p) =>
+      p.map((image) => {
+        if (image.id !== id) return image;
+        return { ...image, link };
+      })
+    );
+  }
+
   useEffect(() => {
-    document.title = "Create a new listing | Connectize";
+    document.title = editId
+      ? "Editing product | " + productToEdit?.title
+      : "Create a new listing | Connectize";
     formik.setValues(formValues);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <section className="bg-white p-4 mb-8 rounded-md w-full shrink-0">
-      <div className="mb-4">
-        <HeadingText>List new products</HeadingText>
-        <LightParagraph>Upload at least 1 image</LightParagraph>
+      <div className="flex items-center mb-4">
+        {editId && (
+          <Link
+            to={`/products/${editId}`}
+            className="mr-2 flex items-center justify-center rounded-full size-8 bg-light_grey/50"
+          >
+            <ArrowLeft className={"size-6"} />
+          </Link>
+        )}
+        <div className="">
+          <HeadingText>
+            {editId ? "Edit product" : "List new products"}
+          </HeadingText>
+          <LightParagraph>Upload at least 1 image</LightParagraph>
+        </div>
       </div>
+      <Divider className="my-4" />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+        {images.map((image, index) => {
+          return (
+            <UploadedImage
+              removeImage={() => {
+                removeImage(index);
+              }}
+              saveLink={(link) => saveLink(image.id, link)}
+              key={image.id}
+              image={image}
+              changeCaption={(c) => changeCaption(image.id, c)}
+              index={index}
+            />
+          );
+        })}
+        {images.length < 4 && (
+          <ImageUpload
+            setFile={(f) => {
+              addImage(f);
+            }}
+          />
+        )}
+      </div>
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
         <ImageSelect
           name="image_1"
           captionName="image_caption1"
@@ -198,20 +291,141 @@ export default function NewListing() {
           captionName="image_caption4"
           formik={formik}
         />
-      </div>
-      <Divider className="my-4" />
+      </div> */}
       <Form
         formik={formik}
         status={"none"}
         inputArray={listingFields}
         button={{
           type: "submit",
-          text: "List product  | ",
+          text: editId ? "Edit product | " : "List product  | ",
           icon: <ChevronRightIcon />,
-          submitText: "Creating product...",
+          submitText: editId ? "Editing product..." : "Creating product...",
           style: "!w-fit mt-10 text-sm",
         }}
       />
     </section>
+  );
+}
+
+function UploadedImage({ image, index, removeImage, saveLink, changeCaption }) {
+  const [imageUrl, setImageUrl] = useState();
+
+  const [progress, setProgress] = useState(0);
+  // const [isUploaded, setIsUploaded] = useState(0)
+
+  const [isUploading, setIsUploading] = useState(false);
+
+  async function handleUploadToServer() {
+    if (!image.file || !(image.file instanceof File)) return;
+
+    setIsUploading(true);
+
+    try {
+      const res = await axios.postForm(
+        "http://localhost:8000/upload",
+        {
+          file: image.file,
+        },
+        {
+          onUploadProgress: (e) => {
+            console.log("Progress", e.progress, e.progress * 100);
+            setProgress(Math.floor(e.progress * 100));
+          },
+        }
+      );
+
+      console.log(res.data, res.data.link);
+      saveLink(res.data.link);
+    } catch (error) {
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  useEffect(() => {
+    console.log("file has changed");
+    if (isUploading) return;
+    if (!image.file) setImageUrl(image.link);
+
+    setIsUploading(true);
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      setImageUrl(e.target.result);
+      handleUploadToServer();
+    };
+
+    reader.readAsDataURL(image.file);
+  }, [image.link, image.file]);
+
+  return (
+    <div className="aspect-video">
+      <div className="size-full bg-background relative">
+        <div
+          className={clsx(
+            "absolute right-4 bottom-4 bg-black bg-opacity-50 text-white rounded-full flex items-center h-8",
+            {
+              "px-2": isUploading,
+              "w-8": isUploading,
+            }
+          )}
+        >
+          {isUploading && (
+            <span className="leading-none font-medium text-sm">
+              {progress}%
+            </span>
+          )}
+          <button
+            className="size-8 flex items-center justify-center"
+            onClick={removeImage}
+          >
+            <Close className="text-lg" fontSize="" />
+          </button>
+        </div>
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            className="size-full object-cover bg-black"
+            alt=""
+          />
+        )}
+      </div>
+
+      <Input
+        value={image.caption}
+        onChange={(e) => changeCaption(e.target.value)}
+        placeholder="Enter caption for image (optional)"
+        className={`${inputClassNames} placeholder:text-xs placeholder:text-gray-400 !border-gray-200`}
+      />
+    </div>
+  );
+}
+
+function ImageUpload({ setFile }) {
+  return (
+    <div className="aspect-square">
+      <label
+        className={clsx(
+          "border !border-gray-100 h-[150px] rounded-md bg-background flex flex-col items-center gap-3 overflow-hidden p-1 cursor-pointer relative justify-center"
+        )}
+      >
+        <input
+          className="w-full file:border-0 file:rounded-md text-gray-500 text-xs file:!text-xs file:p-2"
+          type="file"
+          hidden
+          // accept={accept}
+          onChange={(e) => {
+            let file = e.target.files?.[0];
+
+            if (!file) return;
+            setFile(file);
+            e.target.value = "";
+          }}
+        />
+        <ImageIcon className="w-9 text-custom_grey/20" />
+        <span>Add an image</span>
+      </label>
+    </div>
   );
 }
