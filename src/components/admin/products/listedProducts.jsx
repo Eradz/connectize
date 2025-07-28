@@ -27,6 +27,7 @@ const ListedProducts = ({ company }) => {
                 key={product.id}
                 title={product.title}
                 likes={product.likes.length || "0"}
+                image={product?.images?.[0]?.image}
                 id={product.id}
               />
             );
@@ -46,21 +47,19 @@ const ListedProducts = ({ company }) => {
   );
 };
 
-function ListedProduct({ id, title, likes }) {
-  const { productImage } = useProductImages(id);
+function ListedProduct({ id, title, likes, image }) {
+  // const { productImage } = useProductImages(id);
   return (
     <div className="bg-background p-2.5 rounded-md flex max-sm:flex-col gap-2 sm:gap-4 relative">
-      {productImage?.[0]?.image && (
-        <picture className="bg-white sm:w-1/3 p-2 sm:p-1 sm:h-fit flex">
-          <Link to={"/products/" + id}>
-            <img
-              src={productImage?.[0]?.image}
-              className="max-h-40 sm:w-full rounded-md mx-auto"
-              alt={title || "No title"}
-            />
-          </Link>
-        </picture>
-      )}
+      <picture className="bg-white sm:w-1/3 p-2 sm:p-1 sm:h-fit flex">
+        <Link to={"/products/" + id}>
+          <img
+            src={image}
+            className="max-h-40 sm:w-full rounded-md mx-auto"
+            alt={title || "No title"}
+          />
+        </Link>
+      </picture>
 
       <div className="sm:w-2/3">
         <Link

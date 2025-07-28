@@ -11,3 +11,8 @@
 
 - Notifications are now loaded when you first open the site
 - Websocket is now used to update and load new notifications
+
+-
+
+- Product details page no longer fetches all the products to get a single product. Instead it now uses the get single products route.
+- Product update now works and only needs a different caption implementaion on the server

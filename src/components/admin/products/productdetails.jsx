@@ -5,7 +5,10 @@ import { useCallback, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { getSingleCompany } from "../../../api-services/companies";
+import {
+  getCompanyByIdOrEmail,
+  getSingleCompany,
+} from "../../../api-services/companies";
 import { bookmarkProduct } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
 import { Bookmark, Pencil } from "../../../icon";
@@ -27,11 +30,13 @@ function Productdetails({ product }) {
 
   const { data: userCompanies, isLoading: isLoadingUserCompanies } =
     useGetCurrentCompany();
-  const { data: company, isLoading } = useQuery({
-    queryKey: ["companies", product?.company?.company_name],
-    queryFn: () => getSingleCompany(product?.company?.company_name),
+  const { data: companies, isLoading } = useQuery({
+    queryKey: ["companies", product?.company?.id],
+    queryFn: () => getCompanyByIdOrEmail(product?.company?.id),
     enabled: !!product?.company,
   });
+
+  const company = companies?.[0];
 
   const [searchParams] = useSearchParams();
 
