@@ -20,3 +20,5 @@
 -
 
 fixed search crashing issue
+
+- Image captions are now included when editing or creating products

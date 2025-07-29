@@ -121,7 +121,7 @@ export default function NewListing({ productToEdit }) {
           return;
         }
 
-        newImages.push(image.serverId);
+        newImages.push({ id: image.serverId, caption: image.caption });
         // image.push({ link: image.link, id:image.serverId, caption: image.caption });
       }
 
@@ -135,7 +135,7 @@ export default function NewListing({ productToEdit }) {
           localStorage.removeItem(value);
         }
 
-        navigate("/market", { replace: true });
+        navigate(editId ? `/products/${editId}` : `/market`, { replace: true });
       }
     },
   });

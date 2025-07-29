@@ -97,7 +97,7 @@ function Productdetails({ product }) {
                 >
                   <img
                     src={image?.image}
-                    className="size-full"
+                    className="size-full object-cover"
                     alt={image?.caption || product?.title || "product"}
                   />
                   <div className="w-full absolute bottom-0 px-4 py-2 xs:opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-white max-xs:hidden">

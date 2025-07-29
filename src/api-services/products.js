@@ -118,7 +118,7 @@ export const createProduct = async (data, resetForm, editId) => {
       }
     );
 
-    redirect("/market");
+    return product;
   }
 };
 

@@ -1,5 +1,8 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getOrCreateProductImages } from "../api-services/products";
+import {
+  getOrCreateProductImages,
+  getProducts,
+} from "../api-services/products";
 
 export const useProductImages = (productId) => {
   const { data: productImages, isLoading } = useQuery({
@@ -17,7 +20,7 @@ export const useProductImages = (productId) => {
 };
 
 export const usePageinatedProducts = ({ companyId } = {}) => {
-  return useInfiniteQuery({
+  const res = useInfiniteQuery({
     queryKey: ["products", "all", { companyId }],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
@@ -42,4 +45,6 @@ export const usePageinatedProducts = ({ companyId } = {}) => {
       return nextPageAsNumber;
     },
   });
+
+  return res;
 };
