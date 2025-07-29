@@ -114,6 +114,7 @@ export async function makeApiRequest({
   type = "",
   contentType = "application/json",
   params,
+  onUploadProgress,
 }) {
   try {
     const authorization = await getAuthorizationHeader();
@@ -132,6 +133,7 @@ export async function makeApiRequest({
         "Content-Type": contentType,
       },
       params,
+      onUploadProgress,
     });
 
     hasNotifiedOffline = false;

@@ -1,0 +1,144 @@
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 6,
+      "profile": "info@kealsmonuments.com",
+      "user": {
+        "id": 2,
+        "full_name": "Ikechukwu Arinze",
+        "email": "info@kealsmonuments.com",
+        "avatar": "https://connectizebucket.s3.amazonaws.com/media/4188214_KyxRLm6.jpg",
+        "verified": false,
+        "country": "Nigeria",
+        "city": "Lagos",
+        "phone_number": "7033465454",
+        "region": "Lagos",
+        "address": "No 13 Nnobi Street, Kilo, Surulere"
+      },
+      "company_name": "The Large Company",
+      "organization_type": "Media Company",
+      "about": "this is clearly a test company",
+      "tag_line": "test",
+      "company_size": "0-10 employees",
+      "logo": "https://connectizebucket.s3.amazonaws.com/media/zhao-yangyang-9mGJzG0gVNE-unsplash_5zNpFMw.jpg",
+      "banner": null,
+      "email": "kydiamond33@gmail.com",
+      "office_address": "",
+      "country": "Nigeria",
+      "state": "Edo",
+      "city": "Edo",
+      "website": "https://kofa.cafe",
+      "verify": false,
+      "documents": [
+        {
+          "id": 2,
+          "type": "VAT",
+          "document": "https://connectizebucket.s3.amazonaws.com/media/connectize.pdf",
+          "company": "The Large Company"
+        }
+      ],
+      "products": [
+        {
+          "id": 4,
+          "title": "New impementations 1",
+          "sub_title": "nothing here really",
+          "category": "Gas analytics equipment",
+          "description": "<p>nothing serious</p>",
+          "date_created": "2025-07-28T22:11:26.863005Z",
+          "date_updated": "2025-07-28T22:29:19.282100Z",
+          "featured": false,
+          "company": {
+            "id": 6,
+            "company_name": "The Large Company",
+            "logo": "https://connectizebucket.s3.amazonaws.com/media/zhao-yangyang-9mGJzG0gVNE-unsplash_5zNpFMw.jpg"
+          },
+          "likes": [],
+          "images": [
+            {
+              "id": 33,
+              "caption": null,
+              "image": "https://connectizebucket.s3.amazonaws.com/media/product/4188214_2ECAVZ9.jpg",
+              "product": 4,
+              "temporary": false
+            }
+          ]
+        }
+      ],
+      "services": [
+        {
+          "id": 6,
+          "title": "Edited 3",
+          "sub_title": "This has been edited",
+          "category": "Engineering design/support services",
+          "description": "<p>there is nothing to talk about</p>",
+          "date_created": "2025-07-25T13:21:16.979404Z",
+          "date_updated": "2025-07-27T18:12:32.341654Z",
+          "featured": false,
+          "company": {
+            "id": 6,
+            "company_name": "The Large Company",
+            "logo": "https://connectizebucket.s3.amazonaws.com/media/zhao-yangyang-9mGJzG0gVNE-unsplash_5zNpFMw.jpg"
+          },
+          "likes": [],
+          "images": []
+        },
+        {
+          "id": 5,
+          "title": "Edited service again",
+          "sub_title": "I think editing now works",
+          "category": "Engineering design/support services",
+          "description": "<p>there is nothing to talk about</p>",
+          "date_created": "2025-07-25T13:07:26.541651Z",
+          "date_updated": "2025-07-25T13:55:52.860255Z",
+          "featured": false,
+          "company": {
+            "id": 6,
+            "company_name": "The Large Company",
+            "logo": "https://connectizebucket.s3.amazonaws.com/media/zhao-yangyang-9mGJzG0gVNE-unsplash_5zNpFMw.jpg"
+          },
+          "likes": [],
+          "images": []
+        }
+      ],
+      "followers": [
+        {
+          "id": 4,
+          "user_follower": {
+            "id": 1,
+            "full_name": "Prosper Lekia",
+            "email": "info@connectize.co",
+            "avatar": "https://connectizebucket.s3.amazonaws.com/media/Image_YtFZYaI.jpeg",
+            "verified": false,
+            "country": "Nigeria",
+            "city": "Rivers",
+            "phone_number": "8579619405",
+            "region": "Rivers",
+            "address": "22 Boynton Boston, MA"
+          },
+          "company_follower": {
+            "id": 6,
+            "company_name": "The Large Company",
+            "slug": "comp",
+            "logo": "https://connectizebucket.s3.amazonaws.com/media/zhao-yangyang-9mGJzG0gVNE-unsplash_5zNpFMw.jpg"
+          },
+          "user_following": null,
+          "company_following": {
+            "id": 6,
+            "company_name": "The Large Company",
+            "slug": "comp",
+            "logo": "https://connectizebucket.s3.amazonaws.com/media/zhao-yangyang-9mGJzG0gVNE-unsplash_5zNpFMw.jpg"
+          }
+        }
+      ],
+      "following": [],
+      "reviews": [],
+      "registration_date": "2025-07-08",
+      "registration_number": "123456",
+      "annual_revenue": "100000",
+      "slug": "comp"
+    }
+  ]
+}

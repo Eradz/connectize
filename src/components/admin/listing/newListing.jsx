@@ -6,7 +6,10 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { Divider, Input } from "@chakra-ui/react";
-import { createProduct } from "../../../api-services/products";
+import {
+  createProduct,
+  getOrCreateProductImages,
+} from "../../../api-services/products";
 import { ImageSelect, inputClassNames } from "../../form/customInput";
 import { Link, useNavigate } from "react-router-dom";
 import clsx from "clsx";
@@ -57,10 +60,10 @@ const validationSchema = Yup.object().shape({
   //   .optional()
   //   .test("file-size", largeFileText, checkFileSize)
   //   .test("file-format", unSupportedText, checkFileFormat),
-  image_caption1: Yup.string().optional(),
-  image_caption2: Yup.string().optional(),
-  image_caption3: Yup.string().optional(),
-  image_caption4: Yup.string().optional(),
+  // image_caption1: Yup.string().optional(),
+  // image_caption2: Yup.string().optional(),
+  // image_caption3: Yup.string().optional(),
+  // image_caption4: Yup.string().optional(),
   product_title: Yup.string()
     .max(250, "Should not be more that 250 characters")
     .required("Field cannot be empty"),
@@ -76,21 +79,33 @@ const validationSchema = Yup.object().shape({
 export default function NewListing({ productToEdit }) {
   const editId = productToEdit?.id;
 
-  const [images, setImages] = useState([]);
+  const productImagesUpload = productToEdit
+    ? productToEdit?.images?.map((image) => ({
+        caption: image.caption || "",
+        id: image.id,
+        link: image.image,
+        serverId: image.id,
+      }))
+    : [];
+  const [images, setImages] = useState(productImagesUpload);
 
   const formValues = {
-    image_1: "",
-    image_2: "",
-    image_3: "",
-    image_4: "",
-    image_caption1: localStorage.getItem("image_caption1") || "",
-    image_caption2: localStorage.getItem("image_caption2") || "",
-    image_caption3: localStorage.getItem("image_caption3") || "",
-    image_caption4: localStorage.getItem("image_caption4") || "",
-    product_title: localStorage.getItem("product_title") || "",
-    product_category: localStorage.getItem("product_category") || "",
-    description: localStorage.getItem("description") || "",
-    subtitle: localStorage.getItem("subtitle") || "",
+    // image_1: "",
+    // image_2: "",
+    // image_3: "",
+    // image_4: "",
+    // image_caption1: localStorage.getItem("image_caption1") || "",
+    // image_caption2: localStorage.getItem("image_caption2") || "",
+    // image_caption3: localStorage.getItem("image_caption3") || "",
+    // image_caption4: localStorage.getItem("image_caption4") || "",
+    product_title:
+      productToEdit?.title || localStorage.getItem("product_title") || "",
+    product_category:
+      productToEdit?.category || localStorage.getItem("product_category") || "",
+    description:
+      productToEdit?.description || localStorage.getItem("description") || "",
+    subtitle:
+      productToEdit?.sub_title || localStorage.getItem("subtitle") || "",
   };
 
   const navigate = useNavigate();
@@ -106,7 +121,8 @@ export default function NewListing({ productToEdit }) {
           return;
         }
 
-        image.push({ link: image.link, caption: image.caption });
+        newImages.push({ id: image.serverId, caption: image.caption });
+        // image.push({ link: image.link, id:image.serverId, caption: image.caption });
       }
 
       const product = await createProduct(
@@ -119,7 +135,7 @@ export default function NewListing({ productToEdit }) {
           localStorage.removeItem(value);
         }
 
-        navigate("/market", { replace: true });
+        navigate(editId ? `/products/${editId}` : `/market`, { replace: true });
       }
     },
   });
@@ -192,7 +208,10 @@ export default function NewListing({ productToEdit }) {
     if (images.length >= 4 || !(file instanceof File)) return;
 
     const newId = `${file.name}-${Date.now()}-${file.size}`;
-    setImages((p) => [...p, { id: newId, link: "", file, caption: "" }]);
+    setImages((p) => [
+      ...p,
+      { id: newId, link: "", file, caption: "", serverId: "" },
+    ]);
   }
 
   function removeImage(index) {
@@ -210,11 +229,11 @@ export default function NewListing({ productToEdit }) {
     );
   }
 
-  function saveLink(id, link) {
+  function saveLink(id, link, serverId) {
     setImages((p) =>
       p.map((image) => {
         if (image.id !== id) return image;
-        return { ...image, link };
+        return { ...image, link, serverId };
       })
     );
   }
@@ -254,7 +273,9 @@ export default function NewListing({ productToEdit }) {
               removeImage={() => {
                 removeImage(index);
               }}
-              saveLink={(link) => saveLink(image.id, link)}
+              saveLink={(link, serverId) => {
+                saveLink(image.id, link, serverId);
+              }}
               key={image.id}
               image={image}
               changeCaption={(c) => changeCaption(image.id, c)}
@@ -322,31 +343,40 @@ function UploadedImage({ image, index, removeImage, saveLink, changeCaption }) {
     setIsUploading(true);
 
     try {
-      const res = await axios.postForm(
-        "http://localhost:8000/upload",
-        {
-          file: image.file,
+      const res = await getOrCreateProductImages(image.file, {
+        onUploadProgress: (e) => {
+          setProgress(Math.floor(e.progress * 100));
         },
-        {
-          onUploadProgress: (e) => {
-            console.log("Progress", e.progress, e.progress * 100);
-            setProgress(Math.floor(e.progress * 100));
-          },
-        }
-      );
+      });
 
-      console.log(res.data, res.data.link);
-      saveLink(res.data.link);
+      const link = res.image;
+      const serverId = res.id;
+
+      if (!link || !serverId) {
+        toast.error("Could not complete product upload");
+        return;
+      }
+
+      saveLink(link, serverId);
     } catch (error) {
+      toast.error("An error occured while trying to upload product image");
+      console.log(
+        "An error occured while trying to upload product image ",
+        error
+      );
+      removeImage(image.id);
     } finally {
       setIsUploading(false);
     }
   }
 
   useEffect(() => {
-    console.log("file has changed");
     if (isUploading) return;
-    if (!image.file) setImageUrl(image.link);
+    if (!image.file) {
+      setImageUrl(image.link);
+
+      return;
+    }
 
     setIsUploading(true);
     const reader = new FileReader();
@@ -357,7 +387,7 @@ function UploadedImage({ image, index, removeImage, saveLink, changeCaption }) {
     };
 
     reader.readAsDataURL(image.file);
-  }, [image.link, image.file]);
+  }, [image.file]);
 
   return (
     <div className="aspect-video">
@@ -367,7 +397,7 @@ function UploadedImage({ image, index, removeImage, saveLink, changeCaption }) {
             "absolute right-4 bottom-4 bg-black bg-opacity-50 text-white rounded-full flex items-center h-8",
             {
               "px-2": isUploading,
-              "w-8": isUploading,
+              "w-8": !isUploading,
             }
           )}
         >

@@ -8,6 +8,7 @@ import { useAuth } from "../../../context/userContext";
 import { webRoutes } from "../../../lib/webRoutes";
 import CustomTabs from "../../custom/tabs";
 import PrimaryButton from "../../PrimaryButton";
+import { usePageinatedProducts } from "../../../hooks/useProduct";
 
 function NewlyListed({ companyId }) {
   return (
@@ -32,47 +33,7 @@ function DisplayAllProducts({ companyId }) {
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["products", "all", { companyId }],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
-      return await getProducts(
-        { page_size: 2, page: pageParam, company: companyId || undefined },
-        true
-      );
-    },
-
-    getNextPageParam: (lastPage) => {
-      if (!lastPage || !lastPage.next) return;
-
-      const lastPageUrl = new URL(lastPage.next);
-
-      let nextPage = lastPageUrl.searchParams.get("page");
-
-      if (!nextPage) return;
-      let nextPageAsNumber = parseInt(nextPage);
-
-      if (!nextPageAsNumber) return;
-
-      return nextPageAsNumber;
-    },
-  });
-
-  // these might be needed later or even better moved to the backend
-  // const [searchParams] = useSearchParams();
-  // const productCategory = searchParams.get("category") || "";
-
-  // const filteredProducts = useMemo(
-  //   () =>
-  //     productCategory
-  //       ? products.filter(
-  //           (product) =>
-  //             product.category.toLowerCase() === productCategory.toLowerCase()
-  //         )
-  //       : products,
-  //   [productCategory, products]
-  // );
-
+  } = usePageinatedProducts({ companyId });
   return (
     <div className="">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
@@ -124,19 +85,8 @@ function DisplayNewlyListedProducts({ companyId }) {
   /**
    * @todo Make a request to get real newly listed data from the server when that feature has been implemented on the server. And also find a way to prevent this component from fething products when it has not been mounted.
    */
-  const { data, isLoading } = useInfiniteQuery({
-    queryKey: ["products", "all", { companyId }],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
-      return await getProducts(
-        { page_size: 2, page: pageParam, company: companyId || undefined },
-        true
-      );
-    },
-    getNextPageParam: () => {
-      return;
-    },
-  });
+  const { data, isLoading } = usePageinatedProducts({ companyId });
+
   // the products used right now in this section is the same thing with thoses in the `DisplayAllProducts. This is because the feature of getting newly listed products as not been implemented on the server yet. So to avoid making an entirely new request i decided to make this component share requests with `DisplayAllProducts` Component.
 
   const newlyListedProducts = data?.pages?.[0]?.data;
@@ -177,16 +127,6 @@ export const ProductListCard = ({
   companyName,
   company,
 }) => {
-  // const { data: companies } = usePollAllCompanies();
-  // const company = companies?.results?.find(
-  //   (comp) => comp?.company_name?.toLowerCase() === companyName?.toLowerCase()
-  // );
-
-  // const { productImage } = useProductImages(id);
-  // const imageUrl = productImage?.[0]?.image || image || "";
-  // const { productImage } = useProductImages(id);
-  // const imageUrl = productImage?.[0]?.image || image || "";
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}

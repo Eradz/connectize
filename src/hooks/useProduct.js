@@ -1,11 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { getOrCreateProductImages } from "../api-services/products";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  getOrCreateProductImages,
+  getProducts,
+} from "../api-services/products";
 
 export const useProductImages = (productId) => {
   const { data: productImages, isLoading } = useQuery({
     queryKey: ["productImages", productId],
     queryFn: () => getOrCreateProductImages(undefined, "get"),
-      enabled: !!productId,
+    enabled: !!productId,
     // refetchInterval:100000000
   });
 
@@ -14,4 +17,34 @@ export const useProductImages = (productId) => {
   );
 
   return { productImage, productImages, isLoading };
+};
+
+export const usePageinatedProducts = ({ companyId } = {}) => {
+  const res = useInfiniteQuery({
+    queryKey: ["products", "all", { companyId }],
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      return await getProducts(
+        { page_size: 2, page: pageParam, company: companyId || undefined },
+        true
+      );
+    },
+
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || !lastPage.next) return;
+
+      const lastPageUrl = new URL(lastPage.next);
+
+      let nextPage = lastPageUrl.searchParams.get("page");
+
+      if (!nextPage) return;
+      let nextPageAsNumber = parseInt(nextPage);
+
+      if (!nextPageAsNumber) return;
+
+      return nextPageAsNumber;
+    },
+  });
+
+  return res;
 };

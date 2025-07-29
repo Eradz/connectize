@@ -42,6 +42,15 @@ export const getProducts = async (params, returnFullRes = false) => {
   return products || [];
 };
 
+export const getSingleProduct = async (id) => {
+  const product = await makeApiRequest({
+    url: `api/products/${id}/`,
+    method: "GET",
+  });
+
+  return product || null;
+};
+
 export const getRecommendedProducts = async () => {
   const allProducts = await getProducts();
 
@@ -55,6 +64,11 @@ export const getRecommendedProducts = async () => {
 };
 
 export const createProduct = async (data, resetForm, editId) => {
+  if (!data.images.length) {
+    toast.error("Upload at least one image");
+    return;
+  }
+
   const productCategoryData = capitalizeFirst(
     data.product_category.trim().toLowerCase()
   );
@@ -62,11 +76,6 @@ export const createProduct = async (data, resetForm, editId) => {
   const { user } = getSession();
 
   const company = await getCompanyByIdOrEmail();
-
-  if (!data.images.length) {
-    toast.error("Upload at least one image");
-    return;
-  }
 
   if (!company) {
     toast.error("Please create a company first before you add a product");
@@ -85,7 +94,7 @@ export const createProduct = async (data, resetForm, editId) => {
   await getOrCreateProductCategories(productCategoryData);
 
   const product = await makeApiRequest({
-    url: `api/products${editId ? editId : ""}/`,
+    url: `api/products/${editId ? editId + "/" : ""}`,
     method: editId ? "PUT" : "POST",
     data: {
       title: capitalizeFirst(data.product_title),
@@ -99,75 +108,40 @@ export const createProduct = async (data, resetForm, editId) => {
     resetForm,
   });
 
-  if (data.image_1) {
-    const image1 = await getOrCreateProductImages(
-      {
-        image: data.image_1,
-        caption: data?.image_caption1 || data?.product_title,
-        product: product.id,
-      },
-      product
-    );
-  }
-
-  if (data.image_2)
-    await getOrCreateProductImages(
-      {
-        image: data.image_2,
-        caption: data?.image_caption2 || data?.product_title,
-        product: product.id,
-      },
-      product
-    );
-  if (data.image_3)
-    await getOrCreateProductImages(
-      {
-        image: data.image_3,
-        caption: data?.image_caption3 || data?.product_title,
-        product: product.id,
-      },
-      product
-    );
-
-  if (data.image_4) {
-    await getOrCreateProductImages(
-      {
-        image: data.image_4,
-        caption: data?.image_caption4 || data?.product_title,
-        product: product.id,
-      },
-      product
-    );
-  }
-
-  // if (product && image1) {
   if (product) {
     toast.success(
       editId
-        ? "Product has been edit successfully"
+        ? "Product has been edited successfully"
         : `${product.title} has been created successfully!`,
       {
         id: toastId,
       }
     );
 
-    redirect("/market");
+    return product;
   }
 };
 
-export const getOrCreateProductImages = async (data, type) => {
-  const { results: images } = await makeApiRequest({
-    url: `api/product-images/`,
-    method: "GET",
-  });
+/**
+ *
+ * @param {File} image
+ * @param {*} type
+ * @returns
+ */
+export const getOrCreateProductImages = async (image, { onUploadProgress }) => {
+  // const { results: images } = await makeApiRequest({
+  //   url: `api/product-images/`,
+  //   method: "GET",
+  // });
 
-  if (type === "get" || data === undefined) return images || [];
+  // if (type === "get" || data === undefined) return images || [];
 
   return await makeApiRequest({
     url: `api/product-images/`,
     method: "POST",
-    data,
+    data: { image },
     contentType: "multipart/form-data",
+    onUploadProgress,
   });
 };
 

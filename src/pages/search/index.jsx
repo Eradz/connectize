@@ -145,7 +145,9 @@ export const SearchTab = () => {
                   key={index}
                   id={product?.id}
                   subtitle={product?.sub_title}
+                  product={product?.images?.services}
                   title={product?.title}
+                  image={product?.images?.[0].image}
                   companies={companies}
                   companyName={product?.company?.company_name}
                 />
@@ -166,9 +168,9 @@ export const SearchTab = () => {
             data?.services.map((service, index) => (
               <PostCard
                 key={index}
-                companyName={service?.company}
+                companyName={service?.company.company_name}
                 verified={service?.companyInfo?.verified}
-                logo={service?.companyInfo?.logo}
+                logo={service?.company?.logo}
                 title={service?.title}
                 summary={service?.sub_title}
                 url={`/services/${service?.id}`}
