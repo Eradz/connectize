@@ -8,15 +8,16 @@ import { useAuth } from "../../context/userContext";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import RoomName from "./RoomName";
+import { useMessagesStore } from "../../stores/messagesStore";
 
 export default function Favorites() {
   const { user: currentUser } = useAuth();
 
-  const { data: companies, isLoading: companiesLoading } = useQuery({
-    queryKey: ["allConnectizeCompanies"],
-    queryFn: getAllCompanies,
-    enabled: !!currentUser,
-  });
+  // const { data: companies, isLoading: companiesLoading } = useQuery({
+  //   queryKey: ["allConnectizeCompanies"],
+  //   queryFn: getAllCompanies,
+  //   enabled: !!currentUser,
+  // });
 
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["users"],
@@ -28,28 +29,32 @@ export default function Favorites() {
     ?.filter((user) => user.first_name && user?.id !== currentUser?.id)
     ?.slice(0, 10);
 
+  console.log({ filteredUsers });
+
   return (
     <section className="flex gap-6 py-3 overflow-x-auto scroll-smooth scrollbar-hidden">
-      {companiesLoading || usersLoading ? (
+      {usersLoading ? (
         <CardSkeletonList />
       ) : filteredUsers?.length <= 0 ? (
         <LightParagraph>No favorites yet</LightParagraph>
       ) : (
         filteredUsers?.map((user) => {
-          const company = companies?.results?.find(
-            (company) => company?.profile === user?.email
-          );
           return (
             <motion.div
               key={user?.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 py-6 bg-background rounded-md text-center space-y-3 min-w-[180px] flex flex-col shrink-0"
+              className="p-4 py-6 bg-background/70 rounded-md text-center space-y-3 min-w-[180px] flex flex-col shrink-0"
             >
-              <Link to={`/${company?.slug || ""}`}>
+              <Link
+                to={`/messages/?room_name=room_${currentUser?.id}_${user?.id}`}
+              >
                 <Avatar
                   className={avatarStyle}
-                  src={company?.logo || "/images/default-company-logo.png"}
+                  src={user?.avatar}
+                  name={
+                    `${user?.first_name} ${user?.last_name}` || "Uknown User"
+                  }
                   size="lg"
                 />
               </Link>

@@ -50,7 +50,7 @@ export const useMessagesStore = create((set, get) => ({
       //
       const data = await getMessagesForUser(params);
       //
-      console.log("✅ Fetched messages:", data);
+      // console.log("✅ Fetched messages:", data);
 
       const sortedMessages = (data || []).sort(
         (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
@@ -95,51 +95,6 @@ export const useMessagesStore = create((set, get) => ({
       let processedData = data;
       // log;
       console.log("🔍 Raw lastMessages from API:", data);
-
-      // Process the data to ensure complete other_user info
-      // const processedData = await Promise.all(
-      //   (data || []).map(async (message) => {
-      //     if (!message.other_user || !message.other_user.first_name) {
-      //       console.log(
-      //         "🔧 Processing incomplete other_user for message:",
-      //         message.id
-      //       );
-
-      //       // Try to get user info from the message structure
-      //       const currentUserId = getCurrentUserId();
-      //       const otherUserId =
-      //         message.sender === currentUserId
-      //           ? message.recipient
-      //           : message.sender;
-
-      //       try {
-      //         const userInfo = await getUserById(otherUserId);
-      //         return {
-      //           ...message,
-      //           other_user: {
-      //             id: otherUserId,
-      //             first_name: userInfo.first_name,
-      //             last_name: userInfo.last_name,
-      //             avatar: userInfo.avatar,
-      //             role: userInfo.role,
-      //             email: userInfo.email,
-      //           },
-      //         };
-      //       } catch (error) {
-      //         console.error("Failed to fetch user info for:", otherUserId);
-      //         return {
-      //           ...message,
-      //           other_user: {
-      //             id: otherUserId,
-      //             first_name: "Unknown",
-      //             last_name: "User",
-      //           },
-      //         };
-      //       }
-      //     }
-      //     return message;
-      //   })
-      // );
 
       console.log("✅ Processed lastMessages:", processedData);
       set({ lastMessages: processedData });
@@ -190,7 +145,7 @@ export const useMessagesStore = create((set, get) => ({
 
       // Parse room_name to get recipient info
       const roomParts = room_name.split("_");
-      console.log("🔍 Room parts:", roomParts);
+      // console.log("🔍 Room parts:", roomParts);
 
       if (roomParts.length === 3 && roomParts[0] === "room") {
         const currentUserId = parseInt(roomParts[1]);
@@ -205,7 +160,7 @@ export const useMessagesStore = create((set, get) => ({
         try {
           console.log("🔄 Fetching user data for ID:", recipientId);
           const recipientUser = await getUserById(recipientId);
-          console.log("✅ Fetched user data:", recipientUser);
+          // console.log("✅ Fetched user data:", recipientUser);
 
           const openedMessageData = {
             room_name: room_name,
@@ -219,10 +174,10 @@ export const useMessagesStore = create((set, get) => ({
             },
           };
 
-          console.log(
-            "✅ Setting openedMessage with fetched data:",
-            openedMessageData
-          );
+          // console.log(
+          //   "✅ Setting openedMessage with fetched data:",
+          //   openedMessageData
+          // );
           set({ openedMessage: openedMessageData });
           return;
         } catch (error) {
