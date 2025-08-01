@@ -9,7 +9,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { bookmarkProduct } from "../../../api-services/products";
 import { bookmarkService } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";
-import { usePollProducts, usePollServices } from "../../../hooks/usePolling";
 import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";
@@ -19,11 +18,15 @@ import {
   ConjoinedAvatarSkeleton,
 } from "./DiscoverPosts";
 import { cn } from "../../../lib/utils";
+import { useGetServicesFirstPage } from "../../../hooks/useServices";
+import { useGetProductsFirstPage } from "../../../hooks/useProduct";
 
 const DiscoverPostTabs = () => {
-  const { data: products, isLoading: productsLoading } = usePollProducts();
+  const { data: products, isLoading: productsLoading } =
+    useGetProductsFirstPage();
 
-  const { data: services, isLoading: servicesLoading } = usePollServices();
+  const { data: services, isLoading: servicesLoading } =
+    useGetServicesFirstPage();
 
   const productsForSlider = products?.map((product) => {
     return {

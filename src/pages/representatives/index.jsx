@@ -11,6 +11,11 @@ import RepresentativeCard from "../../components/representatives/RepresentativeC
 import SEO from "../../components/SEO";
 import { usePollAllCompanies } from "../../hooks/usePolling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
+import { usePageination } from "../../hooks/usePagination";
+import { Link, useSearchParams } from "react-router-dom";
+import PrimaryButton from "../../components/PrimaryButton";
+import clsx from "clsx";
+import { useGetSingleCompany } from "../../hooks";
 
 export default function RepresentativesPage() {
   const { data: users, isLoading } = useQuery({
@@ -18,12 +23,46 @@ export default function RepresentativesPage() {
     queryFn: getAllUsers,
   });
 
+  const [searchParams] = useSearchParams();
+
+  const companyParam = searchParams.get("company") || "";
+  const splittedCompanyParam = companyParam.split("---");
+  const companyId = splittedCompanyParam[0] || null;
+  const companySlug = splittedCompanyParam[1] || null;
+
+  const userIdParam = searchParams.get("user") || undefined;
+
   const { data: companies, isLoading: companyLoading } = usePollAllCompanies();
 
-  const { data: representatives, isLoading: repsLoading } = useQuery({
-    queryKey: ["representatives"],
-    queryFn: () => getAllRepresentatives({ status: "True" }),
+  const { data: companyDetails, isLoading: isLoadingCompanyDetails } =
+    useGetSingleCompany(companySlug, { enabled: !!companySlug });
+  const {
+    data: paginatedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isLoading: repsLoading,
+  } = usePageination({
+    queryKey: [
+      "representatives",
+      "all",
+      { company: companyId, user: userIdParam },
+    ],
+    queryFn: async ({ pageParam }) =>
+      await getAllRepresentatives(
+        {
+          // status: "True",
+          company_id: companyId,
+          user: userIdParam,
+          page_size: 1,
+          page: pageParam,
+        },
+        true
+      ),
   });
+
+  const repsFirstPage = paginatedData?.pages?.[0]?.data;
 
   const { data: representativeCategories, isLoading: repsCatLoading } =
     useQuery({
@@ -37,46 +76,72 @@ export default function RepresentativesPage() {
   return (
     <section className="space-y-4">
       <SEO title="Representatives | Connectize" />
-      <section className="flex flex-wrap justify-between gap-4">
-        <HeadingText>Representatives</HeadingText>
+      <section className="flex flex-wrap justify-between gap-4 items-center">
+        <HeadingText>
+          Representatives {companyId && <br />}{" "}
+          {isLoadingCompanyDetails ? (
+            <div className="inline-block w-1/3 h-4 skeleton rounded mt-2" />
+          ) : (
+            <Link to={"/" + companySlug} className="!text-gold">
+              @{companyDetails?.company_name}
+            </Link>
+          )}
+        </HeadingText>
 
         <ManageRepresentativesLink />
       </section>
 
       <section className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {representatives?.length < 1 ? (
+        {repsFirstPage?.length < 1 ? (
           <div className="py-4">
             <LightParagraph>No representatives yet...</LightParagraph>
           </div>
         ) : (
-          representatives
-            ?.filter(
-              (reps) =>
-                reps?.user !== null &&
-                reps?.company !== null &&
-                reps?.role !== null
-            )
-            .map((reps) => {
-              const user = users?.find((user) => reps?.user === user?.id);
-              const company = companies?.results?.find(
-                (company) => reps?.company === company?.id
-              );
-              const role = representativeCategories?.find(
-                (category) => category?.id === reps?.category
-              )?.type;
+          paginatedData?.pages.map((page) => {
+            return page?.data
+              ?.filter(
+                (reps) =>
+                  reps?.user !== null &&
+                  reps?.company !== null &&
+                  reps?.role !== null
+              )
+              .map((reps) => {
+                const user = users?.find((user) => reps?.user === user?.id);
+                const company = companies?.results?.find(
+                  (company) => reps?.company === company?.id
+                );
+                const role = representativeCategories?.find(
+                  (category) => category?.id === reps?.category
+                )?.type;
 
-              const formattedRepsData = {
-                user,
-                company,
-                role,
-              };
+                const formattedRepsData = {
+                  user,
+                  company,
+                  role,
+                };
 
-              return (
-                <RepresentativeCard key={reps?.id} {...formattedRepsData} />
-              );
-            })
+                return (
+                  <RepresentativeCard key={reps?.id} {...formattedRepsData} />
+                );
+              });
+          })
         )}
       </section>
+
+      {hasNextPage && (
+        <div
+          className={clsx("mt-10 flex justify-center", {
+            "animate-pulse": isFetching,
+          })}
+        >
+          <PrimaryButton
+            onClick={fetchNextPage}
+            disabled={!hasNextPage || isFetching || isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "Loading More..." : "Load More"}
+          </PrimaryButton>
+        </div>
+      )}
     </section>
   );
 }

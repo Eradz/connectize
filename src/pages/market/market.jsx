@@ -32,13 +32,6 @@ export default function Market() {
 
       <div className="mx-auto flex items-center justify-center bg-tabs p-1 w-fit rounded-full text-sm">
         <Link
-          // onClick={() => {
-          //   setSearchParams((p) => {
-          //     p.delete("s");
-
-          //     return p;
-          //   });
-          // }}
           to={"/market" + companyParam ? `?company=${companyParam}` : ""}
           className={`${
             !isShowingServices ? "bg-white" : ""
@@ -47,13 +40,6 @@ export default function Market() {
           Market
         </Link>
         <Link
-          // onClick={() => {
-          //   setSearchParams((p) => {
-          //     p.set("s", "services");
-
-          //     return p;
-          //   });
-          // }}
           to={
             `/market?s=services` +
             (companyParam ? `&company=${companyParam}` : "")

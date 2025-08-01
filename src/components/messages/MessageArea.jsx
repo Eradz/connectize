@@ -30,8 +30,7 @@ export default function MessageArea() {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name") || "";
 
-  useMessagingWebSocket({});
-  // useMessagingWebSocket({ room_name });
+  useMessagingWebSocket({ room_name });
 
   // Reduce polling frequency since WebSocket handles real-time updates
   // const { data: messageList = [], isLoading } = usePollMessages(30000);
@@ -247,15 +246,33 @@ export default function MessageArea() {
                               })}
                             >
                               {message.images?.map((image, index) => {
+                                const src = image
+                                  .toString()
+                                  .trim()
+                                  .startsWith("http")
+                                  ? image
+                                  : baseURL + image;
+
                                 return (
                                   <LoadImageAttachment
                                     key={index}
-                                    blur={image.preview}
-                                    width={image.width}
-                                    height={image.height}
-                                    url={image.url}
+                                    blur={""}
+                                    width={20}
+                                    height={20}
+                                    url={src}
+                                    src={src}
+                                    // alt="Messaging"
+                                    // className="rounded-md size-full"
                                   />
                                 );
+                                // return (
+                                //   <img
+                                //     key={index}
+                                //     src={src}
+                                //     alt="Messaging"
+                                //     className="rounded-md size-full"
+                                //   />
+                                // );
                               })}
                             </div>
                           )}

@@ -284,9 +284,10 @@ const NotificationTile = memo(({ notification, index, company }) => {
           verified={company?.verify}
         />
         <Link
-          to={notification?.link
-            .replace("/room", "/?room_name=room")
-            .replace("/representatives", "/co/representatives")}
+          to={
+            notification?.link.replace("/room", "/?room_name=room")
+            // .replace("/representatives", "/co/representatives")
+          }
           onClick={handleMarkAsRead}
           className="text-[.825rem] !text-gray-600 leading-none block"
         >

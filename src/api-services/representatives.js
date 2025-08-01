@@ -1,17 +1,20 @@
 import { makeApiRequest } from "../lib/helpers";
 import { toast } from "sonner";
 
-export const getAllRepresentatives = async ({
-  company_id = null,
-  status = null,
-}) => {
-  const params = company_id ? { company_id } : status ? { status } : null;
+export const getAllRepresentatives = async (
+  params,
+  // { company_id = null, status = null },
+  returnFullRes = false
+) => {
+  // const params = company_id ? { company_id } : status ? { status } : null;
 
-  const { results } = await makeApiRequest({
+  const { results, next } = await makeApiRequest({
     url: `api/representatives/`,
     method: "GET",
     params,
   });
+
+  if (returnFullRes) return { data: results, next };
 
   return results;
 };
