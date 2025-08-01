@@ -10,7 +10,6 @@ import { MarkdownComponent } from "../../MarkDownComponent";
 import ServiceAdminMain from "./serviceAdminMain";
 import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 import { useAuth } from "../../../context/userContext";
-import { useGetCurrentCompany } from "../../../hooks";
 import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 
 export default function OverviewDetails() {
