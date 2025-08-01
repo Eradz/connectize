@@ -87,7 +87,12 @@ export function Suggestions({
   );
 }
 
-export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
+export function SuggestionList({
+  hasSeeMore,
+  associated = false,
+  thisUser,
+  viewMoreUrl,
+}) {
   const { user: currentUser } = useAuth();
 
   const queryKey = [
@@ -159,8 +164,8 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
           })
         )}
       </ul>
-      {hasSeeMore && shownUsers?.length > 10 && (
-        <SeeMoreLink url={`/co/representatives/?company=`} />
+      {hasSeeMore && shownUsers?.length > 1 && (
+        <SeeMoreLink url={viewMoreUrl} />
       )}
     </section>
   );
