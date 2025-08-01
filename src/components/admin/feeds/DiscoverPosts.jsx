@@ -377,7 +377,7 @@ const CommentSection = ({
         />
       ))}
 
-      <div className="mt-4 border-t pt-4 ">
+      <div className="mt-4 border-t pt-4 relative">
         <ReactQuill
           value={comment}
           onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}

@@ -1,3 +1,3 @@
-- Create service/product pages now work as well as their edit pages
-- Product details no longer shows google maps, but the address of the company
-- Used better logic to show edit icon for product details (Reduces network calls a litle bit)
+- comment button is now visible
+- company name on sellers info in product details now links to the correct company page
+- improved the check to see if a user owns a service to show the edit button

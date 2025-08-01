@@ -28,8 +28,8 @@ function Productdetails({ product }) {
   const { user: currentUser } = useAuth();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
-  const { data: userCompanies, isLoading: isLoadingUserCompanies } =
-    useGetCurrentCompany();
+  // const { data: userCompanies, isLoading: isLoadingUserCompanies } =
+  // useGetCurrentCompany();
   const { data: companies, isLoading } = useQuery({
     queryKey: ["companies", product?.company?.id],
     queryFn: () => getCompanyByIdOrEmail(product?.company?.id),
@@ -66,7 +66,7 @@ function Productdetails({ product }) {
     }
   }, []);
 
-  console.log({ company });
+  // console.log({ company });
 
   // Determine if the current user has liked the product
   const hasBookmarked = product?.likes?.some(
@@ -216,10 +216,7 @@ function Productdetails({ product }) {
               name={product?.company?.company_name}
             />
             <div className="flex flex-col">
-              <Link
-                to={`/${product?.company?.company_name?.replace(" ", "-")}`}
-                className="font-bold capitalize"
-              >
+              <Link to={`/${company?.slug}`} className="font-bold capitalize">
                 {product?.company?.company_name || ""}
               </Link>
               <span className="text-gray-400 text-sm">

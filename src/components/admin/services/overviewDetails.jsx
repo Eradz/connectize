@@ -11,12 +11,13 @@ import ServiceAdminMain from "./serviceAdminMain";
 import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
 import { useAuth } from "../../../context/userContext";
 import { useGetCurrentCompany } from "../../../hooks";
+import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 
 export default function OverviewDetails() {
   const { user: currentUser, loading: isLoadingUser } = useAuth();
 
-  const { data: userCompanies, isLoading: isLoadingUserCompanies } =
-    useGetCurrentCompany();
+  // const { data: userCompanies, isLoading: isLoadingUserCompanies } =
+  // useGetCurrentCompany();
 
   const params = useParams();
 
@@ -27,17 +28,30 @@ export default function OverviewDetails() {
     staleTime: 300000, // Cache data for 5 minutes
   });
 
+  const { data: companies, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ["companies", service?.company?.id],
+    queryFn: () => getCompanyByIdOrEmail(service?.company?.id),
+    enabled: !!service?.company,
+  });
+
+  const company = companies?.[0];
+
   const [searchParams] = useSearchParams();
 
   const isEditing = searchParams.get("edit");
 
-  const userCompanyDetails =
-    service?.id && currentUser?.id && userCompanies?.length
-      ? userCompanies?.find(
-          (c) =>
-            c?.id == service?.company?.id && currentUser?.id === c?.user?.id
-        )
-      : null;
+  const isUserCompany =
+    company?.user?.id &&
+    currentUser?.id &&
+    company?.user?.id === currentUser?.id;
+
+  // const userCompanyDetails =
+  //   service?.id && currentUser?.id && userCompanies?.length
+  //     ? userCompanies?.find(
+  //         (c) =>
+  //           c?.id == service?.company?.id && currentUser?.id === c?.user?.id
+  //       )
+  //     : null;
 
   useEffect(() => {
     document.title = `${service?.title + " | " || ""}Services - Connectize`;
@@ -70,7 +84,7 @@ export default function OverviewDetails() {
             <div className="flex items-center gap-1">
               <Location className="w-5 shrink-0" />
               <p className="text-gray-500 text-sm">
-                {isLoadingUserCompanies || isLoadingUser ? (
+                {isLoadingCompanies || isLoadingUser ? (
                   <div className="animate-pulse w-48 h-4 bg-gray-200 rounded" />
                 ) : (
                   service?.company?.company_name
@@ -82,7 +96,7 @@ export default function OverviewDetails() {
           <div className="flex">
             <BookMarkButton service={service} />
 
-            {userCompanyDetails && (
+            {isUserCompany && (
               <Link to={`/services/${service.id}?edit=1`} className="ml-5">
                 <ButtonWithTooltipIcon
                   tip={`Edit Service`}
