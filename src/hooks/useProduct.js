@@ -25,7 +25,7 @@ export const usePageinatedProducts = ({ companyId } = {}) => {
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       return await getProducts(
-        { page_size: 2, page: pageParam, company: companyId || undefined },
+        { page_size: 3, page: pageParam, company: companyId || undefined },
         true
       );
     },
@@ -47,4 +47,11 @@ export const usePageinatedProducts = ({ companyId } = {}) => {
   });
 
   return res;
+};
+
+export const useGetProductsFirstPage = ({ companyId } = {}) => {
+  const { data: services, isLoading } = usePageinatedProducts({ companyId });
+  const page1 = services?.pages?.[0]?.data;
+
+  return { isLoading, data: page1 };
 };

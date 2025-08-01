@@ -15,6 +15,10 @@ import { avatarStyle } from "../../ResponsiveNav";
 import SeeMoreLink from "../../SeeMoreLink";
 import Username from "../../Username";
 import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
+import {
+  useGetServicesFirstPage,
+  usePageinatedServices,
+} from "../../../hooks/useServices";
 
 const TopServiceSuggestions = () => {
   return (
@@ -29,11 +33,7 @@ const TopServiceSuggestions = () => {
 export default TopServiceSuggestions;
 
 export function TopServices() {
-  const { data: services, isLoading } = useQuery({
-    queryKey: ["services"],
-    queryFn: getServices,
-  });
-
+  const { data: services, isLoading } = useGetServicesFirstPage();
   const service = services?.[0];
 
   return (
@@ -160,7 +160,7 @@ export function SuggestionList({ hasSeeMore, associated = false, thisUser }) {
         )}
       </ul>
       {hasSeeMore && shownUsers?.length > 10 && (
-        <SeeMoreLink url="/representatives" />
+        <SeeMoreLink url={`/co/representatives/?company=`} />
       )}
     </section>
   );

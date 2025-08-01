@@ -52,10 +52,10 @@ function ListedProduct({ id, title, likes, image }) {
   return (
     <div className="bg-background p-2.5 rounded-md flex max-sm:flex-col gap-2 sm:gap-4 relative">
       <picture className="bg-white sm:w-1/3 p-2 sm:p-1 sm:h-fit flex">
-        <Link to={"/products/" + id}>
+        <Link to={"/products/" + id} className="w-full">
           <img
             src={image}
-            className="max-h-40 sm:w-full rounded-md mx-auto"
+            className="max-h-40 sm:w-full object-cover rounded-md mx-auto"
             alt={title || "No title"}
           />
         </Link>

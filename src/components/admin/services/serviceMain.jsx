@@ -4,6 +4,7 @@ import { getServices } from "../../../api-services/services";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import CustomTabs from "../../custom/tabs";
 import PrimaryButton from "../../PrimaryButton";
+import { usePageinatedServices } from "../../../hooks/useServices";
 
 function ServiceMain({ isOverview, companyId }) {
   return (
@@ -37,34 +38,7 @@ export const PostCardWrapper = ({ isOverview = false, companyId }) => {
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["services", "all", { companyId }],
-    initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
-      return await getServices(
-        { page_size: 2, page: pageParam, company: companyId },
-        true
-      );
-    },
-
-    getNextPageParam: (lastPage) => {
-      if (!lastPage || !lastPage.next) return;
-
-      const lastPageUrl = new URL(lastPage.next);
-
-      let nextPage = lastPageUrl.searchParams.get("page");
-
-      if (!nextPage) return;
-      let nextPageAsNumber = parseInt(nextPage);
-
-      if (!nextPageAsNumber) return;
-      return nextPageAsNumber;
-    },
-  });
-  // const { data: services, isLoading } = useQuery({
-  //   queryKey: ["services"],
-  //   queryFn: getServices,
-  // });
+  } = usePageinatedServices({ companyId });
 
   const page1Length = data?.pages?.[0]?.data?.length;
 

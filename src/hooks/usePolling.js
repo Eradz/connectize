@@ -165,18 +165,18 @@ export const usePollNotifications = (intervalMs = 3000) => {
   });
 };
 
-export const usePollProducts = (refetchInterval = 0) => {
-  return useQuery({
-    queryKey: ["products"],
-    queryFn: getProducts,
-    // refetchInterval,
-  });
-};
+// export const usePollProducts = (refetchInterval = 0) => {
+//   return useQuery({
+//     queryKey: ["products", "single"],
+//     queryFn: getProducts,
+//     // refetchInterval,
+//   });
+// };
 
-export const usePollServices = (refetchInterval = 0) => {
-  return useQuery({
-    queryKey: ["services"],
-    queryFn: getServices,
-    // refetchInterval,
-  });
-};
+// export const usePollServices = (refetchInterval = 0) => {
+//   return useQuery({
+//     queryKey: ["services"],
+//     queryFn: getServices,
+//     // refetchInterval,
+//   });
+// };
