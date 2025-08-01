@@ -1,0 +1,3 @@
+- Create service/product pages now work as well as their edit pages
+- Product details no longer shows google maps, but the address of the company
+- Used better logic to show edit icon for product details (Reduces network calls a litle bit)

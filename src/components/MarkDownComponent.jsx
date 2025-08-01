@@ -83,7 +83,7 @@ function RenderGrayTextMarkdown({
     const html = document.createElement("div");
 
     html.innerHTML = sanitizedDescriptionMarkdown;
-    if (html.firstChild.textContent === "") {
+    if (html?.firstChild?.textContent === "") {
       html.removeChild(html.firstChild);
     }
     html?.querySelectorAll("p span")?.forEach((node) => {

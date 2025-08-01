@@ -1,5 +1,5 @@
-import React from 'react'
-import { Bookmark } from '../../../icon'
+import React from "react";
+import { Bookmark } from "../../../icon";
 
 function OverviewAside() {
   return (
