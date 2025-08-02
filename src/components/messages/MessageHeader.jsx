@@ -1,7 +1,7 @@
 import { PhoneOutlined } from "@ant-design/icons";
-import { Avatar, Text } from "@chakra-ui/react";
+import { Avatar, Text, useStatStyles } from "@chakra-ui/react";
 import { ChevronLeftRounded } from "@mui/icons-material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { useMessagesStore } from "../../stores/messagesStore";
@@ -18,6 +18,18 @@ function MessageHeader() {
   const loading = useMessagesStore((state) => state.loading);
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
 
+  const [isLoadingOpenedMessage, setIsLoadingOpenedMessage] = useState(false);
+
+  async function handleSetOpenedMessage() {
+    try {
+      setIsLoadingOpenedMessage(true);
+      await setOpenedMessage(null, room_name);
+    } catch (error) {
+    } finally {
+      setIsLoadingOpenedMessage(false);
+    }
+  }
+
   let nameToDisplay;
 
   if (
@@ -29,15 +41,11 @@ function MessageHeader() {
     nameToDisplay =
       openedMessage?.other_user?.first_name ||
       openedMessage?.other_user?.last_name;
-
-    // if (!nameToDisplay) nameToDisplay = "";
   }
-  console.log({ nameToDisplay });
-
   useEffect(() => {
-    if (!openedMessage && room_name) {
-      (async () => await setOpenedMessage(null, room_name))();
-    }
+    if (!room_name) return;
+    if (openedMessage && openedMessage.room_name == room_name) return;
+    handleSetOpenedMessage();
   }, [openedMessage, room_name, loading]);
   return (
     <header className="flex items-center justify-between bg-white p-2 pr-4 rounded-t-md gap-2 sticky">
@@ -50,17 +58,12 @@ function MessageHeader() {
       />
 
       <div className="flex-1 flex items-center gap-2">
-        {loading ? (
+        {loading || isLoadingOpenedMessage ? (
           <CircleTitleSubtitleSkeleton />
         ) : (
           <>
             <Avatar
               src={openedMessage?.other_user?.avatar}
-              // name={
-              //   openedMessage?.other_user?.first_name +
-              //   " " +
-              //   openedMessage?.other_user?.last_name
-              // }
               name={nameToDisplay}
               className={avatarStyle}
               width="40px"

@@ -28,8 +28,8 @@ function Productdetails({ product }) {
   const { user: currentUser } = useAuth();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
-  const { data: userCompanies, isLoading: isLoadingUserCompanies } =
-    useGetCurrentCompany();
+  // const { data: userCompanies, isLoading: isLoadingUserCompanies } =
+  // useGetCurrentCompany();
   const { data: companies, isLoading } = useQuery({
     queryKey: ["companies", product?.company?.id],
     queryFn: () => getCompanyByIdOrEmail(product?.company?.id),
@@ -42,13 +42,18 @@ function Productdetails({ product }) {
 
   const isEditing = searchParams.get("edit");
 
-  const userCompanyDetails =
-    product?.id && currentUser?.id && userCompanies?.length
-      ? userCompanies?.find(
-          (c) =>
-            c?.id == product?.company?.id && currentUser?.id === c?.user?.id
-        )
-      : null;
+  const isUserCompany =
+    company?.user?.id &&
+    currentUser?.id &&
+    company?.user?.id === currentUser?.id;
+
+  // const userCompanyDetails =
+  //   product?.id && currentUser?.id && userCompanies?.length
+  //     ? userCompanies?.find(
+  //         (c) =>
+  //           c?.id == product?.company?.id && currentUser?.id === c?.user?.id
+  //       )
+  //     : null;
 
   // Memoized navigation handler
   const handleNavigation = useCallback((action) => {
@@ -60,6 +65,8 @@ function Productdetails({ product }) {
       setActiveSlideIndex(swiperInstance.activeIndex);
     }
   }, []);
+
+  // console.log({ company });
 
   // Determine if the current user has liked the product
   const hasBookmarked = product?.likes?.some(
@@ -144,7 +151,7 @@ function Productdetails({ product }) {
               <div className="flex-1">
                 <HeadingText>{product.title}</HeadingText>
               </div>
-              {userCompanyDetails && (
+              {isUserCompany && (
                 <Link to={`/products/${product.id}?edit=1`} className="ml-5">
                   <ButtonWithTooltipIcon
                     tip={`Edit Product`}
@@ -176,13 +183,17 @@ function Productdetails({ product }) {
       <section className="gap-4 flex max-lg:flex-col">
         <section className="space-y-4 lg:w-1/2 shrink-0">
           <HeadingText>Location</HeadingText>
-          <iframe
+          <p className="text-gray-600">
+            {company?.office_address && company?.office_address + ","}{" "}
+            {company?.state} {company?.country}
+          </p>
+          {/* <iframe
             src="https://www.google.com/maps/embed?pb=..."
             className="!w-full !min-h-[300px]"
             loading="lazy"
             title={company?.city || company?.state || company?.country}
             referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
+          ></iframe> */}
           {/* <HeadingText>Current Location</HeadingText>
         <iframe
           src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(
@@ -205,10 +216,7 @@ function Productdetails({ product }) {
               name={product?.company?.company_name}
             />
             <div className="flex flex-col">
-              <Link
-                to={`/${product?.company?.company_name?.replace(" ", "-")}`}
-                className="font-bold capitalize"
-              >
+              <Link to={`/${company?.slug}`} className="font-bold capitalize">
                 {product?.company?.company_name || ""}
               </Link>
               <span className="text-gray-400 text-sm">

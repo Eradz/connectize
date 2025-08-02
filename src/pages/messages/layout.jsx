@@ -25,7 +25,7 @@ export default function MessagesLayout() {
       />
       <section
         className={clsx(
-          "lg:max-w-[300px] xl:max-w-[400px] w-full 2xl:max-w-[500px] space-y-6 bg-white h-full p-4 rounded-md overflow-hidden",
+          "lg:max-w-[300px] min-w-[250px] xl:max-w-[400px] w-full 2xl:max-w-[500px] space-y-6 bg-white h-full p-4 rounded-md overflow-hidden",
           {
             "max-lg:hidden": room_name,
           }

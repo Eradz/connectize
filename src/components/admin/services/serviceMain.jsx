@@ -1,10 +1,9 @@
 import clsx from "clsx";
 import { PostCard, PostCardSkeleton } from "../feeds/DiscoverPostTabs";
-import { getServices } from "../../../api-services/services";
-import { useInfiniteQuery } from "@tanstack/react-query";
 import CustomTabs from "../../custom/tabs";
 import PrimaryButton from "../../PrimaryButton";
 import { usePageinatedServices } from "../../../hooks/useServices";
+import { CreateNewLink } from "../markets/carousel";
 
 function ServiceMain({ isOverview, companyId }) {
   return (
@@ -95,6 +94,8 @@ export const PostCardWrapper = ({ isOverview = false, companyId }) => {
           </PrimaryButton>
         </div>
       )}
+
+      <CreateNewLink url="/services/add" text="Add new service" />
     </div>
   );
 };

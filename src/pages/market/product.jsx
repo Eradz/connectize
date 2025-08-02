@@ -1,20 +1,20 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Productdetails from "../../components/admin/products/productdetails";
 import NewProducts from "../../components/admin/products/newProducts";
 import { useParams } from "react-router-dom";
-import { getProducts, getSingleProduct } from "../../api-services/products";
+import { getSingleProduct } from "../../api-services/products";
 import { useQuery } from "@tanstack/react-query";
-import { useCustomQuery } from "../../context/queryContext";
+// import { useCustomQuery } from "../../context/queryContext";
 import NoPage from "../../components/NoPage";
 
 export default function Product() {
   const { id: productId } = useParams();
-  const { refetchInterval } = useCustomQuery();
+  // const { refetchInterval } = useCustomQuery();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["products", { id: productId }],
     queryFn: () => getSingleProduct(productId),
-    refetchInterval,
+    // refetchInterval,
   });
 
   useEffect(() => {

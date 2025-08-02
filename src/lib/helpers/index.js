@@ -103,7 +103,12 @@ export async function getAuthorizationHeader() {
   if (accessToken && Date.now() < accessTokenExpiry) {
     return { Authorization: "Bearer " + accessToken };
   }
-  return await refreshToken();
+
+  const refreshedToken = await refreshToken();
+
+  if (refreshedToken?.Authorization) return refreshedToken;
+
+  return { Authorization: refreshedToken };
 }
 
 export async function makeApiRequest({
