@@ -6,3 +6,7 @@
 
 - You can now navigate back to services page from service details page
 - Refreshing or going directly to the products/services page and their respective details page no longer returns 404
+
+-
+- messages no longer overflow when they are very long and include no seperator characters
+- chats panel no longer distort when a message in a chat is too long

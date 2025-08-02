@@ -193,7 +193,7 @@ export default function MessageArea() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={clsx(
-                          "w-full p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2"
+                          "w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2  "
                         )}
                       >
                         <Link to={`/co/${sender_info?.id}`} className="h-fit">
@@ -206,7 +206,7 @@ export default function MessageArea() {
                         </Link>
                         <div
                           className={clsx(
-                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
+                            "!shrink-0 !w-fit !max-w-[80%]  xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
                           )}
                         >
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
