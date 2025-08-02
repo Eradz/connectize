@@ -19,3 +19,6 @@
 - Added a see all feature to the category
 - Also paginated the categories
 - Corrected routing when you click on all categories
+
+-
+- Removed the poll icon/button from create post form
