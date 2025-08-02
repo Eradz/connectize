@@ -13,3 +13,9 @@
 
 -
 - Removed call icon from chats header
+
+-
+- Fixed alignment in the categories section on the sidebar
+- Added a see all feature to the category
+- Also paginated the categories
+- Corrected routing when you click on all categories
