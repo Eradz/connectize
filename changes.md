@@ -10,3 +10,6 @@
 -
 - messages no longer overflow when they are very long and include no seperator characters
 - chats panel no longer distort when a message in a chat is too long
+
+-
+- Removed call icon from chats header

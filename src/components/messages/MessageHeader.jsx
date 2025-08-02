@@ -94,7 +94,7 @@ function MessageHeader() {
         )}
       </div>
 
-      <ButtonWithTooltipIcon IconName={PhoneOutlined} tip="Call" />
+      {/* <ButtonWithTooltipIcon IconName={PhoneOutlined} tip="Call" /> */}
     </header>
   );
 }
