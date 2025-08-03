@@ -46,7 +46,8 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { data: posts, isLoading } = usePollPosts();
+  const { data: posts, isLoading, refetch } = usePollPosts();
+
   const finalArray = isSearch
     ? searchArray
     : companyName
@@ -74,6 +75,7 @@ function DiscoverPosts({
             hasImage={post?.images?.length > 0}
             key={index}
             postItem={post}
+            refetchPosts={refetch}
           />
         ))
       )}
@@ -87,6 +89,7 @@ export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
   isSinglePost = false,
+  refetchPosts,
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
   const { setRefetchInterval } = useCustomQuery();
@@ -317,16 +320,23 @@ export const DiscoverPostItem = ({
         setShowCommentSection={setShowCommentSection}
         commentsData={postItem.comments}
         postItem={postItem}
+        refetchPosts={refetchPosts}
       />
     </motion.article>
   );
 };
 
+/**
+ * @todo the refechPosts fuction actuall fetches all the posts again when a user adds a comment. Instead make this process optimistc and optimise it for speed
+ * @param {*} param0
+ * @returns
+ */
 const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
   commentsData = [],
   postItem,
+  refetchPosts,
 }) => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -338,6 +348,7 @@ const CommentSection = ({
     setLoading(true);
     try {
       const { id } = await commentOnPost(postItem.id, postItem, comment);
+      await refetchPosts();
       if (id) toast.success("Comment has been added");
 
       setRefetchInterval(1000);
@@ -386,7 +397,7 @@ const CommentSection = ({
           // style={{ height: "200px" }}
         />
         <button
-          className="absolute bottom-1.5 right-2 bg-gray-300 disabled:skeleton hover:bg-gray-400 text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
+          className="absolute bottom-1.5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
           onClick={handleComment}
           disabled={loading || comment.trim().length < 1}
         >

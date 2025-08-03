@@ -22,3 +22,7 @@
 
 -
 - Removed the poll icon/button from create post form
+
+-
+- Comment button is now yellow
+- You can now see comments after adding them
