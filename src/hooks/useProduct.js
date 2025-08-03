@@ -19,13 +19,18 @@ export const useProductImages = (productId) => {
   return { productImage, productImages, isLoading };
 };
 
-export const usePageinatedProducts = ({ companyId } = {}) => {
+export const usePageinatedProducts = ({ companyId, category } = {}) => {
   const res = useInfiniteQuery({
-    queryKey: ["products", "all", { companyId }],
+    queryKey: ["products", "all", { companyId, category }],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       return await getProducts(
-        { page_size: 3, page: pageParam, company: companyId || undefined },
+        {
+          page_size: 3,
+          page: pageParam,
+          company: companyId || undefined,
+          category,
+        },
         true
       );
     },

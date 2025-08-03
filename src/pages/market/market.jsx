@@ -6,8 +6,23 @@ import HeadingText from "../../components/HeadingText";
 import ServiceMain from "../../components/admin/services/serviceMain";
 import { useGetSingleCompany } from "../../hooks";
 
+function constructUrlWithParams({ isServices = false, company, pcat, scat }) {
+  const url = new URL(
+    process.env.NODE_ENV === "production"
+      ? "https://connectize.co"
+      : "http://localhost:3000" + "/market"
+  );
+
+  if (isServices) url.searchParams.set("s", "services");
+  if (company) url.searchParams.set("company", company);
+  if (pcat) url.searchParams.set("pcat", pcat);
+  if (scat) url.searchParams.set("scat", scat);
+
+  return url.toString();
+}
+
 export default function Market() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   /**
    * @expects id-slug
@@ -17,6 +32,9 @@ export default function Market() {
   const splittedCompanyParam = companyParam.split("---");
   const companyId = splittedCompanyParam[0] || null;
   const companySlug = splittedCompanyParam[1] || null;
+
+  const productCategory = searchParams.get("pcat")?.trim();
+  const serviceCategory = searchParams.get("scat")?.trim();
 
   const isShowingServices = searchParams.get("s") === "services";
 
@@ -32,7 +50,11 @@ export default function Market() {
 
       <div className="mx-auto flex items-center justify-center bg-tabs p-1 w-fit rounded-full text-sm">
         <Link
-          to={"/market" + companyParam ? `?company=${companyParam}` : ""}
+          to={constructUrlWithParams({
+            companyParam: `company=${companyParam}`,
+            productCategory: `pcat=${productCategory}`,
+            serviceCategory: `scat=${serviceCategory}`,
+          })}
           className={`${
             !isShowingServices ? "bg-white" : ""
           } rounded-full px-4 py-1`}
@@ -40,10 +62,12 @@ export default function Market() {
           Market
         </Link>
         <Link
-          to={
-            `/market?s=services` +
-            (companyParam ? `&company=${companyParam}` : "")
-          }
+          to={constructUrlWithParams({
+            isServices: true,
+            companyParam: `company=${companyParam}`,
+            productCategory: `pcat=${productCategory}`,
+            serviceCategory: `scat=${serviceCategory}`,
+          })}
           className={`text-decoration-none ${
             isShowingServices ? "bg-white" : ""
           } px-4 py-1 rounded-full`}
@@ -68,10 +92,10 @@ export default function Market() {
       {!companySlug && !isShowingServices && <Carousel />}
       {isShowingServices ? (
         <div className="container">
-          <ServiceMain companyId={companyId} />
+          <ServiceMain companyId={companyId} category={serviceCategory} />
         </div>
       ) : (
-        <NewlyListed companyId={companyId} />
+        <NewlyListed companyId={companyId} category={productCategory} />
       )}
     </section>
   );

@@ -26,3 +26,6 @@
 -
 - Comment button is now yellow
 - You can now see comments after adding them
+
+-
+- Filtering Services/Products by category now works

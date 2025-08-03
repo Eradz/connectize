@@ -131,8 +131,6 @@ function ProductCategory() {
 
   const [searchParams] = useSearchParams();
 
-  console.log({ pathname });
-
   const s = searchParams.get("s");
   const isServicesPage = s === "services" || pathname.startsWith("/services");
   const { data: categoriesPaginated, isLoading } = usePageination({
@@ -178,11 +176,14 @@ function ProductCategory() {
         >
           {categoriesPaginated?.pages?.map((page) =>
             page?.data?.map((item, index) => {
+              const categoryQuery = isServicesPage
+                ? `scat=${item.id}`
+                : `pcat=${item.id}`;
               return (
                 <Link
-                  to={`/market?category=${item.name.toLowerCase()}${
+                  to={`/market?${
                     isServicesPage ? "&s=services" : ""
-                  }`}
+                  }&${categoryQuery}`}
                   key={index}
                   className="flex items-center gap-2 py-2"
                 >
@@ -211,18 +212,23 @@ function ProductCategory() {
               <span className="size-5 bg-dark rounded-full shrink-0" />
               <span className="line-clamp-2">All Categories</span>
             </Link>
-            {categoriesFristPage?.map((item, index) => (
-              <Link
-                to={`/market?category=${item.name.toLowerCase()}${
-                  isServicesPage ? "&s=services" : ""
-                }`}
-                key={index}
-                className="flex items-center gap-2 py-2"
-              >
-                <span className="size-5 bg-dark rounded-full shrink-0" />
-                <span className="line-clamp-2">{item.name}</span>
-              </Link>
-            ))}
+            {categoriesFristPage?.map((item, index) => {
+              const categoryQuery = isServicesPage
+                ? `scat=${item.id}`
+                : `pcat=${item.id}`;
+              return (
+                <Link
+                  to={`/market?${categoryQuery}${
+                    isServicesPage ? "&s=services" : ""
+                  }`}
+                  key={index}
+                  className="flex items-center gap-2 py-2"
+                >
+                  <span className="size-5 bg-dark rounded-full shrink-0" />
+                  <span className="line-clamp-2">{item.name}</span>
+                </Link>
+              );
+            })}
           </>
         )}
       </div>
