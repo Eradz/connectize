@@ -1,7 +1,7 @@
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getProductCategories } from "../../../api-services/products";
 import { getServiceCategories } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";
@@ -12,6 +12,9 @@ import { NavigationSection } from "../../NavigationSection";
 import LightParagraph from "../../ParagraphText";
 import { avatarStyle } from "../../ResponsiveNav";
 import { CircleTitleSubtitleSkeleton } from "../feeds/TopServiceSuggestions";
+import ReusableModal from "../../custom/ResusableModal";
+import { useState } from "react";
+import { usePageination } from "../../../hooks/usePagination";
 
 function Sidebar() {
   const { user: currentUser, loading } = useAuth();
@@ -116,53 +119,116 @@ const UserProfile = ({ currentUser }) => {
 function ProductCategory() {
   const { pathname } = useLocation();
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: pathname.startsWith("/services")
-      ? ["serviceCategories"]
-      : ["productCategories"],
-    queryFn: pathname.startsWith("/services")
-      ? getServiceCategories
-      : getProductCategories,
+  // const { data: categories, isLoading } = useQuery({
+  //   queryKey: pathname.startsWith("/services")
+  //     ? ["serviceCategories"]
+  //     : ["productCategories"],
+  //   queryFn: pathname.startsWith("/services")
+  //     ? getServiceCategories
+  //     : getProductCategories,
+  //   enabled: !!pathname,
+  // });
+
+  const [searchParams] = useSearchParams();
+
+  const s = searchParams.get("s");
+  const isServicesPage = s === "services" || pathname.startsWith("/services");
+  const { data: categoriesPaginated, isLoading } = usePageination({
+    queryKey: isServicesPage
+      ? ["serviceCategories", "all"]
+      : ["productCategories", "all"],
+    queryFn: async ({ pageParam }) => {
+      if (isServicesPage) {
+        return await getServiceCategories(
+          { page_size: 3, page: pageParam },
+          true
+        );
+      }
+      return await getProductCategories(
+        { page_size: 3, page: pageParam },
+        true
+      );
+    },
     enabled: !!pathname,
   });
 
+  const categoriesFristPage = categoriesPaginated?.pages?.[0]?.data;
+
+  const [showMore, setShowMore] = useState(false);
   return (
-    <section className="space-y-2">
+    <section className="space-y-2 px-4">
       <div className="flex gap-2 items-center">
-        <CategoryIcon />
-        <HeadingText>Category</HeadingText>
+        <CategoryIcon className={"size-4"} />
+        <div className="flex-1">
+          <HeadingText heading="sub-heading">Category</HeadingText>
+        </div>
+        <button onClick={() => setShowMore(true)} type="button">
+          See all
+        </button>
+
+        <ReusableModal
+          isOpen={showMore}
+          size="sm"
+          onClose={() => setShowMore(false)}
+          title={
+            isServicesPage ? "All service categories" : "All product categories"
+          }
+        >
+          {categoriesPaginated?.pages?.map((page) =>
+            page?.data?.map((item, index) => {
+              const categoryQuery = isServicesPage
+                ? `scat=${item.id}`
+                : `pcat=${item.id}`;
+              return (
+                <Link
+                  to={`/market?${
+                    isServicesPage ? "&s=services" : ""
+                  }&${categoryQuery}`}
+                  key={index}
+                  className="flex items-center gap-2 py-2"
+                >
+                  <span className="size-5 bg-dark rounded-full shrink-0" />
+                  <span className="line-clamp-2">{item.name}</span>
+                </Link>
+              );
+            })
+          )}
+        </ReusableModal>
       </div>
-      <div className="space-y-2 xs:text-sm p-2">
+      <div className="space-y-2 xs:text-sm">
         {isLoading ? (
           Array.from({ length: 5 }, (_, index) => (
             <CircleTitleSubtitleSkeleton key={index} />
           ))
-        ) : !categories?.length ? (
+        ) : !categoriesFristPage?.length ? (
           <LightParagraph>No categories available</LightParagraph>
         ) : (
           <>
             <Link
-              to={pathname.startsWith("/services") ? "/services" : "/market"}
+              to={isServicesPage ? "/market?s=services" : "/market"}
               key={"all"}
-              className="flex items-center gap-2 p-2"
+              className="flex items-center gap-2 py-2"
             >
               <span className="size-5 bg-dark rounded-full shrink-0" />
               <span className="line-clamp-2">All Categories</span>
             </Link>
-            {categories?.map((item, index) => (
-              <Link
-                to={
-                  (pathname.startsWith("/services") ? "/services" : "/market") +
-                  "?category=" +
-                  item.name.toLowerCase()
-                }
-                key={index}
-                className="flex items-center gap-2 p-2"
-              >
-                <span className="size-5 bg-dark rounded-full shrink-0" />
-                <span className="line-clamp-2">{item.name}</span>
-              </Link>
-            ))}
+            {categoriesFristPage?.map((item, index) => {
+              const categoryQuery = isServicesPage
+                ? `scat=${item.id}`
+                : `pcat=${item.id}`;
+              return (
+                <Link
+                  to={`/market?${categoryQuery}${
+                    isServicesPage ? "&s=services" : ""
+                  }`}
+                  key={index}
+                  className="flex items-center gap-2 py-2"
+                >
+                  <span className="size-5 bg-dark rounded-full shrink-0" />
+                  <span className="line-clamp-2">{item.name}</span>
+                </Link>
+              );
+            })}
           </>
         )}
       </div>

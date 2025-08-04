@@ -10,3 +10,22 @@
 -
 - messages no longer overflow when they are very long and include no seperator characters
 - chats panel no longer distort when a message in a chat is too long
+
+-
+- Removed call icon from chats header
+
+-
+- Fixed alignment in the categories section on the sidebar
+- Added a see all feature to the category
+- Also paginated the categories
+- Corrected routing when you click on all categories
+
+-
+- Removed the poll icon/button from create post form
+
+-
+- Comment button is now yellow
+- You can now see comments after adding them
+
+-
+- Filtering Services/Products by category now works

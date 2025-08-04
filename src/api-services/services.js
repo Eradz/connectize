@@ -111,12 +111,14 @@ export const getServiceImages = async () => {
 };
 
 // Service categories
-export const getServiceCategories = async () => {
-  const { results: categories } = await makeApiRequest({
+export const getServiceCategories = async (params, returnFullRes = false) => {
+  const { results: categories, next } = await makeApiRequest({
     url: `api/service-categories/`,
     method: "GET",
+    params,
   });
 
+  if (returnFullRes) return { data: categories, next };
   return categories || [];
 };
 

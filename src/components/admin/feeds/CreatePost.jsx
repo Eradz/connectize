@@ -206,7 +206,7 @@ function CreatePost() {
             onClick={() => document.getElementById("post_images").click()}
           />
           <MaskedIcon Icon={GifIcon} onClick={() => setShowGifPicker(true)} />
-          <MaskedIcon Icon={AlignmentIcon} />
+          {/* <MaskedIcon Icon={AlignmentIcon} /> */}
           <MaskedIcon
             Icon={SmileIcon}
             onClick={() => setShowEmojiPicker((prevState) => !prevState)}

@@ -22,21 +22,6 @@ export const getProducts = async (params, returnFullRes = false) => {
     params,
   });
 
-  // let mergedProductWIthImage = [];
-
-  // const productImages = await getOrCreateProductImages(undefined, "get");
-
-  // products?.forEach((product) => {
-  //   const productImage = productImages?.filter(
-  //     (image) => product.id === image.product
-  //   );
-
-  //   mergedProductWIthImage.push({
-  //     ...product,
-  //     images: productImage,
-  //   });
-  // });
-
   if (returnFullRes) return { data: products, next };
 
   return products || [];
@@ -129,13 +114,6 @@ export const createProduct = async (data, resetForm, editId) => {
  * @returns
  */
 export const getOrCreateProductImages = async (image, { onUploadProgress }) => {
-  // const { results: images } = await makeApiRequest({
-  //   url: `api/product-images/`,
-  //   method: "GET",
-  // });
-
-  // if (type === "get" || data === undefined) return images || [];
-
   return await makeApiRequest({
     url: `api/product-images/`,
     method: "POST",
@@ -145,11 +123,14 @@ export const getOrCreateProductImages = async (image, { onUploadProgress }) => {
   });
 };
 
-export const getProductCategories = async () => {
-  const { results } = await makeApiRequest({
+export const getProductCategories = async (params, returnFullRes = false) => {
+  const { results, next } = await makeApiRequest({
     url: `api/product-categories/`,
     method: "GET",
+    params,
   });
+
+  if (returnFullRes) return { data: results, next };
 
   return results || [];
 };

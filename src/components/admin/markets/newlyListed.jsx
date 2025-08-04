@@ -10,22 +10,28 @@ import CustomTabs from "../../custom/tabs";
 import PrimaryButton from "../../PrimaryButton";
 import { usePageinatedProducts } from "../../../hooks/useProduct";
 
-function NewlyListed({ companyId }) {
+function NewlyListed({ companyId, category }) {
   return (
     <section className="container">
       <CustomTabs
         tabsHeading={["All Products", "Newly Listed"]}
         tabsPanels={[
           // used `|| undefined` because if the `companyId` is an empty string it would still be falsy, and it would be sent to the server as an empty string i.e `?company=""`
-          <DisplayAllProducts companyId={companyId || undefined} />,
-          <DisplayNewlyListedProducts companyId={companyId || undefined} />,
+          <DisplayAllProducts
+            companyId={companyId || undefined}
+            category={category || undefined}
+          />,
+          <DisplayNewlyListedProducts
+            companyId={companyId || undefined}
+            category={category || undefined}
+          />,
         ]}
       />
     </section>
   );
 }
 
-function DisplayAllProducts({ companyId }) {
+function DisplayAllProducts({ companyId, category }) {
   const {
     data,
     isLoading,
@@ -33,7 +39,7 @@ function DisplayAllProducts({ companyId }) {
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = usePageinatedProducts({ companyId });
+  } = usePageinatedProducts({ companyId, category });
   return (
     <div className="">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4">
@@ -81,11 +87,11 @@ function DisplayAllProducts({ companyId }) {
 function DefaultSkelecton({ length = 6 }) {
   return Array.from({ length }, (_, index) => <ListCardSkeleton key={index} />);
 }
-function DisplayNewlyListedProducts({ companyId }) {
+function DisplayNewlyListedProducts({ companyId, category }) {
   /**
    * @todo Make a request to get real newly listed data from the server when that feature has been implemented on the server. And also find a way to prevent this component from fething products when it has not been mounted.
    */
-  const { data, isLoading } = usePageinatedProducts({ companyId });
+  const { data, isLoading } = usePageinatedProducts({ companyId, category });
 
   // the products used right now in this section is the same thing with thoses in the `DisplayAllProducts. This is because the feature of getting newly listed products as not been implemented on the server yet. So to avoid making an entirely new request i decided to make this component share requests with `DisplayAllProducts` Component.
 

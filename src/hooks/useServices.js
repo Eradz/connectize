@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getServices } from "../api-services/services";
 
-export const usePageinatedServices = ({ companyId } = {}) => {
+export const usePageinatedServices = ({ companyId, category } = {}) => {
   const res = useInfiniteQuery({
-    queryKey: ["services", "all", { companyId }],
+    queryKey: ["services", "all", { companyId, category }],
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       return await getServices(
-        { page_size: 3, page: pageParam, company: companyId },
+        { page_size: 3, page: pageParam, company: companyId, category },
         true
       );
     },
@@ -30,8 +30,8 @@ export const usePageinatedServices = ({ companyId } = {}) => {
   return res;
 };
 
-export const useGetServicesFirstPage = ({ companyId } = {}) => {
-  const { data: services, isLoading } = usePageinatedServices({ companyId });
+export const useGetServicesFirstPage = (params = {}) => {
+  const { data: services, isLoading } = usePageinatedServices(params);
   const page1 = services?.pages?.[0]?.data;
 
   console.log({ servicePage1: page1 });

@@ -5,7 +5,7 @@ import PrimaryButton from "../../PrimaryButton";
 import { usePageinatedServices } from "../../../hooks/useServices";
 import { CreateNewLink } from "../markets/carousel";
 
-function ServiceMain({ isOverview, companyId }) {
+function ServiceMain({ isOverview, companyId, category }) {
   return (
     <CustomTabs
       tabsHeading={["Featured", "Most Recent", "Best Matches"]}
@@ -13,14 +13,17 @@ function ServiceMain({ isOverview, companyId }) {
         <PostCardWrapper
           isOverview={isOverview}
           companyId={companyId || undefined}
+          category={category || undefined}
         />,
         <PostCardWrapper
           isOverview={isOverview}
           companyId={companyId || undefined}
+          category={category || undefined}
         />,
         <PostCardWrapper
           isOverview={isOverview}
           companyId={companyId || undefined}
+          category={category || undefined}
         />,
       ]}
     />
@@ -29,7 +32,11 @@ function ServiceMain({ isOverview, companyId }) {
 
 export default ServiceMain;
 
-export const PostCardWrapper = ({ isOverview = false, companyId }) => {
+export const PostCardWrapper = ({
+  isOverview = false,
+  companyId,
+  category,
+}) => {
   const {
     data,
     isLoading,
@@ -37,7 +44,7 @@ export const PostCardWrapper = ({ isOverview = false, companyId }) => {
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = usePageinatedServices({ companyId });
+  } = usePageinatedServices({ companyId, category });
 
   const page1Length = data?.pages?.[0]?.data?.length;
 

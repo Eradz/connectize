@@ -15,7 +15,7 @@ export const BookmarkedProducts = () => {
   const { user: currentUser } = useAuth();
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(),
     enabled: !!currentUser,
   });
 
