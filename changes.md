@@ -29,3 +29,9 @@
 
 -
 - Filtering Services/Products by category now works
+
+-
+- The view button in products now works
+- fixed image disproportion in the recommeded products in market page
+- changed the layout for maketpage (products and services)
+- The featured and most recent tabs in the services page now works

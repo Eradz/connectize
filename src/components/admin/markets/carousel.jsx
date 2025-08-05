@@ -20,7 +20,7 @@ const Card = memo(({ product }) => {
     >
       <img
         src={product.images[0]?.image || ""}
-        className="w-full max-h-[350px] "
+        className="w-full max-h-[350px] object-cover"
         alt={product.images[0]?.caption || "Product"}
       />
       <div className="absolute top-2 left-3 bg-custom_grey/70 rounded-full size-5 border-2" />

@@ -164,7 +164,12 @@ export const ProductListCard = ({
           </Link>
           <span className="font-semibold text-base">{subtitle}</span>
         </div>
-        {!isSummary && <ChatSellerLink recipientId={company?.user?.id} />}
+        {!isSummary && (
+          <ChatSellerLink
+            recipientId={company?.user?.id}
+            to={`/products/${id}`}
+          />
+        )}
       </div>
     </motion.div>
   );
