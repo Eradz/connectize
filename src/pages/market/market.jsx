@@ -48,48 +48,54 @@ export default function Market() {
         description="Discover Connectize, Connect with trusted suppliers and buyers, explore the latest listings, and grow your business in the global energy sector."
       />
 
-      <div className="mx-auto flex items-center justify-center bg-tabs p-1 w-fit rounded-full text-sm">
-        <Link
-          to={constructUrlWithParams({
-            companyParam: `company=${companyParam}`,
-            productCategory: `pcat=${productCategory}`,
-            serviceCategory: `scat=${serviceCategory}`,
-          })}
-          className={`${
-            !isShowingServices ? "bg-white" : ""
-          } rounded-full px-4 py-1`}
-        >
-          Market
-        </Link>
-        <Link
-          to={constructUrlWithParams({
-            isServices: true,
-            companyParam: `company=${companyParam}`,
-            productCategory: `pcat=${productCategory}`,
-            serviceCategory: `scat=${serviceCategory}`,
-          })}
-          className={`text-decoration-none ${
-            isShowingServices ? "bg-white" : ""
-          } px-4 py-1 rounded-full`}
-        >
-          Services
-        </Link>
+      <div className="flex items-center container">
+        <div className="flex-1">
+          <HeadingText>Market</HeadingText>
+          <div className="">
+            {companySlug &&
+              (isLoadingCompanyDetails ? (
+                <div className="inline-block w-1/3 h-4 skeleton rounded mt-2" />
+              ) : (
+                <HeadingText heading="sub-heading">
+                  <Link to={"/" + companySlug} className="!text-gold">
+                    @{companyDetails?.company_name}
+                  </Link>{" "}
+                </HeadingText>
+              ))}
+          </div>
+        </div>
+        <div className="flex items-center bg-tabs p-1 w-fit rounded-full text-sm">
+          <Link
+            to={constructUrlWithParams({
+              company: companyParam,
+              pcat: productCategory,
+              scat: serviceCategory,
+            })}
+            className={`${
+              !isShowingServices ? "bg-white" : ""
+            } rounded-full px-4 py-1`}
+          >
+            Products
+          </Link>
+          <Link
+            to={constructUrlWithParams({
+              isServices: true,
+              company: companyParam,
+              pcat: productCategory,
+              scat: serviceCategory,
+            })}
+            className={`text-decoration-none ${
+              isShowingServices ? "bg-white" : ""
+            } px-4 py-1 rounded-full`}
+          >
+            Services
+          </Link>
+        </div>
       </div>
+
       <div className="container">
-        {companySlug && (
-          <HeadingText heading="sub-heading">
-            Market{" "}
-            {isLoadingCompanyDetails ? (
-              <div className="inline-block w-1/3 h-4 skeleton rounded mt-2" />
-            ) : (
-              <Link to={"/" + companySlug} className="!text-gold">
-                @{companyDetails?.company_name}
-              </Link>
-            )}
-          </HeadingText>
-        )}
+        {!companySlug && !isShowingServices && <Carousel />}
       </div>
-      {!companySlug && !isShowingServices && <Carousel />}
       {isShowingServices ? (
         <div className="container">
           <ServiceMain companyId={companyId} category={serviceCategory} />

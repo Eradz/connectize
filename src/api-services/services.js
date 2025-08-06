@@ -16,7 +16,7 @@ import { getCurrentUser } from "./users";
 
 export const getServices = async (params, returnFullRes = false) => {
   const { results: services, next } = await makeApiRequest({
-    url: `api/services/`,
+    url: `api/services/${params.sortBy ? params.sortBy + "/" : ""}`,
     method: "GET",
     params,
   });
@@ -24,23 +24,6 @@ export const getServices = async (params, returnFullRes = false) => {
   if (returnFullRes) return { data: services, next };
 
   return services;
-
-  // let mergedServicesWIthImage = [];
-
-  // const serviceImages = await getServiceImages();
-
-  // services?.forEach((service) => {
-  //   const serviceImage = serviceImages?.filter(
-  //     (image) => service.id === image.product
-  //   );
-
-  //   mergedServicesWIthImage.push({
-  //     ...service,
-  //     images: serviceImage,
-  //   });
-  // });
-
-  // return mergedServicesWIthImage;
 };
 
 export const getSingleService = async (id) => {
