@@ -164,6 +164,6 @@ export const bookmarkProduct = async (productId, data, hasBookmarked) => {
   await makeApiRequest({
     url: `api/products/${productId}/like/`,
     method: "POST",
-    data: { ...data, company_id: data.company.id },
+    // data: { ...data, company_id: data.company.id },
   });
 };

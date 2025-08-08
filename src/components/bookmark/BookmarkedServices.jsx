@@ -17,7 +17,7 @@ export const BookmarkedServices = () => {
   const { user: currentUser } = useAuth();
   const { data: services, isLoading } = useQuery({
     queryKey: ["services"],
-    queryFn: () => getServices,
+    queryFn: () => getServices(),
     enabled: !!currentUser,
   });
 

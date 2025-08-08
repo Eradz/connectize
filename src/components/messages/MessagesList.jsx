@@ -14,6 +14,8 @@ import {
   getMonthFromNumber,
   timeAgo,
 } from "../../lib/utils";
+import { Favorite } from "@mui/icons-material";
+import { StarFilledIcon, StarOutlinedIcon } from "../../icon";
 
 export default function MessagesList() {
   // Use WebSocket for real-time sidebar updates
@@ -154,9 +156,19 @@ const MessagesListTile = React.memo(({ message }) => {
       </Link>
 
       <div className="flex flex-col justify-end items-end text-[.6rem] text-gray-400 gap-2 flex-shrink-0">
-        {unread_count > 0 && (
-          <Badge className="!text-[.55rem]">{unread_count} Unread</Badge>
-        )}
+        <div className="flex items-center">
+          {unread_count > 0 && (
+            <Badge className="!text-[.55rem]">{unread_count} Unread</Badge>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {/* <StarFilledIcon className="size-5" /> */}
+            <StarOutlinedIcon className="size-5 text-gray-500" />
+          </button>
+        </div>
         {dateToDisplay}
         {/* <TimeAgo intervalInMs={10000} time={msgToDisplay?.timestamp} /> */}
       </div>
