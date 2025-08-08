@@ -9,8 +9,11 @@ import { avatarStyle } from "../ResponsiveNav";
 import Username from "../Username";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
+import { useAuth } from "../../context/userContext";
 
 function MessageHeader() {
+  const { user: currentUser } = useAuth();
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name");
@@ -19,6 +22,8 @@ function MessageHeader() {
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
 
   const [isLoadingOpenedMessage, setIsLoadingOpenedMessage] = useState(false);
+
+  // console.log({ openedMessage });
 
   async function handleSetOpenedMessage() {
     try {
@@ -47,6 +52,8 @@ function MessageHeader() {
     if (openedMessage && openedMessage.room_name == room_name) return;
     handleSetOpenedMessage();
   }, [openedMessage, room_name, loading]);
+
+  const isSentToSelf = currentUser?.id === openedMessage?.other_user?.id;
   return (
     <header className="flex items-center justify-between bg-white p-2 pr-4 rounded-t-md gap-2 sticky">
       <ButtonWithTooltipIcon
@@ -73,11 +80,17 @@ function MessageHeader() {
               <Username
                 user={
                   nameToDisplay
-                    ? openedMessage?.other_user
+                    ? isSentToSelf
+                      ? {
+                          ...openedMessage?.other_user,
+                          last_name:
+                            openedMessage.other_user?.last_name + " (You)",
+                        }
+                      : openedMessage?.other_user
                     : {
                         ...openedMessage?.other_user,
                         first_name: "Unknown",
-                        last_name: "User",
+                        last_name: "User" + isSentToSelf ? " (You)" : "",
                       }
                 }
               />

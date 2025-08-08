@@ -30,7 +30,8 @@ export default function MessageArea() {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name") || "";
 
-  useMessagingWebSocket({ room_name });
+  useMessagingWebSocket({});
+  // useMessagingWebSocket({ room_name });
 
   // Reduce polling frequency since WebSocket handles real-time updates
   // const { data: messageList = [], isLoading } = usePollMessages(30000);
@@ -112,7 +113,14 @@ export default function MessageArea() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || !messages?.length) return;
+    if (isLoading || !messages?.length || !chatContainerRef.current) return;
+
+    //when a component forcefully sets the scroll positon of this element it might sometimes set the dataset.forced to true. The reason for this is to prevent this side effect from stoping that scroll.
+    // This was implemented like this because the message control component scrolls the chat container to the bottom when ever a message is sent but this side effects hijacks that and scrolls the chat conatainer back to its current position. (This happens so fast that you don't even notice the previous scroll attempt)
+    if (chatContainerRef.current.dataset?.forced === "true") {
+      chatContainerRef.current.dataset.forced = "";
+      return;
+    }
 
     function scrollEventHandler(e) {
       scrollSavedList.current[room_name] = e.target.scrollTop;
@@ -192,6 +200,9 @@ export default function MessageArea() {
                         key={message?.id || index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        // className={clsx(
+                        //   "w-full p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2"
+                        // )}
                         className={clsx(
                           "w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2  "
                         )}
@@ -206,7 +217,7 @@ export default function MessageArea() {
                         </Link>
                         <div
                           className={clsx(
-                            "!shrink-0 !w-fit !max-w-[80%]  xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
+                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
                           )}
                         >
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
@@ -246,33 +257,15 @@ export default function MessageArea() {
                               })}
                             >
                               {message.images?.map((image, index) => {
-                                const src = image
-                                  .toString()
-                                  .trim()
-                                  .startsWith("http")
-                                  ? image
-                                  : baseURL + image;
-
                                 return (
                                   <LoadImageAttachment
                                     key={index}
-                                    blur={""}
-                                    width={20}
-                                    height={20}
-                                    url={src}
-                                    src={src}
-                                    // alt="Messaging"
-                                    // className="rounded-md size-full"
+                                    blur={image.preview}
+                                    width={image.width}
+                                    height={image.height}
+                                    url={image.url}
                                   />
                                 );
-                                // return (
-                                //   <img
-                                //     key={index}
-                                //     src={src}
-                                //     alt="Messaging"
-                                //     className="rounded-md size-full"
-                                //   />
-                                // );
                               })}
                             </div>
                           )}

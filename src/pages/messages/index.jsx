@@ -1,16 +1,14 @@
 import { Avatar, useDisclosure } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getAllUsers } from "../../api-services/users";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
 import { ChatSellerLink } from "../../components/admin/markets/newlyListed";
 import ReusableModal from "../../components/custom/ResusableModal";
-import CustomTabs from "../../components/custom/tabs";
 import HeadingText from "../../components/HeadingText";
-import Favorites from "../../components/messages/Favorites";
 import MessagesList from "../../components/messages/MessagesList";
 import LightParagraph from "../../components/ParagraphText";
 import { UserSearchInput } from "../../components/representatives/UserSearchInput";
@@ -18,7 +16,6 @@ import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
-import { baseURL } from "../../lib/helpers";
 
 export default function MessagesPage() {
   const { user: currentUser } = useAuth();
@@ -61,10 +58,11 @@ export default function MessagesPage() {
   return (
     <>
       <HeadingText heading="sub-heading">Messages</HeadingText>
-      <CustomTabs
+      <MessagesList />
+      {/* <CustomTabs
         tabsHeading={["Recent Chats", "Favorites"]}
         tabsPanels={[<MessagesList />, <Favorites />]}
-      />
+      /> */}
 
       {!room_name && (
         <>
