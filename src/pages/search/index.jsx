@@ -161,13 +161,14 @@ export const SearchTab = () => {
       key: "services",
       heading: "Services",
       content: (
-        <div className="grid gap-x-3 gap-y-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-x-3 gap-y-4 grid-cols-1 md:grid-cols-2">
           {!isNotEmpty(data?.services) ? (
             <LightParagraph>No service found in search</LightParagraph>
           ) : (
             data?.services.map((service, index) => (
               <PostCard
                 key={index}
+                className={"bg-background"}
                 companyName={service?.company.company_name}
                 verified={service?.companyInfo?.verified}
                 logo={service?.company?.logo}
