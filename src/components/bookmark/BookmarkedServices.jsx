@@ -134,7 +134,7 @@ const BookmarkedServicesCard = ({
             </Link>
             <Link
               to={`/${company?.slug}`}
-              className="text-sm font-bold capitalize line-clamp-1"
+              className="text-sm font-semibold capitalize line-clamp-1"
             >
               {company.company_name || "West Land Oil"}
             </Link>
