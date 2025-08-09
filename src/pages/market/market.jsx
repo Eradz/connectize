@@ -9,8 +9,8 @@ import { useGetSingleCompany } from "../../hooks";
 function constructUrlWithParams({ isServices = false, company, pcat, scat }) {
   const url = new URL(
     process.env.NODE_ENV === "production"
-      ? "https://connectize.co"
-      : "http://localhost:3000" + "/market"
+      ? "https://connectize.co/market"
+      : "http://localhost:3000/market"
   );
 
   if (isServices) url.searchParams.set("s", "services");

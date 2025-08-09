@@ -46,3 +46,6 @@
 - Bookmarks for services and products now work
 - Improved the UI/UX of the bookmarks page
 - You can now also see the company that owns a product/service that you bookedmarked
+
+-
+- In prod, clicking on the services tab now links to the services page
