@@ -15,7 +15,7 @@ import { getCompanyByIdOrEmail } from "./companies";
 //     "company": null
 // }
 
-export const getProducts = async (params, returnFullRes = false) => {
+export const getProducts = async (params = {}, returnFullRes = false) => {
   const { results: products, next } = await makeApiRequest({
     url: `api/products/`,
     method: "GET",
@@ -153,17 +153,20 @@ export const getOrCreateProductCategories = async (name) => {
 };
 
 export const bookmarkProduct = async (productId, data, hasBookmarked) => {
+  console.log(data.company);
   if (hasBookmarked) {
     await makeApiRequest({
       url: `api/products/${productId}/unlike/`,
       method: "POST",
       // data: { ...data, company_id: data.company },
+      data: { company: data.company.company_name },
     });
     return;
   }
   await makeApiRequest({
     url: `api/products/${productId}/like/`,
     method: "POST",
-    data: { ...data, company_id: data.company.id },
+    data: { company: data.company.company_name },
+    // data: { ...data, company_id: data.company.id },
   });
 };

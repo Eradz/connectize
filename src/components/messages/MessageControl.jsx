@@ -48,6 +48,9 @@ export default function MessageControl() {
 
   const room_name = searchParams.get("room_name") || "";
   const sendMessage = useMessagesStore((state) => state.sendMessage);
+  const lastMsgInChat = useMessagesStore((state) =>
+    state.messages[room_name]?.at(-1)
+  );
   const openedMessage = useMessagesStore((state) => state.openedMessage);
   const loading = useMessagesStore((state) => state.loading);
 
@@ -154,7 +157,8 @@ export default function MessageControl() {
       setAudioURL(null);
       setErrorMessage(null);
 
-      scrollToBottom();
+      console.log("About to scroll to bottom", scrollToBottom);
+
       await sendMessage(room_name, formData, messageData);
     } catch (error) {
       console.error(error);
@@ -199,13 +203,18 @@ export default function MessageControl() {
     const chatContainer = document.querySelector(".chat-container");
 
     if (chatContainer) {
+      chatContainer.dataset.forced = "true";
       chatContainer.scrollTop = chatContainer.scrollHeight + 20;
     }
   };
 
+  // Scroll chat to bottom if the messages newly added is sent by the current user
   useEffect(() => {
-    scrollToBottom();
-  }, []);
+    if (lastMsgInChat?.optimistic) {
+      scrollToBottom();
+    }
+    console.log("lastMsgInChat", lastMsgInChat);
+  }, [lastMsgInChat]);
 
   useEffect(() => {
     const chatContainer = document.querySelector(".chat-container");
@@ -221,10 +230,11 @@ export default function MessageControl() {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [message]);
+  }, []);
 
   return (
     <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 md:bottom-4">
+      {/* <button onClick={() => scrollToBottom()}>Bottom</button> */}
       {/* valid images */}
       {validImages && (
         <ValidImages

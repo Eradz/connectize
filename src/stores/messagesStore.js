@@ -2,11 +2,14 @@ import isEqual from "lodash/isEqual";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import {
+  favoriteChat,
+  getFavoriteChats,
   getMessagesForUser,
   markMessageAsRead,
   messageUser,
 } from "../api-services/messaging";
 import { getUserById } from "../api-services/users";
+import { toast } from "sonner";
 
 function getCurrentUserId() {
   try {
@@ -32,6 +35,10 @@ export const useMessagesStore = create((set, get) => ({
   // messages: [],
   // chatMessages: {},
   lastMessages: [],
+
+  // an array of room_names
+  favoriteChats: [],
+
   openedMessage: null,
   messagesLoading: false,
   lastMessagesLoading: false,
@@ -83,6 +90,10 @@ export const useMessagesStore = create((set, get) => ({
     }
   },
 
+  /**
+   * @description Fetches and sets the last chats and favorite
+   * @returns
+   */
   getLastMessages: async () => {
     // prevent multiple fetches (especially in dev mode)
     if (get().lastMessagesLoading) {
@@ -90,14 +101,34 @@ export const useMessagesStore = create((set, get) => ({
     }
     try {
       set({ lastMessagesLoading: true });
-      const data = await getMessagesForUser({ last_chats: true });
+      let data = await getMessagesForUser({ last_chats: true });
 
-      let processedData = data;
+      const favData = await getFavoriteChats();
+
+      console.log({ favData, data, map: data?.map });
+
+      const flattenedFavoriteChats = favData.map((c) => c.room_name);
+
+      // if (favData.length) {
+      //   data = data.map((chat) => {
+      //     console.log({ favData });
+      //     const favoritedChat = favData?.find(
+      //       (fav) =>
+      //         fav.other_user?.id && fav.other_user?.id === chat.other_user?.id
+      //     );
+
+      //     if (favoritedChat) {
+      //       chat.isFavorite = true;
+      //     }
+      //     return chat;
+      //   });
+      // }
+
       // log;
       console.log("🔍 Raw lastMessages from API:", data);
 
-      console.log("✅ Processed lastMessages:", processedData);
-      set({ lastMessages: processedData });
+      console.log("✅ Processed lastMessages:", data);
+      set({ lastMessages: data, favoriteChats: flattenedFavoriteChats });
     } catch (err) {
       console.error("Failed to fetch messages", err);
     } finally {
@@ -237,11 +268,14 @@ export const useMessagesStore = create((set, get) => ({
    * @param {string} room_name
    * @param {*} formData
    * @param {*} message
+   * @param {{onAfterOptimistic:()=>void}} opts
    */
-  sendMessage: async (room_name, formData, message) => {
+  sendMessage: async (room_name, formData, message, opts) => {
     if (!room_name) return;
 
     const tempId = get().addOptimisticMessage(room_name, message);
+
+    // if (opts.onAfterOptimistic) opts.onAfterOptimistic();
 
     try {
       const confirmed = await messageUser(formData);
@@ -398,5 +432,56 @@ export const useMessagesStore = create((set, get) => ({
         };
       }
     });
+  },
+
+  isChatFavorited: (room_name) => {
+    return get().favoriteChats.includes(room_name);
+  },
+
+  setIsFavoriteForChat: async (room_name, isFavorite) => {
+    set((state) => {
+      const isChatAlreadyInFavorites = state.favoriteChats.includes(room_name);
+
+      if (isChatAlreadyInFavorites && isFavorite) return state;
+      if (!isChatAlreadyInFavorites && !isFavorite) return state;
+
+      if (isFavorite)
+        return {
+          favoriteChats: [...state.favoriteChats, room_name],
+        };
+      else {
+        return {
+          favoriteChats: state.favoriteChats.filter((c) => c !== room_name),
+        };
+      }
+
+      // return {
+      //   lastMessages: state.lastMessages.map((chat) => {
+      //     if (room_name === chat.room_name) return { ...chat, isFavorite };
+      //     return chat;
+      //   }),
+      // };
+    });
+  },
+
+  favoriteChat: async (room_name, isFavorite = true) => {
+    // used tenary here because isFavorite can be undefined and i don't want to set it to undefined
+    const chatIsFavorited = get().favoriteChats.includes(room_name);
+    get().setIsFavoriteForChat(room_name, isFavorite);
+
+    try {
+      const favoritedRespose = await favoriteChat({
+        room_name,
+        markAsFavorite: isFavorite,
+      });
+
+      // if (!favoritedRespose.favorited)
+      //   throw new Error("Could not favorite chat");
+    } catch (error) {
+      toast.error(
+        isFavorite ? "Could not favorite chat" : "Could not unfavorite chat"
+      );
+      get().setIsFavoriteForChat(room_name, chatIsFavorited);
+    }
   },
 }));

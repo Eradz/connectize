@@ -1,4 +1,4 @@
-import { Link1Icon, Share1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -9,7 +9,8 @@ import { shareThis } from "../../lib/utils";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import PageLoading from "../PageLoading";
 import LightParagraph from "../ParagraphText";
-import { LinkWithTooltipIcon } from "../userProfile/Navbar";
+import { Avatar } from "@chakra-ui/react";
+import { avatarStyle } from "../ResponsiveNav";
 
 export const BookmarkedProducts = () => {
   const { user: currentUser } = useAuth();
@@ -71,59 +72,78 @@ const BookmarkedProductsCard = ({
     );
   };
 
+  const company = product.company;
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      className="flex justify-between max-sm:flex-col relative"
+      className="flex gap-4 bg-white p-3 rounded-md"
     >
-      <div className="flex gap-4">
+      <Link to={`/products/${product?.id}`}>
         <img
           src={product?.images?.[0]?.image || ""}
           alt={product?.images?.[0]?.caption || ""}
-          className="size-16 sm:size-20 rounded-md overflow-hidden shrink-0"
+          className="size-16 sm:size-20 rounded-md overflow-hidden object-cover shrink-0"
         />
+      </Link>
 
-        <div className="flex flex-col justify-between">
-          <div className="">
-            <Link
-              to={`/products/${product?.id}`}
-              className="!line-clamp-1 !break-all text-lg md:text-xl font-semibold"
-            >
-              {product?.title}
-            </Link>
-            <small className="w-fit text-gray-400 mb-2  !line-clamp-1 !break-all block leading-none">
-              {product?.category}
-            </small>
-          </div>
-          {/* <ChatSellerLink text="Chat seller" recipientId={5} /> */}
+      <div className="flex-1">
+        <div className="mb-1 flex items-center">
+          <Link
+            to={`/products/${product?.id}`}
+            className="!line-clamp-1 flex-1 !break-all text-lg md:text-xl font-semibold"
+          >
+            {product?.title}
+          </Link>
         </div>
-      </div>
-
-      <div className="flex items-center justify-end gap-2 max-sm:absolute bottom-3 right-0">
-        <ButtonWithTooltipIcon
-          tip={`Remove ${product?.title} from bookmark`}
-          IconName={TrashIcon}
-          onClick={handleBookmark}
-        />
-        <LinkWithTooltipIcon
-          IconName={Link1Icon}
-          to={`/products/${product?.id}`}
-        />
-        <ButtonWithTooltipIcon
-          tip={`Share ${product?.title}`}
-          onClick={async () => {
-            const shareUrlString =
-              window.location.href + "products/" + product?.id;
-            const shareData = {
-              title: product?.title,
-              text: product?.sub_title,
-              url: shareUrlString,
-            };
-            await shareThis({ shareUrlString, shareData });
-          }}
-          IconName={Share1Icon}
-        />
+        <small className="w-fit text-gray-400 mb-2 !line-clamp-1 !break-all block leading-none">
+          {product?.category}
+        </small>
+        <div className="flex items-center">
+          <div className="flex gap-2 items-center flex-1">
+            <Link to={`/${company.slug}`} className="relative">
+              <Avatar
+                src={company.logo || "images/default-company-logo.png"}
+                alt={company.company_name}
+                name={company.company_name || ""}
+                className={avatarStyle}
+                size="xs"
+              />
+              {company?.verified && (
+                <VerifiedIcon className="absolute bottom-0 right-0" />
+              )}
+            </Link>
+            <Link
+              to={`/${company?.slug}`}
+              className="text-sm font-semibold capitalize line-clamp-1"
+            >
+              {company.company_name || "West Land Oil"}
+            </Link>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <ButtonWithTooltipIcon
+              tip={`Remove ${product?.title} from bookmark`}
+              IconName={TrashIcon}
+              onClick={handleBookmark}
+            />
+            <ButtonWithTooltipIcon
+              tip={`Share ${product?.title}`}
+              onClick={async () => {
+                const shareUrlString =
+                  window.location.href + "products/" + product?.id;
+                const shareData = {
+                  title: product?.title,
+                  text: product?.sub_title,
+                  url: shareUrlString,
+                };
+                await shareThis({ shareUrlString, shareData });
+              }}
+              IconName={Share1Icon}
+            />
+          </div>
+        </div>
+        {/* <ChatSellerLink text="Chat seller" recipientId={5} /> */}
       </div>
     </motion.section>
   );

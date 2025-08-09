@@ -6,7 +6,8 @@ import { useAuth } from "../context/userContext";
  * Hook to connect to a specific chat room websocket and update the messages store in real time.
  * This handles real-time message delivery within a specific conversation.
  */
-const useMessagingWebSocket = ({ room_name }) => {
+// const useMessagingWebSocket = ({ room_name }) => {
+const useMessagingWebSocket = ({}) => {
   const { user: currentUser } = useAuth();
   // const [searchParams] = useSearchParams();
   // const room_name = searchParams.get("room_name")
@@ -16,12 +17,17 @@ const useMessagingWebSocket = ({ room_name }) => {
   const setOpenedMessage = useMessagesStore((s) => s.setOpenedMessage);
 
   // Connect to specific chat WebSocket endpoint: ws/chat/<room_name>/
-  useWebSocket("chat", room_name, {
+  // useWebSocket("chat", room_name, {
+  //   onMessage: handleNewMessage,
+  // });
+  useWebSocket("unified", undefined, {
     onMessage: handleNewMessage,
   });
 
   function handleNewMessage(event) {
     if (event.eventName !== "message_received") return;
+    const room_name = !event.roomId;
+    if (!room_name) return;
     const message = event.payload;
     console.log("A new message just arrived", message);
     //

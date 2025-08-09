@@ -782,10 +782,11 @@ export const SmileIcon = ({
   </svg>
 );
 
-export const StarFilledIcon = () => (
+export const StarFilledIcon = ({ width = "18", height = "18", className }) => (
   <svg
-    width="15"
-    height="15"
+    width={width}
+    height={height}
+    className={className}
     viewBox="0 0 21 21"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -797,10 +798,15 @@ export const StarFilledIcon = () => (
   </svg>
 );
 
-export const StarOutlinedIcon = () => (
+export const StarOutlinedIcon = ({
+  width = "15",
+  height = "15",
+  className,
+}) => (
   <svg
-    width="15"
-    height="15"
+    width={width}
+    height={height}
+    className={className}
     viewBox="0 0 21 21"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -808,7 +814,7 @@ export const StarOutlinedIcon = () => (
     <path
       d="M10.0247 4.58133C10.1744 4.12068 10.8261 4.12068 10.9758 4.58133L12.0453 7.87313C12.2461 8.49116 12.8221 8.9096 13.4719 8.9096H16.9331C17.4175 8.9096 17.6189 9.52941 17.227 9.81411L14.4268 11.8486C13.9011 12.2305 13.6811 12.9076 13.8819 13.5256L14.9515 16.8174C15.1012 17.2781 14.5739 17.6611 14.1821 17.3764L11.3819 15.342C10.8562 14.96 10.1443 14.96 9.61855 15.342L6.81838 17.3764C6.42652 17.6611 5.89928 17.2781 6.04896 16.8174L7.11853 13.5256C7.31934 12.9076 7.09935 12.2305 6.57362 11.8486L3.77345 9.81411C3.3816 9.52941 3.58298 8.9096 4.06735 8.9096H7.52855C8.17839 8.9096 8.75432 8.49116 8.95513 7.87313L10.0247 4.58133Z"
       fill="white"
-      stroke="#F1C644"
+      stroke="currentColor"
     />
   </svg>
 );
