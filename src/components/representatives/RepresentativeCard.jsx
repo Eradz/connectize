@@ -47,7 +47,11 @@ export default function RepresentativeCard({ user, company, role }) {
 
       <div className="">
         {currentUser?.id !== user?.id && (
-          <ConnectButton first_name={user?.first_name} id={user?.id} />
+          <ConnectButton
+            first_name={user?.first_name}
+            id={user?.id}
+            slug={user?.id}
+          />
         )}
       </div>
     </motion.div>

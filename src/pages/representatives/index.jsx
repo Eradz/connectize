@@ -55,7 +55,7 @@ export default function RepresentativesPage() {
           // status: "True",
           company_id: companyId,
           user: userIdParam,
-          page_size: 1,
+          page_size: 2,
           page: pageParam,
         },
         true
@@ -79,12 +79,14 @@ export default function RepresentativesPage() {
       <section className="flex flex-wrap justify-between gap-4 items-center">
         <HeadingText>
           Representatives {companyId && <br />}{" "}
-          {isLoadingCompanyDetails ? (
+          {isLoadingCompanyDetails && !!companyId ? (
             <div className="inline-block w-1/3 h-4 skeleton rounded mt-2" />
           ) : (
-            <Link to={"/" + companySlug} className="!text-gold">
-              @{companyDetails?.company_name}
-            </Link>
+            !!companyId && (
+              <Link to={"/" + companySlug} className="!text-gold">
+                @{companyDetails?.company_name}
+              </Link>
+            )
           )}
         </HeadingText>
 

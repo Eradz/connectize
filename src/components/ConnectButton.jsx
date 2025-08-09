@@ -17,14 +17,32 @@ export default function ConnectButton({
   const [hasConnected, setHasConnected] = useState(false);
 
   useEffect(() => {
-    const followingList =
-      type === "users"
-        ? currentUser?.followings
-        : currentCompany?.[0]?.followers?.flatMap(follower => [follower.company_follower.id, follower.user_follower.id]).filter(Boolean);
-    if (followingList) {
-      const isConnected = followingList.includes(currentUser?.id);
-      setHasConnected(isConnected);
+    if (type === "users") {
+      const isInFollowingList = currentUser?.followings.find(
+        (f) => f.type === "user" && f.id === id
+      );
+
+      setHasConnected(!!isInFollowingList);
+    } else {
+      const followingList = currentCompany?.[0]?.followers
+        ?.flatMap((follower) => [
+          follower.company_follower.id,
+          follower.user_follower.id,
+        ])
+        .filter(Boolean);
+      if (followingList) {
+        const isConnected = followingList.includes(currentUser?.id);
+        setHasConnected(isConnected);
+      }
     }
+    // const followingList =
+    //   type === "users"
+    //     ? currentUser?.followings
+    //     : currentCompany?.[0]?.followers?.flatMap(follower => [follower.company_follower.id, follower.user_follower.id]).filter(Boolean);
+    // if (followingList) {
+    //   const isConnected = followingList.includes(currentUser?.id);
+    //   setHasConnected(isConnected);
+    // }
   }, [currentUser, currentCompany, id, type]);
 
   const handleConnect = async () => {
