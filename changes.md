@@ -41,3 +41,8 @@
 - You can now favorite a chat and also show only favorited chats
 - Fixed the message blurred issue that was caused because of improper git merging
 - Added ( You) to a chat and chat header when the chat is the same user
+
+-
+- Bookmarks for services and products now work
+- Improved the UI/UX of the bookmarks page
+- You can now also see the company that owns a product/service that you bookedmarked

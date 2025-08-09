@@ -14,7 +14,7 @@ import { getCurrentUser } from "./users";
 //     "company": null
 // }
 
-export const getServices = async (params, returnFullRes = false) => {
+export const getServices = async (params = {}, returnFullRes = false) => {
   const { results: services, next } = await makeApiRequest({
     url: `api/services/${params.sortBy ? params.sortBy + "/" : ""}`,
     method: "GET",
@@ -23,7 +23,7 @@ export const getServices = async (params, returnFullRes = false) => {
 
   if (returnFullRes) return { data: services, next };
 
-  return services;
+  return services || [];
 };
 
 export const getSingleService = async (id) => {
@@ -127,13 +127,13 @@ export const bookmarkService = async (serviceId, data, hasBookmarked) => {
     await makeApiRequest({
       url: `api/services/${serviceId}/unlike/`,
       method: "POST",
-      data: { ...data, company_id: data.company.id },
+      data: { company: data.company.company_name },
     });
     return;
   }
   await makeApiRequest({
     url: `api/services/${serviceId}/like/`,
     method: "POST",
-    data: { ...data, company_id: data.company.id },
+    data: { company: data.company.company_name },
   });
 };
