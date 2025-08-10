@@ -49,3 +49,6 @@
 
 -
 - In prod, clicking on the services tab now links to the services page
+
+-
+- Fixed a very annoying overflow that only shows up on moblie view, caused by a popover in the header. NOTE i used a hack to solve the bug
