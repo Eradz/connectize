@@ -52,3 +52,7 @@
 
 -
 - Fixed a very annoying overflow that only shows up on moblie view, caused by a popover in the header. NOTE i used a hack to solve the bug
+
+-
+- Updating the UI when a comment has been posted is now faster
+- Comments are now fetched when the comment section is opened

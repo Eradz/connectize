@@ -24,7 +24,7 @@ import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
 import { usePollPosts } from "../../../hooks/usePolling";
 import { Heart } from "../../../icon";
-import { capitalizeFirst, formatNumber, shareThis } from "../../../lib/utils";
+import { capitalizeFirst, formatNumber } from "../../../lib/utils";
 import CompanyName from "../../company/CompanyName";
 import ReusableModal from "../../custom/ResusableModal";
 import FormatPostText from "../../FormatPostText";
@@ -39,6 +39,8 @@ import TimeAgo from "../../TimeAgo";
 
 import SocialShareModal from "../../CustomShareButton";
 import CustomShareButton from "../../CustomShareButton";
+import { useGetPostComments } from "../../../hooks/useComments";
+import { useQueryClient } from "@tanstack/react-query";
 
 function DiscoverPosts({
   searchArray,
@@ -46,7 +48,7 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { data: posts, isLoading, refetch } = usePollPosts();
+  const { data: posts, isLoading } = usePollPosts();
 
   const finalArray = isSearch
     ? searchArray
@@ -75,7 +77,6 @@ function DiscoverPosts({
             hasImage={post?.images?.length > 0}
             key={index}
             postItem={post}
-            refetchPosts={refetch}
           />
         ))
       )}
@@ -89,9 +90,19 @@ export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
   isSinglePost = false,
-  refetchPosts,
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
+  const {
+    data: comments,
+    refetch: refetchComments,
+    isLoading: isLoadingComments,
+  } = useGetPostComments(
+    { postId: postItem.id },
+    {
+      enabled: showCommentSection,
+    }
+  );
+
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
 
@@ -105,6 +116,10 @@ export const DiscoverPostItem = ({
     ? true
     : false;
 
+  const [commentsLength, setCommentsLength] = useState(
+    () => postItem.comments.length
+  );
+
   const [liked, setLiked] = useState(userHasLikedPost);
   const [likes, setLikes] = useState(postItem?.likes?.length);
   const [disabled, setDisabled] = useState(false);
@@ -113,6 +128,11 @@ export const DiscoverPostItem = ({
   useEffect(() => {
     setLikes(postItem?.likes?.length);
   }, [postItem?.likes?.length]);
+
+  useEffect(() => {
+    if (isLoadingComments || !comments) return;
+    setCommentsLength(comments?.length);
+  }, [comments?.length]);
 
   const handleLikePost = async () => {
     setLiked((prev) => !prev);
@@ -282,7 +302,7 @@ export const DiscoverPostItem = ({
             IconName={MessageOutlined}
             tip="Comments"
             textClassName="!text-[.6rem]"
-            text={formatNumber(postItem.comments.length)}
+            text={formatNumber(commentsLength)}
             onClick={() => setShowCommentSection(!showCommentSection)}
           />
           <ButtonWithTooltipIcon
@@ -318,9 +338,10 @@ export const DiscoverPostItem = ({
       <CommentSection
         showCommentSection={showCommentSection}
         setShowCommentSection={setShowCommentSection}
-        commentsData={postItem.comments}
+        commentsData={comments}
         postItem={postItem}
-        refetchPosts={refetchPosts}
+        refetchComments={refetchComments}
+        isLoading={isLoadingComments}
       />
     </motion.article>
   );
@@ -335,24 +356,41 @@ const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
   commentsData = [],
+  isLoading,
+  // setCommentsLength.
   postItem,
-  refetchPosts,
+  refetchComments,
 }) => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const { setRefetchInterval } = useCustomQuery();
+  const queryClient = useQueryClient();
 
   const handleComment = useCallback(async () => {
     if (comment.trim().length < 1) return;
 
     setLoading(true);
     try {
-      const { id } = await commentOnPost(postItem.id, postItem, comment);
-      await refetchPosts();
+      const newComment = await commentOnPost(postItem.id, postItem, comment);
+      const { id } = newComment;
+
+      queryClient.setQueryData(
+        ["comments", { postId: postItem.id }],
+        (oldComments) => {
+          // const lastComment = oldComments?.at(0);
+          // const clone = { ...lastComment, id: Math.random(), content: comment };
+
+          return [...oldComments, newComment];
+        }
+      );
+
+      refetchComments().catch((e) =>
+        console.log("Could not update to lastest comments")
+      );
       if (id) toast.success("Comment has been added");
 
-      setRefetchInterval(1000);
-      setTimeout(() => setRefetchInterval(false), 2000);
+      // setRefetchInterval(1000);
+      // setTimeout(() => setRefetchInterval(false), 2000);
       setComment("");
     } catch (error) {
       toast.error("Failed to submit the comment. Please try again.");
@@ -380,14 +418,28 @@ const CommentSection = ({
         />
       </div>
 
-      {commentsData.map((comment) => (
-        <MemoizedCommentBlock
-          key={comment.id}
-          comment={comment}
-          postUserId={postItem.user.id}
-        />
-      ))}
-
+      {isLoading
+        ? Array.from({ length: 3 }, (i) => {
+            return (
+              <div className="mb-4 flex gap-2 w-full" key={i}>
+                <div className="">
+                  <div className="w-7 h-7 skeleton rounded-full" />
+                </div>
+                <div className="flex-1">
+                  <div className="mb-3 w-28 h-3 skeleton rounded" />
+                  <div className="mb-1 w-1/2 h-2 skeleton rounded" />
+                  <div className="w-1/2 h-2 skeleton rounded" />
+                </div>
+              </div>
+            );
+          })
+        : commentsData.map((comment) => (
+            <MemoizedCommentBlock
+              key={comment.id}
+              comment={comment}
+              postUserId={postItem.user.id}
+            />
+          ))}
       <div className="mt-4 border-t pt-4 relative">
         <ReactQuill
           value={comment}

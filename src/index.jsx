@@ -16,7 +16,6 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <MyProvider>
-        {/* <div className="text-2xl font-bold">Ill stay here for now</div> */}
         <App />
       </MyProvider>
       <Toaster
