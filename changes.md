@@ -56,3 +56,6 @@
 -
 - Updating the UI when a comment has been posted is now faster
 - Comments are now fetched when the comment section is opened
+
+-
+- Added a link to the about us page on the login/signup pages

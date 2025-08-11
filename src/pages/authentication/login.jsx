@@ -9,6 +9,7 @@ import Form from "../../components/form";
 import HeadingText from "../../components/HeadingText";
 import SEO from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
+import LightParagraph from "../../components/ParagraphText";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
