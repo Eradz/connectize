@@ -59,3 +59,6 @@
 
 -
 - Added a link to the about us page on the login/signup pages
+
+-
+- Updated search to use new server implementation
