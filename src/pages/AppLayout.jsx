@@ -9,7 +9,7 @@ const AppLayout = () => {
   const isHomeRoute = pathname === "/" || pathname.startsWith("/messages");
   const isMessagesRoute = pathname.startsWith("/messages");
   return (
-    <main className="bg-background h-screen flex flex-col">
+    <main className="bg-background w-full  overflow-x-  h-screen flex flex-col">
       <Navbar />
 
       <section

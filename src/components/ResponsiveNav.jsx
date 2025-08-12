@@ -29,7 +29,7 @@ function ResponsiveNav() {
   const { toggleNav } = useNav();
 
   return (
-    <div className="flex justify-between items-center gap-2 sm:gap-4 w-full mb-4 max-md:mt-2">
+    <div className="flex justify-between items-center gap-2 sm:gap-4 w-full overflow-x- mb-4 max-md:mt-2">
       <JoinedUserCompanyImages />
 
       <FeedSearch className="max-xs:hidden" />
@@ -64,11 +64,34 @@ export const JoinedUserCompanyImages = () => {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const handleLogout = async () => {
     setLoading(true);
     await logOutCurrentUser();
     setLoading(false);
   };
+
+  function handleOpenPopOver() {
+    const container = document.getElementById(
+      "header-mobile-popover-container"
+    );
+
+    if (container) {
+      container.style.setProperty("overflow-x", "");
+      setIsPopoverOpen(true);
+    }
+  }
+  function handleClosePopOver() {
+    const container = document.getElementById(
+      "header-mobile-popover-container"
+    );
+
+    if (container) {
+      container.style.setProperty("overflow-x", "hidden");
+
+      setIsPopoverOpen(false);
+    }
+  }
 
   useEffect(() => {
     if (currentUser?.user_type === CompanyUserType) {
@@ -86,9 +109,13 @@ export const JoinedUserCompanyImages = () => {
   return !currentUser || isLoading ? (
     <ConjoinedAvatarSkeleton length={2} />
   ) : (
-    <div className="relative h-fit w-fit">
+    <div className="relative h-fit w-fit ">
       <div className="md:hidden">
-        <Popover>
+        <Popover
+          isOpen={isPopoverOpen}
+          onOpen={handleOpenPopOver}
+          onClose={handleClosePopOver}
+        >
           <PopoverTrigger>
             <Avatar
               src={currentUser?.avatar || ""}

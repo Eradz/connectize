@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Logo from "../../components/logo";
 import { getSession } from "../../lib/session";
+import LightParagraph from "../../components/ParagraphText";
 
 function AuthLayout({ redirectUrl = "/" }) {
   const session = getSession();
@@ -75,6 +76,17 @@ function AuthLayout({ redirectUrl = "/" }) {
               <small className="font-bold text-xs">Endorsed by NUPRC</small>
             </motion.section>
           )}
+
+          <p className="text-gray-500 text-center">
+            Learn more about{" "}
+            <a
+              href="https://about.connectize.co"
+              className="!text-gold font-semibold underline"
+              target="_blank"
+            >
+              Connectize.co
+            </a>
+          </p>
         </section>
       </section>
 
