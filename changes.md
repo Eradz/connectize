@@ -62,3 +62,6 @@
 
 -
 - Updated search to use new server implementation
+
+-
+- Updated the UI for the About us link in the sign in and signup pages
