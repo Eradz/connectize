@@ -19,86 +19,99 @@ function AuthLayout({ redirectUrl = "/" }) {
   }
 
   return (
-    <main className="flex justify-center h-screen p-4">
-      <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center  lg:!w-1/2 shrink-0 scrollbar-hidden">
-        <section className="w-full max-xs:h-ful flex-1 flex flex-col justify-center py-4 max-w-xl lg:max-w-md">
-          <Logo url="/login" />
-          <motion.section
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="flex flex-col-reverse gap-2"
-            key={pathname + "section"}
+    <div className="h-screen flex justify-center flex-col p-4">
+      <nav>
+        <p className="text-gray-500 underline text-right">
+          <a
+            href="https://about.connectize.co"
+            className="font-semibold"
+            target="_blank"
           >
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="max-w-screen-md text-[1.9rem] leading-tight font-bold"
-              key={pathname + "heading"}
-            >
-              {isLogin ? (
-                <>
-                  Connect, Collaborate and Thrive{" "}
-                  <span className="text-gold ">with Connectize</span>
-                </>
-              ) : isRegister ? (
-                <>
-                  <span className="text-gold font-bold">Connectize</span>{" "}
-                  bridges the gap between interactions and transactions within
-                  the oil and gas industry.
-                </>
-              ) : (
-                ""
-              )}
-            </motion.h1>
-          </motion.section>
-          <motion.section
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="mt-4"
-            key={pathname + "outlet"}
-          >
-            <Outlet />
-          </motion.section>
-
-          {isLoginOrRegister && (
+            About Connectize
+          </a>
+        </p>
+      </nav>
+      <main className="flex justify-center flex-1">
+        <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center  lg:!w-1/2 shrink-0 scrollbar-hidden">
+          <section className="w-full max-xs:h-ful flex-1 flex flex-col justify-center py-4 max-w-xl lg:max-w-md">
+            <Logo url="/login" />
             <motion.section
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              viewport={{ once: true }}
-              className="container flex items-center justify-center gap-2 font-semibold text-black mt-12 mb-8"
-              key={pathname + "endorsement"}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="flex flex-col-reverse gap-2"
+              key={pathname + "section"}
             >
-              <img src="/images/nuprc-logo.png" className="h-8 md:h-10" />
-              <small className="font-bold text-xs">Endorsed by NUPRC</small>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="max-w-screen-md text-[1.9rem] leading-tight font-bold"
+                key={pathname + "heading"}
+              >
+                {isLogin ? (
+                  <>
+                    Connect, Collaborate and Thrive{" "}
+                    <span className="text-gold ">with Connectize</span>
+                  </>
+                ) : isRegister ? (
+                  <>
+                    <span className="text-gold font-bold">Connectize</span>{" "}
+                    bridges the gap between interactions and transactions within
+                    the oil and gas industry.
+                  </>
+                ) : (
+                  ""
+                )}
+              </motion.h1>
             </motion.section>
-          )}
-
-          <p className="text-gray-500 text-center">
-            Learn more about{" "}
-            <a
-              href="https://about.connectize.co"
-              className="!text-gold font-semibold underline"
-              target="_blank"
+            <motion.section
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="mt-4"
+              key={pathname + "outlet"}
             >
-              Connectize.co
-            </a>
-          </p>
-        </section>
-      </section>
+              <Outlet />
+            </motion.section>
 
-      <section className="max-lg:hidden !w-[48%] shrink-0 pointer-events-none">
-        <DotLottieReact
-          src="/lottie/authentication.lottie"
-          loop
-          autoplay
-          className="size-full aspect-square"
-        />
-      </section>
-    </main>
+            {isLoginOrRegister && (
+              <motion.section
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                viewport={{ once: true }}
+                className="container flex items-center justify-center gap-2 font-semibold text-black mt-12 mb-8"
+                key={pathname + "endorsement"}
+              >
+                <img src="/images/nuprc-logo.png" className="h-8 md:h-10" />
+                <small className="font-bold text-xs">Endorsed by NUPRC</small>
+              </motion.section>
+            )}
+
+            <p className="text-gray-500 text-center">
+              Learn more about{" "}
+              <a
+                href="https://about.connectize.co"
+                className="!text-gold font-semibold underline"
+                target="_blank"
+              >
+                Connectize.co
+              </a>
+            </p>
+          </section>
+        </section>
+
+        <section className="max-lg:hidden !w-[48%] shrink-0 pointer-events-none">
+          <DotLottieReact
+            src="/lottie/authentication.lottie"
+            loop
+            autoplay
+            className="size-full aspect-square"
+          />
+        </section>
+      </main>
+    </div>
   );
 }
 

@@ -81,9 +81,9 @@ export const CompaniesArray = ({
   ) : companyArray?.length < 1 ? (
     <LightParagraph>No company found in search</LightParagraph>
   ) : (
-    <section className="space-y-4">
+    <section className="">
       {companyArray && hasFilter && (
-        <section className="flex flex-wrap items-center justify-between gap-2">
+        <section className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <h2 className="font-semibold">Sort By</h2>
 
           <div className="flex overflow-x-auto scrollbar-hidden scroll-smooth">
@@ -109,7 +109,13 @@ export const CompaniesArray = ({
         </section>
       )}
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <section
+        className={`grid grid-cols-1 ${
+          isSearch
+            ? "md:grid-cols-2"
+            : "sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
+        } gap-6`}
+      >
         {sortedCompanies?.map((company, index) => {
           return (
             <motion.div
@@ -143,13 +149,15 @@ export const CompaniesArray = ({
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center text-gray-400">
-                    <LocationOnOutlined className="sm:!size-4 !size-5" />
-                    <span className="text-sm sm:text-xs">
-                      {company?.address} {company?.city}, {company?.state},{" "}
-                      {company?.country}.
-                    </span>
-                  </div>
+                  {!isSearch && (
+                    <div className="flex items-center text-gray-400">
+                      <LocationOnOutlined className="sm:!size-4 !size-5" />
+                      <span className="text-sm sm:text-xs">
+                        {company?.address} {company?.city}, {company?.state},{" "}
+                        {company?.country}.
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -160,12 +168,10 @@ export const CompaniesArray = ({
               <div className="h-full" />
 
               <div
-                className={clsx(
-                  "py-4 border-t mt-4 px-4 flex items-center justify-between",
-                  {
-                    "!justify-center": company?.reviews?.length <= 0,
-                  }
-                )}
+                className={clsx("py-4 border-t mt-4 px-4 flex items-center ", {
+                  "justify-between": !!company?.reviews?.length,
+                  "justify-center": !company?.reviews?.length,
+                })}
               >
                 {company?.reviews && (
                   <ConJoinedImages

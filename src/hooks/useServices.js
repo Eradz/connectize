@@ -34,7 +34,5 @@ export const useGetServicesFirstPage = (params = {}) => {
   const { data: services, isLoading } = usePageinatedServices(params);
   const page1 = services?.pages?.[0]?.data;
 
-  console.log({ servicePage1: page1 });
-
   return { isLoading, data: page1 };
 };

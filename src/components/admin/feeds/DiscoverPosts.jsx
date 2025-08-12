@@ -117,7 +117,7 @@ export const DiscoverPostItem = ({
     : false;
 
   const [commentsLength, setCommentsLength] = useState(
-    () => postItem.comments.length
+    () => postItem.commentLength || 0
   );
 
   const [liked, setLiked] = useState(userHasLikedPost);

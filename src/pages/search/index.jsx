@@ -16,7 +16,7 @@ import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
-import { usePollAllCompanies } from "../../hooks/usePolling";
+// import { usePollAllCompanies } from "../../hooks/usePolling";
 import { getRandomOilAndGasKeyword } from "../../lib/helpers/getRandomOilAndGasWords";
 import { CompaniesArray } from "../companies";
 
@@ -28,9 +28,60 @@ export default function Search() {
   );
 }
 
-export const SearchTab = () => {
+function useSearchResults(searchQuery) {
   const { user: currentUser } = useAuth();
-  const { data: companies } = usePollAllCompanies();
+  const { data: companies, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ["search", { searchQuery, types: "companies" }],
+    queryFn: () =>
+      getSearchResults({ searchTerm: searchQuery, types: "companies" }),
+    enabled: !!searchQuery && !!currentUser,
+  });
+  const { data: posts, isLoading: isLoadingPosts } = useQuery({
+    queryKey: ["search", { searchQuery, types: "posts" }],
+    queryFn: () =>
+      getSearchResults({ searchTerm: searchQuery, types: "posts" }),
+    enabled: !!searchQuery && !!currentUser,
+  });
+
+  const { data: products, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ["search", { searchQuery, types: "products" }],
+    queryFn: () =>
+      getSearchResults({ searchTerm: searchQuery, types: "products" }),
+    enabled: !!searchQuery && !!currentUser,
+  });
+
+  const { data: services, isLoading: isLoadingServices } = useQuery({
+    queryKey: ["search", { searchQuery, types: "services" }],
+    queryFn: () =>
+      getSearchResults({ searchTerm: searchQuery, types: "services" }),
+    enabled: !!searchQuery && !!currentUser,
+  });
+  const { data: users, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ["search", { searchQuery, types: "users" }],
+    queryFn: () =>
+      getSearchResults({ searchTerm: searchQuery, types: "users" }),
+    enabled: !!searchQuery && !!currentUser,
+  });
+
+  return {
+    companies,
+    posts,
+    users,
+    services,
+    products,
+
+    //
+    isLoadingCompanies,
+    isLoadingPosts,
+    isLoadingProducts,
+    isLoadingServices,
+    isLoadingUsers,
+  };
+}
+
+export const SearchTab = () => {
+  // const { user: currentUser } = useAuth();
+  // const { data: companies } = usePollAllCompanies();
   const navigate = useNavigate();
 
   const [randKeyWord, setRandKeyWord] = useState(getRandomOilAndGasKeyword());
@@ -48,12 +99,20 @@ export const SearchTab = () => {
     }
   }, [searchQuery, randKeyWord]);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["search", searchQuery],
-    queryFn: () => getSearchResults(searchQuery),
-    enabled: !!searchQuery && !!currentUser,
-  });
+  // const { data, isLoading } = useQuery({
+  //   queryKey: ["search", searchQuery],
+  //   queryFn: () => getSearchResults(searchQuery),
+  //   enabled: !!searchQuery && !!currentUser,
+  // });
 
+  const data = useSearchResults(searchQuery);
+
+  const isAnyLoading =
+    data.isLoadingCompanies ||
+    data.isLoadingPosts ||
+    data.isLoadingServices ||
+    data.isLoadingUsers ||
+    data.isLoadingProducts;
   const isNotEmpty = (arr) => Array.isArray(arr) && arr.length > 0;
 
   const tabDefinitions = [
@@ -64,7 +123,7 @@ export const SearchTab = () => {
         <DiscoverPosts
           isSearch
           searchArray={data?.posts}
-          searchLoading={isLoading}
+          searchLoading={data?.isLoadingPosts}
         />
       ),
     },
@@ -76,7 +135,7 @@ export const SearchTab = () => {
           hasFilter={false}
           isSearch
           array={data?.companies}
-          searchLoading={isLoading}
+          searchLoading={data?.isLoadingCompanies}
         />
       ),
     },
@@ -148,7 +207,7 @@ export const SearchTab = () => {
                   product={product?.images?.services}
                   title={product?.title}
                   image={product?.images?.[0].image}
-                  companies={companies}
+                  // companies={companies}
                   companyName={product?.company?.company_name}
                 />
               );
@@ -185,7 +244,8 @@ export const SearchTab = () => {
     },
   ];
 
-  const filteredTabs = isLoading
+  // const filteredTabs = tabDefinitions;
+  const filteredTabs = isAnyLoading
     ? tabDefinitions
     : tabDefinitions.filter((tab) => isNotEmpty(data?.[tab.key]));
 
