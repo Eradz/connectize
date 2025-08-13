@@ -525,9 +525,12 @@ const AdminNotificationsManagement = () => {
                   href={selectedNotification.action_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm"
+                  className="text-blue-600 hover:text-blue-800 text-sm inline-flex items-center"
                 >
-                  {selectedNotification.action_text || 'View Details'} →
+                  {selectedNotification.action_text || 'View Details'}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 ml-1">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5l7 7-7 7" />
+                  </svg>
                 </a>
               </div>
             )}

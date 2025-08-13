@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
+import { ChatBubbleLeftRightIcon, BellIcon, CheckCircleIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -294,7 +295,7 @@ const AdminMessagesManagement = () => {
         <StatsCard
           title="Total Messages"
           value={totalMessages}
-          icon="💬"
+          icon={<ChatBubbleLeftRightIcon className="w-6 h-6" />}
           color="blue"
           loading={loading}
         />
@@ -302,7 +303,7 @@ const AdminMessagesManagement = () => {
           title="Unread Messages"
           value={unreadMessages}
           subtitle={`${totalMessages > 0 ? Math.round((unreadMessages / totalMessages) * 100) : 0}% unread`}
-          icon="🔔"
+          icon={<BellIcon className="w-6 h-6" />}
           color="red"
           loading={loading}
         />
@@ -310,14 +311,14 @@ const AdminMessagesManagement = () => {
           title="Read Messages"
           value={readMessages}
           subtitle={`${totalMessages > 0 ? Math.round((readMessages / totalMessages) * 100) : 0}% read`}
-          icon="✅"
+          icon={<CheckCircleIcon className="w-6 h-6" />}
           color="green"
           loading={loading}
         />
         <StatsCard
           title="Today's Messages"
           value={todayMessages}
-          icon="📅"
+          icon={<CalendarDaysIcon className="w-6 h-6" />}
           color="purple"
           loading={loading}
         />
