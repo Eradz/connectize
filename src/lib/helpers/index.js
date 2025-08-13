@@ -31,8 +31,8 @@ export function goToLogin() {
 // Configure Axios Defaults
 export const baseURL =
   process.env.NODE_ENV === "development"
-    ? "https://about.connectize.co" //"http://127.0.0.1:8000"
-    : "https://about.connectize.co";
+    ? "http://127.0.0.1:8000" // Development server
+    : "https://about.connectize.co"; // Production server
 
 axios.defaults.withCredentials = true;
 

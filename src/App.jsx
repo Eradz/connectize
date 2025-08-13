@@ -48,11 +48,17 @@ import PrivacyPolicy from "./pages/terms&policies/policy";
 import TermsAndConditions from "./pages/terms&policies/terms";
 import TermsLayout from "./pages/terms&policies/termsLayout";
 
+// Comprehensive Admin CMS Implementation
+import ComprehensiveAdmin from "./pages/admin/ComprehensiveAdmin";
+
 function App() {
   return (
     <>
       <SEO />
       <Routes>
+        {/* Comprehensive Admin CMS System */}
+        <Route path="/admin/*" element={<ComprehensiveAdmin />} />
+        
         <Route path={webRoutes.notFound} element={<NotFound />} />
 
         {/* Main App */}

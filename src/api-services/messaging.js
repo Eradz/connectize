@@ -31,3 +31,12 @@ export const markMessageAsRead = async (room_name) => {
 
   return message;
 };
+
+export const bulkDeleteMessages = async (ids) => {
+  const res = await makeApiRequest({
+    url: "api/messages/bulk-delete/",
+    method: "POST",
+    data: { ids },
+  });
+  return res;
+};

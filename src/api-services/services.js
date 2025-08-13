@@ -137,3 +137,26 @@ export const bookmarkService = async (serviceId, data, hasBookmarked) => {
     data: { ...data, company_id: data.company.id },
   });
 };
+
+export const deleteService = async (id) => {
+  return await makeApiRequest({
+    url: `api/services/${id}/`,
+    method: "DELETE",
+  });
+};
+
+export const updateService = async (id, data) => {
+  return await makeApiRequest({
+    url: `api/services/${id}/`,
+    method: "PATCH",
+    data,
+  });
+};
+
+export const bulkDeleteServices = async (ids) => {
+  return await makeApiRequest({
+    url: `api/services/bulk-delete/`,
+    method: "POST",
+    data: { ids },
+  });
+};
