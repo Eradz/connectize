@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
-import { WrenchScrewdriverIcon, StarIcon } from '@heroicons/react/24/outline';
+import { WrenchScrewdriverIcon, StarIcon, PlusIcon, TagIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -78,63 +79,66 @@ const AdminServicesManagement = () => {
 
   const columns = [
     {
-      key: 'id',
-      label: 'ID',
-      sortable: true,
-      width: '80px'
-    },
-    {
       key: 'title',
-      label: 'Title',
+      label: 'Service',
       sortable: true,
       render: (service) => (
-        <div className="flex items-center space-x-3">
-          {/* Show first image if available */}
-          {Array.isArray(service.images) && service.images[0]?.image && (
-            <img
-              src={service.images[0].image}
-              alt={service.title}
-              className="w-10 h-10 rounded-lg object-cover"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          )}
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 flex-shrink-0 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            {Array.isArray(service.images) && service.images[0]?.image ? (
+              <img
+                src={service.images[0].image}
+                alt={service.title}
+                className="w-full h-full rounded-lg object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : (
+              <WrenchScrewdriverIcon className="w-6 h-6 text-gray-400" />
+            )}
+          </div>
           <div>
-            <div className="font-medium text-gray-900">{service.title}</div>
-            <div className="text-sm text-gray-500">{service.category}</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{service.title}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{service.company || 'N/A'}</div>
           </div>
         </div>
       )
     },
     {
-      key: 'company',
-      label: 'Company',
+      key: 'category',
+      label: 'Category',
       sortable: true,
       render: (service) => (
-        <div>
-          <div className="font-medium text-gray-900">
-            {service.company || 'N/A'}
-          </div>
-          <div className="text-sm text-gray-500">{service.sub_title || ''}</div>
+        <div className="flex items-center">
+          <TagIcon className="w-4 h-4 mr-2 text-gray-400" />
+          <span className="text-sm text-gray-800 dark:text-gray-300">{service.category}</span>
         </div>
       )
     },
     {
       key: 'featured',
       label: 'Featured',
+      sortable: true,
+      width: '120px',
       render: (service) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          service.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
-        }`}>
-          {service.featured ? 'Featured' : 'Regular'}
-        </span>
+        service.featured ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+            <StarIconSolid className="h-4 w-4 mr-1.5" />
+            Featured
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+            Regular
+          </span>
+        )
       )
     },
     {
       key: 'date_created',
       label: 'Created',
       sortable: true,
+      width: '140px',
       render: (service) => (
-        <div className="text-sm text-gray-900">
+        <div className="text-sm text-gray-900 dark:text-gray-300">
           {new Date(service.date_created).toLocaleDateString()}
         </div>
       )
@@ -267,7 +271,7 @@ const AdminServicesManagement = () => {
     <div className="space-y-6">
       {/* Header */}
       <PageHeader
-        title="Services Management"
+        title="Service Management"
         subtitle="Manage all services and offerings on the platform"
         actions={
           <div className="flex items-center gap-2">
@@ -285,7 +289,7 @@ const AdminServicesManagement = () => {
               onChange={(e) => { setFilterFeatured(e.target.value); setPage(1); }}
               className="w-auto"
             >
-              <option value="">All</option>
+              <option value="">All Status</option>
               <option value="true">Featured</option>
               <option value="false">Regular</option>
             </Select>
@@ -298,7 +302,10 @@ const AdminServicesManagement = () => {
                 Clear Filters
               </Button>
             )}
-            <Button onClick={handleCreate}>Add New Service</Button>
+            <Button onClick={handleCreate}>
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Add Service
+            </Button>
           </div>
         }
       />

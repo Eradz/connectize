@@ -7,6 +7,7 @@ import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
 import { NoSymbolIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { CheckBadgeIcon } from '@heroicons/react/24/solid';
 
 // Companies Management using generic components (live API only)
 const AdminCompaniesManagement = () => {
@@ -55,12 +56,18 @@ const AdminCompaniesManagement = () => {
       header: 'Company', sortable: true, sortKey: 'company_name',
       render: (c) => (
         <div className="flex items-center">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold">{c.company_name?.[0] || 'C'}</span>
+          <div className="w-10 h-10 flex-shrink-0">
+            {c.logo ? (
+              <img className="w-10 h-10 rounded-lg object-cover" src={c.logo} alt={c.company_name} />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">{c.company_name?.[0] || 'C'}</span>
+              </div>
+            )}
           </div>
           <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{c.company_name}</div>
-            <div className="text-xs text-gray-500">{c.website || '—'}</div>
+            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{c.company_name}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{c.website || '—'}</div>
           </div>
         </div>
       )
@@ -75,9 +82,16 @@ const AdminCompaniesManagement = () => {
     {
       header: 'Verified', sortable: true, sortKey: 'verify', width: '120px',
       render: (c) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${c.verify ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-          {c.verify ? 'Verified' : 'Unverified'}
-        </span>
+        c.verify ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            <CheckBadgeIcon className="h-4 w-4 mr-1.5" />
+            Verified
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+            Unverified
+          </span>
+        )
       )
     },
     {

@@ -6,7 +6,7 @@ import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
-import { NoSymbolIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { NoSymbolIcon, PlusIcon, CheckCircleIcon, ClockIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
 // Posts Management (live API only) using generic building blocks
 const AdminPostsManagement = () => {
@@ -38,21 +38,39 @@ const AdminPostsManagement = () => {
   // Columns
   const columns = useMemo(() => ([
     {
-      header: 'Body', sortable: false,
-      render: (p) => <div className="truncate max-w-xl text-sm text-gray-900">{p.body || '—'}</div>
-    },
-    {
-      header: 'User',
-      render: (p) => <span className="text-sm text-gray-900">{p.user?.full_name || p.user?.email || '—'}</span>
-    },
-    {
-      header: 'Company', sortable: false,
-      render: (p) => <span className="text-sm text-gray-900">{p.company?.company_name || '—'}</span>
-    },
-    {
-      header: 'Status', sortable: false, width: '120px',
+      header: 'Post', sortable: false,
       render: (p) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${p.status === 'PUBLISHED' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+        <div className="flex items-start space-x-4">
+          <div className="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+            {p.images && p.images.length > 0 ? (
+              <img src={p.images[0]} alt="Post" className="w-full h-full object-cover rounded-lg" />
+            ) : (
+              <PhotoIcon className="w-6 h-6 text-gray-400" />
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-2">{p.body || '—'}</p>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              by {p.user?.full_name || p.user?.email || 'System'}
+              {p.company && ` for ${p.company.company_name}`}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Status', sortable: true, sortKey: 'status', width: '140px',
+      render: (p) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          p.status === 'PUBLISHED' 
+            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+        }`}>
+          {p.status === 'PUBLISHED' ? (
+            <CheckCircleIcon className="h-4 w-4 mr-1.5" />
+          ) : (
+            <ClockIcon className="h-4 w-4 mr-1.5" />
+          )}
           {p.status || 'DRAFT'}
         </span>
       )
@@ -61,6 +79,14 @@ const AdminPostsManagement = () => {
       header: 'Date', sortable: true, sortKey: 'date_created', width: '140px',
       render: (p) => p.date_created ? new Date(p.date_created).toLocaleDateString() : '—'
     },
+    {
+      header: 'Comments', sortable: false, width: '120px',
+      render: (p) => (
+        <span className={`text-sm ${p.allow_comments ? 'text-gray-800 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500'}`}>
+          {p.allow_comments ? 'Enabled' : 'Disabled'}
+        </span>
+      )
+    }
   ]), []);
 
   // Fetcher
@@ -173,12 +199,12 @@ const AdminPostsManagement = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Posts"
-        subtitle="Manage posts from live Django API"
+        title="Post Management"
+        subtitle="Manage user and company-generated posts"
         actions={
           hasPermission('content.add') && !isCreateRoute ? (
             <Button onClick={() => navigate('/admin/content/create')}>
-              <PencilSquareIcon className="w-4 h-4 mr-2" aria-hidden="true" />
+              <PlusIcon className="w-5 h-5 mr-2" aria-hidden="true" />
               Create Post
             </Button>
           ) : null
