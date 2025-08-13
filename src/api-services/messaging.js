@@ -41,3 +41,13 @@ export const bulkDeleteMessages = async (ids) => {
   });
   return res;
 };
+
+export const updateMessage = async (id, { content }) => {
+  const res = await makeApiRequest({
+    url: `api/messages/${id}/`,
+    method: "PATCH",
+    data: { content },
+    contentType: "application/json",
+  });
+  return res;
+};

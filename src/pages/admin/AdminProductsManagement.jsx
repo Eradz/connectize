@@ -392,9 +392,9 @@ const AdminProductsManagement = () => {
         title={modalMode === 'create' ? 'Add New Product' : 'Edit Product'}
         size="lg"
       >
-  <Modal.Form
+      <Modal.Form
           fields={productFields}
-          initialData={selectedProduct}
+          data={selectedProduct || {}}
           onSubmit={handleSubmit}
           onCancel={() => setShowModal(false)}
           submitLabel={modalMode === 'create' ? 'Create Product' : 'Update Product'}

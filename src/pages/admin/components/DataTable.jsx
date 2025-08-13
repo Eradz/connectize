@@ -12,6 +12,7 @@ const DataTable = ({
   onRowClick,
   onEdit,
   onDelete,
+  getActions,
   onExport,
   // Selection control (optional controlled mode)
   selectedItems,
@@ -306,7 +307,7 @@ const DataTable = ({
                   </div>
                 </th>
               ))}
-              {(onEdit || onDelete) && (
+              {(onEdit || onDelete || getActions) && (
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -336,32 +337,43 @@ const DataTable = ({
           {formatCellValue(row, column)}
                   </td>
                 ))}
-                {(onEdit || onDelete) && (
+                {(onEdit || onDelete || getActions) && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-            {onEdit && (
-                        <button
-              type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEdit(row);
-                          }}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Edit
-                        </button>
-                      )}
-            {onDelete && (
-                        <button
-              type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(row);
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
+                    <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+                      {getActions ? (
+                        Array.isArray(getActions(row))
+                          ? getActions(row).map((act, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => act.onClick && act.onClick()}
+                                className={act.className || 'text-blue-600 hover:text-blue-900'}
+                              >
+                                {act.label}
+                              </button>
+                            ))
+                          : getActions(row)
+                      ) : (
+                        <>
+                          {onEdit && (
+                            <button
+                              type="button"
+                              onClick={() => onEdit(row)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Edit
+                            </button>
+                          )}
+                          {onDelete && (
+                            <button
+                              type="button"
+                              onClick={() => onDelete(row)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </td>

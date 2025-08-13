@@ -243,6 +243,7 @@ const DataTable = ({
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         checked={selected.includes(row.id)}
                         onChange={() => toggleOne(row.id)}
+                        onClick={(e) => { e.stopPropagation(); }}
                       />
                     </td>
                   )}
@@ -252,7 +253,11 @@ const DataTable = ({
                     </td>
                   ))}
                   {renderRowActions && (
-                    <td className="px-6 py-4 text-sm">{renderRowActions(row)}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <div onClick={(e) => { e.stopPropagation(); }}>
+                        {renderRowActions(row)}
+                      </div>
+                    </td>
                   )}
                 </tr>
               ))}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
-import { getMessagesForUser as getMessages, markMessageAsRead, bulkDeleteMessages } from '../../api-services/messaging';
+import { getMessagesForUser as getMessages, markMessageAsRead, bulkDeleteMessages, updateMessage } from '../../api-services/messaging';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
 
@@ -11,6 +11,8 @@ const AdminMessagesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editContent, setEditContent] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
 
   useEffect(() => {
@@ -118,17 +120,7 @@ const AdminMessagesManagement = () => {
         </div>
       )
     },
-    {
-      key: 'subject',
-      label: 'Subject',
-      sortable: true,
-  searchAccessor: (message) => message.subject || '',
-      render: (message) => (
-        <div className={`${!message.is_read ? 'font-semibold' : 'font-normal'}`}>
-          {message.subject || 'No Subject'}
-        </div>
-      )
-    },
+  // Subject column removed per request
     {
       key: 'content',
       label: 'Message Preview',
@@ -248,9 +240,18 @@ const AdminMessagesManagement = () => {
 
   const getActions = (message) => [
     {
-      label: 'View Message',
+      label: 'View',
       onClick: () => handleViewMessage(message),
       className: 'text-blue-600 hover:text-blue-900'
+    },
+    {
+      label: 'Edit',
+      onClick: () => {
+        setEditContent(message.content || message.message || '');
+        setSelectedMessage(message);
+        setEditModalOpen(true);
+      },
+      className: 'text-indigo-600 hover:text-indigo-900'
     },
     {
       label: message.is_read ? 'Mark as Unread' : 'Mark as Read',
@@ -440,6 +441,45 @@ const AdminMessagesManagement = () => {
               </button>
             </div>
           </div>
+        )}
+      </Modal>
+
+      {/* Edit Message Modal */}
+      <Modal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Edit Message"
+        size="lg"
+      >
+        {selectedMessage && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                await updateMessage(selectedMessage.id, { content: editContent });
+                await fetchMessages();
+                setEditModalOpen(false);
+              } catch (err) {
+                console.error('Failed to update message', err);
+                alert('Failed to update message');
+              }
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+              <textarea
+                className="w-full border rounded p-2"
+                rows={6}
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end space-x-3 border-t pt-4">
+              <button type="button" onClick={() => setEditModalOpen(false)} className="px-4 py-2 border rounded">Cancel</button>
+              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Save Changes</button>
+            </div>
+          </form>
         )}
       </Modal>
     </div>

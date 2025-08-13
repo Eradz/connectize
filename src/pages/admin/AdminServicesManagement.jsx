@@ -380,7 +380,7 @@ const AdminServicesManagement = () => {
       >
         <Modal.Form
           fields={serviceFields}
-          initialData={selectedService}
+          data={selectedService || {}}
           onSubmit={handleSubmit}
           onCancel={() => setShowModal(false)}
           submitLabel={modalMode === 'create' ? 'Create Service' : 'Update Service'}
