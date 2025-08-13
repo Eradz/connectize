@@ -2,18 +2,17 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.connectize.app",
-  appName: "connectize",
+  appName: "Connectize",
   webDir: "build",
   android: {
     buildOptions: {
-      keystorePath: "android/app/my-release-key.jks",
-      keystorePassword: "t_11BPPOWTA0Fhcv7oyPE5ix_pzdDU9EJMygnRosw0MKJtPg6Qqf",
+      keystorePath: "app/mykeystore.jks",
+      keystorePassword: "t11BPPOWTA0Fhcv7oyPE5ixpzdDU9EJMygnRosw0MKJtPg6Qqf",
       // keystoreAlias: "my-key-alias",
-
+      keystoreAlias: "connectize",
       keystoreAliasPassword:
-        "t_11BPPOWTA0Fhcv7oyPE5ix_pzdDU9EJMygnRosw0MKJtPg6Qqf",
+        "t11BPPOWTA0Fhcv7oyPE5ixpzdDU9EJMygnRosw0MKJtPg6Qqf",
     },
-
     // signing: {
     //   keystorePath: "android/app/my-release-key.jks",
     //   keystorePassword: "ConnectizeSecret!",

@@ -117,7 +117,7 @@ export const DiscoverPostItem = ({
     : false;
 
   const [commentsLength, setCommentsLength] = useState(
-    () => postItem.commentLength || 0
+    () => postItem.numberOfComments || 0
   );
 
   const [liked, setLiked] = useState(userHasLikedPost);
@@ -176,7 +176,7 @@ export const DiscoverPostItem = ({
 
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
             <CompanyName
-              name={postItem?.company?.company_name}
+              name={postItem?.company?.slug}
               verified={postItem?.company?.verify}
             />
             <small className="text-gray-400 lowercase shrink-0">
