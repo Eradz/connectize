@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import Button from '../ui/Button';
+import Input, { Textarea } from '../ui/Input';
+import Select from '../ui/Select';
 
 /**
  * Generic ResourceForm for Create/Edit aligning with DRF error messages
@@ -32,22 +35,19 @@ const ResourceForm = ({ title, fields, initialValues = {}, onSubmit, onCancel, s
   };
 
   const renderField = (f) => {
-    const err = errors[f.name];
-    const common = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent';
     switch (f.type) {
       case 'select':
         return (
-          <select
+          <Select
             value={values[f.name] ?? ''}
             onChange={(e) => handleChange(f.name, e.target.value)}
-            className={common}
             required={f.required}
           >
             <option value="">Select {f.label.toLowerCase()}</option>
             {(f.options || []).map((opt) => (
               <option key={String(opt.value)} value={opt.value}>{opt.label}</option>
             ))}
-          </select>
+          </Select>
         );
       case 'checkbox':
         return (
@@ -63,22 +63,20 @@ const ResourceForm = ({ title, fields, initialValues = {}, onSubmit, onCancel, s
         );
       case 'textarea':
         return (
-          <textarea
+          <Textarea
             value={values[f.name] ?? ''}
             onChange={(e) => handleChange(f.name, e.target.value)}
-            className={common}
             placeholder={f.placeholder}
-            rows={4}
+            rows={f.rows || 4}
             required={f.required}
           />
         );
       default:
         return (
-          <input
+          <Input
             type={f.type || 'text'}
             value={values[f.name] ?? ''}
             onChange={(e) => handleChange(f.name, e.target.value)}
-            className={common}
             placeholder={f.placeholder}
             required={f.required}
             autoComplete="off"
@@ -110,13 +108,13 @@ const ResourceForm = ({ title, fields, initialValues = {}, onSubmit, onCancel, s
 
         <div className="md:col-span-2 flex items-center justify-end gap-3">
           {onCancel && (
-            <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+            <Button type="button" variant="secondary" onClick={onCancel}>
               Cancel
-            </button>
+            </Button>
           )}
-          <button type="submit" disabled={submitting} className={`px-4 py-2 rounded-lg text-white ${submitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} transition-colors`}>
+          <Button type="submit" disabled={submitting}>
             {submitLabel}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
