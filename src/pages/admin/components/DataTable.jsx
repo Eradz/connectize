@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
+import Checkbox from '../../../components/ui/Checkbox';
 
 const DataTable = ({ 
   data = [], 
@@ -283,11 +285,10 @@ const DataTable = ({
             <tr>
               {actions && (
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <input
-                    type="checkbox"
+                  <Checkbox
+                    id="select-all"
                     checked={paginatedData.length > 0 && selectedRows.length === paginatedData.length}
                     onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="rounded border-gray-300"
                   />
                 </th>
               )}
@@ -303,7 +304,11 @@ const DataTable = ({
                     <span>{column.label}</span>
                     {sortable && sortConfig.key === column.key && (
                       <span className="text-blue-600">
-                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                        {sortConfig.direction === 'asc' ? (
+                          <ChevronUpIcon className="w-4 h-4" />
+                        ) : (
+                          <ChevronDownIcon className="w-4 h-4" />
+                        )}
                       </span>
                     )}
                   </div>
@@ -325,13 +330,13 @@ const DataTable = ({
               >
                 {actions && (
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(row.id)}
-                      onChange={(e) => handleSelectRow(row.id, e.target.checked)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="rounded border-gray-300"
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        id={`row-select-${row.id}`}
+                        checked={selectedRows.includes(row.id)}
+                        onChange={(e) => handleSelectRow(row.id, e.target.checked)}
+                      />
+                    </div>
                   </td>
                 )}
         {columns.map((column) => (

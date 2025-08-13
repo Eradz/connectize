@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
+import { WrenchScrewdriverIcon, StarIcon } from '@heroicons/react/24/outline';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
@@ -307,7 +308,7 @@ const AdminServicesManagement = () => {
         <StatsCard
           title="Total Services"
           value={totalServices}
-          icon="🔧"
+          icon={<WrenchScrewdriverIcon className="w-6 h-6" />}
           color="blue"
           loading={loading}
         />
@@ -315,7 +316,7 @@ const AdminServicesManagement = () => {
           title="Featured Services"
           value={featuredServices}
           subtitle={`${totalServices > 0 ? Math.round((featuredServices / totalServices) * 100) : 0}% featured`}
-          icon="⭐"
+          icon={<StarIcon className="w-6 h-6" />}
           color="yellow"
           loading={loading}
         />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { UsersIcon, BuildingOffice2Icon, DocumentTextIcon, Cog6ToothIcon, ArrowPathIcon, ChartBarIcon, FireIcon, BoltIcon, ClipboardDocumentListIcon, NoSymbolIcon, HandThumbUpIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { UsersIcon, BuildingOffice2Icon, DocumentTextIcon, Cog6ToothIcon, ArrowPathIcon, ChartBarIcon, FireIcon, BoltIcon, ClipboardDocumentListIcon, NoSymbolIcon, HandThumbUpIcon, ChatBubbleLeftRightIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
@@ -656,12 +656,8 @@ const AdminAnalyticsReports = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900">
                       Cohort Retention
-                      <span
-                        className="ml-2 text-gray-400 cursor-help text-sm"
-                        title="Weekly cohorts by signup week. Each cell shows % of that cohort active in the given week."
-                        aria-label="Retention explanation"
-                      >
-                        ℹ️
+                      <span className="ml-2 text-gray-400 cursor-help text-sm" title="Weekly cohorts by signup week. Each cell shows % of that cohort active in the given week." aria-label="Retention explanation">
+                        <InformationCircleIcon className="w-4 h-4" aria-hidden="true" />
                       </span>
                     </h3>
                     <div className="flex items-center space-x-3">
@@ -790,12 +786,8 @@ const AdminAnalyticsReports = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <div className="text-sm text-gray-500">
                         DAU
-                        <span
-                          className="ml-2 text-gray-400 cursor-help"
-                          title="Daily Active Users — unique users who engaged in the last 24 hours."
-                          aria-label="Daily Active Users explanation"
-                        >
-                          ℹ️
+                        <span className="ml-2 text-gray-400 cursor-help" title="Daily Active Users — unique users who engaged in the last 24 hours." aria-label="Daily Active Users explanation">
+                          <InformationCircleIcon className="w-4 h-4" aria-hidden="true" />
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-gray-900">{analyticsData.engagement?.dau ?? 0}</div>
@@ -803,12 +795,8 @@ const AdminAnalyticsReports = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <div className="text-sm text-gray-500">
                         WAU
-                        <span
-                          className="ml-2 text-gray-400 cursor-help"
-                          title="Weekly Active Users — unique users who engaged over the last 7 days."
-                          aria-label="Weekly Active Users explanation"
-                        >
-                          ℹ️
+                        <span className="ml-2 text-gray-400 cursor-help" title="Weekly Active Users — unique users who engaged over the last 7 days." aria-label="Weekly Active Users explanation">
+                          <InformationCircleIcon className="w-4 h-4" aria-hidden="true" />
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-gray-900">{analyticsData.engagement?.wau ?? 0}</div>
@@ -816,12 +804,8 @@ const AdminAnalyticsReports = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <div className="text-sm text-gray-500">
                         MAU
-                        <span
-                          className="ml-2 text-gray-400 cursor-help"
-                          title="Monthly Active Users — unique users who engaged over the last 30 days."
-                          aria-label="Monthly Active Users explanation"
-                        >
-                          ℹ️
+                        <span className="ml-2 text-gray-400 cursor-help" title="Monthly Active Users — unique users who engaged over the last 30 days." aria-label="Monthly Active Users explanation">
+                          <InformationCircleIcon className="w-4 h-4" aria-hidden="true" />
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-gray-900">{analyticsData.engagement?.mau ?? 0}</div>
@@ -829,12 +813,8 @@ const AdminAnalyticsReports = () => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <div className="text-sm text-gray-500">
                         Stickiness (DAU/MAU)
-                        <span
-                          className="ml-2 text-gray-400 cursor-help"
-                          title="Stickiness = DAU / MAU — the share of monthly active users who are active on a typical day."
-                          aria-label="Stickiness explanation"
-                        >
-                          ℹ️
+                        <span className="ml-2 text-gray-400 cursor-help" title="Stickiness = DAU / MAU — the share of monthly active users who are active on a typical day." aria-label="Stickiness explanation">
+                          <InformationCircleIcon className="w-4 h-4" aria-hidden="true" />
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-gray-900">{(analyticsData.engagement?.stickiness ?? 0)}%</div>

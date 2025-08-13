@@ -4,5 +4,21 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react()],
   server: { port: 3000 },
-  build: { outDir: "build" },
+  build: {
+    outDir: "build",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: [
+            "react",
+            "react-dom",
+            "react-router-dom",
+          ],
+          charts: [
+            "recharts",
+          ],
+        },
+      },
+    },
+  },
 });

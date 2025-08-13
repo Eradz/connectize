@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, MinusSmallIcon } from '@heroicons/react/24/outline';
 
 const StatsCard = ({ 
   title, 
@@ -60,9 +61,9 @@ const StatsCard = ({
           {change !== undefined && (
             <div className="mt-2 flex items-center">
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${changeColorClasses[changeType]}`}>
-                {changeType === 'positive' && '↗'}
-                {changeType === 'negative' && '↘'}
-                {changeType === 'neutral' && '→'}
+                {changeType === 'positive' && <ArrowTrendingUpIcon className="w-4 h-4" />}
+                {changeType === 'negative' && <ArrowTrendingDownIcon className="w-4 h-4" />}
+                {changeType === 'neutral' && <MinusSmallIcon className="w-4 h-4" />}
                 <span className="ml-1">
                   {typeof change === 'number' ? `${change > 0 ? '+' : ''}${change}%` : change}
                 </span>

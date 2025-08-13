@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ExclamationTriangleIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, DocumentIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
+import Checkbox from '../ui/Checkbox';
 
 /**
  * Generic server-driven DataTable
@@ -201,9 +202,8 @@ const DataTable = ({
               <tr>
                 {selectable && (
                   <th className="px-6 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    <Checkbox
+                      id="select-all"
                       checked={selected.length === items.length && items.length > 0}
                       onChange={toggleAll}
                     />
@@ -222,8 +222,9 @@ const DataTable = ({
                     >
                       <span>{col.header}</span>
                       {col.sortable && (
-                        <span className="text-gray-400 text-xs">
-                          {ordering === (col.sortKey || col.key) ? '▲' : ordering === `-${col.sortKey || col.key}` ? '▼' : ''}
+                        <span className="text-gray-400">
+                          {ordering === (col.sortKey || col.key) && <ChevronUpIcon className="w-4 h-4" />}
+                          {ordering === `-${col.sortKey || col.key}` && <ChevronDownIcon className="w-4 h-4" />}
                         </span>
                       )}
                     </button>
@@ -243,13 +244,13 @@ const DataTable = ({
                 >
                   {selectable && (
                     <td className="px-6 py-4">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        checked={selected.includes(row.id)}
-                        onChange={() => toggleOne(row.id)}
-                        onClick={(e) => { e.stopPropagation(); }}
-                      />
+                      <div onClick={(e) => { e.stopPropagation(); }}>
+                        <Checkbox
+                          id={`row-select-${row.id}`}
+                          checked={selected.includes(row.id)}
+                          onChange={() => toggleOne(row.id)}
+                        />
+                      </div>
                     </td>
                   )}
                   {columns.map((col, idx) => (
