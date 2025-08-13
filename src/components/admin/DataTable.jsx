@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ExclamationTriangleIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
@@ -180,16 +181,16 @@ const DataTable = ({
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">⚠️</span>
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+            <ExclamationTriangleIcon className="w-8 h-8" aria-hidden="true" />
           </div>
           <p className="text-red-600 mb-2">{error}</p>
           <button type="button" onClick={load} className="px-3 py-2 border rounded text-sm">Retry</button>
         </div>
       ) : items.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">📄</span>
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-500">
+            <DocumentIcon className="w-8 h-8" aria-hidden="true" />
           </div>
           <p className="text-gray-600">{emptyStateText}</p>
         </div>

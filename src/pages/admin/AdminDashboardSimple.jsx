@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { UsersIcon, BuildingOffice2Icon, CubeIcon, WrenchScrewdriverIcon, BanknotesIcon, DocumentTextIcon, ChartBarIcon, ChartPieIcon, BellIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const AdminDashboardSimple = () => {
   const [stats, setStats] = useState(null);
@@ -98,8 +99,9 @@ const AdminDashboardSimple = () => {
         <p className="text-gray-600 mt-2">
           Welcome to the Admin Dashboard! Here's what's happening with your platform today.
         </p>
-        <div className="mt-2 p-2 bg-blue-100 border border-blue-300 rounded text-blue-700 text-sm">
-          🔧 <strong>Debug Mode:</strong> Using mock data for testing. Real API integration ready!
+        <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm flex items-center gap-2">
+          <WrenchScrewdriverIcon className="w-5 h-5" aria-hidden="true" />
+          <span><strong>Debug Mode:</strong> Using mock data for testing. Real API integration ready!</span>
         </div>
       </div>
 
@@ -109,7 +111,7 @@ const AdminDashboardSimple = () => {
           title="Total Users"
           value={stats?.total_users?.toLocaleString() || "0"}
           growth={stats?.user_growth || 0}
-          icon="👥"
+          icon={<UsersIcon className="w-8 h-8 text-blue-600" aria-hidden="true" />}
           color="blue"
           subtitle="Active registered users"
         />
@@ -118,7 +120,7 @@ const AdminDashboardSimple = () => {
           title="Active Companies"
           value={stats?.active_companies?.toLocaleString() || "0"}
           growth={stats?.company_growth || 0}
-          icon="🏢"
+          icon={<BuildingOffice2Icon className="w-8 h-8 text-green-600" aria-hidden="true" />}
           color="green"
           subtitle="Verified companies"
         />
@@ -127,7 +129,7 @@ const AdminDashboardSimple = () => {
           title="Total Products"
           value={stats?.total_products?.toLocaleString() || "0"}
           growth={stats?.product_growth || 0}
-          icon="📦"
+          icon={<CubeIcon className="w-8 h-8 text-purple-600" aria-hidden="true" />}
           color="purple"
           subtitle="Products in catalog"
         />
@@ -136,7 +138,7 @@ const AdminDashboardSimple = () => {
           title="Active Services"
           value={stats?.total_services?.toLocaleString() || "0"}
           growth={stats?.service_growth || 0}
-          icon="🔧"
+          icon={<WrenchScrewdriverIcon className="w-8 h-8 text-orange-600" aria-hidden="true" />}
           color="orange"
           subtitle="Available services"
         />
@@ -145,7 +147,7 @@ const AdminDashboardSimple = () => {
           title="Monthly Revenue"
           value={`$${(stats?.monthly_revenue || 0).toLocaleString()}`}
           growth={stats?.revenue_growth || 0}
-          icon="💰"
+          icon={<BanknotesIcon className="w-8 h-8 text-emerald-600" aria-hidden="true" />}
           color="emerald"
           subtitle="Est. monthly revenue"
         />
@@ -154,7 +156,7 @@ const AdminDashboardSimple = () => {
           title="Published Posts"
           value={stats?.posts_created?.toLocaleString() || "0"}
           growth={stats?.posts_growth || 0}
-          icon="📝"
+          icon={<DocumentTextIcon className="w-8 h-8 text-indigo-600" aria-hidden="true" />}
           color="indigo"
           subtitle="Community posts"
         />
@@ -166,7 +168,7 @@ const AdminDashboardSimple = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">User Growth</h3>
           <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
             <div className="text-center">
-              <div className="text-4xl mb-2">📈</div>
+              <ChartBarIcon className="w-10 h-10 mx-auto mb-2 text-gray-400" aria-hidden="true" />
               <p className="text-gray-600">User Growth Chart</p>
               <p className="text-sm text-green-600 font-medium">Real data: {stats?.total_users} total users</p>
               <p className="text-xs text-gray-400 mt-1">Charts visualization coming soon</p>
@@ -178,7 +180,7 @@ const AdminDashboardSimple = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Activity</h3>
           <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
             <div className="text-center">
-              <div className="text-4xl mb-2">💹</div>
+              <ChartPieIcon className="w-10 h-10 mx-auto mb-2 text-gray-400" aria-hidden="true" />
               <p className="text-gray-600">Activity Overview</p>
               <p className="text-sm text-blue-600 font-medium">
                 {stats?.posts_created} posts • {stats?.total_products} products
@@ -240,7 +242,7 @@ const AdminDashboardSimple = () => {
               ))
             ) : (
               <div className="text-center text-gray-500 py-8">
-                <div className="text-4xl mb-2">📊</div>
+                <ChartBarIcon className="w-10 h-10 mx-auto mb-2 text-gray-400" aria-hidden="true" />
                 <p className="font-medium">No recent activities</p>
                 <p className="text-sm">Activities will appear here as they happen</p>
               </div>
@@ -325,11 +327,11 @@ const QuickActionButton = ({ title, count, action, description }) => (
 const ActivityItem = ({ title, description, time, type }) => {
   const getActivityIcon = (type) => {
     switch (type) {
-      case 'user_registration': return '👤';
-      case 'company_verification': return '✅';
-      case 'product_approval': return '📦';
-      case 'post_published': return '📝';
-      default: return '🔔';
+      case 'user_registration': return <UsersIcon className="w-4 h-4" aria-hidden="true" />;
+      case 'company_verification': return <CheckCircleIcon className="w-4 h-4" aria-hidden="true" />;
+      case 'product_approval': return <CubeIcon className="w-4 h-4" aria-hidden="true" />;
+      case 'post_published': return <DocumentTextIcon className="w-4 h-4" aria-hidden="true" />;
+      default: return <BellIcon className="w-4 h-4" aria-hidden="true" />;
     }
   };
 

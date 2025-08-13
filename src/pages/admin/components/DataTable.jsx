@@ -390,7 +390,9 @@ const DataTable = ({
       {paginatedData.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-500">
-            <div className="text-4xl mb-4">📊</div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-10 h-10 mx-auto mb-4 text-gray-400" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 3v18h18M7 13l3 3 7-7" />
+            </svg>
             <p className="text-lg font-medium">No data found</p>
             <p className="text-sm">Try adjusting your search or filters</p>
           </div>

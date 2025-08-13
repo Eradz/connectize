@@ -1,22 +1,22 @@
 import React from "react";
 import { Avatar } from "@chakra-ui/react";
-import { formatDistanceToNow } from "date-fns";
+import { UserIcon, BuildingOffice2Icon, CubeIcon, WrenchScrewdriverIcon, ExclamationTriangleIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 
 const RecentActivityCard = ({ activities = [] }) => {
   const getActivityIcon = (type) => {
     switch (type) {
       case "user_registration":
-        return "👤";
+        return <UserIcon className="w-4 h-4" aria-hidden="true" />;
       case "company_verification":
-        return "🏢";
+        return <BuildingOffice2Icon className="w-4 h-4" aria-hidden="true" />;
       case "product_approval":
-        return "📦";
+        return <CubeIcon className="w-4 h-4" aria-hidden="true" />;
       case "service_posting":
-        return "🔧";
+        return <WrenchScrewdriverIcon className="w-4 h-4" aria-hidden="true" />;
       case "user_report":
-        return "⚠️";
+        return <ExclamationTriangleIcon className="w-4 h-4" aria-hidden="true" />;
       default:
-        return "📋";
+        return <DocumentTextIcon className="w-4 h-4" aria-hidden="true" />;
     }
   };
 
@@ -53,7 +53,7 @@ const RecentActivityCard = ({ activities = [] }) => {
               {activity.avatar ? (
                 <Avatar src={activity.avatar} size="sm" />
               ) : (
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600">
                   {getActivityIcon(activity.type)}
                 </div>
               )}
