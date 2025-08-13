@@ -3,6 +3,7 @@ import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import Card, { CardHeader, CardContent } from '../../components/ui/Card';
 import { useLocation } from 'react-router-dom';
 
 // Content Management Component (Live API Only)
@@ -250,14 +251,14 @@ const AdminContentManagement = () => {
       />
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+      <Card>
+        <CardHeader className="px-6">
+          <nav className="flex space-x-8">
             {['posts', 'comments', 'media'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setSelectedItems([]); setShowCreateForm(false); setEditingItem(null); }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -270,17 +271,18 @@ const AdminContentManagement = () => {
               </button>
             ))}
           </nav>
-        </div>
-      </div>
+        </CardHeader>
+      </Card>
 
       {/* Create/Edit Post Form */}
       {showCreateForm && activeTab === 'posts' && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
+        <Card>
+          <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">{editingItem ? 'Edit Post' : 'Create New Post'}</h3>
             <button onClick={() => { setShowCreateForm(false); setEditingItem(null); }} className="text-gray-400 hover:text-gray-600">✕</button>
-          </div>
-          <form onSubmit={handleSubmitPost} className="space-y-6">
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmitPost} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Body *</label>
@@ -315,12 +317,14 @@ const AdminContentManagement = () => {
               <button type="button" onClick={() => { setShowCreateForm(false); setEditingItem(null); }} className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
               <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">{editingItem ? 'Update Post' : 'Create Post'}</button>
             </div>
-          </form>
-        </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
       {/* Filters and Bulk Actions */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <Card>
+        <CardContent>
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
           {activeTab === 'posts' && (
@@ -384,13 +388,15 @@ const AdminContentManagement = () => {
             </div>
           </div>
         )}
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Content Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <Card>
+        <CardHeader>
           <h3 className="text-lg font-semibold text-gray-900 capitalize">{activeTab === 'media' ? 'documents' : activeTab} ({totals[activeTab] || 0})</h3>
-        </div>
+        </CardHeader>
+        <CardContent className="p-0">
         {loading[activeTab] ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -512,7 +518,8 @@ const AdminContentManagement = () => {
             </table>
           </div>
         )}
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Pagination controls */}
       <div className="flex items-center justify-between">
