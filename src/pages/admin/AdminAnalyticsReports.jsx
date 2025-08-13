@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { UsersIcon, BuildingOffice2Icon, DocumentTextIcon, Cog6ToothIcon, ArrowPathIcon, ChartBarIcon, FireIcon, BoltIcon, ClipboardDocumentListIcon, NoSymbolIcon, HandThumbUpIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
@@ -409,8 +410,8 @@ const AdminAnalyticsReports = () => {
   if (!hasPermission('admin')) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚫</span>
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+          <NoSymbolIcon className="w-8 h-8" aria-hidden="true" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to view analytics and reports.</p>
@@ -443,7 +444,7 @@ const AdminAnalyticsReports = () => {
             onClick={() => loadAnalytics()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
           >
-            <span className="mr-2">🔄</span>
+            <ArrowPathIcon className="w-4 h-4 mr-2" aria-hidden="true" />
             Refresh
           </button>
         </div>
@@ -453,8 +454,8 @@ const AdminAnalyticsReports = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">👥</span>
+            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+              <UsersIcon className="w-7 h-7" aria-hidden="true" />
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-gray-900">Total Users</h3>
@@ -468,8 +469,8 @@ const AdminAnalyticsReports = () => {
         
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">🏢</span>
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
+              <BuildingOffice2Icon className="w-7 h-7" aria-hidden="true" />
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-gray-900">Active Companies</h3>
@@ -480,8 +481,8 @@ const AdminAnalyticsReports = () => {
         
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">📝</span>
+            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
+              <DocumentTextIcon className="w-7 h-7" aria-hidden="true" />
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-gray-900">Published Posts</h3>
@@ -492,8 +493,8 @@ const AdminAnalyticsReports = () => {
         
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">⚙️</span>
+            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center">
+              <Cog6ToothIcon className="w-7 h-7" aria-hidden="true" />
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-gray-900">Uptime</h3>
@@ -508,12 +509,12 @@ const AdminAnalyticsReports = () => {
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             {[
-              { key: 'overview', name: 'Overview', icon: '📊' },
-              { key: 'users', name: 'Users', icon: '👥' },
-              { key: 'engagement', name: 'Engagement', icon: '🔥' },
-              { key: 'retention', name: 'Retention', icon: '📈' },
-              { key: 'performance', name: 'Performance', icon: '⚡' },
-              { key: 'exports', name: 'Export', icon: '📋' }
+              { key: 'overview', name: 'Overview', icon: ChartBarIcon },
+              { key: 'users', name: 'Users', icon: UsersIcon },
+              { key: 'engagement', name: 'Engagement', icon: FireIcon },
+              { key: 'retention', name: 'Retention', icon: ChartBarIcon },
+              { key: 'performance', name: 'Performance', icon: BoltIcon },
+              { key: 'exports', name: 'Export', icon: ClipboardDocumentListIcon }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -525,7 +526,7 @@ const AdminAnalyticsReports = () => {
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <span>{tab.icon}</span>
+                  <tab.icon className="w-4 h-4" aria-hidden="true" />
                   <span>{tab.name}</span>
                 </div>
               </button>
@@ -921,7 +922,11 @@ const AdminAnalyticsReports = () => {
                           <div key={p.id} className="p-4 rounded border border-gray-200 bg-gray-50">
                             <div className="text-sm text-gray-500 mb-1">{p.company || 'Anonymous'}</div>
                             <div className="text-gray-800 line-clamp-2 mb-2">{p.snippet}</div>
-                            <div className="text-xs text-gray-600">👍 {p.likes} • 💬 {p.comments} • {new Date(p.date).toLocaleDateString()}</div>
+                            <div className="text-xs text-gray-600">
+                              <span className="inline-flex items-center mr-3"><HandThumbUpIcon className="w-4 h-4 mr-1" aria-hidden="true" /> {p.likes}</span>
+                              <span className="inline-flex items-center mr-3"><ChatBubbleLeftRightIcon className="w-4 h-4 mr-1" aria-hidden="true" /> {p.comments}</span>
+                              {new Date(p.date).toLocaleDateString()}
+                            </div>
                           </div>
                         ))}
                         {(!analyticsData.engagement?.top_posts || analyticsData.engagement.top_posts.length === 0) && (
@@ -939,7 +944,7 @@ const AdminAnalyticsReports = () => {
 
       <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-6">
         <div className="flex items-center">
-          <span className="text-indigo-600 text-xl mr-3">📊</span>
+          <ChartBarIcon className="text-indigo-600 w-6 h-6 mr-3" aria-hidden="true" />
           <div>
             <h4 className="text-indigo-800 font-semibold">Advanced Analytics Live</h4>
             <p className="text-indigo-700 mt-1">Data shown is fetched from Django API only.</p>

@@ -6,6 +6,7 @@ import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import { NoSymbolIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 
 // Posts Management (live API only) using generic building blocks
 const AdminPostsManagement = () => {
@@ -160,8 +161,8 @@ const AdminPostsManagement = () => {
   if (!hasPermission('content.view')) {
     return (
       <div className="text-center py-12">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚫</span>
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+          <NoSymbolIcon className="w-8 h-8" aria-hidden="true" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to view posts.</p>
@@ -177,7 +178,7 @@ const AdminPostsManagement = () => {
         actions={
           hasPermission('content.add') && !isCreateRoute ? (
             <Button onClick={() => navigate('/admin/content/create')}>
-              <span className="mr-2">📝</span>
+              <PencilSquareIcon className="w-4 h-4 mr-2" aria-hidden="true" />
               Create Post
             </Button>
           ) : null

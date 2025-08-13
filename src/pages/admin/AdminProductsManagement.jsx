@@ -5,6 +5,7 @@ import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import { CubeIcon, StarIcon } from '@heroicons/react/24/outline';
 import Select from '../../components/ui/Select';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import { useAdminData } from './ComprehensiveAdmin';
@@ -328,7 +329,7 @@ const AdminProductsManagement = () => {
         <StatsCard
           title="Total Products"
           value={totalProducts}
-          icon="📦"
+          icon={<CubeIcon className="w-6 h-6" aria-hidden="true" />}
           color="blue"
           loading={loading}
         />
@@ -336,7 +337,7 @@ const AdminProductsManagement = () => {
           title="Featured Products"
           value={featuredProducts}
           subtitle={`${totalProducts > 0 ? Math.round((featuredProducts / totalProducts) * 100) : 0}% featured`}
-          icon="⭐"
+          icon={<StarIcon className="w-6 h-6" aria-hidden="true" />}
           color="yellow"
           loading={loading}
         />

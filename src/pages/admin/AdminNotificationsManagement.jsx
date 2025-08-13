@@ -4,6 +4,7 @@ import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import { BellIcon, EnvelopeIcon, Cog6ToothIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { getNotificationsForUser as getNotifications, markNotificationAsRead, deleteNotification, createNotification } from '../../api-services/notifications';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
@@ -353,7 +354,7 @@ const AdminNotificationsManagement = () => {
         <StatsCard
           title="Total Notifications"
           value={totalNotifications}
-          icon="🔔"
+          icon={<BellIcon className="w-6 h-6" aria-hidden="true" />}
           color="blue"
           loading={loading}
         />
@@ -361,7 +362,7 @@ const AdminNotificationsManagement = () => {
           title="Unread Notifications"
           value={unreadNotifications}
           subtitle={`${totalNotifications > 0 ? Math.round((unreadNotifications / totalNotifications) * 100) : 0}% unread`}
-          icon="📧"
+          icon={<EnvelopeIcon className="w-6 h-6" aria-hidden="true" />}
           color="red"
           loading={loading}
         />
@@ -369,14 +370,14 @@ const AdminNotificationsManagement = () => {
           title="System Notifications"
           value={systemNotifications}
           subtitle={`${totalNotifications > 0 ? Math.round((systemNotifications / totalNotifications) * 100) : 0}% system`}
-          icon="⚙️"
+          icon={<Cog6ToothIcon className="w-6 h-6" aria-hidden="true" />}
           color="purple"
           loading={loading}
         />
         <StatsCard
           title="Today's Notifications"
           value={todayNotifications}
-          icon="📅"
+          icon={<CalendarDaysIcon className="w-6 h-6" aria-hidden="true" />}
           color="green"
           loading={loading}
         />
