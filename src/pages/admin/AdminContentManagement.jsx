@@ -7,6 +7,7 @@ import Input, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Card, { CardHeader, CardContent } from '../../components/ui/Card';
 import { useLocation } from 'react-router-dom';
+import { PencilSquareIcon, ArrowPathIcon, DocumentTextIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 // Content Management Component (Live API Only)
 const AdminContentManagement = () => {
@@ -240,12 +241,12 @@ const AdminContentManagement = () => {
           <div className="flex gap-2">
             {hasPermission('content.add') && activeTab === 'posts' && (
               <Button onClick={() => { setEditingItem(null); setPostForm({ body: '', status: 'PUBLISHED', allow_comments: true, company: '' }); setShowCreateForm(true); }}>
-                <span className="mr-2">📝</span>
+                <PencilSquareIcon className="h-5 w-5 mr-2" />
                 Create Post
               </Button>
             )}
             <Button variant="secondary" onClick={() => loadData(activeTab)}>
-              <span className="mr-2">🔄</span>
+              <ArrowPathIcon className="h-5 w-5 mr-2" />
               Refresh
             </Button>
           </div>
@@ -407,7 +408,7 @@ const AdminContentManagement = () => {
         ) : errors[activeTab] ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">⚠️</span>
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
             </div>
             <p className="text-red-600 mb-2">Error loading {activeTab}</p>
             <p className="text-gray-500 text-sm">{errors[activeTab]}</p>
@@ -415,7 +416,7 @@ const AdminContentManagement = () => {
         ) : processedData.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">📝</span>
+              <DocumentTextIcon className="h-8 w-8 text-gray-500" />
             </div>
             <p className="text-gray-600">No {activeTab === 'media' ? 'documents' : activeTab} found</p>
           </div>
@@ -503,7 +504,7 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                              <span className="text-gray-500">📄</span>
+                              <DocumentTextIcon className="h-5 w-5 text-gray-500" />
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900 truncate max-w-xs">{item.document?.split('/').pop() || 'Document'}</div>
@@ -545,7 +546,7 @@ const AdminContentManagement = () => {
       {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
         <div className="flex items-center">
-          <span className="text-blue-600 text-xl mr-3">✅</span>
+          <CheckCircleIcon className="h-6 w-6 text-blue-600 mr-3" />
           <div>
             <h4 className="text-blue-800 font-semibold">Live content management connected!</h4>
             <p className="text-blue-700 mt-1">Posts, comments, and documents are now managed directly from the Django API.</p>

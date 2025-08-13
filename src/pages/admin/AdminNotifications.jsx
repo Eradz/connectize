@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import Input, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
+import { ChartBarIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
 
 // Notification Management (Live API only)
 const AdminNotifications = () => {
@@ -216,8 +217,8 @@ const AdminNotifications = () => {
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             {[
-              { id: 'overview', name: 'Overview', icon: '📊' },
-              { id: 'list', name: 'All Notifications', icon: '📢' },
+              { id: 'overview', name: 'Overview', Icon: ChartBarIcon },
+              { id: 'list', name: 'All Notifications', Icon: MegaphoneIcon },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -228,7 +229,7 @@ const AdminNotifications = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <span className="mr-2">{tab.Icon && <tab.Icon className="h-5 w-5 inline" aria-hidden="true" />}</span>
                 {tab.name}
               </button>
             ))}

@@ -2,6 +2,21 @@ import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import {
+  Squares2X2Icon,
+  UsersIcon,
+  BuildingOffice2Icon,
+  CubeIcon,
+  WrenchScrewdriverIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftRightIcon,
+  BellIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  Bars3Icon,
+  SunIcon,
+  MoonIcon,
+} from "@heroicons/react/24/outline";
 
 const AdminLayout = ({ children }) => {
   const { pathname } = useLocation();
@@ -18,16 +33,16 @@ const AdminLayout = ({ children }) => {
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   const menuItems = useMemo(() => ([
-    { path: "/admin", label: "Dashboard", icon: "📊" },
-    { path: "/admin/users", label: "Users", icon: "👥" },
-    { path: "/admin/companies", label: "Companies", icon: "🏢" },
-    { path: "/admin/products", label: "Products", icon: "📦" },
-    { path: "/admin/services", label: "Services", icon: "🔧" },
-    { path: "/admin/posts", label: "Posts", icon: "📝" },
-    { path: "/admin/messages", label: "Messages", icon: "💬" },
-    { path: "/admin/notifications", label: "Notifications", icon: "🔔" },
-    { path: "/admin/analytics", label: "Analytics", icon: "📈" },
-    { path: "/admin/settings", label: "Settings", icon: "⚙️" },
+    { path: "/admin", label: "Dashboard", Icon: Squares2X2Icon },
+    { path: "/admin/users", label: "Users", Icon: UsersIcon },
+    { path: "/admin/companies", label: "Companies", Icon: BuildingOffice2Icon },
+    { path: "/admin/products", label: "Products", Icon: CubeIcon },
+    { path: "/admin/services", label: "Services", Icon: WrenchScrewdriverIcon },
+    { path: "/admin/posts", label: "Posts", Icon: DocumentTextIcon },
+    { path: "/admin/messages", label: "Messages", Icon: ChatBubbleLeftRightIcon },
+    { path: "/admin/notifications", label: "Notifications", Icon: BellIcon },
+    { path: "/admin/analytics", label: "Analytics", Icon: ChartBarIcon },
+    { path: "/admin/settings", label: "Settings", Icon: Cog6ToothIcon },
   ]), []);
 
   return (
@@ -70,7 +85,7 @@ const Sidebar = ({ menuItems, pathname, onNavigate }) => {
         </div>
       </div>
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-        {menuItems.map((item) => {
+    {menuItems.map((item) => {
           const active = pathname === item.path;
           return (
             <NavLink
@@ -83,7 +98,7 @@ const Sidebar = ({ menuItems, pathname, onNavigate }) => {
                   : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
               }`}
             >
-              <span className="text-lg">{item.icon}</span>
+      {item.Icon && <item.Icon className="h-5 w-5" aria-hidden="true" />}
               <span className="text-sm font-medium">{item.label}</span>
             </NavLink>
           );
@@ -101,7 +116,8 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
     <header className="h-16 bg-white/80 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 flex items-center px-4 lg:px-6 sticky top-0 z-30">
       {/* Mobile menu */}
       <button type="button" onClick={onMenu} className="lg:hidden mr-2 p-2 rounded-md border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
-        <span className="sr-only">Open menu</span>☰
+        <span className="sr-only">Open menu</span>
+        <Bars3Icon className="h-5 w-5" aria-hidden="true" />
       </button>
       <div className="font-semibold">Admin Dashboard</div>
       <div className="ml-auto flex items-center gap-2">
@@ -124,7 +140,11 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
           className="p-2 h-10 w-10 !px-0"
           title="Toggle theme"
         >
-          {theme === 'dark' ? '🌙' : '🌞'}
+          {theme === 'dark' ? (
+            <MoonIcon className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <SunIcon className="h-5 w-5" aria-hidden="true" />
+          )}
         </Button>
         {/* User */}
         <button type="button" className="ml-1 p-1 pl-2 pr-3 rounded-full border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">

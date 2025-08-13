@@ -5,6 +5,7 @@ import Input, { Select, Textarea } from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import Toggle from '../../components/ui/Toggle';
 import Checkbox from '../../components/ui/Checkbox';
+import { Cog6ToothIcon, EnvelopeIcon, LockClosedIcon, LinkIcon, WrenchScrewdriverIcon, NoSymbolIcon, CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 // System Settings & Configuration Component
 const AdminSystemSettings = () => {
@@ -150,7 +151,7 @@ const AdminSystemSettings = () => {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚫</span>
+          <NoSymbolIcon className="h-8 w-8 text-red-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to view system settings.</p>
@@ -171,10 +172,14 @@ const AdminSystemSettings = () => {
         
         <div className="mt-4 sm:mt-0 flex items-center space-x-3">
           {saveStatus === 'saving' && (
-            <span className="text-blue-600 text-sm">💾 Saving...</span>
+            <span className="inline-flex items-center text-blue-600 text-sm">
+              <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin" /> Saving...
+            </span>
           )}
           {saveStatus === 'saved' && (
-            <span className="text-green-600 text-sm">✅ Saved</span>
+            <span className="inline-flex items-center text-green-600 text-sm">
+              <CheckCircleIcon className="h-4 w-4 mr-1" /> Saved
+            </span>
           )}
         </div>
       </div>
@@ -184,11 +189,11 @@ const AdminSystemSettings = () => {
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             {[
-              { key: 'general', name: 'General', icon: '⚙️' },
-              { key: 'email', name: 'Email', icon: '📧' },
-              { key: 'security', name: 'Security', icon: '🔒' },
-              { key: 'integrations', name: 'Integrations', icon: '🔗' },
-              { key: 'advanced', name: 'Advanced', icon: '🛠️' }
+              { key: 'general', name: 'General', Icon: Cog6ToothIcon },
+              { key: 'email', name: 'Email', Icon: EnvelopeIcon },
+              { key: 'security', name: 'Security', Icon: LockClosedIcon },
+              { key: 'integrations', name: 'Integrations', Icon: LinkIcon },
+              { key: 'advanced', name: 'Advanced', Icon: WrenchScrewdriverIcon }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -200,7 +205,7 @@ const AdminSystemSettings = () => {
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <span>{tab.icon}</span>
+                  {tab.Icon && <tab.Icon className="h-5 w-5" aria-hidden="true" />}
                   <span>{tab.name}</span>
                 </div>
               </button>
@@ -506,9 +511,9 @@ const AdminSystemSettings = () => {
       </div>
 
       {/* Success Message */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+    <div className="bg-green-50 border border-green-200 rounded-xl p-6">
         <div className="flex items-center">
-          <span className="text-green-600 text-xl mr-3">⚙️</span>
+      <Cog6ToothIcon className="h-6 w-6 text-green-600 mr-3" />
           <div>
             <h4 className="text-green-800 font-semibold">System Settings Active!</h4>
             <p className="text-green-700 mt-1">

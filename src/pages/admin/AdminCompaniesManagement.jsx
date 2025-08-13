@@ -6,6 +6,7 @@ import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import { NoSymbolIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 // Companies Management using generic components (live API only)
 const AdminCompaniesManagement = () => {
@@ -187,7 +188,7 @@ const AdminCompaniesManagement = () => {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚫</span>
+          <NoSymbolIcon className="h-8 w-8 text-red-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to view companies.</p>
@@ -204,7 +205,7 @@ const AdminCompaniesManagement = () => {
         actions={
           hasPermission('companies.add') && !isAddRoute ? (
             <Button onClick={() => navigate('/admin/companies/add')}>
-              <span className="mr-2">➕</span>
+              <PlusIcon className="h-5 w-5 mr-2" />
               Add Company
             </Button>
           ) : null

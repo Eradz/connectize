@@ -15,18 +15,16 @@ const Toggle = ({ checked, onChange, className = "", disabled = false, label, id
       aria-checked={checked}
       disabled={disabled}
       onClick={handleClick}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-        checked ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors border border-gray-200 dark:border-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+        checked ? "bg-blue-600" : "bg-gray-100 dark:bg-gray-900"
       } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${className}`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
           checked ? "translate-x-6" : "translate-x-1"
         }`}
       />
-      {label && (
-        <span className="sr-only">{label}</span>
-      )}
+      {label && <span className="sr-only">{label}</span>}
     </button>
   );
 };

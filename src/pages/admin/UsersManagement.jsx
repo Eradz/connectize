@@ -11,6 +11,7 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   EnvelopeIcon,
+  NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import {
   getAllUsersAdmin, 
@@ -113,7 +114,7 @@ const UsersManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
           <p className="text-gray-600">Manage and monitor all platform users</p>
         </div>
-        <Button className="inline-flex items-center">
+  <Button className="inline-flex items-center">
           <UserPlusIcon className="h-5 w-5 mr-2" />
           Add New User
         </Button>
