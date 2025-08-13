@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
-import Input, { Textarea } from '../../components/ui/Input';
+import TextInput, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import { ChartBarIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
 
@@ -277,7 +277,7 @@ const AdminNotifications = () => {
                   <form onSubmit={handleCreate} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                      <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+                      <TextInput value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
@@ -292,7 +292,7 @@ const AdminNotifications = () => {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
-                  <Input
+                  <TextInput
                     placeholder="Search notifications..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

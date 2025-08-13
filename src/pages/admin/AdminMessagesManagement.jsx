@@ -1,475 +1,224 @@
-import React, { useState, useEffect } from 'react';
-import DataTable from './components/DataTable';
-import StatsCard from './components/StatsCard';
-import { ChatBubbleLeftRightIcon, BellIcon, CheckCircleIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useMemo } from 'react';
+import DataTable from '../../components/admin/DataTable';
+import StatsCard from '../../components/admin/dashboard/StatsCard';
+import { ChatBubbleLeftRightIcon, EnvelopeOpenIcon, EnvelopeIcon, CalendarDaysIcon, ArrowPathIcon, TrashIcon, PencilSquareIcon, EyeIcon } from '@heroicons/react/24/outline';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
-import { Textarea } from '../../components/ui/Input';
-import { getMessagesForUser as getMessages, markMessageAsRead, bulkDeleteMessages, updateMessage } from '../../api-services/messaging';
-import { makeApiRequest } from '../../lib/helpers';
+import { useAdminData } from './ComprehensiveAdmin';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import Avatar from '../../components/ui/Avatar';
 
 const AdminMessagesManagement = () => {
-  const [messages, setMessages] = useState([]);
+  const { fetchData, addToast } = useAdminData();
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editContent, setEditContent] = useState('');
-  const [selectedItems, setSelectedItems] = useState([]);
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
-
-  const fetchMessages = async () => {
+  const fetcher = async (params) => {
+    setLoading(true);
     try {
-      setLoading(true);
-  // In admin, ask backend to return all messages when permitted
-  const data = await getMessages({ all: true });
-      const items = data?.results || data || [];
-      // Normalize fields expected by the table
-      const normalized = items.map((m) => {
-        const senderInfo = m.sender_info || (typeof m.sender === 'object' ? m.sender : null) || m.other_user || null;
-        const recipientInfo = m.recipient_info || (typeof m.recipient === 'object' ? m.recipient : null) || null;
-        return {
-          id: m.id,
-          sender: senderInfo,
-          recipient: recipientInfo,
-          subject: m.subject || null,
-          content: m.content || m.message || "",
-          message_type: m.message_type || (m.audio_file ? "audio" : "message"),
-          is_read: Boolean(m.read_at),
-          created_at: m.timestamp || m.created_at,
-          room_name: m.room_name,
-        };
-      });
-      setMessages(normalized);
+      const result = await fetchData(`/chat/messages/?${params.toString()}`, 'messages');
+      if (result.success) {
+        // The backend sends `sender_info` and `recipient_info`
+        const normalizedData = result.data.results.map(msg => ({
+          ...msg,
+          sender: msg.sender_info,
+          recipient: msg.recipient_info,
+          is_read: !!msg.read_at,
+          created_at: msg.timestamp,
+        }));
+        return { data: normalizedData, total: result.data.count };
+      } else {
+        addToast(result.error || 'Failed to fetch messages.', 'error');
+        return { data: [], total: 0 };
+      }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      addToast(error.message, 'error');
+      return { data: [], total: 0 };
     } finally {
       setLoading(false);
     }
   };
 
-  // Calculate statistics
-  const totalMessages = messages.length;
-  const unreadMessages = messages.filter(message => !message.is_read).length;
-  const readMessages = messages.filter(message => message.is_read).length;
-  const todayMessages = messages.filter(message => {
-    const today = new Date().toDateString();
-    return new Date(message.created_at).toDateString() === today;
-  }).length;
+  const stats = useMemo(() => {
+    // These would ideally come from a separate stats endpoint
+    // For now, we'll use placeholder values.
+    return {
+      total: '...',
+      unread: '...',
+      read: '...',
+      today: '...',
+    };
+  }, []);
 
-  const columns = [
-    {
-      key: 'id',
-      label: 'ID',
-      sortable: true,
-      width: '80px'
-    },
+  const handleAction = async (action, messageId, payload = {}) => {
+    const endpoints = {
+      delete: { url: `/chat/messages/${messageId}/`, method: 'DELETE' },
+      update: { url: `/chat/messages/${messageId}/`, method: 'PATCH', body: payload },
+      mark_read: { url: `/chat/messages/${messageId}/mark-as-read/`, method: 'POST' },
+    };
+
+    try {
+      const { url, method, body } = endpoints[action];
+      const result = await fetchData(url, 'messages', { method, body });
+      if (result.success) {
+        addToast(`Message ${action === 'delete' ? 'deleted' : 'updated'} successfully.`, 'success');
+        return true;
+      } else {
+        addToast(result.error || `Failed to ${action} message.`, 'error');
+        return false;
+      }
+    } catch (error) {
+      addToast(error.message, 'error');
+      return false;
+    }
+  };
+
+  const columns = useMemo(() => [
     {
       key: 'sender',
       label: 'From',
-      sortable: true,
-      searchAccessor: (message) => {
-        const s = message.sender;
-        if (!s) return '';
-        return [s.first_name, s.last_name, s.username, s.email].filter(Boolean).join(' ');
-      },
-      render: (message) => (
+      render: (msg) => (
         <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            !message.is_read ? 'bg-blue-100' : 'bg-gray-100'
-          }`}>
-            <span className="text-sm font-medium">
-              {message.sender?.first_name?.[0] || message.sender?.username?.[0] || message.sender_name?.[0] || '?'}
-            </span>
-          </div>
+          <Avatar user={msg.sender} size="sm" />
           <div>
-            <div className={`font-medium ${!message.is_read ? 'text-gray-900' : 'text-gray-600'}`}>
-              {message.sender?.first_name && message.sender?.last_name 
-                ? `${message.sender.first_name} ${message.sender.last_name}`
-                : message.sender?.username || message.sender?.email || message.sender_name || 'Unknown'
-              }
-            </div>
-            <div className="text-sm text-gray-500">
-              {message.sender?.email || message.sender_email || ''}
-            </div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{msg.sender?.display_name || 'Unknown User'}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{msg.sender?.email || 'No email'}</div>
           </div>
         </div>
-      )
+      ),
     },
     {
       key: 'recipient',
       label: 'To',
-      sortable: true,
-      searchAccessor: (message) => {
-        const r = message.recipient;
-        if (!r) return '';
-        return [r.first_name, r.last_name, r.username, r.email].filter(Boolean).join(' ');
-      },
-      render: (message) => (
-        <div>
-          <div className="font-medium text-gray-900">
-            {message.recipient?.first_name && message.recipient?.last_name 
-              ? `${message.recipient.first_name} ${message.recipient.last_name}`
-              : message.recipient?.username || message.recipient?.email || message.recipient_name || 'Unknown'
-            }
-          </div>
-          <div className="text-sm text-gray-500">
-            {message.recipient?.email || message.recipient_email || ''}
+      render: (msg) => (
+        <div className="flex items-center space-x-3">
+          <Avatar user={msg.recipient} size="sm" />
+          <div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{msg.recipient?.display_name || 'Unknown User'}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{msg.recipient?.email || 'No email'}</div>
           </div>
         </div>
-      )
+      ),
     },
-  // Subject column removed per request
     {
       key: 'content',
-      label: 'Message Preview',
-  searchAccessor: (message) => message.content || message.message || '',
-      render: (message) => (
-        <div className="text-sm text-gray-600 max-w-xs truncate">
-          {message.content || message.message || 'No content'}
-        </div>
-      )
+      label: 'Message',
+      render: (msg) => <p className="text-sm text-gray-600 dark:text-gray-300 max-w-sm truncate">{msg.content}</p>,
     },
     {
-      key: 'status',
+      key: 'is_read',
       label: 'Status',
-      sortable: true,
-      render: (message) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          message.is_read
-            ? 'bg-gray-100 text-gray-800'
-            : 'bg-blue-100 text-blue-800'
+      render: (msg) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          msg.is_read
+            ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
         }`}>
-          {message.is_read ? 'Read' : 'Unread'}
+          {msg.is_read ? 'Read' : 'Unread'}
         </span>
-      )
-    },
-    {
-      key: 'message_type',
-      label: 'Type',
-      render: (message) => (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          message.message_type === 'system' ? 'bg-purple-100 text-purple-800' :
-          message.message_type === 'notification' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-green-100 text-green-800'
-        }`}>
-          {message.message_type || 'message'}
-        </span>
-      )
+      ),
     },
     {
       key: 'created_at',
-      label: 'Sent',
-      sortable: true,
-      render: (message) => (
-        <div className="text-sm text-gray-900">
-          {new Date(message.created_at).toLocaleDateString()}
-          <div className="text-xs text-gray-500">
-            {new Date(message.created_at).toLocaleTimeString()}
-          </div>
-        </div>
-      )
-    }
+      label: 'Date',
+      render: (msg) => <div className="text-sm text-gray-500 dark:text-gray-400">{new Date(msg.created_at).toLocaleString()}</div>,
+    },
+  ], []);
+
+  const rowActions = (message, reload) => [
+    { label: 'View', icon: EyeIcon, onClick: () => { setSelectedMessage(message); setModalOpen(true); } },
+    { label: 'Edit', icon: PencilSquareIcon, onClick: async () => {
+        const newContent = prompt('Enter new message content:', message.content);
+        if (newContent && newContent !== message.content) {
+            const success = await handleAction('update', message.id, { content: newContent });
+            if (success) reload();
+        }
+    }},
+    { label: 'Delete', icon: TrashIcon, onClick: async () => {
+        const ok = await confirmDialog({ title: 'Delete Message', message: 'Are you sure you want to delete this message?' });
+        if (ok) {
+            const success = await handleAction('delete', message.id);
+            if (success) reload();
+        }
+    }},
   ];
 
-  const handleViewMessage = (message) => {
-    setSelectedMessage(message);
-    setShowModal(true);
-    
-    // Mark as read if unread
-    if (!message.is_read) {
-      // mark-all-as-read requires room_name; compute if missing
-      const rn = message.room_name ||
-        (message.sender?.id && message.recipient?.id
-          ? `room_${Math.min(message.sender.id, message.recipient.id)}_${Math.max(message.sender.id, message.recipient.id)}`
-          : null);
-      if (!rn) return;
-      markMessageAsRead(rn).then(() => {
-        fetchMessages();
-      }).catch(console.error);
-    }
-  };
-
-  const handleDelete = async (message) => {
-    const ok = await confirmDialog({ title: 'Delete Message', message: 'Are you sure you want to delete this message?', confirmLabel: 'Delete' });
-    if (!ok) return;
-    try {
-      // Fallback: use bulk-delete for single id to keep endpoints consistent
-      await bulkDeleteMessages([message.id]);
-      await fetchMessages();
-    } catch (error) {
-      console.error('Error deleting message:', error);
-      alert('Failed to delete message');
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return;
-    
-    const ok = await confirmDialog({ title: 'Delete Selected Messages', message: `Are you sure you want to delete ${selectedItems.length} messages?`, confirmLabel: 'Delete' });
-    if (!ok) return;
-    try {
-      await bulkDeleteMessages(selectedItems);
-      setSelectedItems([]);
-      await fetchMessages();
-    } catch (error) {
-      console.error('Error bulk deleting messages:', error);
-      alert('Failed to delete messages');
-    }
-  };
-
-  const handleBulkMarkAsRead = async () => {
-    if (selectedItems.length === 0) return;
-    
-    try {
-      for (const messageId of selectedItems) {
-        const msg = messages.find(m => m.id === messageId);
-        const rn = msg?.room_name || (msg?.sender?.id && msg?.recipient?.id
-          ? `room_${Math.min(msg.sender.id, msg.recipient.id)}_${Math.max(msg.sender.id, msg.recipient.id)}`
-          : null);
-        if (rn) await markMessageAsRead(rn);
-      }
-      setSelectedItems([]);
-      await fetchMessages();
-    } catch (error) {
-      console.error('Error marking messages as read:', error);
-      alert('Failed to mark messages as read');
-    }
-  };
-
-  const getActions = (message) => [
-    {
-      label: 'View',
-      onClick: () => handleViewMessage(message),
-      className: 'text-blue-600 hover:text-blue-900'
-    },
-    {
-      label: 'Edit',
-      onClick: () => {
-        setEditContent(message.content || message.message || '');
-        setSelectedMessage(message);
-        setEditModalOpen(true);
-      },
-      className: 'text-indigo-600 hover:text-indigo-900'
-    },
-    {
-      label: message.is_read ? 'Mark as Unread' : 'Mark as Read',
-      onClick: async () => {
-        try {
-          const rn = message.room_name || (message.sender?.id && message.recipient?.id
-            ? `room_${Math.min(message.sender.id, message.recipient.id)}_${Math.max(message.sender.id, message.recipient.id)}`
-            : null);
-          if (!rn) return;
-          await markMessageAsRead(rn);
-          await fetchMessages();
-        } catch (error) {
-          console.error('Error updating message status:', error);
-          alert('Failed to update message status');
+  const bulkActions = (selectedIds, reload) => [
+    { label: 'Mark as Read', onClick: async () => {
+        for (const id of selectedIds) await handleAction('mark_read', id);
+        reload();
+    }},
+    { label: 'Delete Selected', onClick: async () => {
+        const ok = await confirmDialog({ title: 'Bulk Delete', message: `Delete ${selectedIds.length} messages?` });
+        if (ok) {
+            for (const id of selectedIds) await handleAction('delete', id);
+            reload();
         }
-      },
-      className: 'text-green-600 hover:text-green-900'
-    },
-    {
-      label: 'Delete',
-      onClick: () => handleDelete(message),
-      className: 'text-red-600 hover:text-red-900'
-    }
+    }},
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <PageHeader
         title="Messages Management"
-        subtitle="Monitor and manage all platform messages and communications"
-        actions={<Button variant="secondary" onClick={() => fetchMessages()}>Refresh</Button>}
+        subtitle="Monitor and manage all platform messages and communications."
       />
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard
-          title="Total Messages"
-          value={totalMessages}
-          icon={<ChatBubbleLeftRightIcon className="w-6 h-6" />}
-          color="blue"
-          loading={loading}
-        />
-        <StatsCard
-          title="Unread Messages"
-          value={unreadMessages}
-          subtitle={`${totalMessages > 0 ? Math.round((unreadMessages / totalMessages) * 100) : 0}% unread`}
-          icon={<BellIcon className="w-6 h-6" />}
-          color="red"
-          loading={loading}
-        />
-        <StatsCard
-          title="Read Messages"
-          value={readMessages}
-          subtitle={`${totalMessages > 0 ? Math.round((readMessages / totalMessages) * 100) : 0}% read`}
-          icon={<CheckCircleIcon className="w-6 h-6" />}
-          color="green"
-          loading={loading}
-        />
-        <StatsCard
-          title="Today's Messages"
-          value={todayMessages}
-          icon={<CalendarDaysIcon className="w-6 h-6" />}
-          color="purple"
-          loading={loading}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard title="Total Messages" value={stats.total} icon={ChatBubbleLeftRightIcon} color="blue" loading={loading} />
+        <StatsCard title="Unread Messages" value={stats.unread} icon={EnvelopeIcon} color="orange" loading={loading} />
+        <StatsCard title="Read Messages" value={stats.read} icon={EnvelopeOpenIcon} color="green" loading={loading} />
+        <StatsCard title="Today's Messages" value={stats.today} icon={CalendarDaysIcon} color="purple" loading={loading} />
       </div>
 
-      {/* Messages Table */}
       <DataTable
-        data={messages}
+        fetcher={fetcher}
         columns={columns}
-        loading={loading}
-        onEdit={handleViewMessage}
-        onDelete={handleDelete}
-        getActions={getActions}
-        selectedItems={selectedItems}
-        onSelectionChange={setSelectedItems}
-        bulkActions={[
-          { label: 'Mark as Read', onClick: handleBulkMarkAsRead, className: 'px-3 py-1 text-sm border rounded hover:bg-gray-50' },
-          { label: 'Delete Selected', onClick: handleBulkDelete, className: 'px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700' },
-        ]}
+        rowActions={rowActions}
+        bulkActions={bulkActions}
+        searchPlaceholder="Search by user or content..."
       />
 
-      {/* Message Details Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Message Details"
-        size="lg"
-      >
+      <Modal isOpen={isModalOpen} onClose={() => setModalOpen(false)} title="Message Details">
         {selectedMessage && (
           <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{selectedMessage.subject || 'No Subject'}</h3>
-                <p className="text-xs text-gray-500">Sent {new Date(selectedMessage.created_at).toLocaleString()}</p>
-              </div>
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                selectedMessage.is_read ? 'bg-gray-100 text-gray-800' : 'bg-blue-100 text-blue-800'
-              }`}>
-                {selectedMessage.is_read ? 'Read' : 'Unread'}
-              </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">From</label>
+                    <div className="flex items-center space-x-3 mt-1">
+                        <Avatar user={selectedMessage.sender} size="sm" />
+                        <div>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{selectedMessage.sender?.display_name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{selectedMessage.sender?.email}</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">To</label>
+                     <div className="flex items-center space-x-3 mt-1">
+                        <Avatar user={selectedMessage.recipient} size="sm" />
+                        <div>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{selectedMessage.recipient?.display_name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{selectedMessage.recipient?.email}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {/* Sender/Recipient Info */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
-                <div className="text-sm text-gray-900">
-                  {selectedMessage.sender?.first_name && selectedMessage.sender?.last_name
-                    ? `${selectedMessage.sender.first_name} ${selectedMessage.sender.last_name}`
-                    : selectedMessage.sender?.username || selectedMessage.sender_name || 'Unknown'}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {selectedMessage.sender?.email || selectedMessage.sender_email || ''}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
-                <div className="text-sm text-gray-900">
-                  {selectedMessage.recipient?.first_name && selectedMessage.recipient?.last_name
-                    ? `${selectedMessage.recipient.first_name} ${selectedMessage.recipient.last_name}`
-                    : selectedMessage.recipient?.username || selectedMessage.recipient_name || 'Unknown'}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {selectedMessage.recipient?.email || selectedMessage.recipient_email || ''}
-                </div>
-              </div>
-            </div>
-
-            {/* Message Content */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-900 whitespace-pre-wrap">
-                  {selectedMessage.content || selectedMessage.message || 'No content'}
-                </div>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Message</label>
+              <div className="mt-1 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
+                {selectedMessage.content}
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t">
-              <Button
-                onClick={async () => {
-                  try {
-                    const rn = selectedMessage.room_name || (selectedMessage.sender?.id && selectedMessage.recipient?.id
-                      ? `room_${Math.min(selectedMessage.sender.id, selectedMessage.recipient.id)}_${Math.max(selectedMessage.sender.id, selectedMessage.recipient.id)}`
-                      : null);
-                    if (!rn) return;
-                    await markMessageAsRead(rn);
-                    await fetchMessages();
-                    setShowModal(false);
-                  } catch (error) {
-                    console.error('Error updating message status:', error);
-                    alert('Failed to update message status');
-                  }
-                }}
-              >
-                Mark as {selectedMessage.is_read ? 'Unread' : 'Read'}
-              </Button>
-              <Button
-                variant="danger"
-                onClick={() => {
-                  handleDelete(selectedMessage);
-                  setShowModal(false);
-                }}
-              >
-                Delete Message
-              </Button>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>
-                Close
-              </Button>
+            <div className="text-xs text-gray-400 dark:text-gray-500 pt-2 border-t border-gray-200 dark:border-gray-700">
+              Sent on {new Date(selectedMessage.created_at).toLocaleString()}
+            </div>
+            <div className="flex justify-end pt-4">
+              <Button variant="secondary" onClick={() => setModalOpen(false)}>Close</Button>
             </div>
           </div>
-        )}
-      </Modal>
-
-      {/* Edit Message Modal */}
-      <Modal
-        isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        title="Edit Message"
-        size="lg"
-      >
-        {selectedMessage && (
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              try {
-                await updateMessage(selectedMessage.id, { content: editContent });
-                await fetchMessages();
-                setEditModalOpen(false);
-              } catch (err) {
-                console.error('Failed to update message', err);
-                alert('Failed to update message');
-              }
-            }}
-            className="space-y-4"
-          >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-              <Textarea
-                rows={6}
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end space-x-3 border-t pt-4">
-              <Button type="button" variant="secondary" onClick={() => setEditModalOpen(false)}>Cancel</Button>
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </form>
         )}
       </Modal>
     </div>
