@@ -4,6 +4,8 @@ import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import DataTable from '../../components/admin/DataTable';
 import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
 
 // Users Management using generic building blocks (live API only)
 const AdminUsersManagement = () => {
@@ -155,23 +157,18 @@ const AdminUsersManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="mt-2 text-gray-600">Manage platform users</p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-          {hasPermission('users.add') && !isAddRoute && (
-            <button
-              onClick={() => navigate('/admin/users/add')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-            >
+      <PageHeader
+        title="User Management"
+        subtitle="Manage platform users"
+        actions={
+          hasPermission('users.add') && !isAddRoute ? (
+            <Button onClick={() => navigate('/admin/users/add')}>
               <span className="mr-2">➕</span>
               New User
-            </button>
-          )}
-        </div>
-      </div>
+            </Button>
+          ) : null
+        }
+      />
 
       {/* Create User */}
       {isAddRoute && hasPermission('users.add') && (
@@ -238,12 +235,12 @@ const AdminUsersManagement = () => {
         selectable={hasPermission('users.delete')}
   onRowClick={(u) => navigate(`/admin/users/${u.id}`)}
         renderRowActions={(u) => (
-          <div className="flex space-x-3">
+          <div className="flex gap-2">
             {hasPermission('users.change') && (
-              <button onClick={() => setEditingUser(u)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+              <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setEditingUser(u); }}>Edit</Button>
             )}
             {hasPermission('users.delete') && (
-              <button onClick={() => handleDelete(u)} className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+              <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDelete(u); }}>Delete</Button>
             )}
           </div>
         )}

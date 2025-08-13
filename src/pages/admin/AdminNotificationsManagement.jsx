@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
 import { getNotificationsForUser as getNotifications, markNotificationAsRead, deleteNotification, createNotification } from '../../api-services/notifications';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
@@ -335,26 +337,16 @@ const AdminNotificationsManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications Management</h1>
-          <p className="text-gray-600">Create, monitor and manage platform notifications</p>
-        </div>
-        <div className="flex space-x-3">
-          <button
-            onClick={() => fetchNotifications()}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-          >
-            Refresh
-          </button>
-          <button
-            onClick={handleCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Send Notification
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Notifications Management"
+        subtitle="Create, monitor and manage platform notifications"
+        actions={
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => fetchNotifications()}>Refresh</Button>
+            <Button onClick={handleCreate}>Send Notification</Button>
+          </div>
+        }
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

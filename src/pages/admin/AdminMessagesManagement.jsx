@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
 import { getMessagesForUser as getMessages, markMessageAsRead, bulkDeleteMessages, updateMessage } from '../../api-services/messaging';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
@@ -280,20 +282,11 @@ const AdminMessagesManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Messages Management</h1>
-          <p className="text-gray-600">Monitor and manage all platform messages and communications</p>
-        </div>
-        <div className="flex space-x-3">
-          <button
-            onClick={() => fetchMessages()}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-          >
-            Refresh
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Messages Management"
+        subtitle="Monitor and manage all platform messages and communications"
+        actions={<Button variant="secondary" onClick={() => fetchMessages()}>Refresh</Button>}
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

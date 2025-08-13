@@ -4,6 +4,8 @@ import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import DataTable from '../../components/admin/DataTable';
 import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
 
 // Posts Management (live API only) using generic building blocks
 const AdminPostsManagement = () => {
@@ -169,20 +171,18 @@ const AdminPostsManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Posts</h1>
-          <p className="mt-2 text-gray-600">Manage posts from live Django API</p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-          {hasPermission('content.add') && !isCreateRoute && (
-            <button onClick={() => navigate('/admin/content/create')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+      <PageHeader
+        title="Posts"
+        subtitle="Manage posts from live Django API"
+        actions={
+          hasPermission('content.add') && !isCreateRoute ? (
+            <Button onClick={() => navigate('/admin/content/create')}>
               <span className="mr-2">📝</span>
               Create Post
-            </button>
-          )}
-        </div>
-      </div>
+            </Button>
+          ) : null
+        }
+      />
 
       {/* Create Post */}
       {isCreateRoute && hasPermission('content.add') && (
@@ -235,12 +235,12 @@ const AdminPostsManagement = () => {
         selectable={hasPermission('content.delete')}
   onRowClick={(row) => navigate(`/admin/content/${row.id}`)}
         renderRowActions={(row) => (
-          <div className="flex space-x-3">
+          <div className="flex gap-2">
             {hasPermission('content.change') && (
-              <button onClick={() => setEditingPost(row)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+              <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setEditingPost(row); }}>Edit</Button>
             )}
             {hasPermission('content.delete') && (
-              <button onClick={() => handleDelete(row)} className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+              <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDelete(row); }}>Delete</Button>
             )}
           </div>
         )}

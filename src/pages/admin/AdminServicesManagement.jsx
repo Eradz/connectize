@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
+import Select from '../../components/ui/Select';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import { useAdminData } from './ComprehensiveAdmin';
 
@@ -262,48 +265,42 @@ const AdminServicesManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Services Management</h1>
-          <p className="text-gray-600">Manage all services and offerings on the platform</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <select
+      <PageHeader
+        title="Services Management"
+        subtitle="Manage all services and offerings on the platform"
+        actions={
+          <div className="flex items-center gap-2">
+            <Select
               value={filterCategory}
               onChange={(e) => { setFilterCategory(e.target.value); setPage(1); }}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="w-auto"
             >
               {categoryOptions.map(opt => (
                 <option key={opt.value ?? opt.label} value={opt.value}>{opt.label}</option>
               ))}
-            </select>
-            <select
+            </Select>
+            <Select
               value={filterFeatured}
               onChange={(e) => { setFilterFeatured(e.target.value); setPage(1); }}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="w-auto"
             >
               <option value="">All</option>
               <option value="true">Featured</option>
               <option value="false">Regular</option>
-            </select>
+            </Select>
             {(filterCategory || filterFeatured) && (
-              <button
+              <Button
+                variant="secondary"
+                size="md"
                 onClick={() => { setFilterCategory(''); setFilterFeatured(''); setPage(1); }}
-                className="px-3 py-2 border rounded text-sm hover:bg-gray-50"
               >
                 Clear Filters
-              </button>
+              </Button>
             )}
+            <Button onClick={handleCreate}>Add New Service</Button>
           </div>
-          <button
-            onClick={handleCreate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Add New Service
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Statistics Cards */}
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -4,6 +4,8 @@ import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import DataTable from '../../components/admin/DataTable';
 import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
 
 // Companies Management using generic components (live API only)
 const AdminCompaniesManagement = () => {
@@ -196,20 +198,18 @@ const AdminCompaniesManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Company Management</h1>
-          <p className="mt-2 text-gray-600">Manage platform companies and business accounts</p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-          {hasPermission('companies.add') && !isAddRoute && (
-            <button onClick={() => navigate('/admin/companies/add')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+      <PageHeader
+        title="Company Management"
+        subtitle="Manage platform companies and business accounts"
+        actions={
+          hasPermission('companies.add') && !isAddRoute ? (
+            <Button onClick={() => navigate('/admin/companies/add')}>
               <span className="mr-2">➕</span>
               Add Company
-            </button>
-          )}
-        </div>
-      </div>
+            </Button>
+          ) : null
+        }
+      />
 
       {/* Create Company */}
       {isAddRoute && hasPermission('companies.add') && (
@@ -288,12 +288,24 @@ const AdminCompaniesManagement = () => {
         selectable={hasPermission('companies.delete')}
   onRowClick={(row) => navigate(`/admin/companies/${row.slug || row.id}`)}
         renderRowActions={(row) => (
-          <div className="flex space-x-3">
+          <div className="flex gap-2">
             {hasPermission('companies.change') && (
-              <button onClick={() => setEditingCompany(row)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); setEditingCompany(row); }}
+              >
+                Edit
+              </Button>
             )}
             {hasPermission('companies.delete') && (
-              <button onClick={() => handleDelete(row)} className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); handleDelete(row); }}
+              >
+                Delete
+              </Button>
             )}
           </div>
         )}

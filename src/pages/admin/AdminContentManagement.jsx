@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
 import { useLocation } from 'react-router-dom';
 
 // Content Management Component (Live API Only)
@@ -228,30 +230,24 @@ const AdminContentManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Content Management</h1>
-          <p className="mt-2 text-gray-600">Manage posts, comments, and documents</p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-          {hasPermission('content.add') && activeTab === 'posts' && (
-            <button
-              onClick={() => { setEditingItem(null); setPostForm({ body: '', status: 'PUBLISHED', allow_comments: true, company: '' }); setShowCreateForm(true); }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-            >
-              <span className="mr-2">📝</span>
-              Create Post
-            </button>
-          )}
-          <button
-            onClick={() => loadData(activeTab)}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
-          >
-            <span className="mr-2">🔄</span>
-            Refresh
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Content Management"
+        subtitle="Manage posts, comments, and documents"
+        actions={
+          <div className="flex gap-2">
+            {hasPermission('content.add') && activeTab === 'posts' && (
+              <Button onClick={() => { setEditingItem(null); setPostForm({ body: '', status: 'PUBLISHED', allow_comments: true, company: '' }); setShowCreateForm(true); }}>
+                <span className="mr-2">📝</span>
+                Create Post
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => loadData(activeTab)}>
+              <span className="mr-2">🔄</span>
+              Refresh
+            </Button>
+          </div>
+        }
+      />
 
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
