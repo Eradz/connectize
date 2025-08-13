@@ -6,8 +6,7 @@ import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
-import { NoSymbolIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { ErrorIcon, AddIcon } from "../../components/ui/ModernIcon";
 
 // Companies Management using generic components (live API only)
 const AdminCompaniesManagement = () => {
@@ -56,18 +55,12 @@ const AdminCompaniesManagement = () => {
       header: 'Company', sortable: true, sortKey: 'company_name',
       render: (c) => (
         <div className="flex items-center">
-          <div className="w-10 h-10 flex-shrink-0">
-            {c.logo ? (
-              <img className="w-10 h-10 rounded-lg object-cover" src={c.logo} alt={c.company_name} />
-            ) : (
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">{c.company_name?.[0] || 'C'}</span>
-              </div>
-            )}
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold">{c.company_name?.[0] || 'C'}</span>
           </div>
           <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{c.company_name}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{c.website || '—'}</div>
+            <div className="text-sm font-medium text-gray-900">{c.company_name}</div>
+            <div className="text-xs text-gray-500">{c.website || '—'}</div>
           </div>
         </div>
       )
@@ -82,16 +75,9 @@ const AdminCompaniesManagement = () => {
     {
       header: 'Verified', sortable: true, sortKey: 'verify', width: '120px',
       render: (c) => (
-        c.verify ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-            <CheckBadgeIcon className="h-4 w-4 mr-1.5" />
-            Verified
-          </span>
-        ) : (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-            Unverified
-          </span>
-        )
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${c.verify ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+          {c.verify ? 'Verified' : 'Unverified'}
+        </span>
       )
     },
     {
@@ -202,7 +188,7 @@ const AdminCompaniesManagement = () => {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <NoSymbolIcon className="h-8 w-8 text-red-600" />
+          <ErrorIcon size={32} className="text-red-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to view companies.</p>
@@ -219,7 +205,7 @@ const AdminCompaniesManagement = () => {
         actions={
           hasPermission('companies.add') && !isAddRoute ? (
             <Button onClick={() => navigate('/admin/companies/add')}>
-              <PlusIcon className="h-5 w-5 mr-2" />
+              <AddIcon size={20} className="mr-2" />
               Add Company
             </Button>
           ) : null
@@ -306,7 +292,7 @@ const AdminCompaniesManagement = () => {
           <div className="flex gap-2">
             {hasPermission('companies.change') && (
               <Button
-                variant="secondary"
+                variant="minimal"
                 size="sm"
                 onClick={(e) => { e.stopPropagation(); setEditingCompany(row); }}
               >
@@ -315,9 +301,10 @@ const AdminCompaniesManagement = () => {
             )}
             {hasPermission('companies.delete') && (
               <Button
-                variant="danger"
+                variant="minimal"
                 size="sm"
                 onClick={(e) => { e.stopPropagation(); handleDelete(row); }}
+                className="text-error-600 hover:text-error-700 hover:bg-error-50 dark:hover:bg-error-900/20"
               >
                 Delete
               </Button>

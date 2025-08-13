@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, MinusIcon } from "@heroicons/react/24/outline";
+import { TrendingIcon } from "../../ui/ModernIcon";
 
 const StatsCard = ({
   title,
@@ -69,11 +69,11 @@ const StatsCard = ({
   const getTrendIcon = () => {
     switch (changeType) {
       case "increase":
-        return <ArrowTrendingUpIcon className="w-4 h-4 text-success-600 dark:text-success-400" />;
+        return <TrendingIcon size={16} className="text-success-600 dark:text-success-400" />;
       case "decrease":
-        return <ArrowTrendingDownIcon className="w-4 h-4 text-error-600 dark:text-error-400" />;
+        return <TrendingIcon size={16} className="text-error-600 dark:text-error-400 rotate-180" />;
       default:
-        return <MinusIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
+        return <div className="w-4 h-0.5 bg-gray-500 dark:bg-gray-400 rounded-full" />;
     }
   };
 
@@ -142,7 +142,7 @@ const StatsCard = ({
           selectedColor.border,
           "border"
         )}>
-          {Icon && <Icon className={clsx("h-6 w-6", selectedColor.icon)} />}
+          {Icon && <Icon size={24} className={clsx(selectedColor.icon)} />}
         </div>
       </div>
     </div>

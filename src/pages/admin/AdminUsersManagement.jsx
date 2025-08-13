@@ -6,8 +6,7 @@ import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
-import { NoSymbolIcon, PlusIcon, CheckBadgeIcon, ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline';
-import { CheckBadgeIcon as CheckBadgeIconSolid } from '@heroicons/react/24/solid';
+import { ErrorIcon, AddIcon } from "../../components/ui/ModernIcon";
 
 // Users Management using generic building blocks (live API only)
 const AdminUsersManagement = () => {
@@ -22,53 +21,31 @@ const AdminUsersManagement = () => {
   const bumpRefresh = () => setRefreshKey(Date.now());
 
   const columns = useMemo(() => ([
+    { key: 'id', header: 'ID', sortable: true, width: '80px' },
     {
       header: 'User', sortable: true, sortKey: 'first_name',
       render: (u) => (
         <div className="flex items-center">
-          <div className="w-10 h-10 flex-shrink-0">
-            {u.avatar ? (
-              <img className="w-10 h-10 rounded-full object-cover" src={u.avatar} alt={`${u.first_name} ${u.last_name}`} />
-            ) : (
-              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <UserIcon className="w-6 h-6 text-gray-500" />
-              </div>
-            )}
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold">{u.first_name?.[0] || u.email?.[0] || 'U'}</span>
           </div>
           <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{u.first_name} {u.last_name}</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{u.email}</div>
+            <div className="text-sm font-medium text-gray-900">{u.first_name} {u.last_name}</div>
+            <div className="text-xs text-gray-500">{u.role || '—'}</div>
           </div>
         </div>
       )
     },
+    { key: 'email', header: 'Email', sortable: true },
     {
-      header: 'Status', sortable: false, width: '180px',
+      header: 'Verified', sortable: true, sortKey: 'verified', width: '120px',
       render: (u) => (
-        <div className="flex items-center space-x-2">
-          {u.verified && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-              <CheckBadgeIconSolid className="h-4 w-4 mr-1.5" />
-              Verified
-            </span>
-          )}
-          {(u.is_admin || u.is_staff) && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-              <ShieldCheckIcon className="h-4 w-4 mr-1.5" />
-              {u.is_admin ? 'Admin' : 'Staff'}
-            </span>
-          )}
-        </div>
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${u.verified ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+          {u.verified ? 'Verified' : 'Unverified'}
+        </span>
       )
     },
     { key: 'country', header: 'Country', sortable: true },
-    { 
-      key: 'date_joined', 
-      header: 'Date Joined', 
-      sortable: true, 
-      width: '140px',
-      render: (u) => u.date_joined ? new Date(u.date_joined).toLocaleDateString() : '—'
-    },
     { key: 'followers_count', header: 'Followers', sortable: true, width: '120px' },
     { key: 'following_count', header: 'Following', sortable: true, width: '120px' },
   ]), []);
@@ -171,7 +148,7 @@ const AdminUsersManagement = () => {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-          <NoSymbolIcon className="w-8 h-8" aria-hidden="true" />
+          <ErrorIcon size={32} aria-hidden="true" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
         <p className="text-gray-600">You don't have permission to view users.</p>
@@ -183,11 +160,11 @@ const AdminUsersManagement = () => {
     <div className="space-y-6">
       <PageHeader
         title="User Management"
-        subtitle="Manage all user accounts and roles on the platform"
+        subtitle="Manage platform users"
         actions={
           hasPermission('users.add') && !isAddRoute ? (
             <Button onClick={() => navigate('/admin/users/add')}>
-              <PlusIcon className="w-5 h-5 mr-2" aria-hidden="true" />
+              <AddIcon size={16} className="mr-2" aria-hidden="true" />
               New User
             </Button>
           ) : null
@@ -261,10 +238,10 @@ const AdminUsersManagement = () => {
         renderRowActions={(u) => (
           <div className="flex gap-2">
             {hasPermission('users.change') && (
-              <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setEditingUser(u); }}>Edit</Button>
+              <Button variant="minimal" size="sm" onClick={(e) => { e.stopPropagation(); setEditingUser(u); }}>Edit</Button>
             )}
             {hasPermission('users.delete') && (
-              <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDelete(u); }}>Delete</Button>
+              <Button variant="minimal" size="sm" onClick={(e) => { e.stopPropagation(); handleDelete(u); }} className="text-error-600 hover:text-error-700 hover:bg-error-50 dark:hover:bg-error-900/20">Delete</Button>
             )}
           </div>
         )}

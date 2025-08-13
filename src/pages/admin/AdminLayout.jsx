@@ -4,22 +4,22 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import Avatar from "../../components/ui/Avatar";
 import {
-  Squares2X2Icon,
+  DashboardIcon,
   UsersIcon,
-  BuildingOffice2Icon,
-  CubeIcon,
-  WrenchScrewdriverIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftRightIcon,
-  BellIcon,
-  ChartBarIcon,
-  Cog6ToothIcon,
-  Bars3Icon,
+  CompanyIcon,
+  ProductIcon,
+  ServiceIcon,
+  PostIcon,
+  ChatIcon,
+  NotificationIcon,
+  AnalyticsIcon,
+  SettingsIcon,
+  MenuIcon,
   SunIcon,
   MoonIcon,
-  MagnifyingGlassIcon,
-  CommandLineIcon,
-} from "@heroicons/react/24/outline";
+  SearchIcon,
+  CommandIcon,
+} from "../../components/ui/ModernIcon";
 
 const AdminLayout = ({ children }) => {
   const { pathname } = useLocation();
@@ -36,16 +36,16 @@ const AdminLayout = ({ children }) => {
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   const menuItems = useMemo(() => ([
-    { path: "/admin", label: "Dashboard", Icon: Squares2X2Icon },
+    { path: "/admin", label: "Dashboard", Icon: DashboardIcon },
     { path: "/admin/users", label: "Users", Icon: UsersIcon },
-    { path: "/admin/companies", label: "Companies", Icon: BuildingOffice2Icon },
-    { path: "/admin/products", label: "Products", Icon: CubeIcon },
-    { path: "/admin/services", label: "Services", Icon: WrenchScrewdriverIcon },
-    { path: "/admin/posts", label: "Posts", Icon: DocumentTextIcon },
-    { path: "/admin/messages", label: "Messages", Icon: ChatBubbleLeftRightIcon },
-    { path: "/admin/notifications", label: "Notifications", Icon: BellIcon },
-    { path: "/admin/analytics", label: "Analytics", Icon: ChartBarIcon },
-    { path: "/admin/settings", label: "Settings", Icon: Cog6ToothIcon },
+    { path: "/admin/companies", label: "Companies", Icon: CompanyIcon },
+    { path: "/admin/products", label: "Products", Icon: ProductIcon },
+    { path: "/admin/services", label: "Services", Icon: ServiceIcon },
+    { path: "/admin/posts", label: "Posts", Icon: PostIcon },
+    { path: "/admin/messages", label: "Messages", Icon: ChatIcon },
+    { path: "/admin/notifications", label: "Notifications", Icon: NotificationIcon },
+    { path: "/admin/analytics", label: "Analytics", Icon: AnalyticsIcon },
+    { path: "/admin/settings", label: "Settings", Icon: SettingsIcon },
   ]), []);
 
   return (
@@ -146,7 +146,7 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
         className="lg:hidden mr-3 !p-2 !h-10 !w-10"
       >
         <span className="sr-only">Open menu</span>
-        <Bars3Icon className="h-5 w-5" aria-hidden="true" />
+        <MenuIcon size={20} aria-hidden="true" />
       </Button>
 
       {/* Page Title */}
@@ -164,12 +164,12 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
             <Input
               placeholder="Search anything..."
               className="w-72 pl-11 pr-16 !py-2.5 bg-gray-50/80 dark:bg-gray-800/80 border-gray-200/60 dark:border-gray-700/60"
-              icon={MagnifyingGlassIcon}
+              icon={SearchIcon}
               onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs font-mono bg-gray-200/60 dark:bg-gray-700/60 text-gray-600 dark:text-gray-400 rounded border border-gray-300/60 dark:border-gray-600/60">
-                <CommandLineIcon className="w-3 h-3 mr-1" />
+                <CommandIcon size={12} className="mr-1" />
                 K
               </kbd>
             </div>
@@ -182,7 +182,7 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
           size="sm"
           className="!p-2 !h-10 !w-10 relative"
         >
-          <BellIcon className="h-5 w-5" />
+          <NotificationIcon size={20} />
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse" />
         </Button>
 
@@ -195,9 +195,9 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
           title="Toggle theme"
         >
           {theme === 'dark' ? (
-            <MoonIcon className="h-5 w-5" aria-hidden="true" />
+            <MoonIcon size={20} aria-hidden="true" />
           ) : (
-            <SunIcon className="h-5 w-5" aria-hidden="true" />
+            <SunIcon size={20} aria-hidden="true" />
           )}
         </Button>
 

@@ -5,8 +5,7 @@ import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
-import { CubeIcon, StarIcon, PlusIcon, TagIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { ProductIcon, CheckIcon } from "../../components/ui/ModernIcon";
 import Select from '../../components/ui/Select';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import { useAdminData } from './ComprehensiveAdmin';
@@ -79,66 +78,63 @@ const AdminProductsManagement = () => {
 
   const columns = [
     {
+      key: 'id',
+      label: 'ID',
+      sortable: true,
+      width: '80px'
+    },
+    {
       key: 'title',
-      label: 'Product',
+      label: 'Title',
       sortable: true,
       render: (product) => (
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 flex-shrink-0 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-            {Array.isArray(product.images) && product.images[0]?.image ? (
-              <img
-                src={product.images[0].image}
-                alt={product.title}
-                className="w-full h-full rounded-lg object-cover"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-            ) : (
-              <CubeIcon className="w-6 h-6 text-gray-400" />
-            )}
-          </div>
+        <div className="flex items-center space-x-3">
+          {/* Show first image if available */}
+          {Array.isArray(product.images) && product.images[0]?.image && (
+            <img
+              src={product.images[0].image}
+              alt={product.title}
+              className="w-10 h-10 rounded-lg object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          )}
           <div>
-            <div className="font-medium text-gray-900 dark:text-gray-100">{product.title}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">{product.company || 'N/A'}</div>
+            <div className="font-medium text-gray-900">{product.title}</div>
+            <div className="text-sm text-gray-500">{product.category}</div>
           </div>
         </div>
       )
     },
     {
-      key: 'category',
-      label: 'Category',
+      key: 'company',
+      label: 'Company',
       sortable: true,
       render: (product) => (
-        <div className="flex items-center">
-          <TagIcon className="w-4 h-4 mr-2 text-gray-400" />
-          <span className="text-sm text-gray-800 dark:text-gray-300">{product.category}</span>
+        <div>
+          <div className="font-medium text-gray-900">
+            {product.company || 'N/A'}
+          </div>
+          <div className="text-sm text-gray-500">{product.sub_title || ''}</div>
         </div>
       )
     },
     {
-      key: 'featured',
+      key: 'status',
       label: 'Featured',
-      sortable: true,
-      width: '120px',
       render: (product) => (
-        product.featured ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-            <StarIconSolid className="h-4 w-4 mr-1.5" />
-            Featured
-          </span>
-        ) : (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-            Regular
-          </span>
-        )
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          product.featured ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+        }`}>
+          {product.featured ? 'Featured' : 'Regular'}
+        </span>
       )
     },
     {
       key: 'date_created',
       label: 'Created',
       sortable: true,
-      width: '140px',
       render: (product) => (
-        <div className="text-sm text-gray-900 dark:text-gray-300">
+        <div className="text-sm text-gray-900">
           {new Date(product.date_created).toLocaleDateString()}
         </div>
       )
@@ -292,7 +288,7 @@ const AdminProductsManagement = () => {
     <div className="space-y-6">
       {/* Header */}
       <PageHeader
-        title="Product Management"
+        title="Products Management"
         subtitle="Manage all products and listings on the platform"
         actions={
           <div className="flex items-center gap-2">
@@ -310,7 +306,7 @@ const AdminProductsManagement = () => {
               onChange={(e) => { setFilterFeatured(e.target.value); setPage(1); }}
               className="w-auto"
             >
-              <option value="">All Status</option>
+              <option value="">All</option>
               <option value="true">Featured</option>
               <option value="false">Regular</option>
             </Select>
@@ -323,10 +319,7 @@ const AdminProductsManagement = () => {
                 Clear Filters
               </Button>
             )}
-            <Button onClick={handleCreate}>
-              <PlusIcon className="w-5 h-5 mr-2" />
-              Add Product
-            </Button>
+            <Button onClick={handleCreate}>Add New Product</Button>
           </div>
         }
       />
@@ -336,7 +329,7 @@ const AdminProductsManagement = () => {
         <StatsCard
           title="Total Products"
           value={totalProducts}
-          icon={<CubeIcon className="w-6 h-6" aria-hidden="true" />}
+          icon={<ProductIcon size={24} aria-hidden="true" />}
           color="blue"
           loading={loading}
         />

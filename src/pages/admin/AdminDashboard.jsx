@@ -1,18 +1,17 @@
 import React from "react";
 import {
-  ChartBarIcon,
+  AnalyticsIcon,
   UsersIcon,
-  BuildingOfficeIcon,
-  CubeIcon,
-  WrenchScrewdriverIcon,
-  DocumentTextIcon,
-  BanknotesIcon,
-  TrendingUpIcon,
-  ClockIcon,
-  ServerIcon,
-  GlobeAltIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
+  CompanyIcon,
+  ProductIcon,
+  ServiceIcon,
+  PostIcon,
+  MoneyIcon,
+  TrendingIcon,
+  CheckIcon,
+  SettingsIcon,
+  InfoIcon,
+} from "../../components/ui/ModernIcon";
 import Card, { CardHeader, CardContent } from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
@@ -38,7 +37,7 @@ const AdminDashboard = () => {
       value: "1,234",
       change: "+8%",
       changeType: "increase",
-      icon: BuildingOfficeIcon,
+      icon: CompanyIcon,
       color: "green",
     },
     {
@@ -46,7 +45,7 @@ const AdminDashboard = () => {
       value: "5,678",
       change: "+15%",
       changeType: "increase",
-      icon: CubeIcon,
+      icon: ProductIcon,
       color: "purple",
     },
     {
@@ -54,7 +53,7 @@ const AdminDashboard = () => {
       value: "2,345",
       change: "+6%",
       changeType: "increase",
-      icon: WrenchScrewdriverIcon,
+      icon: ServiceIcon,
       color: "orange",
     },
     {
@@ -62,7 +61,7 @@ const AdminDashboard = () => {
       value: "$89,234",
       change: "+23%",
       changeType: "increase",
-      icon: BanknotesIcon,
+      icon: MoneyIcon,
       color: "emerald",
     },
     {
@@ -70,7 +69,7 @@ const AdminDashboard = () => {
       value: "8,901",
       change: "+18%",
       changeType: "increase",
-      icon: DocumentTextIcon,
+      icon: PostIcon,
       color: "indigo",
     },
   ];
