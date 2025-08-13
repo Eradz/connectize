@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Input from '../ui/Input';
+import Button from '../ui/Button';
+import Select from '../ui/Select';
 
 /**
  * Generic server-driven DataTable
@@ -127,7 +130,7 @@ const DataTable = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -136,34 +139,35 @@ const DataTable = ({
           </div>
           <div className="flex items-center gap-2">
             {canSearch && (
-              <input
+              <Input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}
                 placeholder="Search..."
-                className="px-3 py-2 border rounded-lg text-sm"
+                className="w-56"
               />
             )}
             <label className="text-sm text-gray-500">Page size</label>
-            <select
+            <Select
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className="px-2 py-1 border rounded"
+              className="w-24"
             >
               {[10, 20, 50, 100].map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
-            </select>
-      <button type="button" onClick={load} className="px-3 py-2 border rounded hover:bg-gray-50 text-sm">Refresh</button>
-      <button type="button" onClick={exportCSV} className="px-3 py-2 border rounded hover:bg-gray-50 text-sm">Export CSV</button>
+            </Select>
+            <Button type="button" variant="secondary" size="sm" onClick={load}>Refresh</Button>
+            <Button type="button" variant="secondary" size="sm" onClick={exportCSV}>Export CSV</Button>
             {selectable && onBulkDelete && selected.length > 0 && (
-              <button
-        type="button"
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
                 onClick={async () => { await onBulkDelete(selected); }}
-                className="px-3 py-2 bg-red-600 text-white rounded text-sm"
               >
                 Delete Selected ({selected.length})
-              </button>
+              </Button>
             )}
           </div>
         </div>

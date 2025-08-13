@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Input, { Select, Textarea } from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 import {
   CogIcon,
   BellIcon,
@@ -77,11 +79,9 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Site Name
         </label>
-        <input
-          type="text"
+        <Input
           value={settings.siteName}
           onChange={(e) => handleSettingChange('siteName', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
       
@@ -89,11 +89,10 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Site Description
         </label>
-        <textarea
+        <Textarea
           value={settings.siteDescription}
           onChange={(e) => handleSettingChange('siteDescription', e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
       
@@ -164,13 +163,12 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Minimum Password Length
         </label>
-        <input
+        <Input
           type="number"
           value={settings.passwordMinLength}
           onChange={(e) => handleSettingChange('passwordMinLength', parseInt(e.target.value))}
-          min="6"
-          max="20"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          min={6}
+          max={20}
         />
       </div>
       
@@ -178,13 +176,12 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Session Timeout (minutes)
         </label>
-        <input
+        <Input
           type="number"
           value={settings.sessionTimeout}
           onChange={(e) => handleSettingChange('sessionTimeout', parseInt(e.target.value))}
-          min="5"
-          max="480"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          min={5}
+          max={480}
         />
       </div>
       
@@ -192,12 +189,11 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           IP Whitelist (one per line)
         </label>
-        <textarea
+        <Textarea
           value={settings.ipWhitelist}
           onChange={(e) => handleSettingChange('ipWhitelist', e.target.value)}
           rows={4}
-          placeholder="192.168.1.1&#10;10.0.0.1"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder={"192.168.1.1\n10.0.0.1"}
         />
       </div>
       
@@ -348,13 +344,12 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Rate Limit (requests per hour)
         </label>
-        <input
+        <Input
           type="number"
           value={settings.rateLimit}
           onChange={(e) => handleSettingChange('rateLimit', parseInt(e.target.value))}
-          min="100"
-          max="10000"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          min={100}
+          max={10000}
         />
       </div>
       
@@ -362,14 +357,13 @@ const AdminSettings = () => {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           API Version
         </label>
-        <select
+        <Select
           value={settings.apiVersion}
           onChange={(e) => handleSettingChange('apiVersion', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="v1">Version 1.0</option>
           <option value="v2">Version 2.0</option>
-        </select>
+        </Select>
       </div>
       
       <div className="flex items-center justify-between">
@@ -394,9 +388,7 @@ const AdminSettings = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium text-gray-700">API Keys</h3>
-          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-            Generate New Key
-          </button>
+          <Button size="sm">Generate New Key</Button>
         </div>
         <div className="space-y-2">
           <div className="p-3 bg-gray-50 rounded-lg flex items-center justify-between">
@@ -404,7 +396,7 @@ const AdminSettings = () => {
               <code className="text-sm">ak_1234567890abcdef</code>
               <span className="ml-2 text-xs text-gray-500">Created 2 days ago</span>
             </div>
-            <button className="text-red-600 hover:text-red-800 text-sm">Revoke</button>
+            <Button variant="danger" size="sm">Revoke</Button>
           </div>
         </div>
       </div>
@@ -632,12 +624,8 @@ const AdminSettings = () => {
             
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="flex justify-end space-x-3">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-                  Save Changes
-                </button>
+                <Button variant="secondary" size="md">Cancel</Button>
+                <Button size="md">Save Changes</Button>
               </div>
             </div>
           </div>

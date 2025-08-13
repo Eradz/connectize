@@ -4,6 +4,7 @@ import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import { Textarea } from '../../components/ui/Input';
 import { getMessagesForUser as getMessages, markMessageAsRead, bulkDeleteMessages, updateMessage } from '../../api-services/messaging';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
@@ -398,7 +399,7 @@ const AdminMessagesManagement = () => {
 
             {/* Actions */}
             <div className="flex justify-end space-x-3 pt-4 border-t">
-              <button
+              <Button
                 onClick={async () => {
                   try {
                     const rn = selectedMessage.room_name || (selectedMessage.sender?.id && selectedMessage.recipient?.id
@@ -413,25 +414,21 @@ const AdminMessagesManagement = () => {
                     alert('Failed to update message status');
                   }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 Mark as {selectedMessage.is_read ? 'Unread' : 'Read'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
                 onClick={() => {
                   handleDelete(selectedMessage);
                   setShowModal(false);
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 Delete Message
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-              >
+              </Button>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -461,16 +458,15 @@ const AdminMessagesManagement = () => {
           >
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-              <textarea
-                className="w-full border rounded p-2"
+              <Textarea
                 rows={6}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
               />
             </div>
             <div className="flex justify-end space-x-3 border-t pt-4">
-              <button type="button" onClick={() => setEditModalOpen(false)} className="px-4 py-2 border rounded">Cancel</button>
-              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Save Changes</button>
+              <Button type="button" variant="secondary" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+              <Button type="submit">Save Changes</Button>
             </div>
           </form>
         )}

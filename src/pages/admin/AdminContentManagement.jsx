@@ -3,6 +3,8 @@ import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
+import Input, { Textarea } from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 import Card, { CardHeader, CardContent } from '../../components/ui/Card';
 import { useLocation } from 'react-router-dom';
 
@@ -279,21 +281,21 @@ const AdminContentManagement = () => {
         <Card>
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">{editingItem ? 'Edit Post' : 'Create New Post'}</h3>
-            <button onClick={() => { setShowCreateForm(false); setEditingItem(null); }} className="text-gray-400 hover:text-gray-600">✕</button>
+            <Button variant="secondary" size="sm" onClick={() => { setShowCreateForm(false); setEditingItem(null); }}>Close</Button>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitPost} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Body *</label>
-                <textarea value={postForm.body} onChange={(e) => setPostForm({ ...postForm, body: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="8" required />
+                <Textarea value={postForm.body} onChange={(e) => setPostForm({ ...postForm, body: e.target.value })} rows={8} required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select value={postForm.status} onChange={(e) => setPostForm({ ...postForm, status: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <Select value={postForm.status} onChange={(e) => setPostForm({ ...postForm, status: e.target.value })}>
                   <option value="PUBLISHED">PUBLISHED</option>
                   <option value="DRAFT">DRAFT</option>
-                </select>
+                </Select>
               </div>
               <div className="flex items-center md:col-span-1">
                 <label className="flex items-center">
@@ -304,18 +306,18 @@ const AdminContentManagement = () => {
               {!editingItem && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                  <select value={postForm.company} onChange={(e) => setPostForm({ ...postForm, company: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                  <Select value={postForm.company} onChange={(e) => setPostForm({ ...postForm, company: e.target.value })} required>
                     <option value="">Select Company</option>
                     {companyOptions.map(c => (
                       <option key={c.id} value={c.id}>{c.company_name}</option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               )}
             </div>
             <div className="flex justify-end space-x-3">
-              <button type="button" onClick={() => { setShowCreateForm(false); setEditingItem(null); }} className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">Cancel</button>
-              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">{editingItem ? 'Update Post' : 'Create Post'}</button>
+              <Button type="button" variant="secondary" onClick={() => { setShowCreateForm(false); setEditingItem(null); }}>Cancel</Button>
+              <Button type="submit">{editingItem ? 'Update Post' : 'Create Post'}</Button>
             </div>
             </form>
           </CardContent>
@@ -332,25 +334,25 @@ const AdminContentManagement = () => {
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Search Posts</label>
                 <div className="flex">
-                  <input type="text" value={postsState.search} onChange={(e) => setPostsState({ ...postsState, search: e.target.value })} placeholder="Search by body..." className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                  <button onClick={() => { setPostsState(prev => ({ ...prev, page: 1 })); loadData('posts', { page: 1 }); }} className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700">Apply</button>
+                  <Input value={postsState.search} onChange={(e) => setPostsState({ ...postsState, search: e.target.value })} placeholder="Search by body..." className="flex-1 rounded-r-none" />
+                  <Button onClick={() => { setPostsState(prev => ({ ...prev, page: 1 })); loadData('posts', { page: 1 }); }} className="rounded-l-none">Apply</Button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
-                <select value={postsState.ordering} onChange={(e) => { const val = e.target.value; setPostsState(prev => ({ ...prev, ordering: val, page: 1 })); loadData('posts', { ordering: val, page: 1 }); }} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <Select value={postsState.ordering} onChange={(e) => { const val = e.target.value; setPostsState(prev => ({ ...prev, ordering: val, page: 1 })); loadData('posts', { ordering: val, page: 1 }); }}>
                   <option value="-date_created">Newest</option>
                   <option value="date_created">Oldest</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                <select value={postsState.company} onChange={(e) => { const company = e.target.value; setPostsState(prev => ({ ...prev, company, page: 1 })); loadData('posts', { company, page: 1 }); }} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <Select value={postsState.company} onChange={(e) => { const company = e.target.value; setPostsState(prev => ({ ...prev, company, page: 1 })); loadData('posts', { company, page: 1 }); }}>
                   <option value="">All companies</option>
                   {companyOptions.map(c => (
                     <option key={c.id} value={c.id}>{c.company_name}</option>
                   ))}
-                </select>
+                </Select>
               </div>
             </>
           )}
@@ -359,31 +361,31 @@ const AdminContentManagement = () => {
             <>
               <div className="md:col-span-3">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
-                <select value={mediaState.company} onChange={(e) => { const company = e.target.value; setMediaState(prev => ({ ...prev, company, page: 1 })); loadData('media', { company, page: 1 }); }} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <Select value={mediaState.company} onChange={(e) => { const company = e.target.value; setMediaState(prev => ({ ...prev, company, page: 1 })); loadData('media', { company, page: 1 }); }}>
                   <option value="">All companies</option>
                   {companyOptions.map(c => (
                     <option key={c.id} value={c.id}>{c.company_name}</option>
                   ))}
-                </select>
+                </Select>
               </div>
             </>
           )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Page size</label>
-            <select value={currentState.pageSize} onChange={(e) => { const size = Number(e.target.value); setCurrentState(prev => ({ ...prev, pageSize: size, page: 1 })); loadData(activeTab, { pageSize: size, page: 1 }); }} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <Select value={currentState.pageSize} onChange={(e) => { const size = Number(e.target.value); setCurrentState(prev => ({ ...prev, pageSize: size, page: 1 })); loadData(activeTab, { pageSize: size, page: 1 }); }}>
               {[10,20,50,100].map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            </Select>
           </div>
         </div>
 
         {/* Bulk delete */}
         {selectedItems.length > 0 && (
-          <div className="p-4 bg-blue-50 rounded-lg">
+      <div className="p-4 bg-blue-50 rounded-lg">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-blue-900">{selectedItems.length} {activeTab} selected</span>
               <div className="flex space-x-2">
-                <button onClick={handleBulkDelete} className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors">Delete</button>
+        <Button variant="danger" size="sm" onClick={handleBulkDelete}>Delete</Button>
               </div>
             </div>
           </div>
@@ -473,8 +475,12 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4 text-sm text-gray-500">{item.date_created ? new Date(item.date_created).toLocaleDateString() : 'N/A'}</td>
                         <td className="px-6 py-4 text-sm">
                           <div className="flex space-x-2">
-                            {hasPermission('content.change') && <button onClick={() => handleEditPost(item)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>}
-                            {hasPermission('content.delete') && <button onClick={async () => { const ok = await confirmDialog({ title: 'Delete Post', message: 'Delete this post?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/posts/${item.id}/`, { method: 'DELETE' }); await loadData('posts'); addToast('Post deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete post', 'error'); } }} className="text-red-600 hover:text-red-800 font-medium">Delete</button>}
+                            {hasPermission('content.change') && (
+                              <Button variant="secondary" size="sm" onClick={() => handleEditPost(item)}>Edit</Button>
+                            )}
+                            {hasPermission('content.delete') && (
+                              <Button variant="danger" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Post', message: 'Delete this post?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/posts/${item.id}/`, { method: 'DELETE' }); await loadData('posts'); addToast('Post deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete post', 'error'); } }}>Delete</Button>
+                            )}
                           </div>
                         </td>
                       </>
@@ -486,7 +492,9 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4 text-sm text-gray-900">#{item.post_id || '—'}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{item.commented_at ? new Date(item.commented_at).toLocaleDateString() : 'N/A'}</td>
                         <td className="px-6 py-4 text-sm">
-                          {hasPermission('content.delete') && <button onClick={async () => { const ok = await confirmDialog({ title: 'Delete Comment', message: 'Delete this comment?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/comments/${item.id}/`, { method: 'DELETE' }); await loadData('comments'); addToast('Comment deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete comment', 'error'); } }} className="text-red-600 hover:text-red-800 font-medium">Delete</button>}
+                          {hasPermission('content.delete') && (
+                            <Button variant="danger" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Comment', message: 'Delete this comment?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/comments/${item.id}/`, { method: 'DELETE' }); await loadData('comments'); addToast('Comment deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete comment', 'error'); } }}>Delete</Button>
+                          )}
                         </td>
                       </>
                     )}
@@ -506,8 +514,10 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4 text-sm text-gray-900">{item.company || item.company?.company_name || '—'}</td>
                         <td className="px-6 py-4 text-sm">
                           <div className="flex space-x-2">
-                            <a href={item.document} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 font-medium">Download</a>
-                            {hasPermission('content.delete') && <button onClick={async () => { const ok = await confirmDialog({ title: 'Delete Document', message: 'Delete this document?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/documents/${item.id}/`, { method: 'DELETE' }); await loadData('media'); addToast('Document deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete document', 'error'); } }} className="text-red-600 hover:text-red-800 font-medium">Delete</button>}
+                            <Button as="a" href={item.document} target="_blank" rel="noreferrer" variant="secondary" size="sm">Download</Button>
+                            {hasPermission('content.delete') && (
+                              <Button variant="danger" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Document', message: 'Delete this document?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/documents/${item.id}/`, { method: 'DELETE' }); await loadData('media'); addToast('Document deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete document', 'error'); } }}>Delete</Button>
+                            )}
                           </div>
                         </td>
                       </>

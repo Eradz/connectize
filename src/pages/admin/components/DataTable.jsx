@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import Input from '../../../components/ui/Input';
+import Button from '../../../components/ui/Button';
 
 const DataTable = ({ 
   data = [], 
@@ -203,7 +205,7 @@ const DataTable = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="p-6">
           <div className="animate-pulse">
             <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
@@ -219,7 +221,7 @@ const DataTable = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex justify-between items-center">
@@ -244,22 +246,23 @@ const DataTable = ({
               </div>
             )}
             {onExport && (
-              <button
+              <Button
+                size="sm"
+                variant="secondary"
                 onClick={() => {
                   const selectedObjects = sortedData.filter(r => selectedRows.includes(r.id));
                   onExport(selectedRows.length > 0 ? selectedObjects : sortedData);
                 }}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Export
-              </button>
+              </Button>
             )}
           </div>
         </div>
         
         {searchable && (
           <div className="mt-4">
-            <input
+            <Input
               type="text"
               placeholder="Search..."
               value={serverSide ? serverSearchTerm : searchTerm}
@@ -268,7 +271,6 @@ const DataTable = ({
                 else setSearchTerm(e.target.value);
               }}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         )}

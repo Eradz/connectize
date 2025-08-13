@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Button from '../../components/ui/Button';
+import Input, { Textarea } from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
 
 // Notification Management (Live API only)
 const AdminNotifications = () => {
@@ -184,9 +187,9 @@ const AdminNotifications = () => {
           </div>
           <div className="flex items-center gap-3">
             {hasPermission('notifications.change') && (
-              <button onClick={handleMarkAllRead} className="px-4 py-2 border rounded-lg">Mark all as read</button>
+              <Button variant="secondary" onClick={handleMarkAllRead}>Mark all as read</Button>
             )}
-            <button onClick={() => loadNotifications({ page })} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Refresh</button>
+            <Button onClick={() => loadNotifications({ page })}>Refresh</Button>
           </div>
         </div>
         {error && (
@@ -273,14 +276,14 @@ const AdminNotifications = () => {
                   <form onSubmit={handleCreate} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                      <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
+                      <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                      <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="4" required />
+                      <Textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} required />
                     </div>
                     <div className="flex justify-end">
-                      <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create</button>
+                      <Button type="submit">Create</Button>
                     </div>
                   </form>
                 </div>
@@ -288,32 +291,28 @@ const AdminNotifications = () => {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
-                  <input
-                    type="text"
+                  <Input
                     placeholder="Search notifications..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <select
+                <Select
                   value={filterStatus}
                   onChange={async (e) => { setFilterStatus(e.target.value); await loadNotifications({ page: 1 }); await refreshUnreadCount(); }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All</option>
                   <option value="unread">Unread</option>
                   <option value="read">Read</option>
-                </select>
+                </Select>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Page size</label>
-                  <select
+                  <Select
                     value={pageSize}
                     onChange={(e) => loadNotifications({ page: 1, pageSize: Number(e.target.value) })}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {[10,20,50,100].map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  </Select>
                 </div>
               </div>
 
@@ -323,10 +322,10 @@ const AdminNotifications = () => {
                   <span className="text-sm font-medium text-blue-900">{selected.length} selected</span>
                   <div className="space-x-2">
                     {hasPermission('notifications.change') && (
-                      <button onClick={bulkMarkRead} className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">Mark read</button>
+                      <Button size="sm" variant="secondary" onClick={bulkMarkRead}>Mark read</Button>
                     )}
                     {hasPermission('notifications.delete') && (
-                      <button onClick={bulkDelete} className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">Delete</button>
+                      <Button size="sm" variant="danger" onClick={bulkDelete}>Delete</Button>
                     )}
                   </div>
                 </div>
@@ -381,7 +380,9 @@ const AdminNotifications = () => {
                             <td className="px-6 py-4 text-sm font-medium">
                               <div className="flex items-center space-x-2">
                                 {!n.is_read && hasPermission('notifications.change') && (
-                                  <button
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
                                     onClick={async (e) => {
                                       e.stopPropagation();
                                       try {
@@ -393,18 +394,18 @@ const AdminNotifications = () => {
                                         addToast(e.message || 'Failed to mark as read', 'error');
                                       }
                                     }}
-                                    className="text-blue-600 hover:text-blue-900"
                                   >
                                     Mark Read
-                                  </button>
+                                  </Button>
                                 )}
                                 {hasPermission('notifications.delete') && (
-                                  <button
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
                                     onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }}
-                                    className="text-red-600 hover:text-red-900"
                                   >
                                     Delete
-                                  </button>
+                                  </Button>
                                 )}
                               </div>
                             </td>
@@ -420,10 +421,10 @@ const AdminNotifications = () => {
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600">Page {page} of {totalPages}</div>
                 <div className="space-x-2">
-                  <button disabled={page <= 1} onClick={() => loadNotifications({ page: 1 })} className="px-3 py-1 border rounded disabled:opacity-50">First</button>
-                  <button disabled={page <= 1} onClick={() => loadNotifications({ page: Math.max(1, page - 1) })} className="px-3 py-1 border rounded disabled:opacity-50">Prev</button>
-                  <button disabled={page >= totalPages} onClick={() => loadNotifications({ page: page + 1 })} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
-                  <button disabled={page >= totalPages} onClick={() => loadNotifications({ page: totalPages })} className="px-3 py-1 border rounded disabled:opacity-50">Last</button>
+                  <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => loadNotifications({ page: 1 })}>First</Button>
+                  <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => loadNotifications({ page: Math.max(1, page - 1) })}>Prev</Button>
+                  <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => loadNotifications({ page: page + 1 })}>Next</Button>
+                  <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => loadNotifications({ page: totalPages })}>Last</Button>
                 </div>
               </div>
             </div>

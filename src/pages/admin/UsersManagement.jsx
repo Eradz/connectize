@@ -23,6 +23,8 @@ import {
   sendUserNotification 
 } from "../../api-services/adminUsers";
 import { confirmDialog } from '../../lib/confirm.jsx';
+import Button from "../../components/ui/Button";
+import Input, { Select } from "../../components/ui/Input";
 
 const UsersManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -111,10 +113,10 @@ const UsersManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
           <p className="text-gray-600">Manage and monitor all platform users</p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <Button className="inline-flex items-center">
           <UserPlusIcon className="h-5 w-5 mr-2" />
           Add New User
-        </button>
+        </Button>
       </div>
 
       {/* Search and Filters */}
@@ -124,48 +126,42 @@ const UsersManagement = () => {
             <div className="flex-1">
               <div className="relative">
                 <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="text"
+                <Input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search users by name, email, or company..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-8"
                 />
               </div>
             </div>
             <div className="flex gap-4">
-              <select
+              <Select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   handleFilterChange("status", e.target.value);
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="suspended">Suspended</option>
-              </select>
-              <select
+              </Select>
+              <Select
                 value={userTypeFilter}
                 onChange={(e) => {
                   setUserTypeFilter(e.target.value);
                   handleFilterChange("userType", e.target.value);
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Types</option>
                 <option value="individual">Individual</option>
                 <option value="company">Company</option>
-              </select>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
-              >
+              </Select>
+              <Button type="submit" variant="secondary" className="flex items-center">
                 <FunnelIcon className="h-5 w-5 mr-2" />
                 Filter
-              </button>
+              </Button>
             </div>
           </div>
         </form>
@@ -179,24 +175,9 @@ const UsersManagement = () => {
               {selectedUsers.length} user(s) selected
             </div>
             <div className="flex space-x-2">
-              <button
-                onClick={() => bulkActionMutation.mutate({ userIds: selectedUsers, action: 'activate' })}
-                className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Activate
-              </button>
-              <button
-                onClick={() => bulkActionMutation.mutate({ userIds: selectedUsers, action: 'deactivate' })}
-                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Deactivate
-              </button>
-              <button
-                onClick={() => setSelectedUsers([])}
-                className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
-              >
-                Clear
-              </button>
+              <Button size="sm" onClick={() => bulkActionMutation.mutate({ userIds: selectedUsers, action: 'activate' })}>Activate</Button>
+              <Button size="sm" variant="danger" onClick={() => bulkActionMutation.mutate({ userIds: selectedUsers, action: 'deactivate' })}>Deactivate</Button>
+              <Button size="sm" variant="secondary" onClick={() => setSelectedUsers([])}>Clear</Button>
             </div>
           </div>
         </div>
@@ -426,12 +407,8 @@ const UsersManagement = () => {
           <span className="font-medium">{users?.length || 0}</span> results
         </div>
         <div className="flex space-x-2">
-          <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
-            Previous
-          </button>
-          <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
-            Next
-          </button>
+          <Button variant="secondary" size="sm">Previous</Button>
+          <Button variant="secondary" size="sm">Next</Button>
         </div>
       </div>
     </div>

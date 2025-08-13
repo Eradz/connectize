@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import Input, { Textarea } from '../../../components/ui/Input';
+import Select from '../../../components/ui/Select';
+import Button from '../../../components/ui/Button';
 
 const Modal = ({ 
   isOpen, 
@@ -32,23 +35,23 @@ const Modal = ({
     >
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div className="fixed inset-0 bg-gray-500/75 dark:bg-black/70 transition-opacity"></div>
 
         {/* Modal panel */}
-        <div className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} sm:w-full`}>
+        <div className={`inline-block align-bottom bg-white dark:bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} sm:w-full`}>
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-200">
+            <div className="bg-white dark:bg-gray-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 {title && (
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                     {title}
                   </h3>
                 )}
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none"
                   >
                     <span className="sr-only">Close</span>
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,7 +64,7 @@ const Modal = ({
           )}
 
           {/* Content */}
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+          <div className="bg-white dark:bg-gray-900 px-4 pt-5 pb-4 sm:p-6">
             {children}
           </div>
         </div>
@@ -118,87 +121,64 @@ const Form = ({
       name: field.name,
       value: formData[field.name] || '',
       onChange: (e) => handleChange(field.name, e.target.value),
-      className: `mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-        errors[field.name] ? 'border-red-500' : ''
-      }`,
-      disabled: loading
+      disabled: loading,
     };
 
     switch (field.type) {
-      case 'text':
-      case 'email':
-      case 'number':
-      case 'url':
-        return (
-          <input
-            type={field.type}
-            {...commonProps}
-            placeholder={field.placeholder}
-          />
-        );
-
       case 'textarea':
         return (
-          <textarea
+          <Textarea
             {...commonProps}
             rows={field.rows || 4}
             placeholder={field.placeholder}
           />
         );
-
       case 'select':
         return (
-          <select {...commonProps}>
+          <Select {...commonProps}>
             <option value="">Select {field.label}</option>
-            {field.options?.map(option => (
-              <option key={option.value} value={option.value}>
+            {field.options?.map((option) => (
+              <option key={String(option.value)} value={option.value}>
                 {option.label}
               </option>
             ))}
-          </select>
+          </Select>
         );
-
       case 'checkbox':
         return (
-          <input
-            type="checkbox"
-            {...commonProps}
-            checked={formData[field.name] || false}
-            onChange={(e) => handleChange(field.name, e.target.checked)}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
+          <label className="inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData[field.name] || false}
+              onChange={(e) => handleChange(field.name, e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={loading}
+            />
+            <span className="text-sm text-gray-700 dark:text-gray-200">{field.label}</span>
+          </label>
         );
-
       case 'file':
         return (
           <input
             type="file"
-            {...commonProps}
             onChange={(e) => handleChange(field.name, e.target.files[0])}
             accept={field.accept}
+            disabled={loading}
+            className={`w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors[field.name] ? 'border-red-500' : ''}`}
           />
         );
-
       case 'date':
-        return (
-          <input
-            type="date"
-            {...commonProps}
-          />
-        );
-
+        return <Input type="date" {...commonProps} />;
       case 'datetime-local':
-        return (
-          <input
-            type="datetime-local"
-            {...commonProps}
-          />
-        );
-
+        return <Input type="datetime-local" {...commonProps} />;
+      case 'email':
+      case 'number':
+      case 'url':
+      case 'text':
       default:
         return (
-          <input
-            type="text"
+          <Input
+            type={field.type || 'text'}
             {...commonProps}
             placeholder={field.placeholder}
           />
@@ -210,38 +190,31 @@ const Form = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       {fields.map(field => (
         <div key={field.name}>
-          <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
+          {field.type !== 'checkbox' && (
+            <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 dark:text-gray-200">
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
-          </label>
+            </label>
+          )}
           {renderField(field)}
           {errors[field.name] && (
             <p className="mt-1 text-sm text-red-600">{errors[field.name]}</p>
           )}
           {field.help && (
-            <p className="mt-1 text-sm text-gray-500">{field.help}</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{field.help}</p>
           )}
         </div>
       ))}
 
-      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-800">
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={loading} size="md">
             {cancelLabel}
-          </button>
+          </Button>
         )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading} size="md">
           {loading ? 'Saving...' : submitLabel}
-        </button>
+        </Button>
       </div>
     </form>
   );

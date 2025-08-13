@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
 
 const AdminLayout = ({ children }) => {
   const { pathname } = useLocation();
@@ -106,24 +108,24 @@ const Topbar = ({ onMenu, theme, onToggleTheme }) => {
         {/* Search */}
         <div className="hidden sm:flex items-center">
           <div className="relative">
-            <input
-              type="text"
+            <Input
               placeholder="Search…"
-              className="w-64 px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-64"
               onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
             />
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">⌘K</span>
           </div>
         </div>
         {/* Theme toggle */}
-        <button
+        <Button
           type="button"
+          variant="secondary"
           onClick={onToggleTheme}
-          className="p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="p-2 h-10 w-10 !px-0"
           title="Toggle theme"
         >
           {theme === 'dark' ? '🌙' : '🌞'}
-        </button>
+        </Button>
         {/* User */}
         <button type="button" className="ml-1 p-1 pl-2 pr-3 rounded-full border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
           <span className="inline-block w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500" />

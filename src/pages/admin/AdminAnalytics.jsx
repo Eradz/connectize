@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Select from "../../components/ui/Select";
+import Button from "../../components/ui/Button";
 import {
   ChartBarIcon,
   UsersIcon,
@@ -135,16 +137,12 @@ const AdminAnalytics = () => {
         </div>
         <div className="flex items-center space-x-3">
           <CalendarIcon className="h-5 w-5 text-gray-400" />
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
+          <Select value={dateRange} onChange={(e) => setDateRange(e.target.value)} className="w-auto">
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 3 months</option>
             <option value="1y">Last year</option>
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -307,15 +305,9 @@ const AdminAnalytics = () => {
             <p className="text-gray-600">Download detailed analytics reports</p>
           </div>
           <div className="flex space-x-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Export PDF
-            </button>
-            <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              Export CSV
-            </button>
-            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-              Schedule Report
-            </button>
+            <Button>Export PDF</Button>
+            <Button variant="secondary">Export CSV</Button>
+            <Button variant="ghost">Schedule Report</Button>
           </div>
         </div>
       </div>

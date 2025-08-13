@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import Input, { Select, Textarea } from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
+import Toggle from '../../components/ui/Toggle';
+import Checkbox from '../../components/ui/Checkbox';
 
 // System Settings & Configuration Component
 const AdminSystemSettings = () => {
@@ -221,11 +225,9 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Site Name
                       </label>
-                      <input
-                        type="text"
+                      <Input
                         value={settings.general?.site_name || ''}
                         onChange={(e) => handleSettingChange('general', 'site_name', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -233,11 +235,10 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Admin Email
                       </label>
-                      <input
+                      <Input
                         type="email"
                         value={settings.general?.admin_email || ''}
                         onChange={(e) => handleSettingChange('general', 'admin_email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -245,11 +246,10 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Site Description
                       </label>
-                      <textarea
+                      <Textarea
                         value={settings.general?.site_description || ''}
                         onChange={(e) => handleSettingChange('general', 'site_description', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        rows="3"
+                        rows={3}
                       />
                     </div>
                     
@@ -257,10 +257,9 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Timezone
                       </label>
-                      <select
+                      <Select
                         value={settings.general?.timezone || 'UTC'}
                         onChange={(e) => handleSettingChange('general', 'timezone', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="UTC">UTC</option>
                         <option value="US/Eastern">US/Eastern</option>
@@ -270,81 +269,65 @@ const AdminSystemSettings = () => {
                         <option value="Europe/London">Europe/London</option>
                         <option value="Europe/Paris">Europe/Paris</option>
                         <option value="Asia/Tokyo">Asia/Tokyo</option>
-                      </select>
+                      </Select>
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Default Language
                       </label>
-                      <select
+                      <Select
                         value={settings.general?.language || 'en'}
                         onChange={(e) => handleSettingChange('general', 'language', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="en">English</option>
                         <option value="es">Spanish</option>
                         <option value="fr">French</option>
                         <option value="de">German</option>
                         <option value="pt">Portuguese</option>
-                      </select>
+                      </Select>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700">Enable Maintenance Mode</h4>
+                        <p className="text-xs text-gray-500">Temporarily disable the site for maintenance</p>
+                      </div>
+                      <Toggle
                         id="maintenance_mode"
                         checked={settings.general?.maintenance_mode || false}
-                        onChange={(e) => handleSettingChange('general', 'maintenance_mode', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        onChange={(val) => handleSettingChange('general', 'maintenance_mode', val)}
                       />
-                      <label htmlFor="maintenance_mode" className="ml-2 text-sm text-gray-700">
-                        Enable Maintenance Mode
-                      </label>
                     </div>
-                    
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700">Allow User Registration</h4>
+                        <p className="text-xs text-gray-500">Enable sign-up for new users</p>
+                      </div>
+                      <Toggle
                         id="user_registration"
                         checked={settings.general?.user_registration_enabled || false}
-                        onChange={(e) => handleSettingChange('general', 'user_registration_enabled', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        onChange={(val) => handleSettingChange('general', 'user_registration_enabled', val)}
                       />
-                      <label htmlFor="user_registration" className="ml-2 text-sm text-gray-700">
-                        Allow User Registration
-                      </label>
                     </div>
-                    
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-700">Require Email Verification</h4>
+                        <p className="text-xs text-gray-500">New accounts must confirm email</p>
+                      </div>
+                      <Toggle
                         id="email_verification"
                         checked={settings.general?.email_verification_required || false}
-                        onChange={(e) => handleSettingChange('general', 'email_verification_required', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        onChange={(val) => handleSettingChange('general', 'email_verification_required', val)}
                       />
-                      <label htmlFor="email_verification" className="ml-2 text-sm text-gray-700">
-                        Require Email Verification
-                      </label>
                     </div>
                   </div>
                   
                   <div className="flex justify-end space-x-3">
-                    <button
-                      onClick={() => resetToDefaults('general')}
-                      className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Reset to Defaults
-                    </button>
-                    <button
-                      onClick={() => saveSettings('general')}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Save General Settings
-                    </button>
+                    <Button variant="secondary" onClick={() => resetToDefaults('general')}>Reset to Defaults</Button>
+                    <Button onClick={() => saveSettings('general')}>Save General Settings</Button>
                   </div>
                 </div>
               )}
@@ -357,11 +340,9 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         SMTP Host
                       </label>
-                      <input
-                        type="text"
+                      <Input
                         value={settings.email?.smtp_host || ''}
                         onChange={(e) => handleSettingChange('email', 'smtp_host', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -369,11 +350,10 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         SMTP Port
                       </label>
-                      <input
+                      <Input
                         type="number"
                         value={settings.email?.smtp_port || 587}
                         onChange={(e) => handleSettingChange('email', 'smtp_port', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -381,11 +361,10 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         From Email
                       </label>
-                      <input
+                      <Input
                         type="email"
                         value={settings.email?.from_email || ''}
                         onChange={(e) => handleSettingChange('email', 'from_email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -393,56 +372,31 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         From Name
                       </label>
-                      <input
-                        type="text"
+                      <Input
                         value={settings.email?.from_name || ''}
                         onChange={(e) => handleSettingChange('email', 'from_name', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="smtp_tls"
-                        checked={settings.email?.smtp_use_tls || false}
-                        onChange={(e) => handleSettingChange('email', 'smtp_use_tls', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="smtp_tls" className="ml-2 text-sm text-gray-700">
-                        Use TLS
-                      </label>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="welcome_email"
-                        checked={settings.email?.welcome_email_enabled || false}
-                        onChange={(e) => handleSettingChange('email', 'welcome_email_enabled', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="welcome_email" className="ml-2 text-sm text-gray-700">
-                        Send Welcome Emails
-                      </label>
-                    </div>
+                    <Checkbox
+                      id="smtp_tls"
+                      checked={settings.email?.smtp_use_tls || false}
+                      onChange={(e) => handleSettingChange('email', 'smtp_use_tls', e.target.checked)}
+                      label="Use TLS"
+                    />
+                    <Checkbox
+                      id="welcome_email"
+                      checked={settings.email?.welcome_email_enabled || false}
+                      onChange={(e) => handleSettingChange('email', 'welcome_email_enabled', e.target.checked)}
+                      label="Send Welcome Emails"
+                    />
                   </div>
                   
                   <div className="flex justify-end space-x-3">
-                    <button
-                      onClick={() => resetToDefaults('email')}
-                      className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Reset to Defaults
-                    </button>
-                    <button
-                      onClick={() => saveSettings('email')}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Save Email Settings
-                    </button>
+                    <Button variant="secondary" onClick={() => resetToDefaults('email')}>Reset to Defaults</Button>
+                    <Button onClick={() => saveSettings('email')}>Save Email Settings</Button>
                   </div>
                 </div>
               )}
@@ -455,13 +409,12 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Minimum Password Length
                       </label>
-                      <input
+                      <Input
                         type="number"
-                        min="6"
-                        max="50"
+                        min={6}
+                        max={50}
                         value={settings.security?.password_min_length || 8}
                         onChange={(e) => handleSettingChange('security', 'password_min_length', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -469,13 +422,12 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Session Timeout (hours)
                       </label>
-                      <input
+                      <Input
                         type="number"
-                        min="1"
-                        max="168"
+                        min={1}
+                        max={168}
                         value={settings.security?.session_timeout || 24}
                         onChange={(e) => handleSettingChange('security', 'session_timeout', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -483,13 +435,12 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Max Login Attempts
                       </label>
-                      <input
+                      <Input
                         type="number"
-                        min="3"
-                        max="10"
+                        min={3}
+                        max={10}
                         value={settings.security?.max_login_attempts || 5}
                         onChange={(e) => handleSettingChange('security', 'max_login_attempts', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     
@@ -497,13 +448,12 @@ const AdminSystemSettings = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Lockout Duration (minutes)
                       </label>
-                      <input
+                      <Input
                         type="number"
-                        min="5"
-                        max="1440"
+                        min={5}
+                        max={1440}
                         value={settings.security?.lockout_duration || 30}
                         onChange={(e) => handleSettingChange('security', 'lockout_duration', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -512,73 +462,39 @@ const AdminSystemSettings = () => {
                     <h3 className="text-lg font-medium text-gray-900">Password Requirements</h3>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="require_uppercase"
-                          checked={settings.security?.password_require_uppercase || false}
-                          onChange={(e) => handleSettingChange('security', 'password_require_uppercase', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="require_uppercase" className="ml-2 text-sm text-gray-700">
-                          Require Uppercase
-                        </label>
-                      </div>
+                      <Checkbox
+                        id="require_uppercase"
+                        checked={settings.security?.password_require_uppercase || false}
+                        onChange={(e) => handleSettingChange('security', 'password_require_uppercase', e.target.checked)}
+                        label="Require Uppercase"
+                      />
                       
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="require_lowercase"
-                          checked={settings.security?.password_require_lowercase || false}
-                          onChange={(e) => handleSettingChange('security', 'password_require_lowercase', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="require_lowercase" className="ml-2 text-sm text-gray-700">
-                          Require Lowercase
-                        </label>
-                      </div>
+                      <Checkbox
+                        id="require_lowercase"
+                        checked={settings.security?.password_require_lowercase || false}
+                        onChange={(e) => handleSettingChange('security', 'password_require_lowercase', e.target.checked)}
+                        label="Require Lowercase"
+                      />
                       
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="require_numbers"
-                          checked={settings.security?.password_require_numbers || false}
-                          onChange={(e) => handleSettingChange('security', 'password_require_numbers', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="require_numbers" className="ml-2 text-sm text-gray-700">
-                          Require Numbers
-                        </label>
-                      </div>
+                      <Checkbox
+                        id="require_numbers"
+                        checked={settings.security?.password_require_numbers || false}
+                        onChange={(e) => handleSettingChange('security', 'password_require_numbers', e.target.checked)}
+                        label="Require Numbers"
+                      />
                       
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="require_special"
-                          checked={settings.security?.password_require_special || false}
-                          onChange={(e) => handleSettingChange('security', 'password_require_special', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="require_special" className="ml-2 text-sm text-gray-700">
-                          Require Special Characters
-                        </label>
-                      </div>
+                      <Checkbox
+                        id="require_special"
+                        checked={settings.security?.password_require_special || false}
+                        onChange={(e) => handleSettingChange('security', 'password_require_special', e.target.checked)}
+                        label="Require Special Characters"
+                      />
                     </div>
                   </div>
                   
                   <div className="flex justify-end space-x-3">
-                    <button
-                      onClick={() => resetToDefaults('security')}
-                      className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Reset to Defaults
-                    </button>
-                    <button
-                      onClick={() => saveSettings('security')}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Save Security Settings
-                    </button>
+                    <Button variant="secondary" onClick={() => resetToDefaults('security')}>Reset to Defaults</Button>
+                    <Button onClick={() => saveSettings('security')}>Save Security Settings</Button>
                   </div>
                 </div>
               )}
