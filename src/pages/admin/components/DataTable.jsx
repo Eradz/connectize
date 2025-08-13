@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 const DataTable = ({ 
   data = [], 
@@ -26,28 +26,63 @@ const DataTable = ({
   onSearchChange,
   onSortChange,
   loading = false,
-  actions = true
+  actions = true,
+  // Client-side exhaustive search support (keys or dot paths or accessor fns)
+  searchFields = [],
+  // Debounce interval for server-side search
+  serverSearchDebounceMs = 400,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [internalSelectedRows, setInternalSelectedRows] = useState([]);
+  const [serverSearchTerm, setServerSearchTerm] = useState('');
   const selectedRows = selectedItems ?? internalSelectedRows;
 
   // Effective page for UI
   const effectivePage = serverSide && typeof controlledPage === 'number' ? controlledPage : currentPage;
 
+  // Helper to get nested value by path (e.g., 'recipient.username')
+  const getByPath = (obj, path) => {
+    if (!obj || !path) return undefined;
+    if (typeof path === 'function') {
+      try { return path(obj); } catch { return undefined; }
+    }
+    if (typeof path !== 'string') return undefined;
+    if (!path.includes('.')) return obj[path];
+    return path.split('.').reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+  };
+
   // Filter data based on search term (client-side only)
   const filteredData = useMemo(() => {
     if (serverSide) return data;
     if (!searchTerm) return data;
+    const term = searchTerm.toLowerCase();
     return data.filter(row =>
-      columns.some(column => {
+      (
+        // Search across visible columns
+        columns.some(column => {
+        // Allow per-column accessor for nested/computed search
+        if (typeof column.searchAccessor === 'function') {
+          try {
+            const v = column.searchAccessor(row);
+            return (v ?? '').toString().toLowerCase().includes(term);
+          } catch (_) {
+            return false;
+          }
+        }
         const value = row[column.key];
-        return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
-      })
+        return value && value.toString().toLowerCase().includes(term);
+        })
+        ||
+        // Also search extra fields provided via searchFields
+        (Array.isArray(searchFields) && searchFields.some((sf) => {
+          const v = getByPath(row, sf);
+          return (v ?? '').toString().toLowerCase().includes(term);
+        }))
+      )
     );
-  }, [data, searchTerm, columns, serverSide]);
+  }, [data, searchTerm, columns, serverSide, searchFields]);
 
   // Sort data
   const sortedData = useMemo(() => {
@@ -81,6 +116,18 @@ const DataTable = ({
     if (serverSide) return Math.max(1, Math.ceil((totalCount || 0) / pageSize));
     return Math.ceil(sortedData.length / pageSize);
   }, [pagination, serverSide, totalCount, pageSize, sortedData.length]);
+
+  // Debounce server-side search input -> onSearchChange
+  useEffect(() => {
+    if (!serverSide || !onSearchChange) return;
+    const id = setTimeout(() => {
+      onSearchChange(serverSearchTerm);
+      // Reset to page 1 when search changes
+      onPageChange && onPageChange(1);
+    }, serverSearchDebounceMs);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverSide, serverSearchTerm, onSearchChange, serverSearchDebounceMs]);
 
   const handleSort = (key) => {
     if (!sortable) return;
@@ -214,11 +261,12 @@ const DataTable = ({
             <input
               type="text"
               placeholder="Search..."
-              value={serverSide ? '' : searchTerm}
+              value={serverSide ? serverSearchTerm : searchTerm}
               onChange={(e) => {
-                if (serverSide && onSearchChange) onSearchChange(e.target.value);
+                if (serverSide) setServerSearchTerm(e.target.value);
                 else setSearchTerm(e.target.value);
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -291,8 +339,9 @@ const DataTable = ({
                 {(onEdit || onDelete) && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      {onEdit && (
+            {onEdit && (
                         <button
+              type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit(row);
@@ -302,8 +351,9 @@ const DataTable = ({
                           Edit
                         </button>
                       )}
-                      {onDelete && (
+            {onDelete && (
                         <button
+              type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onDelete(row);
@@ -358,7 +408,7 @@ const DataTable = ({
               {[...Array(Math.min(5, totalPages))].map((_, i) => {
                 const page = i + 1;
                 return (
-                  <button
+          <button
                     key={page}
                     onClick={() => {
                       if (serverSide && onPageChange) onPageChange(page);
@@ -374,7 +424,7 @@ const DataTable = ({
                   </button>
                 );
               })}
-              <button
+        <button
                 onClick={() => {
                   if (serverSide && onPageChange) onPageChange(effectivePage + 1);
                   else setCurrentPage(effectivePage + 1);

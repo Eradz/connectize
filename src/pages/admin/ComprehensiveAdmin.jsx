@@ -18,6 +18,7 @@ import AdminNotifications from './AdminNotifications';
 import AdminProductDetail from './details/AdminProductDetail';
 import AdminServiceDetail from './details/AdminServiceDetail';
 import AdminNotificationDetail from './details/AdminNotificationDetail';
+import AdminMessagesManagement from './AdminMessagesManagement';
 
 // Enhanced API Helper with comprehensive error handling and live data support
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -1168,7 +1169,15 @@ const ComprehensiveAdmin = () => {
               <Route path="notifications" element={<RequirePermission permission="notifications.view"><AdminNotifications /></RequirePermission>} />
               <Route path="notifications/:id" element={<RequirePermission permission="notifications.view"><AdminNotificationDetail /></RequirePermission>} />
               <Route path="notifications/create" element={<RequirePermission permission="notifications.add"><AdminNotifications /></RequirePermission>} />
+              <Route path="messages" element={<RequirePermission permission="messages.view"><AdminMessagesManagement /></RequirePermission>} />
               <Route path="analytics" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              <Route path="analytics/users" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              <Route path="analytics/content" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              <Route path="analytics/export" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              {/* Optional direct aliases for completeness */}
+              <Route path="analytics/engagement" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              <Route path="analytics/retention" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              <Route path="analytics/performance" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="settings" element={<RequirePermission permission="admin"><AdminSystemSettings /></RequirePermission>} />
               <Route path="profile" element={<AdminProfile />} />
               <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />

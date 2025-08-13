@@ -108,7 +108,8 @@ export async function getAuthorizationHeader() {
 
   if (refreshedToken?.Authorization) return refreshedToken;
 
-  return { Authorization: refreshedToken };
+  // No valid auth header
+  return null;
 }
 
 export async function makeApiRequest({
@@ -122,9 +123,9 @@ export async function makeApiRequest({
   onUploadProgress,
 }) {
   try {
-    const authorization = await getAuthorizationHeader();
+  const authorization = await getAuthorizationHeader();
 
-    if (!authorization && !type.startsWith("auth")) {
+  if ((!authorization || !authorization.Authorization) && !type.startsWith("auth")) {
       goToLogin();
       return;
     }
@@ -134,7 +135,7 @@ export async function makeApiRequest({
       method,
       data,
       headers: {
-        ...authorization,
+        ...(authorization || {}),
         "Content-Type": contentType,
       },
       params,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './components/DataTable';
 import StatsCard from './components/StatsCard';
 import Modal from './components/Modal';
-import { getNotificationsForUser as getNotifications, markNotificationAsRead, deleteNotification } from '../../api-services/notifications';
+import { getNotificationsForUser as getNotifications, markNotificationAsRead, deleteNotification, createNotification } from '../../api-services/notifications';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
 
@@ -36,7 +36,8 @@ const AdminNotificationsManagement = () => {
   const systemNotifications = notifications.filter(notification => notification.type === 'system').length;
   const todayNotifications = notifications.filter(notification => {
     const today = new Date().toDateString();
-    return new Date(notification.created_at).toDateString() === today;
+    const ts = notification.timestamp || notification.created_at;
+    return ts ? new Date(ts).toDateString() === today : false;
   }).length;
 
   const columns = [
@@ -50,6 +51,8 @@ const AdminNotificationsManagement = () => {
       key: 'title',
       label: 'Title',
       sortable: true,
+      // Include alternate fields in search (subject)
+      searchAccessor: (n) => n?.title || n?.subject || '',
       render: (notification) => (
         <div className={`${!notification.is_read ? 'font-semibold' : 'font-normal'}`}>
           {notification.title || notification.subject || 'No Title'}
@@ -59,6 +62,8 @@ const AdminNotificationsManagement = () => {
     {
       key: 'message',
       label: 'Message Preview',
+      // Include alternate fields in search (content)
+      searchAccessor: (n) => n?.message || n?.content || '',
       render: (notification) => (
         <div className="text-sm text-gray-600 max-w-xs truncate">
           {notification.message || notification.content || 'No message'}
@@ -69,6 +74,18 @@ const AdminNotificationsManagement = () => {
       key: 'recipient',
       label: 'Recipient',
       sortable: true,
+      // Search on nested recipient name/username/email
+      searchAccessor: (n) => {
+        const r = n?.recipient || {};
+        const name = r.first_name && r.last_name ? `${r.first_name} ${r.last_name}` : '';
+        return [
+          name,
+          r.username,
+          r.email,
+          n?.recipient_name,
+          n?.recipient_email,
+        ].filter(Boolean).join(' ').trim();
+      },
       render: (notification) => (
         <div>
           <div className="font-medium text-gray-900">
@@ -87,15 +104,15 @@ const AdminNotificationsManagement = () => {
       key: 'type',
       label: 'Type',
       sortable: true,
-      render: (notification) => (
+    render: (notification) => (
         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          notification.type === 'system' ? 'bg-purple-100 text-purple-800' :
-          notification.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-          notification.type === 'error' ? 'bg-red-100 text-red-800' :
-          notification.type === 'success' ? 'bg-green-100 text-green-800' :
+      (notification.type || notification.notification_type) === 'system' ? 'bg-purple-100 text-purple-800' :
+      (notification.type || notification.notification_type) === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+      (notification.type || notification.notification_type) === 'error' ? 'bg-red-100 text-red-800' :
+      (notification.type || notification.notification_type) === 'success' ? 'bg-green-100 text-green-800' :
           'bg-blue-100 text-blue-800'
         }`}>
-          {notification.type || 'info'}
+      {notification.type || notification.notification_type || 'info'}
         </span>
       )
     },
@@ -132,9 +149,9 @@ const AdminNotificationsManagement = () => {
       sortable: true,
       render: (notification) => (
         <div className="text-sm text-gray-900">
-          {new Date(notification.created_at).toLocaleDateString()}
+          {new Date(notification.timestamp || notification.created_at).toLocaleDateString()}
           <div className="text-xs text-gray-500">
-            {new Date(notification.created_at).toLocaleTimeString()}
+            {new Date(notification.timestamp || notification.created_at).toLocaleTimeString()}
           </div>
         </div>
       )
@@ -459,18 +476,18 @@ const AdminNotificationsManagement = () => {
                     {selectedNotification.title || 'No Title'}
                   </h3>
                   <div className="text-sm text-gray-500 mt-1">
-                    {new Date(selectedNotification.created_at).toLocaleString()}
+                    {new Date(selectedNotification.timestamp || selectedNotification.created_at).toLocaleString()}
                   </div>
                 </div>
                 <div className="flex space-x-2">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    selectedNotification.type === 'system' ? 'bg-purple-100 text-purple-800' :
-                    selectedNotification.type === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                    selectedNotification.type === 'error' ? 'bg-red-100 text-red-800' :
-                    selectedNotification.type === 'success' ? 'bg-green-100 text-green-800' :
+                    (selectedNotification.type || selectedNotification.notification_type) === 'system' ? 'bg-purple-100 text-purple-800' :
+                    (selectedNotification.type || selectedNotification.notification_type) === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                    (selectedNotification.type || selectedNotification.notification_type) === 'error' ? 'bg-red-100 text-red-800' :
+                    (selectedNotification.type || selectedNotification.notification_type) === 'success' ? 'bg-green-100 text-green-800' :
                     'bg-blue-100 text-blue-800'
                   }`}>
-                    {selectedNotification.type || 'info'}
+                    {selectedNotification.type || selectedNotification.notification_type || 'info'}
                   </span>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     selectedNotification.priority === 'high' ? 'bg-red-100 text-red-800' :

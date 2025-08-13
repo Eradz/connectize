@@ -1,13 +1,14 @@
 import { makeApiRequest } from "../lib/helpers";
 
 export const getMessagesForUser = async (params) => {
-  const { results: messages } = await makeApiRequest({
+  const res = await makeApiRequest({
     url: "api/messages/",
     method: "GET",
     params,
   });
 
-  return messages;
+  // If backend returns { results: [...] } use that; otherwise assume res is already an array
+  return res?.results ?? res ?? [];
 };
 
 export const messageUser = async (formData) => {
@@ -26,7 +27,7 @@ export const markMessageAsRead = async (room_name) => {
     url: "api/messages/mark-all-as-read/",
     method: "POST",
     data: { room_name },
-    contentType: "multipart/form-data",
+  contentType: "application/json",
   });
 
   return message;

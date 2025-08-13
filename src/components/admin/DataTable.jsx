@@ -139,6 +139,7 @@ const DataTable = ({
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}
                 placeholder="Search..."
                 className="px-3 py-2 border rounded-lg text-sm"
               />
@@ -153,10 +154,11 @@ const DataTable = ({
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            <button onClick={load} className="px-3 py-2 border rounded hover:bg-gray-50 text-sm">Refresh</button>
-            <button onClick={exportCSV} className="px-3 py-2 border rounded hover:bg-gray-50 text-sm">Export CSV</button>
+      <button type="button" onClick={load} className="px-3 py-2 border rounded hover:bg-gray-50 text-sm">Refresh</button>
+      <button type="button" onClick={exportCSV} className="px-3 py-2 border rounded hover:bg-gray-50 text-sm">Export CSV</button>
             {selectable && onBulkDelete && selected.length > 0 && (
               <button
+        type="button"
                 onClick={async () => { await onBulkDelete(selected); }}
                 className="px-3 py-2 bg-red-600 text-white rounded text-sm"
               >
@@ -178,7 +180,7 @@ const DataTable = ({
             <span className="text-2xl">⚠️</span>
           </div>
           <p className="text-red-600 mb-2">{error}</p>
-          <button onClick={load} className="px-3 py-2 border rounded text-sm">Retry</button>
+          <button type="button" onClick={load} className="px-3 py-2 border rounded text-sm">Retry</button>
         </div>
       ) : items.length === 0 ? (
         <div className="text-center py-12">
@@ -263,10 +265,10 @@ const DataTable = ({
       <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
         <div className="text-sm text-gray-600">Page {page} of {totalPages}</div>
         <div className="space-x-2">
-          <button disabled={page <= 1} onClick={() => setPage(1)} className="px-3 py-1 border rounded disabled:opacity-50">First</button>
-          <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border rounded disabled:opacity-50">Prev</button>
-          <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
-          <button disabled={page >= totalPages} onClick={() => setPage(totalPages)} className="px-3 py-1 border rounded disabled:opacity-50">Last</button>
+          <button type="button" disabled={page <= 1} onClick={() => setPage(1)} className="px-3 py-1 border rounded disabled:opacity-50">First</button>
+          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3 py-1 border rounded disabled:opacity-50">Prev</button>
+          <button type="button" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+          <button type="button" disabled={page >= totalPages} onClick={() => setPage(totalPages)} className="px-3 py-1 border rounded disabled:opacity-50">Last</button>
         </div>
       </div>
     </div>

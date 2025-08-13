@@ -20,8 +20,26 @@ const AdminMessagesManagement = () => {
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const data = await getMessages();
-      setMessages(data.results || data);
+  // In admin, ask backend to return all messages when permitted
+  const data = await getMessages({ all: true });
+      const items = data?.results || data || [];
+      // Normalize fields expected by the table
+      const normalized = items.map((m) => {
+        const senderInfo = m.sender_info || (typeof m.sender === 'object' ? m.sender : null) || m.other_user || null;
+        const recipientInfo = m.recipient_info || (typeof m.recipient === 'object' ? m.recipient : null) || null;
+        return {
+          id: m.id,
+          sender: senderInfo,
+          recipient: recipientInfo,
+          subject: m.subject || null,
+          content: m.content || m.message || "",
+          message_type: m.message_type || (m.audio_file ? "audio" : "message"),
+          is_read: Boolean(m.read_at),
+          created_at: m.timestamp || m.created_at,
+          room_name: m.room_name,
+        };
+      });
+      setMessages(normalized);
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
@@ -49,6 +67,11 @@ const AdminMessagesManagement = () => {
       key: 'sender',
       label: 'From',
       sortable: true,
+      searchAccessor: (message) => {
+        const s = message.sender;
+        if (!s) return '';
+        return [s.first_name, s.last_name, s.username, s.email].filter(Boolean).join(' ');
+      },
       render: (message) => (
         <div className="flex items-center space-x-3">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -62,7 +85,7 @@ const AdminMessagesManagement = () => {
             <div className={`font-medium ${!message.is_read ? 'text-gray-900' : 'text-gray-600'}`}>
               {message.sender?.first_name && message.sender?.last_name 
                 ? `${message.sender.first_name} ${message.sender.last_name}`
-                : message.sender?.username || message.sender_name || 'Unknown'
+                : message.sender?.username || message.sender?.email || message.sender_name || 'Unknown'
               }
             </div>
             <div className="text-sm text-gray-500">
@@ -76,12 +99,17 @@ const AdminMessagesManagement = () => {
       key: 'recipient',
       label: 'To',
       sortable: true,
+      searchAccessor: (message) => {
+        const r = message.recipient;
+        if (!r) return '';
+        return [r.first_name, r.last_name, r.username, r.email].filter(Boolean).join(' ');
+      },
       render: (message) => (
         <div>
           <div className="font-medium text-gray-900">
             {message.recipient?.first_name && message.recipient?.last_name 
               ? `${message.recipient.first_name} ${message.recipient.last_name}`
-              : message.recipient?.username || message.recipient_name || 'Unknown'
+              : message.recipient?.username || message.recipient?.email || message.recipient_name || 'Unknown'
             }
           </div>
           <div className="text-sm text-gray-500">
@@ -94,6 +122,7 @@ const AdminMessagesManagement = () => {
       key: 'subject',
       label: 'Subject',
       sortable: true,
+  searchAccessor: (message) => message.subject || '',
       render: (message) => (
         <div className={`${!message.is_read ? 'font-semibold' : 'font-normal'}`}>
           {message.subject || 'No Subject'}
@@ -103,6 +132,7 @@ const AdminMessagesManagement = () => {
     {
       key: 'content',
       label: 'Message Preview',
+  searchAccessor: (message) => message.content || message.message || '',
       render: (message) => (
         <div className="text-sm text-gray-600 max-w-xs truncate">
           {message.content || message.message || 'No content'}
@@ -157,7 +187,13 @@ const AdminMessagesManagement = () => {
     
     // Mark as read if unread
     if (!message.is_read) {
-      markMessageAsRead(message.id).then(() => {
+      // mark-all-as-read requires room_name; compute if missing
+      const rn = message.room_name ||
+        (message.sender?.id && message.recipient?.id
+          ? `room_${Math.min(message.sender.id, message.recipient.id)}_${Math.max(message.sender.id, message.recipient.id)}`
+          : null);
+      if (!rn) return;
+      markMessageAsRead(rn).then(() => {
         fetchMessages();
       }).catch(console.error);
     }
@@ -196,7 +232,11 @@ const AdminMessagesManagement = () => {
     
     try {
       for (const messageId of selectedItems) {
-        await markMessageAsRead(messageId);
+        const msg = messages.find(m => m.id === messageId);
+        const rn = msg?.room_name || (msg?.sender?.id && msg?.recipient?.id
+          ? `room_${Math.min(msg.sender.id, msg.recipient.id)}_${Math.max(msg.sender.id, msg.recipient.id)}`
+          : null);
+        if (rn) await markMessageAsRead(rn);
       }
       setSelectedItems([]);
       await fetchMessages();
@@ -216,7 +256,11 @@ const AdminMessagesManagement = () => {
       label: message.is_read ? 'Mark as Unread' : 'Mark as Read',
       onClick: async () => {
         try {
-          await markMessageAsRead(message.id, !message.is_read);
+          const rn = message.room_name || (message.sender?.id && message.recipient?.id
+            ? `room_${Math.min(message.sender.id, message.recipient.id)}_${Math.max(message.sender.id, message.recipient.id)}`
+            : null);
+          if (!rn) return;
+          await markMessageAsRead(rn);
           await fetchMessages();
         } catch (error) {
           console.error('Error updating message status:', error);
@@ -363,7 +407,11 @@ const AdminMessagesManagement = () => {
               <button
                 onClick={async () => {
                   try {
-                    await markMessageAsRead(selectedMessage.id, !selectedMessage.is_read);
+                    const rn = selectedMessage.room_name || (selectedMessage.sender?.id && selectedMessage.recipient?.id
+                      ? `room_${Math.min(selectedMessage.sender.id, selectedMessage.recipient.id)}_${Math.max(selectedMessage.sender.id, selectedMessage.recipient.id)}`
+                      : null);
+                    if (!rn) return;
+                    await markMessageAsRead(rn);
                     await fetchMessages();
                     setShowModal(false);
                   } catch (error) {
