@@ -1,22 +1,29 @@
 import React from "react";
 import { Avatar } from "@chakra-ui/react";
-import { UserIcon, BuildingOffice2Icon, CubeIcon, WrenchScrewdriverIcon, ExclamationTriangleIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { 
+  UserIcon, 
+  CompanyIcon, 
+  ProductIcon, 
+  ServiceIcon, 
+  WarningIcon, 
+  DocumentIcon 
+} from "../../ui/ModernIcon";
 
 const RecentActivityCard = ({ activities = [] }) => {
   const getActivityIcon = (type) => {
     switch (type) {
       case "user_registration":
-        return <UserIcon className="w-4 h-4" aria-hidden="true" />;
+        return <UserIcon size={16} aria-hidden="true" />;
       case "company_verification":
-        return <BuildingOffice2Icon className="w-4 h-4" aria-hidden="true" />;
+        return <CompanyIcon size={16} aria-hidden="true" />;
       case "product_approval":
-        return <CubeIcon className="w-4 h-4" aria-hidden="true" />;
+        return <ProductIcon size={16} aria-hidden="true" />;
       case "service_posting":
-        return <WrenchScrewdriverIcon className="w-4 h-4" aria-hidden="true" />;
+        return <ServiceIcon size={16} aria-hidden="true" />;
       case "user_report":
-        return <ExclamationTriangleIcon className="w-4 h-4" aria-hidden="true" />;
+        return <WarningIcon size={16} aria-hidden="true" />;
       default:
-        return <DocumentTextIcon className="w-4 h-4" aria-hidden="true" />;
+        return <DocumentIcon size={16} aria-hidden="true" />;
     }
   };
 

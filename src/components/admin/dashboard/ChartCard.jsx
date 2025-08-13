@@ -12,7 +12,6 @@ import {
   ArcElement,
 } from "chart.js";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
-import { useTheme } from "../../../context/ThemeContext";
 
 // Register Chart.js components
 ChartJS.register(
@@ -27,12 +26,53 @@ ChartJS.register(
   ArcElement
 );
 
-const ChartCard = ({ title, subtitle, type = "line", data }) => {
-  const { theme } = useTheme();
-  const isDarkMode = theme === 'dark';
+const ChartCard = ({ title, subtitle, type = "line", data: customData }) => {
+  // Mock data - replace with real data
+  const defaultLineData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    datasets: [
+      {
+        label: "Users",
+        data: [1200, 1900, 3000, 5000, 4200, 6200],
+        borderColor: "rgb(59, 130, 246)",
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        tension: 0.4,
+      },
+    ],
+  };
 
-  const textColor = isDarkMode ? 'rgba(229, 231, 235, 0.8)' : 'rgba(55, 65, 81, 1)';
-  const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  const defaultBarData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    datasets: [
+      {
+        label: "Revenue",
+        data: [12000, 19000, 30000, 50000, 42000, 62000],
+        backgroundColor: "rgba(34, 197, 94, 0.8)",
+        borderColor: "rgb(34, 197, 94)",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const defaultDoughnutData = {
+    labels: ["Products", "Services", "Posts"],
+    datasets: [
+      {
+        data: [40, 35, 25],
+        backgroundColor: [
+          "rgba(59, 130, 246, 0.8)",
+          "rgba(34, 197, 94, 0.8)",
+          "rgba(168, 85, 247, 0.8)",
+        ],
+        borderColor: [
+          "rgb(59, 130, 246)",
+          "rgb(34, 197, 94)",
+          "rgb(168, 85, 247)",
+        ],
+        borderWidth: 2,
+      },
+    ],
+  };
 
   const chartOptions = {
     responsive: true,
@@ -40,35 +80,31 @@ const ChartCard = ({ title, subtitle, type = "line", data }) => {
     plugins: {
       legend: {
         position: "top",
-        labels: {
-          color: textColor,
-          font: {
-            size: 12,
-          },
-        },
       },
-      tooltip: {
-        backgroundColor: isDarkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-        titleColor: isDarkMode ? '#fff' : '#333',
-        bodyColor: isDarkMode ? '#ddd' : '#666',
-        borderColor: isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
-        borderWidth: 1,
-      }
     },
     scales: type !== "doughnut" ? {
       y: {
         beginAtZero: true,
-        ticks: { color: textColor },
-        grid: { color: gridColor },
-      },
-      x: {
-        ticks: { color: textColor },
-        grid: { color: gridColor },
       },
     } : {},
   };
 
+  const getChartData = () => {
+    if (customData) return customData;
+    
+    switch (type) {
+      case "bar":
+        return defaultBarData;
+      case "doughnut":
+        return defaultDoughnutData;
+      default:
+        return defaultLineData;
+    }
+  };
+
   const renderChart = () => {
+    const data = getChartData();
+    
     switch (type) {
       case "bar":
         return <Bar data={data} options={chartOptions} />;
@@ -80,12 +116,12 @@ const ChartCard = ({ title, subtitle, type = "line", data }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-        {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>}
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
       </div>
-      <div className="h-64 sm:h-72">
+      <div className="h-64">
         {renderChart()}
       </div>
     </div>

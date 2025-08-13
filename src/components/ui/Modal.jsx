@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import clsx from "clsx";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { CloseIcon } from "./ModernIcon";
 import Button from "./Button";
 
 const Modal = ({ 
@@ -88,7 +88,7 @@ const Modal = ({
                 onClick={onClose}
               >
                 <span className="sr-only">Close</span>
-                <XMarkIcon className="w-5 h-5" />
+                <CloseIcon size={20} />
               </Button>
             )}
           </div>

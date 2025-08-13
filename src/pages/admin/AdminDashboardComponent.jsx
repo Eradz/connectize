@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
+import { 
+  UsersIcon, 
+  CompanyIcon, 
+  PostIcon, 
+  MessageIcon,
+  ActivityIcon,
+  SystemIcon,
+  RefreshIcon
+} from '../../components/ui/ModernIcon';
 
 // Dashboard Analytics Component
 const AdminDashboard = () => {
@@ -119,19 +128,17 @@ const AdminDashboard = () => {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center"
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all duration-200 flex items-center shadow-soft glass border border-white/20"
           >
             {refreshing ? (
               <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <RefreshIcon size={16} className="animate-spin mr-2" />
                 Refreshing...
               </>
             ) : (
               <>
-                🔄 Refresh
+                <RefreshIcon size={16} className="mr-2" />
+                Refresh
               </>
             )}
           </button>
@@ -141,7 +148,7 @@ const AdminDashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Users Stats */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Users</p>
@@ -156,14 +163,14 @@ const AdminDashboard = () => {
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-blue-50 rounded-full">
-              <span className="text-2xl">👥</span>
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-soft">
+              <UsersIcon size={24} className="text-white" />
             </div>
           </div>
         </div>
 
         {/* Companies Stats */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Verified Companies</p>
@@ -178,14 +185,14 @@ const AdminDashboard = () => {
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-green-50 rounded-full">
-              <span className="text-2xl">🏢</span>
+            <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-soft">
+              <CompanyIcon size={24} className="text-white" />
             </div>
           </div>
         </div>
 
         {/* Posts Stats */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Published Posts</p>
@@ -200,14 +207,14 @@ const AdminDashboard = () => {
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-yellow-50 rounded-full">
-              <span className="text-2xl">📝</span>
+            <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-soft">
+              <PostIcon size={24} className="text-white" />
             </div>
           </div>
         </div>
 
         {/* Messages Stats */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Messages</p>
@@ -222,8 +229,8 @@ const AdminDashboard = () => {
                 </span>
               </div>
             </div>
-            <div className="p-3 bg-purple-50 rounded-full">
-              <span className="text-2xl">💬</span>
+            <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-soft">
+              <MessageIcon size={24} className="text-white" />
             </div>
           </div>
         </div>
@@ -232,15 +239,20 @@ const AdminDashboard = () => {
       {/* Activities and System Health */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activities */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activities</h3>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mr-3 shadow-soft">
+                <ActivityIcon size={20} className="text-white" />
+              </div>
+              Recent Activities
+            </h3>
           </div>
           <div className="space-y-4">
             {(activities || []).slice(0, 7).map((act) => (
-              <div key={act.id} className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-xs">•</span>
+              <div key={act.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50/50 transition-colors">
+                <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-soft">
+                  <span className="text-white text-xs">•</span>
                 </div>
                 <div>
                   <p className="text-sm text-gray-900">{act.message}</p>
@@ -252,8 +264,13 @@ const AdminDashboard = () => {
         </div>
 
         {/* System Health */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">System Health</h3>
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+            <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg mr-3 shadow-soft">
+              <SystemIcon size={20} className="text-white" />
+            </div>
+            System Health
+          </h3>
           
           <div className="space-y-4">
             {/* Uptime */}
@@ -265,7 +282,7 @@ const AdminDashboard = () => {
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${systemStats?.uptime || 0}%` }}></div>
+                <div className="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full shadow-inner" style={{ width: `${systemStats?.uptime || 0}%` }}></div>
               </div>
             </div>
 
@@ -279,7 +296,7 @@ const AdminDashboard = () => {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-blue-500 h-2 rounded-full" 
+                  className="bg-gradient-to-r from-blue-400 to-blue-500 h-2 rounded-full shadow-inner" 
                   style={{ width: `${Math.min(100, (systemStats?.response_time || 0) / 3)}%` }}
                 ></div>
               </div>
@@ -295,7 +312,7 @@ const AdminDashboard = () => {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-yellow-500 h-2 rounded-full" 
+                  className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2 rounded-full shadow-inner" 
                   style={{ width: `${systemStats?.error_rate || 0}%` }}
                 ></div>
               </div>
@@ -306,18 +323,23 @@ const AdminDashboard = () => {
 
       {/* Recent Users */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Users</h3>
-            <Link to="/admin/users" className="text-sm text-blue-600 hover:text-blue-800">View all</Link>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mr-3 shadow-soft">
+                <UsersIcon size={16} className="text-white" />
+              </div>
+              Recent Users
+            </h3>
+            <Link to="/admin/users" className="text-sm text-blue-600 hover:text-blue-800 font-medium">View all</Link>
           </div>
           <div className="space-y-3">
             {(users || []).slice(0, 5).map((u) => {
               const displayName = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || u.email || 'Unknown user';
               const userSuffix = u.username ? ` (${u.username})` : '';
               return (
-                <Link key={u.id} to={`/admin/users/${u.id}`} className="flex items-center space-x-3 hover:bg-gray-50 rounded-md p-2 group" aria-label={`View ${displayName}`}>
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+                <Link key={u.id} to={`/admin/users/${u.id}`} className="flex items-center space-x-3 hover:bg-gray-50/50 rounded-lg p-3 group transition-colors" aria-label={`View ${displayName}`}>
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-soft">
                     <span className="text-white text-sm font-bold">
                       {u.first_name?.[0] || u.username?.[0] || 'U'}
                     </span>
@@ -336,16 +358,21 @@ const AdminDashboard = () => {
         </div>
 
         {/* Recent Companies */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Companies</h3>
-            <Link to="/admin/companies" className="text-sm text-blue-600 hover:text-blue-800">View all</Link>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg mr-3 shadow-soft">
+                <CompanyIcon size={16} className="text-white" />
+              </div>
+              Recent Companies
+            </h3>
+            <Link to="/admin/companies" className="text-sm text-blue-600 hover:text-blue-800 font-medium">View all</Link>
           </div>
           <div className="space-y-3">
             {(companies || []).slice(0, 5).map((c) => (
-              <Link key={c.slug || c.id} to={`/admin/companies/${c.slug || c.id}`} className="flex items-center space-x-3 hover:bg-gray-50 rounded-md p-2">
-                <div className="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold">🏢</span>
+              <Link key={c.slug || c.id} to={`/admin/companies/${c.slug || c.id}`} className="flex items-center space-x-3 hover:bg-gray-50/50 rounded-lg p-3 transition-colors">
+                <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-soft">
+                  <CompanyIcon size={16} className="text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{c.company_name || c.name}</p>
@@ -358,16 +385,21 @@ const AdminDashboard = () => {
         </div>
 
         {/* Recent Posts */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="glass shadow-soft border border-white/20 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Posts</h3>
-            <Link to="/admin/content" className="text-sm text-blue-600 hover:text-blue-800">View all</Link>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <div className="p-2 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg mr-3 shadow-soft">
+                <PostIcon size={16} className="text-white" />
+              </div>
+              Recent Posts
+            </h3>
+            <Link to="/admin/content" className="text-sm text-blue-600 hover:text-blue-800 font-medium">View all</Link>
           </div>
           <div className="space-y-3">
             {(posts || []).slice(0, 5).map((p) => (
-              <Link key={p.id} to={`/admin/content/${p.id}`} className="flex items-center space-x-3 hover:bg-gray-50 rounded-md p-2">
-                <div className="w-8 h-8 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold">📝</span>
+              <Link key={p.id} to={`/admin/content/${p.id}`} className="flex items-center space-x-3 hover:bg-gray-50/50 rounded-lg p-3 transition-colors">
+                <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full flex items-center justify-center shadow-soft">
+                  <PostIcon size={16} className="text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{p.title}</p>
@@ -381,9 +413,11 @@ const AdminDashboard = () => {
       </div>
 
       {/* Success Message */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+      <div className="glass shadow-soft border border-green-200/50 rounded-xl p-6 bg-gradient-to-r from-green-50/80 to-emerald-50/80">
         <div className="flex items-center">
-          <span className="text-green-600 text-xl mr-3">✅</span>
+          <div className="p-2 bg-gradient-to-br from-green-500 to-green-600 rounded-lg mr-3 shadow-soft">
+            <span className="text-white text-lg">✅</span>
+          </div>
           <div>
             <h4 className="text-green-800 font-semibold">Admin Dashboard Live</h4>
             <p className="text-green-700 mt-1">

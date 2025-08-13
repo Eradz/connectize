@@ -4,7 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import TextInput, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
-import { ChartBarIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
+import { WarningIcon, CheckIcon, MegaphoneIcon, ChartIcon } from "../../components/ui/ModernIcon";
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 // Notification Management (Live API only)
 const AdminNotifications = () => {
@@ -33,47 +34,172 @@ const AdminNotifications = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ title: '', message: '' });
 
-  const loadNotifications = async (opts = {}) => {
-    setLoading(true);
-    setError('');
-    const nextPage = opts.page ?? page;
-    const nextSize = opts.pageSize ?? pageSize;
-    const params = new URLSearchParams({ page: String(nextPage), page_size: String(nextSize) });
-    // server filter for status if supported
-    if (filterStatus === 'read') params.set('is_read', 'true');
-    if (filterStatus === 'unread') params.set('is_read', 'false');
-    if (searchTerm && searchTerm.trim()) params.set('search', searchTerm.trim());
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchNotifications = async (params) => {
     try {
-      const res = await makeApiRequest(`/notifications/?${params.toString()}`);
+      const qs = new URLSearchParams({
+        page: String(params.page),
+        page_size: String(params.pageSize),
+        ...(params.search ? { search: params.search } : {}),
+        ...(params.ordering ? { ordering: params.ordering } : {}),
+        ...(typeof params.is_read === 'boolean' ? { is_read: String(params.is_read) } : {}),
+      }).toString();
+      const res = await makeApiRequest(`/notifications/?${qs}`);
       if (res.success) {
         const data = res.data;
         const list = Array.isArray(data) ? data : (data.results || []);
-        setNotifications(list);
-        setTotal(Number.isFinite(data?.count) ? data.count : list.length);
-        setPage(nextPage);
-        setPageSize(nextSize);
-        setSelected([]);
-      } else {
-        setNotifications([]);
-        setTotal(0);
-        setError(res.error || 'Failed to load notifications');
+        const count = Number.isFinite(data?.count) ? data.count : list.length;
+        return { items: list, count: count };
       }
+      return { items: [], count: 0 };
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return { items: [], count: 0 };
+    }
+  };
+
+  // Loader
+  const loadNotifications = async ({ page: nextPage = page, pageSize: nextSize = pageSize } = {}) => {
+    try {
+      setLoading(true);
+      setError('');
+      const serverParams = {
+        page: nextPage,
+        pageSize: nextSize,
+        search: (searchTerm || '').trim(),
+        ...(filterStatus === 'read' ? { is_read: true } : filterStatus === 'unread' ? { is_read: false } : {}),
+      };
+      const { items, count } = await fetchNotifications(serverParams);
+      setNotifications(items);
+      setTotal(count);
+      if (nextPage !== page) setPage(nextPage);
+      if (nextSize !== pageSize) setPageSize(nextSize);
+      setSelected([]);
     } catch (e) {
-      setError(e.message);
-      setNotifications([]);
-      setTotal(0);
+      setError(e.message || 'Failed to load notifications');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadNotifications(); }, []);
+  const handleMarkAsRead = async (notification) => {
+    try {
+      await makeApiRequest(`/notifications/${notification.id}/mark-as-read/`, { method: 'POST' });
+      await refreshUnreadCount();
+      setRefreshKey(prev => prev + 1);
+      addToast('Notification marked as read', 'success');
+    } catch (error) {
+      addToast(error.message || 'Failed to mark as read', 'error');
+    }
+  };
 
-  // Debounce server-side search
-  useEffect(() => {
-    const id = setTimeout(() => loadNotifications({ page: 1 }), 400);
-    return () => clearTimeout(id);
-  }, [searchTerm]);
+  const handleDelete = async (notification) => {
+    const id = typeof notification === 'object' ? notification?.id : notification;
+    const confirmed = await confirmDialog({
+      title: 'Delete Notification',
+      message: 'Are you sure you want to delete this notification?',
+      confirmText: 'Delete',
+      confirmVariant: 'danger'
+    });
+
+    if (confirmed) {
+      try {
+        await makeApiRequest(`/notifications/${id}/`, { method: 'DELETE' });
+        setRefreshKey(prev => prev + 1);
+        addToast('Notification deleted successfully', 'success');
+      } catch (error) {
+        addToast('Failed to delete notification', 'error');
+      }
+    }
+  };
+
+  const handleBulkDelete = async (selectedIds) => {
+    const confirmed = await confirmDialog({
+      title: 'Delete Notifications',
+      message: `Are you sure you want to delete ${selectedIds.length} notification(s)?`,
+      confirmText: 'Delete',
+      confirmVariant: 'danger'
+    });
+
+    if (confirmed) {
+      try {
+        await Promise.all(selectedIds.map(id => 
+          makeApiRequest(`/notifications/${id}/`, { method: 'DELETE' })
+        ));
+        setRefreshKey(prev => prev + 1);
+        addToast(`${selectedIds.length} notification(s) deleted successfully`, 'success');
+      } catch (error) {
+        addToast('Failed to delete some notifications', 'error');
+      }
+    }
+  };
+
+  const renderRowActions = (notification) => (
+    <div className="flex items-center gap-2">
+      {!notification.is_read && hasPermission('notifications.change') && (
+        <Button
+          variant="minimal"
+          size="sm"
+          onClick={() => handleMarkAsRead(notification)}
+          className="text-green-600 hover:text-green-700"
+        >
+          <CheckIcon size={16} />
+        </Button>
+      )}
+      {hasPermission('notifications.delete') && (
+        <Button
+          variant="minimal"
+          size="sm"
+          onClick={() => handleDelete(notification)}
+          className="text-red-600 hover:text-red-700"
+        >
+          <WarningIcon size={16} />
+        </Button>
+      )}
+    </div>
+  );
+
+  const columns = [
+    {
+      key: 'id',
+      label: 'ID',
+      sortable: true,
+      width: '80px'
+    },
+    {
+      key: 'title',
+      label: 'Notification',
+      sortable: true,
+      render: (notification) => (
+        <div>
+          <div className="font-medium text-gray-900">{notification.title || 'Notification'}</div>
+          <div className="text-sm text-gray-500 truncate max-w-xs">{notification.message}</div>
+        </div>
+      )
+    },
+    {
+      key: 'is_read',
+      label: 'Status',
+      render: (notification) => (
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          notification.is_read ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
+        }`}>
+          {notification.is_read ? 'Read' : 'Unread'}
+        </span>
+      )
+    },
+    {
+      key: 'timestamp',
+      label: 'Created',
+      sortable: true,
+      render: (notification) => (
+        <div className="text-sm text-gray-900">
+          {new Date(notification.timestamp).toLocaleDateString()}
+        </div>
+      )
+    }
+  ];
 
   // route awareness for create form
   useEffect(() => {
@@ -84,6 +210,17 @@ const AdminNotifications = () => {
       setShowCreate(false);
     }
   }, [location.pathname]);
+
+  // initial and reactive load
+  useEffect(() => {
+    loadNotifications({ page: 1, pageSize });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
+
+  useEffect(() => {
+    loadNotifications({ page, pageSize });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, filterStatus, searchTerm]);
 
   const handleMarkAllRead = async () => {
     try {
@@ -96,18 +233,6 @@ const AdminNotifications = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this notification?')) return;
-    try {
-      await makeApiRequest(`/notifications/${id}/hard-delete/`, { method: 'DELETE' });
-      await loadNotifications({ page });
-      await refreshUnreadCount();
-      addToast('Notification deleted', 'success');
-    } catch (e) {
-      addToast(e.message || 'Failed to delete notification', 'error');
-    }
-  };
-
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
@@ -115,7 +240,7 @@ const AdminNotifications = () => {
       if (res.success) {
         addToast('Notification created', 'success');
         setForm({ title: '', message: '' });
-        await loadNotifications({ page: 1 });
+        setRefreshKey(prev => prev + 1);
         await refreshUnreadCount();
       } else {
         addToast(res.error || 'Failed to create notification', 'error');
@@ -217,7 +342,7 @@ const AdminNotifications = () => {
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             {[
-              { id: 'overview', name: 'Overview', Icon: ChartBarIcon },
+              { id: 'overview', name: 'Overview', Icon: ChartIcon },
               { id: 'list', name: 'All Notifications', Icon: MegaphoneIcon },
             ].map((tab) => (
               <button
@@ -403,7 +528,7 @@ const AdminNotifications = () => {
                                   <Button
                                     variant="danger"
                                     size="sm"
-                                    onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(n); }}
                                   >
                                     Delete
                                   </Button>

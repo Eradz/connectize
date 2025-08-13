@@ -1,5 +1,18 @@
 import React, { useState, useEffect, createContext, useContext, useMemo, useCallback } from 'react';
 import { Link, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import {
+  DashboardIcon,
+  UsersIcon,
+  CompanyIcon,
+  DocumentIcon,
+  ProductIcon,
+  ServiceIcon,
+  NotificationIcon,
+  TrendingIcon,
+  SettingsIcon,
+  MessageIcon,
+  SystemIcon
+} from '../../components/ui/ModernIcon';
 
 // Import Dashboard Component
 import AdminDashboardComponent from './AdminDashboardComponent';
@@ -19,6 +32,7 @@ import AdminProductDetail from './details/AdminProductDetail';
 import AdminServiceDetail from './details/AdminServiceDetail';
 import AdminNotificationDetail from './details/AdminNotificationDetail';
 import AdminMessagesManagement from './AdminMessagesManagement';
+import PlaceholderPage from './PlaceholderPage';
 
 // Enhanced API Helper with comprehensive error handling and live data support
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -195,6 +209,11 @@ const AuthProvider = ({ children }) => {
   const [sessionExpiry, setSessionExpiry] = useState(null);
 
   useEffect(() => {
+    // Safety: ensure we never keep the UI in loading state for too long
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 7000);
+
     const checkAuth = async () => {
       try {
         const access = localStorage.getItem('access') || sessionStorage.getItem('access');
@@ -202,14 +221,17 @@ const AuthProvider = ({ children }) => {
           // Verify JWT access token
           const verify = await makeApiRequest('/auth/verify-token/', {
             method: 'POST',
-            body: JSON.stringify({ token: access })
+            body: JSON.stringify({ token: access }),
+            // Fast-fail in UI to avoid long blank states if API is down
+            timeout: 4000,
+            retries: 0,
           });
 
           if (verify.success) {
             // Load current user profile
-            const me = await makeApiRequest('/current-user/');
+            const me = await makeApiRequest('/current-user/', { timeout: 5000, retries: 0 });
             // Load user permissions (protected endpoint, Authorization is attached)
-            const perms = await makeApiRequest('/auth/permissions/');
+            const perms = await makeApiRequest('/auth/permissions/', { timeout: 5000, retries: 0 });
             if (me.success) {
               setUser(me.data);
               const basePerms = ['analytics.view', 'settings.view'];
@@ -238,6 +260,7 @@ const AuthProvider = ({ children }) => {
         setUser(null);
       } finally {
         setLoading(false);
+  clearTimeout(safetyTimer);
       }
     };
 
@@ -848,13 +871,13 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Dashboard',
       path: '/admin/dashboard',
-      icon: '📊',
+      icon: DashboardIcon,
       permission: 'admin'
     },
     {
       name: 'Users',
       path: '/admin/users',
-      icon: '👥',
+      icon: UsersIcon,
       permission: 'users.view',
       subItems: [
         { name: 'All Users', path: '/admin/users', permission: 'users.view' },
@@ -865,7 +888,7 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Companies',
       path: '/admin/companies',
-      icon: '🏢',
+      icon: CompanyIcon,
       permission: 'companies.view',
       subItems: [
         { name: 'All Companies', path: '/admin/companies', permission: 'companies.view' },
@@ -876,7 +899,7 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Content',
       path: '/admin/content',
-      icon: '📝',
+      icon: DocumentIcon,
       permission: 'content.view',
       subItems: [
         { name: 'All Posts', path: '/admin/content', permission: 'content.view' },
@@ -888,19 +911,19 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Products',
       path: '/admin/products',
-      icon: '📦',
+      icon: ProductIcon,
       permission: 'products.view',
     },
     {
       name: 'Services',
       path: '/admin/services',
-      icon: '🛠️',
+      icon: ServiceIcon,
       permission: 'services.view',
     },
     {
       name: 'Notifications',
       path: '/admin/notifications',
-      icon: '🔔',
+      icon: NotificationIcon,
       permission: 'notifications.view',
       subItems: [
         { name: 'All Notifications', path: '/admin/notifications', permission: 'notifications.view' },
@@ -912,7 +935,7 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Analytics',
       path: '/admin/analytics',
-      icon: '📊',
+      icon: TrendingIcon,
       permission: 'admin',
       subItems: [
         { name: 'Overview', path: '/admin/analytics', permission: 'admin' },
@@ -924,7 +947,7 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Settings',
       path: '/admin/settings',
-      icon: '⚙️',
+      icon: SettingsIcon,
       permission: 'admin',
       subItems: [
         { name: 'General', path: '/admin/settings', permission: 'admin' },
@@ -936,13 +959,13 @@ const AdminLayout = ({ children }) => {
     {
       name: 'Messages',
       path: '/admin/messages',
-      icon: '💬',
+      icon: MessageIcon,
       permission: 'messages.view'
     },
     {
       name: 'System',
       path: '/admin/system',
-      icon: '⚙️',
+      icon: SystemIcon,
       permission: 'system.manage',
       subItems: [
         { name: 'Settings', path: '/admin/system/settings', permission: 'system.manage' },
@@ -955,61 +978,68 @@ const AdminLayout = ({ children }) => {
   const filteredNavigation = navigation.filter(item => hasPermission(item.permission));
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white shadow-xl transition-all duration-300 ease-in-out`}>
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900">
+      {/* Modern Sidebar */}
+      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} glass rounded-r-3xl shadow-large transition-all duration-300 ease-in-out border-r border-white/20`}>
         <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-between p-4 border-b">
+          {/* Modern Logo */}
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
             {sidebarOpen && (
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded flex items-center justify-center">
-                  <span className="text-white font-bold">C</span>
+                <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-medium">
+                  <span className="text-white font-bold text-lg">C</span>
                 </div>
-                <span className="ml-2 text-xl font-bold text-gray-900">Connectize</span>
+                <span className="ml-3 text-xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                  Connectize
+                </span>
               </div>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-xl hover:bg-white/10 transition-all duration-200 backdrop-blur-sm"
             >
               <span className="text-lg">{sidebarOpen ? '◀' : '▶'}</span>
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-4">
+          {/* Modern Navigation */}
+          <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-2">
             {filteredNavigation.map((item) => {
               const isActive = location.pathname.startsWith(item.path);
+              const IconComponent = item.icon;
               return (
-                <div key={item.path}>
+                <div key={item.path} className="animate-in">
                   <Link
                     to={item.path}
-                    className={`flex items-center px-4 py-3 mx-2 rounded-lg transition-colors ${
+                    className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${
                       isActive 
-                        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-white/20 text-blue-700 shadow-medium border border-white/30' 
+                        : 'text-gray-600 hover:bg-white/10 hover:text-gray-900'
                     }`}
                   >
-                    <span className="text-xl">{item.icon}</span>
+                    <div className={`p-2 rounded-lg transition-all duration-200 ${
+                      isActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500 group-hover:bg-white/10'
+                    }`}>
+                      <IconComponent size={18} />
+                    </div>
                     {sidebarOpen && (
                       <span className="ml-3 font-medium">{item.name}</span>
                     )}
                   </Link>
                   
-                  {/* Sub-items */}
+                  {/* Modern Sub-items */}
                   {sidebarOpen && isActive && item.subItems && (
-                    <div className="ml-6 mt-2">
+                    <div className="ml-6 mt-2 space-y-1 animate-in">
                       {item.subItems
                         .filter(subItem => hasPermission(subItem.permission))
                         .map(subItem => (
                           <Link
                             key={subItem.path}
                             to={subItem.path}
-                            className={`block px-4 py-2 text-sm rounded-lg transition-colors ${
+                            className={`block px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                               location.pathname === subItem.path
-                                ? 'text-blue-700 bg-blue-50'
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                ? 'text-blue-700 bg-blue-50/60 font-medium'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-white/10'
                             }`}
                           >
                             {subItem.name}
@@ -1022,14 +1052,14 @@ const AdminLayout = ({ children }) => {
             })}
           </nav>
 
-          {/* User Profile */}
-          <div className="border-t p-4">
+          {/* Modern User Profile */}
+          <div className="border-t border-white/10 p-4">
             <div className="relative">
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="w-full flex items-center text-left hover:bg-gray-50 rounded-lg p-2 transition-colors"
+                className="w-full flex items-center text-left hover:bg-white/10 rounded-xl p-3 transition-all duration-200"
               >
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-medium">
                   <span className="text-white text-sm font-bold">
                     {user?.first_name?.[0] || user?.username?.[0] || 'A'}
                   </span>
@@ -1039,17 +1069,17 @@ const AdminLayout = ({ children }) => {
                     <p className="text-sm font-medium text-gray-900">
                       {user?.first_name} {user?.last_name}
                     </p>
-                    <p className="text-xs text-gray-500">{user?.username}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
                 )}
               </button>
 
-              {/* Profile Dropdown */}
+              {/* Modern Profile Dropdown */}
               {profileMenuOpen && sidebarOpen && (
-                <div className="absolute bottom-full left-0 w-full mb-2 bg-white rounded-lg shadow-lg border py-2">
+                <div className="absolute bottom-full left-0 w-full mb-2 glass rounded-xl shadow-large border border-white/20 py-2 animate-in">
                   <Link
                     to="/admin/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-3 text-sm text-gray-700 hover:bg-white/10 transition-colors rounded-lg mx-2"
                     onClick={() => setProfileMenuOpen(false)}
                   >
                     Profile Settings
@@ -1059,7 +1089,7 @@ const AdminLayout = ({ children }) => {
                       logout();
                       setProfileMenuOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50/60 transition-colors rounded-lg mx-2"
                   >
                     Sign Out
                   </button>
@@ -1070,57 +1100,73 @@ const AdminLayout = ({ children }) => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="px-6 py-4">
+        {/* Modern Top Bar */}
+        <header className="glass border-b border-white/20 shadow-soft">
+          <div className="px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
                   Admin Dashboard
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mt-1">
                   Welcome back, {user?.first_name || user?.username}
                 </p>
               </div>
               
-              <div className="flex items-center space-x-4">
-                <Link to="/admin/notifications" className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors" aria-label="Notifications">
-                  <span className="text-xl">🔔</span>
+              <div className="flex items-center space-x-3">
+                <Link 
+                  to="/admin/notifications" 
+                  className="relative p-3 glass rounded-xl hover:bg-white/20 transition-all duration-200 group" 
+                  aria-label="Notifications"
+                >
+                  <NotificationIcon size={20} className="text-gray-600 group-hover:text-blue-600" />
                   {unreadNotificationsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full px-1.5 py-0.5 leading-none">
+                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center font-medium shadow-medium">
                       {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
                     </span>
                   )}
                 </Link>
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors" aria-label="Settings">
-                  <span className="text-xl">⚙️</span>
+                <button className="p-3 glass rounded-xl hover:bg-white/20 transition-all duration-200 group" aria-label="Settings">
+                  <SettingsIcon size={20} className="text-gray-600 group-hover:text-blue-600" />
                 </button>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          {children}
+        {/* Modern Page Content */}
+        <main className="flex-1 overflow-y-auto p-8 space-y-6">
+          <div className="animate-in">
+            {children}
+          </div>
         </main>
 
-        {/* Toasts */}
+        {/* Modern Toast Notifications */}
         <div className="fixed top-4 right-4 space-y-3 z-50">
           {toasts.map(t => (
-            <div key={t.id} className={`max-w-sm shadow-lg rounded-lg border px-4 py-3 flex items-start space-x-3 ${
-              t.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-              t.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-              t.type === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
-              'bg-blue-50 border-blue-200 text-blue-800'
+            <div key={t.id} className={`max-w-sm glass rounded-xl shadow-large px-6 py-4 flex items-start space-x-3 animate-in ${
+              t.type === 'success' ? 'border-l-4 border-green-500' :
+              t.type === 'error' ? 'border-l-4 border-red-500' :
+              t.type === 'warning' ? 'border-l-4 border-yellow-500' :
+              'border-l-4 border-blue-500'
             }`}>
-              <span className="text-lg">
-                {t.type === 'success' ? '✅' : t.type === 'error' ? '⚠️' : t.type === 'warning' ? '⚠️' : 'ℹ️'}
-              </span>
-              <div className="flex-1 text-sm leading-5">{t.message}</div>
-              <button onClick={() => removeToast(t.id)} className="text-xs opacity-70 hover:opacity-100">✕</button>
+              <div className={`p-1 rounded-lg ${
+                t.type === 'success' ? 'bg-green-100 text-green-600' :
+                t.type === 'error' ? 'bg-red-100 text-red-600' :
+                t.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                'bg-blue-100 text-blue-600'
+              }`}>
+                {t.type === 'success' ? '✓' : t.type === 'error' ? '⚠' : t.type === 'warning' ? '⚠' : 'ℹ'}
+              </div>
+              <div className="flex-1 text-sm leading-5 text-gray-800 font-medium">{t.message}</div>
+              <button 
+                onClick={() => removeToast(t.id)} 
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+              >
+                ✕
+              </button>
             </div>
           ))}
         </div>
@@ -1148,15 +1194,18 @@ const ComprehensiveAdmin = () => {
       <Route path="/*" element={
         <ProtectedRoute>
           <AdminLayout>
+            <ErrorBoundary>
             <Routes>
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<RequirePermission permission="admin"><AdminDashboardComponent /></RequirePermission>} />
               <Route path="users" element={<RequirePermission permission="users.view"><AdminUsersManagement /></RequirePermission>} />
               <Route path="users/:id" element={<RequirePermission permission="users.view"><AdminUserDetail /></RequirePermission>} />
               <Route path="users/add" element={<RequirePermission permission="users.add"><AdminUsersManagement /></RequirePermission>} />
+              <Route path="users/roles" element={<RequirePermission permission="users.change"><PlaceholderPage title="User Roles Management" subtitle="Manage user roles and permissions" /></RequirePermission>} />
               <Route path="companies" element={<RequirePermission permission="companies.view"><AdminCompaniesManagement /></RequirePermission>} />
               <Route path="companies/:id" element={<RequirePermission permission="companies.view"><AdminCompanyDetail /></RequirePermission>} />
               <Route path="companies/add" element={<RequirePermission permission="companies.add"><AdminCompaniesManagement /></RequirePermission>} />
+              <Route path="companies/verify" element={<RequirePermission permission="companies.change"><PlaceholderPage title="Company Verification" subtitle="Manage company verification requests and status updates" /></RequirePermission>} />
               <Route path="content" element={<RequirePermission permission="content.view"><AdminPostsManagement /></RequirePermission>} />
               <Route path="content/:id" element={<RequirePermission permission="content.view"><AdminPostDetail /></RequirePermission>} />
               <Route path="content/create" element={<RequirePermission permission="content.add"><AdminPostsManagement /></RequirePermission>} />
@@ -1169,6 +1218,8 @@ const ComprehensiveAdmin = () => {
               <Route path="notifications" element={<RequirePermission permission="notifications.view"><AdminNotifications /></RequirePermission>} />
               <Route path="notifications/:id" element={<RequirePermission permission="notifications.view"><AdminNotificationDetail /></RequirePermission>} />
               <Route path="notifications/create" element={<RequirePermission permission="notifications.add"><AdminNotifications /></RequirePermission>} />
+              <Route path="notifications/templates" element={<RequirePermission permission="notifications.view"><PlaceholderPage title="Notification Templates" subtitle="Manage and customize notification templates" /></RequirePermission>} />
+              <Route path="notifications/analytics" element={<RequirePermission permission="notifications.view"><PlaceholderPage title="Notification Analytics" subtitle="View notification performance and engagement metrics" /></RequirePermission>} />
               <Route path="messages" element={<RequirePermission permission="messages.view"><AdminMessagesManagement /></RequirePermission>} />
               <Route path="analytics" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/users" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
@@ -1179,9 +1230,16 @@ const ComprehensiveAdmin = () => {
               <Route path="analytics/retention" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/performance" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="settings" element={<RequirePermission permission="admin"><AdminSystemSettings /></RequirePermission>} />
+              <Route path="settings/email" element={<RequirePermission permission="admin"><PlaceholderPage title="Email Configuration" subtitle="Configure email settings and SMTP servers" /></RequirePermission>} />
+              <Route path="settings/security" element={<RequirePermission permission="admin"><PlaceholderPage title="Security Settings" subtitle="Manage security policies and authentication settings" /></RequirePermission>} />
+              <Route path="settings/integrations" element={<RequirePermission permission="admin"><PlaceholderPage title="Integrations" subtitle="Configure third-party integrations and API settings" /></RequirePermission>} />
+              <Route path="system/settings" element={<RequirePermission permission="system.manage"><PlaceholderPage title="System Settings" subtitle="Configure system-wide settings and preferences" /></RequirePermission>} />
+              <Route path="system/logs" element={<RequirePermission permission="system.manage"><PlaceholderPage title="System Logs" subtitle="View and manage system logs and error reports" /></RequirePermission>} />
+              <Route path="system/backups" element={<RequirePermission permission="system.manage"><PlaceholderPage title="System Backups" subtitle="Manage database backups and restore points" /></RequirePermission>} />
               <Route path="profile" element={<AdminProfile />} />
               <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
             </Routes>
+            </ErrorBoundary>
           </AdminLayout>
         </ProtectedRoute>
       } />
@@ -1204,3 +1262,32 @@ const ComprehensiveAdminWrapper = () => {
 export { useAuth, useAdminData };
 
 export default ComprehensiveAdminWrapper;
+
+// Simple error boundary to avoid blank pages on runtime errors in route components
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    // eslint-disable-next-line no-console
+    console.error('Admin route error:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8">
+          <div className="max-w-xl mx-auto text-center bg-red-50 border border-red-200 rounded-xl p-6">
+            <div className="text-3xl mb-2">⚠️</div>
+            <h2 className="text-xl font-semibold text-red-700 mb-2">Something went wrong</h2>
+            <p className="text-red-600 text-sm">{String(this.state.error?.message || 'Unknown error')}</p>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}

@@ -7,7 +7,7 @@ import Input, { Textarea } from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Card, { CardHeader, CardContent } from '../../components/ui/Card';
 import { useLocation } from 'react-router-dom';
-import { PencilSquareIcon, ArrowPathIcon, DocumentTextIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { EditIcon, RefreshIcon, DocumentIcon, WarningIcon, CheckIcon } from "../../components/ui/ModernIcon";
 
 // Content Management Component (Live API Only)
 const AdminContentManagement = () => {
@@ -46,6 +46,12 @@ const AdminContentManagement = () => {
     allow_comments: true,
     company: '' // company id (required on create)
   });
+
+  // Comments form for editing
+  const [commentForm, setCommentForm] = useState({
+    content: ''
+  });
+  const [showCommentEditModal, setShowCommentEditModal] = useState(false);
 
   // Companies for selecting on Post create
   const [companyOptions, setCompanyOptions] = useState([]);
@@ -214,6 +220,36 @@ const AdminContentManagement = () => {
     setShowCreateForm(true);
   };
 
+  const handleEditComment = (item) => {
+    setEditingItem(item);
+    setCommentForm({
+      content: item.content || ''
+    });
+    setShowCommentEditModal(true);
+  };
+
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    if (!editingItem) return;
+
+    try {
+      await makeApiRequest(`/comments/${editingItem.id}/`, {
+        method: 'PUT',
+        data: {
+          content: commentForm.content
+        }
+      });
+      
+      setShowCommentEditModal(false);
+      setEditingItem(null);
+      setCommentForm({ content: '' });
+      await loadData('comments');
+      addToast('Comment updated successfully', 'success');
+    } catch (error) {
+      addToast(error.message || 'Failed to update comment', 'error');
+    }
+  };
+
   if (!hasPermission('content.view')) {
     return (
       <div className="text-center py-12">
@@ -241,12 +277,12 @@ const AdminContentManagement = () => {
           <div className="flex gap-2">
             {hasPermission('content.add') && activeTab === 'posts' && (
               <Button onClick={() => { setEditingItem(null); setPostForm({ body: '', status: 'PUBLISHED', allow_comments: true, company: '' }); setShowCreateForm(true); }}>
-                <PencilSquareIcon className="h-5 w-5 mr-2" />
+                <EditIcon size={20} className="mr-2" />
                 Create Post
               </Button>
             )}
-            <Button variant="secondary" onClick={() => loadData(activeTab)}>
-              <ArrowPathIcon className="h-5 w-5 mr-2" />
+            <Button variant="minimal" onClick={() => loadData(activeTab)}>
+              <RefreshIcon size={20} className="mr-2" />
               Refresh
             </Button>
           </div>
@@ -282,7 +318,7 @@ const AdminContentManagement = () => {
         <Card>
           <CardHeader className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">{editingItem ? 'Edit Post' : 'Create New Post'}</h3>
-            <Button variant="secondary" size="sm" onClick={() => { setShowCreateForm(false); setEditingItem(null); }}>Close</Button>
+            <Button variant="minimal" size="sm" onClick={() => { setShowCreateForm(false); setEditingItem(null); }}>Close</Button>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitPost} className="space-y-6">
@@ -317,9 +353,37 @@ const AdminContentManagement = () => {
               )}
             </div>
             <div className="flex justify-end space-x-3">
-              <Button type="button" variant="secondary" onClick={() => { setShowCreateForm(false); setEditingItem(null); }}>Cancel</Button>
+              <Button type="button" variant="minimal" onClick={() => { setShowCreateForm(false); setEditingItem(null); }}>Cancel</Button>
               <Button type="submit">{editingItem ? 'Update Post' : 'Create Post'}</Button>
             </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Edit Comment Modal */}
+      {showCommentEditModal && editingItem && (
+        <Card className="mb-6">
+          <CardContent>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Edit Comment</h3>
+              <Button variant="minimal" size="sm" onClick={() => { setShowCommentEditModal(false); setEditingItem(null); }}>Close</Button>
+            </div>
+            <form onSubmit={handleSubmitComment} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Comment Content</label>
+                <Textarea 
+                  value={commentForm.content} 
+                  onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })} 
+                  rows={4} 
+                  required 
+                  placeholder="Enter comment content..."
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <Button type="button" variant="minimal" onClick={() => { setShowCommentEditModal(false); setEditingItem(null); }}>Cancel</Button>
+                <Button type="submit">Update Comment</Button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -386,7 +450,7 @@ const AdminContentManagement = () => {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-blue-900">{selectedItems.length} {activeTab} selected</span>
               <div className="flex space-x-2">
-        <Button variant="danger" size="sm" onClick={handleBulkDelete}>Delete</Button>
+        <Button variant="minimal" size="sm" onClick={handleBulkDelete} className="text-error-600 hover:text-error-700 hover:bg-error-50 dark:hover:bg-error-900/20">Delete</Button>
               </div>
             </div>
           </div>
@@ -408,7 +472,7 @@ const AdminContentManagement = () => {
         ) : errors[activeTab] ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+              <WarningIcon size={32} className="text-red-600" />
             </div>
             <p className="text-red-600 mb-2">Error loading {activeTab}</p>
             <p className="text-gray-500 text-sm">{errors[activeTab]}</p>
@@ -416,7 +480,7 @@ const AdminContentManagement = () => {
         ) : processedData.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <DocumentTextIcon className="h-8 w-8 text-gray-500" />
+              <DocumentIcon size={32} className="text-gray-500" />
             </div>
             <p className="text-gray-600">No {activeTab === 'media' ? 'documents' : activeTab} found</p>
           </div>
@@ -477,10 +541,10 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4 text-sm">
                           <div className="flex space-x-2">
                             {hasPermission('content.change') && (
-                              <Button variant="secondary" size="sm" onClick={() => handleEditPost(item)}>Edit</Button>
+                              <Button variant="minimal" size="sm" onClick={() => handleEditPost(item)}>Edit</Button>
                             )}
                             {hasPermission('content.delete') && (
-                              <Button variant="danger" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Post', message: 'Delete this post?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/posts/${item.id}/`, { method: 'DELETE' }); await loadData('posts'); addToast('Post deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete post', 'error'); } }}>Delete</Button>
+                              <Button variant="minimal" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Post', message: 'Delete this post?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/posts/${item.id}/`, { method: 'DELETE' }); await loadData('posts'); addToast('Post deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete post', 'error'); } }} className="text-error-600 hover:text-error-700 hover:bg-error-50 dark:hover:bg-error-900/20">Delete</Button>
                             )}
                           </div>
                         </td>
@@ -493,9 +557,18 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4 text-sm text-gray-900">#{item.post_id || '—'}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{item.commented_at ? new Date(item.commented_at).toLocaleDateString() : 'N/A'}</td>
                         <td className="px-6 py-4 text-sm">
-                          {hasPermission('content.delete') && (
-                            <Button variant="danger" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Comment', message: 'Delete this comment?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/comments/${item.id}/`, { method: 'DELETE' }); await loadData('comments'); addToast('Comment deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete comment', 'error'); } }}>Delete</Button>
-                          )}
+                          <div className="flex space-x-2">
+                            {hasPermission('content.change') && (
+                              <Button variant="minimal" size="sm" onClick={() => handleEditComment(item)}>
+                                <EditIcon size={16} />
+                              </Button>
+                            )}
+                            {hasPermission('content.delete') && (
+                              <Button variant="minimal" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Comment', message: 'Delete this comment?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/comments/${item.id}/`, { method: 'DELETE' }); await loadData('comments'); addToast('Comment deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete comment', 'error'); } }} className="text-error-600 hover:text-error-700 hover:bg-error-50 dark:hover:bg-error-900/20">
+                                <WarningIcon size={16} />
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </>
                     )}
@@ -504,7 +577,7 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                              <DocumentTextIcon className="h-5 w-5 text-gray-500" />
+                              <DocumentIcon size={20} className="text-gray-500" />
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900 truncate max-w-xs">{item.document?.split('/').pop() || 'Document'}</div>
@@ -515,9 +588,9 @@ const AdminContentManagement = () => {
                         <td className="px-6 py-4 text-sm text-gray-900">{item.company || item.company?.company_name || '—'}</td>
                         <td className="px-6 py-4 text-sm">
                           <div className="flex space-x-2">
-                            <Button as="a" href={item.document} target="_blank" rel="noreferrer" variant="secondary" size="sm">Download</Button>
+                            <Button as="a" href={item.document} target="_blank" rel="noreferrer" variant="minimal" size="sm">Download</Button>
                             {hasPermission('content.delete') && (
-                              <Button variant="danger" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Document', message: 'Delete this document?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/documents/${item.id}/`, { method: 'DELETE' }); await loadData('media'); addToast('Document deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete document', 'error'); } }}>Delete</Button>
+                              <Button variant="minimal" size="sm" onClick={async () => { const ok = await confirmDialog({ title: 'Delete Document', message: 'Delete this document?', confirmLabel: 'Delete' }); if (!ok) return; try { await makeApiRequest(`/documents/${item.id}/`, { method: 'DELETE' }); await loadData('media'); addToast('Document deleted', 'success'); } catch (e) { addToast(e.message || 'Failed to delete document', 'error'); } }} className="text-error-600 hover:text-error-700 hover:bg-error-50 dark:hover:bg-error-900/20">Delete</Button>
                             )}
                           </div>
                         </td>
@@ -546,7 +619,7 @@ const AdminContentManagement = () => {
       {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
         <div className="flex items-center">
-          <CheckCircleIcon className="h-6 w-6 text-blue-600 mr-3" />
+          <CheckIcon size={24} className="text-blue-600 mr-3" />
           <div>
             <h4 className="text-blue-800 font-semibold">Live content management connected!</h4>
             <p className="text-blue-700 mt-1">Posts, comments, and documents are now managed directly from the Django API.</p>

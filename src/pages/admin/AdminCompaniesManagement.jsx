@@ -6,7 +6,7 @@ import ResourceForm from '../../components/admin/ResourceForm';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import PageHeader from '../../components/ui/PageHeader';
 import Button from '../../components/ui/Button';
-import { ErrorIcon, AddIcon } from "../../components/ui/ModernIcon";
+import { ErrorIcon, AddIcon, CompanyIcon, EditIcon, DeleteIcon, ViewIcon } from "../../components/ui/ModernIcon";
 
 // Companies Management using generic components (live API only)
 const AdminCompaniesManagement = () => {
@@ -197,20 +197,29 @@ const AdminCompaniesManagement = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="Company Management"
-        subtitle="Manage platform companies and business accounts"
-        actions={
-          hasPermission('companies.add') && !isAddRoute ? (
-            <Button onClick={() => navigate('/admin/companies/add')}>
-              <AddIcon size={20} className="mr-2" />
+    <div className="space-y-6 animate-in">
+      {/* Modern Header */}
+      <div className="glass rounded-2xl p-6 border border-white/20 shadow-soft">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 gradient-primary rounded-xl shadow-medium">
+              <CompanyIcon size={24} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 bg-clip-text text-transparent">
+                Companies Management
+              </h1>
+              <p className="text-gray-600 mt-1">Manage company registrations and verifications</p>
+            </div>
+          </div>
+          {hasPermission('companies.add') && !isAddRoute && (
+            <Button onClick={() => navigate('/admin/companies/add')} className="shadow-medium">
+              <AddIcon size={16} />
               Add Company
             </Button>
-          ) : null
-        }
-      />
+          )}
+        </div>
+      </div>
 
       {/* Create Company */}
       {isAddRoute && hasPermission('companies.add') && (
