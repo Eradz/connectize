@@ -19,17 +19,17 @@ function AuthLayout({ redirectUrl = "/" }) {
   }
 
   return (
-    <div className="h-screen flex justify-center flex-col p-4">
+    <div className="h-screen grid justify-center flex-col p-4">
       <nav>
-        <p className="text-gray-500 underline text-right">
+        <div className="text-white flex justify-end">
           <a
             href="https://about.connectize.co"
-            className="font-semibold"
             target="_blank"
+            className="text-sm rounded-full py-2 px-3 bg-black hover:opacity-80"
           >
-            About Connectize
+            About Us
           </a>
-        </p>
+        </div>
       </nav>
       <main className="flex justify-center flex-1">
         <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center  lg:!w-1/2 shrink-0 scrollbar-hidden">
@@ -89,7 +89,7 @@ function AuthLayout({ redirectUrl = "/" }) {
               </motion.section>
             )}
 
-            <p className="text-gray-500 text-center">
+            {/* <p className="text-gray-500 text-center">
               Learn more about{" "}
               <a
                 href="https://about.connectize.co"
@@ -98,7 +98,7 @@ function AuthLayout({ redirectUrl = "/" }) {
               >
                 Connectize.co
               </a>
-            </p>
+            </p> */}
           </section>
         </section>
 
