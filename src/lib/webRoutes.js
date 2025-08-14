@@ -78,6 +78,98 @@ const webRoutes = {
   adminSettingsRoles: "/admin/settings/roles",
   adminSettingsSystem: "/admin/settings/system",
   adminSettingsApi: "/admin/settings/api",
+  
+  // Oil & Gas Platform Routes
+  // Deal Management
+  dealRooms: "/deals",
+  dealRoomDetail: "/deals/:id",
+  dealRoomCreate: "/deals/create",
+  dealRoomEdit: "/deals/:id/edit",
+  dealRoomDocuments: "/deals/:id/documents",
+  dealRoomParticipants: "/deals/:id/participants",
+  dealRoomMilestones: "/deals/:id/milestones",
+  dealRoomActivities: "/deals/:id/activities",
+  dealRoomValuations: "/deals/:id/valuations",
+  dealRoomReports: "/deals/:id/reports",
+  
+  // Workforce Marketplace
+  workforceJobs: "/jobs",
+  workforceJobDetail: "/jobs/:id",
+  workforceJobCreate: "/jobs/create",
+  workforceJobApply: "/jobs/:id/apply",
+  workforceProfiles: "/professionals",
+  workforceProfileDetail: "/professionals/:id",
+  workforceProfileCreate: "/professionals/create",
+  workforceProfileEdit: "/professionals/edit",
+  workforceEvents: "/events",
+  workforceEventDetail: "/events/:id",
+  workforceEventCreate: "/events/create",
+  workforceApplications: "/applications",
+  workforceApplicationsManage: "/applications/manage",
+  workforceDashboard: "/workforce/dashboard",
+  
+  // AI Services
+  aiDashboard: "/ai",
+  aiMatching: "/ai/matching",
+  aiOpportunities: "/ai/opportunities",
+  aiCompliance: "/ai/compliance",
+  aiAnalytics: "/ai/analytics",
+  aiInsights: "/ai/insights",
+  
+  // Logistics Hub
+  logisticsDashboard: "/logistics",
+  logisticsShipments: "/logistics/shipments",
+  logisticsShipmentDetail: "/logistics/shipments/:id",
+  logisticsShipmentCreate: "/logistics/shipments/create",
+  logisticsInventory: "/logistics/inventory",
+  logisticsInventoryDetail: "/logistics/inventory/:id",
+  logisticsSuppliers: "/logistics/suppliers",
+  logisticsSupplierDetail: "/logistics/suppliers/:id",
+  logisticsTracking: "/logistics/tracking",
+  
+  // Trust & Verification
+  trustDashboard: "/trust",
+  trustVerification: "/trust/verification",
+  trustVerificationStatus: "/trust/verification/:id",
+  trustReputation: "/trust/reputation",
+  trustReputationUser: "/trust/reputation/:userId",
+  trustRatings: "/trust/ratings",
+  trustReviews: "/trust/reviews",
+  
+  // Specialized Tools
+  toolsDashboard: "/tools",
+  toolsEquipment: "/tools/equipment",
+  toolsEquipmentDetail: "/tools/equipment/:id",
+  toolsEquipmentRental: "/tools/equipment/rental",
+  toolsHSE: "/tools/hse",
+  toolsHSEIncidents: "/tools/hse/incidents",
+  toolsHSECompliance: "/tools/hse/compliance",
+  toolsHSEInspections: "/tools/hse/inspections",
+  toolsSupplyChain: "/tools/supply-chain",
+  toolsSupplyChainOptimization: "/tools/supply-chain/optimization",
+  toolsRegulatory: "/tools/regulatory",
+  toolsRegulatoryCompliance: "/tools/regulatory/compliance",
+  toolsWorkflow: "/tools/workflow",
+  toolsWorkflowManagement: "/tools/workflow/management",
+  
+  // Dashboard & Overview
+  platformDashboard: "/dashboard",
+  platformOverview: "/overview",
+  platformAnalytics: "/analytics",
+  platformReports: "/reports",
+  
+  // User Management
+  userProfile: "/user/profile",
+  userSettings: "/user/settings",
+  userNotifications: "/user/notifications",
+  userSubscription: "/user/subscription",
+  
+  // Company Management  
+  companyDashboard: "/company/dashboard",
+  companyProfile: "/company/profile",
+  companyTeam: "/company/team",
+  companyVerification: "/company/verification",
+  companyBilling: "/company/billing",
 };
 
 export { webRoutes };

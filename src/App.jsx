@@ -51,6 +51,21 @@ import TermsLayout from "./pages/terms&policies/termsLayout";
 // Comprehensive Admin CMS Implementation
 import ComprehensiveAdmin from "./pages/admin/ComprehensiveAdmin";
 
+// Oil & Gas Platform Components
+import PlatformLayout from "./pages/platform/PlatformLayout";
+import PlatformDashboard from "./pages/platform/PlatformDashboard";
+import DealRooms from "./pages/platform/DealRooms";
+import DealRoomCreate from "./pages/platform/DealRoomCreate";
+import WorkforceJobs from "./pages/platform/WorkforceJobs";
+import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
+import AIDashboard from "./pages/platform/AIDashboard";
+import DealRoomDetail from "./pages/platform/DealRoomDetail";
+import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
+import AISubpage from "./pages/platform/AISubpage";
+import LogisticsDashboard from "./pages/platform/LogisticsDashboard";
+import TrustDashboard from "./pages/platform/TrustDashboard";
+import SpecializedToolsDashboard from "./pages/platform/SpecializedToolsDashboard";
+
 function App() {
   return (
     <>
@@ -59,108 +74,96 @@ function App() {
         {/* Comprehensive Admin CMS System */}
         <Route path="/admin/*" element={<ComprehensiveAdmin />} />
         
-        <Route path={webRoutes.notFound} element={<NotFound />} />
-
-        {/* Main App */}
-        <Route path="/" element={<AppLayout />}>
-          <Route path={webRoutes.feed} element={<FeedLayout />}>
-            <Route path={webRoutes.newsFeed} element={<NewsFeed />} />
-            <Route path={webRoutes.singlePost} element={<SinglePostPage />} />
+  {/* Oil & Gas Platform Routes - Set as Default */}
+        <Route path="/" element={<PlatformLayout />}>
+          <Route index element={<PlatformDashboard />} />
+          <Route path={webRoutes.platformDashboard} element={<PlatformDashboard />} />
+          <Route path={webRoutes.dealRooms} element={<DealRooms />} />
+          <Route path={webRoutes.dealRoomCreate} element={<DealRoomCreate />} />
+          <Route path={webRoutes.dealRoomDetail} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomDocuments} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomParticipants} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomMilestones} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomActivities} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomValuations} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomReports} element={<DealRoomDetail />} />
+          <Route path={webRoutes.workforceJobs} element={<WorkforceJobs />} />
+          <Route path={webRoutes.workforceJobCreate} element={<WorkforceJobCreate />} />
+          <Route path={webRoutes.workforceJobDetail} element={<WorkforceJobDetail />} />
+          <Route path={webRoutes.workforceJobApply} element={<WorkforceJobDetail />} />
+          <Route path={webRoutes.aiDashboard} element={<AIDashboard />} />
+          <Route path={webRoutes.aiMatching} element={<AISubpage />} />
+          <Route path={webRoutes.aiOpportunities} element={<AISubpage />} />
+          <Route path={webRoutes.aiCompliance} element={<AISubpage />} />
+          <Route path={webRoutes.aiAnalytics} element={<AISubpage />} />
+          <Route path={webRoutes.aiInsights} element={<AISubpage />} />
+          <Route path={webRoutes.logisticsDashboard} element={<LogisticsDashboard />} />
+          <Route path={webRoutes.trustDashboard} element={<TrustDashboard />} />
+          <Route path={webRoutes.toolsDashboard} element={<SpecializedToolsDashboard />} />
+        </Route>
+        
+  {/* Main App Routes under /app prefix */}
+        <Route path="/app" element={<AppLayout />}>
+          <Route path="feed" element={<FeedLayout />}>
+            <Route index element={<NewsFeed />} />
+            <Route path="posts/:id" element={<SinglePostPage />} />
           </Route>
 
-          <Route path={webRoutes.profile} element={<Profile />} />
+          <Route path="profile" element={<Profile />} />
 
           {/* Profile Update Routes */}
-          <Route path="/" element={<ProfileLayout />}>
-            <Route path={webRoutes.address} element={<Address />} />
-            <Route path={webRoutes.bio} element={<Bio />} />
-            <Route path={webRoutes.contact} element={<Contact />} />
-            <Route path={webRoutes.home} element={<Home />} />
-            <Route path={webRoutes.overview} element={<Overview />} />
+          <Route path="profile-update" element={<ProfileLayout />}>
+            <Route path="address" element={<Address />} />
+            <Route path="bio" element={<Bio />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="home" element={<Home />} />
+            <Route path="overview" element={<Overview />} />
           </Route>
 
           {/* Company Routes */}
-          <Route element={<CompanyLayout />}>
-            <Route path={webRoutes.createCompany} element={<CreateCompany />} />
-            <Route
-              path={webRoutes.companyDocuments}
-              element={<CompanyDocuments />}
-            />
-            <Route
-              path={webRoutes.companyInformation}
-              element={<CompanyInformation />}
-            />
+          <Route path="company" element={<CompanyLayout />}>
+            <Route path="create" element={<CreateCompany />} />
+            <Route path="documents" element={<CompanyDocuments />} />
+            <Route path="information" element={<CompanyInformation />} />
           </Route>
 
-          <Route path={webRoutes.analysis} element={<Analysis />} />
-          <Route path={webRoutes.bookmarks} element={<BookMark />} />
-          <Route path={webRoutes.companies} element={<CompaniesPage />} />
-          <Route
-            path={webRoutes.coNotifications}
-            element={<NotificationItem />}
-          />
-          <Route path={webRoutes.company} element={<CompanyProfile />} />
-          <Route
-            path={webRoutes.companyEditProfile}
-            element={<EditCompanyPage />}
-          />
-          <Route path={webRoutes.market} element={<Market />} />
-
-          <Route path={webRoutes.messages} element={<MessagesLayout />} />
-
-          <Route path={webRoutes.productDetails} element={<Product />} />
-          <Route path={webRoutes.productListing} element={<Listing />} />
-          <Route
-            path={webRoutes.representatives}
-            element={<RepresentativesPage />}
-          />
-          <Route
-            path={webRoutes.assignRepresentative}
-            element={<AssignRepresentative />}
-          />
-          <Route
-            path={webRoutes.acceptRepresentation}
-            element={<AcceptRepresentation />}
-          />
-          <Route path={webRoutes.search} element={<Search />} />
-          <Route path={webRoutes.services} element={<Services />} />
-          <Route path={webRoutes.servicesAdd} element={<ServiceAdmin />} />
-          <Route
-            path={webRoutes.servicesDetail}
-            element={<ServiceOverView />}
-          />
-          <Route path={webRoutes.settings} element={<SettingsPage />} />
-          <Route path={webRoutes.userProfile} element={<UserProfile />} />
+          <Route path="analysis" element={<Analysis />} />
+          <Route path="bookmarks" element={<BookMark />} />
+          <Route path="companies" element={<CompaniesPage />} />
+          <Route path="notifications" element={<NotificationItem />} />
+          <Route path="company/:company" element={<CompanyProfile />} />
+          <Route path="company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="market" element={<Market />} />
+          <Route path="messages" element={<MessagesLayout />} />
+          <Route path="products/:id" element={<Product />} />
+          <Route path="products/listing" element={<Listing />} />
+          <Route path="representatives" element={<RepresentativesPage />} />
+          <Route path="representatives/assign" element={<AssignRepresentative />} />
+          <Route path="representatives/accept" element={<AcceptRepresentation />} />
+          <Route path="search" element={<Search />} />
+          <Route path="services" element={<Services />} />
+          <Route path="services/add" element={<ServiceAdmin />} />
+          <Route path="services/:id" element={<ServiceOverView />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="user/:userId" element={<UserProfile />} />
         </Route>
 
-        {/* Authentication Routes */}
-        <Route path="/" element={<AuthLayout />}>
-          <Route path={webRoutes.signup} element={<Signup />} />
-          <Route path={webRoutes.login} element={<Login />} />
-          <Route
-            path={webRoutes.reactivateAccount}
-            element={<ReactivationPage />}
-          />
-          <Route path={webRoutes.verifyAccount} element={<VerifyAccount />} />
-          <Route
-            path={webRoutes.resetPassword}
-            element={<ResetPasswordPage />}
-          />
-          <Route
-            path={webRoutes.confirmResetPassword}
-            element={<ConfirmResetPassword />}
-          />
-        </Route>
+  {/* Authentication Routes (top-level to preserve existing links) */}
+  <Route path="/login" element={<Login />} />
+  <Route path="/signup" element={<Signup />} />
+  <Route path="/verify-account" element={<VerifyAccount />} />
+  <Route path="/reset-password" element={<ResetPasswordPage />} />
+  <Route path="/confirm-reset-password" element={<ConfirmResetPassword />} />
+  <Route path="/reactivate-account" element={<ReactivationPage />} />
 
         {/* Misc Pages */}
-        <Route path={webRoutes.success} element={<SuccessPage />} />
-        <Route path="/" element={<TermsLayout />}>
-          <Route
-            path={webRoutes.termsAndConditions}
-            element={<TermsAndConditions />}
-          />
-          <Route path={webRoutes.privacyPolicy} element={<PrivacyPolicy />} />
-        </Route>
+  <Route path="/success" element={<SuccessPage />} />
+  {/* Keep original terms routes for compatibility */}
+  <Route path={webRoutes.termsAndConditions} element={<TermsAndConditions />} />
+  <Route path={webRoutes.privacyPolicy} element={<PrivacyPolicy />} />
+        
+        {/* Catch all for 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

@@ -173,12 +173,12 @@ const AdminSystemSettings = () => {
         <div className="mt-4 sm:mt-0 flex items-center space-x-3">
           {saveStatus === 'saving' && (
             <span className="inline-flex items-center text-blue-600 text-sm">
-              <RefreshIcon className="h-4 w-4 mr-1 animate-spin" /> Saving...
+              <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin" /> Saving...
             </span>
           )}
           {saveStatus === 'saved' && (
             <span className="inline-flex items-center text-green-600 text-sm">
-              <CheckIcon className="h-4 w-4 mr-1" /> Saved
+              <CheckCircleIcon className="h-4 w-4 mr-1" /> Saved
             </span>
           )}
         </div>
@@ -188,12 +188,12 @@ const AdminSystemSettings = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
-            {[ 
-              { key: 'general', name: 'General', Icon: SettingsIcon },
-              { key: 'email', name: 'Email', Icon: EmailIcon },
-              { key: 'security', name: 'Security', Icon: SecurityIcon },
+            {[
+              { key: 'general', name: 'General', Icon: Cog6ToothIcon },
+              { key: 'email', name: 'Email', Icon: EnvelopeIcon },
+              { key: 'security', name: 'Security', Icon: LockClosedIcon },
               { key: 'integrations', name: 'Integrations', Icon: LinkIcon },
-              { key: 'advanced', name: 'Advanced', Icon: ToolIcon }
+              { key: 'advanced', name: 'Advanced', Icon: WrenchScrewdriverIcon }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -511,9 +511,9 @@ const AdminSystemSettings = () => {
       </div>
 
       {/* Success Message */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+    <div className="bg-green-50 border border-green-200 rounded-xl p-6">
         <div className="flex items-center">
-          <SettingsIcon className="h-6 w-6 text-green-600 mr-3" />
+      <Cog6ToothIcon className="h-6 w-6 text-green-600 mr-3" />
           <div>
             <h4 className="text-green-800 font-semibold">System Settings Active!</h4>
             <p className="text-green-700 mt-1">

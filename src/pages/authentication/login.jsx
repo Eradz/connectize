@@ -28,11 +28,7 @@ function Login() {
   const { user, setUser } = useAuth();
   const [searchParams] = useSearchParams();
 
-  // Ensure clean state only once when landing on login
-  useEffect(() => {
-    setUser(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  setUser(null);
 
   const nextParam = searchParams.get("next");
 
@@ -61,13 +57,7 @@ function Login() {
     },
   });
 
-  // Navigate after login only when user is set
-  useEffect(() => {
-    if (user) {
-      navigate(navigateTo, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  if (user) navigate(navigateTo);
 
   useEffect(() => {
     formik.setValues(formValues);
