@@ -70,3 +70,7 @@
 - used the numberOfComments property for posts instead of commentsLength
 - Turned the About Us link in the sign up and login pages into a button
 - Edited all configs for android gradle and capacitor to allow building of the release version of the android app
+
+-
+- Moved the about btn to the far right
+- Updated the likes funtionality to the new server implementation

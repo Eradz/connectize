@@ -19,7 +19,7 @@ function AuthLayout({ redirectUrl = "/" }) {
   }
 
   return (
-    <div className="h-screen grid justify-center flex-col p-4">
+    <div className="h-screen grid  flex-col p-4">
       <nav>
         <div className="text-white flex justify-end">
           <a
