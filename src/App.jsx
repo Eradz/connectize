@@ -59,6 +59,7 @@ import DealRoomCreate from "./pages/platform/DealRoomCreate";
 import DealRoomEdit from "./pages/platform/DealRoomEdit";
 import WorkforceJobs from "./pages/platform/WorkforceJobs";
 import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
+import WorkforceMyPostedJobs from "./pages/platform/WorkforceMyPostedJobs";
 import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
 import WorkforceProfessionals from "./pages/platform/WorkforceProfessionals";
 import WorkforceProfileDetail from "./pages/platform/WorkforceProfileDetail";
@@ -104,6 +105,7 @@ function App() {
           <Route path={webRoutes.dealRoomReports} element={<DealRoomDetail />} />
           <Route path={webRoutes.workforceJobs} element={<WorkforceJobs />} />
           <Route path={webRoutes.workforceJobCreate} element={<WorkforceJobCreate />} />
+          <Route path={webRoutes.workforceMyPostedJobs} element={<WorkforceMyPostedJobs />} />
           <Route path={webRoutes.workforceJobDetail} element={<WorkforceJobDetail />} />
           <Route path={webRoutes.workforceJobApply} element={<WorkforceJobDetail />} />
           <Route path={webRoutes.workforceProfiles} element={<WorkforceProfessionals />} />

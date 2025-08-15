@@ -60,6 +60,7 @@ const PlatformNavigation = ({ children }) => {
       current: location.pathname.startsWith('/jobs') || location.pathname.startsWith('/professionals'),
       children: [
         { name: 'Job Marketplace', href: webRoutes.workforceJobs },
+        { name: 'My Posted Jobs', href: webRoutes.workforceMyPostedJobs },
         { name: 'Professionals', href: webRoutes.workforceProfiles },
         { name: 'Industry Events', href: webRoutes.workforceEvents },
         { name: 'My Applications', href: webRoutes.workforceApplications }

@@ -21,7 +21,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { workforceJobService } from '../../api-services/oilgas';
+import { workforceAPI } from '../../api-services/workforce';
 
 const WorkforceJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -49,7 +49,7 @@ const WorkforceJobs = () => {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(job => 
         (job.title || '').toLowerCase().includes(term) ||
-        (job.company || '').toLowerCase().includes(term) ||
+        (job.company_name || '').toLowerCase().includes(term) ||
         (job.location || '').toLowerCase().includes(term) ||
         (job.skills_required || []).some(skill => (skill || '').toLowerCase().includes(term))
       );
@@ -113,8 +113,8 @@ const WorkforceJobs = () => {
   const loadJobs = async () => {
     try {
       setLoading(true);
-      const response = await workforceJobService.getAll();
-      const data = response?.results || response?.data || response || [];
+      const response = await workforceAPI.getJobs();
+      const data = response.data?.results || response.data || response || [];
       setJobs(data);
     } catch (error) {
       console.error('Failed to load jobs:', error);
@@ -216,7 +216,7 @@ const WorkforceJobs = () => {
                 <h3 className="font-semibold text-gray-900 text-lg">{job.title}</h3>
                 <div className="flex items-center text-sm text-gray-600 mt-1">
                   <Building className="w-4 h-4 mr-1" />
-                  <span className="font-medium">Posted by User {job.posted_by}</span>
+                  <span className="font-medium">{job.company_name || 'Company'}</span>
                   <span className="mx-2">•</span>
                   <span>{getTimeAgo(job.created_at)}</span>
                 </div>

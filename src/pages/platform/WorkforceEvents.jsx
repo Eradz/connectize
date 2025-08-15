@@ -22,7 +22,7 @@ import {
   UserPlus
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { workforceService } from '../../api-services/oilgas';
+import { workforceAPI } from '../../api-services/workforce';
 
 const WorkforceEvents = () => {
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,7 @@ const WorkforceEvents = () => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const response = await workforceService.getEvents();
+      const response = await workforceAPI.getEvents();
       const data = response.data?.results || response.data || [];
       setEvents(data);
       setFilteredEvents(data);

@@ -97,6 +97,7 @@ const webRoutes = {
   workforceJobDetail: "/jobs/:id",
   workforceJobCreate: "/jobs/create",
   workforceJobApply: "/jobs/:id/apply",
+  workforceMyPostedJobs: "/jobs/my-posted",
   workforceProfiles: "/professionals",
   workforceProfileDetail: "/professionals/:id",
   workforceProfileCreate: "/professionals/create",

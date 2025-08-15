@@ -28,25 +28,21 @@ const WorkforceJobCreate = () => {
   
   const [formData, setFormData] = useState({
     title: '',
+    company_id: '',
     description: '',
-    company_id: '', // Changed from company_name to company_id
-    location: '',
     employment_type: 'full_time',
-    experience_level: 'mid_level',
+    experience_level: 'mid',
+    location: '',
+    qualifications: [], // Fixed: should be array
+    responsibilities: '',
+    skills_required: [], // Fixed field name to match usage
+    benefits: [], // Fixed: should be array
     salary_min: '',
     salary_max: '',
     currency: 'USD',
-    skills_required: [],
-    qualifications: [],
-    benefits: [],
     application_deadline: '',
     remote_allowed: false,
-    travel_required: false,
-    security_clearance_required: false,
-    department: '',
-    reports_to: '',
-    contact_email: '',
-    application_instructions: ''
+    travel_required: false
   });
 
   const [currentSkill, setCurrentSkill] = useState('');
@@ -89,9 +85,28 @@ const WorkforceJobCreate = () => {
 
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NOK'];
 
-  // Load user's companies on component mount
+  // Fetch user companies on component mount
   useEffect(() => {
-    loadUserCompanies();
+    const fetchUserCompanies = async () => {
+      try {
+        setLoadingCompanies(true);
+        const response = await getCompanyByIdOrEmail();
+        if (response && Array.isArray(response)) {
+          setUserCompanies(response);
+          // Auto-select first company if available
+          if (response.length > 0) {
+            setFormData(prev => ({ ...prev, company_id: response[0].id }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+        toast.error('Failed to load your companies');
+      } finally {
+        setLoadingCompanies(false);
+      }
+    };
+
+    fetchUserCompanies();
   }, []);
 
   const loadUserCompanies = async () => {
@@ -265,35 +280,74 @@ const WorkforceJobCreate = () => {
       return;
     }
 
+    console.log('Submitting job with data:', {
+      company_id: formData.company_id,
+      userCompanies,
+      selectedCompany: userCompanies.find(c => c.id === parseInt(formData.company_id))
+    });
+
     setLoading(true);
     try {
       const jobData = {
         title: formData.title,
         description: formData.description,
-        company_id: formData.company_id, // Send company ID to backend
+        company: parseInt(formData.company_id), // Ensure it's an integer
         job_type: formData.employment_type, // maps to backend job_type choices
         experience_level: formData.experience_level,
         location: formData.location,
+        // skills_required: removed - not supported by current serializer
         is_remote: !!formData.remote_allowed,
         requires_relocation: !!formData.travel_required,
         salary_min: formData.salary_min ? parseFloat(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseFloat(formData.salary_max) : null,
         currency: formData.currency,
-        benefits: formData.benefits,
+        benefits_list: formData.benefits, // Send as array
         min_years_experience: undefined, // optional; not collected in this form
-        education_requirements: formData.qualifications,
+        education_requirements_list: formData.qualifications, // Send as array
         certifications_required: [],
         application_deadline: formData.application_deadline || null,
         max_applications: undefined,
         status: 'active'
+        // Note: reports_to field removed as it's not part of JobPosting model
       };
 
+      console.log('Job data being sent to API:', jobData);
+      console.log('Job data stringified:', JSON.stringify(jobData, null, 2));
+
       const response = await workforceAPI.createJob(jobData);
-      toast.success('Job posted successfully');
-      navigate(webRoutes.workforceJobDetail.replace(':id', response.data.id));
+      
+      // Enhanced response debugging
+      console.log('Job creation response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response data:', response?.data);
+      console.log('Response data type:', typeof response?.data);
+      
+      // Only show success toast if we actually have a response
+      if (response && (response.data || response.id)) {
+        toast.success('Job posted successfully');
+      }
+      
+      // Fix: Check response structure and handle different formats
+      const jobId = response?.data?.id || response?.id || response?.data?.job_id;
+      if (jobId) {
+        navigate(webRoutes.workforceJobDetail.replace(':id', jobId));
+      } else {
+        console.warn('Job created but no ID returned in response:', {
+          response,
+          responseData: response?.data,
+          keys: response ? Object.keys(response) : 'no response',
+          dataKeys: response?.data ? Object.keys(response.data) : 'no response.data'
+        });
+        // Only navigate if we got some response
+        if (response) {
+          navigate(webRoutes.workforceJobs);
+        }
+      }
     } catch (error) {
       console.error('Error creating job posting:', error);
-      const msg = error.response?.data?.message || error.response?.data?.detail || 'Failed to publish job.';
+      console.error('Error response:', error.response);
+      console.error('Error data:', error.response?.data);
+      const msg = error.response?.data?.error || error.response?.data?.message || error.response?.data?.detail || 'Failed to publish job.';
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -550,20 +604,6 @@ const WorkforceJobCreate = () => {
                       </span>
                     ))}
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Reports To
-                  </label>
-                  <input
-                    type="text"
-                    name="reports_to"
-                    value={formData.reports_to}
-                    onChange={handleTextChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="e.g., Operations Manager, VP of Engineering"
-                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

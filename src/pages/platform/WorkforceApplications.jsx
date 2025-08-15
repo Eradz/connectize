@@ -84,8 +84,8 @@ const WorkforceApplications = () => {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(app =>
         (app.job_title || '').toLowerCase().includes(term) ||
-        (app.company || '').toLowerCase().includes(term) ||
-        (app.location || '').toLowerCase().includes(term)
+        (app.job_posting?.company_name || app.job_company || '').toLowerCase().includes(term) ||
+        (app.location || app.job_location || '').toLowerCase().includes(term)
       );
     }
 
@@ -432,7 +432,7 @@ const WorkforceApplications = () => {
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span className="flex items-center">
                             <Building className="w-4 h-4 mr-1" />
-                            {application.job_company || 'Unknown Company'}
+                            {application.job_posting?.company_name || application.job_company || 'Unknown Company'}
                           </span>
                           <span className="flex items-center">
                             <MapPin className="w-4 h-4 mr-1" />

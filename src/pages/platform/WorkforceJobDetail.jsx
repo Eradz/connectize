@@ -109,10 +109,10 @@ export default function WorkforceJobDetail() {
                       {job?.title || `Job #${id}`}
                     </h1>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      {job?.company && (
+                      {job?.company_name && (
                         <div className="flex items-center">
                           <Building className="h-4 w-4 mr-1" />
-                          {job.company}
+                          {job.company_name}
                         </div>
                       )}
                       {job?.location && (
@@ -248,9 +248,9 @@ export default function WorkforceJobDetail() {
               </div>
 
               {/* Company Info */}
-              {job?.company && (
+              {job?.company_name && (
                 <div className="bg-white border rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">About {job.company}</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">About {job.company_name}</h3>
                   <div className="space-y-2 text-sm text-gray-600">
                     {job.company_description && (
                       <p>{job.company_description}</p>
