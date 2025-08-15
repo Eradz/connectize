@@ -74,3 +74,7 @@
 -
 - Moved the about btn to the far right
 - Updated the likes funtionality to the new server implementation
+
+-
+- Attempted to change app version to 3.0
+- Make the likes functionality fully compatible with the new server implementation
