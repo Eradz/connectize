@@ -110,24 +110,23 @@ export const DiscoverPostItem = ({
     postItem?.user?.first_name
   } | ${capitalizeFirst(postItem?.company?.company_name)} Company`;
 
-  const userHasLikedPost = postItem?.likes.find(
-    (post) => post?.user?.id === currentUser?.id
-  )
-    ? true
-    : false;
+  // const userHasLikedPost = postItem?.likes.find(
+  //   (post) => post?.user?.id === currentUser?.id
+  // )
+  //   ? true
+  //   : false;
 
   const [commentsLength, setCommentsLength] = useState(
     () => postItem.numberOfComments || 0
   );
 
-  const [liked, setLiked] = useState(userHasLikedPost);
-  const [likes, setLikes] = useState(postItem?.likes?.length);
+  const recentLikes = postItem?.likes;
+  const [liked, setLiked] = useState(() => !!postItem?.isLikedByUser);
+  const [likes, setLikes] = useState(
+    () => postItem?.numberOfLikes || postItem?.likes?.length
+  );
   const [disabled, setDisabled] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-
-  useEffect(() => {
-    setLikes(postItem?.likes?.length);
-  }, [postItem?.likes?.length]);
 
   useEffect(() => {
     if (isLoadingComments || !comments) return;
@@ -135,10 +134,16 @@ export const DiscoverPostItem = ({
   }, [comments?.length]);
 
   const handleLikePost = async () => {
-    setLiked((prev) => !prev);
-    setLikes((prev) => (!liked ? prev + 1 : prev - 1));
+    const currentIsLiked = liked;
+    setLiked(!currentIsLiked);
+    setLikes((prev) => (!currentIsLiked ? prev + 1 : prev - 1));
     setDisabled(true);
-    await likePost(postItem?.id, postItem, userHasLikedPost);
+    try {
+      await likePost(postItem?.id, postItem, currentIsLiked);
+    } catch (error) {
+      setLiked(currentIsLiked);
+      setLikes((prev) => (!currentIsLiked ? prev - 1 : prev + 1));
+    }
     setDisabled(false);
     setRefetchInterval(1000);
     setTimeout(() => setRefetchInterval(false), 2000);
@@ -289,7 +294,7 @@ export const DiscoverPostItem = ({
       <div className="flex items-center gap-2 justify-between mt-4">
         <ConJoinedImages
           size={30}
-          array={postItem?.likes.slice(0, 5).map((post) => ({
+          array={recentLikes?.map((post) => ({
             name: `${post?.user?.first_name} ${post?.user?.last_name}`,
             src: post?.user?.avatar,
             href: `/co/${post?.user?.id}`,

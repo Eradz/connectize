@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: "com.connectize.app",
   appName: "Connectize",
   webDir: "build",
+
   android: {
     buildOptions: {
       keystorePath: "app/mykeystore.jks",
@@ -12,6 +13,7 @@ const config: CapacitorConfig = {
       keystoreAlias: "connectize",
       keystoreAliasPassword:
         "t11BPPOWTA0Fhcv7oyPE5ixpzdDU9EJMygnRosw0MKJtPg6Qqf",
+      // releaseType: "APK",
     },
     // signing: {
     //   keystorePath: "android/app/my-release-key.jks",
