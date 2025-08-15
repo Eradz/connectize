@@ -1,4 +1,4 @@
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 
 // Get all users with admin filtering
 export const getAllUsersAdmin = async (params = {}) => {

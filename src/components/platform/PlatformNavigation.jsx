@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard,
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 
-// Helper to combine class names across components
+// Utility function for conditional class names
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
@@ -34,7 +34,7 @@ const PlatformNavigation = ({ children }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
 
-  const navigation = [
+  const navigation = useMemo(() => ([
     {
       name: 'Dashboard',
       href: webRoutes.platformDashboard,
@@ -113,13 +113,13 @@ const PlatformNavigation = ({ children }) => {
         { name: 'Regulatory Compliance', href: webRoutes.toolsRegulatory }
       ]
     }
-  ];
+  ]), [location.pathname]);
 
-  const secondaryNavigation = [
+  const secondaryNavigation = useMemo(() => ([
     { name: 'Analytics', href: webRoutes.platformAnalytics, icon: BarChart3 },
     { name: 'Reports', href: webRoutes.platformReports, icon: FileText },
     { name: 'Settings', href: webRoutes.userSettings, icon: Settings }
-  ];
+  ]), []);
 
   const quickActions = [
     { name: 'Create Deal Room', href: webRoutes.dealRoomCreate, icon: FileText, color: 'bg-blue-500' },
@@ -170,7 +170,7 @@ const PlatformNavigation = ({ children }) => {
           {/* Search */}
           <div className="flex-1 px-4 flex justify-between">
             <div className="flex-1 flex">
-              <form className="w-full flex md:ml-0" action="#" method="GET">
+              <form className="w-full flex md:ml-0" onSubmit={(e) => e.preventDefault()}>
                 <div className="relative w-full text-gray-400 focus-within:text-gray-600">
                   <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
                     <Search className="h-5 w-5" />
@@ -254,7 +254,7 @@ const PlatformNavigation = ({ children }) => {
   );
 };
 
-const SidebarContent = ({ navigation, secondaryNavigation }) => {
+const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
   const [expandedItems, setExpandedItems] = useState(new Set());
 
   const toggleExpanded = (itemName) => {
@@ -352,6 +352,6 @@ const SidebarContent = ({ navigation, secondaryNavigation }) => {
       </div>
     </div>
   );
-};
+});
 
-export default PlatformNavigation;
+export default React.memo(PlatformNavigation);

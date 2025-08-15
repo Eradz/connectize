@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { goToLogin, makeApiRequest } from "../lib/helpers";
+import { goToLogin, makeApiRequest } from "../lib/helpers/index";
 import { getSession } from "../lib/session";
 import { capitalizeFirst } from "../lib/utils";
 import { authenticationService } from "./authentication";

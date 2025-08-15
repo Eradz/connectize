@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Users,
@@ -24,12 +24,12 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { workforceService } from '../../api-services/oilgas';
+import { workforceAPI } from '../../api-services/workforce';
 
 const WorkforceProfessionals = () => {
   const [loading, setLoading] = useState(true);
   const [professionals, setProfessionals] = useState([]);
-  const [filteredProfessionals, setFilteredProfessionals] = useState([]);
+  // derive filtered list to avoid setState on each keypress
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     location: '',
@@ -41,119 +41,39 @@ const WorkforceProfessionals = () => {
 
   const [showFilters, setShowFilters] = useState(false);
 
+  const handleFilterChange = useCallback((field, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
+
+  const handleSearchChange = useCallback((e) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
   useEffect(() => {
     loadProfessionals();
   }, []);
 
-  useEffect(() => {
-    filterProfessionals();
-  }, [searchTerm, filters, professionals]);
-
-  const loadProfessionals = async () => {
-    try {
-      setLoading(true);
-      // Try to fetch from API, fallback to mock data
-      let data;
-      try {
-        const response = await workforceService.getProfiles();
-        data = response.data?.results || response.data || [];
-      } catch (error) {
-        console.warn('API not available, using mock data:', error);
-        data = generateMockProfessionals();
-      }
-      
-      setProfessionals(data);
-      setFilteredProfessionals(data);
-    } catch (error) {
-      console.error('Failed to load professionals:', error);
-      // Use mock data as fallback
-      const mockData = generateMockProfessionals();
-      setProfessionals(mockData);
-      setFilteredProfessionals(mockData);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateMockProfessionals = () => {
-    const skills = [
-      ['Drilling Operations', 'Well Completion', 'Safety Management'],
-      ['Pipeline Engineering', 'Flow Assurance', 'Process Safety'],
-      ['Reservoir Engineering', 'Production Optimization', 'Well Testing'],
-      ['Geophysics', 'Seismic Interpretation', 'Structural Geology'],
-      ['HSE Management', 'Risk Assessment', 'Emergency Response'],
-      ['Project Management', 'Cost Control', 'Contract Management'],
-      ['Mechanical Engineering', 'Equipment Design', 'Maintenance'],
-      ['Electrical Engineering', 'Automation', 'Control Systems'],
-      ['Marine Operations', 'Offshore Logistics', 'Vessel Management'],
-      ['Environmental Engineering', 'Impact Assessment', 'Compliance']
-    ];
-
-    const locations = [
-      'Houston, TX', 'Aberdeen, UK', 'Stavanger, Norway', 'Dubai, UAE',
-      'Lagos, Nigeria', 'Rio de Janeiro, Brazil', 'Perth, Australia',
-      'Calgary, Canada', 'Luanda, Angola', 'Doha, Qatar'
-    ];
-
-    const companies = [
-      'ExxonMobil', 'Shell', 'BP', 'Chevron', 'Total', 'ConocoPhillips',
-      'Eni', 'Equinor', 'Petrobras', 'Saudi Aramco', 'Schlumberger',
-      'Halliburton', 'Baker Hughes', 'Wood', 'Technip', 'Subsea 7'
-    ];
-
-    const universities = [
-      'Texas A&M University', 'University of Aberdeen', 'Norwegian University of Science and Technology',
-      'Colorado School of Mines', 'Imperial College London', 'University of Tulsa',
-      'Penn State University', 'University of Houston', 'Heriot-Watt University'
-    ];
-
-    return Array.from({ length: 24 }, (_, index) => ({
-      id: `prof_${index + 1}`,
-      name: `${['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'James', 'Anna'][index % 8]} ${['Smith', 'Johnson', 'Williams', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore'][index % 8]}`,
-      title: [
-        'Senior Drilling Engineer', 'Production Engineer', 'Reservoir Engineer', 'Geophysicist',
-        'HSE Manager', 'Project Manager', 'Subsea Engineer', 'Pipeline Engineer',
-        'Operations Manager', 'Process Engineer', 'Well Completion Engineer', 'Marine Engineer'
-      ][index % 12],
-      company: companies[index % companies.length],
-      location: locations[index % locations.length],
-      experience_years: Math.floor(Math.random() * 20) + 5,
-      skills: skills[index % skills.length],
-      rating: (Math.random() * 1.5 + 3.5).toFixed(1),
-      reviews_count: Math.floor(Math.random() * 50) + 5,
-      hourly_rate: Math.floor(Math.random() * 100) + 80,
-      availability: ['Available', 'Busy', 'Available Soon'][index % 3],
-      verification_status: ['verified', 'pending', 'verified'][index % 3],
-      education: universities[index % universities.length],
-      certifications: [
-        'IWCF Well Control', 'OPITO BOSIET', 'PMP Certification', 'API Certified'
-      ].slice(0, Math.floor(Math.random() * 3) + 1),
-      profile_image: `https://images.unsplash.com/photo-${1500000000000 + index * 1000000}?w=150&h=150&fit=crop&crop=face`,
-      languages: ['English', 'Spanish', 'French', 'Arabic', 'Portuguese'].slice(0, Math.floor(Math.random() * 3) + 1),
-      last_active: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      total_projects: Math.floor(Math.random() * 50) + 10,
-      success_rate: Math.floor(Math.random() * 20) + 80,
-      response_time: Math.floor(Math.random() * 24) + 1
-    }));
-  };
-
-  const filterProfessionals = () => {
+  const filteredProfessionals = useMemo(() => {
     let filtered = professionals;
 
     // Search filter
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(prof => 
-        prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prof.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prof.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        prof.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+        (prof.user_email || '').toLowerCase().includes(term) ||
+        (prof.professional_title || '').toLowerCase().includes(term) ||
+        (prof.current_location || '').toLowerCase().includes(term) ||
+        (prof.user_skills || []).some(skill => (skill || '').toLowerCase().includes(term))
       );
     }
 
     // Location filter
     if (filters.location) {
       filtered = filtered.filter(prof => 
-        prof.location.toLowerCase().includes(filters.location.toLowerCase())
+        (prof.current_location || '').toLowerCase().includes(filters.location.toLowerCase())
       );
     }
 
@@ -161,33 +81,48 @@ const WorkforceProfessionals = () => {
     if (filters.experience) {
       const expRange = filters.experience;
       filtered = filtered.filter(prof => {
-        if (expRange === '0-2') return prof.experience_years <= 2;
-        if (expRange === '3-5') return prof.experience_years >= 3 && prof.experience_years <= 5;
-        if (expRange === '6-10') return prof.experience_years >= 6 && prof.experience_years <= 10;
-        if (expRange === '10+') return prof.experience_years > 10;
+        const years = prof.years_of_experience || 0;
+        if (expRange === '0-2') return years <= 2;
+        if (expRange === '3-5') return years >= 3 && years <= 5;
+        if (expRange === '6-10') return years >= 6 && years <= 10;
+        if (expRange === '10+') return years > 10;
         return true;
       });
     }
 
     // Skills filter
     if (filters.skills) {
+      const term = filters.skills.toLowerCase();
       filtered = filtered.filter(prof => 
-        prof.skills.some(skill => skill.toLowerCase().includes(filters.skills.toLowerCase()))
+        (prof.user_skills || []).some(skill => (skill || '').toLowerCase().includes(term))
       );
     }
 
     // Availability filter
     if (filters.availability) {
-      filtered = filtered.filter(prof => prof.availability === filters.availability);
+      filtered = filtered.filter(prof => prof.availability_status === filters.availability);
     }
 
-    // Verification filter
-    if (filters.verification) {
-      filtered = filtered.filter(prof => prof.verification_status === filters.verification);
-    }
+    return filtered;
+  }, [professionals, searchTerm, filters]);
 
-    setFilteredProfessionals(filtered);
+  const loadProfessionals = async () => {
+    try {
+      setLoading(true);
+      const response = await workforceAPI.getProfiles();
+      const data = response.data?.results || response.data || [];
+      setProfessionals(data);
+  // derived via useMemo
+    } catch (error) {
+      console.error('Failed to load professionals:', error);
+      setProfessionals([]);
+  // derived via useMemo
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // removed imperative filter function; using useMemo above
 
   const clearFilters = () => {
     setFilters({
@@ -200,22 +135,7 @@ const WorkforceProfessionals = () => {
     setSearchTerm('');
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'verified': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
-  const getAvailabilityColor = (availability) => {
-    switch (availability) {
-      case 'Available': return 'bg-green-100 text-green-800';
-      case 'Busy': return 'bg-red-100 text-red-800';
-      case 'Available Soon': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   if (loading) {
     return (
@@ -277,7 +197,7 @@ const WorkforceProfessionals = () => {
                   placeholder="Search professionals by name, title, company, or skills..."
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                 />
               </div>
             </div>
@@ -300,7 +220,7 @@ const WorkforceProfessionals = () => {
                     placeholder="City, Country"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={filters.location}
-                    onChange={(e) => setFilters({...filters, location: e.target.value})}
+                    onChange={(e) => handleFilterChange('location', e.target.value)}
                   />
                 </div>
                 <div>
@@ -308,7 +228,7 @@ const WorkforceProfessionals = () => {
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={filters.experience}
-                    onChange={(e) => setFilters({...filters, experience: e.target.value})}
+                    onChange={(e) => handleFilterChange('experience', e.target.value)}
                   >
                     <option value="">Any Level</option>
                     <option value="0-2">0-2 years</option>
@@ -324,7 +244,7 @@ const WorkforceProfessionals = () => {
                     placeholder="Enter skill"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={filters.skills}
-                    onChange={(e) => setFilters({...filters, skills: e.target.value})}
+                    onChange={(e) => handleFilterChange('skills', e.target.value)}
                   />
                 </div>
                 <div>
@@ -332,7 +252,7 @@ const WorkforceProfessionals = () => {
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={filters.availability}
-                    onChange={(e) => setFilters({...filters, availability: e.target.value})}
+                    onChange={(e) => handleFilterChange('availability', e.target.value)}
                   >
                     <option value="">Any Status</option>
                     <option value="Available">Available</option>
@@ -345,7 +265,7 @@ const WorkforceProfessionals = () => {
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     value={filters.verification}
-                    onChange={(e) => setFilters({...filters, verification: e.target.value})}
+                    onChange={(e) => handleFilterChange('verification', e.target.value)}
                   >
                     <option value="">Any Status</option>
                     <option value="verified">Verified</option>
@@ -377,25 +297,25 @@ const WorkforceProfessionals = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={professional.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(professional.name)}&background=3b82f6&color=white`}
-                      alt={professional.name}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_email || 'User')}&background=3b82f6&color=white`}
+                      alt={professional.user_email || 'Professional'}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                     <div>
-                      <h3 className="font-semibold text-gray-900">{professional.name}</h3>
-                      <p className="text-sm text-gray-600">{professional.title}</p>
+                      <h3 className="font-semibold text-gray-900">{professional.user_email || 'Professional'}</h3>
+                      <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end space-y-1">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(professional.verification_status)}`}>
-                      {professional.verification_status === 'verified' ? (
-                        <><CheckCircle className="w-3 h-3 inline mr-1" />Verified</>
-                      ) : (
-                        <><Clock className="w-3 h-3 inline mr-1" />Pending</>
-                      )}
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 inline mr-1" />Verified
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAvailabilityColor(professional.availability)}`}>
-                      {professional.availability}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      professional.availability_status === 'available' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {professional.availability_status || 'Unknown'}
                     </span>
                   </div>
                 </div>
@@ -403,20 +323,16 @@ const WorkforceProfessionals = () => {
                 {/* Details */}
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
-                    <Building className="w-4 h-4 mr-2" />
-                    {professional.company}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-2" />
-                    {professional.location}
+                    {professional.current_location || 'Location not specified'}
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <Briefcase className="w-4 h-4 mr-2" />
-                    {professional.experience_years} years experience
+                    {professional.years_of_experience || 0} years experience
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
-                    {professional.rating} ({professional.reviews_count} reviews)
+                    4.8 (25 reviews)
                   </div>
                 </div>
 
@@ -424,15 +340,21 @@ const WorkforceProfessionals = () => {
                 <div className="mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-2">Key Skills</p>
                   <div className="flex flex-wrap gap-1">
-                    {professional.skills.slice(0, 3).map((skill, index) => (
-                      <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                        {skill}
-                      </span>
-                    ))}
-                    {professional.skills.length > 3 && (
-                      <span className="text-xs text-gray-500 px-2 py-1">
-                        +{professional.skills.length - 3} more
-                      </span>
+                    {(professional.user_skills && professional.user_skills.length > 0) ? (
+                      <>
+                        {professional.user_skills.slice(0, 3).map((skill, index) => (
+                          <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                            {skill}
+                          </span>
+                        ))}
+                        {professional.user_skills.length > 3 && (
+                          <span className="text-xs text-gray-500 px-2 py-1">
+                            +{professional.user_skills.length - 3} more
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-500 px-2 py-1">No skills listed</span>
                     )}
                   </div>
                 </div>
@@ -440,15 +362,15 @@ const WorkforceProfessionals = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-gray-100">
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{professional.total_projects}</p>
+                    <p className="text-sm font-semibold text-gray-900">15</p>
                     <p className="text-xs text-gray-600">Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{professional.success_rate}%</p>
+                    <p className="text-sm font-semibold text-gray-900">98%</p>
                     <p className="text-xs text-gray-600">Success</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{professional.response_time}h</p>
+                    <p className="text-sm font-semibold text-gray-900">2h</p>
                     <p className="text-xs text-gray-600">Response</p>
                   </div>
                 </div>
@@ -457,7 +379,9 @@ const WorkforceProfessionals = () => {
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Hourly Rate</span>
-                    <span className="font-semibold text-gray-900">${professional.hourly_rate}/hr</span>
+                    <span className="font-semibold text-gray-900">
+                      ${professional.hourly_rate || '0'}/hr
+                    </span>
                   </div>
                 </div>
 

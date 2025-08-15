@@ -117,19 +117,25 @@ const webRoutes = {
   aiInsights: "/ai/insights",
   
   // Logistics Hub
+  logistics: "/logistics",
   logisticsDashboard: "/logistics",
   logisticsShipments: "/logistics/shipments",
   logisticsShipmentDetail: "/logistics/shipments/:id",
   logisticsShipmentCreate: "/logistics/shipments/create",
   logisticsInventory: "/logistics/inventory",
   logisticsInventoryDetail: "/logistics/inventory/:id",
+  logisticsInventoryCreate: "/logistics/inventory/create",
+  logisticsInventoryEdit: "/logistics/inventory/:id/edit",
   logisticsSuppliers: "/logistics/suppliers",
   logisticsSupplierDetail: "/logistics/suppliers/:id",
+  logisticsSupplierCreate: "/logistics/suppliers/create",
+  logisticsSupplierEdit: "/logistics/suppliers/:id/edit",
   logisticsTracking: "/logistics/tracking",
   
   // Trust & Verification
   trustDashboard: "/trust",
   trustVerification: "/trust/verification",
+  trustVerificationCreate: "/trust/verification/create",
   trustVerificationStatus: "/trust/verification/:id",
   trustReputation: "/trust/reputation",
   trustReputationUser: "/trust/reputation/:userId",

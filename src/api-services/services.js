@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 import { capitalizeFirst } from "../lib/utils";
 import { getCompanyByIdOrEmail } from "./companies";
 import { getCurrentUser } from "./users";

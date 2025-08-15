@@ -1,5 +1,6 @@
 import { toast } from "sonner";
-import { makeApiRequest } from "../lib/helpers";
+import { capitalizeFirst } from "../lib/utils";
+import { makeApiRequest } from "../lib/helpers/index";
 import { getCompanyByIdOrEmail } from "./companies";
 
 export const getPosts = async () => {

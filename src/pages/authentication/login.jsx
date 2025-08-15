@@ -28,7 +28,11 @@ function Login() {
   const { user, setUser } = useAuth();
   const [searchParams] = useSearchParams();
 
-  setUser(null);
+  // Ensure we don't call setState during render
+  useEffect(() => {
+    setUser(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const nextParam = searchParams.get("next");
 
@@ -57,7 +61,13 @@ function Login() {
     },
   });
 
-  if (user) navigate(navigateTo);
+  // Navigate after render when user becomes available
+  useEffect(() => {
+    if (user) {
+      navigate(navigateTo, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     formik.setValues(formValues);

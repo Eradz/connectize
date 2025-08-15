@@ -46,45 +46,60 @@ const AIDashboard = () => {
 
   const loadAIData = async () => {
     try {
+      setLoading(true);
+      
       const [
-        matchingRes,
+        matchesRes,
         opportunitiesRes,
-        complianceRes
+        complianceRes,
+        profilesRes
       ] = await Promise.all([
         aiMatchingService.getMatches(),
         aiOpportunityService.getOpportunities(),
-        aiComplianceService.getComplianceAlerts()
+        aiComplianceService.getComplianceAlerts(),
+        aiMatchingService.getMatchProfiles()
       ]);
 
-      const pendingCompliance = complianceRes?.results?.filter(alert => alert.status === 'pending')?.length || 0;
-      const resolvedCompliance = complianceRes?.results?.filter(alert => alert.status === 'resolved')?.length || 0;
+      const pendingCompliance = complianceRes?.results?.filter(alert => alert.is_active && !alert.is_acknowledged)?.length || 0;
+      const resolvedCompliance = complianceRes?.results?.filter(alert => alert.is_acknowledged)?.length || 0;
+      
+      // Calculate total opportunity value from real data
+      const totalOpportunityValue = opportunitiesRes?.results?.reduce((sum, opp) => 
+        sum + (parseFloat(opp.estimated_value) || 0), 0) || 0;
 
       setAiData({
         matching: {
-          profiles: 45, // Mock data
-          matches: matchingRes?.count || 0,
-          data: matchingRes?.results || []
+          profiles: profilesRes?.count || profilesRes?.results?.length || 0,
+          matches: matchesRes?.count || matchesRes?.results?.length || 0,
+          data: matchesRes?.results || matchesRes || []
         },
         opportunities: {
-          count: opportunitiesRes?.count || 0,
-          value: 125000000, // Mock total value
-          data: opportunitiesRes?.results || []
+          count: opportunitiesRes?.count || opportunitiesRes?.results?.length || 0,
+          value: totalOpportunityValue,
+          data: opportunitiesRes?.results || opportunitiesRes || []
         },
         compliance: {
-          total: complianceRes?.count || 0,
+          total: complianceRes?.count || complianceRes?.results?.length || 0,
           pending: pendingCompliance,
           resolved: resolvedCompliance,
-          data: complianceRes?.results || []
+          data: complianceRes?.results || complianceRes || []
         },
         analytics: {
-          matchAccuracy: 95,
-          opportunitySuccess: 78,
-          complianceScore: 92,
-          aiUtilization: 85
+          matchAccuracy: 95, // This could come from analytics API
+          opportunitySuccess: 78, // This could come from analytics API
+          complianceScore: pendingCompliance === 0 ? 100 : Math.max(0, 100 - (pendingCompliance * 10)),
+          aiUtilization: 85 // This could come from analytics API
         }
       });
     } catch (error) {
       console.error('Failed to load AI data:', error);
+      // Initialize with empty data instead of mock data
+      setAiData({
+        matching: { profiles: 0, matches: 0, data: [] },
+        opportunities: { count: 0, value: 0, data: [] },
+        compliance: { total: 0, pending: 0, resolved: 0, data: [] },
+        analytics: { matchAccuracy: 0, opportunitySuccess: 0, complianceScore: 0, aiUtilization: 0 }
+      });
     } finally {
       setLoading(false);
     }

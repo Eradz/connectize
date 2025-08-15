@@ -1,4 +1,4 @@
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 
 export const getSearchResults = async (searchTerm) => {
   const searchResults = await makeApiRequest({

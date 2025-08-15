@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Plus, 
@@ -25,6 +25,8 @@ import { workforceJobService } from '../../api-services/oilgas';
 
 const WorkforceJobs = () => {
   const [jobs, setJobs] = useState([]);
+  // derive filtered list to avoid setState on each keypress
+  // keeps input focus stable and reduces unnecessary renders
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLocation, setFilterLocation] = useState('all');
@@ -36,37 +38,94 @@ const WorkforceJobs = () => {
 
   useEffect(() => {
     loadJobs();
-  }, [filterLocation, filterType, filterExperience, filterSalaryRange, sortBy]);
+  }, []);
+
+  // derive filtered + sorted jobs without triggering extra state updates
+  const filteredJobs = useMemo(() => {
+    let filtered = [...jobs];
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(job => 
+        (job.title || '').toLowerCase().includes(term) ||
+        (job.company || '').toLowerCase().includes(term) ||
+        (job.location || '').toLowerCase().includes(term) ||
+        (job.skills_required || []).some(skill => (skill || '').toLowerCase().includes(term))
+      );
+    }
+
+    // Location filter
+    if (filterLocation !== 'all') {
+      filtered = filtered.filter(job => 
+        (job.location || '').toLowerCase().includes(filterLocation.toLowerCase())
+      );
+    }
+
+    // Job type filter
+    if (filterType !== 'all') {
+      filtered = filtered.filter(job => job.job_type === filterType);
+    }
+
+    // Experience level filter
+    if (filterExperience !== 'all') {
+      filtered = filtered.filter(job => job.experience_level === filterExperience);
+    }
+
+    // Salary range filter
+    if (filterSalaryRange !== 'all') {
+      filtered = filtered.filter(job => {
+        const salary = job.salary_min || 0;
+        switch (filterSalaryRange) {
+          case '50000-80000':
+            return salary >= 50000 && salary <= 80000;
+          case '80000-120000':
+            return salary >= 80000 && salary <= 120000;
+          case '120000-150000':
+            return salary >= 120000 && salary <= 150000;
+          case '150000-plus':
+            return salary >= 150000;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort jobs
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'created_at':
+          return new Date(b.created_at) - new Date(a.created_at);
+        case 'salary':
+          return (b.salary_min || 0) - (a.salary_min || 0);
+        case 'title':
+          return (a.title || '').localeCompare(b.title || '');
+        case 'company':
+          return (a.company || '').localeCompare(b.company || '');
+        default:
+          return new Date(b.created_at) - new Date(a.created_at);
+      }
+    });
+
+    return filtered;
+  }, [jobs, searchTerm, filterLocation, filterType, filterExperience, filterSalaryRange, sortBy]);
 
   const loadJobs = async () => {
     try {
       setLoading(true);
-      const params = {
-        search: searchTerm,
-        location: filterLocation !== 'all' ? filterLocation : undefined,
-        job_type: filterType !== 'all' ? filterType : undefined,
-        experience_level: filterExperience !== 'all' ? filterExperience : undefined,
-        ordering: sortBy.startsWith('-') ? sortBy : `-${sortBy}`
-      };
-      
-      if (filterSalaryRange !== 'all') {
-        const [min, max] = filterSalaryRange.split('-');
-        if (min) params.salary_min = min;
-        if (max && max !== 'plus') params.salary_max = max;
-      }
-      
-      const response = await workforceJobService.getAll(1, 50, params);
-      setJobs(response.results || []);
+      const response = await workforceJobService.getAll();
+      const data = response?.results || response?.data || response || [];
+      setJobs(data);
     } catch (error) {
       console.error('Failed to load jobs:', error);
+      setJobs([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSearch = (e) => {
-    e.preventDefault();
-    loadJobs();
+  e.preventDefault();
   };
 
   const toggleSaveJob = async (jobId) => {
@@ -84,6 +143,7 @@ const WorkforceJobs = () => {
       }
     } catch (error) {
       console.error('Failed to toggle job save:', error);
+      // Don't show error to user, just log it
     }
   };
 
@@ -349,11 +409,16 @@ const WorkforceJobs = () => {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Locations</option>
-              <option value="Houston, TX">Houston, TX</option>
-              <option value="Calgary, AB">Calgary, AB</option>
-              <option value="Aberdeen, UK">Aberdeen, UK</option>
-              <option value="Dubai, UAE">Dubai, UAE</option>
-              <option value="Lagos, Nigeria">Lagos, Nigeria</option>
+              <option value="Houston">Houston, TX</option>
+              <option value="Aberdeen">Aberdeen, UK</option>
+              <option value="Stavanger">Stavanger, Norway</option>
+              <option value="Dubai">Dubai, UAE</option>
+              <option value="Lagos">Lagos, Nigeria</option>
+              <option value="Rio de Janeiro">Rio de Janeiro, Brazil</option>
+              <option value="Perth">Perth, Australia</option>
+              <option value="Calgary">Calgary, Canada</option>
+              <option value="Luanda">Luanda, Angola</option>
+              <option value="Doha">Doha, Qatar</option>
             </select>
 
             <select
@@ -362,10 +427,10 @@ const WorkforceJobs = () => {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Job Types</option>
-              <option value="full_time">Full Time</option>
-              <option value="part_time">Part Time</option>
-              <option value="contract">Contract</option>
-              <option value="remote">Remote</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Contract">Contract</option>
+              <option value="Temporary">Temporary</option>
             </select>
 
             <select
@@ -374,10 +439,10 @@ const WorkforceJobs = () => {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Experience</option>
-              <option value="entry">Entry Level</option>
-              <option value="mid">Mid Level</option>
-              <option value="senior">Senior Level</option>
-              <option value="executive">Executive</option>
+              <option value="Entry Level">Entry Level</option>
+              <option value="Mid Level">Mid Level</option>
+              <option value="Senior Level">Senior Level</option>
+              <option value="Executive">Executive</option>
             </select>
 
             <select
@@ -388,8 +453,8 @@ const WorkforceJobs = () => {
               <option value="all">All Salaries</option>
               <option value="50000-80000">$50K - $80K</option>
               <option value="80000-120000">$80K - $120K</option>
-              <option value="120000-180000">$120K - $180K</option>
-              <option value="180000-plus">$180K+</option>
+              <option value="120000-150000">$120K - $150K</option>
+              <option value="150000-plus">$150K+</option>
             </select>
 
             <select
@@ -405,12 +470,22 @@ const WorkforceJobs = () => {
           </div>
         </div>
 
+        {/* Filter Results Count */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-sm text-gray-600">
+            Showing {filteredJobs.length} of {jobs.length} jobs
+          </div>
+          <div className="text-sm text-gray-500">
+            Updated {new Date().toLocaleDateString()}
+          </div>
+        </div>
+
         {/* Jobs Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
-        ) : jobs.length === 0 ? (
+        ) : filteredJobs.length === 0 ? (
           <div className="text-center py-12">
             <Briefcase className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs found</h3>
@@ -429,7 +504,7 @@ const WorkforceJobs = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
           </div>

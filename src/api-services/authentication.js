@@ -1,4 +1,4 @@
-import { makeApiRequest, REGISTER_EMAIL_KEY } from "../lib/helpers";
+import { makeApiRequest, REGISTER_EMAIL_KEY } from "../lib/helpers/index";
 import { setSession } from "../lib/session";
 
 export const authenticationService = async ({

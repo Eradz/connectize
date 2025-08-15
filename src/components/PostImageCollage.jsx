@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { baseURL } from "../lib/helpers";
+import { baseURL } from "../lib/helpers/index";
 import ReusableModal from "./custom/ResusableModal";
 import { NAVIGATION_BUTTONS } from "../lib/slide_button";
 import { Button } from "@chakra-ui/react";

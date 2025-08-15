@@ -1,4 +1,4 @@
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 
 // Enhanced Admin API Services with full CRUD operations
 

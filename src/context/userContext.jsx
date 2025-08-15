@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { getCurrentUser } from "../api-services/users";
-import { refreshToken } from "../lib/helpers";
+import { refreshToken } from "../lib/helpers/index";
 
 // Create the context
 const UserContext = createContext();

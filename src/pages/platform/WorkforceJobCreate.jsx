@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -16,17 +16,20 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
-import { workforceJobService } from '../../api-services/oilgas';
+import { workforceAPI } from '../../api-services/workforce';
+import { getCompanyByIdOrEmail } from '../../api-services/companies';
 
 const WorkforceJobCreate = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
+  const [userCompanies, setUserCompanies] = useState([]);
   
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    company_name: '',
+    company_id: '', // Changed from company_name to company_id
     location: '',
     employment_type: 'full_time',
     experience_level: 'mid_level',
@@ -86,12 +89,55 @@ const WorkforceJobCreate = () => {
 
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NOK'];
 
-  const handleInputChange = (field, value) => {
+  // Load user's companies on component mount
+  useEffect(() => {
+    loadUserCompanies();
+  }, []);
+
+  const loadUserCompanies = async () => {
+    try {
+      setLoadingCompanies(true);
+      const companies = await getCompanyByIdOrEmail();
+      setUserCompanies(companies || []);
+      
+      // Auto-select first company if available
+      if (companies && companies.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          company_id: companies[0].id
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to load user companies:', error);
+      toast.error('Failed to load your companies');
+      setUserCompanies([]);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
+
+  const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
+
+  const handleTextChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }, []);
+
+  const handleCheckboxChange = useCallback((e) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: checked
+    }));
+  }, []);
 
   const addSkill = () => {
     if (currentSkill.trim() && !formData.skills_required.includes(currentSkill.trim())) {
@@ -155,8 +201,8 @@ const WorkforceJobCreate = () => {
           toast.error('Job description is required');
           return false;
         }
-        if (!formData.company_name.trim()) {
-          toast.error('Company name is required');
+        if (!formData.company_id) {
+          toast.error('Please select a company');
           return false;
         }
         if (!formData.location.trim()) {
@@ -209,25 +255,46 @@ const WorkforceJobCreate = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return;
+    if (userCompanies.length === 0) {
+      toast.error('You need to be associated with a company to post jobs');
+      return;
+    }
+
+    if (!formData.company_id) {
+      toast.error('Please select a company');
+      return;
+    }
 
     setLoading(true);
     try {
       const jobData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        company_id: formData.company_id, // Send company ID to backend
+        job_type: formData.employment_type, // maps to backend job_type choices
+        experience_level: formData.experience_level,
+        location: formData.location,
+        is_remote: !!formData.remote_allowed,
+        requires_relocation: !!formData.travel_required,
         salary_min: formData.salary_min ? parseFloat(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseFloat(formData.salary_max) : null,
-        skills_required: formData.skills_required.join(','),
-        qualifications: formData.qualifications.join(','),
-        benefits: formData.benefits.join(',')
+        currency: formData.currency,
+        benefits: formData.benefits,
+        min_years_experience: undefined, // optional; not collected in this form
+        education_requirements: formData.qualifications,
+        certifications_required: [],
+        application_deadline: formData.application_deadline || null,
+        max_applications: undefined,
+        status: 'active'
       };
 
-      const response = await workforceJobService.create(jobData);
-      toast.success('Job posting created successfully!');
-      navigate(webRoutes.workforceJobDetail.replace(':id', response.id));
+      const response = await workforceAPI.createJob(jobData);
+      toast.success('Job posted successfully');
+      navigate(webRoutes.workforceJobDetail.replace(':id', response.data.id));
     } catch (error) {
-      console.error('Failed to create job posting:', error);
-      toast.error('Failed to create job posting. Please try again.');
+      console.error('Error creating job posting:', error);
+      const msg = error.response?.data?.message || error.response?.data?.detail || 'Failed to publish job.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -237,7 +304,7 @@ const WorkforceJobCreate = () => {
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center space-x-4">
         {[1, 2, 3, 4].map((step) => (
-          <React.Fragment key={step}>
+          <div key={step} className="flex items-center">
             <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
               step < currentStep ? 'bg-green-600 border-green-600 text-white' :
               step === currentStep ? 'border-green-600 text-green-600' :
@@ -246,11 +313,11 @@ const WorkforceJobCreate = () => {
               {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
             </div>
             {step < 4 && (
-              <div className={`w-12 h-0.5 ${
+              <div className={`w-12 h-0.5 ml-4 ${
                 step < currentStep ? 'bg-green-600' : 'bg-gray-300'
               }`} />
             )}
-          </React.Fragment>
+          </div>
         ))}
       </div>
     </div>
@@ -271,8 +338,9 @@ const WorkforceJobCreate = () => {
                   </label>
                   <input
                     type="text"
+                    name="title"
                     value={formData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    onChange={handleTextChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="e.g., Senior Drilling Engineer"
                   />
@@ -280,15 +348,38 @@ const WorkforceJobCreate = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name *
+                    Company *
                   </label>
-                  <input
-                    type="text"
-                    value={formData.company_name}
-                    onChange={(e) => handleInputChange('company_name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Your company name"
-                  />
+                  {loadingCompanies ? (
+                    <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
+                      Loading companies...
+                    </div>
+                  ) : userCompanies.length === 0 ? (
+                    <div className="w-full px-3 py-2 border border-red-300 rounded-lg bg-red-50 text-red-600">
+                      No companies found. You need to be associated with a company to post jobs.
+                    </div>
+                  ) : (
+                    <select
+                      name="company_id"
+                      value={formData.company_id}
+                      onChange={handleTextChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    >
+                      <option value="">Select Company</option>
+                      {userCompanies.map((company) => (
+                        <option key={company.id} value={company.id}>
+                          {company.company_name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {userCompanies.length === 0 && !loadingCompanies && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Contact your administrator to be added to a company.
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -298,8 +389,9 @@ const WorkforceJobCreate = () => {
                     </label>
                     <input
                       type="text"
+                      name="location"
                       value={formData.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
+                      onChange={handleTextChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="e.g., Houston, TX or Remote"
                     />
@@ -310,8 +402,9 @@ const WorkforceJobCreate = () => {
                       Employment Type
                     </label>
                     <select
+                      name="employment_type"
                       value={formData.employment_type}
-                      onChange={(e) => handleInputChange('employment_type', e.target.value)}
+                      onChange={handleTextChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     >
                       {employmentTypes.map((type) => (
@@ -326,8 +419,9 @@ const WorkforceJobCreate = () => {
                     Job Description *
                   </label>
                   <textarea
+                    name="description"
                     value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    onChange={handleTextChange}
                     rows={6}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Provide a detailed description of the role, responsibilities, and requirements..."
@@ -339,8 +433,9 @@ const WorkforceJobCreate = () => {
                     Experience Level
                   </label>
                   <select
+                    name="experience_level"
                     value={formData.experience_level}
-                    onChange={(e) => handleInputChange('experience_level', e.target.value)}
+                    onChange={handleTextChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     {experienceLevels.map((level) => (
@@ -365,8 +460,9 @@ const WorkforceJobCreate = () => {
                     Department *
                   </label>
                   <select
+                    name="department"
                     value={formData.department}
-                    onChange={(e) => handleInputChange('department', e.target.value)}
+                    onChange={handleTextChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="">Select Department</option>
@@ -462,8 +558,9 @@ const WorkforceJobCreate = () => {
                   </label>
                   <input
                     type="text"
+                    name="reports_to"
                     value={formData.reports_to}
-                    onChange={(e) => handleInputChange('reports_to', e.target.value)}
+                    onChange={handleTextChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="e.g., Operations Manager, VP of Engineering"
                   />
@@ -474,8 +571,9 @@ const WorkforceJobCreate = () => {
                     <input
                       type="checkbox"
                       id="remote_allowed"
+                      name="remote_allowed"
                       checked={formData.remote_allowed}
-                      onChange={(e) => handleInputChange('remote_allowed', e.target.checked)}
+                      onChange={handleCheckboxChange}
                       className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                     />
                     <label htmlFor="remote_allowed" className="ml-2 text-sm font-medium text-gray-700">
@@ -487,8 +585,9 @@ const WorkforceJobCreate = () => {
                     <input
                       type="checkbox"
                       id="travel_required"
+                      name="travel_required"
                       checked={formData.travel_required}
-                      onChange={(e) => handleInputChange('travel_required', e.target.checked)}
+                      onChange={handleCheckboxChange}
                       className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                     />
                     <label htmlFor="travel_required" className="ml-2 text-sm font-medium text-gray-700">
@@ -500,8 +599,9 @@ const WorkforceJobCreate = () => {
                     <input
                       type="checkbox"
                       id="security_clearance_required"
+                      name="security_clearance_required"
                       checked={formData.security_clearance_required}
-                      onChange={(e) => handleInputChange('security_clearance_required', e.target.checked)}
+                      onChange={handleCheckboxChange}
                       className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                     />
                     <label htmlFor="security_clearance_required" className="ml-2 text-sm font-medium text-gray-700">
@@ -529,8 +629,9 @@ const WorkforceJobCreate = () => {
                     <div>
                       <input
                         type="number"
+                        name="salary_min"
                         value={formData.salary_min}
-                        onChange={(e) => handleInputChange('salary_min', e.target.value)}
+                        onChange={handleTextChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         placeholder="Minimum"
                         min="0"
@@ -539,8 +640,9 @@ const WorkforceJobCreate = () => {
                     <div>
                       <input
                         type="number"
+                        name="salary_max"
                         value={formData.salary_max}
-                        onChange={(e) => handleInputChange('salary_max', e.target.value)}
+                        onChange={handleTextChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         placeholder="Maximum"
                         min="0"
@@ -548,8 +650,9 @@ const WorkforceJobCreate = () => {
                     </div>
                     <div>
                       <select
+                        name="currency"
                         value={formData.currency}
-                        onChange={(e) => handleInputChange('currency', e.target.value)}
+                        onChange={handleTextChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       >
                         {currencies.map((currency) => (
@@ -606,8 +709,9 @@ const WorkforceJobCreate = () => {
                   </label>
                   <input
                     type="date"
+                    name="application_deadline"
                     value={formData.application_deadline}
-                    onChange={(e) => handleInputChange('application_deadline', e.target.value)}
+                    onChange={handleTextChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     min={new Date().toISOString().split('T')[0]}
                   />
@@ -619,8 +723,9 @@ const WorkforceJobCreate = () => {
                   </label>
                   <input
                     type="email"
+                    name="contact_email"
                     value={formData.contact_email}
-                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                    onChange={handleTextChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="hr@company.com"
                   />
@@ -631,8 +736,9 @@ const WorkforceJobCreate = () => {
                     Application Instructions
                   </label>
                   <textarea
+                    name="application_instructions"
                     value={formData.application_instructions}
-                    onChange={(e) => handleInputChange('application_instructions', e.target.value)}
+                    onChange={handleTextChange}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Provide specific instructions for how candidates should apply..."
@@ -657,7 +763,9 @@ const WorkforceJobCreate = () => {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">Company:</span>
-                    <p className="text-gray-900">{formData.company_name}</p>
+                    <p className="text-gray-900">
+                      {userCompanies.find(c => c.id === formData.company_id)?.company_name || 'Not selected'}
+                    </p>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">Location:</span>
@@ -836,14 +944,15 @@ const WorkforceJobCreate = () => {
               {currentStep < 4 ? (
                 <button
                   onClick={nextStep}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                  disabled={userCompanies.length === 0}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={loading}
+                  disabled={loading || userCompanies.length === 0}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   {loading ? (
@@ -851,6 +960,8 @@ const WorkforceJobCreate = () => {
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       Publishing...
                     </>
+                  ) : userCompanies.length === 0 ? (
+                    'No Company Selected'
                   ) : (
                     'Publish Job'
                   )}

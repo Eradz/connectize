@@ -1,4 +1,4 @@
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 
 export const getNotificationsForUser = async () => {
   const { results: notifications } = await makeApiRequest({

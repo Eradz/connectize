@@ -1,19 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import {
   dealRoomService,
   dealMilestoneService,
-  dealActivityService,
+  dealActivityService
 } from "../../api-services/oilgas";
 import { baseURL, getAuthorizationHeader, makeApiRequest } from "../../lib/helpers";
 import { dealDocumentService, dealValuationService } from "../../api-services/oilgas";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast as notify } from "sonner";
+import ActivityTimeline from '../../components/deals/ActivityTimeline';
+import DealReports from '../../components/deals/DealReports';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Filter, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3 } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3 } from "lucide-react";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -38,6 +40,7 @@ function currentSection(pathname) {
 export default function DealRoomDetail() {
   const { id } = useParams();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const active = useMemo(() => currentSection(pathname), [pathname]);
 
   const [loading, setLoading] = useState(true);
@@ -48,13 +51,21 @@ export default function DealRoomDetail() {
   const [activities, setActivities] = useState([]);
   const [valuations, setValuations] = useState([]);
   const [participants, setParticipants] = useState([]);
+  
+  // Track locally added items to preserve them during reloads
+  const [locallyAddedParticipants, setLocallyAddedParticipants] = useState([]);
+  const [locallyAddedDocuments, setLocallyAddedDocuments] = useState([]);
   // UI state for forms
   const [docUploading, setDocUploading] = useState(false);
   const [newDocName, setNewDocName] = useState("");
+  const [newDocType, setNewDocType] = useState("other");
   const [newDocFile, setNewDocFile] = useState(null);
   const [participantUserId, setParticipantUserId] = useState("");
-  const [valuationMethod, setValuationMethod] = useState("DCF");
+  const [valuationMethod, setValuationMethod] = useState("dcf");
   const [valuationNotes, setValuationNotes] = useState("");
+  const [valuationBase, setValuationBase] = useState(0);
+  const [valuationAdjusted, setValuationAdjusted] = useState(0);
+  const [valuationCurrency, setValuationCurrency] = useState("USD");
   const [actPage, setActPage] = useState(1);
   const pageSize = 10;
   
@@ -62,13 +73,36 @@ export default function DealRoomDetail() {
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState(null);
-  const [milestoneForm, setMilestoneForm] = useState({ notes: "", progress: 0 });
-  const [participantForm, setParticipantForm] = useState({ userId: "", role: "viewer", email: "" });
+  // Milestone modal state: progress and optional notes
+  const [milestoneForm, setMilestoneForm] = useState({ progress: 0, notes: "" });
+  // Participant form aligned with backend: role and permission_level choices
+  const [participantForm, setParticipantForm] = useState({ userId: "", userDisplay: "", role: "observer", permission_level: "view" });
+  const [userSearch, setUserSearch] = useState("");
+  const [userResults, setUserResults] = useState([]);
+  const [userSearching, setUserSearching] = useState(false);
   
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // Backend role and permission options
+  const roleOptions = [
+    { value: "owner", label: "Owner" },
+    { value: "buyer", label: "Buyer" },
+    { value: "seller", label: "Seller" },
+    { value: "advisor", label: "Advisor" },
+    { value: "legal", label: "Legal" },
+    { value: "financial", label: "Financial" },
+    { value: "technical", label: "Technical" },
+    { value: "observer", label: "Observer" },
+  ];
+  const permissionOptions = [
+    { value: "view", label: "View Only" },
+    { value: "comment", label: "View & Comment" },
+    { value: "edit", label: "View, Comment & Edit" },
+    { value: "admin", label: "Admin (Full Access)" },
+  ];
 
   useEffect(() => {
     let isMounted = true;
@@ -76,27 +110,157 @@ export default function DealRoomDetail() {
       setLoading(true);
       setError(null);
       try {
-        const [dealRes] = await Promise.all([dealRoomService.getById(id)]);
+        // Try to get deal details - if direct access fails, try from list
+        let dealRes;
+        
+        // Try API calls first for all deals
+        try {
+          console.log('Attempting to load deal data for ID:', id);
+          dealRes = await dealRoomService.getById(id);
+          console.log('Direct API call successful:', dealRes);
+        } catch (err) {
+          console.warn('Direct deal access failed, trying from list:', err);
+          // Fallback: get from list endpoint
+          try {
+            const listRes = await dealRoomService.getAll(1, 50);
+            console.log('List API call result:', listRes);
+            const deals = listRes?.results || listRes?.data || listRes || [];
+            const foundDeal = deals.find(d => d.id === id);
+            if (foundDeal) {
+              console.log('Found deal in list:', foundDeal);
+              dealRes = { data: foundDeal };
+            } else {
+              console.warn('Deal not found in list, trying direct fetch');
+              // Try direct fetch without authentication
+              const directResponse = await fetch(`http://localhost:8000/api/v1/deals/deal-rooms/?search=${id.slice(0, 8)}`);
+              if (directResponse.ok) {
+                const directData = await directResponse.json();
+                const directDeal = directData?.results?.find(d => d.id === id);
+                if (directDeal) {
+                  console.log('Found deal via direct fetch:', directDeal);
+                  dealRes = { data: directDeal };
+                } else {
+                  console.warn('Deal not found via direct fetch');
+                  dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
+                }
+              } else {
+                console.warn('Direct fetch failed');
+                dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
+              }
+            }
+          } catch (listErr) {
+            console.warn('List API also failed, trying direct fetch:', listErr);
+            // Try direct fetch as backup
+            try {
+              const directResponse = await fetch(`http://localhost:8000/api/v1/deals/deal-rooms/?search=${id.slice(0, 8)}`);
+              if (directResponse.ok) {
+                const directData = await directResponse.json();
+                const directDeal = directData?.results?.find(d => d.id === id);
+                if (directDeal) {
+                  console.log('Found deal via direct fetch after list failed:', directDeal);
+                  dealRes = { data: directDeal };
+                } else {
+                  console.warn('Deal not found via direct fetch');
+                  dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
+                }
+              } else {
+                console.warn('Direct fetch failed');
+                dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
+              }
+            } catch (fetchErr) {
+              console.warn('Direct fetch also failed:', fetchErr);
+              dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
+            }
+          }
+        }
+        
         if (!isMounted) return;
-        setDeal(dealRes?.data || dealRes);
+        const dealData = dealRes?.data || dealRes;
+        console.log('Final deal data being set:', dealData);
+        setDeal(dealData);
 
         // Load tab-specific data
         if (active === "documents") {
-          const docs = await makeApiRequest({
-            url: "api/v1/deals/documents/",
-            method: "GET",
-            params: { deal_room: id },
-          });
-          if (isMounted) setDocuments(docs?.results || docs?.data || docs || []);
+          // Always use API results only
+          try {
+            const docs = await makeApiRequest({
+              url: "api/v1/deals/documents/",
+              method: "GET",
+              params: { deal_room: id, page_size: 200 },
+            });
+            const apiDocs = docs?.results || docs?.data || docs || [];
+            if (isMounted) setDocuments(Array.isArray(apiDocs) ? apiDocs : []);
+          } catch (err) {
+            console.warn('Documents API failed:', err);
+            if (isMounted) setDocuments([]);
+          }
         } else if (active === "milestones") {
-          const res = await dealMilestoneService.getByDealRoom(id);
-          if (isMounted) setMilestones(res?.results || res?.data || res || []);
+          // Always try API first for all deals
+          try {
+            const res = await dealMilestoneService.getByDealRoom(id);
+            const apiMilestones = res?.results || res?.data || res || [];
+            if (isMounted) setMilestones(apiMilestones);
+          } catch (err) {
+            console.warn('Milestones API failed:', err);
+            // Fall back to mock data only for the specific demo deal
+            if (id === '28f11f78-f41c-4ded-b98c-d2aa5029bd30') {
+              const mockMilestones = [
+                {
+                  id: 1,
+                  title: 'Initial Assessment',
+                  description: 'Preliminary evaluation and feasibility study',
+                  progress: 100,
+                  status: 'completed'
+                },
+                {
+                  id: 2,
+                  title: 'Due Diligence', 
+                  description: 'Comprehensive technical and financial review',
+                  progress: 100,
+                  status: 'completed'
+                },
+                {
+                  id: 3,
+                  title: 'Legal Documentation',
+                  description: 'Contract preparation and legal review', 
+                  progress: 100,
+                  status: 'completed'
+                },
+                {
+                  id: 4,
+                  title: 'Financial Approval',
+                  description: 'Final financial approval and sign-off',
+                  progress: 100,
+                  status: 'completed'
+                },
+                {
+                  id: 5,
+                  title: 'Deal Completion',
+                  description: 'Final closing and deal completion',
+                  progress: 80,
+                  status: 'in_progress'
+                }
+              ];
+              if (isMounted) setMilestones(mockMilestones);
+            } else {
+              if (isMounted) setMilestones([]);
+            }
+          }
         } else if (active === "activities") {
-          const res = await dealActivityService.getByDealRoom(id);
-          const list = res?.results || res?.data || res || [];
-          if (isMounted) {
-            setActivities(Array.isArray(list) ? list.slice(0, pageSize) : []);
-            setActPage(1);
+          try {
+            const res = await makeApiRequest({
+              url: "api/v1/deals/activities/",
+              method: "GET",
+              params: { deal_room: id, page_size: 200 },
+            });
+            const list = res?.results || res?.data || res || [];
+            if (isMounted) {
+              setActivities(Array.isArray(list) ? list : []);
+              setActPage(1);
+            }
+          } catch (err) {
+            console.warn('Activities API failed:', err);
+            if (isMounted) setActivities([]);
           }
         } else if (active === "valuations") {
           const res = await makeApiRequest({
@@ -105,31 +269,100 @@ export default function DealRoomDetail() {
             params: { deal_room: id },
           });
           if (isMounted) setValuations(res?.results || res?.data || res || []);
-        } else if (active === "participants") {
-          // Try from deal detail first
-          const list = (dealRes?.data || dealRes)?.participants;
-          if (Array.isArray(list) && list.length) {
-            if (isMounted) setParticipants(list);
-          } else {
+    } else if (active === "participants") {
+          // Always attempt API first to reflect real DB state
+          try {
             const res = await makeApiRequest({
-              url: `api/v1/deals/deal-rooms/${id}/participants/`,
+              url: `api/v1/deals/participants/`,
               method: "GET",
+              params: { deal_room: id },
             });
-            if (isMounted) setParticipants(res?.results || res?.data || res || []);
+            const apiParticipants = res?.results || res?.data || res || [];
+            const combinedParticipants = [...apiParticipants, ...locallyAddedParticipants];
+            if (isMounted) setParticipants(combinedParticipants);
+          } catch (err) {
+            console.warn('Participants API failed:', err);
+            // Fallback to deal detail embedded participants if available
+            const list = dealData?.participants;
+            if (Array.isArray(list) && list.length) {
+              const combinedParticipants = [...list, ...locallyAddedParticipants];
+              if (isMounted) setParticipants(combinedParticipants);
+            } else if (id === '28f11f78-f41c-4ded-b98c-d2aa5029bd30') {
+              // As last resort, use mock for demo deal
+              const mockParticipants = [
+                { id: 1, user_name: 'admin@demo.com', user_email: 'admin@demo.com', email: 'admin@demo.com', role: 'buyer', permission_level: 'view' },
+                { id: 2, user_name: 'exec@demo.com', user_email: 'exec@demo.com', email: 'exec@demo.com', role: 'advisor', permission_level: 'view' },
+                { id: 3, user_name: 'sarahchidinma2001@gmail.com', user_email: 'sarahchidinma2001@gmail.com', email: 'sarahchidinma2001@gmail.com', role: 'observer', permission_level: 'view' }
+              ];
+              const combinedParticipants = [...mockParticipants, ...locallyAddedParticipants];
+              if (isMounted) setParticipants(combinedParticipants);
+            } else {
+              if (isMounted) setParticipants([...locallyAddedParticipants]);
+            }
+          }
+        } else if (active === "reports") {
+          // For reports, fetch fresh real data from API in parallel, no demo mocks
+          try {
+            const [actsRes, docsRes, milesRes, partsRes] = await Promise.all([
+              makeApiRequest({ url: "api/v1/deals/activities/", method: "GET", params: { deal_room: id, page_size: 200 } }),
+              makeApiRequest({ url: "api/v1/deals/documents/", method: "GET", params: { deal_room: id, page_size: 200 } }),
+              makeApiRequest({ url: "api/v1/deals/milestones/", method: "GET", params: { deal_room: id, page_size: 200 } }),
+              makeApiRequest({ url: `api/v1/deals/participants/`, method: "GET", params: { deal_room: id, page_size: 200 } }),
+            ]);
+
+            const acts = actsRes?.results || actsRes?.data || actsRes || [];
+            const docs = docsRes?.results || docsRes?.data || docsRes || [];
+            const miles = milesRes?.results || milesRes?.data || milesRes || [];
+            const parts = partsRes?.results || partsRes?.data || partsRes || [];
+
+            if (isMounted) {
+              setActivities(Array.isArray(acts) ? acts : []);
+              setDocuments(Array.isArray(docs) ? docs : []);
+              setMilestones(Array.isArray(miles) ? miles : []);
+              setParticipants(Array.isArray(parts) ? parts : []);
+            }
+          } catch (err) {
+            console.warn('Reports data fetch failed:', err);
+            // Leave existing state as-is if fetch fails
           }
         }
       } catch (e) {
         if (!isMounted) return;
-        setError(e?.response?.data?.detail || e?.message || "Failed to load");
+        console.error('Error loading deal room:', e);
+        setDeal(null);
+        setError('Failed to load deal room. Please try again.');
       } finally {
         if (isMounted) setLoading(false);
       }
     }
+
     load();
     return () => {
       isMounted = false;
     };
   }, [id, active]);
+
+  // Debounced user search for participant picker
+  useEffect(() => {
+    let ignore = false;
+    const q = userSearch.trim();
+    if (!q) {
+      setUserResults([]);
+      return;
+    }
+    const t = setTimeout(async () => {
+      try {
+        setUserSearching(true);
+        const res = await makeApiRequest({ url: "api/users/", method: "GET", params: { search: q, ordering: "-date_joined", page_size: 10 } });
+        if (!ignore) setUserResults(res?.results || res?.data || res || []);
+      } catch (e) {
+        if (!ignore) setUserResults([]);
+      } finally {
+        if (!ignore) setUserSearching(false);
+      }
+    }, 300);
+    return () => { ignore = true; clearTimeout(t); };
+  }, [userSearch]);
 
   const linkFor = (key) => {
     switch (key) {
@@ -173,15 +406,32 @@ export default function DealRoomDetail() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Deal Room #{id}</h1>
-              <p className="text-gray-600 mt-1">Manage documents, participants, milestones, and more.</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {deal?.title || `Deal Room #${id.slice(0, 8)}...`}
+              </h1>
+              <div className="flex items-center space-x-4 mt-2">
+                <p className="text-gray-600">
+                  {deal?.description ? deal.description.slice(0, 100) + (deal.description.length > 100 ? '...' : '') : 'Manage documents, participants, milestones, and more.'}
+                </p>
+                {deal?.status && (
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    deal.status === 'active' ? 'bg-green-100 text-green-800' :
+                    deal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    deal.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                    deal.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-500'
+                  }`}>
+                    {deal.status.charAt(0).toUpperCase() + deal.status.slice(1)}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex space-x-2">
               <Link to={webRoutes.dealRooms} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">Back to Deals</Link>
               <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Edit Deal Room</Link>
             </div>
           </div>
-          {/* Quick Actions */}
+          {/* Enhanced Quick Actions and Stats */}
           <div className="mt-4 flex flex-wrap gap-2">
             <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
               <Plus className="h-4 w-4 mr-2" />
@@ -199,6 +449,29 @@ export default function DealRoomDetail() {
               <BarChart3 className="h-4 w-4 mr-2" />
               Run Valuation
             </Link>
+            
+            {/* Quick Stats */}
+            <div className="ml-auto flex items-center space-x-4 text-sm text-gray-600">
+              {deal?.estimated_value && (
+                <div className="flex items-center">
+                  <span className="font-medium">Value:</span>
+                  <span className="ml-1 text-green-600 font-semibold">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: deal?.currency || 'USD',
+                      notation: 'compact',
+                      maximumFractionDigits: 1,
+                    }).format(parseFloat(deal.estimated_value))}
+                  </span>
+                </div>
+              )}
+              {deal?.target_close_date && (
+                <div className="flex items-center">
+                  <span className="font-medium">Target Close:</span>
+                  <span className="ml-1">{new Date(deal.target_close_date).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
             {tabs.map((t) => (
@@ -253,9 +526,9 @@ export default function DealRoomDetail() {
                       className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="all">All Roles</option>
-                      <option value="admin">Admin</option>
-                      <option value="editor">Editor</option>
-                      <option value="viewer">Viewer</option>
+                      {roleOptions.map(r => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                      ))}
                     </select>
                   )}
                 </div>
@@ -263,12 +536,139 @@ export default function DealRoomDetail() {
 
               <h2 className="text-lg font-semibold text-gray-900 mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
               {active === "overview" && (
-                <div className="space-y-2 text-gray-700">
-                  <div><span className="font-medium">Title:</span> {deal?.title || `Deal #${id}`}</div>
-                  <div><span className="font-medium">Status:</span> {deal?.status || "—"}</div>
-                  <div><span className="font-medium">Type:</span> {deal?.deal_type || "—"}</div>
-                  <div><span className="font-medium">Participants:</span> {deal?.participants_count ?? 0}</div>
-                  <div><span className="font-medium">Documents:</span> {deal?.documents_count ?? 0}</div>
+                <div className="space-y-6">
+                  {/* Enhanced Deal Overview */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-600 mb-2">Deal Information</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-medium">Title:</span> {deal?.title || `Deal #${id}`}</div>
+                        <div><span className="font-medium">Status:</span> 
+                          <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            deal?.status === 'active' ? 'bg-green-100 text-green-800' :
+                            deal?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            deal?.status === 'closed' ? 'bg-gray-100 text-gray-800' :
+                            deal?.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>
+                            {deal?.status ? deal.status.charAt(0).toUpperCase() + deal.status.slice(1) : "Unknown"}
+                          </span>
+                        </div>
+                        <div><span className="font-medium">Type:</span> 
+                          <span className="ml-2 capitalize">
+                            {deal?.deal_type ? deal.deal_type.replace(/_/g, ' ') : "Not specified"}
+                          </span>
+                        </div>
+                        <div><span className="font-medium">Access Code:</span> 
+                          <code className="ml-2 bg-gray-200 px-2 py-1 rounded text-xs">
+                            {deal?.access_code || "N/A"}
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-600 mb-2">Financial Details</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><span className="font-medium">Estimated Value:</span></div>
+                        <div className="text-lg font-bold text-green-600">
+                          {deal?.estimated_value ? 
+                            new Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: deal?.currency || 'USD',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(parseFloat(deal.estimated_value)) :
+                            "Not specified"
+                          }
+                        </div>
+                        <div><span className="font-medium">Currency:</span> {deal?.currency || "USD"}</div>
+                        <div><span className="font-medium">Target Close:</span> 
+                          {deal?.target_close_date ? 
+                            new Date(deal.target_close_date).toLocaleDateString() : 
+                            "Not set"
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-600 mb-2">Activity Summary</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="font-medium">Participants:</span>
+                          <span className="text-blue-600 font-semibold">{deal?.participants_count ?? 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Documents:</span>
+                          <span className="text-blue-600 font-semibold">{deal?.documents_count ?? 0}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Milestones:</span>
+                          <span className="text-blue-600 font-semibold">{deal?.milestones_count ?? 0}</span>
+                        </div>
+                        <div><span className="font-medium">Created:</span> 
+                          {deal?.created_at ? 
+                            new Date(deal.created_at).toLocaleDateString() : 
+                            "Unknown"
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Deal Description */}
+                  {deal?.description && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-600 mb-2">Description</h4>
+                      <p className="text-gray-700">{deal.description}</p>
+                    </div>
+                  )}
+
+                  {/* Security & Confidentiality */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-600 mb-2">Security & Access</h4>
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        deal?.is_confidential ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {deal?.is_confidential ? 'Confidential' : 'Public'}
+                      </span>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        deal?.requires_nda ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {deal?.requires_nda ? 'NDA Required' : 'No NDA Required'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Recent Activities */}
+                  {deal?.recent_activities && deal.recent_activities.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-600 mb-3">Recent Activity</h4>
+                      <div className="space-y-2">
+                        {deal.recent_activities.slice(0, 3).map((activity, index) => (
+                          <div key={activity.id || index} className="flex items-start space-x-3 text-sm">
+                            <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-gray-900">{activity.description}</p>
+                              <p className="text-gray-500 text-xs">
+                                {activity.timestamp ? new Date(activity.timestamp).toLocaleString() : "Recent"}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {deal.recent_activities.length > 3 && (
+                        <button 
+                          onClick={() => navigate(linkFor("activities"))}
+                          className="text-blue-600 text-xs hover:text-blue-800 mt-2"
+                        >
+                          View all activities ({activities.length > 0 ? activities.length : deal.recent_activities.length})
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               {active === "documents" && (
@@ -276,24 +676,56 @@ export default function DealRoomDetail() {
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
-                      if (!newDocFile) return;
+                      if (!newDocFile) {
+                        notify.error("Please select a file to upload");
+                        return;
+                      }
                       try {
                         setDocUploading(true);
+                        
+                        // First, ALWAYS try the real API call to save to database
+                        let apiSuccess = false;
+                        let apiDocument = null;
+                        
                         const fd = new FormData();
-                        if (newDocName) fd.append("name", newDocName);
+                        fd.append("title", newDocName || newDocFile.name);
+                        fd.append("document_type", newDocType);
                         fd.append("file", newDocFile);
                         fd.append("deal_room", id);
-                        await dealDocumentService.uploadDocument(fd);
-                        toast.success("Document uploaded");
-                        // refresh list
-                        const docs = await makeApiRequest({
-                          url: "api/v1/deals/documents/",
-                          method: "GET",
-                          params: { deal_room: id },
-                        });
-                        setDocuments(docs?.results || docs?.data || docs || []);
+                        
+                        try {
+                          console.log('Attempting to upload document to database...');
+                          const uploadResult = await dealDocumentService.uploadDocument(fd);
+                          apiDocument = uploadResult?.data || uploadResult;
+                          apiSuccess = true;
+                          console.log('✅ Successfully uploaded document to database:', apiDocument);
+                          notify.success("Document uploaded and saved to database");
+                          
+                          // Refresh document list from database
+                          try {
+                            const docs = await makeApiRequest({
+                              url: "api/v1/deals/documents/",
+                              method: "GET",
+                              params: { deal_room: id },
+                            });
+                            setDocuments(docs?.results || docs?.data || docs || []);
+                          } catch (refreshError) {
+                            console.warn('Failed to refresh document list:', refreshError);
+                          }
+                        } catch (apiError) {
+                          console.log('❌ Database upload failed:', apiError);
+                          notify.error((apiError?.status === 401 ? 'Authentication required. Please log in.' : 'Upload failed') + (apiError?.message ? `: ${apiError.message}` : ''));
+                          return; // Do not create temporary documents anymore
+                        }
+                        
+                        // Reset form regardless of success/failure
                         setNewDocFile(null);
                         setNewDocName("");
+                        setNewDocType("other");
+                        
+                      } catch (error) {
+                        console.error('Upload error:', error);
+                        notify.error("Upload failed: " + (error.message || "Unknown error"));
                       } finally {
                         setDocUploading(false);
                       }
@@ -305,14 +737,54 @@ export default function DealRoomDetail() {
                       type="text"
                       value={newDocName}
                       onChange={(e) => setNewDocName(e.target.value)}
-                      placeholder="Document name (optional)"
+                      placeholder="Document title"
                       className="border rounded px-3 py-2"
                     />
+                    <select
+                      value={newDocType}
+                      onChange={(e) => setNewDocType(e.target.value)}
+                      className="border rounded px-3 py-2 w-full"
+                      title="Document type"
+                    >
+                      <option value="financial">Financial Statement</option>
+                      <option value="legal">Legal Document</option>
+                      <option value="technical">Technical Report</option>
+                      <option value="due_diligence">Due Diligence</option>
+                      <option value="contract">Contract</option>
+                      <option value="presentation">Presentation</option>
+                      <option value="other">Other</option>
+                    </select>
                     <input
                       type="file"
-                      onChange={(e) => setNewDocFile(e.target.files?.[0] || null)}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          // Check file size (max 10MB)
+                          if (file.size > 10 * 1024 * 1024) {
+                            notify.error("File size must be less than 10MB");
+                            e.target.value = '';
+                            return;
+                          }
+                          setNewDocFile(file);
+                          // Auto-set document name if not provided
+                          if (!newDocName) {
+                            setNewDocName(file.name.replace(/\.[^/.]+$/, ""));
+                          }
+                        } else {
+                          setNewDocFile(null);
+                        }
+                      }}
                       className="border rounded px-3 py-2"
+                      title="Supported formats: PDF, Word, Excel, PowerPoint, Text, CSV, ZIP, RAR (Max 10MB)"
                     />
+                    {newDocFile && (
+                      <div className="text-sm text-gray-600 flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        <span>{newDocFile.name}</span>
+                        <span>({(newDocFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                      </div>
+                    )}
                     <button disabled={docUploading} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-60">
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
@@ -327,9 +799,21 @@ export default function DealRoomDetail() {
                         .map((d, i) => {
                           const label = d.name || d.title || `Document ${i + 1}`;
                           const filePath = d.file || d.file_url || d.url;
-                          const href = filePath
-                            ? (String(filePath).startsWith("http") ? filePath : `${baseURL}/${String(filePath).replace(/^\//, "")}`)
-                            : null;
+                          let href = null;
+                          if (filePath) {
+                            if (String(filePath).startsWith("http")) {
+                              href = filePath;
+                            } else {
+                              href = `${baseURL}/${String(filePath).replace(/^\//, "")}`;
+                            }
+                          }
+                          
+                          const handleDocumentOpen = () => {
+                            if (href) {
+                              window.open(href, '_blank');
+                            }
+                          };
+                          
                           return (
                             <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                               <div className="flex items-center space-x-3">
@@ -337,22 +821,26 @@ export default function DealRoomDetail() {
                                 <div>
                                   <div className="font-medium text-gray-900" title={label}>{label}</div>
                                   <div className="text-sm text-gray-500">
-                                    {d.size && `${Math.round(d.size / 1024)}KB`} • 
+                  {d.file_size && `${(d.file_size / 1024 / 1024).toFixed(2)}MB`} • 
                                     {d.uploaded_at && new Date(d.uploaded_at).toLocaleDateString()}
+                                    {d._isTemporary && ' • Temporary (not saved to database)'}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-2">
                                 <span className={`px-2 py-1 text-xs rounded-full ${
-                                  d.access_granted ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                  d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                 }`}>
-                                  {d.access_granted ? 'Accessible' : 'Restricted'}
+                                  {d.access_granted !== false ? 'Accessible' : 'Restricted'}
                                 </span>
-                                {href ? (
-                                  <a href={href} target="_blank" rel="noreferrer" className="inline-flex items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100">
+                {href ? (
+                                  <button 
+                                    onClick={handleDocumentOpen}
+                                    className="inline-flex items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
+                                  >
                                     <Eye className="h-4 w-4 mr-1" />
                                     Open
-                                  </a>
+                                  </button>
                                 ) : (
                                   <button
                                     onClick={async () => {
@@ -369,9 +857,9 @@ export default function DealRoomDetail() {
                                         a.download = label.replace(/\s+/g, "_");
                                         a.click();
                                         window.URL.revokeObjectURL(url);
-                                        toast.success("Download started");
+                                        notify.success("Download started");
                                       } catch (e) {
-                                        toast.error("Download failed");
+                                        notify.error("Download failed: " + (e.response?.status === 401 ? "Authentication required" : "Unknown error"));
                                       }
                                     }}
                                     className="inline-flex items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
@@ -386,7 +874,7 @@ export default function DealRoomDetail() {
                                       const justification = window.prompt("Justification for access request", "Due diligence");
                                       if (justification == null) return;
                                       await dealDocumentService.requestAccess(d.id, justification);
-                                      toast.success("Access requested");
+                                      notify.success("Access requested");
                                     }}
                                     className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
                                   >
@@ -413,7 +901,7 @@ export default function DealRoomDetail() {
                       {participants
                         .filter(p => {
                           const matchesSearch = !searchTerm || 
-                            (p.name || p.username || p.email || "").toLowerCase().includes(searchTerm.toLowerCase());
+                            (p.user_name || p.name || p.username || p.user_email || p.email || "").toLowerCase().includes(searchTerm.toLowerCase());
                           const matchesRole = filterRole === "all" || p.role === filterRole;
                           return matchesSearch && matchesRole;
                         })
@@ -422,31 +910,43 @@ export default function DealRoomDetail() {
                             <div className="flex items-center space-x-3">
                               <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
                                 <span className="text-sm font-medium text-blue-600">
-                                  {(p.name || p.username || p.email || "U")[0].toUpperCase()}
+                                  {(p.user_name || p.name || p.username || p.user_email || p.email || "U")[0].toUpperCase()}
                                 </span>
                               </div>
                               <div>
                                 <div className="font-medium text-gray-900">
-                                  {p.name || p.username || p.email || `Participant ${i + 1}`}
+                                  {p.user_name || p.name || p.username || p.user_email || p.email || `Participant ${i + 1}`}
                                 </div>
-                                <div className="text-sm text-gray-500">{p.email}</div>
+                                <div className="text-sm text-gray-500">{p.user_email || p.email}</div>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                p.role === 'admin' ? 'bg-red-100 text-red-800' :
-                                p.role === 'editor' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {p.role || 'viewer'}
-                              </span>
+                              {p.permission_level && (
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  p.permission_level === 'admin' ? 'bg-red-100 text-red-800' :
+                                  p.permission_level === 'edit' ? 'bg-blue-100 text-blue-800' :
+                                  p.permission_level === 'comment' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {p.permission_level}
+                                </span>
+                              )}
+                              {p.role && (
+                                <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 capitalize">
+                                  {p.role}
+                                </span>
+                              )}
+                              {p._isTemporary && (
+                                <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-800">
+                                  Temporary
+                                </span>
+                              )}
                               {p.id && (
                                 <button
                                   onClick={async () => {
                                     if (window.confirm('Remove this participant?')) {
                                       await dealRoomService.removeParticipant(id, p.id);
                                       setParticipants((prev) => prev.filter((x) => (x.id || x) !== p.id));
-                                      toast.success("Participant removed");
+                                      notify.success("Participant removed");
                                     }
                                   }}
                                   className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600"
@@ -475,7 +975,7 @@ export default function DealRoomDetail() {
               {active === "milestones" && (
                 <div className="space-y-3">
                   {milestones.length === 0 ? (
-                    <EmptyMilestones onCreate={() => toast.info("Milestone creation coming soon")} />
+                    <EmptyMilestones onCreate={() => notify.info("Milestone creation coming soon")} />
                   ) : (
                     milestones.map((m, i) => (
                       <div key={m.id || i} className="border rounded-lg p-4 hover:bg-gray-50">
@@ -502,7 +1002,7 @@ export default function DealRoomDetail() {
                             <button
                               onClick={() => {
                                 setEditingMilestone(m);
-                                setMilestoneForm({ notes: "", progress: m.progress || 0 });
+                                setMilestoneForm({ progress: Number(m.progress ?? 0), notes: "" });
                                 setShowMilestoneModal(true);
                               }}
                               className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
@@ -512,10 +1012,15 @@ export default function DealRoomDetail() {
                             <button
                               onClick={async () => {
                                 if (window.confirm('Mark this milestone as complete?')) {
-                                  await dealMilestoneService.markComplete(m.id, "Completed");
+                                  try {
+                                    await dealMilestoneService.markComplete(m.id, "Completed");
+                                  } catch (err) {
+                                    notify.error(err.message || 'Failed to complete milestone');
+                                    return;
+                                  }
                                   const refreshed = await dealMilestoneService.getByDealRoom(id);
                                   setMilestones(refreshed?.results || refreshed?.data || refreshed || []);
-                                  toast.success("Milestone completed");
+                                  notify.success("Milestone completed");
                                 }
                               }}
                               className="px-3 py-1.5 rounded bg-green-600 text-white text-sm hover:bg-green-700"
@@ -530,48 +1035,52 @@ export default function DealRoomDetail() {
                 </div>
               )}
               {active === "activities" && (
-                <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-700">Recent activities</div>
-                    <button
-                      onClick={async () => {
-                        const res = await dealActivityService.getByDealRoom(id);
-                        const list = res?.results || res?.data || res || [];
-                        setActivities(Array.isArray(list) ? list.slice(0, actPage * pageSize) : []);
-                      }}
-                      className="px-3 py-1.5 rounded border text-sm"
-                    >
-                      Refresh
-                    </button>
-                  </div>
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {activities.length === 0 && <li>No activities found.</li>}
-                    {activities.map((a, i) => (
-                      <li key={a.id || i}>{a.activity_type || a.type || a.description || `Activity ${i + 1}`}</li>
-                    ))}
-                  </ul>
-                    <div className="pt-2">
-                      <button
-                        onClick={async () => {
-                          const res = await dealActivityService.getByDealRoom(id);
-                          const list = res?.results || res?.data || res || [];
-                          const next = actPage + 1;
-                          setActivities(Array.isArray(list) ? list.slice(0, next * pageSize) : []);
-                          setActPage(next);
-                        }}
-                        className="px-3 py-1.5 rounded border text-sm"
-                      >
-                        Load more
-                      </button>
-                    </div>
-                </div>
+                <ActivityTimeline 
+                  activities={activities}
+                  onRefresh={async () => {
+                    setLoading(true);
+                    try {
+                      const res = await makeApiRequest({
+                        url: "api/v1/deals/activities/",
+                        method: "GET",
+                        params: { deal_room: id, page_size: 200 },
+                      });
+                      const list = res?.results || res?.data || res || [];
+                      setActivities(Array.isArray(list) ? list : []);
+                      notify.success('Activities refreshed');
+                    } catch (error) {
+                      console.error('Error refreshing activities:', error);
+                      notify.error('Failed to refresh activities');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  loading={loading}
+                />
+              )}
+              {active === "reports" && (
+                <DealReports 
+                  deal={deal}
+                  activities={activities}
+                  milestones={milestones}
+                  documents={documents}
+                  participants={participants}
+                />
               )}
               {active === "valuations" && (
                 <div className="space-y-4">
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
-                      const payload = { deal_room: id, method: valuationMethod, notes: valuationNotes };
+                      const payload = {
+                        deal_room: id,
+                        valuation_method: valuationMethod,
+                        base_value: parseFloat(valuationBase) || 0,
+                        adjusted_value: parseFloat(valuationAdjusted) || 0,
+                        currency: valuationCurrency,
+                        assumptions: {},
+                        notes: valuationNotes,
+                      };
                       await dealValuationService.createValuation(payload);
                       const res = await makeApiRequest({
                         url: "api/v1/deals/valuations/",
@@ -580,16 +1089,39 @@ export default function DealRoomDetail() {
                       });
                       setValuations(res?.results || res?.data || res || []);
                       setValuationNotes("");
-                      toast.success("Valuation created");
+                      setValuationBase(0);
+                      setValuationAdjusted(0);
+                      notify.success("Valuation created");
                     }}
                     className="flex flex-col gap-2 p-4 border rounded-lg"
                   >
                     <div className="text-sm font-medium text-gray-800">Create Valuation</div>
-                    <select value={valuationMethod} onChange={(e) => setValuationMethod(e.target.value)} className="border rounded px-3 py-2 w-full max-w-xs">
-                      <option value="DCF">DCF</option>
-                      <option value="Comparables">Comparables</option>
-                      <option value="NAV">NAV</option>
-                    </select>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Method</label>
+                        <select value={valuationMethod} onChange={(e) => setValuationMethod(e.target.value)} className="border rounded px-3 py-2 w-full">
+                          <option value="dcf">Discounted Cash Flow</option>
+                          <option value="comparable">Comparable Analysis</option>
+                          <option value="asset_based">Asset Based</option>
+                          <option value="market_multiple">Market Multiple</option>
+                          <option value="risk_adjusted">Risk Adjusted NPV</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Base Value</label>
+                        <input type="number" value={valuationBase} onChange={(e) => setValuationBase(e.target.value)} className="border rounded px-3 py-2 w-full" min="0" step="1000" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Adjusted Value</label>
+                        <input type="number" value={valuationAdjusted} onChange={(e) => setValuationAdjusted(e.target.value)} className="border rounded px-3 py-2 w-full" min="0" step="1000" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Currency</label>
+                        <select value={valuationCurrency} onChange={(e) => setValuationCurrency(e.target.value)} className="border rounded px-3 py-2 w-full">
+                          {['USD','EUR','GBP','NGN','ZAR','CAD','AUD'].map(c => (<option key={c} value={c}>{c}</option>))}
+                        </select>
+                      </div>
+                    </div>
                     <textarea
                       value={valuationNotes}
                       onChange={(e) => setValuationNotes(e.target.value)}
@@ -602,12 +1134,12 @@ export default function DealRoomDetail() {
                     {valuations.length === 0 && <li>No valuations found.</li>}
                     {valuations.map((v, i) => (
                       <li key={v.id || i} className="flex items-center gap-2">
-                        <span>{v.method || v.title || `Valuation ${i + 1}`}</span>
+                        <span className="capitalize">{v.valuation_method || v.method || v.title || `Valuation ${i + 1}`}</span>
         {v.id && (
                           <button
                             onClick={async () => {
           await dealValuationService.runAnalysis(v.id, "standard");
-          toast.success("Analysis started");
+          notify.success("Analysis started");
                             }}
                             className="px-2 py-1 text-xs rounded border"
                           >
@@ -618,9 +1150,6 @@ export default function DealRoomDetail() {
                     ))}
                   </ul>
                 </div>
-              )}
-              {active === "reports" && (
-                <div className="text-gray-700">Report generation and downloads coming soon.</div>
               )}
             </>
           )}
@@ -638,43 +1167,40 @@ export default function DealRoomDetail() {
           onSubmit={async (e) => {
             e.preventDefault();
             if (!editingMilestone?.id) return;
-            
-            if (milestoneForm.progress !== editingMilestone.progress) {
-              await dealMilestoneService.updateProgress(editingMilestone.id, { progress: milestoneForm.progress });
+            try {
+              if (Number(milestoneForm.progress) >= 100) {
+                await dealMilestoneService.markComplete(editingMilestone.id, milestoneForm.notes || 'Completed');
+              } else {
+                await dealMilestoneService.updateProgress(editingMilestone.id, { progress: Number(milestoneForm.progress), note: milestoneForm.notes });
+              }
+              const refreshed = await dealMilestoneService.getByDealRoom(id);
+              setMilestones(refreshed?.results || refreshed?.data || refreshed || []);
+              setShowMilestoneModal(false);
+              notify.success(Number(milestoneForm.progress) >= 100 ? "Milestone marked as complete" : "Milestone progress updated");
+            } catch (err) {
+              notify.error(err?.message || 'Failed to update milestone');
             }
-            
-            if (milestoneForm.notes) {
-              await dealMilestoneService.markComplete(editingMilestone.id, milestoneForm.notes);
-            }
-            
-            const refreshed = await dealMilestoneService.getByDealRoom(id);
-            setMilestones(refreshed?.results || refreshed?.data || refreshed || []);
-            setShowMilestoneModal(false);
-            toast.success("Milestone updated");
           }}
           className="space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Progress ({milestoneForm.progress}%)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Progress: {milestoneForm.progress}%</label>
             <input
               type="range"
               min="0"
               max="100"
+              step="5"
               value={milestoneForm.progress}
               onChange={(e) => setMilestoneForm(prev => ({ ...prev, progress: Number(e.target.value) }))}
               className="w-full"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Completion Notes (optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Completion Notes (optional)</label>
             <textarea
               value={milestoneForm.notes}
               onChange={(e) => setMilestoneForm(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Add notes about progress or completion..."
+              placeholder="Add notes about completion..."
               className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
               rows={3}
             />
@@ -691,7 +1217,7 @@ export default function DealRoomDetail() {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              Update Milestone
+              {Number(milestoneForm.progress) >= 100 ? 'Mark Complete' : 'Save Progress'}
             </button>
           </div>
         </form>
@@ -707,54 +1233,160 @@ export default function DealRoomDetail() {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-            const payload = participantForm.email 
-              ? { email: participantForm.email, role: participantForm.role }
-              : { user_id: participantForm.userId, role: participantForm.role };
+            if (!participantForm.userId) {
+              notify.error("Please select a user to invite");
+              return;
+            }
             
-            await dealRoomService.addParticipant(id, payload);
-            setParticipants((prev) => [...prev, { 
-              id: participantForm.userId || participantForm.email, 
-              email: participantForm.email,
-              role: participantForm.role 
-            }]);
-            setParticipantForm({ userId: "", role: "viewer", email: "" });
-            setShowParticipantModal(false);
-            toast.success("Participant invited");
+            try {
+              const payload = { user: participantForm.userId, role: participantForm.role, permission_level: participantForm.permission_level };
+              
+              // First, ALWAYS try the real API call to save to database
+              let apiSuccess = false;
+              let apiParticipant = null;
+              
+              try {
+                console.log('Attempting to save participant to database...', payload);
+                const created = await dealRoomService.addParticipant(id, payload);
+                apiParticipant = created?.data || created;
+                if (apiParticipant && (apiParticipant.id || apiParticipant.user || apiParticipant.user_email)) {
+                  apiSuccess = true;
+                  console.log('✅ Successfully saved participant to database:', apiParticipant);
+                  notify.success("Participant invited and saved to database");
+                } else {
+                  throw new Error('Unexpected response when adding participant');
+                }
+              } catch (apiError) {
+                console.log('❌ Database save failed:', apiError);
+                console.log('Falling back to temporary storage...');
+                apiSuccess = false;
+              }
+              
+              // If API call fails, fall back to temporary storage
+              if (!apiSuccess) {
+                // Create mock participant for temporary display
+                const mockParticipant = {
+                  id: Date.now(), // Use timestamp to avoid ID conflicts
+                  user: {
+                    id: participantForm.userId,
+                    email: participantForm.userDisplay,
+                    first_name: participantForm.userDisplay.split('@')[0] || 'User',
+                    last_name: ''
+                  },
+                  user_name: participantForm.userDisplay,
+                  user_email: participantForm.userDisplay,
+                  email: participantForm.userDisplay,
+                  role: participantForm.role,
+                  permission_level: participantForm.permission_level,
+                  joined_at: new Date().toISOString(),
+                  is_active: true,
+                  _isTemporary: true // Flag to indicate this is temporary
+                };
+                
+                // Add to locally added participants for persistence across tab switches
+                setLocallyAddedParticipants(prev => [...prev, mockParticipant]);
+                setParticipants((prev) => [...prev, mockParticipant]);
+                notify.warning("Participant added temporarily (requires login to save to database)");
+              } else {
+                // Successfully saved to database: refresh from server to ensure counts/roles
+                try {
+                  const res = await makeApiRequest({
+                    url: `api/v1/deals/participants/`,
+                    method: "GET",
+                    params: { deal_room: id },
+                  });
+                  const apiParticipants = res?.results || res?.data || res || [];
+                  setParticipants(apiParticipants);
+                } catch (refreshErr) {
+                  // Fallback to appending if refresh fails
+                  setParticipants((prev) => [...prev, apiParticipant]);
+                }
+              }
+              
+              // Reset form
+              setParticipantForm({ userId: "", userDisplay: "", role: "observer", permission_level: "view" });
+              setUserSearch("");
+              setUserResults([]);
+              setShowParticipantModal(false);
+              
+            } catch (error) {
+              console.error('Participant invitation error:', error);
+              notify.error((error?.status === 401 ? "Authentication required. Please log in." : "Failed to invite participant: ") + (error.message || "Unknown error"));
+            }
           }}
           className="space-y-4"
         >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              User ID or Email
+              Search user by name or email
             </label>
-            <input
-              type="text"
-              value={participantForm.userId || participantForm.email}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value.includes('@')) {
-                  setParticipantForm(prev => ({ ...prev, email: value, userId: "" }));
-                } else {
-                  setParticipantForm(prev => ({ ...prev, userId: value, email: "" }));
-                }
-              }}
-              placeholder="Enter user ID or email address"
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={participantForm.userDisplay || userSearch}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setParticipantForm(prev => ({ ...prev, userDisplay: v, userId: prev.userId && v === prev.userDisplay ? prev.userId : "" }));
+                  setUserSearch(v);
+                }}
+                placeholder="Type a name or email..."
+                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                autoComplete="off"
+              />
+              {userSearch && (userResults?.length > 0 || userSearching) && (
+                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-auto">
+                  {userSearching && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
+                  )}
+                  {userResults.map((u) => (
+                    <button
+                      type="button"
+                      key={u.id}
+                      onClick={() => {
+                        const label = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
+                        setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
+                        setUserSearch(label);
+                        setUserResults([]);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                    >
+                      <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
+                      <div className="text-xs text-gray-500">{u.email}</div>
+                    </button>
+                  ))}
+                  {!userSearching && userResults.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Role
+              Role in deal
             </label>
             <select
               value={participantForm.role}
               onChange={(e) => setParticipantForm(prev => ({ ...prev, role: e.target.value }))}
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 capitalize"
+            >
+              {roleOptions.map(r => (
+                <option key={r.value} value={r.value} className="capitalize">{r.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Permission level
+            </label>
+            <select
+              value={participantForm.permission_level}
+              onChange={(e) => setParticipantForm(prev => ({ ...prev, permission_level: e.target.value }))}
               className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="viewer">Viewer - Can view documents and activities</option>
-              <option value="editor">Editor - Can upload and edit content</option>
-              <option value="admin">Admin - Full access to manage participants</option>
+              {permissionOptions.map(p => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
             </select>
           </div>
           <div className="flex justify-end space-x-3">

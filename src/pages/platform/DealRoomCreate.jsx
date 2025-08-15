@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
-import { dealRoomService } from '../../api-services/oilgas';
+import { dealRoomAPI } from '../../api-services/dealRoom';
 
 const DealRoomCreate = () => {
   const navigate = useNavigate();
@@ -60,12 +60,12 @@ const DealRoomCreate = () => {
 
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NOK'];
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, []);
 
   const addTag = () => {
     if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
@@ -162,22 +162,37 @@ const DealRoomCreate = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return;
-
+    // Only allowed on step 4 via UI; keep simple
     setLoading(true);
     try {
-      const dealData = {
-        ...formData,
-        estimated_value: parseFloat(formData.estimated_value),
-        tags: formData.tags.join(',')
+      // Align payload with backend DealRoomSerializer
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        deal_type: formData.deal_type,
+        estimated_value: formData.estimated_value ? parseFloat(formData.estimated_value) : null,
+        currency: formData.currency,
+        target_close_date: formData.target_close_date || null,
+        is_confidential: !!formData.is_confidential,
+        requires_nda: !!formData.requires_nda,
+        location: formData.location || '',
+        tags: formData.tags || []
       };
 
-      const response = await dealRoomService.create(dealData);
-      toast.success('Deal room created successfully!');
-      navigate(webRoutes.dealRoomDetail.replace(':id', response.id));
+      const response = await dealRoomAPI.createDealRoom(payload);
+
+      // Inform about participants since backend expects user IDs, not emails
+      if (formData.participants?.length) {
+        toast.info('Deal room created. Add participants by user from the Participants tab.');
+      } else {
+        toast.success('Deal room created successfully');
+      }
+
+      navigate(webRoutes.dealRoomDetail.replace(':id', response.data.id));
     } catch (error) {
-      console.error('Failed to create deal room:', error);
-      toast.error('Failed to create deal room. Please try again.');
+      console.error('Error creating deal room:', error);
+      const msg = error.response?.data?.message || error.response?.data?.detail || 'Failed to create deal room.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

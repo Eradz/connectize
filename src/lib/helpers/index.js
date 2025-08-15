@@ -130,14 +130,18 @@ export async function makeApiRequest({
       return;
     }
 
+    // Build headers, omitting Content-Type for FormData so axios sets boundary
+    const headers = { ...(authorization || {}) };
+    const isFormData = (typeof FormData !== 'undefined') && data instanceof FormData;
+    if (!isFormData && contentType) {
+      headers["Content-Type"] = contentType;
+    }
+
     const response = await axios({
       url: `${baseURL}/${url}`,
       method,
       data,
-      headers: {
-        ...(authorization || {}),
-        "Content-Type": contentType,
-      },
+      headers,
       params,
       onUploadProgress,
     });
@@ -232,8 +236,10 @@ export async function makeApiRequest({
 }
 
 function extractErrorMessage(errorResponse) {
-  const apiErrorResponse = errorResponse?.errors?.[0];
-  return (
+  if (!errorResponse) return null;
+  const apiErrorResponse = errorResponse?.errors?.[0] ?? errorResponse;
+
+  const direct = (
     apiErrorResponse?.message ||
     apiErrorResponse?.__all__?.[0] ||
     apiErrorResponse?.username?.[0] ||
@@ -241,9 +247,22 @@ function extractErrorMessage(errorResponse) {
     apiErrorResponse?.password2?.[0] ||
     apiErrorResponse?.gender?.[0] ||
     apiErrorResponse?.non_field_errors?.[0] ||
-    errorResponse?.company_name?.[0] ||
+    apiErrorResponse?.company_name?.[0] ||
+    apiErrorResponse?.detail ||
     errorResponse?.message ||
     errorResponse?.detail ||
     null
   );
+  if (direct) return direct;
+
+  // Fallback: pick the first field error from object responses
+  if (typeof apiErrorResponse === 'object') {
+    const keys = Object.keys(apiErrorResponse);
+    for (const k of keys) {
+      const v = apiErrorResponse[k];
+      if (Array.isArray(v) && v.length) return String(v[0]);
+      if (typeof v === 'string') return v;
+    }
+  }
+  return null;
 }

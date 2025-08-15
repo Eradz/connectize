@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsShipmentService, logisticsInventoryService } from '../../api-services/oilgas';
+import InventoryDashboardWidget from '../../components/dashboard/InventoryDashboardWidget';
 
 const LogisticsDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -48,73 +49,62 @@ const LogisticsDashboard = () => {
     try {
       setLoading(true);
       
-      // Mock data since endpoints may not exist yet
-      const mockShipments = generateMockShipments();
-      const mockInventory = generateMockInventory();
-      const mockAnalytics = generateMockAnalytics();
+      // Fetch real data from APIs
+      const [shipmentsResponse, inventoryResponse] = await Promise.all([
+        logisticsShipmentService.getAll(),
+        logisticsInventoryService.getAll()
+      ]);
+
+      // Calculate analytics from real data
+      const totalShipments = shipmentsResponse.length;
+      const deliveredShipments = shipmentsResponse.filter(s => s.status === 'delivered');
+      const onTimeDelivery = deliveredShipments.length > 0 
+        ? ((deliveredShipments.length / totalShipments) * 100).toFixed(1)
+        : 0;
+      
+      const totalValue = shipmentsResponse.reduce((sum, shipment) => sum + (parseFloat(shipment.value) || 0), 0);
+      const costSavings = totalValue * 0.15; // Estimated 15% savings
+      const activeRoutes = shipmentsResponse.filter(s => ['in_transit', 'picked_up'].includes(s.status)).length;
+      
+      const monthlyGrowth = 8.5; // This would come from analytics service
 
       setDashboardData({
         shipments: {
-          total: mockShipments.length,
-          data: mockShipments
+          total: totalShipments,
+          data: shipmentsResponse
         },
         inventory: {
-          total: mockInventory.length,
-          data: mockInventory
+          total: inventoryResponse.length,
+          data: inventoryResponse
         },
-        analytics: mockAnalytics
+        analytics: {
+          totalShipments,
+          onTimeDelivery: parseFloat(onTimeDelivery),
+          costSavings,
+          activeRoutes,
+          monthlyGrowth,
+          totalValue
+        }
       });
     } catch (error) {
       console.error('Failed to load logistics data:', error);
+      // Initialize with empty data instead of mock data
+      setDashboardData({
+        shipments: { total: 0, data: [] },
+        inventory: { total: 0, data: [] },
+        analytics: {
+          totalShipments: 0,
+          onTimeDelivery: 0,
+          costSavings: 0,
+          activeRoutes: 0,
+          monthlyGrowth: 0,
+          totalValue: 0
+        }
+      });
     } finally {
       setLoading(false);
     }
   };
-
-  const generateMockShipments = () => {
-    const statuses = ['in_transit', 'delivered', 'pending', 'delayed'];
-    const origins = ['Houston, TX', 'Aberdeen, UK', 'Singapore', 'Dubai, UAE', 'Lagos, Nigeria'];
-    const destinations = ['North Sea Platform', 'Gulf of Mexico Rig', 'Offshore Brazil', 'West Africa Field'];
-    
-    return Array.from({ length: 12 }, (_, index) => ({
-      id: `ship_${index + 1}`,
-      tracking_number: `TRK${String(index + 1).padStart(6, '0')}`,
-      status: statuses[index % statuses.length],
-      origin: origins[index % origins.length],
-      destination: destinations[index % destinations.length],
-      estimated_delivery: new Date(Date.now() + (index + 1) * 24 * 60 * 60 * 1000).toISOString(),
-      cargo_type: ['Drilling Equipment', 'Safety Supplies', 'Technical Parts', 'Fuel'][index % 4],
-      weight: (Math.random() * 50 + 10).toFixed(1),
-      value: (Math.random() * 500000 + 50000).toFixed(0),
-      created_at: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString()
-    }));
-  };
-
-  const generateMockInventory = () => {
-    const categories = ['Drilling', 'Safety', 'Maintenance', 'Production'];
-    const locations = ['Houston Warehouse', 'Aberdeen Storage', 'Singapore Hub', 'Dubai Facility'];
-    
-    return Array.from({ length: 8 }, (_, index) => ({
-      id: `inv_${index + 1}`,
-      item_name: `${categories[index % categories.length]} Equipment ${index + 1}`,
-      category: categories[index % categories.length],
-      location: locations[index % locations.length],
-      quantity: Math.floor(Math.random() * 100) + 10,
-      reserved: Math.floor(Math.random() * 20),
-      reorder_level: Math.floor(Math.random() * 15) + 5,
-      unit_cost: (Math.random() * 1000 + 100).toFixed(2),
-      last_updated: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString()
-    }));
-  };
-
-  const generateMockAnalytics = () => ({
-    totalShipments: 156,
-    onTimeDelivery: 94.2,
-    costSavings: 2450000,
-    activeRoutes: 28,
-    monthlyGrowth: 8.5,
-    totalValue: 12750000
-  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -289,7 +279,7 @@ const LogisticsDashboard = () => {
 
           <div className="p-6">
             {activeTab === 'overview' && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Recent Shipments */}
                   <div>
@@ -303,24 +293,33 @@ const LogisticsDashboard = () => {
                       </Link>
                     </div>
                     <div className="space-y-3">
-                      {dashboardData.shipments.data.slice(0, 5).map((shipment) => (
-                        <div key={shipment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-lg ${getStatusColor(shipment.status)}`}>
-                              {getStatusIcon(shipment.status)}
+                      {dashboardData.shipments.data.length > 0 ? (
+                        dashboardData.shipments.data.slice(0, 5).map((shipment) => (
+                          <div key={shipment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className={`p-2 rounded-lg ${getStatusColor(shipment.status)}`}>
+                                {getStatusIcon(shipment.status)}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">{shipment.tracking_number}</p>
+                                <p className="text-sm text-gray-600">
+                                  {shipment.origin_address || shipment.origin} → {shipment.destination_address || shipment.destination}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{shipment.tracking_number}</p>
-                              <p className="text-sm text-gray-600">{shipment.origin} → {shipment.destination}</p>
+                            <div className="text-right">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
+                                {shipment.status.replace('_', ' ')}
+                              </span>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                              {shipment.status.replace('_', ' ')}
-                            </span>
-                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-6 text-gray-500">
+                          <Truck className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                          <p>No recent shipments</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 
@@ -337,7 +336,7 @@ const LogisticsDashboard = () => {
                     </div>
                     <div className="space-y-3">
                       {dashboardData.inventory.data
-                        .filter(item => item.quantity <= item.reorder_level)
+                        .filter(item => item.current_stock <= item.reorder_point)
                         .slice(0, 5)
                         .map((item) => (
                           <div key={item.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
@@ -346,23 +345,31 @@ const LogisticsDashboard = () => {
                                 <AlertTriangle className="w-4 h-4 text-orange-600" />
                               </div>
                               <div>
-                                <p className="font-medium text-gray-900">{item.item_name}</p>
-                                <p className="text-sm text-gray-600">{item.location}</p>
+                                <p className="font-medium text-gray-900">{item.name}</p>
+                                <p className="text-sm text-gray-600">{item.location || item.warehouse}</p>
                               </div>
                             </div>
                             <div className="text-right">
                               <p className="text-sm font-medium text-orange-600">
-                                {item.quantity} remaining
+                                {item.current_stock} remaining
                               </p>
                               <p className="text-xs text-gray-500">
-                                Reorder at {item.reorder_level}
+                                Reorder at {item.reorder_point}
                               </p>
                             </div>
                           </div>
                         ))}
+                      {dashboardData.inventory.data.filter(item => item.current_stock <= item.reorder_point).length === 0 && (
+                        <div className="text-center py-4 text-gray-500">
+                          No low stock alerts
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
+
+                {/* Enhanced Inventory Dashboard Widget */}
+                <InventoryDashboardWidget className="col-span-full" />
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -422,64 +429,79 @@ const LogisticsDashboard = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Tracking #</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">ETA</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Value</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dashboardData.shipments.data.map((shipment) => (
-                        <tr key={shipment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-4 px-4">
-                            <Link 
-                              to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                              className="font-medium text-blue-600 hover:text-blue-700"
-                            >
-                              {shipment.tracking_number}
-                            </Link>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{shipment.origin}</p>
-                              <p className="text-sm text-gray-600">→ {shipment.destination}</p>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">{shipment.cargo_type}</p>
-                              <p className="text-sm text-gray-600">{shipment.weight} tons</p>
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                              {shipment.status.replace('_', ' ')}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4 text-sm text-gray-900">
-                            {new Date(shipment.estimated_delivery).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-4 font-medium text-gray-900">
-                            {formatCurrency(shipment.value)}
-                          </td>
-                          <td className="py-4 px-4">
-                            <Link
-                              to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                            >
-                              View
-                            </Link>
-                          </td>
+                  {dashboardData.shipments.data.length > 0 ? (
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">Tracking #</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">ETA</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">Value</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {dashboardData.shipments.data.map((shipment) => (
+                          <tr key={shipment.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-4 px-4">
+                              <Link 
+                                to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
+                                className="font-medium text-blue-600 hover:text-blue-700"
+                              >
+                                {shipment.tracking_number}
+                              </Link>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{shipment.origin_address || shipment.origin}</p>
+                                <p className="text-sm text-gray-600">→ {shipment.destination_address || shipment.destination}</p>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{shipment.cargo_type}</p>
+                                <p className="text-sm text-gray-600">{shipment.weight} tons</p>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
+                                {shipment.status.replace('_', ' ')}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-sm text-gray-900">
+                              {shipment.estimated_delivery ? new Date(shipment.estimated_delivery).toLocaleDateString() : 'N/A'}
+                            </td>
+                            <td className="py-4 px-4 font-medium text-gray-900">
+                              {shipment.value ? formatCurrency(shipment.value) : 'N/A'}
+                            </td>
+                            <td className="py-4 px-4">
+                              <Link
+                                to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                              >
+                                View
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Truck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Shipments</h3>
+                      <p className="text-gray-500 mb-4">You haven't created any shipments yet</p>
+                      <Link
+                        to={webRoutes.logisticsShipmentCreate}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create First Shipment
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -504,52 +526,60 @@ const LogisticsDashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {dashboardData.inventory.data.map((item) => (
-                    <div key={item.id} className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium text-gray-900">{item.item_name}</h4>
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                          {item.category}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Available:</span>
-                          <span className={`font-medium ${item.quantity <= item.reorder_level ? 'text-orange-600' : 'text-gray-900'}`}>
-                            {item.quantity - item.reserved}
+                  {dashboardData.inventory.data.length > 0 ? (
+                    dashboardData.inventory.data.map((item) => (
+                      <div key={item.id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-gray-900">{item.name}</h4>
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                            {item.category}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Reserved:</span>
-                          <span className="text-gray-900">{item.reserved}</span>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Available:</span>
+                            <span className={`font-medium ${item.current_stock <= item.reorder_point ? 'text-orange-600' : 'text-gray-900'}`}>
+                              {item.current_stock}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Min Stock:</span>
+                            <span className="text-gray-900">{item.minimum_stock}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Location:</span>
+                            <span className="text-gray-900">{item.location || item.warehouse || 'N/A'}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Unit Cost:</span>
+                            <span className="text-gray-900">${item.unit_cost}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Location:</span>
-                          <span className="text-gray-900">{item.location}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Unit Cost:</span>
-                          <span className="text-gray-900">${item.unit_cost}</span>
+
+                        {item.current_stock <= item.reorder_point && (
+                          <div className="mt-3 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-700">
+                            ⚠️ Below reorder level ({item.reorder_point})
+                          </div>
+                        )}
+
+                        <div className="mt-3 flex space-x-2">
+                          <Link
+                            to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
+                            className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                          >
+                            View Details
+                          </Link>
                         </div>
                       </div>
-
-                      {item.quantity <= item.reorder_level && (
-                        <div className="mt-3 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-700">
-                          ⚠️ Below reorder level ({item.reorder_level})
-                        </div>
-                      )}
-
-                      <div className="mt-3 flex space-x-2">
-                        <Link
-                          to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                          className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                        >
-                          View Details
-                        </Link>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-3 text-center py-8 text-gray-500">
+                      <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p>No inventory items found</p>
+                      <p className="text-sm">Add inventory items to get started</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             )}

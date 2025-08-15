@@ -19,16 +19,22 @@ export const FeatureFlagProvider = ({ children }) => {
 
   const fetchFeatureFlags = async () => {
     try {
-      // In production, this would be an API call to get user's enabled features
+      // Try same-origin relative path using cookies for auth if applicable
       const response = await fetch('/api/v1/features/enabled/', {
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Accept': 'application/json',
         },
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setFlags(data.features || {});
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (e) {
+          console.warn('Feature flags: non-JSON response');
+        }
+        setFlags((data && data.features) || {});
       } else {
         // Fallback to default flags for demo
         setFlags({

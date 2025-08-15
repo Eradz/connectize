@@ -47,9 +47,12 @@ const DealRooms = () => {
       };
       
       const response = await dealRoomService.getAll(1, 50, params);
-      setDealRooms(response.results || []);
+      // Backend returns data directly for list views, results for paginated
+      const rooms = response?.results || response?.data || response || [];
+      setDealRooms(Array.isArray(rooms) ? rooms : []);
     } catch (error) {
       console.error('Failed to load deal rooms:', error);
+      setDealRooms([]);
     } finally {
       setLoading(false);
     }
@@ -58,6 +61,10 @@ const DealRooms = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     loadDealRooms();
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   const formatCurrency = (amount) => {
@@ -287,7 +294,7 @@ const DealRooms = () => {
                   type="text"
                   placeholder="Search deal rooms..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchInputChange}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>

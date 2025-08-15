@@ -56,13 +56,27 @@ import PlatformLayout from "./pages/platform/PlatformLayout";
 import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import DealRooms from "./pages/platform/DealRooms";
 import DealRoomCreate from "./pages/platform/DealRoomCreate";
+import DealRoomEdit from "./pages/platform/DealRoomEdit";
 import WorkforceJobs from "./pages/platform/WorkforceJobs";
 import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
+import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
+import WorkforceProfessionals from "./pages/platform/WorkforceProfessionals";
+import WorkforceProfileDetail from "./pages/platform/WorkforceProfileDetail";
+import WorkforceApplications from "./pages/platform/WorkforceApplications";
+import WorkforceEvents from "./pages/platform/WorkforceEvents";
 import AIDashboard from "./pages/platform/AIDashboard";
 import DealRoomDetail from "./pages/platform/DealRoomDetail";
-import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
 import AISubpage from "./pages/platform/AISubpage";
 import LogisticsDashboard from "./pages/platform/LogisticsDashboard";
+import LogisticsInventory from "./pages/platform/LogisticsInventory";
+import LogisticsInventoryForm from "./pages/platform/LogisticsInventoryForm";
+import LogisticsInventoryDetailView from "./pages/platform/LogisticsInventoryDetailView";
+import LogisticsShipments from "./pages/platform/LogisticsShipments";
+import LogisticsShipmentCreate from "./pages/platform/LogisticsShipmentCreate";
+import LogisticsShipmentDetail from "./pages/platform/LogisticsShipmentDetail";
+import LogisticsSuppliers from "./pages/platform/LogisticsSuppliers";
+import LogisticsSupplierDetail from "./pages/platform/LogisticsSupplierDetail";
+import LogisticsTracking from "./pages/platform/LogisticsTracking";
 import TrustDashboard from "./pages/platform/TrustDashboard";
 import SpecializedToolsDashboard from "./pages/platform/SpecializedToolsDashboard";
 
@@ -81,6 +95,7 @@ function App() {
           <Route path={webRoutes.dealRooms} element={<DealRooms />} />
           <Route path={webRoutes.dealRoomCreate} element={<DealRoomCreate />} />
           <Route path={webRoutes.dealRoomDetail} element={<DealRoomDetail />} />
+          <Route path={webRoutes.dealRoomEdit} element={<DealRoomEdit />} />
           <Route path={webRoutes.dealRoomDocuments} element={<DealRoomDetail />} />
           <Route path={webRoutes.dealRoomParticipants} element={<DealRoomDetail />} />
           <Route path={webRoutes.dealRoomMilestones} element={<DealRoomDetail />} />
@@ -91,6 +106,10 @@ function App() {
           <Route path={webRoutes.workforceJobCreate} element={<WorkforceJobCreate />} />
           <Route path={webRoutes.workforceJobDetail} element={<WorkforceJobDetail />} />
           <Route path={webRoutes.workforceJobApply} element={<WorkforceJobDetail />} />
+          <Route path={webRoutes.workforceProfiles} element={<WorkforceProfessionals />} />
+          <Route path={webRoutes.workforceProfileDetail} element={<WorkforceProfileDetail />} />
+          <Route path={webRoutes.workforceApplications} element={<WorkforceApplications />} />
+          <Route path={webRoutes.workforceEvents} element={<WorkforceEvents />} />
           <Route path={webRoutes.aiDashboard} element={<AIDashboard />} />
           <Route path={webRoutes.aiMatching} element={<AISubpage />} />
           <Route path={webRoutes.aiOpportunities} element={<AISubpage />} />
@@ -98,6 +117,15 @@ function App() {
           <Route path={webRoutes.aiAnalytics} element={<AISubpage />} />
           <Route path={webRoutes.aiInsights} element={<AISubpage />} />
           <Route path={webRoutes.logisticsDashboard} element={<LogisticsDashboard />} />
+          <Route path={webRoutes.logisticsInventory} element={<LogisticsInventory />} />
+          <Route path={webRoutes.logisticsInventoryForm} element={<LogisticsInventoryForm />} />
+          <Route path={webRoutes.logisticsInventoryDetail} element={<LogisticsInventoryDetailView />} />
+          <Route path={webRoutes.logisticsShipments} element={<LogisticsShipments />} />
+          <Route path={webRoutes.logisticsShipmentCreate} element={<LogisticsShipmentCreate />} />
+          <Route path={webRoutes.logisticsShipmentDetail} element={<LogisticsShipmentDetail />} />
+          <Route path={webRoutes.logisticsSuppliers} element={<LogisticsSuppliers />} />
+          <Route path={webRoutes.logisticsSupplierDetail} element={<LogisticsSupplierDetail />} />
+          <Route path={webRoutes.logisticsTracking} element={<LogisticsTracking />} />
           <Route path={webRoutes.trustDashboard} element={<TrustDashboard />} />
           <Route path={webRoutes.toolsDashboard} element={<SpecializedToolsDashboard />} />
         </Route>

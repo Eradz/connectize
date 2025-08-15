@@ -1,4 +1,4 @@
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 
 // Admin Dashboard Statistics
 export const getAdminStats = async () => {
