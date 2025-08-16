@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import Form from "../../components/form";
 import { useFormik } from "formik";
 import { authenticationService } from "../../api-services/authentication";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import HeadingText from "../../components/HeadingText";
 import useRedirect from "../../hooks/useRedirect";
 import {

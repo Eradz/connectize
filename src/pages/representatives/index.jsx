@@ -12,7 +12,7 @@ import SEO from "../../components/SEO";
 import { usePollAllCompanies } from "../../hooks/usePolling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 import { usePageination } from "../../hooks/usePagination";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import PrimaryButton from "../../components/PrimaryButton";
 import clsx from "clsx";
 import { useGetSingleCompany } from "../../hooks";

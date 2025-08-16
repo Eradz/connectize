@@ -2,7 +2,7 @@ import { Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { bookmarkProduct, getProducts } from "../../api-services/products";
 import { useAuth } from "../../context/userContext";
 import { shareThis } from "../../lib/utils";

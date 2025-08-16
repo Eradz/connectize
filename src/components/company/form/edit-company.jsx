@@ -3,13 +3,15 @@ import { getCountries } from "@loophq/country-state-list";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { editCompanyInformation } from "../../../api-services/companies";
 import cities from "../../../lib/data/cities.json";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export default function EditCompanyForm({ company }) {
   const countries = getCountries();
@@ -76,6 +78,23 @@ export default function EditCompanyForm({ company }) {
   const stateForCountry =
     countries.find((country) => country.name === formik.values["country"])
       ?.states || [];
+
+  //     const countryName = formik.values["country"]
+  //     const stateName = formik.values['state']
+
+  // const {data: citiesFor, isLoading: isLoadingGetCitiesForState} = useQuery({
+  //   queryKey: ["cities", {countryName,stateName }],
+  //   queryFn: async () => {
+  //     try {
+  //       const res=      await axios.get(process.env.NODE_ENV=== "production" ? "" : "http://192.168.8.101:6000",{params:{countryName,stateName}})
+
+  //       return res.data || []
+  //     } catch (error) {
+  //       toast.error("Could not get list of cities for " + stateName + " " + countryName)
+  //       throw error
+  //     }
+  //   }
+  // })
 
   const citiesForState =
     cities

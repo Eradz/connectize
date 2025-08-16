@@ -10,7 +10,7 @@ import Heading from "../../components/company/Heading";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import PrimaryButton from "../../components/PrimaryButton";
 import SEO from "../../components/SEO";
 import { useAuth } from "../../context/userContext";

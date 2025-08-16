@@ -1,6 +1,6 @@
 import React from "react";
 import Logo from "../logo";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import clsx from "clsx";
 import Headroom from "react-headroom";
 import { ChevronRightIcon } from "@radix-ui/react-icons";

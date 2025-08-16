@@ -231,8 +231,8 @@ export const CustomTextArea = ({ formik, name, placeholder }) => {
               {textLength === 0
                 ? ""
                 : textLength > 1
-                ? "characters"
-                : "character"}
+                  ? "characters"
+                  : "character"}
             </div>
           </TabPanel>
           <TabPanel className="mb-4 !px-0">

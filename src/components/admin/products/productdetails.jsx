@@ -2,7 +2,7 @@ import { Avatar, Button, Divider } from "@chakra-ui/react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {

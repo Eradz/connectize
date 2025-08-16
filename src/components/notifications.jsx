@@ -10,7 +10,7 @@ import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import {
   deleteAllNotifications,
   deleteNotification,

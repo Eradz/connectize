@@ -4,7 +4,7 @@ import { CameraIcon, ImageIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { toast } from "sonner";
 import * as yup from "yup";
 import {

@@ -12,7 +12,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import {
   commentOnPost,

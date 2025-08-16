@@ -11,7 +11,7 @@ import {
   getOrCreateProductImages,
 } from "../../../api-services/products";
 import { ImageSelect, inputClassNames } from "../../form/customInput";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import clsx from "clsx";
 import axios from "axios";
 import { Close } from "@mui/icons-material";

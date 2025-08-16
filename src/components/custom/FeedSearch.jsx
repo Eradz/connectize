@@ -1,6 +1,6 @@
 import { SearchOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 import { SearchTab } from "../../pages/search";
 import ReusableModal from "./ResusableModal";

@@ -1,16 +1,24 @@
 import clsx from "clsx";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigation } from "react-router";
 import Sidebar from "../components/admin/markets/sidebar";
 import Navbar from "../components/userProfile/Navbar";
 
+function Loader() {
+  return <div className="fixed top-0 right-0 text-4xl">Loader</div>;
+}
 const AppLayout = () => {
   const { pathname } = useLocation();
+  const navigation = useNavigation();
+  const isNavigating = Boolean(navigation.location);
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/" || pathname.startsWith("/messages");
   const isMessagesRoute = pathname.startsWith("/messages");
+
   return (
     <main className="bg-background w-full  overflow-x-  h-screen flex flex-col">
       <Navbar />
+
+      {isNavigating && <Loader />}
 
       <section
         className={clsx(
