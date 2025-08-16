@@ -9,9 +9,16 @@ export const workforceAPI = {
     params: categoryId ? { category: categoryId } : {} 
   }),
   
+  // User Skills Management
+  getUserSkills: (profileId) => api.get(`${WORKFORCE_BASE_URL}/profiles/${profileId}/skills/`),
+  addUserSkill: (profileId, data) => api.post(`${WORKFORCE_BASE_URL}/profiles/${profileId}/skills/`, data),
+  updateUserSkill: (skillId, data) => api.put(`${WORKFORCE_BASE_URL}/user-skills/${skillId}/`, data),
+  deleteUserSkill: (skillId) => api.delete(`${WORKFORCE_BASE_URL}/user-skills/${skillId}/`),
+  
   // Professional Profiles
   getProfiles: (params = {}) => api.get(`${WORKFORCE_BASE_URL}/profiles/`, { params }),
   getProfile: (id) => api.get(`${WORKFORCE_BASE_URL}/profiles/${id}/`),
+  getMyProfile: () => api.get(`${WORKFORCE_BASE_URL}/profiles/my_profile/`),
   createProfile: (data) => api.post(`${WORKFORCE_BASE_URL}/profiles/`, data),
   updateProfile: (id, data) => api.put(`${WORKFORCE_BASE_URL}/profiles/${id}/`, data),
   searchProfiles: (params) => api.get(`${WORKFORCE_BASE_URL}/profiles/search/`, { params }),
@@ -38,7 +45,14 @@ export const workforceAPI = {
   getEvents: (params = {}) => api.get(`${WORKFORCE_BASE_URL}/events/`, { params }),
   getEvent: (id) => api.get(`${WORKFORCE_BASE_URL}/events/${id}/`),
   createEvent: (data) => api.post(`${WORKFORCE_BASE_URL}/events/`, data),
+  updateEvent: (id, data) => api.put(`${WORKFORCE_BASE_URL}/events/${id}/`, data),
+  deleteEvent: (id) => api.delete(`${WORKFORCE_BASE_URL}/events/${id}/`),
   registerForEvent: (id, data) => api.post(`${WORKFORCE_BASE_URL}/events/${id}/register/`, data),
+  getMyCreatedEvents: () => api.get(`${WORKFORCE_BASE_URL}/events/my_created/`),
+  getMyEventRegistrations: () => api.get(`${WORKFORCE_BASE_URL}/events/my_registrations/`),
+  getEventRegistrations: (id) => api.get(`${WORKFORCE_BASE_URL}/events/${id}/registrations/`),
+  updateEventRegistration: (eventId, registrationId, data) => api.put(`${WORKFORCE_BASE_URL}/events/${eventId}/registrations/${registrationId}/`, data),
+  cancelEventRegistration: (eventId, registrationId) => api.delete(`${WORKFORCE_BASE_URL}/events/${eventId}/registrations/${registrationId}/`),
   
   // Industry Councils
   getCouncils: () => api.get(`${WORKFORCE_BASE_URL}/councils/`),

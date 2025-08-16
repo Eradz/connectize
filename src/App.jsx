@@ -62,9 +62,15 @@ import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
 import WorkforceMyPostedJobs from "./pages/platform/WorkforceMyPostedJobs";
 import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
 import WorkforceProfessionals from "./pages/platform/WorkforceProfessionals";
+import WorkforceProfileCreate from "./pages/platform/WorkforceProfileCreate";
 import WorkforceProfileDetail from "./pages/platform/WorkforceProfileDetail";
+import WorkforceProfileEdit from "./pages/platform/WorkforceProfileEdit";
 import WorkforceApplications from "./pages/platform/WorkforceApplications";
 import WorkforceEvents from "./pages/platform/WorkforceEvents";
+import WorkforceEventDetail from "./pages/platform/WorkforceEventDetail";
+import WorkforceEventCreate from "./pages/platform/WorkforceEventCreate";
+import WorkforceMyEvents from "./pages/platform/WorkforceMyEvents";
+import WorkforceMyRegistrations from "./pages/platform/WorkforceMyRegistrations";
 import AIDashboard from "./pages/platform/AIDashboard";
 import DealRoomDetail from "./pages/platform/DealRoomDetail";
 import AISubpage from "./pages/platform/AISubpage";
@@ -83,7 +89,7 @@ import SpecializedToolsDashboard from "./pages/platform/SpecializedToolsDashboar
 
 function App() {
   return (
-    <>
+    <div>
       <SEO />
       <Routes>
         {/* Comprehensive Admin CMS System */}
@@ -109,9 +115,15 @@ function App() {
           <Route path={webRoutes.workforceJobDetail} element={<WorkforceJobDetail />} />
           <Route path={webRoutes.workforceJobApply} element={<WorkforceJobDetail />} />
           <Route path={webRoutes.workforceProfiles} element={<WorkforceProfessionals />} />
+          <Route path={webRoutes.workforceProfileCreate} element={<WorkforceProfileCreate />} />
           <Route path={webRoutes.workforceProfileDetail} element={<WorkforceProfileDetail />} />
+          <Route path={webRoutes.workforceProfileEdit} element={<WorkforceProfileEdit />} />
           <Route path={webRoutes.workforceApplications} element={<WorkforceApplications />} />
           <Route path={webRoutes.workforceEvents} element={<WorkforceEvents />} />
+          <Route path={webRoutes.workforceEventCreate} element={<WorkforceEventCreate />} />
+          <Route path={webRoutes.workforceEventDetail} element={<WorkforceEventDetail />} />
+          <Route path={webRoutes.workforceMyEvents} element={<WorkforceMyEvents />} />
+          <Route path={webRoutes.workforceMyRegistrations} element={<WorkforceMyRegistrations />} />
           <Route path={webRoutes.aiDashboard} element={<AIDashboard />} />
           <Route path={webRoutes.aiMatching} element={<AISubpage />} />
           <Route path={webRoutes.aiOpportunities} element={<AISubpage />} />
@@ -195,7 +207,7 @@ function App() {
         {/* Catch all for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </>
+    </div>
   );
 }
 

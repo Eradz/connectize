@@ -25,10 +25,23 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
+import { workforceProfileService } from '../../api-services/oilgas';
+import { toast } from 'sonner';
+import { useAuth } from '../../context/userContext';
 
 const WorkforceProfessionals = () => {
+  const { user } = useAuth(); // Get authentication state
   const [loading, setLoading] = useState(true);
   const [professionals, setProfessionals] = useState([]);
+  const [pagination, setPagination] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+    currentPage: 1,
+    totalPages: 1
+  });
+  const [userProfile, setUserProfile] = useState(null);
+  const [checkingProfile, setCheckingProfile] = useState(true);
   // derive filtered list to avoid setState on each keypress
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -52,21 +65,38 @@ const WorkforceProfessionals = () => {
     setSearchTerm(e.target.value);
   }, []);
 
+  const handleConnectWithProfessional = useCallback(async (professionalId) => {
+    try {
+      await workforceProfileService.connectWithProfile(professionalId, "I'd like to connect and discuss potential opportunities.");
+      toast.success('Connection request sent successfully!');
+    } catch (error) {
+      console.error('Failed to connect with professional:', error);
+      toast.error('Failed to send connection request. Please try again.');
+    }
+  }, []);
+
   useEffect(() => {
     loadProfessionals();
-  }, []);
+    // Only check for user profile if the user is authenticated
+    if (user) {
+      checkUserProfile();
+    } else {
+      setCheckingProfile(false);
+      setUserProfile(null);
+    }
+  }, [user]); // Add user as dependency
 
   const filteredProfessionals = useMemo(() => {
     let filtered = professionals;
 
     // Search filter
-    if (searchTerm) {
+  if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(prof => 
         (prof.user_email || '').toLowerCase().includes(term) ||
         (prof.professional_title || '').toLowerCase().includes(term) ||
         (prof.current_location || '').toLowerCase().includes(term) ||
-        (prof.user_skills || []).some(skill => (skill || '').toLowerCase().includes(term))
+    (prof.user_skills || []).filter(s => s && s.skill_name).some(s => s.skill_name.toLowerCase().includes(term))
       );
     }
 
@@ -93,36 +123,117 @@ const WorkforceProfessionals = () => {
     // Skills filter
     if (filters.skills) {
       const term = filters.skills.toLowerCase();
-      filtered = filtered.filter(prof => 
-        (prof.user_skills || []).some(skill => (skill || '').toLowerCase().includes(term))
-      );
+      filtered = filtered.filter(prof => (prof.user_skills || []).some(s => (s?.skill_name || '').toLowerCase().includes(term)));
     }
 
-    // Availability filter
+    // Availability filter (map UI labels to backend enum values)
     if (filters.availability) {
-      filtered = filtered.filter(prof => prof.availability_status === filters.availability);
+      const map = {
+        'Available': 'available',
+        'Busy': 'busy',
+        'Available Soon': 'available_soon'
+      };
+      const val = map[filters.availability] || filters.availability;
+      filtered = filtered.filter(prof => (prof.availability_status || '').toLowerCase() === val);
+    }
+
+    // Verification filter (best-effort; only applies if data has these fields)
+    if (filters.verification) {
+      const val = filters.verification.toLowerCase();
+      filtered = filtered.filter(prof => {
+        const status = (prof.verification_status || '').toLowerCase();
+        const isVerified = !!prof.is_verified;
+        if (val === 'verified') return isVerified || status === 'verified';
+        if (val === 'pending') return status === 'pending';
+        return true;
+      });
     }
 
     return filtered;
   }, [professionals, searchTerm, filters]);
 
-  const loadProfessionals = async () => {
+  const loadProfessionals = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await workforceAPI.getProfiles();
-      const data = response.data?.results || response.data || [];
-      setProfessionals(data);
-  // derived via useMemo
+      const response = await workforceAPI.getProfiles({ page, page_size: 12 });
+      const data = response.data;
+      
+      // Handle paginated response
+      if (data.results) {
+        setProfessionals(data.results);
+        setPagination({
+          count: data.count,
+          next: data.next,
+          previous: data.previous,
+          currentPage: page,
+          totalPages: Math.ceil(data.count / 12)
+        });
+      } else {
+        // Fallback for non-paginated response
+        setProfessionals(data || []);
+        setPagination({
+          count: Array.isArray(data) ? data.length : 0,
+          next: null,
+          previous: null,
+          currentPage: 1,
+          totalPages: 1
+        });
+      }
     } catch (error) {
       console.error('Failed to load professionals:', error);
       setProfessionals([]);
-  // derived via useMemo
+      setPagination({
+        count: 0,
+        next: null,
+        previous: null,
+        currentPage: 1,
+        totalPages: 1
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  const checkUserProfile = async () => {
+    try {
+      setCheckingProfile(true);
+      const response = await workforceAPI.getMyProfile();
+      setUserProfile(response.data);
+    } catch (error) {
+      // User doesn't have a profile yet or not authenticated, that's okay
+      console.log('User profile check:', error?.response?.status === 404 ? 'No profile found' : 'Not authenticated');
+      setUserProfile(null);
+    } finally {
+      setCheckingProfile(false);
+    }
+  };
+
   // removed imperative filter function; using useMemo above
+
+  const handleLoadMore = async () => {
+    if (pagination.next && !loading) {
+      try {
+        setLoading(true);
+        const nextPage = pagination.currentPage + 1;
+        const response = await workforceAPI.getProfiles({ page: nextPage, page_size: 12 });
+        const data = response.data;
+        
+        // Append new professionals to existing list
+        setProfessionals(prev => [...prev, ...(data.results || [])]);
+        setPagination({
+          count: data.count,
+          next: data.next,
+          previous: data.previous,
+          currentPage: nextPage,
+          totalPages: Math.ceil(data.count / 12)
+        });
+      } catch (error) {
+        console.error('Failed to load more professionals:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   const clearFilters = () => {
     setFilters({
@@ -173,13 +284,34 @@ const WorkforceProfessionals = () => {
               <p className="text-gray-600 mt-1">Connect with verified industry experts and contractors</p>
             </div>
             <div className="flex space-x-3">
-              <Link
-                to={webRoutes.workforceProfileCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Create Profile
-              </Link>
+              {user && !checkingProfile && (
+                userProfile ? (
+                  <Link
+                    to={webRoutes.workforceProfileDetail.replace(':id', userProfile.id)}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    My Profile
+                  </Link>
+                ) : (
+                  <Link
+                    to={webRoutes.workforceProfileCreate}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Create Profile
+                  </Link>
+                )
+              )}
+              {!user && (
+                <Link
+                  to="/login"
+                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Login to Create Profile
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -281,7 +413,7 @@ const WorkforceProfessionals = () => {
                   Clear Filters
                 </button>
                 <span className="text-sm text-gray-500 py-2">
-                  {filteredProfessionals.length} professionals found
+                  {filteredProfessionals.length} of {pagination.count} professionals shown
                 </span>
               </div>
             </div>
@@ -297,19 +429,21 @@ const WorkforceProfessionals = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_email || 'User')}&background=3b82f6&color=white`}
-                      alt={professional.user_email || 'Professional'}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
+                      alt={professional.user_name || professional.user_email || 'Professional'}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                     <div>
-                      <h3 className="font-semibold text-gray-900">{professional.user_email || 'Professional'}</h3>
+                      <h3 className="font-semibold text-gray-900">{professional.user_name || professional.user_email || 'Professional'}</h3>
                       <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end space-y-1">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 inline mr-1" />Verified
-                    </span>
+                    {(professional.is_verified || professional.verification_status === 'verified') && (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 inline mr-1" />Verified
+                      </span>
+                    )}
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       professional.availability_status === 'available' 
                         ? 'bg-green-100 text-green-800' 
@@ -330,26 +464,31 @@ const WorkforceProfessionals = () => {
                     <Briefcase className="w-4 h-4 mr-2" />
                     {professional.years_of_experience || 0} years experience
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Star className="w-4 h-4 mr-2 text-yellow-400 fill-current" />
-                    4.8 (25 reviews)
-                  </div>
+                  {professional.total_applications > 0 && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
+                      {professional.total_applications} applications • {professional.success_rate}% success rate
+                    </div>
+                  )}
                 </div>
 
                 {/* Skills */}
                 <div className="mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-2">Key Skills</p>
                   <div className="flex flex-wrap gap-1">
-                    {(professional.user_skills && professional.user_skills.length > 0) ? (
+          {(professional.user_skills && professional.user_skills.length > 0) ? (
                       <>
-                        {professional.user_skills.slice(0, 3).map((skill, index) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                            {skill}
+            {professional.user_skills
+              .filter(skill => skill && skill.skill_name) // Filter out null/undefined skills
+              .slice(0, 3)
+              .map((skill, index) => (
+                          <span key={skill.id || index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+              {skill.skill_name}
                           </span>
                         ))}
-                        {professional.user_skills.length > 3 && (
+                        {professional.user_skills.filter(skill => skill && skill.skill_name).length > 3 && (
                           <span className="text-xs text-gray-500 px-2 py-1">
-                            +{professional.user_skills.length - 3} more
+                            +{professional.user_skills.filter(skill => skill && skill.skill_name).length - 3} more
                           </span>
                         )}
                       </>
@@ -360,17 +499,18 @@ const WorkforceProfessionals = () => {
                 </div>
 
                 {/* Stats */}
+                                {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-gray-100">
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">15</p>
+                    <p className="text-sm font-semibold text-gray-900">{professional.completed_projects || 0}</p>
                     <p className="text-xs text-gray-600">Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">98%</p>
+                    <p className="text-sm font-semibold text-gray-900">{professional.success_rate || 0}%</p>
                     <p className="text-xs text-gray-600">Success</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">2h</p>
+                    <p className="text-sm font-semibold text-gray-900">{professional.average_response_hours || 24}h</p>
                     <p className="text-xs text-gray-600">Response</p>
                   </div>
                 </div>
@@ -394,7 +534,11 @@ const WorkforceProfessionals = () => {
                     <Eye className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <button className="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">
+                  <button 
+                    onClick={() => handleConnectWithProfessional(professional.id)}
+                    className="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    title="Send connection request"
+                  >
                     <MessageCircle className="w-4 h-4" />
                   </button>
                 </div>
@@ -423,10 +567,14 @@ const WorkforceProfessionals = () => {
         )}
 
         {/* Load More */}
-        {filteredProfessionals.length > 0 && (
+        {filteredProfessionals.length > 0 && pagination.next && (
           <div className="text-center mt-8">
-            <button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors">
-              Load More Professionals
+            <button 
+              onClick={handleLoadMore}
+              disabled={loading}
+              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Loading...' : `Load More Professionals (${pagination.count - filteredProfessionals.length} remaining)`}
             </button>
           </div>
         )}

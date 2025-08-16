@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { workforceJobService } from "../../api-services/oilgas";
 import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
+import { workforceAPI } from "../../api-services/workforce";
 
 export default function WorkforceJobDetail() {
   const { id } = useParams();
@@ -14,6 +15,8 @@ export default function WorkforceJobDetail() {
   const [error, setError] = useState(null);
   const [job, setJob] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [similarJobs, setSimilarJobs] = useState([]);
+  const [similarLoading, setSimilarLoading] = useState(false);
 
   // Apply form state
   const [fullName, setFullName] = useState("");
@@ -43,6 +46,45 @@ export default function WorkforceJobDetail() {
       isMounted = false;
     };
   }, [id]);
+
+  // Load similar jobs once the job is available
+  useEffect(() => {
+    if (!job) return;
+    let isMounted = true;
+    async function loadSimilar() {
+      try {
+        setSimilarLoading(true);
+        const res = await workforceAPI.getJobs({ page_size: 50 });
+        const list = res?.data?.results || res?.data || [];
+        // Compute a simple similarity score
+        const titleTokens = (job.title || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+        const scoreJob = (j) => {
+          if (!j || j.id === job.id) return -1;
+          let score = 0;
+          if (j.company_name && job.company_name && j.company_name === job.company_name) score += 3;
+          if ((j.location || "").toLowerCase() === (job.location || "").toLowerCase()) score += 2;
+          const tokens = (j.title || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+          const overlap = tokens.filter(t => titleTokens.includes(t)).length;
+          score += overlap;
+          return score;
+        };
+        const candidates = list
+          .filter(j => j && j.id !== job.id)
+          .map(j => ({ j, s: scoreJob(j) }))
+          .filter(x => x.s > 0)
+          .sort((a, b) => b.s - a.s)
+          .slice(0, 3)
+          .map(x => x.j);
+        if (isMounted) setSimilarJobs(candidates);
+      } catch (e) {
+        if (isMounted) setSimilarJobs([]);
+      } finally {
+        if (isMounted) setSimilarLoading(false);
+      }
+    }
+    loadSimilar();
+    return () => { isMounted = false; };
+  }, [job]);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumbs */}
@@ -268,14 +310,28 @@ export default function WorkforceJobDetail() {
               {/* Similar Jobs */}
               <div className="bg-white border rounded-xl p-6">
                 <h3 className="font-semibold text-gray-900 mb-3">Similar Jobs</h3>
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
-                      <div className="font-medium text-sm text-gray-900">Senior Engineer Position</div>
-                      <div className="text-xs text-gray-500">Company Name • $120k-150k</div>
-                    </div>
-                  ))}
-                </div>
+                {similarLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ) : similarJobs.length > 0 ? (
+                  <div className="space-y-3">
+                    {similarJobs.map((sj) => (
+                      <Link
+                        key={sj.id}
+                        to={webRoutes.workforceJobDetail.replace(':id', sj.id)}
+                        className="block border rounded-lg p-3 hover:bg-gray-50"
+                      >
+                        <div className="font-medium text-sm text-gray-900">{sj.title || 'Untitled role'}</div>
+                        <div className="text-xs text-gray-500">{sj.company_name || 'Company'}{sj.salary_range ? ` • ${sj.salary_range}` : ''}</div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">No similar jobs found.</div>
+                )}
               </div>
             </div>
           </div>

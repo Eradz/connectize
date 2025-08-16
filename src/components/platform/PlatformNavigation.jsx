@@ -63,6 +63,8 @@ const PlatformNavigation = ({ children }) => {
         { name: 'My Posted Jobs', href: webRoutes.workforceMyPostedJobs },
         { name: 'Professionals', href: webRoutes.workforceProfiles },
         { name: 'Industry Events', href: webRoutes.workforceEvents },
+        { name: 'My Registered Events', href: webRoutes.workforceMyRegistrations },
+        { name: 'My Created Events', href: webRoutes.workforceMyEvents },
         { name: 'My Applications', href: webRoutes.workforceApplications }
       ]
     },

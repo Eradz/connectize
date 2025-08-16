@@ -140,22 +140,34 @@ const WorkforceEvents = () => {
     setSearchTerm('');
   };
 
+  // Derive a status label from backend fields
+  const getEventStatus = (event) => {
+    if (!event) return 'unknown';
+    if (event.is_cancelled) return 'cancelled';
+    const now = new Date();
+    const start = event.start_date ? new Date(event.start_date) : null;
+    const end = event.end_date ? new Date(event.end_date) : null;
+    // Sold out when max_attendees present and reached
+    if (event.max_attendees && event.attendees_count >= event.max_attendees) return 'sold_out';
+    if (start && start > now) return 'upcoming';
+    if (start && end && now >= start && now <= end) return 'open';
+    return 'past';
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'upcoming': return 'bg-blue-100 text-blue-800';
       case 'open': return 'bg-green-100 text-green-800';
       case 'sold_out': return 'bg-orange-100 text-orange-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'past': return 'bg-gray-200 text-gray-700';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case 'Virtual': return <Globe className="w-4 h-4" />;
-      case 'Hybrid': return <Users className="w-4 h-4" />;
-      default: return <MapPin className="w-4 h-4" />;
-    }
+  const getTypeIcon = (isVirtual, _eventType) => {
+    if (isVirtual) return <Globe className="w-4 h-4" />;
+    return <MapPin className="w-4 h-4" />;
   };
 
   const formatDate = (dateString) => {
@@ -169,7 +181,10 @@ const WorkforceEvents = () => {
   };
 
   const getAvailableSpots = (event) => {
-    return event.capacity - event.registered;
+    if (!event) return 0;
+    const cap = event.max_attendees ?? null;
+    const reg = event.attendees_count ?? 0;
+    return cap ? Math.max(cap - reg, 0) : 0;
   };
 
   if (loading) {
@@ -337,22 +352,27 @@ const WorkforceEvents = () => {
               {/* Event Image */}
               <div className="relative">
                 <img
-                  src={event.image}
+                  src={event.image || 'https://picsum.photos/seed/energy-events/800/400'}
                   alt={event.title}
                   className="w-full h-48 object-cover rounded-t-xl"
                 />
                 <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-                    {event.status.replace('_', ' ').toUpperCase()}
-                  </span>
+                  {(() => {
+                    const status = getEventStatus(event);
+                    return (
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                        {status.replace('_', ' ').toUpperCase()}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div className="absolute top-4 right-4">
                   <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 flex items-center">
-                    {getTypeIcon(event.type)}
-                    <span className="ml-1">{event.type}</span>
+                    {getTypeIcon(event.is_virtual, event.event_type)}
+                    <span className="ml-1">{event.is_virtual ? 'Virtual' : 'In-Person'}</span>
                   </span>
                 </div>
-                {event.price === 0 && (
+                {event.is_free && (
                   <div className="absolute bottom-4 left-4">
                     <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
                       FREE
@@ -365,11 +385,11 @@ const WorkforceEvents = () => {
                 {/* Category & Date */}
                 <div className="flex items-center justify-between mb-3">
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                    {event.category}
+                    {(event.event_type || 'event').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                   </span>
                   <span className="text-sm text-gray-600 flex items-center">
                     <Calendar className="w-4 h-4 mr-1" />
-                    {formatDate(event.start_date)}
+                    {event.start_date ? formatDate(event.start_date) : 'TBD'}
                   </span>
                 </div>
 
@@ -381,25 +401,26 @@ const WorkforceEvents = () => {
                 {/* Organizer */}
                 <p className="text-sm text-gray-600 mb-3 flex items-center">
                   <Building className="w-4 h-4 mr-1" />
-                  {event.organizer}
+                  {event.organizer_name || 'Organizer'}
                 </p>
 
                 {/* Location & Time */}
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="w-4 h-4 mr-2" />
-                    {event.location}
+                    {event.is_virtual ? 'Online' : (event.venue_name || event.venue_address || 'Venue TBA')}
                   </div>
                   <div className="flex items-center text-sm text-gray-600">
                     <Clock className="w-4 h-4 mr-2" />
-                    {event.start_time} - {event.end_time}
+                    {event.start_date ? new Date(event.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                    {event.end_date ? ` - ${new Date(event.end_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
                   </div>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-gray-100">
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{event.registered}</p>
+                    <p className="text-sm font-semibold text-gray-900">{event.attendees_count ?? 0}</p>
                     <p className="text-xs text-gray-600">Registered</p>
                   </div>
                   <div className="text-center">
@@ -408,47 +429,27 @@ const WorkforceEvents = () => {
                   </div>
                 </div>
 
-                {/* Rating */}
-                {event.rating && (
-                  <div className="flex items-center mb-4">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                    <span className="text-sm font-medium text-gray-900">{event.rating}</span>
-                    <span className="text-sm text-gray-600 ml-1">({event.reviews_count})</span>
+                {/* Topics (if any) */}
+                {Array.isArray(event.topics) && event.topics.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {event.topics.slice(0, 3).map((t, i) => (
+                      <span key={i} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">{t}</span>
+                    ))}
                   </div>
                 )}
 
                 {/* Price */}
                 <div className="mb-4">
-                  {event.price === 0 ? (
+                  {event.is_free ? (
                     <span className="text-lg font-bold text-green-600">FREE</span>
                   ) : (
                     <span className="text-lg font-bold text-gray-900">
-                      ${event.price} {event.currency}
+                      {event.ticket_price ?? '—'} {event.currency || ''}
                     </span>
                   )}
                 </div>
 
-                {/* Features */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-1">
-                    {event.certification && (
-                      <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded flex items-center">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Certificate
-                      </span>
-                    )}
-                    {event.ceu_credits > 0 && (
-                      <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">
-                        {event.ceu_credits} CEU
-                      </span>
-                    )}
-                    {event.recording_available && (
-                      <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
-                        Recording
-                      </span>
-                    )}
-                  </div>
-                </div>
+                {/* Features placeholder intentionally minimal to match backend */}
 
                 {/* Actions */}
                 <div className="flex space-x-2">
