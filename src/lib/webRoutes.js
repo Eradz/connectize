@@ -123,9 +123,11 @@ const webRoutes = {
   // Logistics Hub
   logistics: "/logistics",
   logisticsDashboard: "/logistics",
+  logisticsRequests: "/logistics/requests",
   logisticsShipments: "/logistics/shipments",
   logisticsShipmentDetail: "/logistics/shipments/:id",
   logisticsShipmentCreate: "/logistics/shipments/create",
+  logisticsShipmentEdit: "/logistics/shipments/:id/edit",
   logisticsInventory: "/logistics/inventory",
   logisticsInventoryDetail: "/logistics/inventory/:id",
   logisticsInventoryCreate: "/logistics/inventory/create",

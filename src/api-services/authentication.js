@@ -9,7 +9,9 @@ export const authenticationService = async ({
   resetForm,
 }) => {
   try {
-    const { results } = await makeApiRequest({
+    console.log(`🔐 Authentication ${type} attempt:`, { url, values: { ...values, password: '[HIDDEN]' } });
+    
+    const response = await makeApiRequest({
       url: `api/auth/${url}/`,
       method,
       data: values,
@@ -17,14 +19,19 @@ export const authenticationService = async ({
       type: "auth-" + type,
     });
 
+    // Handle different response structures
+    const results = response?.results || response?.data || response;
+    console.log(`✅ Authentication ${type} response:`, { success: response?.success, hasTokens: !!(results?.tokens) });
+
     if (type === "login") {
+      console.log('🔑 Setting session with tokens:', { hasAccess: !!(results?.tokens?.access), hasRefresh: !!(results?.tokens?.refresh) });
       setSession(results);
     } else if (type === "register" && values?.email) {
       localStorage.setItem(REGISTER_EMAIL_KEY, values.email);
     }
     return true;
   } catch (error) {
-    console.error("Auth submission error:", error);
+    console.error("❌ Auth submission error:", error);
     return false;
   }
 };

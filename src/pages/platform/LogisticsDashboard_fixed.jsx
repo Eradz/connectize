@@ -20,8 +20,7 @@ import {
   RefreshCw,
   Globe,
   Warehouse,
-  Ship,
-  FileText
+  Ship
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
@@ -32,7 +31,6 @@ const LogisticsDashboard = () => {
   const [dashboardData, setDashboardData] = useState({
     shipments: { total: 0, data: [] },
     inventory: { total: 0, data: [] },
-    requests: { total: 0, data: [] },
     analytics: {
       totalShipments: 0,
       onTimeDelivery: 0,
@@ -52,16 +50,14 @@ const LogisticsDashboard = () => {
       setLoading(true);
       
       // Fetch real data from APIs
-      const [shipmentsResponse, inventoryResponse, requestsResponse] = await Promise.all([
+      const [shipmentsResponse, inventoryResponse] = await Promise.all([
         logisticsAPI.getShipments(),
-        logisticsAPI.getInventoryItems(),
-        logisticsAPI.getRequests()
+        logisticsAPI.getInventoryItems()
       ]);
 
       // Handle paginated responses
       const shipments = shipmentsResponse.data?.results || shipmentsResponse.data || [];
       const inventory = inventoryResponse.data?.results || inventoryResponse.data || [];
-      const requests = requestsResponse.data?.results || requestsResponse.data || [];
 
       // Calculate analytics from real data with corrected field mappings
       const totalShipments = shipments.length;
@@ -89,10 +85,6 @@ const LogisticsDashboard = () => {
           total: inventory.length,
           data: inventory
         },
-        requests: {
-          total: requests.length,
-          data: requests
-        },
         analytics: {
           totalShipments,
           onTimeDelivery: parseFloat(onTimeDelivery),
@@ -108,7 +100,6 @@ const LogisticsDashboard = () => {
       setDashboardData({
         shipments: { total: 0, data: [] },
         inventory: { total: 0, data: [] },
-        requests: { total: 0, data: [] },
         analytics: {
           totalShipments: 0,
           onTimeDelivery: 0,
@@ -276,7 +267,6 @@ const LogisticsDashboard = () => {
             <nav className="flex space-x-8 px-6">
               {[
                 { key: 'overview', label: 'Overview', icon: BarChart3 },
-                { key: 'requests', label: 'Shipment Requests', icon: FileText },
                 { key: 'shipments', label: 'Shipments', icon: Truck },
                 { key: 'inventory', label: 'Inventory', icon: Package },
                 { key: 'tracking', label: 'Live Tracking', icon: MapPin }
@@ -388,102 +378,11 @@ const LogisticsDashboard = () => {
                   </div>
                 </div>
 
-                {/* Recent Requests Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Recent Requests */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Recent Shipment Requests</h3>
-                      <Link 
-                        to={webRoutes.logisticsRequests}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
-                        View all
-                      </Link>
-                    </div>
-                    <div className="space-y-3">
-                      {dashboardData.requests.data.length > 0 ? (
-                        dashboardData.requests.data.slice(0, 5).map((request) => (
-                          <div key={request.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <FileText className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">REQ-{request.id?.slice(0,8)}</p>
-                                <p className="text-sm text-gray-600">
-                                  {request.origin_address} → {request.destination_address}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                  request.status === 'quoted' ? 'bg-blue-100 text-blue-800' :
-                                  request.status === 'awarded' ? 'bg-green-100 text-green-800' :
-                                  'bg-gray-100 text-gray-800'}`}>
-                                {request.status}
-                              </span>
-                              <p className="text-xs text-gray-500 mt-1">
-                                ${request.budget_max || 'No budget'}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-6 text-gray-500">
-                          <FileText className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                          <p>No recent shipment requests</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Request Statistics */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Shipment Request Statistics</h3>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Total Shipment Requests</span>
-                          <span className="text-lg font-semibold text-gray-900">{dashboardData.requests.total}</span>
-                        </div>
-                      </div>
-                      <div className="p-4 bg-yellow-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Pending Quotes</span>
-                          <span className="text-lg font-semibold text-yellow-700">
-                            {dashboardData.requests.data.filter(r => r.status === 'pending').length}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Quoted</span>
-                          <span className="text-lg font-semibold text-blue-700">
-                            {dashboardData.requests.data.filter(r => r.status === 'quoted').length}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Awarded</span>
-                          <span className="text-lg font-semibold text-green-700">
-                            {dashboardData.requests.data.filter(r => r.status === 'awarded').length}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Enhanced Inventory Dashboard Widget */}
                 <InventoryDashboardWidget className="col-span-full" />
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Link
                     to={webRoutes.logisticsShipmentCreate}
                     className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
@@ -516,133 +415,6 @@ const LogisticsDashboard = () => {
                       <p className="mt-1 text-sm text-gray-500">Real-time location tracking</p>
                     </div>
                   </Link>
-
-                  <Link
-                    to={webRoutes.logisticsRequests}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-colors group"
-                  >
-                    <div className="text-center">
-                      <FileText className="mx-auto h-8 w-8 text-gray-400 group-hover:text-orange-500" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">View Requests</h3>
-                      <p className="mt-1 text-sm text-gray-500">Manage shipping requests</p>
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'requests' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">All Shipment Requests</h3>
-                  <div className="flex space-x-2">
-                    <Link
-                      to={webRoutes.logisticsShipmentCreate}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Create Shipment Request</span>
-                    </Link>
-                    <Link
-                      to={webRoutes.logisticsRequests}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>View All</span>
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  {dashboardData.requests.data.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Request ID</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Title</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo Type</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Budget</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Created</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboardData.requests.data.slice(0, 10).map((request) => (
-                          <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-4 px-4">
-                              <Link 
-                                to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
-                                className="font-medium text-blue-600 hover:text-blue-700"
-                              >
-                                REQ-{request.id?.slice(0,8)}
-                              </Link>
-                            </td>
-                            <td className="py-4 px-4">
-                              <p className="text-sm font-medium text-gray-900">{request.title}</p>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div>
-                                <p className="text-sm text-gray-900">{request.origin_address}</p>
-                                <p className="text-sm text-gray-500">→ {request.destination_address}</p>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                {request.cargo_type?.replace('_', ' ')}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                  request.status === 'posted' ? 'bg-blue-100 text-blue-800' :
-                                  request.status === 'quoted' ? 'bg-purple-100 text-purple-800' :
-                                  request.status === 'awarded' ? 'bg-green-100 text-green-800' :
-                                  'bg-gray-100 text-gray-800'}`}>
-                                {request.status}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4">
-                              <p className="text-sm text-gray-900">
-                                ${request.budget_min} - ${request.budget_max}
-                              </p>
-                            </td>
-                            <td className="py-4 px-4">
-                              <p className="text-sm text-gray-900">
-                                {new Date(request.created_at).toLocaleDateString()}
-                              </p>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex space-x-2">
-                                <Link
-                                  to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
-                                  className="text-blue-600 hover:text-blue-700"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Link>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="text-center py-12">
-                      <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">No shipment requests found</h3>
-                      <p className="mt-1 text-sm text-gray-500">Get started by creating a new shipment request.</p>
-                      <div className="mt-6">
-                        <Link
-                          to={webRoutes.logisticsShipmentCreate}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Shipment Request
-                        </Link>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}

@@ -7,7 +7,7 @@ import {
   MapPin, Trash2
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { logisticsInventoryService } from '../../api-services/oilgas';
+import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 
 const LogisticsInventoryEnhanced = () => {
@@ -74,20 +74,15 @@ const LogisticsInventoryEnhanced = () => {
       
       // Load all inventory data in parallel
       const [inventoryData, summaryData, categoriesData, alertsData] = await Promise.allSettled([
-        logisticsInventoryService.getAll(),
-        logisticsInventoryService.getSummary(),
-        logisticsInventoryService.getCategories(),
-        logisticsInventoryService.getLowStockAlerts()
+        logisticsAPI.getInventoryItems(),
+        Promise.resolve({}), // getSummary not available in API yet
+        logisticsAPI.getInventoryCategories ? logisticsAPI.getInventoryCategories() : Promise.resolve([]),
+        Promise.resolve([])  // getLowStockAlerts not available in API yet
       ]);
 
       // Handle inventory data
       if (inventoryData.status === 'fulfilled') {
-        const items = Array.isArray(inventoryData.value?.results) 
-          ? inventoryData.value.results 
-          : Array.isArray(inventoryData.value) 
-            ? inventoryData.value 
-            : [];
-        setInventory(items);
+        setInventory(inventoryData.value.data?.results || inventoryData.value.results || inventoryData.value || []);
       } else {
         console.warn('Inventory API failed, using fallback data');
         setInventory(generateMockInventoryData());
@@ -618,7 +613,7 @@ const LogisticsInventoryEnhanced = () => {
                                     onClick: async () => {
                                       try {
                                         setDeletingId(item.id);
-                                        await logisticsInventoryService.delete(item.id);
+                                        await logisticsAPI.deleteInventoryItem(item.id);
                                         toast.success('Inventory item deleted');
                                         setInventory((prev) => prev.filter((x) => x.id !== item.id));
                                       } catch (e) {

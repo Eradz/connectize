@@ -534,7 +534,7 @@ export class LogisticsShipmentService extends CrudService {
 
 export class LogisticsInventoryService extends CrudService {
   constructor() {
-    super("api/v1/logistics/inventory/");
+    super("api/v1/logistics/inventory-items/");
   }
 
   async checkAvailability(itemId, quantity) {

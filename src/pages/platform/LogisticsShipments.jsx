@@ -23,7 +23,7 @@ import {
   Globe
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { logisticsShipmentService } from '../../api-services/oilgas';
+import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 
 const LogisticsShipments = () => {
@@ -61,9 +61,12 @@ const LogisticsShipments = () => {
         ordering
       };
 
-      const response = await logisticsShipmentService.getAll(params);
-      setShipments(response.results || response || []);
-      setTotalCount(response.count || response.length || 0);
+      const response = await logisticsAPI.getShipments(params);
+      // api.get returns { data }, DRF pagination returns { results, count }
+      const data = response?.data ?? response;
+      const list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+      setShipments(list);
+      setTotalCount(typeof data?.count === 'number' ? data.count : list.length);
       
     } catch (error) {
       console.error('Error loading shipments:', error);
@@ -76,17 +79,29 @@ const LogisticsShipments = () => {
     }
   };
 
+  const handleEditShipment = (shipmentId) => {
+    // Navigate to shipment edit page
+    navigate(webRoutes.logisticsShipmentEdit.replace(':id', shipmentId));
+  };
+
   const filterShipments = () => {
-    let filtered = shipments;
+    // Ensure shipments is always an array
+    if (!Array.isArray(shipments)) {
+      setFilteredShipments([]);
+      return;
+    }
+
+  // Work on a copy to avoid accidental mutation
+  let filtered = Array.isArray(shipments) ? [...shipments] : [];
 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(shipment => 
         (shipment.tracking_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (shipment.origin_address || shipment.origin || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (shipment.destination_address || shipment.destination || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (shipment.cargo_type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (shipment.title || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (shipment.request_details?.origin_address || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (shipment.request_details?.destination_address || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (shipment.request_details?.cargo_type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (shipment.provider_name || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -98,7 +113,8 @@ const LogisticsShipments = () => {
     // Method filter - map to transport types
     if (methodFilter !== 'all') {
       filtered = filtered.filter(shipment => 
-        shipment.transport_method === methodFilter || shipment.method === methodFilter
+        (shipment.provider_name || '').toLowerCase().includes(methodFilter.toLowerCase()) ||
+        (shipment.request_details?.cargo_type || '').toLowerCase().includes(methodFilter.toLowerCase())
       );
     }
 
@@ -128,6 +144,7 @@ const LogisticsShipments = () => {
       case 'delivered': return 'bg-green-100 text-green-800';
       case 'in_transit': return 'bg-blue-100 text-blue-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'preparing': return 'bg-orange-100 text-orange-800';
       case 'delayed': return 'bg-red-100 text-red-800';
       case 'cancelled': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -139,6 +156,7 @@ const LogisticsShipments = () => {
       case 'delivered': return <CheckCircle className="w-4 h-4" />;
       case 'in_transit': return <Truck className="w-4 h-4" />;
       case 'pending': return <Clock className="w-4 h-4" />;
+      case 'preparing': return <Package className="w-4 h-4" />;
       case 'delayed': return <AlertTriangle className="w-4 h-4" />;
       case 'cancelled': return <Package className="w-4 h-4" />;
       default: return <Package className="w-4 h-4" />;
@@ -284,7 +302,7 @@ const LogisticsShipments = () => {
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>Showing {filteredShipments.length} of {shipments.length} shipments</span>
+            <span>Showing {filteredShipments.length} of {Array.isArray(shipments) ? shipments.length : 0} shipments</span>
             <div className="flex items-center space-x-4">
               <span>Sort by:</span>
               <select 
@@ -310,7 +328,7 @@ const LogisticsShipments = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Shipments</p>
-                <p className="text-2xl font-bold text-gray-900">{shipments.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{Array.isArray(shipments) ? shipments.length : 0}</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
                 <Package className="w-6 h-6 text-blue-600" />
@@ -323,7 +341,7 @@ const LogisticsShipments = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">In Transit</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {shipments.filter(s => s.status === 'in_transit').length}
+                  {Array.isArray(shipments) ? shipments.filter(s => s.status === 'in_transit').length : 0}
                 </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
@@ -337,7 +355,7 @@ const LogisticsShipments = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Delivered</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {shipments.filter(s => s.status === 'delivered').length}
+                  {Array.isArray(shipments) ? shipments.filter(s => s.status === 'delivered').length : 0}
                 </p>
               </div>
               <div className="bg-green-100 p-3 rounded-lg">
@@ -351,7 +369,13 @@ const LogisticsShipments = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(shipments.reduce((sum, s) => sum + s.value, 0))}
+                  {formatCurrency(
+                    (Array.isArray(shipments) ? shipments : []).reduce((sum, s) => {
+                      const budgetMax = s?.request_details?.budget_max;
+                      const value = budgetMax ? parseFloat(budgetMax) : 0;
+                      return sum + (isNaN(value) ? 0 : value);
+                    }, 0)
+                  )}
                 </p>
               </div>
               <div className="bg-yellow-100 p-3 rounded-lg">
@@ -402,7 +426,7 @@ const LogisticsShipments = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {filteredShipments.map((shipment) => (
+                    {(Array.isArray(filteredShipments) ? filteredShipments : []).map((shipment) => (
                       <tr key={shipment.id} className="hover:bg-gray-50">
                         <td className="py-4 px-6">
                           <Link 
@@ -411,23 +435,23 @@ const LogisticsShipments = () => {
                           >
                             {shipment.tracking_number}
                           </Link>
-                          <p className="text-sm text-gray-500">{shipment.carrier}</p>
+                          <p className="text-sm text-gray-500">{shipment.provider_name || 'N/A'}</p>
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center space-x-2">
                             <div className="text-sm">
-                              <p className="font-medium text-gray-900">{shipment.origin}</p>
+                              <p className="font-medium text-gray-900">{shipment.request_details?.origin_address || 'N/A'}</p>
                               <div className="flex items-center text-gray-500">
                                 <ArrowRight className="w-3 h-3 mx-1" />
-                                <span>{shipment.destination}</span>
+                                <span>{shipment.request_details?.destination_address || 'N/A'}</span>
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="text-sm">
-                            <p className="font-medium text-gray-900">{shipment.cargo_type}</p>
-                            <p className="text-gray-500">{shipment.weight} tons</p>
+                            <p className="font-medium text-gray-900">{shipment.request_details?.cargo_type?.replace('_', ' ')?.toUpperCase() || 'N/A'}</p>
+                            <p className="text-gray-500">{shipment.request_details?.weight ? `${shipment.request_details.weight} kg` : 'N/A'}</p>
                           </div>
                           {shipment.dangerous_goods && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 mt-1">
@@ -437,8 +461,8 @@ const LogisticsShipments = () => {
                         </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center space-x-2">
-                            {getMethodIcon(shipment.method)}
-                            <span className="text-sm text-gray-900">{shipment.method}</span>
+                            {getMethodIcon(shipment.provider_name || 'General')}
+                            <span className="text-sm text-gray-900">{shipment.provider_name || 'N/A'}</span>
                           </div>
                         </td>
                         <td className="py-4 px-6">
@@ -450,21 +474,32 @@ const LogisticsShipments = () => {
                         <td className="py-4 px-6">
                           <div className="text-sm">
                             <p className="font-medium text-gray-900">
-                              {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                              {shipment.request_details?.delivery_date_requested ? 
+                                new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 
+                                'N/A'
+                              }
                             </p>
                             <p className="text-gray-500">
-                              {getDateDifference(shipment.estimated_delivery)}
+                              {shipment.request_details?.delivery_date_requested ?
+                                getDateDifference(shipment.request_details.delivery_date_requested) :
+                                'N/A'
+                              }
                             </p>
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <p className="font-medium text-gray-900">{formatCurrency(shipment.value)}</p>
+                          <p className="font-medium text-gray-900">
+                            {shipment.request_details?.budget_max ? 
+                              formatCurrency(parseFloat(shipment.request_details.budget_max)) : 
+                              'N/A'
+                            }
+                          </p>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            shipment.priority === 'high' ? 'bg-red-100 text-red-800' :
-                            shipment.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            shipment.request_details?.urgency === 'urgent' ? 'bg-red-100 text-red-800' :
+                            shipment.request_details?.urgency === 'standard' ? 'bg-yellow-100 text-yellow-800' :
                             'bg-green-100 text-green-800'
                           }`}>
-                            {shipment.priority}
+                            {shipment.request_details?.urgency || 'standard'}
                           </span>
                         </td>
                         <td className="py-4 px-6">
@@ -475,7 +510,11 @@ const LogisticsShipments = () => {
                             >
                               <Eye className="w-4 h-4" />
                             </Link>
-                            <button className="text-gray-600 hover:text-gray-700 p-1">
+                            <button 
+                              onClick={() => handleEditShipment(shipment.id)}
+                              className="text-blue-600 hover:text-blue-700 p-1"
+                              title="Edit Shipment"
+                            >
                               <Edit className="w-4 h-4" />
                             </button>
                             <button className="text-gray-600 hover:text-gray-700 p-1">
@@ -491,7 +530,7 @@ const LogisticsShipments = () => {
 
               {/* Mobile Card View */}
               <div className="md:hidden divide-y divide-gray-200">
-                {filteredShipments.map((shipment) => (
+                {(Array.isArray(filteredShipments) ? filteredShipments : []).map((shipment) => (
                   <div key={shipment.id} className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <Link 
@@ -509,40 +548,60 @@ const LogisticsShipments = () => {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Route:</span>
-                        <span className="text-gray-900">{shipment.origin} → {shipment.destination}</span>
+                        <span className="text-gray-900">
+                          {shipment.request_details?.origin_address || 'N/A'} → {shipment.request_details?.destination_address || 'N/A'}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Cargo:</span>
-                        <span className="text-gray-900">{shipment.cargo_type} ({shipment.weight} tons)</span>
+                        <span className="text-gray-900">
+                          {shipment.request_details?.cargo_type?.replace('_', ' ')?.toUpperCase() || 'N/A'} ({shipment.request_details?.weight ? `${shipment.request_details.weight} kg` : 'N/A'})
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Method:</span>
                         <div className="flex items-center space-x-1">
-                          {getMethodIcon(shipment.method)}
-                          <span className="text-gray-900">{shipment.method}</span>
+                          {getMethodIcon(shipment.provider_name || 'General')}
+                          <span className="text-gray-900">{shipment.provider_name || 'N/A'}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Delivery:</span>
                         <span className="text-gray-900">
-                          {new Date(shipment.estimated_delivery).toLocaleDateString()}
+                          {shipment.request_details?.delivery_date_requested ? 
+                            new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 
+                            'N/A'
+                          }
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600">Value:</span>
-                        <span className="font-medium text-gray-900">{formatCurrency(shipment.value)}</span>
+                        <span className="font-medium text-gray-900">
+                          {shipment.request_details?.budget_max ? 
+                            formatCurrency(parseFloat(shipment.request_details.budget_max)) : 
+                            'N/A'
+                          }
+                        </span>
                       </div>
                     </div>
                     
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                      <span className="text-xs text-gray-500">{shipment.carrier}</span>
+                      <span className="text-xs text-gray-500">{shipment.provider_name || 'N/A'}</span>
                       <div className="flex items-center space-x-2">
                         <Link
                           to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
                           className="text-blue-600 hover:text-blue-700 p-1"
+                          title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
+                        <button 
+                          onClick={() => handleEditShipment(shipment.id)}
+                          className="text-blue-600 hover:text-blue-700 p-1"
+                          title="Edit Shipment"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                         <button className="text-gray-600 hover:text-gray-700 p-1">
                           <MoreHorizontal className="w-4 h-4" />
                         </button>

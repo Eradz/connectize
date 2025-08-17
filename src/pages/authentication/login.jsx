@@ -53,17 +53,28 @@ function Login() {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async ({ email, password }, { resetForm }) => {
+      console.log('📝 Login form submitted:', { email });
+      
       const success = await loginUser({ email, password, resetForm });
+      console.log('🔐 Login result:', { success });
 
       if (success) {
-        setUser(await getCurrentUser());
+        console.log('✅ Login successful, fetching current user...');
+        const currentUser = await getCurrentUser();
+        console.log('👤 Setting user:', { hasUser: !!currentUser, userId: currentUser?.id });
+        setUser(currentUser);
+      } else {
+        console.log('❌ Login failed');
       }
     },
   });
 
   // Navigate after render when user becomes available
   useEffect(() => {
+    console.log('🚀 Navigation effect triggered:', { hasUser: !!user, userId: user?.id, navigateTo });
+    
     if (user) {
+      console.log('🚀 Navigating to:', navigateTo);
       navigate(navigateTo, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

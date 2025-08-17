@@ -6,7 +6,7 @@ import {
   Eye, RefreshCw, Plus, Minus, FileText, Truck, User, Hash, AlertTriangle
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { logisticsInventoryService } from '../../api-services/oilgas';
+import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 
 const LogisticsInventoryDetailView = () => {
@@ -72,19 +72,19 @@ const LogisticsInventoryDetailView = () => {
       
       // Load item details and movement history in parallel
       const [itemData, movementsData] = await Promise.allSettled([
-        logisticsInventoryService.getById(id),
-        logisticsInventoryService.getMovements(id)
+        logisticsAPI.getInventoryItem(id),
+        logisticsAPI.getInventoryMovements ? logisticsAPI.getInventoryMovements(id) : Promise.resolve([])
       ]);
 
       if (itemData.status === 'fulfilled') {
-        setItem(itemData.value);
+        setItem(itemData.value.data || itemData.value);
       } else {
         // Fallback to mock data for demo
         setItem(generateMockItemData());
       }
 
       if (movementsData.status === 'fulfilled') {
-        setMovements(movementsData.value);
+        setMovements(movementsData.value.data || movementsData.value || []);
       } else {
         setMovements(generateMockMovements());
       }
@@ -209,7 +209,7 @@ const LogisticsInventoryDetailView = () => {
         ? Math.abs(adjustmentData.quantity)
         : -Math.abs(adjustmentData.quantity);
 
-      await logisticsInventoryService.adjustStock(id, {
+      await logisticsAPI.adjustStock(id, {
         quantity,
         reason: adjustmentData.reason,
         notes: adjustmentData.notes
@@ -237,7 +237,7 @@ const LogisticsInventoryDetailView = () => {
         label: 'Confirm Delete',
         onClick: async () => {
           try {
-            await logisticsInventoryService.delete(id);
+            await logisticsAPI.deleteInventoryItem(id);
             toast.success('Inventory item deleted successfully');
             navigate(webRoutes.logisticsInventory);
           } catch (error) {

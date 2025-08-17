@@ -87,6 +87,7 @@ const PlatformNavigation = ({ children }) => {
       current: location.pathname.startsWith('/logistics'),
       children: [
         { name: 'Logistics Overview', href: webRoutes.logisticsDashboard },
+        { name: 'Shipment Requests', href: webRoutes.logisticsRequests },
         { name: 'Shipments', href: webRoutes.logisticsShipments },
         { name: 'Inventory', href: webRoutes.logisticsInventory },
         { name: 'Suppliers', href: webRoutes.logisticsSuppliers }

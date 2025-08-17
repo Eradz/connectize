@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import SEO from "./components/SEO";
 import { NotificationItem } from "./components/notifications";
 import Address from "./components/profile/address";
@@ -77,7 +77,9 @@ import AISubpage from "./pages/platform/AISubpage";
 import LogisticsDashboard from "./pages/platform/LogisticsDashboard";
 import LogisticsInventory from "./pages/platform/LogisticsInventory";
 import LogisticsInventoryForm from "./pages/platform/LogisticsInventoryForm";
+import LogisticsInventoryEdit from "./pages/platform/LogisticsInventoryEdit";
 import LogisticsInventoryDetailView from "./pages/platform/LogisticsInventoryDetailView";
+import LogisticsRequests from "./pages/platform/LogisticsRequests";
 import LogisticsShipments from "./pages/platform/LogisticsShipments";
 import LogisticsShipmentCreate from "./pages/platform/LogisticsShipmentCreate";
 import LogisticsShipmentDetail from "./pages/platform/LogisticsShipmentDetail";
@@ -86,8 +88,16 @@ import LogisticsSupplierDetail from "./pages/platform/LogisticsSupplierDetail";
 import LogisticsTracking from "./pages/platform/LogisticsTracking";
 import TrustDashboard from "./pages/platform/TrustDashboard";
 import SpecializedToolsDashboard from "./pages/platform/SpecializedToolsDashboard";
+import LogisticsTest from "./pages/test/LogisticsTest";
 
 function App() {
+  // Redirect legacy /platform/* URLs to new root-based routes
+  const LegacyPlatformRedirect = () => {
+    const location = useLocation();
+    const target = location.pathname.replace(/^\/platform/, '') || '/';
+    return <Navigate to={target} replace />;
+  };
+
   return (
     <div>
       <SEO />
@@ -133,15 +143,20 @@ function App() {
           <Route path={webRoutes.logisticsDashboard} element={<LogisticsDashboard />} />
           <Route path={webRoutes.logisticsInventory} element={<LogisticsInventory />} />
           <Route path={webRoutes.logisticsInventoryForm} element={<LogisticsInventoryForm />} />
+          <Route path={webRoutes.logisticsInventoryEdit} element={<LogisticsInventoryEdit />} />
           <Route path={webRoutes.logisticsInventoryDetail} element={<LogisticsInventoryDetailView />} />
+          <Route path={webRoutes.logisticsRequests} element={<LogisticsRequests />} />
           <Route path={webRoutes.logisticsShipments} element={<LogisticsShipments />} />
           <Route path={webRoutes.logisticsShipmentCreate} element={<LogisticsShipmentCreate />} />
+          <Route path={webRoutes.logisticsShipmentEdit} element={<LogisticsShipmentCreate />} />
           <Route path={webRoutes.logisticsShipmentDetail} element={<LogisticsShipmentDetail />} />
           <Route path={webRoutes.logisticsSuppliers} element={<LogisticsSuppliers />} />
           <Route path={webRoutes.logisticsSupplierDetail} element={<LogisticsSupplierDetail />} />
           <Route path={webRoutes.logisticsTracking} element={<LogisticsTracking />} />
           <Route path={webRoutes.trustDashboard} element={<TrustDashboard />} />
           <Route path={webRoutes.toolsDashboard} element={<SpecializedToolsDashboard />} />
+          {/* Test Routes */}
+          <Route path="/test/logistics" element={<LogisticsTest />} />
         </Route>
         
   {/* Main App Routes under /app prefix */}
@@ -204,7 +219,10 @@ function App() {
   <Route path={webRoutes.termsAndConditions} element={<TermsAndConditions />} />
   <Route path={webRoutes.privacyPolicy} element={<PrivacyPolicy />} />
         
-        {/* Catch all for 404 */}
+  {/* Legacy alias for old /platform/* paths */}
+  <Route path="/platform/*" element={<LegacyPlatformRedirect />} />
+
+  {/* Catch all for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

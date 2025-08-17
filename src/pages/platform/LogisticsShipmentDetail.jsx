@@ -21,7 +21,7 @@ import {
   Info
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { logisticsShipmentService } from '../../api-services/oilgas';
+import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 
 const LogisticsShipmentDetail = () => {
@@ -38,19 +38,98 @@ const LogisticsShipmentDetail = () => {
   const loadShipmentDetail = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Loading shipment detail for ID:', id);
       
-      // Try to fetch from API, fall back to mock data
+      // Try to fetch shipment by ID first
       try {
-        const response = await logisticsShipmentService.getShipment(id);
-        setShipment(response.data);
-        setTrackingHistory(response.tracking_history || []);
-      } catch (error) {
-        console.warn('API failed, using mock data:', error.message);
-        // Generate detailed mock data
-        const mockShipment = generateMockShipmentDetail(id);
-        setShipment(mockShipment);
-        setTrackingHistory(mockShipment.tracking_history);
+        console.log('📦 Attempting to fetch as shipment...');
+        const response = await logisticsAPI.getShipment(id);
+        const shipmentData = response?.data ?? response;
+        console.log('✅ Shipment data:', shipmentData);
+        
+        // Check if we got valid shipment data
+        if (shipmentData && shipmentData.id) {
+          setShipment(shipmentData);
+          
+          // Load tracking data if available
+          try {
+            const trackingResponse = await logisticsAPI.getShipmentTracking(shipmentData.id);
+            const trackingData = trackingResponse?.data ?? trackingResponse;
+            setTrackingHistory(Array.isArray(trackingData?.results) ? trackingData.results : []);
+          } catch (trackingError) {
+            console.warn('Failed to load tracking data:', trackingError);
+            setTrackingHistory([]);
+          }
+          return;
+        }
+      } catch (shipmentError) {
+        console.warn('Shipment fetch failed:', shipmentError.message);
       }
+      
+      // Fallback: try to fetch as request ID
+      try {
+        console.log('📋 Attempting to fetch as request...');
+        const requestResponse = await logisticsAPI.getRequest(id);
+        const requestData = requestResponse?.data ?? requestResponse;
+        console.log('✅ Request data:', requestData);
+        
+        if (requestData && requestData.id) {
+          // Normalize request data for display
+          const normalizedRequest = {
+            id: requestData.id,
+            tracking_number: null,
+            status: requestData.status,
+            provider_name: requestData.awarded_to_name || null,
+            request: requestData.id,
+            request_details: requestData,
+            weight: requestData.weight,
+            volume: requestData.volume,
+            current_location: null,
+            created_at: requestData.created_at,
+            updated_at: requestData.updated_at,
+            // Add missing fields that the component expects
+            origin: requestData.origin || {
+              name: requestData.origin_name || 'Origin Location',
+              address: requestData.origin_address || 'Address not specified',
+              contact_name: requestData.origin_contact_name || 'Contact not specified',
+              contact_phone: requestData.origin_contact_phone || 'Phone not specified',
+              contact_email: requestData.origin_contact_email || 'Email not specified'
+            },
+            destination: requestData.destination || {
+              name: requestData.destination_name || 'Destination Location', 
+              address: requestData.destination_address || 'Address not specified',
+              contact_name: requestData.destination_contact_name || 'Contact not specified',
+              contact_phone: requestData.destination_contact_phone || 'Phone not specified',
+              contact_email: requestData.destination_contact_email || 'Email not specified'
+            },
+            cargo: requestData.cargo || {
+              type: requestData.cargo_type || 'General Cargo',
+              description: requestData.description || 'No description',
+              value: requestData.cargo_value || 0,
+              dangerous_goods: requestData.dangerous_goods || false
+            },
+            // Add other expected fields
+            pickup_date: requestData.pickup_date,
+            delivery_date: requestData.requested_delivery_date,
+            shipping_method: requestData.shipping_method,
+            special_instructions: requestData.special_instructions,
+            budget: requestData.budget
+          };
+          
+          console.log('🔄 Using normalized request data');
+          setShipment(normalizedRequest);
+          setTrackingHistory([]);
+          return;
+        }
+      } catch (requestError) {
+        console.warn('Request fetch also failed:', requestError.message);
+      }
+      
+      // Final fallback: generate mock data
+      console.warn('Both API calls failed, using mock data');
+      const mockShipment = generateMockShipmentDetail(id);
+      setShipment(mockShipment);
+      setTrackingHistory(mockShipment.tracking_history);
       
     } catch (error) {
       toast.error('Failed to load shipment details');
@@ -259,7 +338,7 @@ const LogisticsShipmentDetail = () => {
                   Shipment {shipment.tracking_number}
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  {shipment.origin.name} → {shipment.destination.name}
+                  {shipment?.origin?.name || 'Origin'} → {shipment?.destination?.name || 'Destination'}
                 </p>
               </div>
             </div>
@@ -313,39 +392,39 @@ const LogisticsShipmentDetail = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Cargo Type</label>
-                    <p className="text-sm text-gray-900">{shipment.cargo.type}</p>
+                    <p className="text-sm text-gray-900">{shipment?.cargo?.type || 'General Cargo'}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Description</label>
-                    <p className="text-sm text-gray-900">{shipment.cargo.description}</p>
+                    <p className="text-sm text-gray-900">{shipment?.cargo?.description || 'No description'}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Commodity Code</label>
-                    <p className="text-sm text-gray-900">{shipment.cargo.commodity_code}</p>
+                    <p className="text-sm text-gray-900">{shipment?.cargo?.commodity_code || 'Not specified'}</p>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-600">Weight</label>
-                      <p className="text-sm text-gray-900">{shipment.cargo.weight} tons</p>
+                      <p className="text-sm text-gray-900">{shipment?.weight || shipment?.cargo?.weight || '0'} kg</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-600">Volume</label>
-                      <p className="text-sm text-gray-900">{shipment.cargo.volume} m³</p>
+                      <p className="text-sm text-gray-900">{shipment?.volume || shipment?.cargo?.volume || '0'} m³</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-600">Pieces</label>
-                      <p className="text-sm text-gray-900">{shipment.cargo.pieces}</p>
+                      <p className="text-sm text-gray-900">{shipment?.cargo?.pieces || '1'}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-600">Value</label>
-                      <p className="text-sm text-gray-900 font-semibold">{formatCurrency(shipment.cargo.value)}</p>
+                      <p className="text-sm text-gray-900 font-semibold">{formatCurrency(shipment?.cargo?.value || shipment?.budget || 0)}</p>
                     </div>
                   </div>
-                  {shipment.cargo.dangerous_goods && (
+                  {shipment?.cargo?.dangerous_goods && (
                     <div className="flex items-center space-x-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <AlertTriangle className="w-5 h-5 text-orange-600" />
                       <span className="text-sm font-medium text-orange-700">Dangerous Goods</span>
@@ -454,19 +533,19 @@ const LogisticsShipmentDetail = () => {
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Origin</h4>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{shipment.origin.name}</p>
-                    <p className="text-gray-600">{shipment.origin.address}</p>
+                    <p className="font-medium">{shipment?.origin?.name || 'Origin Location'}</p>
+                    <p className="text-gray-600">{shipment?.origin?.address || 'Address not specified'}</p>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="w-3 h-3" />
-                      <span>{shipment.origin.contact}</span>
+                      <span>{shipment?.origin?.contact_name || 'Contact not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Phone className="w-3 h-3" />
-                      <span>{shipment.origin.phone}</span>
+                      <span>{shipment?.origin?.contact_phone || 'Phone not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Mail className="w-3 h-3" />
-                      <span>{shipment.origin.email}</span>
+                      <span>{shipment?.origin?.contact_email || 'Email not specified'}</span>
                     </div>
                   </div>
                 </div>
@@ -474,19 +553,19 @@ const LogisticsShipmentDetail = () => {
                 <div className="border-t border-gray-200 pt-6">
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Destination</h4>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{shipment.destination.name}</p>
-                    <p className="text-gray-600">{shipment.destination.address}</p>
+                    <p className="font-medium">{shipment?.destination?.name || 'Destination Location'}</p>
+                    <p className="text-gray-600">{shipment?.destination?.address || 'Address not specified'}</p>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="w-3 h-3" />
-                      <span>{shipment.destination.contact}</span>
+                      <span>{shipment?.destination?.contact_name || 'Contact not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Phone className="w-3 h-3" />
-                      <span>{shipment.destination.phone}</span>
+                      <span>{shipment?.destination?.contact_phone || 'Phone not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Mail className="w-3 h-3" />
-                      <span>{shipment.destination.email}</span>
+                      <span>{shipment?.destination?.contact_email || 'Email not specified'}</span>
                     </div>
                   </div>
                 </div>
