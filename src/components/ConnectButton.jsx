@@ -10,11 +10,16 @@ export default function ConnectButton({
   slug = "",
   type = "users",
   setCachedConnections,
+  data,
 }) {
   const { user: currentUser } = useAuth();
-  const { data: currentCompany, isLoading } = useGetCurrentCompany(id);
+  const { data: fetchedCompany, isLoading } = useGetCurrentCompany(id, !data);
 
-  const [hasConnected, setHasConnected] = useState(false);
+  const currentCompany = data ? data : fetchedCompany?.[0];
+
+  const [hasConnected, setHasConnected] = useState(
+    () => !currentCompany?.isFollowedByUser || false
+  );
 
   useEffect(() => {
     if (type === "users") {
@@ -24,25 +29,18 @@ export default function ConnectButton({
 
       setHasConnected(!!isInFollowingList);
     } else {
-      const followingList = currentCompany?.[0]?.followers
-        ?.flatMap((follower) => [
-          follower.company_follower.id,
-          follower.user_follower.id,
-        ])
-        .filter(Boolean);
-      if (followingList) {
-        const isConnected = followingList.includes(currentUser?.id);
-        setHasConnected(isConnected);
-      }
+      setHasConnected(!!currentCompany?.isFollowedByUser);
+      // const followingList = currentCompany?.followers
+      //   ?.flatMap((follower) => [
+      //     follower.company_follower.id,
+      //     follower.user_follower.id,
+      //   ])
+      //   .filter(Boolean);
+      // if (followingList) {
+      //   const isConnected = followingList.includes(currentUser?.id);
+      //   setHasConnected(isConnected);
+      // }
     }
-    // const followingList =
-    //   type === "users"
-    //     ? currentUser?.followings
-    //     : currentCompany?.[0]?.followers?.flatMap(follower => [follower.company_follower.id, follower.user_follower.id]).filter(Boolean);
-    // if (followingList) {
-    //   const isConnected = followingList.includes(currentUser?.id);
-    //   setHasConnected(isConnected);
-    // }
   }, [currentUser, currentCompany, id, type]);
 
   const handleConnect = async () => {

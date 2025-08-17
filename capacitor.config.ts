@@ -22,6 +22,7 @@ const config: CapacitorConfig = {
     //   keyPassword: "ConnectizeSecret!",
     // },
   },
+
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,

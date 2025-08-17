@@ -94,7 +94,7 @@ export const usePollCurrentCompany = (companyName, interval = 0) => {
 export const usePollAllCompanies = (interval = 0) => {
   return useQuery({
     queryKey: ["allConnectizeCompanies"],
-    queryFn: getAllCompanies,
+    queryFn: async () => await getAllCompanies(),
     // refetchInterval: interval,
   });
 };

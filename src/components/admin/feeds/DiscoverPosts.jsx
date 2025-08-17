@@ -122,9 +122,7 @@ export const DiscoverPostItem = ({
 
   const recentLikes = postItem?.likes;
   const [liked, setLiked] = useState(() => !!postItem?.isLikedByUser);
-  const [likes, setLikes] = useState(
-    () => postItem?.numberOfLikes || postItem?.likes?.length
-  );
+  const [likes, setLikes] = useState(() => postItem?.numberOfLikes || 0);
   const [disabled, setDisabled] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
