@@ -20,13 +20,12 @@ import {
   Send
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { logisticsShipmentService } from '../../api-services/oilgas';
+import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 
-const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
+const LogisticsRequestEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEditMode = Boolean(id);
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
@@ -80,10 +79,9 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
     pickup_date: '',
     requested_delivery_date: '',
     special_instructions: '',
-  // Budget & Currency
-  budget_min: '',
-  budget_max: '',
-  currency: 'USD',
+    budget_min: '',
+    budget_max: '',
+    currency: 'USD',
     
     // Insurance & Documentation
     insurance_required: true,
@@ -91,94 +89,144 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
     special_handling: []
   });
 
-  // Load shipment data in edit mode
+  // Load request data for editing
   useEffect(() => {
-    if (isEditMode && id) {
-      loadShipmentData();
+    if (id) {
+      loadRequestData();
     }
-  }, [id, isEditMode]);
+  }, [id]);
 
-  const loadShipmentData = async () => {
+  const loadRequestData = async () => {
     try {
       setLoading(true);
-  const { logisticsAPI } = await import('../../api-services/logistics');
-  // When editing, load the Shipment Request (not active Shipment)
-  const response = await logisticsAPI.getRequest(id);
-      const shipment = response.data || response;
+      const response = await logisticsAPI.getRequest(id);
+      const request = response.data || response;
       
-      // Map API data to form structure
-      if (shipment.request_details) {
-        const dimItems = Array.isArray(shipment.request_details.dimensions?.items)
-          ? shipment.request_details.dimensions.items
-          : [];
-        setFormData({
-          cargo_type: shipment.request_details.cargo_type || '',
-          description: shipment.request_details.description || '',
-          dangerous_goods: shipment.request_details.special_requirements?.includes('Dangerous') || false,
-          priority: shipment.request_details.urgency || 'standard',
-          origin: {
-            name: '',
-            address: shipment.request_details.origin_address || '',
-            city: '',
-            country: '',
-            postal_code: '',
-            contact_name: '',
-            contact_phone: '',
-            contact_email: ''
-          },
-          destination: {
-            name: '',
-            address: shipment.request_details.destination_address || '',
-            city: '',
-            country: '',
-            postal_code: '',
-            contact_name: '',
-            contact_phone: '',
-            contact_email: ''
-          },
-          pickup_date: shipment.request_details.pickup_date_requested || '',
-          requested_delivery_date: shipment.request_details.delivery_date_requested || '',
-          budget_min: shipment.request_details.budget_min || '',
-          budget_max: shipment.request_details.budget_max || '',
-          currency: shipment.request_details.currency || 'USD',
-          items: dimItems.length > 0
-            ? dimItems.map((it) => ({
-                description: it.description || '',
-                quantity: it.quantity ?? 1,
-                weight: it.weight ?? '',
-                dimensions: {
-                  length: it.dimensions?.length ?? '',
-                  width: it.dimensions?.width ?? '',
-                  height: it.dimensions?.height ?? '',
-                },
-                value: it.value ?? '',
-                commodity_code: it.commodity_code || '',
-              }))
-            : [
-                {
-                  description: '',
-                  quantity: 1,
-                  weight: '',
-                  dimensions: { length: '', width: '', height: '' },
-                  value: '',
-                  commodity_code: ''
-                }
-              ],
-          special_instructions: shipment.request_details.special_requirements || '',
-          insurance_required: true,
-          customs_documents: [],
-          special_handling: []
-        });
-      }
+      // Parse existing contact information from special_requirements if needed
+      const parseSpecialRequirements = (specialReq) => {
+        const parsed = {
+          origin: { contact_name: '', contact_phone: '', contact_email: '' },
+          destination: { contact_name: '', contact_phone: '', contact_email: '' },
+          shipping_method: '',
+          preferred_carrier: '',
+          special_instructions: ''
+        };
+
+        if (!specialReq) return parsed;
+
+        const lines = specialReq.split('\n').map(line => line.trim()).filter(Boolean);
+        let remainingLines = [];
+
+        for (const line of lines) {
+          const lower = line.toLowerCase();
+          if (lower.startsWith('pickup contact:')) {
+            const contactInfo = line.replace(/^[^:]*:\s*/, '');
+            const parts = contactInfo.split('|').map(s => s.trim());
+            parsed.origin.contact_name = parts[0] || '';
+            parsed.origin.contact_phone = parts[1] || '';
+            parsed.origin.contact_email = parts[2] || '';
+          } else if (lower.startsWith('delivery contact:')) {
+            const contactInfo = line.replace(/^[^:]*:\s*/, '');
+            const parts = contactInfo.split('|').map(s => s.trim());
+            parsed.destination.contact_name = parts[0] || '';
+            parsed.destination.contact_phone = parts[1] || '';
+            parsed.destination.contact_email = parts[2] || '';
+          } else if (lower.startsWith('shipping method:')) {
+            parsed.shipping_method = line.replace(/^[^:]*:\s*/, '');
+          } else if (lower.startsWith('preferred carrier:')) {
+            parsed.preferred_carrier = line.replace(/^[^:]*:\s*/, '');
+          } else if (!lower.includes('dangerous goods') && !lower.includes('insurance required')) {
+            remainingLines.push(line);
+          }
+        }
+
+        parsed.special_instructions = remainingLines.join('\n');
+        return parsed;
+      };
+
+      const specialParsed = parseSpecialRequirements(request.special_requirements);
+      
+      // Map request data to form structure, including existing contact fields
+      const dimItems = Array.isArray(request.dimensions?.items)
+        ? request.dimensions.items
+        : [];
+
+      setFormData({
+        cargo_type: request.cargo_type || '',
+        description: request.description || '',
+        dangerous_goods: request.special_requirements?.includes('Dangerous') || false,
+        priority: request.urgency || 'standard',
+        
+        origin: {
+          name: '',
+          address: request.origin_address?.split(',')[0] || '',
+          city: request.origin_address?.split(',')[1]?.trim() || '',
+          country: request.origin_address?.split(',')[2]?.trim() || '',
+          postal_code: '',
+          contact_name: request.origin_contact_name || specialParsed.origin.contact_name || '',
+          contact_phone: request.origin_contact_phone || specialParsed.origin.contact_phone || '',
+          contact_email: request.origin_contact_email || specialParsed.origin.contact_email || ''
+        },
+        
+        destination: {
+          name: '',
+          address: request.destination_address?.split(',')[0] || '',
+          city: request.destination_address?.split(',')[1]?.trim() || '',
+          country: request.destination_address?.split(',')[2]?.trim() || '',
+          postal_code: '',
+          contact_name: request.destination_contact_name || specialParsed.destination.contact_name || '',
+          contact_phone: request.destination_contact_phone || specialParsed.destination.contact_phone || '',
+          contact_email: request.destination_contact_email || specialParsed.destination.contact_email || ''
+        },
+        
+        pickup_date: request.pickup_date_requested?.split('T')[0] || '',
+        requested_delivery_date: request.delivery_date_requested?.split('T')[0] || '',
+        budget_min: request.budget_min || '',
+        budget_max: request.budget_max || '',
+        currency: request.currency || 'USD',
+        
+        items: dimItems.length > 0
+          ? dimItems.map((item) => ({
+              description: item.description || '',
+              quantity: item.quantity ?? 1,
+              weight: item.weight ?? '',
+              dimensions: {
+                length: item.dimensions?.length ?? '',
+                width: item.dimensions?.width ?? '',
+                height: item.dimensions?.height ?? '',
+              },
+              value: item.value ?? '',
+              commodity_code: item.commodity_code || '',
+            }))
+          : [
+              {
+                description: '',
+                quantity: 1,
+                weight: '',
+                dimensions: { length: '', width: '', height: '' },
+                value: '',
+                commodity_code: ''
+              }
+            ],
+        
+        shipping_method: specialParsed.shipping_method || '',
+        preferred_carrier: specialParsed.preferred_carrier || '',
+        special_instructions: specialParsed.special_instructions || '',
+        insurance_required: request.special_requirements?.includes('Insurance') || true,
+        customs_documents: [],
+        special_handling: []
+      });
+      
     } catch (error) {
-      console.error('Error loading shipment:', error);
-      toast.error('Failed to load shipment data');
+      console.error('Error loading request:', error);
+      toast.error('Failed to load request data');
+      navigate(webRoutes.logisticsRequests);
     } finally {
       setLoading(false);
     }
   };
 
-    const handleInputChange = useCallback((...args) => {
+  const handleInputChange = useCallback((...args) => {
     // Handle both old (parentField, field, value) and new (field, value) signatures
     let actualField, actualValue;
     
@@ -264,8 +312,6 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
     try {
       setLoading(true);
       
-      const { logisticsAPI } = await import('../../api-services/logistics');
-
       // Validate budget range if both provided
       const hasMin = formData.budget_min !== '' && formData.budget_min != null;
       const hasMax = formData.budget_max !== '' && formData.budget_max != null;
@@ -302,10 +348,9 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
       const totalWeight = round2(totalWeightRaw);
       const totalVolume = round2(totalVolumeRaw);
       
-      // Ensure Django DateTimeFields receive ISO 8601 datetime strings (backend expects DateTime, not Date)
+      // Ensure Django DateTimeFields receive ISO 8601 datetime strings
       const toISOUTC = (dateStr) => {
         if (!dateStr) return null;
-        // Send midnight UTC for date-only inputs to satisfy DRF DateTimeField
         return `${dateStr}T00:00:00Z`;
       };
       
@@ -318,7 +363,7 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
         ? formData.cargo_type
         : 'general_cargo';
 
-      // Build a comprehensive special requirements string capturing all auxiliary selections
+      // Build special requirements string
       const specialFlags = [];
       if (formData.dangerous_goods) specialFlags.push('Dangerous goods handling required');
       if (formData.insurance_required) specialFlags.push('Insurance required');
@@ -332,7 +377,7 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
       const titleFrom = formData.origin.city || formData.origin.address || 'Origin';
       const titleTo = formData.destination.city || formData.destination.address || 'Destination';
 
-      const shipmentData = {
+      const requestData = {
         title: `${formData.cargo_type || 'Cargo'} - ${titleFrom} to ${titleTo}`,
         description: formData.description,
         cargo_type: normalizedCargoType,
@@ -346,14 +391,13 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
         destination_contact_email: formData.destination.contact_email || '',
         weight: totalWeight,
         volume: totalVolume,
-        // Capture detailed item attributes inside the JSON dimensions field
         dimensions: {
           items: formData.items.map(item => ({
             description: item.description,
             quantity: Number(item.quantity || 1),
-            weight: Number(item.weight || 0), // tons
+            weight: Number(item.weight || 0),
             dimensions: {
-              length: Number(item.dimensions?.length || 0), // meters
+              length: Number(item.dimensions?.length || 0),
               width: Number(item.dimensions?.width || 0),
               height: Number(item.dimensions?.height || 0),
             },
@@ -371,44 +415,23 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
         status: isDraft ? 'draft' : 'posted'
       };
 
-      const response = isEditMode 
-        ? await logisticsAPI.updateRequest(id, shipmentData)
-        : await logisticsAPI.createRequest(shipmentData);
-
-      console.log('API Response:', response); // Debug log
-
-      // Handle cases where our request wrapper swallows errors and returns undefined
+      const response = await logisticsAPI.updateRequest(id, requestData);
       const payload = response?.data ?? response;
+      
       if (!payload || typeof payload !== 'object') {
-        toast.error('Failed to save shipment request. Please check the form and try again.');
+        toast.error('Failed to update request. Please check the form and try again.');
         return;
       }
 
-      // Get id from payload and navigate to detail; fallback to staying on page if missing
-      const createdId = isEditMode ? id : (payload.id || payload?.results?.id);
-      if (!createdId) {
-        // Show backend validation errors if available
-        const possibleMsg = payload?.message || payload?.detail || 'Invalid server response (no id).';
-        toast.error(possibleMsg);
-        return;
-      }
-
-      if (isEditMode) {
-        toast.success(`${isRequestMode ? 'Request' : 'Shipment request'} updated successfully!`);
-      } else {
-        toast.success(`${isRequestMode ? 'Request' : 'Shipment request'} created successfully! You can now get quotes from providers.`);
-      }
-      navigate(`${isRequestMode ? webRoutes.logisticsRequests : webRoutes.logisticsShipments}/${createdId}`);
+      toast.success('Request updated successfully!');
+      navigate(`${webRoutes.logisticsRequests}/${id}`);
       
     } catch (error) {
-      console.error('Error creating shipment:', error);
-      console.error('Error response:', error.response);
-      console.error('Error response data:', error.response?.data);
+      console.error('Error updating request:', error);
       
-      let errorMessage = 'Failed to ' + (isEditMode ? 'update' : 'create') + ` ${isRequestMode ? 'request' : 'shipment'}. Please try again.`;
+      let errorMessage = 'Failed to update request. Please try again.';
       
       if (error.response?.data) {
-        // Handle detailed validation errors
         const errorData = error.response.data;
         if (typeof errorData === 'object') {
           const errors = [];
@@ -492,18 +515,14 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate(isRequestMode ? webRoutes.logisticsRequests : webRoutes.logisticsShipments)}
+                onClick={() => navigate(`${webRoutes.logisticsRequests}/${id}`)}
                 className="p-2 rounded-lg hover:bg-gray-100"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {isEditMode ? `Edit ${isRequestMode ? 'Request' : 'Shipment'}` : `Create New ${isRequestMode ? 'Request' : 'Shipment'}`}
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  {isRequestMode ? 'Request quotes from logistics providers' : 'Schedule and manage your cargo shipment'}
-                </p>
+                <h1 className="text-2xl font-bold text-gray-900">Edit Request</h1>
+                <p className="text-gray-600 mt-1">Update your shipment request details</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -524,13 +543,12 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
         {renderStepIndicator()}
 
         <div className="bg-white rounded-xl shadow-sm border p-8">
+          {/* Reuse the same step components from LogisticsShipmentCreate */}
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Basic {isRequestMode ? 'Request' : 'Shipment'} Information
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Request Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -615,7 +633,7 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
             </div>
           )}
 
-          {/* Step 2: Origin & Destination */}
+          {/* Step 2: Origin & Destination - Same as create page */}
           {currentStep === 2 && (
             <div className="space-y-8">
               <h3 className="text-lg font-semibold text-gray-900">Pickup & Delivery Locations</h3>
@@ -790,7 +808,7 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
             </div>
           )}
 
-          {/* Step 3: Cargo Details */}
+          {/* Step 3: Cargo Details - Same as create page */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -914,7 +932,7 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
             </div>
           )}
 
-          {/* Step 4: Shipping & Timeline */}
+          {/* Step 4: Shipping & Timeline - Same as create page */}
           {currentStep === 4 && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Shipping Details & Timeline</h3>
@@ -1091,9 +1109,7 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
                     ) : (
                       <Send className="w-4 h-4 mr-2" />
                     )}
-                    {isEditMode 
-                      ? `Update ${isRequestMode ? 'Request' : 'Shipment'}`
-                      : `Create ${isRequestMode ? 'Request' : 'Shipment'}`}
+                    Update Request
                   </button>
                 </>
               ) : (
@@ -1113,4 +1129,4 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
   );
 };
 
-export default LogisticsShipmentCreate;
+export default LogisticsRequestEdit;

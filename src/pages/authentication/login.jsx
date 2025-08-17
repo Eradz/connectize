@@ -34,14 +34,21 @@ function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const nextParam = searchParams.get("next");
+  const nextParamRaw = searchParams.get("next");
+  const isAuthPath = (p) => [
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/confirm-reset-password",
+    "/verify-account",
+    "/reactivate-account",
+  ].some((ap) => (p || "").startsWith(ap));
+  const nextParam = nextParamRaw && !isAuthPath(nextParamRaw) ? nextParamRaw : "/";
 
   const navigateTo =
     user && user?.is_first_time_user
       ? "/profile"
-      : searchParams.has("next")
-      ? nextParam
-      : "/";
+      : nextParam || "/";
 
   const formValues = {
     username: "",

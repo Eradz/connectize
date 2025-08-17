@@ -80,6 +80,10 @@ import LogisticsInventoryForm from "./pages/platform/LogisticsInventoryForm";
 import LogisticsInventoryEdit from "./pages/platform/LogisticsInventoryEdit";
 import LogisticsInventoryDetailView from "./pages/platform/LogisticsInventoryDetailView";
 import LogisticsRequests from "./pages/platform/LogisticsRequests";
+import LogisticsRequestList from "./pages/platform/LogisticsRequestList";
+import LogisticsRequestDetail from "./pages/platform/LogisticsRequestDetail";
+import LogisticsRequestCreate from "./pages/platform/LogisticsRequestCreate";
+import LogisticsRequestEdit from "./pages/platform/LogisticsRequestEdit";
 import LogisticsShipments from "./pages/platform/LogisticsShipments";
 import LogisticsShipmentCreate from "./pages/platform/LogisticsShipmentCreate";
 import LogisticsShipmentDetail from "./pages/platform/LogisticsShipmentDetail";
@@ -145,7 +149,10 @@ function App() {
           <Route path={webRoutes.logisticsInventoryForm} element={<LogisticsInventoryForm />} />
           <Route path={webRoutes.logisticsInventoryEdit} element={<LogisticsInventoryEdit />} />
           <Route path={webRoutes.logisticsInventoryDetail} element={<LogisticsInventoryDetailView />} />
-          <Route path={webRoutes.logisticsRequests} element={<LogisticsRequests />} />
+          <Route path={webRoutes.logisticsRequests} element={<LogisticsRequestList />} />
+          <Route path={webRoutes.logisticsRequestDetail} element={<LogisticsRequestDetail />} />
+          <Route path={webRoutes.logisticsRequestCreate} element={<LogisticsRequestCreate />} />
+          <Route path={webRoutes.logisticsRequestEdit} element={<LogisticsRequestEdit />} />
           <Route path={webRoutes.logisticsShipments} element={<LogisticsShipments />} />
           <Route path={webRoutes.logisticsShipmentCreate} element={<LogisticsShipmentCreate />} />
           <Route path={webRoutes.logisticsShipmentEdit} element={<LogisticsShipmentCreate />} />

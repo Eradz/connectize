@@ -61,19 +61,19 @@ const LogisticsRequests = () => {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'published': return 'bg-blue-100 text-blue-800';
+      case 'draft': return 'bg-yellow-100 text-yellow-800';
+      case 'posted': return 'bg-blue-100 text-blue-800';
+      case 'quoted': return 'bg-purple-100 text-purple-800';
       case 'awarded': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const formatCurrency = (amount) => {
-    if (!amount) return '$0';
+  const formatCurrency = (amount, currency = 'USD') => {
+    if (amount == null) return '$0';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency
     }).format(amount);
   };
 
@@ -87,24 +87,26 @@ const LogisticsRequests = () => {
   };
 
   const filteredRequests = requests.filter(request => {
-    const matchesSearch = searchTerm === '' || 
-      request.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.cargo_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.origin_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.destination_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
-    
+    const term = searchTerm.trim().toLowerCase();
+    const idStr = typeof request.id === 'string' ? request.id.toLowerCase() : '';
+    const cargo = request.cargo_type?.toLowerCase?.() || '';
+    const origin = request.origin_address?.toLowerCase?.() || '';
+    const destination = request.destination_address?.toLowerCase?.() || '';
+    const matchesSearch = term === '' ||
+      idStr.includes(term) || cargo.includes(term) || origin.includes(term) || destination.includes(term);
+
+    const matchesStatus = statusFilter === 'all' || (request.status || '').toLowerCase() === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
   const handleViewRequest = (requestId) => {
-    navigate(`${webRoutes.logisticsShipments}/${requestId}`);
+    navigate(`${webRoutes.logisticsRequests}/${requestId}`);
   };
 
   const handleAwardRequest = (requestId) => {
-    // Navigate to awarding interface
-    navigate(`${webRoutes.logisticsShipments}/${requestId}?action=award`);
+    // Navigate to awarding interface on the request detail page
+    navigate(`${webRoutes.logisticsRequests}/${requestId}?action=award`);
   };
 
   if (loading) {
@@ -158,10 +160,10 @@ const LogisticsRequests = () => {
           className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="posted">Posted</option>
+          <option value="quoted">Quoted</option>
           <option value="awarded">Awarded</option>
-          <option value="completed">Completed</option>
         </select>
       </div>
 
@@ -215,17 +217,22 @@ const LogisticsRequests = () => {
                       
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
-                        <span>{request.origin_name || 'Origin'} → {request.destination_name || 'Destination'}</span>
+                        <span>{request.origin_address || 'Origin'} → {request.destination_address || 'Destination'}</span>
                       </div>
                       
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>{formatDate(request.pickup_date)}</span>
+                        <span>{formatDate(request.pickup_date_requested)}</span>
                       </div>
                       
                       <div className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4" />
-                        <span>{formatCurrency(request.budget)}</span>
+                        <span>
+                          {request.budget_min != null || request.budget_max != null
+                            ? `${request.budget_min != null ? formatCurrency(Number(request.budget_min), request.currency || 'USD') : '—'}
+                               – ${request.budget_max != null ? formatCurrency(Number(request.budget_max), request.currency || 'USD') : '—'}`
+                            : 'Budget N/A'}
+                        </span>
                       </div>
                     </div>
 
@@ -245,7 +252,7 @@ const LogisticsRequests = () => {
                       View
                     </button>
                     
-                    {request.status === 'pending' && (
+                    {['posted', 'quoted', 'draft'].includes((request.status || '').toLowerCase()) && (
                       <button
                         onClick={() => handleAwardRequest(request.id)}
                         className="inline-flex items-center px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded-lg transition-colors"

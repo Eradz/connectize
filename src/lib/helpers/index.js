@@ -24,8 +24,23 @@ export const frontendUrl = () => window.location.origin;
 
 export function goToLogin() {
   removeSession();
-  const pathname = window.location.pathname;
-  window.location.replace("/login?next=" + pathname);
+  const pathname = window.location.pathname || "/";
+  const authPaths = new Set([
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/confirm-reset-password",
+    "/verify-account",
+    "/reactivate-account",
+  ]);
+
+  // Avoid redirecting back to login (or other auth pages) as the "next" target
+  const nextPath = Array.from(authPaths).some((p) => pathname.startsWith(p))
+    ? "/"
+    : pathname;
+
+  const url = nextPath && nextPath !== "/" ? `/login?next=${nextPath}` : "/login";
+  window.location.replace(url);
 }
 
 // Configure Axios Defaults
@@ -100,6 +115,20 @@ let hasNotifiedOffline = false;
 export async function getAuthorizationHeader() {
   if (accessToken && Date.now() < accessTokenExpiry) {
     return { Authorization: "Bearer " + accessToken };
+  }
+
+  // Try to use access token from session first (avoids unnecessary refresh right after login)
+  try {
+    const session = getSession();
+    const tokenFromSession = session?.tokens?.access;
+    if (tokenFromSession) {
+      accessToken = tokenFromSession;
+      // Set a conservative TTL; backend JWT is long-lived, but we'll refresh periodically
+      accessTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+      return { Authorization: "Bearer " + accessToken };
+    }
+  } catch (e) {
+    // Ignore and fallback to refresh flow
   }
 
   const refreshedToken = await refreshToken();

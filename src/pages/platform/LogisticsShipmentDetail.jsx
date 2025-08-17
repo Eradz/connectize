@@ -23,6 +23,7 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
+import ProviderComparisonSystem from '../../components/logistics/ProviderComparisonSystem';
 
 const LogisticsShipmentDetail = () => {
   const { id } = useParams();
@@ -59,6 +60,12 @@ const LogisticsShipmentDetail = () => {
             description: shipmentData.description || rd.description,
             origin_address: shipmentData.origin_address || rd.origin_address,
             destination_address: shipmentData.destination_address || rd.destination_address,
+            origin_contact_name: shipmentData.origin_contact_name || rd.origin_contact_name,
+            origin_contact_phone: shipmentData.origin_contact_phone || rd.origin_contact_phone,
+            origin_contact_email: shipmentData.origin_contact_email || rd.origin_contact_email,
+            destination_contact_name: shipmentData.destination_contact_name || rd.destination_contact_name,
+            destination_contact_phone: shipmentData.destination_contact_phone || rd.destination_contact_phone,
+            destination_contact_email: shipmentData.destination_contact_email || rd.destination_contact_email,
             weight: shipmentData.weight || rd.weight,
             volume: shipmentData.volume || rd.volume,
             dimensions: shipmentData.dimensions || rd.dimensions,
@@ -113,8 +120,12 @@ const LogisticsShipmentDetail = () => {
             title: requestData.title,
             cargo_type: requestData.cargo_type,
             description: requestData.description,
-            origin_address: requestData.origin_address,
-            destination_address: requestData.destination_address,
+            origin_contact_name: requestData.origin_contact_name,
+            origin_contact_phone: requestData.origin_contact_phone,
+            origin_contact_email: requestData.origin_contact_email,
+            destination_contact_name: requestData.destination_contact_name,
+            destination_contact_phone: requestData.destination_contact_phone,
+            destination_contact_email: requestData.destination_contact_email,
             weight: requestData.weight,
             volume: requestData.volume,
             dimensions: requestData.dimensions,
@@ -439,6 +450,19 @@ const LogisticsShipmentDetail = () => {
     );
   }
 
+  // Determine if this shipment/request is actually assigned to a provider.
+  // Consider it assigned only when there is a concrete assignment signal,
+  // not just a "preferred carrier" hint from free text.
+  const isAssigned = (() => {
+    const status = (shipment?.status || '').toLowerCase();
+    return Boolean(
+      shipment?.provider_name ||
+      shipment?.shipping?.carrier ||
+      shipment?.request_details?.awarded_to ||
+      ['awarded', 'assigned'].includes(status)
+    );
+  })();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -553,6 +577,133 @@ const LogisticsShipmentDetail = () => {
               </div>
             </div>
 
+            {/* Provider Assignment (if shipment has been assigned) */}
+            {isAssigned && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <Truck className="w-5 h-5 text-blue-600 mr-2" />
+                    Provider Assignment
+                  </h3>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                    Assigned
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Logistics Provider</label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {shipment?.provider_name || shipment?.shipping?.carrier || shipment?.request_details?.awarded_to_name || 'Assigned Provider'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Service Type</label>
+                      <p className="text-sm text-gray-900">
+                        {shipment?.shipping?.method || shipment?.shipping_method || parseSpecial(shipment).shipping_method || 'Standard Shipping'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Assignment Date</label>
+                      <p className="text-sm text-gray-900">
+                        {shipment?.assigned_at ? new Date(shipment.assigned_at).toLocaleDateString() : 
+                         shipment?.updated_at ? new Date(shipment.updated_at).toLocaleDateString() : 'Recently assigned'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                      <p className="text-sm font-mono bg-white px-3 py-2 rounded border">
+                        {shipment?.tracking_number || `REQ-${shipment?.id?.slice(0, 8)}`}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Current Status</label>
+                      <div className="flex items-center space-x-2">
+                        {getStatusIcon(shipment?.status)}
+                        <span className="text-sm font-medium text-gray-900 capitalize">
+                          {shipment?.status?.replace('_', ' ') || 'In Progress'}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Provider Contact</label>
+                      <div className="text-sm text-gray-900">
+                        <div className="flex items-center space-x-2">
+                          <Phone className="w-3 h-3 text-gray-400" />
+                          <span>{shipment?.provider_contact_phone || 'Contact via platform'}</span>
+                        </div>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Mail className="w-3 h-3 text-gray-400" />
+                          <span>{shipment?.provider_contact_email || 'Contact via platform'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Provider Selection System (if shipment is not yet assigned) */}
+            {!isAssigned && (
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl shadow-sm border border-orange-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 mr-2" />
+                    Provider Assignment Required
+                  </h3>
+                  <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full">
+                    Pending Assignment
+                  </span>
+                </div>
+                
+                <div className="mb-6">
+                  <p className="text-sm text-gray-700 mb-4">
+                    This shipment request has not been assigned to a logistics provider yet. 
+                    Compare available providers and select the best option based on rates, transit times, and service quality.
+                  </p>
+                  
+                  <div className="bg-white rounded-lg p-4 border border-orange-200">
+                    <h4 className="font-medium text-gray-900 mb-3">Why assign a provider?</h4>
+                    <ul className="text-sm text-gray-600 space-y-2">
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Get real-time tracking information</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Lock in competitive shipping rates</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Access provider-specific services</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>Enable automated status updates</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Comprehensive Provider Comparison System */}
+                <ProviderComparisonSystem
+                  shipmentRequest={shipment}
+                  onProviderSelected={(assignmentData) => {
+                    toast.success(`Provider ${assignmentData.provider_name} assigned successfully!`);
+                    // Reload shipment data to show updated assignment
+                    loadShipmentDetail();
+                  }}
+                  onSuccess={(successData) => {
+                    toast.success('Shipment successfully assigned to provider!');
+                    // Reload shipment data to show updated assignment
+                    loadShipmentDetail();
+                  }}
+                />
+              </div>
+            )}
+
             {/* Shipping Details */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Shipping Information</h3>
@@ -563,22 +714,27 @@ const LogisticsShipmentDetail = () => {
                     <p className="text-sm text-gray-900">{shipment?.shipping?.method || shipment?.shipping_method || parseSpecial(shipment).shipping_method || 'Not specified'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Provider</label>
-                    <p className="text-sm text-gray-900">{shipment?.shipping?.carrier || parseSpecial(shipment).preferred_carrier || shipment?.provider_name || 'Not specified'}</p>
+                    <label className="block text-sm font-medium text-gray-600">Vessel/Flight Info</label>
+                    <p className="text-sm text-gray-900">
+                      {shipment?.shipping?.vessel_name ? `${shipment.shipping.vessel_name}` : 
+                       shipment?.shipping?.flight_number ? `Flight ${shipment.shipping.flight_number}` : 'Not available'}
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Status</label>
-                    <p className="text-sm text-gray-900 capitalize">{shipment?.status || 'Posted'}</p>
+                    <label className="block text-sm font-medium text-gray-600">Container/Booking Ref</label>
+                    <p className="text-sm text-gray-900">
+                      {shipment?.shipping?.container_number || shipment?.shipping?.booking_reference || 'Not assigned'}
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
-                    <p className="text-sm text-gray-900">{shipment?.tracking_number || `REQ-${shipment?.id?.slice(0, 8)}`}</p>
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium text-gray-600">Current Location</label>
                     <p className="text-sm text-gray-900">{shipment?.current_location || 'Not available'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Transit Time</label>
+                    <p className="text-sm text-gray-900">{shipment?.timeline?.transit_time || shipment?.urgency || 'Not specified'}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Delays</label>
@@ -669,14 +825,82 @@ const LogisticsShipmentDetail = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Provider Information */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <Truck className="w-5 h-5 text-blue-600 mr-2" />
+                Provider Status
+              </h3>
+              {isAssigned ? (
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="text-lg font-bold text-blue-900">
+          {shipment?.provider_name || shipment?.shipping?.carrier || shipment?.request_details?.awarded_to_name || 'Assigned Provider'}
+                    </div>
+                    <div className="text-sm text-blue-600 mt-1">
+                      {shipment?.shipping?.method || shipment?.shipping_method || parseSpecial(shipment).shipping_method || 'Logistics Provider'}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Assignment Status</span>
+                    <span className="font-medium text-green-600">Active</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Service Level</span>
+                    <span className="font-medium text-gray-900">
+                      {shipment?.urgency || 'Standard'}
+                    </span>
+                  </div>
+                  {shipment?.tracking_number && (
+                    <div className="pt-3 border-t">
+                      <div className="text-sm text-gray-600 mb-1">Tracking Reference</div>
+                      <div className="font-mono text-sm bg-gray-50 p-2 rounded border">
+                        {shipment.tracking_number}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div className="text-lg font-bold text-yellow-900">
+                      Pending Assignment
+                    </div>
+                    <div className="text-sm text-yellow-600 mt-1">
+                      Awaiting provider selection
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Quotes Received</span>
+                    <span className="font-medium text-gray-900">{shipment?.quotes_count || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Status</span>
+                    <span className="font-medium text-gray-900 capitalize">{shipment?.status || 'Open'}</span>
+                  </div>
+                  {shipment?.status === 'posted' && (
+                    <div className="pt-3 border-t">
+                      <Link
+                        to={`${webRoutes.logisticsRequestDetail.replace(':id', shipment?.id)}`}
+                        className="inline-flex items-center justify-center w-full px-3 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100"
+                      >
+                        <Truck className="w-4 h-4 mr-2" />
+                        Assign Provider
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Key Information */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Details</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Tracking Number</span>
+                  <span className="text-sm text-gray-600">Request ID</span>
                   <span className="text-sm font-mono font-medium text-gray-900">
-                    {shipment?.tracking_number || `REQ-${shipment?.id?.slice(0, 8)}` || 'Not assigned'}
+                    {`REQ-${shipment?.id?.slice(0, 8)}` || 'Not assigned'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -723,15 +947,15 @@ const LogisticsShipmentDetail = () => {
                     <p className="text-gray-600">{shipment?.origin_address || 'Address not specified'}</p>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="w-3 h-3" />
-                      <span>{shipment?.origin?.contact_name || parseSpecial(shipment).origin_contact_name || 'Contact not specified'}</span>
+                      <span>{shipment?.origin?.contact_name || shipment?.origin_contact_name || parseSpecial(shipment).origin_contact_name || 'Contact not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Phone className="w-3 h-3" />
-                      <span>{shipment?.origin?.contact_phone || parseSpecial(shipment).origin_contact_phone || 'Phone not specified'}</span>
+                      <span>{shipment?.origin?.contact_phone || shipment?.origin_contact_phone || parseSpecial(shipment).origin_contact_phone || 'Phone not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Mail className="w-3 h-3" />
-                      <span>{shipment?.origin?.contact_email || parseSpecial(shipment).origin_contact_email || 'Email not specified'}</span>
+                      <span>{shipment?.origin?.contact_email || shipment?.origin_contact_email || parseSpecial(shipment).origin_contact_email || 'Email not specified'}</span>
                     </div>
                   </div>
                 </div>
@@ -743,15 +967,15 @@ const LogisticsShipmentDetail = () => {
                     <p className="text-gray-600">{shipment?.destination_address || 'Address not specified'}</p>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="w-3 h-3" />
-                      <span>{shipment?.destination?.contact_name || parseSpecial(shipment).dest_contact_name || 'Contact not specified'}</span>
+                      <span>{shipment?.destination?.contact_name || shipment?.destination_contact_name || parseSpecial(shipment).dest_contact_name || 'Contact not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Phone className="w-3 h-3" />
-                      <span>{shipment?.destination?.contact_phone || parseSpecial(shipment).dest_contact_phone || 'Phone not specified'}</span>
+                      <span>{shipment?.destination?.contact_phone || shipment?.destination_contact_phone || parseSpecial(shipment).dest_contact_phone || 'Phone not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Mail className="w-3 h-3" />
-                      <span>{shipment?.destination?.contact_email || parseSpecial(shipment).dest_contact_email || 'Email not specified'}</span>
+                      <span>{shipment?.destination?.contact_email || shipment?.destination_contact_email || parseSpecial(shipment).dest_contact_email || 'Email not specified'}</span>
                     </div>
                   </div>
                 </div>
