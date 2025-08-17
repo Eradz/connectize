@@ -15,7 +15,7 @@ export const useCompanies = () => {
   const { user: currentUser } = useAuth();
   return useQuery({
     queryKey: ["allConnectizeCompanies"],
-    queryFn: getAllCompanies,
+    queryFn: async () => await getAllCompanies(),
     enabled: !!currentUser,
   });
 };

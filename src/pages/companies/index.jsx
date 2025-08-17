@@ -163,27 +163,12 @@ export default function CompaniesPage() {
 }
 
 export const CompaniesArray = ({
-  hasFilter = true,
   isSearch,
   array,
   companies = [],
-  isLoading = false,
   searchLoading,
 }) => {
-  //
-  const { updateSearchParams, searchParams } = useCustomSearchParams();
-  // const { updateSearchParams, searchParams } = useCustomSearchParams();
-
-  //
-  // const { data: companiesList } = usePollAllCompanies();
-
-  //
-  // const selectedSortOption = searchParams.get("sort_by") || "company name";
-
-  //
   const companyArray = isSearch ? array : companies;
-  // const companyArray = isSearch ? array : companiesList?.results;
-
   //
   const { user: currentUser } = useAuth();
 

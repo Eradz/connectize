@@ -50,7 +50,10 @@ const Sidebar = () => {
 
 export default Sidebar;
 
-export function CompaniesList({ queryFn = getAllCompanies }) {
+async function defaultQueryFn() {
+  return await getAllCompanies();
+}
+export function CompaniesList({ queryFn = defaultQueryFn }) {
   const { user: currentUser } = useAuth();
   const { data: companiesList, isLoading } = useQuery({
     queryKey: ["allConnectizeCompanies"],
@@ -96,7 +99,12 @@ function CompanyListItem({ company }) {
         />
       </Link>
       <div>
-        <CompanyName slug={slug} name={company_name} verified={verify} size="md" />
+        <CompanyName
+          slug={slug}
+          name={company_name}
+          verified={verify}
+          size="md"
+        />
         <small className="text-gray-400 text-xs line-clamp-1">
           {capitalizeFirst(tag_line) || "Tag line goes here"}
         </small>
