@@ -29,20 +29,17 @@ export default function ConnectButton({
 
       setHasConnected(!!isInFollowingList);
     } else {
-      if (Object.keys(currentCompany).includes("isFollowedByUser")) {
-        setHasConnected(!!currentCompany?.isFollowedByUser);
-        return;
-      }
-      const followingList = currentCompany?.followers
-        ?.flatMap((follower) => [
-          follower.company_follower.id,
-          follower.user_follower.id,
-        ])
-        .filter(Boolean);
-      if (followingList) {
-        const isConnected = followingList.includes(currentUser?.id);
-        setHasConnected(isConnected);
-      }
+      setHasConnected(!!currentCompany?.isFollowedByUser);
+      // const followingList = currentCompany?.followers
+      //   ?.flatMap((follower) => [
+      //     follower.company_follower.id,
+      //     follower.user_follower.id,
+      //   ])
+      //   .filter(Boolean);
+      // if (followingList) {
+      //   const isConnected = followingList.includes(currentUser?.id);
+      //   setHasConnected(isConnected);
+      // }
     }
   }, [currentUser, currentCompany, id, type]);
 

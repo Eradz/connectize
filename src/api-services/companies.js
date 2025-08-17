@@ -19,11 +19,14 @@ import { getCurrentUser } from "./users";
 //     "verify": false
 // }
 
-export const getAllCompanies = async () => {
-  const companies = await makeApiRequest({
+export const getAllCompanies = async (params, returnFullRes = false) => {
+  const { results: companies, next } = await makeApiRequest({
     url: `api/companies/`,
     method: "GET",
+    params,
   });
+
+  if (returnFullRes) return { data: companies, next };
 
   return companies || [];
 };
