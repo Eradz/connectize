@@ -39,12 +39,12 @@ export const useUsers = () => {
   });
 };
 
-export const useGetCurrentCompany = (id) => {
+export const useGetCurrentCompany = (id, enabled = true) => {
   const { user: currentUser } = useAuth();
   return useQuery({
     queryKey: ["myCompanies", id],
     queryFn: () => getCompanyByIdOrEmail(id),
-    enabled: !!currentUser,
+    enabled: !!currentUser && enabled,
   });
 };
 export const useGetSingleCompany = (name, { enabled = true }) => {

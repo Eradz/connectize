@@ -56,26 +56,36 @@ export const CompaniesArray = ({
   array,
   searchLoading,
 }) => {
+  //
   const { updateSearchParams, searchParams } = useCustomSearchParams();
+
+  //
   const { data: companiesList } = usePollAllCompanies();
+
+  //
   const selectedSortOption = searchParams.get("sort_by") || "company name";
 
+  //
   const companyArray = isSearch ? array : companiesList?.results;
 
+  //
   const { user: currentUser } = useAuth();
 
+  //
   const sortedCompanies = companyArray?.sort((a, b) => {
     switch (selectedSortOption) {
       case "company type":
-        return a.organization_type.localeCompare(b.organization_type);
+        return a?.organization_type?.localeCompare(b?.organization_type);
       case "products":
-        return a.products.length - b?.products.length;
+        return a?.products?.length - b?.products?.length;
       case "country":
-        return a?.country.localeCompare(b?.country);
+        return a?.country?.localeCompare(b?.country);
       default:
-        return a.company_name.localeCompare(b?.company_name);
+        return a?.company_name?.localeCompare(b?.company_name);
     }
   });
+
+  //
   return searchLoading ? (
     <PageLoading hasLogo={false} text="Getting companies" />
   ) : companyArray?.length < 1 ? (
@@ -189,6 +199,7 @@ export const CompaniesArray = ({
                     id={Number(company?.id)}
                     slug={company?.slug}
                     type="company"
+                    data={company}
                   />
                 ) : (
                   <Link to={`/${company?.slug}`}>
