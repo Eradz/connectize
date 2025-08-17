@@ -18,6 +18,7 @@ capacitor.config.ts.backup
 
 # production
 /build
+/build-bk
 
 # misc
 .DS_Store
