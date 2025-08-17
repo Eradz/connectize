@@ -1,0 +1,1 @@
+import{e as u}from"./notifications-BHxKZRbx.js";const o=({queryKey:n,queryFn:a,initialPageParam:s=1}={})=>u({queryKey:n,initialPageParam:s,queryFn:a,getNextPageParam:e=>{if(!e||!e.next)return;let r=new URL(e.next).searchParams.get("page");if(!r)return;let t=parseInt(r);if(t)return t}});export{o as u};

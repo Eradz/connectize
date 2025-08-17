@@ -1,0 +1,1 @@
+import{j as x}from"./chunk-UH6JLGW7-CryfoZLB.js";import{c as a}from"./clsx-B-dksMZM.js";function r({children:o,center:s=!1,weight:t="bold",heading:e="heading"}){return x.jsx("h1",{className:a("text-balance",{"text-center":s,"font-bold ":t==="bold","font-semibold":t==="semibold","text-xl":e==="sub-heading","text-2xl ":e==="heading"}),children:o})}export{r as H};

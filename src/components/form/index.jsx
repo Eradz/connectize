@@ -29,6 +29,7 @@ export default function Form({
     disabled,
     validate,
     helpText,
+    isLoading,
   }) => {
     return (
       <section className="w-full my-2.5 md:my-3" key={name}>
@@ -66,6 +67,7 @@ export default function Form({
           />
         ) : type === "select" ? (
           <CustomSelect
+            isLoading={isLoading}
             formik={formik}
             name={name}
             placeholder={placeholder}

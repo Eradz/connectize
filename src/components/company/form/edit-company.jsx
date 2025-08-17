@@ -2,12 +2,12 @@ import { Button } from "@chakra-ui/react";
 import { getCountries } from "@loophq/country-state-list";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { editCompanyInformation } from "../../../api-services/companies";
-import cities from "../../../lib/data/cities.json";
+// import cities from "../../../lib/data/cities.json";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
 import { useQuery } from "@tanstack/react-query";
@@ -79,27 +79,37 @@ export default function EditCompanyForm({ company }) {
     countries.find((country) => country.name === formik.values["country"])
       ?.states || [];
 
-  //     const countryName = formik.values["country"]
-  //     const stateName = formik.values['state']
+  const countryName = formik.values["country"];
+  const stateName = formik.values["state"];
 
-  // const {data: citiesFor, isLoading: isLoadingGetCitiesForState} = useQuery({
-  //   queryKey: ["cities", {countryName,stateName }],
-  //   queryFn: async () => {
-  //     try {
-  //       const res=      await axios.get(process.env.NODE_ENV=== "production" ? "" : "http://192.168.8.101:6000",{params:{countryName,stateName}})
+  const { data: citiesForState, isLoading: isLoadingGetCitiesForState } =
+    useQuery({
+      queryKey: ["cities", { countryName, stateName }],
+      initialData: [],
+      queryFn: async () => {
+        if (!countryName || !stateName) return [];
+        try {
+          const res = await axios.get(
+            process.env.NODE_ENV === "production"
+              ? ""
+              : `http://192.168.8.116:4000`,
+            { params: { country: countryName, state: stateName } }
+          );
 
-  //       return res.data || []
-  //     } catch (error) {
-  //       toast.error("Could not get list of cities for " + stateName + " " + countryName)
-  //       throw error
-  //     }
-  //   }
-  // })
+          return res.data?.map((city) => city.name) || [];
+        } catch (error) {
+          toast.error(
+            "Could not get list of cities for " + stateName + " " + countryName
+          );
+          throw error;
+        }
+      },
+    });
 
-  const citiesForState =
-    cities
-      .filter((city) => city.state_name === formik.values["state"])
-      .map((city) => city.name) || [];
+  // const citiesForState =
+  //   cities
+  //     .filter((city) => city.state_name === formik.values["state"])
+  //     .map((city) => city.name) || [];
 
   const companyFields = [
     {
@@ -155,6 +165,7 @@ export default function EditCompanyForm({ company }) {
           label: "Region/City",
           placeholder: "Select city",
           options: citiesForState,
+          isLoading: isLoadingGetCitiesForState,
         },
         {
           name: "organization_type",

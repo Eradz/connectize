@@ -244,7 +244,13 @@ export const CustomTextArea = ({ formik, name, placeholder }) => {
   );
 };
 
-export const CustomSelect = ({ formik, name, placeholder, options = [""] }) => (
+export const CustomSelect = ({
+  formik,
+  name,
+  placeholder,
+  isLoading,
+  options = [""],
+}) => (
   <Select
     id={name}
     name={name}
@@ -257,7 +263,7 @@ export const CustomSelect = ({ formik, name, placeholder, options = [""] }) => (
       localStorage.setItem(name, e.currentTarget.value);
       formik.handleChange(e);
     }}
-    value={formik.values[`${name}`]}
+    value={isLoading ? "Loading..." : formik.values[`${name}`]}
     className="!w-full !bg-background px-3 !text-sm mt-2 border-gray-100"
   >
     {options?.map((option, index) => (
