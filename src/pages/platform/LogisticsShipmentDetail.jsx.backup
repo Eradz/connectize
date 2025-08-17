@@ -49,40 +49,13 @@ const LogisticsShipmentDetail = () => {
         
         // Check if we got valid shipment data
         if (shipmentData && shipmentData.id) {
-          // Normalize shipment by flattening request_details fields used by the UI
-          const rd = shipmentData.request_details || {};
-          const normalizedShipment = {
-            ...shipmentData,
-            // Mirror request fields at top-level so UI reads consistent keys
-            title: shipmentData.title || rd.title || shipmentData.tracking_number || shipmentData.id,
-            cargo_type: shipmentData.cargo_type || rd.cargo_type,
-            description: shipmentData.description || rd.description,
-            origin_address: shipmentData.origin_address || rd.origin_address,
-            destination_address: shipmentData.destination_address || rd.destination_address,
-            weight: shipmentData.weight || rd.weight,
-            volume: shipmentData.volume || rd.volume,
-            dimensions: shipmentData.dimensions || rd.dimensions,
-            pickup_date_requested: shipmentData.pickup_date_requested || rd.pickup_date_requested,
-            delivery_date_requested: shipmentData.delivery_date_requested || rd.delivery_date_requested,
-            urgency: shipmentData.urgency || rd.urgency,
-            budget: shipmentData.budget || rd.budget,
-            budget_min: shipmentData.budget_min || rd.budget_min,
-            budget_max: shipmentData.budget_max || rd.budget_max,
-            currency: shipmentData.currency || rd.currency,
-            quotes_count: shipmentData.quotes_count || rd.quotes_count,
-          };
-          setShipment(normalizedShipment);
+          setShipment(shipmentData);
           
           // Load tracking data if available
           try {
             const trackingResponse = await logisticsAPI.getShipmentTracking(shipmentData.id);
             const trackingData = trackingResponse?.data ?? trackingResponse;
-            const events = Array.isArray(trackingData)
-              ? trackingData
-              : Array.isArray(trackingData?.results)
-                ? trackingData.results
-                : [];
-            setTrackingHistory(events);
+            setTrackingHistory(Array.isArray(trackingData?.results) ? trackingData.results : []);
           } catch (trackingError) {
             console.warn('Failed to load tracking data:', trackingError);
             setTrackingHistory([]);
@@ -109,23 +82,8 @@ const LogisticsShipmentDetail = () => {
             provider_name: requestData.awarded_to_name || null,
             request: requestData.id,
             request_details: requestData,
-            // Direct fields mirrored from API for exact mapping in UI
-            title: requestData.title,
-            cargo_type: requestData.cargo_type,
-            description: requestData.description,
-            origin_address: requestData.origin_address,
-            destination_address: requestData.destination_address,
             weight: requestData.weight,
             volume: requestData.volume,
-            dimensions: requestData.dimensions,
-            pickup_date_requested: requestData.pickup_date_requested,
-            delivery_date_requested: requestData.delivery_date_requested,
-            urgency: requestData.urgency,
-            budget: requestData.budget,
-            budget_min: requestData.budget_min,
-            budget_max: requestData.budget_max,
-            currency: requestData.currency,
-            quotes_count: requestData.quotes_count,
             current_location: null,
             created_at: requestData.created_at,
             updated_at: requestData.updated_at,
@@ -155,7 +113,7 @@ const LogisticsShipmentDetail = () => {
             delivery_date: requestData.requested_delivery_date,
             shipping_method: requestData.shipping_method,
             special_instructions: requestData.special_instructions,
-            special_requirements: requestData.special_requirements
+            budget: requestData.budget
           };
           
           console.log('🔄 Using normalized request data');
@@ -290,47 +248,48 @@ const LogisticsShipmentDetail = () => {
     };
   };
 
-  const getStatusColor = (code) => {
-    const s = (code || '').toLowerCase();
-    switch (s) {
-      // Shipment status
-      case 'preparing': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'picked_up': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'in_transit': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'at_destination': return 'bg-purple-100 text-purple-800 border-purple-200';
+  const getStatusColor = (status) => {
+    switch (status) {
       case 'delivered': return 'bg-green-100 text-green-800 border-green-200';
-      case 'exception': return 'bg-red-100 text-red-800 border-red-200';
-      case 'cancelled': return 'bg-gray-200 text-gray-700 border-gray-300';
-      // Tracking event types
-      case 'created': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'arrived_facility': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'departed_facility': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'customs_clearance': return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'out_for_delivery': return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'in_transit': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'arrived': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'delayed': return 'bg-red-100 text-red-800 border-red-200';
+      case 'transfer': return 'bg-orange-100 text-orange-800 border-orange-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const getStatusIcon = (code) => {
-    const s = (code || '').toLowerCase();
-    switch (s) {
-      case 'preparing': return <Clock className="w-5 h-5" />;
-      case 'picked_up': return <Truck className="w-5 h-5" />;
-      case 'in_transit': return <Truck className="w-5 h-5" />;
-      case 'at_destination': return <MapPin className="w-5 h-5" />;
+  const getStatusIcon = (status) => {
+    switch (status) {
       case 'delivered': return <CheckCircle className="w-5 h-5" />;
-      case 'exception': return <AlertTriangle className="w-5 h-5" />;
-      case 'cancelled': return <AlertTriangle className="w-5 h-5" />;
-      case 'created': return <Package className="w-5 h-5" />;
-      case 'arrived_facility': return <MapPin className="w-5 h-5" />;
-      case 'departed_facility': return <Plane className="w-5 h-5" />;
-      case 'customs_clearance': return <Info className="w-5 h-5" />;
-      case 'out_for_delivery': return <Truck className="w-5 h-5" />;
+      case 'in_transit': return <Truck className="w-5 h-5" />;
+      case 'arrived': return <MapPin className="w-5 h-5" />;
+      case 'pending': return <Clock className="w-5 h-5" />;
       case 'delayed': return <AlertTriangle className="w-5 h-5" />;
+      case 'transfer': return <Plane className="w-5 h-5" />;
       default: return <Package className="w-5 h-5" />;
     }
   };
+
+  // Parse contact information from special requirements
+  const parseContactInfo = (specialRequirements) => {
+    if (!specialRequirements) return {};
+    
+    const pickupMatch = specialRequirements.match(/Pickup contact: (.+?) \| (.+?) \| (.+?)(?:\n|$)/);
+    const deliveryMatch = specialRequirements.match(/Delivery contact: (.+?) \| (.+?) \| (.+?)(?:\n|$)/);
+    const shippingMethodMatch = specialRequirements.match(/Shipping method: (.+?)(?:\n|$)/);
+    const carrierMatch = specialRequirements.match(/Preferred carrier: (.+?)(?:\n|$)/);
+    
+    return {
+      pickupContact: pickupMatch ? { name: pickupMatch[1], phone: pickupMatch[2], email: pickupMatch[3] } : null,
+      deliveryContact: deliveryMatch ? { name: deliveryMatch[1], phone: deliveryMatch[2], email: deliveryMatch[3] } : null,
+      shippingMethod: shippingMethodMatch ? shippingMethodMatch[1].replace('_', ' ') : null,
+      preferredCarrier: carrierMatch ? carrierMatch[1].replace('_', ' ') : null
+    };
+  };
+
+  const contactInfo = parseContactInfo(shipment?.special_requirements);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -349,65 +308,6 @@ const LogisticsShipmentDetail = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  // Compute a robust volume for display: prefer API volume if > 0; else compute from dimensions; else default to 1
-  const getDisplayVolume = (data) => {
-    if (!data) return '1';
-    const toNum = (v) => {
-      const n = typeof v === 'string' ? parseFloat(v) : Number(v);
-      return Number.isFinite(n) ? n : 0;
-    };
-    // 1) Direct volume from API
-    const vol = toNum(data.volume || data.request_details?.volume);
-    if (vol > 0) return vol.toFixed(2).replace(/\.00$/, '');
-    // 2) Sum item volumes if structured dimensions exist
-    const items = data.dimensions?.items || data.request_details?.dimensions?.items;
-    if (Array.isArray(items) && items.length > 0) {
-      const total = items.reduce((sum, item) => {
-        const dims = item.dimensions || item?.dimensions?.dimensions || {}; // support nested shape just in case
-        const L = toNum(dims.length);
-        const W = toNum(dims.width);
-        const H = toNum(dims.height);
-        const qty = toNum(item.quantity) || 1;
-        const v = L * W * H * qty;
-        return sum + (Number.isFinite(v) ? v : 0);
-      }, 0);
-      if (total > 0) return total.toFixed(2).replace(/\.00$/, '');
-      // If items exist but dimensions are zero, default to 1 m³
-      return '1';
-    }
-    // 3) Final fallback
-    return '1';
-  };
-
-  // Extract optional contact/method hints from special_requirements free text
-  const parseSpecial = (data) => {
-    const sr = data?.special_requirements || data?.request_details?.special_requirements || '';
-    if (!sr || typeof sr !== 'string') return {};
-    const lines = sr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    const out = {};
-    for (const ln of lines) {
-      const lower = ln.toLowerCase();
-      if (lower.startsWith('pickup contact:')) {
-        out.origin_contact_raw = ln.replace(/^[^:]*:\s*/, '');
-        const parts = out.origin_contact_raw.split('|').map(s => s.trim());
-        out.origin_contact_name = parts[0] || undefined;
-        out.origin_contact_phone = parts[1] || undefined;
-        out.origin_contact_email = parts[2] || undefined;
-      } else if (lower.startsWith('delivery contact:')) {
-        out.dest_contact_raw = ln.replace(/^[^:]*:\s*/, '');
-        const parts = out.dest_contact_raw.split('|').map(s => s.trim());
-        out.dest_contact_name = parts[0] || undefined;
-        out.dest_contact_phone = parts[1] || undefined;
-        out.dest_contact_email = parts[2] || undefined;
-      } else if (lower.startsWith('shipping method:')) {
-        out.shipping_method = ln.replace(/^[^:]*:\s*/, '');
-      } else if (lower.startsWith('preferred carrier:')) {
-        out.preferred_carrier = ln.replace(/^[^:]*:\s*/, '');
-      }
-    }
-    return out;
   };
 
   if (loading) {
@@ -454,10 +354,10 @@ const LogisticsShipmentDetail = () => {
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {shipment?.title || `Request REQ-${shipment?.id?.slice(0, 8)}`}
+                  {shipment.title || `Shipment ${shipment?.tracking_number || `REQ-${shipment?.id?.slice(0,8)}`}`}
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  {shipment?.origin_address || shipment?.origin?.name || 'Origin'} → {shipment?.destination_address || shipment?.destination?.name || 'Destination'}
+                  {shipment?.origin_address || 'Origin'} → {shipment?.destination_address || 'Destination'}
                 </p>
               </div>
             </div>
@@ -489,8 +389,8 @@ const LogisticsShipmentDetail = () => {
               <div className="space-y-6">
                 {trackingHistory.map((event, index) => (
                   <div key={index} className="flex items-start space-x-4">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getStatusColor(event.event_type || event.status)}`}>
-                      {getStatusIcon(event.event_type || event.status)}
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getStatusColor(event.status)}`}>
+                      {getStatusIcon(event.status)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
@@ -526,11 +426,11 @@ const LogisticsShipmentDetail = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-600">Weight</label>
-                      <p className="text-sm text-gray-900">{shipment?.weight || shipment?.cargo?.weight || '0'} kg</p>
+                      <p className="text-sm text-gray-900">{shipment?.weight || '0'} kg</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-600">Volume</label>
-                      <p className="text-sm text-gray-900">{getDisplayVolume(shipment)} m³</p>
+                      <p className="text-sm text-gray-900">{shipment?.volume || '0'} m³</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -553,6 +453,59 @@ const LogisticsShipmentDetail = () => {
               </div>
             </div>
 
+            {/* Special Requirements */}
+            {shipment?.special_requirements && (
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Special Requirements</h3>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans">{shipment.special_requirements}</pre>
+                </div>
+              </div>
+            )}
+
+            {/* Contact Information */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Contact Information</h3>
+              
+              {/* Pickup Contact */}
+              <div className="mb-6">
+                <h4 className="text-md font-medium text-gray-800 mb-3">Pickup Contact</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                    <p className="text-sm text-gray-900">{contactInfo.pickupContact?.name || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Phone</label>
+                    <p className="text-sm text-gray-900">{contactInfo.pickupContact?.phone || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                    <p className="text-sm text-gray-900">{contactInfo.pickupContact?.email || "Not specified"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Contact */}
+              <div>
+                <h4 className="text-md font-medium text-gray-800 mb-3">Delivery Contact</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                    <p className="text-sm text-gray-900">{contactInfo.deliveryContact?.name || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Phone</label>
+                    <p className="text-sm text-gray-900">{contactInfo.deliveryContact?.phone || "Not specified"}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                    <p className="text-sm text-gray-900">{contactInfo.deliveryContact?.email || "Not specified"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Shipping Details */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Shipping Information</h3>
@@ -560,11 +513,11 @@ const LogisticsShipmentDetail = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Method</label>
-                    <p className="text-sm text-gray-900">{shipment?.shipping?.method || shipment?.shipping_method || parseSpecial(shipment).shipping_method || 'Not specified'}</p>
+                    <p className="text-sm text-gray-900">{contactInfo.shippingMethod || shipment?.urgency || 'Standard'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Provider</label>
-                    <p className="text-sm text-gray-900">{shipment?.shipping?.carrier || parseSpecial(shipment).preferred_carrier || shipment?.provider_name || 'Not specified'}</p>
+                    <label className="block text-sm font-medium text-gray-600">Preferred Carrier</label>
+                    <p className="text-sm text-gray-900">{contactInfo.preferredCarrier || 'Not specified'}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Status</label>
@@ -573,17 +526,19 @@ const LogisticsShipmentDetail = () => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
-                    <p className="text-sm text-gray-900">{shipment?.tracking_number || `REQ-${shipment?.id?.slice(0, 8)}`}</p>
+                    <label className="block text-sm font-medium text-gray-600">Container Number</label>
+                    <p className="text-sm text-gray-900 font-mono">{shipment?.shipping?.container_number || 'Not specified'}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600">Current Location</label>
-                    <p className="text-sm text-gray-900">{shipment?.current_location || 'Not available'}</p>
+                    <label className="block text-sm font-medium text-gray-600">Booking Reference</label>
+                    <p className="text-sm text-gray-900 font-mono">{shipment?.shipping?.booking_reference || 'Not specified'}</p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Delays</label>
-                    <p className="text-sm text-gray-900">{shipment?.delays_count || 0} events{shipment?.total_delay_hours ? ` • ${shipment.total_delay_hours}h` : ''}</p>
-                  </div>
+                  {shipment?.shipping?.flight_number && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">Flight Number</label>
+                      <p className="text-sm text-gray-900">{shipment.shipping.flight_number}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -610,59 +565,6 @@ const LogisticsShipmentDetail = () => {
                     </span>
                   </div>
                 ))}
-                {/* Render file fields from API if present */}
-                {(shipment?.bill_of_lading || shipment?.delivery_receipt || shipment?.customs_documents) && (
-                  <>
-                    {shipment?.bill_of_lading && (
-                      <a href={shipment.bill_of_lading} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Download className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Bill of Lading</p>
-                            <p className="text-xs text-gray-500">BOL</p>
-                          </div>
-                        </div>
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">available</span>
-                      </a>
-                    )}
-                    {shipment?.delivery_receipt && (
-                      <a href={shipment.delivery_receipt} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Download className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Delivery Receipt</p>
-                            <p className="text-xs text-gray-500">POD</p>
-                          </div>
-                        </div>
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">available</span>
-                      </a>
-                    )}
-                    {shipment?.customs_documents && (
-                      <a href={shipment.customs_documents} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Download className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">Customs Documents</p>
-                            <p className="text-xs text-gray-500">CD</p>
-                          </div>
-                        </div>
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">available</span>
-                      </a>
-                    )}
-                  </>
-                )}
-                {(!shipment?.documents || shipment.documents.length === 0) && !shipment?.bill_of_lading && !shipment?.delivery_receipt && !shipment?.customs_documents && (
-                  <div className="col-span-2 text-center py-8 text-gray-500">
-                    <Package className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                    <p>No documents available yet</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -675,39 +577,23 @@ const LogisticsShipmentDetail = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Tracking Number</span>
-                  <span className="text-sm font-mono font-medium text-gray-900">
-                    {shipment?.tracking_number || `REQ-${shipment?.id?.slice(0, 8)}` || 'Not assigned'}
-                  </span>
+                  <span className="text-sm font-mono font-medium text-gray-900">{shipment?.tracking_number || `REQ-${shipment?.id?.slice(0,8)}` || 'Not assigned'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Pickup Date</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {shipment?.actual_pickup_date
-                      ? new Date(shipment.actual_pickup_date).toLocaleDateString()
-                      : shipment?.pickup_date_requested 
-                        ? new Date(shipment.pickup_date_requested).toLocaleDateString()
-                        : shipment?.timeline?.pickup_date 
-                          ? new Date(shipment.timeline.pickup_date).toLocaleDateString()
-                          : 'Not specified'}
+                    {shipment?.pickup_date_requested ? new Date(shipment.pickup_date_requested).toLocaleDateString() : 'Not specified'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Est. Delivery</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {shipment?.actual_delivery_date
-                      ? new Date(shipment.actual_delivery_date).toLocaleDateString()
-                      : shipment?.delivery_date_requested 
-                        ? new Date(shipment.delivery_date_requested).toLocaleDateString()
-                        : shipment?.timeline?.estimated_delivery 
-                          ? new Date(shipment.timeline.estimated_delivery).toLocaleDateString()
-                          : 'Not specified'}
+                    {shipment?.delivery_date_requested ? new Date(shipment.delivery_date_requested).toLocaleDateString() : 'Not specified'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Transit Time</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    {shipment?.timeline?.transit_time || shipment?.urgency || 'Not specified'}
-                  </span>
+                  <span className="text-sm font-medium text-gray-900">{shipment?.urgency || 'Not specified'}</span>
                 </div>
               </div>
             </div>
@@ -719,19 +605,19 @@ const LogisticsShipmentDetail = () => {
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Origin</h4>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{shipment?.origin?.name || 'Origin Location'}</p>
+                    <p className="font-medium">Origin Location</p>
                     <p className="text-gray-600">{shipment?.origin_address || 'Address not specified'}</p>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="w-3 h-3" />
-                      <span>{shipment?.origin?.contact_name || parseSpecial(shipment).origin_contact_name || 'Contact not specified'}</span>
+                      <span>{contactInfo.pickupContact?.name || 'Contact not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Phone className="w-3 h-3" />
-                      <span>{shipment?.origin?.contact_phone || parseSpecial(shipment).origin_contact_phone || 'Phone not specified'}</span>
+                      <span>{contactInfo.pickupContact?.phone || 'Phone not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Mail className="w-3 h-3" />
-                      <span>{shipment?.origin?.contact_email || parseSpecial(shipment).origin_contact_email || 'Email not specified'}</span>
+                      <span>{contactInfo.pickupContact?.email || 'Email not specified'}</span>
                     </div>
                   </div>
                 </div>
@@ -739,85 +625,60 @@ const LogisticsShipmentDetail = () => {
                 <div className="border-t border-gray-200 pt-6">
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Destination</h4>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{shipment?.destination?.name || 'Destination Location'}</p>
+                    <p className="font-medium">Destination Location</p>
                     <p className="text-gray-600">{shipment?.destination_address || 'Address not specified'}</p>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <User className="w-3 h-3" />
-                      <span>{shipment?.destination?.contact_name || parseSpecial(shipment).dest_contact_name || 'Contact not specified'}</span>
+                      <span>{contactInfo.deliveryContact?.name || 'Contact not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Phone className="w-3 h-3" />
-                      <span>{shipment?.destination?.contact_phone || parseSpecial(shipment).dest_contact_phone || 'Phone not specified'}</span>
+                      <span>{contactInfo.deliveryContact?.phone || 'Phone not specified'}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
                       <Mail className="w-3 h-3" />
-                      <span>{shipment?.destination?.contact_email || parseSpecial(shipment).dest_contact_email || 'Email not specified'}</span>
+                      <span>{contactInfo.deliveryContact?.email || 'Email not specified'}</span>
+                    </div>
+                  </div>
+                </div>
+                      <User className="w-3 h-3" />
+                      <span>Contact not specified</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Phone className="w-3 h-3" />
+                      <span>{contactInfo.deliveryContact?.phone || 'Phone not specified'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Mail className="w-3 h-3" />
+                      <span>{contactInfo.deliveryContact?.email || 'Email not specified'}</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Cost Breakdown */}
+            {/* Budget Information */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {shipment?.costs ? 'Cost Breakdown' : 'Budget Information'}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Budget Information</h3>
               <div className="space-y-3">
-                {shipment?.costs ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Freight</span>
-                      <span className="text-sm font-medium text-gray-900">{formatCurrency(shipment.costs.freight)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Insurance</span>
-                      <span className="text-sm font-medium text-gray-900">{formatCurrency(shipment.costs.insurance)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Handling</span>
-                      <span className="text-sm font-medium text-gray-900">{formatCurrency(shipment.costs.handling)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Customs</span>
-                      <span className="text-sm font-medium text-gray-900">{formatCurrency(shipment.costs.customs)}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Fuel Surcharge</span>
-                      <span className="text-sm font-medium text-gray-900">{formatCurrency(shipment.costs.fuel_surcharge)}</span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-900">Total</span>
-                        <span className="text-sm font-bold text-gray-900">{formatCurrency(shipment.costs.total)}</span>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Budget Range</span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {shipment?.budget_min && shipment?.budget_max 
-                          ? `${formatCurrency(shipment.budget_min)} - ${formatCurrency(shipment.budget_max)}`
-                          : shipment?.budget ? formatCurrency(shipment.budget) : 'Not specified'
-                        }
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Currency</span>
-                      <span className="text-sm font-medium text-gray-900">{shipment?.currency || 'USD'}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Quotes Received</span>
-                      <span className="text-sm font-medium text-gray-900">{shipment?.quotes_count || 0}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Status</span>
-                      <span className="text-sm font-medium text-gray-900 capitalize">{shipment?.status || 'Posted'}</span>
-                    </div>
-                  </>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Budget Range</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatCurrency(shipment?.budget_min || 0)} - {formatCurrency(shipment?.budget_max || 0)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Currency</span>
+                  <span className="text-sm font-medium text-gray-900">{shipment?.currency || 'USD'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Quotes Received</span>
+                  <span className="text-sm font-medium text-gray-900">{shipment?.quotes_count || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Status</span>
+                  <span className="text-sm font-medium text-gray-900 capitalize">{shipment?.status || 'Posted'}</span>
+                </div>
               </div>
             </div>
           </div>
