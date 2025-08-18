@@ -36,9 +36,9 @@ export default function CompaniesPage() {
   const sortBy = useMemo(() => {
     switch (selectedSortOption) {
       case "company type":
-        return "type";
+        return "organization_type__name";
       case "products":
-        return "numberOfProducts";
+        return "products_count";
       case "date created":
         return "date_created";
       default:
@@ -71,7 +71,11 @@ export default function CompaniesPage() {
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
       const res = await getAllCompanies(
-        { page_size: 6, page: pageParam, sort_by: sortBy ? sortBy : undefined },
+        {
+          page_size: 6,
+          page: pageParam,
+          ordering: sortBy ? "-" + sortBy : undefined,
+        },
         true
       );
       return res;
