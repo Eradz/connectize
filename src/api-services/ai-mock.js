@@ -159,7 +159,7 @@ import { makeApiRequest } from '../lib/helpers';
 export class EnhancedAIMatchingService {
   constructor() {
     this.mockService = new MockAIMatchingService();
-    this.useMock = true; // Set to false when real backend is ready
+    this.useMock = false; // Enforce real backend usage
   }
 
   async getMatchProfiles() {
@@ -214,7 +214,7 @@ export class EnhancedAIMatchingService {
 export class EnhancedAIOpportunityService {
   constructor() {
     this.mockService = new MockAIOpportunityService();
-    this.useMock = true; // Set to false when real backend is ready
+    this.useMock = false; // Enforce real backend usage
   }
 
   async getOpportunities() {
@@ -257,7 +257,7 @@ export class EnhancedAIOpportunityService {
 export class EnhancedAIComplianceService {
   constructor() {
     this.mockService = new MockAIComplianceService();
-    this.useMock = true; // Set to false when real backend is ready
+    this.useMock = false; // Enforce real backend usage
   }
 
   async getComplianceAlerts() {

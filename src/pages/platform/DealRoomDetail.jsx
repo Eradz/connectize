@@ -11,7 +11,6 @@ import { dealDocumentService, dealValuationService } from "../../api-services/oi
 import axios from "axios";
 import { toast as notify } from "sonner";
 import ActivityTimeline from '../../components/deals/ActivityTimeline';
-import DealReports from '../../components/deals/DealReports';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
@@ -24,7 +23,6 @@ const tabs = [
   { key: "milestones", label: "Milestones" },
   { key: "activities", label: "Activities" },
   { key: "valuations", label: "Valuations" },
-  { key: "reports", label: "Reports" },
 ];
 
 function currentSection(pathname) {
@@ -33,7 +31,6 @@ function currentSection(pathname) {
   if (pathname.includes("/milestones")) return "milestones";
   if (pathname.includes("/activities")) return "activities";
   if (pathname.includes("/valuations")) return "valuations";
-  if (pathname.includes("/reports")) return "reports";
   return "overview";
 }
 
@@ -42,6 +39,20 @@ export default function DealRoomDetail() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const active = useMemo(() => currentSection(pathname), [pathname]);
+
+  // Early validation - don't even render if ID is invalid
+  if (!id || id === 'my-participations' || id === 'create' || !id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+    console.warn('Invalid deal ID detected, redirecting:', id);
+    setTimeout(() => navigate(webRoutes.dealRooms, { replace: true }), 0);
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -105,6 +116,11 @@ export default function DealRoomDetail() {
   ];
 
   useEffect(() => {
+    // Skip loading if we're about to redirect due to invalid ID
+    if (!id || id === 'my-participations' || id === 'create' || !id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+      return;
+    }
+
     let isMounted = true;
     async function load() {
       setLoading(true);
@@ -300,31 +316,6 @@ export default function DealRoomDetail() {
               if (isMounted) setParticipants([...locallyAddedParticipants]);
             }
           }
-        } else if (active === "reports") {
-          // For reports, fetch fresh real data from API in parallel, no demo mocks
-          try {
-            const [actsRes, docsRes, milesRes, partsRes] = await Promise.all([
-              makeApiRequest({ url: "api/v1/deals/activities/", method: "GET", params: { deal_room: id, page_size: 200 } }),
-              makeApiRequest({ url: "api/v1/deals/documents/", method: "GET", params: { deal_room: id, page_size: 200 } }),
-              makeApiRequest({ url: "api/v1/deals/milestones/", method: "GET", params: { deal_room: id, page_size: 200 } }),
-              makeApiRequest({ url: `api/v1/deals/participants/`, method: "GET", params: { deal_room: id, page_size: 200 } }),
-            ]);
-
-            const acts = actsRes?.results || actsRes?.data || actsRes || [];
-            const docs = docsRes?.results || docsRes?.data || docsRes || [];
-            const miles = milesRes?.results || milesRes?.data || milesRes || [];
-            const parts = partsRes?.results || partsRes?.data || partsRes || [];
-
-            if (isMounted) {
-              setActivities(Array.isArray(acts) ? acts : []);
-              setDocuments(Array.isArray(docs) ? docs : []);
-              setMilestones(Array.isArray(miles) ? miles : []);
-              setParticipants(Array.isArray(parts) ? parts : []);
-            }
-          } catch (err) {
-            console.warn('Reports data fetch failed:', err);
-            // Leave existing state as-is if fetch fails
-          }
         }
       } catch (e) {
         if (!isMounted) return;
@@ -376,8 +367,6 @@ export default function DealRoomDetail() {
         return webRoutes.dealRoomActivities.replace(":id", id);
       case "valuations":
         return webRoutes.dealRoomValuations.replace(":id", id);
-      case "reports":
-        return webRoutes.dealRoomReports.replace(":id", id);
       default:
         return webRoutes.dealRoomDetail.replace(":id", id);
     }
@@ -1056,15 +1045,6 @@ export default function DealRoomDetail() {
                     }
                   }}
                   loading={loading}
-                />
-              )}
-              {active === "reports" && (
-                <DealReports 
-                  deal={deal}
-                  activities={activities}
-                  milestones={milestones}
-                  documents={documents}
-                  participants={participants}
                 />
               )}
               {active === "valuations" && (

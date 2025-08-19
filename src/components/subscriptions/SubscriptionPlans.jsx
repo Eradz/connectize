@@ -3,6 +3,7 @@ import { useAuth } from '../../context/userContext';
 import { useFeatureFlag } from '../../context/featureFlagContext';
 import Button from '../ui/Button';
 import { CrownIcon, StarIcon, TrendingUpIcon, ZapIcon } from '../ui/ModernIcon';
+import subscriptionsApi from '../../api-services/subscriptions';
 
 const SubscriptionPlans = () => {
   const { user } = useAuth();
@@ -19,74 +20,31 @@ const SubscriptionPlans = () => {
 
   const fetchPlans = async () => {
     try {
-      // In production, this would be an API call
-      const mockPlans = [
-        {
-          id: 'trial',
-          name: 'Trial',
-          price: 0,
-          billing_cycle: 'monthly',
-          features: [
-            '5 Posts per month',
-            '3 Products per month',
-            '3 Services per month',
-            '1GB Storage',
-            'Basic Support',
-          ],
-          limitations: [
-            'No Featured Ads',
-            'No AI Features',
-            'Limited Analytics',
-          ],
-          popular: false,
-        },
-        {
-          id: 'standard',
-          name: 'Standard',
-          price: 29.99,
-          billing_cycle: 'monthly',
-          features: [
-            '50 Posts per month',
-            '25 Products per month',
-            '25 Services per month',
-            '10GB Storage',
-            'Featured Ads',
-            'Basic AI Matchmaking',
-            'Deal Rooms',
-            'Events Platform',
-            'Priority Support',
-          ],
-          limitations: [
-            'Limited AI Analytics',
-            'No Custom Branding',
-          ],
-          popular: true,
-        },
-        {
-          id: 'premium',
-          name: 'Premium',
-          price: 99.99,
-          billing_cycle: 'monthly',
-          features: [
-            'Unlimited Posts',
-            'Unlimited Products',
-            'Unlimited Services',
-            '100GB Storage',
-            'All AI Features',
-            'Advanced Analytics',
-            'Data Licensing',
-            'API Access',
-            'Custom Branding',
-            'White-label Options',
-            'Dedicated Support',
-          ],
-          limitations: [],
-          popular: false,
-        },
-      ];
-      
-      setPlans(mockPlans);
-      setSelectedPlan(user?.subscription?.plan_type || 'trial');
+      const { data } = await subscriptionsApi.getPlans();
+      const norm = (data || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: Number(p.price || 0),
+        billing_cycle: p.billing_cycle,
+        features: [
+          `${p.max_posts_per_month ?? 0} Posts per month`,
+          `${p.max_products_per_month ?? 0} Products per month`,
+          `${p.max_services_per_month ?? 0} Services per month`,
+          `${p.max_storage_gb ?? 0}GB Storage`,
+          p.priority_support ? 'Priority Support' : 'Basic Support',
+          p.analytics_enabled ? 'Analytics' : 'No Analytics',
+          p.api_access_enabled ? 'API Access' : 'No API Access',
+          p.custom_branding ? 'Custom Branding' : 'No Custom Branding',
+        ],
+        limitations: [
+          ...(p.analytics_enabled ? [] : ['No Analytics']),
+          ...(p.api_access_enabled ? [] : ['No API Access']),
+          ...(p.custom_branding ? [] : ['No Custom Branding']),
+        ],
+        popular: p.plan_type === 'standard',
+      }));
+      setPlans(norm);
+      setSelectedPlan(user?.subscription?.plan_type || norm[0]?.id || '');
     } catch (error) {
       console.error('Error fetching plans:', error);
     } finally {
@@ -98,17 +56,11 @@ const SubscriptionPlans = () => {
     if (planId === selectedPlan) return;
     
     try {
-      // In production, this would initiate payment flow
-      console.log(`Upgrading to ${planId} plan`);
-      
-      // Mock upgrade
-      setSelectedPlan(planId);
-      
-      // Show success message
-      alert(`Successfully upgraded to ${plans.find(p => p.id === planId)?.name} plan!`);
+      // TODO: Initiate real subscription flow here (payment/checkout)
+      // For now, avoid mock changes. Just navigate or open checkout if available.
+      console.log(`Select plan ${planId}. Implement payment/checkout flow.`);
     } catch (error) {
       console.error('Error upgrading plan:', error);
-      alert('Error upgrading plan. Please try again.');
     }
   };
 
@@ -232,7 +184,7 @@ const SubscriptionPlans = () => {
 
                 {/* CTA Button */}
                 <div className="text-center">
-                  {isCurrentPlan ? (
+          {isCurrentPlan ? (
                     <div className="text-gray-600 font-medium">
                       Your Current Plan
                     </div>
@@ -242,7 +194,7 @@ const SubscriptionPlans = () => {
                       variant={isPopular ? 'primary' : 'minimal'}
                       className="w-full"
                     >
-                      {selectedPlan === 'trial' ? 'Upgrade Now' : 'Switch Plan'}
+            {selectedPlan ? 'Switch Plan' : 'Choose Plan'}
                     </Button>
                   )}
                 </div>

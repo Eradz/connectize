@@ -45,7 +45,7 @@ export function goToLogin() {
 
 // Configure Axios Defaults
 export const baseURL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? "http://127.0.0.1:8000" : "https://about.connectize.co");
+  (import.meta.env.DEV ? "http://127.0.0.1:8001" : "https://about.connectize.co");
 
 axios.defaults.withCredentials = true;
 
@@ -61,6 +61,14 @@ export async function refreshToken() {
   const session = getSession();
 
   if (!session?.tokens?.refresh) {
+    console.warn('No refresh token available');
+    return undefined;
+  }
+
+  // Check if refresh token looks valid (basic validation)
+  if (typeof session.tokens.refresh !== 'string' || session.tokens.refresh.length < 10) {
+    console.warn('Invalid refresh token format');
+    removeSession();
     return undefined;
   }
 
@@ -72,9 +80,15 @@ export async function refreshToken() {
 
   try {
     refreshPromise = (async () => {
+      console.log('Attempting token refresh...');
       const { data } = await axios.post(`${baseURL}/api/auth/refresh-token/`, {
         refresh: session.tokens.refresh,
       });
+
+      // Validate response
+      if (!data?.access || !data?.refresh) {
+        throw new Error('Invalid refresh response format');
+      }
 
       const newTokens = {
         access: data.access,
@@ -89,21 +103,27 @@ export async function refreshToken() {
       accessToken = newTokens.access;
       accessTokenExpiry = Date.now() + 15 * 60 * 1000;
 
+      console.log('Token refresh successful');
       return "Bearer " + newTokens.access;
     })();
 
     const authorizationHeader = await refreshPromise;
     return { Authorization: authorizationHeader };
   } catch (error) {
-    retries++;
-
-    if (retries === 1) {
-      removeSession();
+    console.error('Token refresh failed:', error);
+    
+    // If refresh fails, clear session and redirect to login
+    removeSession();
+    accessToken = null;
+    accessTokenExpiry = null;
+    
+    // Only redirect if we're not already on an auth page
+    const currentPath = window.location.pathname;
+    if (!currentPath.includes('/login') && !currentPath.includes('/signup')) {
       goToLogin();
-      return;
     }
-
-    throw error;
+    
+    return undefined;
   } finally {
     isRefreshing = false;
     refreshPromise = null;
@@ -121,7 +141,8 @@ export async function getAuthorizationHeader() {
   try {
     const session = getSession();
     const tokenFromSession = session?.tokens?.access;
-    if (tokenFromSession) {
+    if (tokenFromSession && tokenFromSession !== accessToken) {
+      // Fresh token from session, update cache
       accessToken = tokenFromSession;
       // Set a conservative TTL; backend JWT is long-lived, but we'll refresh periodically
       accessTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -129,15 +150,27 @@ export async function getAuthorizationHeader() {
     }
   } catch (e) {
     // Ignore and fallback to refresh flow
+    console.warn('Session token retrieval failed:', e);
   }
 
-  const refreshedToken = await refreshToken();
+  // Try refresh if we have a refresh token
+  const session = getSession();
+  if (session?.tokens?.refresh) {
+    const refreshedToken = await refreshToken();
+    if (refreshedToken?.Authorization) return refreshedToken;
+  }
 
-  if (refreshedToken?.Authorization) return refreshedToken;
-
-  // No valid auth header
+  // No valid auth header available
+  console.warn('No valid authorization available');
   return null;
 }
+
+// Build absolute URL with proper path normalization
+const buildUrl = (baseUrl, path) => {
+  const cleanBase = baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
+  const cleanPath = path.replace(/^\/+/, ''); // Remove leading slashes
+  return `${cleanBase}/${cleanPath}`;
+};
 
 export async function makeApiRequest({
   url,
@@ -150,9 +183,10 @@ export async function makeApiRequest({
   onUploadProgress,
 }) {
   try {
-  const authorization = await getAuthorizationHeader();
+    const authorization = await getAuthorizationHeader();
 
-  if ((!authorization || !authorization.Authorization) && !type.startsWith("auth")) {
+    if ((!authorization || !authorization.Authorization) && !type.startsWith("auth")) {
+      console.warn('No authorization available for protected route:', url);
       goToLogin();
       return;
     }
@@ -164,8 +198,10 @@ export async function makeApiRequest({
       headers["Content-Type"] = contentType;
     }
 
+    console.log('Making API request:', { url: buildUrl(baseURL, url), method });
+
     const response = await axios({
-      url: `${baseURL}/${url}`,
+      url: buildUrl(baseURL, url),
       method,
       data,
       headers,
@@ -186,18 +222,19 @@ export async function makeApiRequest({
       ) {
         toast.success(responseMessage);
       }
+      // Only log successful responses for debugging if needed
+      if (method !== 'GET') {
+        console.log('API request successful:', { url, status: response.status });
+      }
       return response.data;
     }
   } catch (error) {
+    console.error('API request failed:', { url, error: error.message, status: error.response?.status });
+    
     if (!navigator.onLine && !hasNotifiedOffline) {
       hasNotifiedOffline = true;
-
-      //
       toast.error("Network error. Please check your internet connection.");
-
-      // this set timeout helps to allow network error to still show up once in a while. Instead of showing once and never again.
       setTimeout(() => (hasNotifiedOffline = false), 30000);
-      console.error("Network error:", error);
       return;
     }
 
@@ -226,11 +263,12 @@ export async function makeApiRequest({
     if (errorCode === "token_not_valid") {
       // Retry after refreshing token
       try {
+        console.log('Token invalid, attempting refresh...');
         const authorization = await refreshToken();
         if (authorization) {
           // Retry the original request
           const response = await axios({
-            url: `${baseURL}/${url}`,
+            url: buildUrl(baseURL, url),
             method,
             data,
             headers: {
@@ -248,17 +286,19 @@ export async function makeApiRequest({
         }
       } catch (retryError) {
         console.error("Token refresh failed:", retryError);
+        goToLogin();
       }
     }
 
     const errorResponse = error?.response?.data;
-
     const errorMsg = extractErrorMessage(errorResponse);
 
     if (errorMsg && method?.toLowerCase() !== "get") {
       toast.error(errorMsg);
-      // console.error("API request failed:", error);
     }
+    
+    // Return null for failed requests to prevent infinite loading
+    return null;
   }
 }
 

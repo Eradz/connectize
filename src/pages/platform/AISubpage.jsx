@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { aiMatchingService, aiOpportunityService, aiComplianceService } from "../../api-services/oilgas";
 import { toast } from "sonner";
@@ -50,191 +50,6 @@ export default function AISubpage() {
     pending: 0,
     accuracy: 0
   });
-
-  // Generate mock data based on section
-  const generateMockData = useCallback(() => {
-    const mockData = {
-      "ai": [
-        { id: 1, title: "AI Dashboard Overview", status: "active", type: "overview", accuracy: 94, processedToday: 156 },
-        { id: 2, title: "Smart Recommendations", status: "processing", type: "recommendation", accuracy: 87, processedToday: 23 },
-        { id: 3, title: "Predictive Analytics", status: "completed", type: "analytics", accuracy: 91, processedToday: 78 }
-      ],
-      "ai-matching": [
-        { 
-          id: 1, 
-          title: "Oil & Gas Engineer - Senior Position", 
-          candidate: "John Smith", 
-          company: "Chevron",
-          matchScore: 94, 
-          status: "matched", 
-          skills: ["Drilling Operations", "Safety Management", "Project Leadership"],
-          experience: "12 years",
-          location: "Houston, TX",
-          salary: "$145,000",
-          confidence: "High",
-          reasoning: "Strong technical background in offshore drilling with relevant project management experience"
-        },
-        { 
-          id: 2, 
-          title: "Pipeline Inspector", 
-          candidate: "Maria Rodriguez", 
-          company: "Kinder Morgan",
-          matchScore: 87, 
-          status: "processing", 
-          skills: ["Pipeline Inspection", "NDT Testing", "Regulatory Compliance"],
-          experience: "8 years",
-          location: "Dallas, TX", 
-          salary: "$85,000",
-          confidence: "Medium",
-          reasoning: "Solid inspection experience but needs additional certification for advanced pipeline systems"
-        },
-        { 
-          id: 3, 
-          title: "Reservoir Engineer", 
-          candidate: "Ahmed Hassan", 
-          company: "ExxonMobil",
-          matchScore: 91, 
-          status: "matched", 
-          skills: ["Reservoir Simulation", "Petroleum Geology", "Enhanced Recovery"],
-          experience: "15 years",
-          location: "Midland, TX",
-          salary: "$165,000",
-          confidence: "High",
-          reasoning: "Exceptional expertise in unconventional reservoirs with proven track record"
-        },
-        { 
-          id: 4, 
-          title: "HSE Manager", 
-          candidate: "Sarah Johnson", 
-          company: "BP America",
-          matchScore: 89, 
-          status: "pending", 
-          skills: ["Safety Management", "Environmental Compliance", "Risk Assessment"],
-          experience: "10 years",
-          location: "New Orleans, LA",
-          salary: "$125,000",
-          confidence: "High",
-          reasoning: "Strong safety background with offshore platform experience"
-        },
-        { 
-          id: 5, 
-          title: "Drilling Supervisor", 
-          candidate: "Michael Chen", 
-          company: "Halliburton",
-          matchScore: 82, 
-          status: "reviewing", 
-          skills: ["Drilling Operations", "Well Control", "Team Leadership"],
-          experience: "14 years",
-          location: "Bakersfield, CA",
-          salary: "$135,000",
-          confidence: "Medium",
-          reasoning: "Good drilling experience but limited exposure to latest automation technologies"
-        }
-      ],
-      "ai-opportunities": [
-        {
-          id: 1,
-          title: "Market Expansion Opportunity",
-          description: "AI analysis identified potential for 35% market growth in renewable energy transition services",
-          confidence: 89,
-          status: "high-priority",
-          value: "$2.4M",
-          timeline: "6 months",
-          factors: ["Regulatory Changes", "Market Demand", "Competitive Gap"],
-          region: "Gulf Coast",
-          actionItems: ["Conduct market research", "Develop service offerings", "Build partnerships"]
-        },
-        {
-          id: 2,
-          title: "Cost Optimization in Logistics",
-          description: "Machine learning models suggest 23% cost reduction through route optimization",
-          confidence: 94,
-          status: "ready-to-implement",
-          value: "$850K",
-          timeline: "3 months",
-          factors: ["Route Efficiency", "Fuel Costs", "Asset Utilization"],
-          region: "Texas Triangle",
-          actionItems: ["Deploy routing algorithms", "Train logistics team", "Monitor KPIs"]
-        },
-        {
-          id: 3,
-          title: "Talent Acquisition Enhancement",
-          description: "AI identifies key skill gaps and predicts hiring success with 87% accuracy",
-          confidence: 76,
-          status: "in-analysis",
-          value: "$1.2M",
-          timeline: "4 months",
-          factors: ["Skill Demand", "Competition", "Salary Trends"],
-          region: "Permian Basin",
-          actionItems: ["Refine job descriptions", "Expand recruiting channels", "Implement AI screening"]
-        },
-        {
-          id: 4,
-          title: "Digital Transformation ROI",
-          description: "Automation opportunities could reduce operational costs by 18%",
-          confidence: 82,
-          status: "under-review",
-          value: "$3.1M",
-          timeline: "12 months",
-          factors: ["Technology Adoption", "Training Costs", "Process Efficiency"],
-          region: "Eagle Ford",
-          actionItems: ["Technology assessment", "Change management", "Phased implementation"]
-        }
-      ],
-      "ai-compliance": [
-        {
-          id: 1,
-          title: "Environmental Compliance Monitoring",
-          description: "AI-powered monitoring of environmental regulations and permit requirements",
-          status: "compliant",
-          riskLevel: "low",
-          lastChecked: "2024-01-15",
-          regulations: ["EPA Clean Air Act", "OSHA PSM", "DOT Pipeline Safety"],
-          findings: [],
-          nextReview: "2024-02-15",
-          confidence: 96
-        },
-        {
-          id: 2,
-          title: "Safety Protocol Adherence",
-          description: "Automated analysis of safety incident reports and protocol compliance",
-          status: "attention-required",
-          riskLevel: "medium",
-          lastChecked: "2024-01-14",
-          regulations: ["OSHA Standards", "API Guidelines", "Company Policies"],
-          findings: ["Minor PPE violations (3 instances)", "Training refresh needed for 12 employees"],
-          nextReview: "2024-01-21",
-          confidence: 87
-        },
-        {
-          id: 3,
-          title: "Financial Reporting Compliance",
-          description: "AI verification of financial reporting accuracy and regulatory compliance",
-          status: "compliant",
-          riskLevel: "low",
-          lastChecked: "2024-01-13",
-          regulations: ["SEC Reporting", "SOX Compliance", "Tax Regulations"],
-          findings: [],
-          nextReview: "2024-02-13",
-          confidence: 99
-        },
-        {
-          id: 4,
-          title: "Data Privacy & Security",
-          description: "Continuous monitoring of data handling practices and privacy compliance",
-          status: "needs-action",
-          riskLevel: "high",
-          lastChecked: "2024-01-12",
-          regulations: ["GDPR", "CCPA", "Industry Standards"],
-          findings: ["Outdated privacy policies", "Access control review required", "Employee training overdue"],
-          nextReview: "2024-01-19",
-          confidence: 73
-        }
-      ]
-    };
-
-    return mockData[section] || mockData["ai"];
-  }, [section]);
 
   // Process AI actions
   const handleAIAction = async (actionType, itemId = null) => {
@@ -310,7 +125,7 @@ export default function AISubpage() {
     }
   };
 
-  // Use mock data when API fails
+  // Load real API data; on failure, show empty list (no mocks)
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -325,16 +140,14 @@ export default function AISubpage() {
         } else if (section === "ai-compliance") {
           res = await aiComplianceService.getComplianceAlerts();
         }
-        if (mounted && res) {
+        if (mounted) {
           setItems(res?.results || res?.data || res || []);
-        } else {
-          // Use mock data as fallback
-          setItems(generateMockData());
         }
       } catch (e) {
         if (mounted) {
-          console.warn("API failed, using mock data:", e.message);
-          setItems(generateMockData());
+          console.warn("AI API failed:", e.message);
+          setItems([]);
+          toast.error("Failed to load AI data.");
         }
       } finally {
         if (mounted) setLoading(false);
@@ -344,7 +157,7 @@ export default function AISubpage() {
     return () => {
       mounted = false;
     };
-  }, [section, generateMockData]);
+  }, [section]);
 
   return (
     <div className="min-h-screen bg-gray-50">

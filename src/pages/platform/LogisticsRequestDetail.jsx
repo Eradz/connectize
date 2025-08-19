@@ -24,6 +24,9 @@ import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 import ProviderComparisonSystem from '../../components/logistics/ProviderComparisonSystem';
+import ProviderQuoteForm from '../../components/logistics/ProviderQuoteForm';
+import { getSession } from '../../lib/session';
+import { useAuth } from '../../context/userContext';
 
 const LogisticsRequestDetail = () => {
   const navigate = useNavigate();
@@ -37,12 +40,34 @@ const LogisticsRequestDetail = () => {
   const [showProviderModal, setShowProviderModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState('');
   const [selectedService, setSelectedService] = useState('');
+  const [togglingBids, setTogglingBids] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
 
   useEffect(() => {
     if (id) {
       fetchRequestData();
     }
   }, [id]);
+
+  // Debug logging for assignment UI conditions
+  useEffect(() => {
+    if (request) {
+      console.log('🔧 Assignment UI Debug:', {
+        request_id: request.id,
+        status: request.status,
+        awarded_to: request.awarded_to,
+        requested_by: request.requested_by,
+        userId,
+        isOwner: userId != null && String(request.requested_by) === String(userId),
+        statusCheck: ['draft', 'posted', 'quoted'].includes(request.status),
+        notAwarded: !request.awarded_to,
+        shouldShowAssignment: (['draft', 'posted', 'quoted'].includes(request.status)) && !request.awarded_to
+      });
+    }
+  }, [request, userId]);
 
   const fetchRequestData = async () => {
     try {
@@ -184,6 +209,22 @@ const LogisticsRequestDetail = () => {
     }
   };
 
+  const toggleAllowBids = async () => {
+    if (!request) return;
+    try {
+      setTogglingBids(true);
+      const next = !request.allow_bids;
+      await logisticsAPI.patchRequest(request.id, { allow_bids: next });
+      setRequest(prev => ({ ...prev, allow_bids: next }));
+      toast.success(next ? 'Provider bids enabled' : 'Provider bids disabled');
+    } catch (e) {
+      console.error('Failed to toggle allow_bids', e);
+      toast.error('Failed to update visibility');
+    } finally {
+      setTogglingBids(false);
+    }
+  };
+
   const formatCurrency = (amount, currency = 'USD') => {
     if (!amount && amount !== 0) return 'N/A';
     return new Intl.NumberFormat('en-US', {
@@ -251,12 +292,15 @@ const LogisticsRequestDetail = () => {
                     {getStatusIcon(request.status)}
                     <span className="text-sm font-medium">{getStatusLabel(request.status)}</span>
                   </div>
+                  {userId != null && String(request.requested_by) === String(userId) && (
+                    <span className="px-2 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium">Mine</span>
+                  )}
                 </div>
                 <p className="text-gray-600 mt-1">Request ID: {request.id}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              {(request.status === 'draft' || request.status === 'posted') && (
+              {userId != null && String(request.requested_by) === String(userId) && (request.status === 'draft' || request.status === 'posted' || request.status === 'awarded') && (
                 <>
                   <button
                     onClick={() => navigate(`${webRoutes.logisticsRequests}/${request.id}/edit`)}
@@ -265,15 +309,30 @@ const LogisticsRequestDetail = () => {
                     <Edit3 className="w-4 h-4" />
                     <span>Edit</span>
                   </button>
-                  <button
-                    onClick={handleDeleteRequest}
-                    className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 flex items-center space-x-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete</span>
-                  </button>
+                  {(request.status === 'draft' || request.status === 'posted') && (
+                    <button
+                      onClick={handleDeleteRequest}
+                      className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 flex items-center space-x-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
+                  )}
                 </>
               )}
+              <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100">
+                <span className={`w-2 h-2 rounded-full ${request.allow_bids ? 'bg-green-500' : 'bg-gray-400'}`} />
+                <span className="text-sm">{request.allow_bids ? 'Bids allowed' : 'Private'}</span>
+                {userId != null && String(request.requested_by) === String(userId) && (request.status === 'draft' || request.status === 'posted' || request.status === 'quoted' || request.status === 'awarded') && (
+                  <button
+                    onClick={toggleAllowBids}
+                    disabled={togglingBids}
+                    className="ml-2 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                  >
+                    {togglingBids ? 'Updating…' : request.allow_bids ? 'Disable' : 'Enable'}
+                  </button>
+                )}
+              </div>
               {/* Comprehensive provider comparison system is now integrated below, removing simple assign button */}
               {false && (request.status === 'posted' || request.status === 'quoted') && (
                 <button
@@ -427,7 +486,7 @@ const LogisticsRequestDetail = () => {
                         <div>Delivery: {formatDate(quote.estimated_delivery_date)}</div>
                         <div>Payment: {quote.payment_terms}</div>
                       </div>
-                      {request.status === 'quoted' && (
+                      {userId != null && String(request.requested_by) === String(userId) && request.status === 'quoted' && (
                         <button
                           onClick={() => handleAwardQuote(quote.id)}
                           disabled={awarding}
@@ -443,14 +502,21 @@ const LogisticsRequestDetail = () => {
             )}
 
             {/* Comprehensive Provider Assignment System (for unassigned requests) */}
-            {(request.status === 'posted' || request.status === 'quoted') && !request.awarded_to && (
+            {(['draft', 'posted', 'quoted'].includes(request.status)) && !request.awarded_to && (
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <ProviderComparisonSystem
                   shipmentRequest={request}
-                  onProviderSelected={(assignmentData) => {
-                    toast.success(`Provider ${assignmentData.provider_name} assigned successfully!`);
-                    // Reload request data to show updated assignment
-                    fetchRequestData();
+                  onProviderSelected={(data) => {
+                    // If ProviderComparisonSystem triggers quote form open, handle it here
+                    if (data?.action === 'open-quote-form') {
+                      setShowQuoteModal(true);
+                      return;
+                    }
+                    // Otherwise treat as assignment success (legacy path)
+                    if (data?.provider_name) {
+                      toast.success(`Provider ${data.provider_name} assigned successfully!`);
+                      fetchRequestData();
+                    }
                   }}
                   onSuccess={(successData) => {
                     toast.success('Request successfully assigned to provider!');
@@ -633,6 +699,32 @@ const LogisticsRequestDetail = () => {
                 {awarding ? 'Assigning...' : 'Assign Provider'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Provider Quote Submission Modal */}
+      {showQuoteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Submit a Quote</h3>
+              <button
+                onClick={() => setShowQuoteModal(false)}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+            <ProviderQuoteForm
+              requestId={request?.id}
+              onSuccess={() => {
+                setShowQuoteModal(false);
+                // Refresh quotes and request (status may change to quoted)
+                fetchRequestData();
+              }}
+              onCancel={() => setShowQuoteModal(false)}
+            />
           </div>
         </div>
       )}

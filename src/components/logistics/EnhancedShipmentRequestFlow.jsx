@@ -32,6 +32,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
     priority_level: 'standard',
     insurance_required: false,
     insurance_value: '',
+  allow_bids: true,
     items: [
       {
         description: '',
@@ -200,6 +201,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
         budget_min: parseFloat(requestData.budget_min),
         budget_max: parseFloat(requestData.budget_max),
         insurance_value: requestData.insurance_required ? parseFloat(requestData.insurance_value || 0) : 0,
+  allow_bids: requestData.allow_bids,
         items: requestData.items.map(item => ({
           ...item,
           quantity: parseInt(item.quantity),
@@ -600,6 +602,27 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                   />
                 </div>
               )}
+            </div>
+
+            {/* Allow Provider Bids */}
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="flex items-start space-x-3">
+                <input
+                  id="allow_bids"
+                  type="checkbox"
+                  checked={!!requestData.allow_bids}
+                  onChange={(e) => handleInputChange('allow_bids', e.target.checked)}
+                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <div>
+                  <label htmlFor="allow_bids" className="text-sm font-medium text-gray-700">
+                    Allow provider bids
+                  </label>
+                  <p className="text-xs text-gray-600 mt-1">
+                    When enabled, providers can view this request (once posted) and submit quotes. Disable if you want to keep this request private.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Special Instructions */}

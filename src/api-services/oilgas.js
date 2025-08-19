@@ -8,7 +8,7 @@ export class AIMatchingService extends CrudService {
 
   async getMatchProfiles() {
     return await makeApiRequest({
-      url: "api/v1/ai/profiles/",
+  url: "api/v1/ai/profiles/",
       method: "GET"
     });
   }
@@ -27,7 +27,7 @@ export class AIMatchingService extends CrudService {
 
   async markViewed(matchId) {
     return await makeApiRequest({
-      url: `api/v1/ai/matches/${matchId}/mark_viewed/`,
+  url: `api/v1/ai/matches/${matchId}/mark_viewed/`,
       method: "POST"
     });
   }
@@ -52,7 +52,7 @@ export class AIOpportunityService extends CrudService {
 
   async expressInterest(opportunityId, interestLevel, notes = '') {
     return await makeApiRequest({
-      url: `api/v1/ai/opportunities/${opportunityId}/express_interest/`,
+  url: `api/v1/ai/opportunities/${opportunityId}/express_interest/`,
       method: "POST",
       data: { interest_level: interestLevel, notes }
     });
@@ -532,6 +532,37 @@ export class LogisticsShipmentService extends CrudService {
   }
 }
 
+export class LogisticsTrackingService extends CrudService {
+  constructor() {
+    super("api/v1/logistics/tracking/");
+  }
+
+  async getTrackingData() {
+    try {
+      return await makeApiRequest({
+        url: `${this.basePath}`,
+        method: "GET",
+      });
+    } catch (error) {
+      console.warn('Logistics tracking service unavailable, using fallback');
+      throw error; // Let the component handle with mock data
+    }
+  }
+
+  async trackShipment(trackingNumber) {
+    try {
+      return await makeApiRequest({
+        url: `${this.basePath}track/`,
+        method: "GET",
+        params: { tracking_number: trackingNumber },
+      });
+    } catch (error) {
+      console.warn('Tracking service unavailable for tracking number:', trackingNumber);
+      throw error;
+    }
+  }
+}
+
 export class LogisticsInventoryService extends CrudService {
   constructor() {
     super("api/v1/logistics/inventory-items/");
@@ -701,169 +732,6 @@ export class LogisticsInventoryService extends CrudService {
   }
 }
 
-export class LogisticsSupplierService extends CrudService {
-  constructor() {
-    // This maps to LogisticsProvider in the backend
-    super("api/v1/logistics/providers/");
-  }
-
-  async getSuppliers() {
-    try {
-      return await this.getAll();
-    } catch (error) {
-      console.warn('Supplier service unavailable');
-      throw error;
-    }
-  }
-
-  async rateSupplier(supplierId, rating, review) {
-    try {
-      return await this.customRequest(`${supplierId}/rate`, 'POST', { rating, review });
-    } catch (error) {
-      console.warn('Rating service unavailable');
-      throw error;
-    }
-  }
-}
-
-export class LogisticsTrackingService extends CrudService {
-  constructor() {
-    super("api/v1/logistics/tracking/");
-  }
-
-  async getTrackingData() {
-    try {
-      return await this.getAll();
-    } catch (error) {
-      console.warn('Tracking data service unavailable');
-      throw error;
-    }
-  }
-
-  async getRealTimeLocation(shipmentId) {
-    try {
-      return await this.customRequest(`${shipmentId}/location`, 'GET');
-    } catch (error) {
-      console.warn('Real-time location service unavailable');
-      throw error;
-    }
-  }
-}
-
-// Trust & Verification Services
-export class TrustVerificationService extends CrudService {
-  constructor() {
-    super("api/v1/trust/verifications");
-  }
-
-  async submitForVerification(verificationType, documentData) {
-    return makeApiRequest({
-      url: this.basePath,
-      method: "POST",
-      data: {
-        verification_type: verificationType,
-        ...documentData,
-      },
-      contentType: "multipart/form-data",
-    });
-  }
-
-  async getVerificationStatus(verificationId) {
-    return makeApiRequest({
-      url: `${this.basePath}/${verificationId}/status/`,
-      method: "GET",
-    });
-  }
-}
-
-export class TrustReputationService {
-  async getRating(userId) {
-    return makeApiRequest({
-      url: `api/v1/trust/ratings/user/${userId}/`,
-      method: "GET",
-    });
-  }
-
-  async submitRating(userId, ratingData) {
-    return makeApiRequest({
-      url: "api/v1/trust/ratings/",
-      method: "POST",
-      data: {
-        rated_user: userId,
-        ...ratingData,
-      },
-    });
-  }
-
-  async getReviews(userId) {
-    return makeApiRequest({
-      url: `api/v1/trust/ratings/user/${userId}/reviews/`,
-      method: "GET",
-    });
-  }
-}
-
-// Specialized Tools Services
-export class SpecializedEquipmentService extends CrudService {
-  constructor() {
-    super("api/v1/tools/equipment");
-  }
-
-  async searchEquipment(filters) {
-    return makeApiRequest({
-      url: this.basePath,
-      method: "GET",
-      params: filters,
-    });
-  }
-
-  async requestQuote(equipmentId, quoteData) {
-    return makeApiRequest({
-      url: `${this.basePath}/${equipmentId}/request_quote/`,
-      method: "POST",
-      data: quoteData,
-    });
-  }
-
-  async checkAvailability(equipmentId, startDate, endDate) {
-    return makeApiRequest({
-      url: `${this.basePath}/${equipmentId}/check_availability/`,
-      method: "GET",
-      params: { start_date: startDate, end_date: endDate },
-    });
-  }
-}
-
-export class SpecializedHSEService extends CrudService {
-  constructor() {
-    super("api/v1/tools/hse");
-  }
-
-  async submitIncident(incidentData) {
-    return makeApiRequest({
-      url: `${this.basePath}/incidents/`,
-      method: "POST",
-      data: incidentData,
-    });
-  }
-
-  async getComplianceStatus(facilityId) {
-    return makeApiRequest({
-      url: `${this.basePath}/compliance/${facilityId}/`,
-      method: "GET",
-    });
-  }
-
-  async scheduleInspection(inspectionData) {
-    return makeApiRequest({
-      url: `${this.basePath}/inspections/`,
-      method: "POST",
-      data: inspectionData,
-    });
-  }
-}
-
-// Service Instances
 export const dealRoomService = new DealRoomService();
 export const dealDocumentService = new DealDocumentService();
 export const dealActivityService = new DealActivityService();
@@ -881,12 +749,378 @@ export const aiComplianceService = new AIComplianceService();
 export const aiPredictiveService = new AIPredictiveService();
 
 export const logisticsShipmentService = new LogisticsShipmentService();
-export const logisticsInventoryService = new LogisticsInventoryService();
-export const logisticsSupplierService = new LogisticsSupplierService();
 export const logisticsTrackingService = new LogisticsTrackingService();
+export const logisticsInventoryService = new LogisticsInventoryService();
 
-export const trustVerificationService = new TrustVerificationService();
-export const trustReputationService = new TrustReputationService();
+// Inventory Management Services
+export class InventoryWarehouseService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/warehouses/");
+  }
+}
 
-export const specializedEquipmentService = new SpecializedEquipmentService();
-export const specializedHSEService = new SpecializedHSEService();
+export class InventoryCategoryService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/categories/");
+  }
+}
+
+export class InventoryItemService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/items/");
+  }
+
+  async reserve(itemId, quantity) {
+    return makeApiRequest({
+      url: `${this.basePath}${itemId}/reserve/`,
+      method: "POST",
+      data: { quantity },
+    });
+  }
+
+  async unreserve(itemId, quantity) {
+    return makeApiRequest({
+      url: `${this.basePath}${itemId}/unreserve/`,
+      method: "POST",
+      data: { quantity },
+    });
+  }
+
+  async getTransactions(itemId, page = 1, pageSize = 20) {
+    return makeApiRequest({
+      url: `${this.basePath}${itemId}/transactions/`,
+      method: "GET",
+      params: { page, page_size: pageSize },
+    });
+  }
+
+  async getSummary() {
+    return makeApiRequest({
+      url: `${this.basePath}summary/`,
+      method: "GET",
+    });
+  }
+}
+
+export class InventoryTransactionService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/transactions/");
+  }
+}
+
+export class InventoryAlertService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/alerts/");
+  }
+
+  async acknowledge(alertId) {
+    return makeApiRequest({
+      url: `${this.basePath}${alertId}/acknowledge/`,
+      method: "POST",
+    });
+  }
+}
+
+export class InventoryReportService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/reports/");
+  }
+}
+
+// Knowledge Hub Services
+export class KnowledgeCategoryService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/categories/");
+  }
+}
+
+export class KnowledgeTagService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/tags/");
+  }
+
+  async getPopular() {
+    return makeApiRequest({
+      url: `${this.basePath}popular/`,
+      method: "GET",
+    });
+  }
+}
+
+export class KnowledgeArticleService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/articles/");
+  }
+
+  async like(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/like/`,
+      method: "POST",
+    });
+  }
+
+  async share(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/share/`,
+      method: "POST",
+    });
+  }
+
+  async getFeatured() {
+    return makeApiRequest({
+      url: `${this.basePath}featured/`,
+      method: "GET",
+    });
+  }
+
+  async getTrending() {
+    return makeApiRequest({
+      url: `${this.basePath}trending/`,
+      method: "GET",
+    });
+  }
+}
+
+export class KnowledgeForumService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/forums/");
+  }
+
+  async getTopics(slug, params = {}) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/topics/`,
+      method: "GET",
+      params,
+    });
+  }
+
+  async togglePrivacy(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/toggle_privacy/`,
+      method: "POST",
+    });
+  }
+
+  async getMembers(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/members/`,
+      method: "GET",
+    });
+  }
+
+  async addMember(slug, user_id) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/add_member/`,
+      method: "POST",
+      data: { user_id },
+    });
+  }
+
+  async removeMember(slug, user_id) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/remove_member/`,
+      method: "POST",
+      data: { user_id },
+    });
+  }
+
+  async invite(slug, { email, message }) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/invite/`,
+      method: "POST",
+      data: { email, message },
+    });
+  }
+
+  async getInvitations(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/invitations/`,
+      method: "GET",
+    });
+  }
+
+  async acceptInvite(token) {
+    return makeApiRequest({
+      url: `${this.basePath}accept_invite/`,
+      method: "POST",
+      data: { token },
+    });
+  }
+
+  async declineInvite(token) {
+    return makeApiRequest({
+      url: `${this.basePath}decline_invite/`,
+      method: "POST",
+      data: { token },
+    });
+  }
+
+  async requestJoin(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/request_join/`,
+      method: "POST",
+    });
+  }
+
+  async getJoinRequests(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/join_requests/`,
+      method: "GET",
+    });
+  }
+
+  async approveRequest(slug, request_id) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/approve_request/`,
+      method: "POST",
+      data: { request_id },
+    });
+  }
+
+  async rejectRequest(slug, request_id) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/reject_request/`,
+      method: "POST",
+      data: { request_id },
+    });
+  }
+
+  async leave(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/leave/`,
+      method: "POST",
+    });
+  }
+}
+
+export class KnowledgeForumTopicService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/topics/");
+  }
+
+  async getPosts(slug, params = {}) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/posts/`,
+      method: "GET",
+      params,
+    });
+  }
+
+  async lock(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/lock/`,
+      method: "POST",
+    });
+  }
+
+  async unlock(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/unlock/`,
+      method: "POST",
+    });
+  }
+
+  async pin(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/pin/`,
+      method: "POST",
+    });
+  }
+
+  async unpin(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/unpin/`,
+      method: "POST",
+    });
+  }
+
+  async like(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/like/`,
+      method: "POST",
+    });
+  }
+}
+
+export class KnowledgeForumPostService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/posts/");
+  }
+
+  async like(postId) {
+    return makeApiRequest({
+      url: `${this.basePath}${postId}/like/`,
+      method: "POST",
+    });
+  }
+
+  async getReplies(postId) {
+    return makeApiRequest({
+      url: `${this.basePath}${postId}/replies/`,
+      method: "GET",
+    });
+  }
+}
+
+export class KnowledgeModerationService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/moderation/");
+  }
+
+  async approve(itemId, notes = '') {
+    return makeApiRequest({
+      url: `${this.basePath}${itemId}/approve/`,
+      method: "POST",
+      data: { notes },
+    });
+  }
+
+  async reject(itemId, notes = '') {
+    return makeApiRequest({
+      url: `${this.basePath}${itemId}/reject/`,
+      method: "POST",
+      data: { notes },
+    });
+  }
+}
+
+export class KnowledgeInteractionService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/interactions/");
+  }
+}
+
+export class KnowledgeSearchService extends CrudService {
+  constructor() {
+    super("api/v1/knowledge/search/");
+  }
+
+  async search(params) {
+    try {
+      const response = await this.api.get('', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error performing search:', error);
+      throw error;
+    }
+  }
+}
+
+// Export service instances
+export const inventoryWarehouseService = new InventoryWarehouseService();
+export const inventoryCategoryService = new InventoryCategoryService();
+export const inventoryItemService = new InventoryItemService();
+export const inventoryTransactionService = new InventoryTransactionService();
+export const inventoryAlertService = new InventoryAlertService();
+export const inventoryReportService = new InventoryReportService();
+
+export const knowledgeCategoryService = new KnowledgeCategoryService();
+export const knowledgeTagService = new KnowledgeTagService();
+export const knowledgeArticleService = new KnowledgeArticleService();
+export const knowledgeForumService = new KnowledgeForumService();
+export const knowledgeForumTopicService = new KnowledgeForumTopicService();
+export const knowledgeForumPostService = new KnowledgeForumPostService();
+export const knowledgeModerationService = new KnowledgeModerationService();
+export const knowledgeInteractionService = new KnowledgeInteractionService();
+export const knowledgeSearchService = new KnowledgeSearchService();
+

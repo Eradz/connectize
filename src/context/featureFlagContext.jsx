@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './userContext';
+import { makeApiRequest } from '../lib/helpers';
 
 const FeatureFlagContext = createContext();
 
@@ -19,25 +20,13 @@ export const FeatureFlagProvider = ({ children }) => {
 
   const fetchFeatureFlags = async () => {
     try {
-      // Try same-origin relative path using cookies for auth if applicable
-      const response = await fetch('/api/v1/features/enabled/', {
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        let data = {};
-        try {
-          data = await response.json();
-        } catch (e) {
-          console.warn('Feature flags: non-JSON response');
-        }
-        setFlags((data && data.features) || {});
-      } else {
-        // Fallback to default flags for demo
-        setFlags({
+      const data = await makeApiRequest({ url: '/api/v1/features/enabled/', method: 'GET' });
+      if (data && data.features) {
+        setFlags(data.features);
+        return;
+      }
+      // Fallback to defaults
+      setFlags({
           // A. Core monetization & content
           'subscriptions': true,
           'featured_ads': user?.subscription?.plan_type !== 'trial',
@@ -76,8 +65,7 @@ export const FeatureFlagProvider = ({ children }) => {
           // G. API ecosystem
           'public_apis': user?.subscription?.plan_type !== 'trial',
           'webhook_integrations': user?.subscription?.plan_type === 'premium',
-        });
-      }
+  });
     } catch (error) {
       console.error('Error fetching feature flags:', error);
       setFlags({});

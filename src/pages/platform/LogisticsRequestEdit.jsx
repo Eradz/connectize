@@ -86,7 +86,8 @@ const LogisticsRequestEdit = () => {
     // Insurance & Documentation
     insurance_required: true,
     customs_documents: [],
-    special_handling: []
+  special_handling: [],
+  allow_bids: true
   });
 
   // Load request data for editing
@@ -156,6 +157,7 @@ const LogisticsRequestEdit = () => {
         description: request.description || '',
         dangerous_goods: request.special_requirements?.includes('Dangerous') || false,
         priority: request.urgency || 'standard',
+  allow_bids: request.allow_bids !== undefined ? request.allow_bids : true,
         
         origin: {
           name: '',
@@ -214,7 +216,7 @@ const LogisticsRequestEdit = () => {
         special_instructions: specialParsed.special_instructions || '',
         insurance_required: request.special_requirements?.includes('Insurance') || true,
         customs_documents: [],
-        special_handling: []
+  special_handling: []
       });
       
     } catch (error) {
@@ -412,7 +414,8 @@ const LogisticsRequestEdit = () => {
         budget_min: formData.budget_min !== '' && formData.budget_min != null ? round2(formData.budget_min) : null,
         budget_max: formData.budget_max !== '' && formData.budget_max != null ? round2(formData.budget_max) : null,
         currency: formData.currency || 'USD',
-        status: isDraft ? 'draft' : 'posted'
+  status: isDraft ? 'draft' : 'posted',
+  allow_bids: !!formData.allow_bids
       };
 
       const response = await logisticsAPI.updateRequest(id, requestData);
@@ -1072,6 +1075,22 @@ const LogisticsRequestEdit = () => {
                   />
                   <label htmlFor="insurance_required" className="ml-2 text-sm text-gray-900">
                     Cargo insurance required
+                  </label>
+                </div>
+
+                <div className="flex items-start mt-2">
+                  <input
+                    type="checkbox"
+                    id="allow_bids"
+                    checked={!!formData.allow_bids}
+                    onChange={(e) => handleInputChange(null, 'allow_bids', e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5"
+                  />
+                  <label htmlFor="allow_bids" className="ml-2 text-sm text-gray-900">
+                    Allow provider bids
+                    <span className="block text-xs text-gray-500">
+                      When enabled and status is posted/quoted, providers can discover and quote this request.
+                    </span>
                   </label>
                 </div>
               </div>

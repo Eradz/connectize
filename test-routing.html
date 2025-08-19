@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connectize Routing Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-link { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; text-decoration: none; border-radius: 4px; }
+        .test-link:hover { background: #e0e0e0; }
+        .status { margin-left: 10px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Connectize Route Testing</h1>
+    <p>Click these links to test the routing fixes:</p>
+    
+    <a href="http://localhost:3004/deals" class="test-link">
+        ✅ Deals List <span class="status">(Should work)</span>
+    </a>
+    
+    <a href="http://localhost:3004/deals/my-participations" class="test-link">
+        🔧 My Participations <span class="status">(Fixed: Should show MyParticipations component)</span>
+    </a>
+    
+    <a href="http://localhost:3004/deals/28f11f78-f41c-4ded-b98c-d2aa5029bd30" class="test-link">
+        ✅ Valid Deal Detail <span class="status">(Should show DealRoomDetail)</span>
+    </a>
+    
+    <a href="http://localhost:3004/deals/invalid-id" class="test-link">
+        🔧 Invalid Deal ID <span class="status">(Fixed: Should redirect to deals list)</span>
+    </a>
+    
+    <a href="http://localhost:3004/enterprise" class="test-link">
+        ✅ Enterprise Dashboard <span class="status">(Should work)</span>
+    </a>
+    
+    <h2>Backend API Tests</h2>
+    <p>These should all return JSON (check console):</p>
+    
+    <button onclick="testAPI('/api/v1/plans/')">Test Plans API</button>
+    <button onclick="testLogin()">Test Login + Protected API</button>
+    
+    <div id="results" style="margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+    
+    <script>
+        async function testAPI(endpoint) {
+            const results = document.getElementById('results');
+            try {
+                const response = await fetch(`http://127.0.0.1:8001${endpoint}`);
+                const data = await response.json();
+                results.textContent = `${endpoint}: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                results.textContent = `${endpoint}: ERROR\n${error.message}`;
+            }
+        }
+        
+        async function testLogin() {
+            const results = document.getElementById('results');
+            try {
+                // Login
+                const loginResponse = await fetch('http://127.0.0.1:8001/api/auth/login/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'info@connectize.co', password: 'Access2024' })
+                });
+                const loginData = await loginResponse.json();
+                const token = loginData.results.tokens.access;
+                
+                // Test protected endpoint
+                const protectedResponse = await fetch('http://127.0.0.1:8001/api/v1/subscriptions/current/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const protectedData = await protectedResponse.json();
+                
+                results.textContent = `Login + Protected API Test:\nLogin: ${loginResponse.status}\nProtected: ${protectedResponse.status}\n${JSON.stringify(protectedData, null, 2)}`;
+            } catch (error) {
+                results.textContent = `Login Test: ERROR\n${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -13,12 +13,14 @@ export const logisticsAPI = {
   
   // Shipment Requests
   getRequests: (params = {}) => {
-    console.log('🔗 Making requests API call to:', `${LOGISTICS_BASE_URL}/requests/`);
-    return api.get(`${LOGISTICS_BASE_URL}/requests/`, { params });
+    const p = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
+    console.log('🔗 Making requests API call to:', `${LOGISTICS_BASE_URL}/requests/`, 'with params:', p);
+    return api.get(`${LOGISTICS_BASE_URL}/requests/`, { params: p });
   },
   getRequest: (id) => api.get(`${LOGISTICS_BASE_URL}/requests/${id}/`),
   createRequest: (data) => api.post(`${LOGISTICS_BASE_URL}/requests/`, data),
   updateRequest: (id, data) => api.put(`${LOGISTICS_BASE_URL}/requests/${id}/`, data),
+  patchRequest: (id, data) => api.patch(`${LOGISTICS_BASE_URL}/requests/${id}/`, data),
   deleteRequest: (id) => api.delete(`${LOGISTICS_BASE_URL}/requests/${id}/`),
   publishRequest: (id) => api.post(`${LOGISTICS_BASE_URL}/requests/${id}/publish/`),
   awardRequest: (id, data) => api.post(`${LOGISTICS_BASE_URL}/requests/${id}/award/`, data),
@@ -92,12 +94,6 @@ export const logisticsAPI = {
   // Tracking Events
   getTrackingEvents: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/tracking/`, { params }),
   
-  // Supply Chain Optimization
-  getOptimizationReports: () => api.get(`${LOGISTICS_BASE_URL}/optimization/`),
-  getOptimizationReport: (id) => api.get(`${LOGISTICS_BASE_URL}/optimization/${id}/`),
-  generateOptimizationReport: (data) => api.post(`${LOGISTICS_BASE_URL}/optimization/generate_report/`, data),
-  createOptimizationReport: (data) => api.post(`${LOGISTICS_BASE_URL}/optimization/`, data),
-
   // Inventory Management
   getInventoryItems: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/inventory-items/`, { params }),
   getInventoryItem: (id) => api.get(`${LOGISTICS_BASE_URL}/inventory-items/${id}/`),

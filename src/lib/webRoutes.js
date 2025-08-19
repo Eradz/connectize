@@ -82,6 +82,7 @@ const webRoutes = {
   // Oil & Gas Platform Routes
   // Deal Management
   dealRooms: "/deals",
+  myParticipations: "/deals/my-participations",
   dealRoomDetail: "/deals/:id",
   dealRoomCreate: "/deals/create",
   dealRoomEdit: "/deals/:id/edit",
@@ -135,49 +136,68 @@ const webRoutes = {
   logisticsInventoryDetail: "/logistics/inventory/:id",
   logisticsInventoryCreate: "/logistics/inventory/create",
   logisticsInventoryEdit: "/logistics/inventory/:id/edit",
-  logisticsSuppliers: "/logistics/suppliers",
-  logisticsSupplierDetail: "/logistics/suppliers/:id",
-  logisticsSupplierCreate: "/logistics/suppliers/create",
-  logisticsSupplierEdit: "/logistics/suppliers/:id/edit",
   logisticsTracking: "/logistics/tracking",
   
-  // Trust & Verification
-  trustDashboard: "/trust",
-  trustVerification: "/trust/verification",
-  trustVerificationCreate: "/trust/verification/create",
-  trustVerificationStatus: "/trust/verification/:id",
-  trustReputation: "/trust/reputation",
-  trustReputationUser: "/trust/reputation/:userId",
-  trustRatings: "/trust/ratings",
-  trustReviews: "/trust/reviews",
+  // Inventory Management
+  inventoryDashboard: "/inventory",
+  inventoryItems: "/inventory/items",
+  inventoryItemDetail: "/inventory/items/:id",
+  inventoryItemCreate: "/inventory/items/create",
+  inventoryItemEdit: "/inventory/items/:id/edit",
+  inventoryWarehouses: "/inventory/warehouses",
+  inventoryWarehouseDetail: "/inventory/warehouses/:id",
+  inventoryWarehouseCreate: "/inventory/warehouses/create",
+  inventoryWarehouseEdit: "/inventory/warehouses/:id/edit",
+  inventoryCategories: "/inventory/categories",
+  inventoryTransactions: "/inventory/transactions",
+  inventoryAlerts: "/inventory/alerts",
+  inventoryReports: "/inventory/reports",
+  inventoryReportCreate: "/inventory/reports/create",
+  inventoryReportDetail: "/inventory/reports/:id",
   
-  // Specialized Tools
-  toolsDashboard: "/tools",
-  toolsEquipment: "/tools/equipment",
-  toolsEquipmentDetail: "/tools/equipment/:id",
-  toolsEquipmentRental: "/tools/equipment/rental",
-  toolsHSE: "/tools/hse",
-  toolsHSEIncidents: "/tools/hse/incidents",
-  toolsHSECompliance: "/tools/hse/compliance",
-  toolsHSEInspections: "/tools/hse/inspections",
-  toolsSupplyChain: "/tools/supply-chain",
-  toolsSupplyChainOptimization: "/tools/supply-chain/optimization",
-  toolsRegulatory: "/tools/regulatory",
-  toolsRegulatoryCompliance: "/tools/regulatory/compliance",
-  toolsWorkflow: "/tools/workflow",
-  toolsWorkflowManagement: "/tools/workflow/management",
+  // Knowledge Hub
+  knowledgeHub: "/knowledge",
+  knowledgeArticles: "/knowledge/articles",
+  knowledgeArticleDetail: "/knowledge/articles/:slug",
+  knowledgeArticleCreate: "/knowledge/articles/create",
+  knowledgeArticleEdit: "/knowledge/articles/:slug/edit",
+  knowledgeForums: "/knowledge/forums",
+  knowledgeForumCreate: "/knowledge/forums/create",
+  knowledgeForumDetail: "/knowledge/forums/:slug",
+  knowledgeTopics: "/knowledge/topics",
+  knowledgeForumTopicDetail: "/knowledge/topics/:slug",
+  knowledgeForumTopicCreate: "/knowledge/forums/:forumSlug/topics/create",
+  knowledgeForumTopicEdit: "/knowledge/topics/:slug/edit",
+  knowledgeCategories: "/knowledge/categories",
+  knowledgeCategoryDetail: "/knowledge/categories/:slug",
+  knowledgeTags: "/knowledge/tags",
+  knowledgeTagDetail: "/knowledge/tags/:slug",
+  knowledgeModeration: "/knowledge/moderation",
+  knowledgeSearch: "/knowledge/search",
   
   // Dashboard & Overview
   platformDashboard: "/dashboard",
   platformOverview: "/overview",
   platformAnalytics: "/analytics",
-  platformReports: "/reports",
+  
+  // Featured Ads
+  featuredAds: "/ads",
   
   // User Management
   userProfile: "/user/profile",
   userSettings: "/user/settings",
   userNotifications: "/user/notifications",
   userSubscription: "/user/subscription",
+  
+  // Subscriptions
+  subscriptions: "/subscriptions",
+  
+  // Enterprise Suite Routes
+  enterprise: "/enterprise",
+  enterpriseDashboard: "/enterprise",
+  enterpriseSubscriptions: "/enterprise/subscriptions", 
+  enterpriseAdvertising: "/enterprise/advertising",
+  enterpriseAnalytics: "/enterprise/analytics",
   
   // Company Management  
   companyDashboard: "/company/dashboard",

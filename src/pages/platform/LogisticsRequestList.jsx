@@ -19,6 +19,8 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
+import { getSession } from '../../lib/session';
+import { useAuth } from '../../context/userContext';
 
 const LogisticsRequestList = () => {
   const navigate = useNavigate();
@@ -26,17 +28,50 @@ const LogisticsRequestList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showMineOnly, setShowMineOnly] = useState(false);
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [showMineOnly, statusFilter, searchTerm]);
 
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await logisticsAPI.getRequests();
-      const requestData = response?.data || response?.results || response || [];
-      setRequests(Array.isArray(requestData) ? requestData : []);
+      console.log('🔍 Debug Info:', {
+        showMineOnly,
+        statusFilter,
+        searchTerm,
+        userId,
+        session: session?.user
+      });
+      
+      const response = await logisticsAPI.getRequests({
+        mine: showMineOnly ? 'true' : undefined,
+        status: statusFilter,
+        search: searchTerm || undefined,
+      });
+      
+      console.log('📡 API Response:', response);
+      
+      // Handle paginated and non-paginated responses
+      const data = response?.data ?? response;
+      const requestsList = Array.isArray(data?.results)
+        ? data.results
+        : Array.isArray(data)
+          ? data
+          : [];
+          
+      console.log('📋 Processed requests:', requestsList.length, requestsList.map(r => ({
+        id: r.id,
+        requested_by: r.requested_by,
+        status: r.status,
+        title: r.title
+      })));
+      
+      setRequests(requestsList);
     } catch (error) {
       console.error('Error fetching requests:', error);
       toast.error('Failed to load shipment requests');
@@ -99,6 +134,7 @@ const LogisticsRequestList = () => {
   };
 
   const filteredRequests = requests.filter(request => {
+    const isOwner = userId != null && String(request.requested_by) === String(userId);
     const matchesSearch = !searchTerm || 
       request.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.cargo_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,8 +142,21 @@ const LogisticsRequestList = () => {
       request.destination_address?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    // When "My Requests" is selected, the API already filters by owner.
+    // Avoid client-side owner filtering to prevent hiding results when userId isn't loaded yet.
+    const matchesOwner = true;
     
-    return matchesSearch && matchesStatus;
+    console.log('🔍 Filtering request:', {
+      id: request.id,
+      requested_by: request.requested_by,
+      userId,
+      isOwner,
+      showMineOnly,
+      matchesOwner,
+      matches: matchesSearch && matchesStatus && matchesOwner
+    });
+    
+    return matchesSearch && matchesStatus && matchesOwner;
   });
 
   if (loading) {
@@ -120,6 +169,13 @@ const LogisticsRequestList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {!userId && (
+        <div className="bg-yellow-50 border-b border-yellow-200 text-yellow-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm">
+            You're viewing public requests. Log in again to see "My Requests". If you just logged in, wait a moment and refresh.
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -170,6 +226,22 @@ const LogisticsRequestList = () => {
                 <option value="completed">Completed</option>
               </select>
             </div>
+            <div className="flex items-center">
+              <div className="ml-0 md:ml-4 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setShowMineOnly(false)}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${!showMineOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setShowMineOnly(true)}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${showMineOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                >
+                  My Requests
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -206,6 +278,11 @@ const LogisticsRequestList = () => {
                           {getStatusIcon(request.status)}
                           <span>{getStatusLabel(request.status)}</span>
                         </div>
+                        {userId != null && String(request.requested_by) === String(userId) && (
+                          <div className="bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                            Mine
+                          </div>
+                        )}
                         {request.quotes_count > 0 && (
                           <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
                             {request.quotes_count} Quote{request.quotes_count !== 1 ? 's' : ''}
@@ -224,7 +301,7 @@ const LogisticsRequestList = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      {(request.status === 'draft' || request.status === 'posted') && (
+                      {userId != null && String(request.requested_by) === String(userId) && (request.status === 'draft' || request.status === 'posted' || request.status === 'awarded') && (
                         <button
                           onClick={() => navigate(`${webRoutes.logisticsRequests}/${request.id}/edit`)}
                           className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

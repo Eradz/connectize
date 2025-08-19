@@ -57,6 +57,9 @@ import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import DealRooms from "./pages/platform/DealRooms";
 import DealRoomCreate from "./pages/platform/DealRoomCreate";
 import DealRoomEdit from "./pages/platform/DealRoomEdit";
+
+// Enterprise Dashboard Components
+import EnterpriseApp from "./components/enterprise/EnterpriseApp";
 import WorkforceJobs from "./pages/platform/WorkforceJobs";
 import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
 import WorkforceMyPostedJobs from "./pages/platform/WorkforceMyPostedJobs";
@@ -73,6 +76,7 @@ import WorkforceMyEvents from "./pages/platform/WorkforceMyEvents";
 import WorkforceMyRegistrations from "./pages/platform/WorkforceMyRegistrations";
 import AIDashboard from "./pages/platform/AIDashboard";
 import DealRoomDetail from "./pages/platform/DealRoomDetail";
+import MyParticipations from "./pages/platform/MyParticipations";
 import AISubpage from "./pages/platform/AISubpage";
 import LogisticsDashboard from "./pages/platform/LogisticsDashboard";
 import LogisticsInventory from "./pages/platform/LogisticsInventory";
@@ -87,12 +91,34 @@ import LogisticsRequestEdit from "./pages/platform/LogisticsRequestEdit";
 import LogisticsShipments from "./pages/platform/LogisticsShipments";
 import LogisticsShipmentCreate from "./pages/platform/LogisticsShipmentCreate";
 import LogisticsShipmentDetail from "./pages/platform/LogisticsShipmentDetail";
-import LogisticsSuppliers from "./pages/platform/LogisticsSuppliers";
-import LogisticsSupplierDetail from "./pages/platform/LogisticsSupplierDetail";
 import LogisticsTracking from "./pages/platform/LogisticsTracking";
-import TrustDashboard from "./pages/platform/TrustDashboard";
-import SpecializedToolsDashboard from "./pages/platform/SpecializedToolsDashboard";
 import LogisticsTest from "./pages/test/LogisticsTest";
+import FeaturedAdsPage from "./pages/platform/FeaturedAds";
+import SubscriptionsPage from "./pages/platform/Subscriptions";
+
+// Inventory Management Components
+import InventoryDashboard from "./pages/inventory/InventoryDashboard";
+import InventoryItems from "./pages/inventory/InventoryItems";
+import InventoryWarehouses from "./pages/inventory/InventoryWarehouses";
+import InventoryTransactions from "./pages/inventory/InventoryTransactions";
+import InventoryAlerts from "./pages/inventory/InventoryAlerts";
+import InventoryReports from "./pages/inventory/InventoryReports";
+
+// Knowledge Hub Components  
+import KnowledgeHubDashboard from "./pages/knowledge/KnowledgeHubDashboard";
+import KnowledgeArticles from "./pages/knowledge/KnowledgeArticles";
+import KnowledgeArticleDetail from "./pages/knowledge/KnowledgeArticleDetail";
+import KnowledgeForums from "./pages/knowledge/KnowledgeForums";
+import KnowledgeTopics from "./pages/knowledge/KnowledgeTopics";
+import KnowledgeCategories from "./pages/knowledge/KnowledgeCategories";
+import KnowledgeCategoryDetail from "./pages/knowledge/KnowledgeCategoryDetail";
+import KnowledgeSearch from "./pages/knowledge/KnowledgeSearch";
+import KnowledgeArticleCreate from "./pages/knowledge/KnowledgeArticleCreate";
+import KnowledgeForumCreate from "./pages/knowledge/KnowledgeForumCreate";
+import KnowledgeForumDetail from "./pages/knowledge/KnowledgeForumDetail";
+import KnowledgeTopicCreate from "./pages/knowledge/KnowledgeTopicCreate";
+import KnowledgeTopicDetail from "./pages/knowledge/KnowledgeTopicDetail";
+import KnowledgeForumInvite from "./pages/knowledge/KnowledgeForumInvite";
 
 function App() {
   // Redirect legacy /platform/* URLs to new root-based routes
@@ -114,6 +140,7 @@ function App() {
           <Route index element={<PlatformDashboard />} />
           <Route path={webRoutes.platformDashboard} element={<PlatformDashboard />} />
           <Route path={webRoutes.dealRooms} element={<DealRooms />} />
+          <Route path={webRoutes.myParticipations} element={<MyParticipations />} />
           <Route path={webRoutes.dealRoomCreate} element={<DealRoomCreate />} />
           <Route path={webRoutes.dealRoomDetail} element={<DealRoomDetail />} />
           <Route path={webRoutes.dealRoomEdit} element={<DealRoomEdit />} />
@@ -144,6 +171,15 @@ function App() {
           <Route path={webRoutes.aiCompliance} element={<AISubpage />} />
           <Route path={webRoutes.aiAnalytics} element={<AISubpage />} />
           <Route path={webRoutes.aiInsights} element={<AISubpage />} />
+          <Route path={webRoutes.featuredAds} element={<FeaturedAdsPage />} />
+          <Route path={webRoutes.subscriptions} element={<SubscriptionsPage />} />
+          {/* Legacy alias for user subscription path */}
+          <Route path={webRoutes.userSubscription} element={<SubscriptionsPage />} />
+          
+          {/* Enterprise Suite Routes */}
+          <Route path={webRoutes.enterprise} element={<EnterpriseApp />} />
+          <Route path="/enterprise/*" element={<EnterpriseApp />} />
+          
           <Route path={webRoutes.logisticsDashboard} element={<LogisticsDashboard />} />
           <Route path={webRoutes.logisticsInventory} element={<LogisticsInventory />} />
           <Route path={webRoutes.logisticsInventoryForm} element={<LogisticsInventoryForm />} />
@@ -157,11 +193,32 @@ function App() {
           <Route path={webRoutes.logisticsShipmentCreate} element={<LogisticsShipmentCreate />} />
           <Route path={webRoutes.logisticsShipmentEdit} element={<LogisticsShipmentCreate />} />
           <Route path={webRoutes.logisticsShipmentDetail} element={<LogisticsShipmentDetail />} />
-          <Route path={webRoutes.logisticsSuppliers} element={<LogisticsSuppliers />} />
-          <Route path={webRoutes.logisticsSupplierDetail} element={<LogisticsSupplierDetail />} />
           <Route path={webRoutes.logisticsTracking} element={<LogisticsTracking />} />
-          <Route path={webRoutes.trustDashboard} element={<TrustDashboard />} />
-          <Route path={webRoutes.toolsDashboard} element={<SpecializedToolsDashboard />} />
+          
+          {/* Inventory Routes */}
+          <Route path={webRoutes.inventoryDashboard} element={<InventoryDashboard />} />
+          <Route path={webRoutes.inventoryWarehouses} element={<InventoryWarehouses />} />
+          <Route path={webRoutes.inventoryItems} element={<InventoryItems />} />
+          <Route path={webRoutes.inventoryTransactions} element={<InventoryTransactions />} />
+          <Route path={webRoutes.inventoryReports} element={<InventoryReports />} />
+          <Route path={webRoutes.inventoryAlerts} element={<InventoryAlerts />} />
+          
+          {/* Knowledge Hub Routes */}
+          <Route path={webRoutes.knowledgeHub} element={<KnowledgeHubDashboard />} />
+          <Route path={webRoutes.knowledgeArticles} element={<KnowledgeArticles />} />
+          <Route path={webRoutes.knowledgeArticleDetail} element={<KnowledgeArticleDetail />} />
+          <Route path={webRoutes.knowledgeArticleCreate} element={<KnowledgeArticleCreate />} />
+          <Route path={webRoutes.knowledgeForums} element={<KnowledgeForums />} />
+          <Route path={webRoutes.knowledgeForumCreate} element={<KnowledgeForumCreate />} />
+          <Route path={webRoutes.knowledgeForumDetail} element={<KnowledgeForumDetail />} />
+          <Route path={webRoutes.knowledgeForumTopicCreate} element={<KnowledgeTopicCreate />} />
+          <Route path={webRoutes.knowledgeForumTopicDetail} element={<KnowledgeTopicDetail />} />
+          <Route path={webRoutes.knowledgeTopics} element={<KnowledgeTopics />} />
+          <Route path={webRoutes.knowledgeCategories} element={<KnowledgeCategories />} />
+          <Route path={webRoutes.knowledgeCategoryDetail} element={<KnowledgeCategoryDetail />} />
+          <Route path={webRoutes.knowledgeSearch} element={<KnowledgeSearch />} />
+          <Route path="/knowledge/forums/invite" element={<KnowledgeForumInvite />} />
+          
           {/* Test Routes */}
           <Route path="/test/logistics" element={<LogisticsTest />} />
         </Route>

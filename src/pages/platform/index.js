@@ -11,6 +11,7 @@ export { default as ToolsDashboard } from './ToolsDashboard';
 // Deal Room components
 export { default as DealRoomDetail } from './DealRoomDetail';
 export { default as DealRoomCreate } from './DealRoomCreate';
+export { default as MyParticipations } from './MyParticipations';
 
 // Workforce components  
 export { default as WorkforceProfiles } from './WorkforceProfiles';

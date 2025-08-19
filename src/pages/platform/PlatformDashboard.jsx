@@ -37,12 +37,13 @@ const PlatformDashboard = () => {
     activities: { count: 0, data: [] },
     opportunities: { count: 0, data: [] },
     compliance: { count: 0, alerts: 0, data: [] },
-    analytics: {
+  analytics: {
       revenue: 0,
       growth: 0,
       activeUsers: 0,
       completedDeals: 0
-    }
+  },
+  ads: { active: 0, impressions: 0, clicks: 0, spent: 0 }
   });
   const [loading, setLoading] = useState(true);
 
@@ -57,13 +58,15 @@ const PlatformDashboard = () => {
         jobsRes,
         activitiesRes,
         opportunitiesRes,
-        complianceRes
+        complianceRes,
+        adsSummaryRes
       ] = await Promise.all([
         dealRoomService.getAll(1, 5),
         workforceJobService.getAll(1, 5),
         dealActivityService.getRecentActivities(10),
         aiOpportunityService.getOpportunities(),
-        aiComplianceService.getComplianceAlerts()
+        aiComplianceService.getComplianceAlerts(),
+        import('../../api-services/ads').then(m => m.featuredAdsApi.summary()).catch(() => ({ active_campaigns: 0, impressions: 0, clicks: 0, spent: 0 }))
       ]);
 
       // Calculate total deal value
@@ -98,6 +101,12 @@ const PlatformDashboard = () => {
           growth: 12.5, // Mock data
           activeUsers: 1248, // Mock data
           completedDeals: 23 // Mock data
+        },
+        ads: {
+          active: adsSummaryRes?.active_campaigns || 0,
+          impressions: adsSummaryRes?.impressions || 0,
+          clicks: adsSummaryRes?.clicks || 0,
+          spent: adsSummaryRes?.spent || 0,
         }
       });
     } catch (error) {
@@ -225,15 +234,14 @@ const PlatformDashboard = () => {
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Compliance Alerts</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData.compliance.alerts}</p>
-                <p className="text-sm text-orange-600 flex items-center mt-1">
-                  <AlertTriangle className="w-4 h-4 mr-1" />
-                  Needs attention
+                <p className="text-sm font-medium text-gray-600">Featured Ads</p>
+                <p className="text-2xl font-bold text-gray-900">{dashboardData.ads.active} active</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {dashboardData.ads.impressions.toLocaleString()} views · {dashboardData.ads.clicks.toLocaleString()} clicks
                 </p>
               </div>
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <Shield className="w-6 h-6 text-orange-600" />
+              <div className="bg-yellow-100 p-3 rounded-lg">
+                <Star className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
           </div>
@@ -311,31 +319,17 @@ const PlatformDashboard = () => {
                 </Link>
 
                 <Link
-                  to={webRoutes.trustDashboard}
+                  to={webRoutes.featuredAds}
                   className="p-4 border rounded-lg hover:bg-gray-50 transition-colors group"
                 >
                   <div className="flex items-center mb-3">
-                    <div className="bg-indigo-100 p-2 rounded-lg mr-3 group-hover:bg-indigo-200">
-                      <Shield className="w-5 h-5 text-indigo-600" />
+                    <div className="bg-yellow-100 p-2 rounded-lg mr-3 group-hover:bg-yellow-200">
+                      <Star className="w-5 h-5 text-yellow-600" />
                     </div>
-                    <h3 className="font-medium text-gray-900">Trust & Verification</h3>
+                    <h3 className="font-medium text-gray-900">Featured Ads</h3>
                   </div>
-                  <p className="text-sm text-gray-600">Identity verification and reputation management</p>
-                  <p className="text-xs text-indigo-600 mt-2">Secure platform</p>
-                </Link>
-
-                <Link
-                  to={webRoutes.toolsDashboard}
-                  className="p-4 border rounded-lg hover:bg-gray-50 transition-colors group"
-                >
-                  <div className="flex items-center mb-3">
-                    <div className="bg-red-100 p-2 rounded-lg mr-3 group-hover:bg-red-200">
-                      <Settings className="w-5 h-5 text-red-600" />
-                    </div>
-                    <h3 className="font-medium text-gray-900">Specialized Tools</h3>
-                  </div>
-                  <p className="text-sm text-gray-600">Industry-specific tools and compliance</p>
-                  <p className="text-xs text-red-600 mt-2">Equipment & HSE</p>
+                  <p className="text-sm text-gray-600">Promote your content across the platform</p>
+                  <p className="text-xs text-yellow-600 mt-2">{dashboardData.ads.active} active</p>
                 </Link>
               </div>
             </div>

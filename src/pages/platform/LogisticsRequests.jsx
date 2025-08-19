@@ -11,7 +11,8 @@ import {
   Eye,
   Edit,
   Award,
-  Clock
+  Clock,
+  Users
 } from 'lucide-react';
 import { logisticsAPI } from '../../api-services/logistics';
 import { webRoutes } from '../../lib/webRoutes';
@@ -233,6 +234,11 @@ const LogisticsRequests = () => {
                                – ${request.budget_max != null ? formatCurrency(Number(request.budget_max), request.currency || 'USD') : '—'}`
                             : 'Budget N/A'}
                         </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Users className={`w-4 h-4 ${request.allow_bids ? 'text-green-600' : 'text-gray-400'}`} />
+                        <span>{request.allow_bids ? 'Bids allowed' : 'Private'}</span>
                       </div>
                     </div>
 

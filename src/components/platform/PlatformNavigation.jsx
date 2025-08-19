@@ -6,7 +6,6 @@ import {
   Users,
   Brain,
   Truck,
-  Shield,
   Settings,
   Bell,
   Search,
@@ -20,7 +19,10 @@ import {
   Briefcase,
   Target,
   AlertTriangle,
-  Wrench
+  Package,
+  BookOpen,
+  CreditCard,
+  Crown
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 
@@ -49,7 +51,7 @@ const PlatformNavigation = ({ children }) => {
       children: [
         { name: 'All Deal Rooms', href: webRoutes.dealRooms },
         { name: 'Create Deal Room', href: webRoutes.dealRoomCreate },
-        { name: 'My Participations', href: '/deals/my-participations' },
+        { name: 'My Participations', href: webRoutes.myParticipations },
         { name: 'Deal Analytics', href: '/deals/analytics' }
       ]
     },
@@ -81,6 +83,57 @@ const PlatformNavigation = ({ children }) => {
       ]
     },
     {
+      name: 'Inventory',
+      href: webRoutes.inventoryDashboard,
+      icon: Package,
+      current: location.pathname.startsWith('/inventory'),
+      children: [
+        { name: 'Dashboard', href: webRoutes.inventoryDashboard },
+        { name: 'Warehouses', href: webRoutes.inventoryWarehouses },
+        { name: 'Items', href: webRoutes.inventoryItems },
+        { name: 'Transactions', href: webRoutes.inventoryTransactions },
+        { name: 'Reports', href: webRoutes.inventoryReports },
+        { name: 'Alerts', href: webRoutes.inventoryAlerts }
+      ]
+    },
+    {
+      name: 'Knowledge Hub',
+      href: webRoutes.knowledgeHub,
+      icon: BookOpen,
+      current: location.pathname.startsWith('/knowledge'),
+      children: [
+        { name: 'Dashboard', href: webRoutes.knowledgeHub },
+        { name: 'Articles', href: webRoutes.knowledgeArticles },
+        { name: 'Forums', href: webRoutes.knowledgeForums },
+        { name: 'Topics', href: webRoutes.knowledgeTopics },
+        { name: 'Categories', href: webRoutes.knowledgeCategories },
+        { name: 'Search', href: webRoutes.knowledgeSearch }
+      ]
+    },
+    {
+      name: 'Enterprise Suite',
+      href: webRoutes.enterprise,
+      icon: Crown,
+      current: location.pathname.startsWith('/enterprise'),
+      badge: 'PRO',
+      premium: true,
+      children: [
+        { name: 'Executive Dashboard', href: webRoutes.enterprise },
+        { name: 'Subscription Center', href: webRoutes.enterpriseSubscriptions },
+        { name: 'Advertising Console', href: webRoutes.enterpriseAdvertising },
+        { name: 'Advanced Analytics', href: webRoutes.enterpriseAnalytics }
+      ]
+    },
+    {
+      name: 'Featured Ads',
+      href: webRoutes.featuredAds,
+      icon: Target,
+      current: location.pathname.startsWith('/ads'),
+      children: [
+        { name: 'Manage Campaigns', href: webRoutes.featuredAds }
+      ]
+    },
+    {
       name: 'Logistics Hub',
       href: webRoutes.logisticsDashboard,
       icon: Truck,
@@ -88,33 +141,7 @@ const PlatformNavigation = ({ children }) => {
       children: [
         { name: 'Logistics Overview', href: webRoutes.logisticsDashboard },
         { name: 'Shipment Requests', href: webRoutes.logisticsRequests },
-        { name: 'Shipments', href: webRoutes.logisticsShipments },
-        { name: 'Inventory', href: webRoutes.logisticsInventory },
-        { name: 'Suppliers', href: webRoutes.logisticsSuppliers }
-      ]
-    },
-    {
-      name: 'Trust & Verification',
-      href: webRoutes.trustDashboard,
-      icon: Shield,
-      current: location.pathname.startsWith('/trust'),
-      children: [
-        { name: 'Trust Dashboard', href: webRoutes.trustDashboard },
-        { name: 'Verification', href: webRoutes.trustVerification },
-        { name: 'Reputation', href: webRoutes.trustReputation },
-        { name: 'Reviews & Ratings', href: webRoutes.trustReviews }
-      ]
-    },
-    {
-      name: 'Specialized Tools',
-      href: webRoutes.toolsDashboard,
-      icon: Wrench,
-      current: location.pathname.startsWith('/tools'),
-      children: [
-        { name: 'Tools Overview', href: webRoutes.toolsDashboard },
-        { name: 'Equipment Rental', href: webRoutes.toolsEquipment },
-        { name: 'HSE Management', href: webRoutes.toolsHSE },
-        { name: 'Regulatory Compliance', href: webRoutes.toolsRegulatory }
+        { name: 'Shipments', href: webRoutes.logisticsShipments }
       ]
     }
   ]), [location.pathname]);
@@ -122,14 +149,15 @@ const PlatformNavigation = ({ children }) => {
   const secondaryNavigation = useMemo(() => ([
     { name: 'Analytics', href: webRoutes.platformAnalytics, icon: BarChart3 },
     { name: 'Reports', href: webRoutes.platformReports, icon: FileText },
-    { name: 'Settings', href: webRoutes.userSettings, icon: Settings }
+  { name: 'Settings', href: webRoutes.userSettings, icon: Settings },
+  { name: 'Subscription', href: webRoutes.subscriptions, icon: CreditCard }
   ]), []);
 
   const quickActions = [
     { name: 'Create Deal Room', href: webRoutes.dealRoomCreate, icon: FileText, color: 'bg-blue-500' },
     { name: 'Post Job', href: webRoutes.workforceJobCreate, icon: Briefcase, color: 'bg-green-500' },
-    { name: 'Create Profile', href: webRoutes.workforceProfileCreate, icon: User, color: 'bg-purple-500' },
-    { name: 'Get Verified', href: webRoutes.trustVerification, icon: Shield, color: 'bg-indigo-500' }
+    { name: 'Enterprise Dashboard', href: webRoutes.enterprise, icon: Crown, color: 'bg-purple-500' },
+    { name: 'Knowledge Hub', href: webRoutes.knowledgeHub, icon: BookOpen, color: 'bg-orange-500' }
   ];
 
   return (
@@ -181,7 +209,7 @@ const PlatformNavigation = ({ children }) => {
                   </div>
                   <input
                     className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
-                    placeholder="Search deals, jobs, professionals..."
+                    placeholder="Search deals, jobs, inventory, articles, forums..."
                     type="search"
                   />
                 </div>
@@ -199,7 +227,7 @@ const PlatformNavigation = ({ children }) => {
               <div className="ml-3 relative">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-700">Quick Actions:</span>
-                  {quickActions.slice(0, 2).map((action) => (
+                  {quickActions.slice(0, 3).map((action) => (
                     <Link
                       key={action.name}
                       to={action.href}
@@ -236,7 +264,7 @@ const PlatformNavigation = ({ children }) => {
                     <Link to={webRoutes.userSettings} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Settings
                     </Link>
-                    <Link to={webRoutes.userSubscription} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <Link to={webRoutes.subscriptions} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Subscription
                     </Link>
                     <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -295,16 +323,23 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
                     item.current
                       ? 'bg-gray-100 text-gray-900'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                    'group flex-1 flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                    'group flex-1 flex items-center px-2 py-2 text-sm font-medium rounded-md',
+                    item.premium ? 'relative' : ''
                   )}
                 >
                   <item.icon
                     className={classNames(
                       item.current ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500',
-                      'mr-3 flex-shrink-0 h-5 w-5'
+                      'mr-3 flex-shrink-0 h-5 w-5',
+                      item.premium ? 'text-purple-500' : ''
                     )}
                   />
-                  {item.name}
+                  <span className="flex-1">{item.name}</span>
+                  {item.badge && (
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
                 
                 {item.children && (

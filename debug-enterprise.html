@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enterprise Dashboard Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: orange; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>Enterprise Dashboard Debug</h1>
+    
+    <div class="test-section">
+        <h2>Backend Connectivity Test</h2>
+        <button onclick="testBackend()">Test Backend Connection</button>
+        <div id="backend-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Authentication Test</h2>
+        <button onclick="testAuth()">Test Login & Protected Endpoints</button>
+        <div id="auth-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Enterprise API Test</h2>
+        <button onclick="testEnterpriseAPIs()">Test All Enterprise APIs</button>
+        <div id="enterprise-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Frontend Direct Access</h2>
+        <p>Frontend running at: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+        <p>Try Enterprise Dashboard: <a href="http://localhost:3000/enterprise" target="_blank">http://localhost:3000/enterprise</a></p>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:8000';
+        let authToken = null;
+
+        async function testBackend() {
+            const result = document.getElementById('backend-result');
+            result.innerHTML = '<div class="loading">Testing backend connectivity...</div>';
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/v1/plans/`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="success">✅ Backend is accessible</div>
+                        <div>Found ${data.count} subscription plans</div>
+                        <pre>${JSON.stringify(data.results.slice(0, 2), null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="error">❌ Backend error: ${response.status}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Connection failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testAuth() {
+            const result = document.getElementById('auth-result');
+            result.innerHTML = '<div class="loading">Testing authentication...</div>';
+            
+            try {
+                // Login
+                const loginResponse = await fetch(`${BASE_URL}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'info@connectize.co', password: 'Access2024' })
+                });
+                
+                if (!loginResponse.ok) {
+                    result.innerHTML = `<div class="error">❌ Login failed: ${loginResponse.status}</div>`;
+                    return;
+                }
+                
+                const loginData = await loginResponse.json();
+                authToken = loginData.results.tokens.access;
+                
+                // Test protected endpoint
+                const protectedResponse = await fetch(`${BASE_URL}/api/v1/subscriptions/current/`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (protectedResponse.ok) {
+                    const subData = await protectedResponse.json();
+                    result.innerHTML = `
+                        <div class="success">✅ Authentication working</div>
+                        <div>Current plan: ${subData.plan.name}</div>
+                        <div>Status: ${subData.status}</div>
+                        <pre>Token: ${authToken.substring(0, 50)}...</pre>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="error">❌ Protected endpoint failed: ${protectedResponse.status}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Auth test failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testEnterpriseAPIs() {
+            const result = document.getElementById('enterprise-result');
+            result.innerHTML = '<div class="loading">Testing Enterprise APIs...</div>';
+            
+            if (!authToken) {
+                result.innerHTML = '<div class="error">❌ Please run authentication test first</div>';
+                return;
+            }
+            
+            const tests = [
+                { name: 'Subscription Plans', url: '/api/v1/plans/' },
+                { name: 'Current Subscription', url: '/api/v1/subscriptions/current/' },
+                { name: 'Usage Analytics', url: '/api/v1/subscriptions/usage/' },
+                { name: 'Featured Ads', url: '/api/v1/featured-ads/' },
+                { name: 'Features', url: '/api/v1/features/enabled/' }
+            ];
+            
+            let results = '<div class="success">✅ Testing Enterprise APIs:</div>';
+            
+            for (const test of tests) {
+                try {
+                    const response = await fetch(`${BASE_URL}${test.url}`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results += `<div class="success">✅ ${test.name}: OK (${response.status})</div>`;
+                    } else {
+                        results += `<div class="error">❌ ${test.name}: ${response.status}</div>`;
+                    }
+                } catch (error) {
+                    results += `<div class="error">❌ ${test.name}: ${error.message}</div>`;
+                }
+            }
+            
+            result.innerHTML = results;
+        }
+
+        // Auto-test on load
+        window.onload = () => {
+            testBackend();
+        };
+    </script>
+</body>
+</html>

@@ -3,7 +3,8 @@ import { useAuth } from '../../context/userContext';
 import { useFeatureFlag } from '../../context/featureFlagContext';
 import Button from '../ui/Button';
 import Input, { Select, Textarea } from '../ui/Input';
-import { TrendingUpIcon, TargetIcon, CurrencyDollarIcon, EyeIcon, MousePointerClickIcon } from '../ui/ModernIcon';
+import { TrendingIcon as TrendingUpIcon, MoneyIcon as CurrencyDollarIcon, ViewIcon as EyeIcon, MegaphoneIcon as MousePointerClickIcon } from '../ui/ModernIcon';
+import { featuredAdsApi } from '../../api-services/ads';
 
 const FeaturedAdsManager = () => {
   const { user } = useAuth();
@@ -11,6 +12,11 @@ const FeaturedAdsManager = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState(null);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,38 +38,12 @@ const FeaturedAdsManager = () => {
 
   const fetchCampaigns = async () => {
     try {
-      // Mock campaigns data
-      const mockCampaigns = [
-        {
-          id: '1',
-          title: 'Premium Oil Drilling Equipment',
-          status: 'active',
-          placement: 'feed_top',
-          budget: 500.00,
-          spent_amount: 234.50,
-          impressions: 15420,
-          clicks: 342,
-          ctr: 2.22,
-          start_date: '2024-01-15',
-          end_date: '2024-02-15',
-          content_type: 'product',
-        },
-        {
-          id: '2',
-          title: 'Offshore Engineering Services',
-          status: 'paused',
-          placement: 'sidebar',
-          budget: 750.00,
-          spent_amount: 125.30,
-          impressions: 8930,
-          clicks: 156,
-          ctr: 1.75,
-          start_date: '2024-01-10',
-          end_date: '2024-02-10',
-          content_type: 'service',
-        },
-      ];
-      setCampaigns(mockCampaigns);
+      const [list, summaryRes] = await Promise.all([
+        featuredAdsApi.list(),
+        featuredAdsApi.summary(),
+      ]);
+      setCampaigns(list?.results || list || []);
+      setSummary(summaryRes);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
     } finally {
@@ -75,18 +55,17 @@ const FeaturedAdsManager = () => {
     e.preventDefault();
     
     try {
-      // In production, this would be an API call
-      const newCampaign = {
-        id: Date.now().toString(),
+      // Backend expects datetimes; convert date-only to ISO strings ending of day
+      const payload = {
         ...formData,
-        status: 'draft',
-        spent_amount: 0,
-        impressions: 0,
-        clicks: 0,
-        ctr: 0,
+        // Map content_type string to Django content type by model name; backend expects ID, but we expose model label.
+        // If backend expects numeric content_type, adjust API accordingly. For now, pass through and let backend map.
+        start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
+        end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
       };
-      
-      setCampaigns([...campaigns, newCampaign]);
+
+      const created = await featuredAdsApi.create(payload);
+      setCampaigns([created, ...campaigns]);
       setShowCreateForm(false);
       setFormData({
         title: '',
@@ -109,13 +88,41 @@ const FeaturedAdsManager = () => {
   };
 
   const toggleCampaignStatus = async (campaignId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-    
-    setCampaigns(campaigns.map(campaign => 
-      campaign.id === campaignId 
-        ? { ...campaign, status: newStatus }
-        : campaign
-    ));
+    try {
+      let updated;
+      if (currentStatus === 'active') {
+        updated = await featuredAdsApi.pause(campaignId);
+      } else {
+        updated = await featuredAdsApi.resume(campaignId);
+      }
+      setCampaigns(campaigns.map(c => (c.id === campaignId ? updated : c)));
+      const s = await featuredAdsApi.summary();
+      setSummary(s);
+    } catch (e) {
+      console.error('Failed to toggle campaign status', e);
+    }
+  };
+
+  const openAnalytics = async (campaign) => {
+    setSelectedCampaign(campaign);
+    setAnalyticsOpen(true);
+    setAnalyticsLoading(true);
+    try {
+      const data = await featuredAdsApi.analytics(campaign.id);
+      setAnalyticsData(data);
+    } catch (e) {
+      console.error('Failed to load analytics', e);
+      setAnalyticsData(null);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const closeAnalytics = () => {
+    setAnalyticsOpen(false);
+    setSelectedCampaign(null);
+    setAnalyticsData(null);
+    setAnalyticsLoading(false);
   };
 
   if (!hasFeaturedAds) {
@@ -168,14 +175,14 @@ const FeaturedAdsManager = () => {
         </Button>
       </div>
 
-      {/* Overview Cards */}
+  {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
               <p className="text-2xl font-bold text-gray-900">
-                {campaigns.filter(c => c.status === 'active').length}
+        {summary?.active_campaigns ?? campaigns.filter(c => c.status === 'active').length}
               </p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -189,7 +196,7 @@ const FeaturedAdsManager = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Impressions</p>
               <p className="text-2xl font-bold text-gray-900">
-                {campaigns.reduce((sum, c) => sum + c.impressions, 0).toLocaleString()}
+        {(summary?.impressions ?? campaigns.reduce((sum, c) => sum + (c.impressions || 0), 0)).toLocaleString()}
               </p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -203,7 +210,7 @@ const FeaturedAdsManager = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Clicks</p>
               <p className="text-2xl font-bold text-gray-900">
-                {campaigns.reduce((sum, c) => sum + c.clicks, 0).toLocaleString()}
+        {(summary?.clicks ?? campaigns.reduce((sum, c) => sum + (c.clicks || 0), 0)).toLocaleString()}
               </p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
@@ -217,7 +224,7 @@ const FeaturedAdsManager = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Spent</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${campaigns.reduce((sum, c) => sum + c.spent_amount, 0).toFixed(2)}
+        ${((summary?.spent ?? campaigns.reduce((sum, c) => sum + (c.spent_amount || 0), 0))).toFixed(2)}
               </p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -263,7 +270,7 @@ const FeaturedAdsManager = () => {
                         {campaign.title}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {campaign.content_type} • {campaign.placement}
+                        {(campaign.content_type_label || campaign.content_type)} • {campaign.placement}
                       </div>
                     </div>
                   </td>
@@ -280,21 +287,21 @@ const FeaturedAdsManager = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div>
-                      ${campaign.spent_amount.toFixed(2)} / ${campaign.budget.toFixed(2)}
+                      ${Number(campaign.spent_amount || 0).toFixed(2)} / ${Number(campaign.budget || 0).toFixed(2)}
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                       <div 
                         className="bg-blue-600 h-2 rounded-full" 
-                        style={{ width: `${(campaign.spent_amount / campaign.budget) * 100}%` }}
+                        style={{ width: `${Number(campaign.budget) > 0 ? (Number(campaign.spent_amount || 0) / Number(campaign.budget)) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div>
-                      {campaign.impressions.toLocaleString()} impressions
+                      {(campaign.impressions || 0).toLocaleString()} impressions
                     </div>
                     <div>
-                      {campaign.clicks} clicks ({campaign.ctr}% CTR)
+                      {(campaign.clicks || 0)} clicks ({campaign.ctr}% CTR)
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -307,6 +314,12 @@ const FeaturedAdsManager = () => {
                       }`}
                     >
                       {campaign.status === 'active' ? 'Pause' : 'Resume'}
+                    </button>
+                    <button
+                      onClick={() => openAnalytics(campaign)}
+                      className="text-purple-600 hover:text-purple-900 mr-3"
+                    >
+                      View analytics
                     </button>
                     <button className="text-blue-600 hover:text-blue-900">
                       Edit
@@ -352,6 +365,19 @@ const FeaturedAdsManager = () => {
                     <option value="product">Product</option>
                     <option value="service">Service</option>
                   </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Content ID
+                  </label>
+                  <Input
+                    type="number"
+                    value={formData.content_id}
+                    onChange={(e) => setFormData({...formData, content_id: e.target.value})}
+                    placeholder="Enter the ID of the content to promote"
+                    required
+                  />
                 </div>
 
                 <div>
@@ -420,6 +446,88 @@ const FeaturedAdsManager = () => {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Drawer */}
+      {analyticsOpen && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black bg-opacity-30" onClick={closeAnalytics}></div>
+          <div className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-xl border-l border-gray-200 flex flex-col">
+            <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Campaign analytics</h3>
+                {selectedCampaign && (
+                  <p className="text-sm text-gray-500 truncate">{selectedCampaign.title}</p>
+                )}
+              </div>
+              <button onClick={closeAnalytics} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+
+            <div className="p-5 overflow-y-auto">
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : analyticsData ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500">Impressions</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <EyeIcon className="h-5 w-5 text-blue-600" />
+                        <p className="text-xl font-semibold">{(analyticsData.impressions || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500">Clicks</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <MousePointerClickIcon className="h-5 w-5 text-purple-600" />
+                        <p className="text-xl font-semibold">{(analyticsData.clicks || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500">CTR</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <TrendingUpIcon className="h-5 w-5 text-green-600" />
+                        <p className="text-xl font-semibold">{Number(analyticsData.ctr || 0).toFixed(2)}%</p>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-xs text-gray-500">Avg CPC</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <CurrencyDollarIcon className="h-5 w-5 text-yellow-600" />
+                        <p className="text-xl font-semibold">${Number(analyticsData.avg_cpc || 0).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-600 mb-2">Budget usage</p>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div
+                        className="bg-blue-600 h-3 rounded-full"
+                        style={{ width: `${(Number(selectedCampaign?.spent_amount || 0) / Number(selectedCampaign?.budget || 1)) * 100}%` }}
+                      ></div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
+                      <span>Spent: ${Number(analyticsData.spent || 0).toFixed(2)}</span>
+                      <span>Remaining: ${Number(analyticsData.remaining_budget || 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-gray-500">
+                    <p>Status: {analyticsData.is_active ? 'Active' : 'Inactive'}</p>
+                    {selectedCampaign && (
+                      <p className="mt-1">Placement: {selectedCampaign.placement}</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center text-gray-500 py-8">No analytics available.</div>
+              )}
             </div>
           </div>
         </div>
