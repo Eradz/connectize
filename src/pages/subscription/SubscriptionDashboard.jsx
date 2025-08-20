@@ -91,6 +91,14 @@ const SubscriptionDashboard = () => {
         currentSubscriptionResponse: currentSubscriptionResult
       });
 
+      console.log('🔍 Current subscription analysis:', {
+        rawData: currentSubscriptionResult?.data,
+        subscriptionNested: currentSubscriptionResult?.data?.subscription,
+        directSubscription: currentSubscriptionResult?.data,
+        planName: currentSubscriptionResult?.data?.subscription?.plan?.name || currentSubscriptionResult?.data?.plan?.name,
+        status: currentSubscriptionResult?.data?.subscription?.status || currentSubscriptionResult?.data?.status
+      });
+
       console.log('📊 Extracted data:', {
         plans: plansResult?.data?.results?.length || 0,
         features: Object.keys(featuresResult?.data?.features_by_category || {}).length,
@@ -107,12 +115,20 @@ const SubscriptionDashboard = () => {
         analytics: !!analyticsResult?.data
       });
 
+      const extractedSubscription = currentSubscriptionResult?.data?.subscription || null;
+      console.log('🔧 Subscription extraction result:', {
+        extracted: extractedSubscription,
+        planName: extractedSubscription?.plan?.name,
+        status: extractedSubscription?.status,
+        isActive: extractedSubscription?.is_active
+      });
+
       setDashboardData({
         plans: plansResult?.data?.results || [],
         features: allFeatures || [],
         featuresCategories: featuresData,
         analytics: analyticsResult?.data,
-        currentSubscription: currentSubscriptionResult?.data || null
+        currentSubscription: extractedSubscription
       });
 
     } catch (error) {
@@ -436,7 +452,7 @@ const SubscriptionDashboard = () => {
                       <div className="bg-white bg-opacity-60 rounded-lg p-3">
                         <p className="text-xs font-medium text-green-700">Plan Type</p>
                         <p className="text-sm font-bold text-green-900 capitalize">
-                          {dashboardData.currentSubscription.plan?.plan_type || 'Professional'}
+                          {dashboardData.currentSubscription.plan?.plan_type || 'N/A'}
                         </p>
                       </div>
                       

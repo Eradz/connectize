@@ -4,6 +4,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import Alert, { AlertDescription } from '@/components/ui/Alert';
+import { getAuthorizationHeader } from '../../lib/helpers';
 import { 
   CheckCircle, 
   TrendingUp, 
@@ -43,7 +44,13 @@ const SubscriptionManagementCenter = () => {
 
   const fetchUserSubscription = async () => {
     try {
-      const res = await fetch('/api/admin_permissions/api/v2/subscription/current/');
+      const authHeaders = await getAuthorizationHeader();
+      const res = await fetch('/api/v1/subscriptions/current/', {
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
       const data = await res.json();
       setSubscription(data);
     } catch (error) {
@@ -54,7 +61,13 @@ const SubscriptionManagementCenter = () => {
   const fetchNotifications = async () => {
     try {
       // Derive notifications from analytics recommendations
-      const res = await fetch('/api/admin_permissions/api/v2/subscription/analytics/');
+      const authHeaders = await getAuthorizationHeader();
+      const res = await fetch('/api/v1/subscriptions/analytics/', {
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        }
+      });
       const data = await res.json();
 
       const recs = data?.recommendations || [];

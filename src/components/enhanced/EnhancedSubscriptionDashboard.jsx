@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Progress from '@/components/ui/Progress';
 import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import Alert, { AlertDescription } from '@/components/ui/Alert';
+import { getAuthorizationHeader } from '../../lib/helpers';
 import { 
   CheckCircle, 
   XCircle, 
@@ -35,12 +36,35 @@ const EnhancedSubscriptionDashboard = () => {
     try {
       setLoading(true);
 
+      // Get authentication headers
+      const authHeaders = await getAuthorizationHeader();
+
       // Fetch current subscription with enhanced details
       const [subResponse, featuresResponse, analyticsResponse, plansResponse] = await Promise.all([
-        fetch('/api/admin_permissions/api/v2/subscription/current/'),
-        fetch('/api/admin_permissions/api/v2/subscription/features/'),
-        fetch('/api/admin_permissions/api/v2/subscription/analytics/'),
-        fetch('/api/admin_permissions/api/v2/enhanced-plans/')
+        fetch('/api/v1/subscriptions/current/', {
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          }
+        }),
+        fetch('/api/v1/subscriptions/usage/', {
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          }
+        }),
+        fetch('/api/v1/subscriptions/analytics/', {
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          }
+        }),
+        fetch('/api/v1/plans/', {
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          }
+        })
       ]);
 
       const subData = await subResponse.json();

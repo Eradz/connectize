@@ -813,7 +813,11 @@ const SubscriptionPlanDetail = () => {
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Current Plan
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => navigate(webRoutes.subscriptionManagement)}
+                      >
                         <Settings className="h-4 w-4 mr-2" />
                         Manage Subscription
                       </Button>

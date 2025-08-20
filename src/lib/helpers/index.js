@@ -45,7 +45,7 @@ export function goToLogin() {
 
 // Configure Axios Defaults
 export const baseURL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? "http://127.0.0.1:8001" : "https://about.connectize.co");
+  (import.meta.env.DEV ? "http://localhost:8000" : "https://about.connectize.co");
 
 axios.defaults.withCredentials = true;
 
