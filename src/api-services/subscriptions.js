@@ -44,7 +44,10 @@ export default {
   getCompanySubscriptionSummary: () => api.get(`${SUBSCRIPTION_BASE_URL}/company-subscriptions/summary/`),
   
   // Features API - using correct admin_permissions URLs
-  getAvailableFeatures: () => api.get(`/api/permissions/features/available/`),
+  getAvailableFeatures: (planType = null) => {
+    const params = planType ? { plan_type: planType } : {};
+    return api.get(`/api/permissions/features/available/`, { params });
+  },
   getPlanFeatures: (planType) => api.get(`/api/permissions/features/available/`, { params: { plan_type: planType } }),
   
   // Conversion tracking and analytics

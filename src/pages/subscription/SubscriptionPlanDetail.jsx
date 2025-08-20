@@ -532,19 +532,26 @@ const SubscriptionPlanDetail = () => {
 
   // Get plan features for this specific plan (only included features)
   const getPlanFeatures = (planType) => {
-    // Since we're fetching plan-specific features from the API,
-    // all features returned are already filtered for this plan
-    return planData.features || [];
+    if (!planData.features.length) return [];
+    
+    const planHierarchy = {
+      'trial': ['trial'],
+      'starter': ['trial', 'starter'],
+      'professional': ['trial', 'starter', 'professional'],
+      'enterprise': ['trial', 'starter', 'professional', 'enterprise'],
+      'custom': ['trial', 'starter', 'professional', 'enterprise', 'custom']
+    };
+
+    const availablePlans = planHierarchy[planType?.toLowerCase()] || ['trial'];
+    
+    return planData.features.filter(feature => 
+      availablePlans.includes(feature.minimum_plan?.toLowerCase())
+    );
   };
 
   // Categorize features by their category
   const categorizeFeatures = (features) => {
-    // Use the features categories directly from the API response
-    if (planData.featuresCategories && Object.keys(planData.featuresCategories).length > 0) {
-      return planData.featuresCategories;
-    }
-    
-    // Fallback: categorize features manually if categories not provided
+    // Always categorize the filtered features passed as parameter
     const categories = {};
     features.forEach(feature => {
       const category = feature.feature_category || feature.category || 'General Features';

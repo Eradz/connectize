@@ -51,6 +51,21 @@ const SubscriptionManagementCenter = () => {
           ...authHeaders
         }
       });
+      
+      // Check if response is ok and contains JSON
+      if (!res.ok) {
+        console.warn(`Subscription API returned ${res.status}: ${res.statusText}`);
+        setSubscription(null);
+        return;
+      }
+      
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn('Subscription API returned non-JSON response:', contentType);
+        setSubscription(null);
+        return;
+      }
+      
       const data = await res.json();
       setSubscription(data);
     } catch (error) {
@@ -68,6 +83,21 @@ const SubscriptionManagementCenter = () => {
           ...authHeaders
         }
       });
+      
+      // Check if response is ok and contains JSON
+      if (!res.ok) {
+        console.warn(`Analytics API returned ${res.status}: ${res.statusText}`);
+        setNotifications([]);
+        return;
+      }
+      
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn('Analytics API returned non-JSON response:', contentType);
+        setNotifications([]);
+        return;
+      }
+      
       const data = await res.json();
 
       const recs = data?.recommendations || [];

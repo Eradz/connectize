@@ -34,6 +34,21 @@ const EnhancedPlanComparison = () => {
   const fetchComparisonData = async () => {
     try {
       const response = await fetch('/api/admin_permissions/api/v2/plans/comparison/');
+      
+      // Check if response is ok and contains JSON
+      if (!response.ok) {
+        console.warn(`Comparison API returned ${response.status}: ${response.statusText}`);
+        setComparison(null);
+        return;
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn('Comparison API returned non-JSON response:', contentType);
+        setComparison(null);
+        return;
+      }
+      
       const data = await response.json();
       setComparison(data);
     } catch (error) {

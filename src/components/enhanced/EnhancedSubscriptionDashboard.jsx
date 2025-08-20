@@ -67,10 +67,31 @@ const EnhancedSubscriptionDashboard = () => {
         })
       ]);
 
-      const subData = await subResponse.json();
-      const featuresData = await featuresResponse.json();
-      const analyticsData = await analyticsResponse.json();
-      const plansData = await plansResponse.json();
+      // Helper function to safely parse JSON responses
+      const safeJsonParse = async (response, defaultValue = null) => {
+        if (!response.ok) {
+          console.warn(`API returned ${response.status}: ${response.statusText}`);
+          return defaultValue;
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.warn('API returned non-JSON response:', contentType);
+          return defaultValue;
+        }
+        
+        try {
+          return await response.json();
+        } catch (error) {
+          console.warn('Failed to parse JSON response:', error);
+          return defaultValue;
+        }
+      };
+
+      const subData = await safeJsonParse(subResponse, {});
+      const featuresData = await safeJsonParse(featuresResponse, { features_by_category: {} });
+      const analyticsData = await safeJsonParse(analyticsResponse, {});
+      const plansData = await safeJsonParse(plansResponse, { results: [] });
 
       setSubscription(subData);
       setFeatures(featuresData.features_by_category || {});
@@ -229,7 +250,7 @@ const EnhancedSubscriptionDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {Object.entries(analytics.current_usage).map(([key, usage]) => (
+                  {analytics?.current_usage && Object.entries(analytics.current_usage).map(([key, usage]) => (
                     <div key={key} className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="font-medium capitalize">
@@ -279,7 +300,7 @@ const EnhancedSubscriptionDashboard = () => {
         {/* Features Tab */}
         <TabsContent value="features" className="space-y-6">
           <div className="grid gap-6">
-            {Object.entries(features).map(([category, categoryFeatures]) => {
+            {features && Object.entries(features).map(([category, categoryFeatures]) => {
               const IconComponent = getCategoryIcon(category);
               
               return (
@@ -384,19 +405,19 @@ const EnhancedSubscriptionDashboard = () => {
                     <div>
                       <p className="text-sm text-gray-600">Period Start</p>
                       <p className="font-medium">
-                        {new Date(analytics.billing_period.start).toLocaleDateString()}
+                        {analytics?.billing_period?.start ? new Date(analytics.billing_period.start).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Period End</p>
                       <p className="font-medium">
-                        {new Date(analytics.billing_period.end).toLocaleDateString()}
+                        {analytics?.billing_period?.end ? new Date(analytics.billing_period.end).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Days Remaining</p>
                       <p className="font-medium text-blue-600">
-                        {analytics.billing_period.days_remaining} days
+                        {analytics?.billing_period?.days_remaining ?? 'N/A'} days
                       </p>
                     </div>
                   </div>
@@ -410,7 +431,7 @@ const EnhancedSubscriptionDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {Object.entries(analytics.current_usage).map(([key, usage]) => (
+                    {analytics?.current_usage && Object.entries(analytics.current_usage).map(([key, usage]) => (
                       <div key={key} className="p-4 border rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <h4 className="font-medium capitalize">
@@ -451,7 +472,7 @@ const EnhancedSubscriptionDashboard = () => {
               </Card>
 
               {/* Insights */}
-              {analytics.insights && (
+              {analytics?.insights && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Usage Insights</CardTitle>
@@ -461,19 +482,19 @@ const EnhancedSubscriptionDashboard = () => {
                       <div className="p-4 bg-blue-50 rounded-lg">
                         <p className="text-sm text-blue-600 font-medium">Usage Efficiency</p>
                         <p className="text-lg font-bold text-blue-800 capitalize">
-                          {analytics.insights.usage_efficiency}
+                          {analytics.insights?.usage_efficiency || 'N/A'}
                         </p>
                       </div>
                       <div className="p-4 bg-green-50 rounded-lg">
                         <p className="text-sm text-green-600 font-medium">Cost per Post</p>
                         <p className="text-lg font-bold text-green-800">
-                          ${analytics.insights.cost_per_post.toFixed(2)}
+                          ${analytics.insights?.cost_per_post?.toFixed(2) || '0.00'}
                         </p>
                       </div>
                       <div className="p-4 bg-purple-50 rounded-lg">
                         <p className="text-sm text-purple-600 font-medium">Value Score</p>
                         <p className="text-lg font-bold text-purple-800">
-                          {Math.round(analytics.insights.value_score)}/100
+                          {analytics.insights?.value_score ? Math.round(analytics.insights.value_score) : 'N/A'}/100
                         </p>
                       </div>
                     </div>

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { webRoutes } from '../lib/webRoutes';
 
-// Enhanced subscription components
+// New comprehensive subscription management system
+import SubscriptionManagementSystem from '../components/subscription/SubscriptionManagementSystem';
+
+// Enhanced subscription components for specific use cases
 import SubscriptionManagementCenter from '../components/enhanced/SubscriptionManagementCenter';
 import EnhancedSubscriptionDashboard from '../components/enhanced/EnhancedSubscriptionDashboard';
 import EnhancedPlanComparison from '../components/enhanced/EnhancedPlanComparison';
@@ -14,44 +16,52 @@ import SubscriptionPlanDetail from '../pages/subscription/SubscriptionPlanDetail
 const SubscriptionRoutes = () => {
   return (
     <Routes>
-      {/* Enhanced Subscription Management Center - Main entry point */}
+      {/* Main comprehensive subscription management system */}
       <Route 
-        path="/management" 
+        path="/" 
+        element={<SubscriptionManagementSystem />} 
+      />
+      
+      {/* Direct tab access through URL params */}
+      <Route 
+        path="/dashboard" 
+        element={<Navigate to="/subscriptions?tab=dashboard" replace />} 
+      />
+      
+      <Route 
+        path="/plans" 
+        element={<Navigate to="/subscriptions?tab=plans" replace />} 
+      />
+      
+      <Route 
+        path="/features" 
+        element={<Navigate to="/subscriptions?tab=features" replace />} 
+      />
+      
+      <Route 
+        path="/billing" 
+        element={<Navigate to="/subscriptions?tab=billing" replace />} 
+      />
+      
+      {/* Enhanced components for specific workflows */}
+      <Route 
+        path="/enhanced" 
         element={<SubscriptionManagementCenter />} 
       />
       
-      {/* Enhanced Dashboard */}
       <Route 
-        path="/dashboard" 
+        path="/enhanced/dashboard" 
         element={<EnhancedSubscriptionDashboard />} 
       />
       
-      {/* Enhanced Plan Comparison */}
       <Route 
-        path="/compare" 
+        path="/enhanced/compare" 
         element={<EnhancedPlanComparison />} 
       />
       
-      {/* Feature Explorer (redirect to management center) */}
+      {/* Plan-specific routes */}
       <Route 
-        path="/features" 
-        element={<Navigate to="/subscriptions/management?tab=features" replace />} 
-      />
-      
-      {/* Billing (redirect to management center) */}
-      <Route 
-        path="/billing" 
-        element={<Navigate to="/subscriptions/management?tab=billing" replace />} 
-      />
-      
-      {/* Legacy routes for backward compatibility */}
-      <Route 
-        path="/" 
-        element={<SubscriptionDashboard />} 
-      />
-      
-      <Route 
-        path="/plans/:planId" 
+        path="/plan/:planId" 
         element={<SubscriptionPlanDetail />} 
       />
       
@@ -60,10 +70,26 @@ const SubscriptionRoutes = () => {
         element={<SubscriptionPlanDetail />} 
       />
       
-      {/* Default redirect to management center */}
+      {/* Legacy routes for backward compatibility */}
+      <Route 
+        path="/legacy" 
+        element={<SubscriptionDashboard />} 
+      />
+      
+      <Route 
+        path="/legacy/dashboard" 
+        element={<SubscriptionDashboard />} 
+      />
+      
+      <Route 
+        path="/legacy/plan-detail" 
+        element={<SubscriptionPlanDetail />} 
+      />
+      
+      {/* Catch-all redirect to main system */}
       <Route 
         path="*" 
-        element={<Navigate to="/subscriptions/management" replace />} 
+        element={<Navigate to="/subscriptions" replace />} 
       />
     </Routes>
   );
