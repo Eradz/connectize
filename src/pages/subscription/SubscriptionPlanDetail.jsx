@@ -67,7 +67,7 @@ const SubscriptionPlanDetail = () => {
       console.log('📊 Loading plan details for ID:', planId);
 
       // Load plan details and related data using the correct API endpoints
-      const [planResult, currentSubscriptionResult] = await Promise.all([
+      const [planResult, currentSubscriptionResult, actualFeaturesResult] = await Promise.all([
         // Get specific plan details using the existing subscription API
         subscriptionsApi.getPlanDetails(planId).catch(err => {
           console.log('⚠️ Plan details not available, trying regular plan endpoint:', err);
@@ -94,6 +94,11 @@ const SubscriptionPlanDetail = () => {
         }).catch(err => {
           console.error('Current subscription fetch error:', err);
           return { subscription_plan: null };
+        }),
+        // Get actual features count from permissions API (same as dashboard)
+        subscriptionsApi.getAvailableFeatures().catch(err => {
+          console.error('Failed to load actual features count:', err);
+          return { data: { features_by_category: {} } };
         })
       ]);
 
@@ -432,13 +437,24 @@ const SubscriptionPlanDetail = () => {
       console.log('🔍 Detailed features response:', JSON.stringify(planFeaturesResult, null, 2));
       console.log('🔍 Plan data:', JSON.stringify(planResult?.data, null, 2));
 
-      // Extract features data - handle different response formats
+      // Extract features data - prioritize actual features from permissions API
       let featuresData = {};
       let allPlanFeatures = [];
 
-      if (planFeaturesResult?.features_by_category) {
+      // First, try to use actual features from permissions API (same as dashboard)
+      if (actualFeaturesResult?.data?.features_by_category) {
+        featuresData = actualFeaturesResult.data.features_by_category;
+        allPlanFeatures = Object.values(featuresData).flat();
+        console.log('✅ Using actual features from permissions API:', {
+          totalFeatures: allPlanFeatures.length,
+          categories: Object.keys(featuresData).length
+        });
+      }
+      // Fallback to manual features from plan data if API features not available
+      else if (planFeaturesResult?.features_by_category) {
         featuresData = planFeaturesResult.features_by_category;
         allPlanFeatures = Object.values(featuresData).flat();
+        console.log('⚠️ Using fallback manual features from plan data');
       }
 
       console.log('� Final features processing:', {
