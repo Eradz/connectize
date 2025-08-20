@@ -191,6 +191,13 @@ const webRoutes = {
   
   // Subscriptions
   subscriptions: "/subscriptions",
+  subscriptionDashboard: "/subscriptions/dashboard",
+  subscriptionPlanDetail: "/subscriptions/plans/:planId",
+  subscriptionPlanCompare: "/subscriptions/compare",
+  subscriptionUpgrade: "/subscriptions/upgrade/:planId",
+  subscriptionManagement: "/subscriptions/management",
+  subscriptionFeatures: "/subscriptions/features",
+  subscriptionBilling: "/subscriptions/billing",
   
   // Enterprise Suite Routes
   enterprise: "/enterprise",

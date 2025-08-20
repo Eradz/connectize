@@ -95,6 +95,10 @@ import LogisticsTracking from "./pages/platform/LogisticsTracking";
 import LogisticsTest from "./pages/test/LogisticsTest";
 import FeaturedAdsPage from "./pages/platform/FeaturedAds";
 import SubscriptionsPage from "./pages/platform/Subscriptions";
+import SubscriptionPlanDetail from "./pages/subscription/SubscriptionPlanDetail";
+
+// Enhanced Subscription System
+import SubscriptionRoutes from "./routes/SubscriptionRoutes";
 
 // Inventory Management Components
 import InventoryDashboard from "./pages/inventory/InventoryDashboard";
@@ -172,7 +176,13 @@ function App() {
           <Route path={webRoutes.aiAnalytics} element={<AISubpage />} />
           <Route path={webRoutes.aiInsights} element={<AISubpage />} />
           <Route path={webRoutes.featuredAds} element={<FeaturedAdsPage />} />
+          
+          {/* Enhanced Subscription System Routes */}
+          <Route path="/subscriptions/*" element={<SubscriptionRoutes />} />
+          
+          {/* Legacy subscription routes for backward compatibility */}
           <Route path={webRoutes.subscriptions} element={<SubscriptionsPage />} />
+          <Route path={webRoutes.subscriptionPlanDetail} element={<SubscriptionPlanDetail />} />
           {/* Legacy alias for user subscription path */}
           <Route path={webRoutes.userSubscription} element={<SubscriptionsPage />} />
           

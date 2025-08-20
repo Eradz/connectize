@@ -21,8 +21,7 @@ import {
   AlertTriangle,
   Package,
   BookOpen,
-  CreditCard,
-  Crown
+  CreditCard
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 
@@ -111,20 +110,6 @@ const PlatformNavigation = ({ children }) => {
       ]
     },
     {
-      name: 'Enterprise Suite',
-      href: webRoutes.enterprise,
-      icon: Crown,
-      current: location.pathname.startsWith('/enterprise'),
-      badge: 'PRO',
-      premium: true,
-      children: [
-        { name: 'Executive Dashboard', href: webRoutes.enterprise },
-        { name: 'Subscription Center', href: webRoutes.enterpriseSubscriptions },
-        { name: 'Advertising Console', href: webRoutes.enterpriseAdvertising },
-        { name: 'Advanced Analytics', href: webRoutes.enterpriseAnalytics }
-      ]
-    },
-    {
       name: 'Featured Ads',
       href: webRoutes.featuredAds,
       icon: Target,
@@ -156,7 +141,6 @@ const PlatformNavigation = ({ children }) => {
   const quickActions = [
     { name: 'Create Deal Room', href: webRoutes.dealRoomCreate, icon: FileText, color: 'bg-blue-500' },
     { name: 'Post Job', href: webRoutes.workforceJobCreate, icon: Briefcase, color: 'bg-green-500' },
-    { name: 'Enterprise Dashboard', href: webRoutes.enterprise, icon: Crown, color: 'bg-purple-500' },
     { name: 'Knowledge Hub', href: webRoutes.knowledgeHub, icon: BookOpen, color: 'bg-orange-500' }
   ];
 

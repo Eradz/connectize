@@ -45,7 +45,7 @@ import {
 // LOADING STATE COMPONENT
 // =============================================================================
 
-export const LoadingState = () => (
+const LoadingState = () => (
   <div className="flex items-center justify-center h-64">
     <div className="flex items-center space-x-3">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -58,7 +58,7 @@ export const LoadingState = () => (
 // METRIC CARD COMPONENT
 // =============================================================================
 
-export const MetricCard = ({ metric }) => {
+const MetricCard = ({ metric }) => {
   const IconComponent = metric.icon;
   const colorClasses = {
     blue: 'bg-blue-50 text-blue-600 border-blue-200',
@@ -99,7 +99,7 @@ export const MetricCard = ({ metric }) => {
 // PERFORMANCE CHART COMPONENT
 // =============================================================================
 
-export const PerformanceChart = ({ data }) => {
+const PerformanceChart = ({ data }) => {
   if (!data || data.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-gray-500">
@@ -139,7 +139,7 @@ export const PerformanceChart = ({ data }) => {
 // USAGE CHART COMPONENT
 // =============================================================================
 
-export const UsageChart = ({ data }) => {
+const UsageChart = ({ data }) => {
   if (!data || data.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center text-gray-500">
@@ -173,7 +173,7 @@ export const UsageChart = ({ data }) => {
 // RECENT ACTIVITIES COMPONENT
 // =============================================================================
 
-export const RecentActivities = ({ campaigns }) => {
+const RecentActivities = ({ campaigns }) => {
   if (!campaigns || campaigns.length === 0) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -230,7 +230,7 @@ export const RecentActivities = ({ campaigns }) => {
 // SUBSCRIPTION DETAILS COMPONENT
 // =============================================================================
 
-export const SubscriptionDetails = ({ subscription }) => {
+const SubscriptionDetails = ({ subscription }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'active': return 'text-green-600 bg-green-100';
@@ -278,7 +278,55 @@ export const SubscriptionDetails = ({ subscription }) => {
         
         <div>
           <h4 className="text-sm font-medium text-gray-500">Plan Features</h4>
-          <p className="text-sm text-gray-900">{subscription.plan?.features || 'Standard features included'}</p>
+          <div className="text-sm text-gray-900">
+            {subscription.plan?.features ? (
+              typeof subscription.plan.features === 'string' ? (
+                subscription.plan.features
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(subscription.plan.features).map(([category, features]) => (
+                    <div key={category} className="border-l-2 border-blue-200 pl-3">
+                      <h5 className="font-medium text-gray-700 capitalize mb-1">
+                        {category.replace(/_/g, ' ')}
+                      </h5>
+                      <div className="space-y-1 text-xs">
+                        {typeof features === 'object' && features !== null ? (
+                          Object.entries(features).map(([key, value]) => (
+                            <div key={key} className="flex justify-between items-center">
+                              <span className="text-gray-600 capitalize">
+                                {key.replace(/_/g, ' ')}
+                              </span>
+                              <span className="font-medium">
+                                {typeof value === 'boolean' ? (
+                                  value ? (
+                                    <span className="text-green-600">✓ Enabled</span>
+                                  ) : (
+                                    <span className="text-gray-400">✗ Disabled</span>
+                                  )
+                                ) : typeof value === 'number' ? (
+                                  value === 0 ? (
+                                    <span className="text-gray-400">Not included</span>
+                                  ) : (
+                                    <span className="text-blue-600">{value.toLocaleString()}</span>
+                                  )
+                                ) : (
+                                  <span className="text-gray-800">{String(value)}</span>
+                                )}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-gray-600">{String(features)}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              'Standard features included'
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -289,7 +337,7 @@ export const SubscriptionDetails = ({ subscription }) => {
 // NO SUBSCRIPTION STATE COMPONENT
 // =============================================================================
 
-export const NoSubscriptionState = () => (
+const NoSubscriptionState = () => (
   <div className="text-center py-12">
     <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
     <h4 className="text-lg font-medium text-gray-900 mb-2">No Active Subscription</h4>
@@ -304,37 +352,80 @@ export const NoSubscriptionState = () => (
 // PLAN CARD COMPONENT
 // =============================================================================
 
-export const PlanCard = ({ plan, isCurrentPlan }) => (
-  <div className={`border rounded-lg p-6 ${
-    isCurrentPlan ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
-  }`}>
-    <div className="text-center">
-      <h4 className="text-lg font-semibold text-gray-900">{plan.name}</h4>
-      <div className="mt-2">
-        <span className="text-3xl font-bold text-gray-900">${plan.price}</span>
-        <span className="text-gray-500">/month</span>
-      </div>
-      
-      <div className="mt-4">
-        {isCurrentPlan ? (
-          <span className="inline-flex px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-lg">
-            Current Plan
-          </span>
-        ) : (
-          <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Upgrade
-          </button>
-        )}
+const PlanCard = ({ plan, isCurrentPlan }) => {
+  const getPlanIcon = (planType) => {
+    const icons = {
+      'trial': '🎯',
+      'starter': '🚀', 
+      'professional': '💼',
+      'enterprise': '🏢',
+      'custom': '👑'
+    };
+    return icons[plan.plan_type] || '📦';
+  };
+
+  const getKeyFeatures = (plan) => {
+    if (!plan.features) return [];
+    
+    const features = [];
+    const technical = plan.features.technical_limits || {};
+    const content = plan.features.content_limits || {};
+    
+    if (technical.api_calls_per_month) {
+      features.push(`${(technical.api_calls_per_month / 1000).toLocaleString()}K API calls`);
+    }
+    if (technical.storage_gb) {
+      features.push(`${technical.storage_gb}GB storage`);
+    }
+    if (content.posts_per_month) {
+      features.push(`${content.posts_per_month} posts/month`);
+    }
+    
+    return features.slice(0, 3); // Show top 3 features
+  };
+
+  return (
+    <div className={`border rounded-lg p-6 transition-all hover:shadow-lg ${
+      isCurrentPlan ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-200 bg-white'
+    }`}>
+      <div className="text-center">
+        <div className="text-2xl mb-2">{getPlanIcon(plan.plan_type)}</div>
+        <h4 className="text-lg font-semibold text-gray-900">{plan.name}</h4>
+        <div className="mt-2">
+          <span className="text-3xl font-bold text-gray-900">${plan.price}</span>
+          <span className="text-gray-500">/month</span>
+        </div>
+        
+        {/* Key Features */}
+        <div className="mt-4 space-y-1 text-sm text-gray-600">
+          {getKeyFeatures(plan).map((feature, index) => (
+            <div key={index} className="flex items-center justify-center">
+              <span>✓ {feature}</span>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-6">
+          {isCurrentPlan ? (
+            <span className="inline-flex px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-lg">
+              Current Plan
+            </span>
+          ) : (
+            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Upgrade
+            </button>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // =============================================================================
 // CAMPAIGNS LIST COMPONENT
 // =============================================================================
 
-export const CampaignsList = ({ campaigns }) => {
+const CampaignsList = ({ campaigns }) => {
   if (!campaigns || campaigns.length === 0) {
     return (
       <div className="p-8 text-center">
@@ -381,7 +472,7 @@ export const CampaignsList = ({ campaigns }) => {
 // CAMPAIGN ROW COMPONENT
 // =============================================================================
 
-export const CampaignRow = ({ campaign }) => {
+const CampaignRow = ({ campaign }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'active': return <Play className="h-4 w-4 text-green-600" />;
@@ -448,7 +539,7 @@ export const CampaignRow = ({ campaign }) => {
 // ANALYTICS CHART COMPONENT
 // =============================================================================
 
-export const AnalyticsChart = ({ title, data, type = 'line' }) => {
+const AnalyticsChart = ({ title, data, type = 'line' }) => {
   if (!data || data.length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -486,7 +577,8 @@ export const AnalyticsChart = ({ title, data, type = 'line' }) => {
   );
 };
 
-export default {
+// Export individual components as named exports
+export {
   LoadingState,
   MetricCard,
   PerformanceChart,

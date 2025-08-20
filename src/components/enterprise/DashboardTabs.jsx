@@ -19,7 +19,6 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  Legend, 
   ResponsiveContainer 
 } from 'recharts';
 import { 
@@ -30,14 +29,19 @@ import {
   Target, 
   Eye, 
   MousePointer, 
-  Activity,
+  Calendar, 
+  Clock, 
   CheckCircle,
-  Clock,
+  XCircle,
   AlertTriangle,
-  Play,
-  Pause,
-  Edit,
-  MoreHorizontal
+  BarChart3,
+  Shield,
+  Database,
+  Globe,
+  Headphones,
+  Crown,
+  Star,
+  Award
 } from 'lucide-react';
 import { 
   LoadingState,
@@ -63,7 +67,7 @@ import {
 // OVERVIEW TAB COMPONENT
 // =============================================================================
 
-export const OverviewTab = ({ 
+const OverviewTab = ({ 
   currentSubscription, 
   usageAnalytics, 
   dashboardMetrics, 
@@ -156,7 +160,7 @@ export const OverviewTab = ({
 // SUBSCRIPTION TAB COMPONENT
 // =============================================================================
 
-export const SubscriptionTab = ({ 
+const SubscriptionTab = ({ 
   currentSubscription, 
   subscriptionPlans, 
   usageAnalytics, 
@@ -196,7 +200,7 @@ export const SubscriptionTab = ({
       {usageAnalytics && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-xl font-semibold text-gray-900 mb-6">Usage Analytics</h3>
-          <UsageBreakdown analytics={usageAnalytics} />
+          <UsageBreakdown analytics={usageAnalytics} currentSubscription={currentSubscription} />
         </div>
       )}
 
@@ -230,7 +234,7 @@ export const SubscriptionTab = ({
 // ADVERTISING TAB COMPONENT
 // =============================================================================
 
-export const AdvertisingTab = ({ campaigns, dashboardMetrics, isLoading }) => {
+const AdvertisingTab = ({ campaigns, dashboardMetrics, isLoading }) => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -307,7 +311,7 @@ export const AdvertisingTab = ({ campaigns, dashboardMetrics, isLoading }) => {
 // ANALYTICS TAB COMPONENT
 // =============================================================================
 
-export const AnalyticsTab = ({ usageAnalytics, dashboardMetrics, dateRange, isLoading }) => {
+const AnalyticsTab = ({ usageAnalytics, dashboardMetrics, dateRange, isLoading }) => {
   const [chartType, setChartType] = useState('line');
 
   if (isLoading) {
@@ -357,7 +361,8 @@ export const AnalyticsTab = ({ usageAnalytics, dashboardMetrics, dateRange, isLo
   );
 };
 
-export default {
+// Export individual components as named exports
+export {
   OverviewTab,
   SubscriptionTab,
   AdvertisingTab,

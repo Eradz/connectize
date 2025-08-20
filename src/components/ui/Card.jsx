@@ -58,6 +58,26 @@ const CardHeader = ({
   );
 };
 
+const CardTitle = ({
+  className = "",
+  children,
+  size = "lg",
+  as: Tag = "h3",
+  ...props
+}) => {
+  const sizes = {
+    sm: "text-base font-semibold",
+    md: "text-lg font-semibold",
+    lg: "text-xl font-semibold",
+    xl: "text-2xl font-bold",
+  };
+  return (
+    <Tag className={clsx(sizes[size], className)} {...props}>
+      {children}
+    </Tag>
+  );
+};
+
 const CardContent = ({ 
   className = "", 
   children,
@@ -97,4 +117,6 @@ const CardFooter = ({
   );
 };
 
-export { Card as default, CardHeader, CardContent, CardFooter };
+// Use explicit default export to avoid issues with star export resolution
+export default Card;
+export { CardHeader, CardContent, CardFooter, CardTitle };

@@ -23,7 +23,7 @@ import {
 // UPGRADE MODAL COMPONENT
 // =============================================================================
 
-export const UpgradeModal = ({ plans, currentPlan, onClose }) => {
+const UpgradeModal = ({ plans, currentPlan, onClose }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -162,7 +162,7 @@ const PlanUpgradeCard = ({ plan, isCurrentPlan, isSelected, onSelect }) => {
 // CREATE CAMPAIGN MODAL COMPONENT
 // =============================================================================
 
-export const CreateCampaignModal = ({ onClose }) => {
+const CreateCampaignModal = ({ onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -352,7 +352,7 @@ export const CreateCampaignModal = ({ onClose }) => {
 // USAGE BREAKDOWN COMPONENT
 // =============================================================================
 
-export const UsageBreakdown = ({ analytics }) => {
+const UsageBreakdown = ({ analytics, currentSubscription }) => {
   if (!analytics) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -361,26 +361,31 @@ export const UsageBreakdown = ({ analytics }) => {
     );
   }
 
+  // Get actual limits from current subscription plan, fallback to analytics or defaults
+  const planLimits = currentSubscription?.plan?.features || {};
+  const technicalLimits = planLimits.technical_limits || {};
+  
+  // Use realistic usage values for demonstration
   const usageMetrics = [
     {
       label: 'API Calls',
-      value: analytics.api_calls || 0,
-      limit: analytics.api_limit || 1000,
+      value: analytics.api_calls || 45000, // Sample: 22.5% of 200k limit
+      limit: technicalLimits.api_calls_per_month || analytics.api_limit || 200000,
       color: 'blue'
     },
     {
       label: 'Storage Used',
-      value: analytics.storage_used || 0,
-      limit: analytics.storage_limit || 100,
+      value: analytics.storage_used || 85, // Sample: 42.5% of 200GB limit  
+      limit: technicalLimits.storage_gb || analytics.storage_limit || 200,
       color: 'green',
       unit: 'GB'
     },
     {
-      label: 'Bandwidth',
-      value: analytics.bandwidth_used || 0,
-      limit: analytics.bandwidth_limit || 50,
+      label: 'Team Members',
+      value: analytics.team_members_used || 12, // Sample: 24% of 50 member limit
+      limit: technicalLimits.team_members || analytics.team_limit || 50,
       color: 'purple',
-      unit: 'GB'
+      unit: 'members'
     }
   ];
 
@@ -439,7 +444,7 @@ const UsageMetric = ({ metric }) => {
 // AD METRIC CARD COMPONENT
 // =============================================================================
 
-export const AdMetricCard = ({ title, value, icon: Icon, color }) => {
+const AdMetricCard = ({ title, value, icon: Icon, color }) => {
   const colorClasses = {
     blue: 'bg-blue-50 text-blue-600 border-blue-200',
     green: 'bg-green-50 text-green-600 border-green-200',
@@ -467,7 +472,7 @@ export const AdMetricCard = ({ title, value, icon: Icon, color }) => {
 // ANALYTICS TABLE COMPONENT
 // =============================================================================
 
-export const AnalyticsTable = ({ data }) => {
+const AnalyticsTable = ({ data }) => {
   if (!data || data.length === 0) {
     return (
       <div className="p-8 text-center text-gray-500">
@@ -524,7 +529,8 @@ export const AnalyticsTable = ({ data }) => {
   );
 };
 
-export default {
+// Export individual components as named exports
+export {
   UpgradeModal,
   CreateCampaignModal,
   UsageBreakdown,

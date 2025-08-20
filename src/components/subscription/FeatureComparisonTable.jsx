@@ -1,442 +1,246 @@
+/**
+ * FEATURE COMPARISON TABLE COMPONENT
+ * Enhanced feature comparison with visual hierarchy and conversion optimization
+ * Part of the Enhanced Subscription Dashboard Implementation Plan
+ */
+
 import React, { useState } from 'react';
-import { useAuth } from '../../context/userContext';
-import { useFeatureFlags } from '../../context/featureFlagContext';
-import Button from '../ui/Button';
 import { 
-  CheckIcon, 
-  XMarkIcon, 
-  StarIcon,
-  SparklesIcon,
-  RocketLaunchIcon,
-  ShieldCheckIcon,
-  CogIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  BoltIcon
-} from '../ui/ModernIcon';
+  Check, X, Star, Crown, Shield, Zap, Users, BarChart3,
+  FileText, Database, Headphones, Brain, Sparkles, Target,
+  ChevronDown, ChevronUp, Info, ExternalLink
+} from 'lucide-react';
 
-const FeatureComparisonTable = () => {
-  const { user, subscription } = useAuth();
-  const { isEnabled } = useFeatureFlags();
-  const [selectedPlan, setSelectedPlan] = useState('premium');
+const FeatureComparisonTable = ({ plans, highlightPlan, currentPlan }) => {
+  const [expandedCategories, setExpandedCategories] = useState(new Set(['Core Features']));
+  const [showAllFeatures, setShowAllFeatures] = useState(false);
 
-  const plans = {
-    trial: {
-      name: 'Trial',
-      price: 'Free',
-      duration: '14 days',
-      description: 'Perfect for exploring the platform',
-      icon: <StarIcon className="h-8 w-8" />,
-      color: 'gray',
-      popular: false
-    },
-    standard: {
-      name: 'Standard',
-      price: '$49',
-      duration: '/month',
-      description: 'Essential features for growing businesses',
-      icon: <CheckIcon className="h-8 w-8" />,
-      color: 'blue',
-      popular: true
-    },
-    premium: {
-      name: 'Premium',
-      price: '$149',
-      duration: '/month',
-      description: 'Advanced features for enterprise operations',
-      icon: <RocketLaunchIcon className="h-8 w-8" />,
-      color: 'purple',
-      popular: false
-    }
-  };
-
-  const featureCategories = [
+  const features = [
     {
-      name: 'Core Platform Access',
-      icon: <CogIcon className="h-5 w-5" />,
-      features: [
-        {
-          name: 'User Account & Profile',
-          description: 'Basic account management and profile customization',
-          trial: true,
-          standard: true,
-          premium: true
+      category: "Core Features",
+      icon: Target,
+      items: [
+        { 
+          key: "max_posts_per_month", 
+          label: "Posts per Month", 
+          icon: FileText,
+          description: "Create and publish posts to reach your audience",
+          type: "number"
         },
-        {
-          name: 'Content Publishing',
-          description: 'Create and publish posts, products, and services',
-          trial: { limit: '5 posts/month' },
-          standard: { limit: '50 posts/month' },
-          premium: { limit: 'Unlimited' }
+        { 
+          key: "max_storage_gb", 
+          label: "Storage", 
+          icon: Database,
+          description: "Store images, videos, and documents",
+          type: "storage"
         },
-        {
-          name: 'Search & Discovery',
-          description: 'Advanced search across platform content',
-          trial: true,
-          standard: true,
-          premium: true
+        { 
+          key: "max_team_members", 
+          label: "Team Members", 
+          icon: Users,
+          description: "Collaborate with team members",
+          type: "number"
         },
-        {
-          name: 'Mobile App Access',
-          description: 'Full access to iOS and Android applications',
-          trial: true,
-          standard: true,
-          premium: true
+        { 
+          key: "max_api_calls_per_month", 
+          label: "API Calls", 
+          icon: Zap,
+          description: "Integrate with external services",
+          type: "number"
         }
       ]
     },
     {
-      name: 'AI-Powered Features',
-      icon: <SparklesIcon className="h-5 w-5" />,
-      features: [
-        {
-          name: 'AI Matchmaking',
-          description: 'Intelligent business connection recommendations',
-          trial: { limit: '3 matches/day' },
-          standard: { limit: '20 matches/day' },
-          premium: { limit: 'Unlimited' }
+      category: "Analytics & Insights",
+      icon: BarChart3,
+      items: [
+        { 
+          key: "analytics_enabled", 
+          label: "Basic Analytics", 
+          icon: BarChart3,
+          description: "View basic performance metrics",
+          type: "boolean"
         },
-        {
-          name: 'Opportunity Radar',
-          description: 'AI-powered business opportunity detection',
-          trial: false,
-          standard: { limit: '10 opportunities/week' },
-          premium: { limit: 'Unlimited + Real-time alerts' }
+        { 
+          key: "advanced_analytics", 
+          label: "Advanced Analytics", 
+          icon: BarChart3,
+          description: "Detailed insights and custom reports",
+          type: "boolean"
         },
-        {
-          name: 'Predictive Analytics',
-          description: 'Advanced analytics and market insights',
-          trial: false,
-          standard: false,
-          premium: true
+        { 
+          key: "ai_insights_enabled", 
+          label: "AI Insights", 
+          icon: Brain,
+          description: "AI-powered recommendations and predictions",
+          type: "boolean"
         },
-        {
-          name: 'AI Compliance Assistant',
-          description: 'Automated compliance monitoring and alerts',
-          trial: false,
-          standard: false,
-          premium: true
+        { 
+          key: "ai_predictions_enabled", 
+          label: "AI Predictions", 
+          icon: Sparkles,
+          description: "Forecast trends and performance",
+          type: "boolean"
         }
       ]
     },
     {
-      name: 'Deal Flow & Transactions',
-      icon: <ChartBarIcon className="h-5 w-5" />,
-      features: [
-        {
-          name: 'Virtual Deal Rooms',
-          description: 'Secure spaces for transaction management',
-          trial: false,
-          standard: { limit: '2 active rooms' },
-          premium: { limit: 'Unlimited rooms' }
+      category: "Business Features",
+      icon: Crown,
+      items: [
+        { 
+          key: "custom_branding", 
+          label: "Custom Branding", 
+          icon: Star,
+          description: "Customize with your brand colors and logo",
+          type: "boolean"
         },
-        {
-          name: 'E-Invoicing System',
-          description: 'Digital invoicing and payment processing',
-          trial: false,
-          standard: { limit: '$10K/month volume' },
-          premium: { limit: 'Unlimited volume' }
+        { 
+          key: "white_label", 
+          label: "White Label", 
+          icon: Crown,
+          description: "Remove platform branding completely",
+          type: "boolean"
         },
-        {
-          name: 'Logistics Hub',
-          description: 'Supply chain and logistics management',
-          trial: false,
-          standard: { limit: 'Basic tracking' },
-          premium: { limit: 'Advanced + API access' }
+        { 
+          key: "api_access_enabled", 
+          label: "API Access", 
+          icon: Zap,
+          description: "Full API access for integrations",
+          type: "boolean"
         },
-        {
-          name: 'Contract Management',
-          description: 'Digital contract creation and management',
-          trial: false,
-          standard: false,
-          premium: true
+        { 
+          key: "custom_ai_models", 
+          label: "Custom AI Models", 
+          icon: Brain,
+          description: "Train custom AI models for your business",
+          type: "boolean"
         }
       ]
     },
     {
-      name: 'Community & Networking',
-      icon: <UserGroupIcon className="h-5 w-5" />,
-      features: [
-        {
-          name: 'Professional Forums',
-          description: 'Access to industry discussion forums',
-          trial: { limit: 'Read-only' },
-          standard: { limit: 'Full participation' },
-          premium: { limit: 'Full + Moderator tools' }
+      category: "Support & SLA",
+      icon: Shield,
+      items: [
+        { 
+          key: "priority_support", 
+          label: "Priority Support", 
+          icon: Headphones,
+          description: "Get faster response times",
+          type: "boolean"
         },
-        {
-          name: 'Event Management',
-          description: 'Create and manage professional events',
-          trial: false,
-          standard: { limit: '2 events/month' },
-          premium: { limit: 'Unlimited events' }
+        { 
+          key: "dedicated_account_manager", 
+          label: "Dedicated Account Manager", 
+          icon: Users,
+          description: "Personal account manager for Enterprise plans",
+          type: "boolean"
         },
-        {
-          name: 'Workforce Marketplace',
-          description: 'Connect with skilled professionals',
-          trial: false,
-          standard: { limit: 'Basic access' },
-          premium: { limit: 'Priority matching' }
+        { 
+          key: "sla_response_hours", 
+          label: "SLA Response Time", 
+          icon: Shield,
+          description: "Guaranteed response time",
+          type: "hours"
         },
-        {
-          name: 'Industry Councils',
-          description: 'Participate in exclusive industry groups',
-          trial: false,
-          standard: false,
-          premium: true
-        }
-      ]
-    },
-    {
-      name: 'Premium Services',
-      icon: <BoltIcon className="h-5 w-5" />,
-      features: [
-        {
-          name: 'Featured Ads',
-          description: 'Promote your content with targeted advertising',
-          trial: false,
-          standard: { limit: '$500/month ad spend' },
-          premium: { limit: 'Unlimited ad spend' }
-        },
-        {
-          name: 'Knowledge Hub Access',
-          description: 'Premium industry insights and reports',
-          trial: { limit: '2 articles/month' },
-          standard: { limit: '20 articles/month' },
-          premium: { limit: 'Unlimited access' }
-        },
-        {
-          name: 'Data Licensing',
-          description: 'Access to premium market data and APIs',
-          trial: false,
-          standard: false,
-          premium: true
-        },
-        {
-          name: 'White-label Solutions',
-          description: 'Customize platform for your brand',
-          trial: false,
-          standard: false,
-          premium: true
-        }
-      ]
-    },
-    {
-      name: 'Trust & Security',
-      icon: <ShieldCheckIcon className="h-5 w-5" />,
-      features: [
-        {
-          name: 'Identity Verification',
-          description: 'Professional identity verification services',
-          trial: false,
-          standard: { limit: 'Basic verification' },
-          premium: { limit: 'Enhanced + Background check' }
-        },
-        {
-          name: 'Reputation System',
-          description: 'Track and display professional reputation',
-          trial: { limit: 'View only' },
-          standard: true,
-          premium: { limit: 'Advanced metrics' }
-        },
-        {
-          name: 'HSE Management',
-          description: 'Health, Safety & Environmental tools',
-          trial: false,
-          standard: false,
-          premium: true
-        },
-        {
-          name: 'Audit Trail',
-          description: 'Comprehensive activity logging',
-          trial: false,
-          standard: { limit: '90 days' },
-          premium: { limit: 'Unlimited history' }
+        { 
+          key: "support_level", 
+          label: "Support Channel", 
+          icon: Headphones,
+          description: "Available support channels",
+          type: "text"
         }
       ]
     }
   ];
 
-  const renderFeatureValue = (feature, plan) => {
-    const value = feature[plan];
-    
-    if (value === true) {
-      return <CheckIcon className="h-5 w-5 text-green-500" />;
+  const toggleCategory = (category) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
     }
-    
-    if (value === false) {
-      return <XMarkIcon className="h-5 w-5 text-gray-300" />;
+    setExpandedCategories(newExpanded);
+  };
+
+  const formatFeatureValue = (value, type, planType) => {
+    if (value === null || value === undefined) {
+      return <X className="w-4 h-4 text-gray-400" />;
     }
-    
-    if (typeof value === 'object' && value.limit) {
+
+    switch (type) {
+      case 'boolean':
+        return value ? (
+          <Check className="w-4 h-4 text-green-500" />
+        ) : (
+          <X className="w-4 h-4 text-gray-400" />
+        );
+      
+      case 'number':
+        if (value === -1 || value === 999999) {
+          return (
+            <span className="text-green-600 font-medium flex items-center">
+              Unlimited
+              <Crown className="w-3 h-3 ml-1" />
+            </span>
+          );
+        }
+        return (
+          <span className="font-medium text-gray-900">
+            {value.toLocaleString()}
+          </span>
+        );
+      
+      case 'storage':
+        if (value === -1 || value === 999999) {
+          return (
+            <span className="text-green-600 font-medium flex items-center">
+              Unlimited
+              <Crown className="w-3 h-3 ml-1" />
+            </span>
+          );
+        }
+        return (
+          <span className="font-medium text-gray-900">
+            {value >= 1000 ? `${(value/1000).toFixed(1)}TB` : `${value}GB`}
+          </span>
+        );
+      
+      case 'hours':
+        return (
+          <span className="font-medium text-gray-900">
+            {value}h
+          </span>
+        );
+      
+      case 'text':
+        return (
+          <span className="font-medium text-gray-900 capitalize">
+            {value.replace(/_/g, ' ')}
+          </span>
+        );
+      
+      default:
+        return <span className="font-medium text-gray-900">{value}</span>;
+    }
+  };
+
+  const getPlanBadge = (plan) => {
+    if (plan.popular) {
       return (
-        <div className="text-center">
-          <CheckIcon className="h-4 w-4 text-green-500 mx-auto mb-1" />
-          <span className="text-xs text-gray-600">{value.limit}</span>
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+          <span className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-1 rounded-full text-xs font-medium flex items-center">
+            <Star className="w-3 h-3 mr-1" />
+            Most Popular
+          </span>
         </div>
       );
     }
-    
-    return <XMarkIcon className="h-5 w-5 text-gray-300" />;
+    return null;
   };
 
-  const getPlanButtonText = (planKey) => {
-    if (subscription?.plan === planKey) {
-      return 'Current Plan';
-    }
-    
-    switch (planKey) {
-      case 'trial':
-        return 'Start Free Trial';
-      case 'standard':
-        return 'Upgrade to Standard';
-      case 'premium':
-        return 'Upgrade to Premium';
-      default:
-        return 'Select Plan';
-    }
-  };
-
-  const getPlanButtonVariant = (planKey) => {
-    if (subscription?.plan === planKey) {
-      return 'minimal';
-    }
-    
-    return planKey === 'premium' ? 'gradient' : 'primary';
-  };
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Choose Your Plan
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Compare features across all subscription plans and find the perfect fit for your business needs
-        </p>
-      </div>
-
-      {/* Plan Headers */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
-        <div className="col-span-1">
-          {/* Empty space for feature names */}
-        </div>
-        
-        {Object.entries(plans).map(([planKey, plan]) => (
-          <div key={planKey} className="text-center">
-            <div className={`bg-white rounded-xl p-6 shadow-sm border-2 ${
-              plan.popular ? 'border-blue-500' : 'border-gray-200'
-            } relative`}>
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              
-              <div className={`w-16 h-16 bg-${plan.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                <div className={`text-${plan.color}-600`}>
-                  {plan.icon}
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-              <div className="mb-2">
-                <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-                <span className="text-gray-600">{plan.duration}</span>
-              </div>
-              <p className="text-gray-600 text-sm mb-6">{plan.description}</p>
-              
-              <Button 
-                variant={getPlanButtonVariant(planKey)}
-                size="sm"
-                disabled={subscription?.plan === planKey}
-                className="w-full"
-              >
-                {getPlanButtonText(planKey)}
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Feature Comparison Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        {featureCategories.map((category, categoryIndex) => (
-          <div key={categoryIndex}>
-            {/* Category Header */}
-            <div className="bg-gray-50 border-b border-gray-200">
-              <div className="grid grid-cols-4 gap-6 p-6">
-                <div className="col-span-1">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-blue-600">
-                      {category.icon}
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {category.name}
-                    </h3>
-                  </div>
-                </div>
-                <div className="col-span-3"></div>
-              </div>
-            </div>
-
-            {/* Category Features */}
-            {category.features.map((feature, featureIndex) => (
-              <div key={featureIndex} className="border-b border-gray-100 last:border-b-0">
-                <div className="grid grid-cols-4 gap-6 p-6 hover:bg-gray-50 transition-colors">
-                  <div className="col-span-1">
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-1">
-                        {feature.name}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {feature.description}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center flex items-center justify-center">
-                    {renderFeatureValue(feature, 'trial')}
-                  </div>
-                  
-                  <div className="text-center flex items-center justify-center">
-                    {renderFeatureValue(feature, 'standard')}
-                  </div>
-                  
-                  <div className="text-center flex items-center justify-center">
-                    {renderFeatureValue(feature, 'premium')}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom CTA */}
-      <div className="text-center mt-12">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
-          <h3 className="text-2xl font-bold mb-4">
-            Ready to get started?
-          </h3>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Join thousands of oil & gas professionals who are already using Connectize to grow their business
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="secondary" size="lg" className="bg-white text-gray-900 hover:bg-gray-100">
-              Start Free Trial
-            </Button>
-            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-gray-900">
-              Contact Sales
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+  const isCurrentPlan = (plan) => currentPlan && plan.id === currentPlan.id;
+  const isHighlighted = (plan) => highlightPlan && plan.id === highlightPlan;
 
 export default FeatureComparisonTable;
