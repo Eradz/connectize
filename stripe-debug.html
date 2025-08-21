@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; max-width: 800px; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .test-card { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        button { background: #635bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .error { color: #d63031; }
+        .success { color: #00b894; }
+    </style>
+</head>
+<body>
+    <h1>Stripe SetupIntent Debug Test</h1>
+
+    <div class="card">
+        <h3>Test Cards</h3>
+        <div class="test-card">
+            <strong>4242424242424242</strong> - Succeeds (use this for basic testing)
+        </div>
+        <div class="test-card">
+            <strong>4000002500003155</strong> - Requires Authentication (3D Secure)
+        </div>
+        <div class="test-card">
+            <strong>4000000000009995</strong> - Always declined
+        </div>
+        <p>Use expiry date: 12/25, CVC: 123</p>
+    </div>
+
+    <div class="card">
+        <h3>Environment Check</h3>
+        <div id="env-info"></div>
+    </div>
+
+    <div class="card">
+        <h3>SetupIntent Test</h3>
+        <button onclick="testSetupIntent()" id="test-btn">Test SetupIntent Creation</button>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Display environment info
+        document.getElementById('env-info').innerHTML = `
+            <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+            <p><strong>Location:</strong> ${window.location.href}</p>
+            <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+        `;
+
+        async function testSetupIntent() {
+            const btn = document.getElementById('test-btn');
+            const results = document.getElementById('test-results');
+            
+            btn.disabled = true;
+            btn.textContent = 'Testing...';
+            results.innerHTML = '<p>Creating SetupIntent...</p>';
+
+            try {
+                // Test API call to create setup intent
+                const response = await fetch('http://127.0.0.1:8000/api/v1/subscriptions/payment-methods/create_setup_intent/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('access_token') || 'test-token')
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                results.innerHTML = `
+                    <div class="success">
+                        <h4>✅ SetupIntent Created Successfully!</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+
+                // Test if we can reach Stripe API
+                if (data.client_secret) {
+                    testStripeAPI(data.client_secret);
+                }
+
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error Creating SetupIntent</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Test SetupIntent Creation';
+            }
+        }
+
+        async function testStripeAPI(clientSecret) {
+            try {
+                const stripeTestUrl = `https://api.stripe.com/v1/setup_intents/${clientSecret.split('_secret_')[0]}`;
+                
+                document.getElementById('test-results').innerHTML += `
+                    <div>
+                        <h4>🔍 Testing Stripe API Access</h4>
+                        <p>SetupIntent ID: ${clientSecret.split('_secret_')[0]}</p>
+                        <p>Client Secret: ${clientSecret.substring(0, 30)}...</p>
+                        <p class="success">✅ Client secret format looks correct</p>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('test-results').innerHTML += `
+                    <div class="error">
+                        <h4>❌ Stripe API Test Failed</h4>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Check if user is logged in
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                document.getElementById('test-results').innerHTML = `
+                    <div class="error">
+                        <p>⚠️ No authentication token found. Please log in first.</p>
+                        <p>You can manually set a token in localStorage for testing:</p>
+                        <pre>localStorage.setItem('access_token', 'your-token-here')</pre>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

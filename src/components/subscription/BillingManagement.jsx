@@ -23,13 +23,14 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-const BillingManagement = () => {
+const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod }) => {
   const [subscription, setSubscription] = useState(null);
   const [billingHistory, setBillingHistory] = useState([]);
   const [usage, setUsage] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -46,12 +47,14 @@ const BillingManagement = () => {
         subscriptionResult,
         billingResult,
         usageResult,
-        analyticsResult
+        analyticsResult,
+        paymentMethodsResult
       ] = await Promise.allSettled([
         subscriptionsApi.getCurrentSubscription(),
         subscriptionsApi.getBillingHistory(),
         subscriptionsApi.getUsage(),
-        subscriptionsApi.getSubscriptionAnalytics()
+        subscriptionsApi.getSubscriptionAnalytics(),
+        subscriptionsApi.getPaymentMethods()
       ]);
 
       // Extract data safely
@@ -67,12 +70,25 @@ const BillingManagement = () => {
       const analyticsData = analyticsResult.status === 'fulfilled' ? 
         analyticsResult.value?.data : null;
 
+      const paymentMethodsData = paymentMethodsResult.status === 'fulfilled' ? 
+        paymentMethodsResult.value?.data : null;
+
       console.log('Billing API responses:', {
         subscription: subscriptionData,
         billing: billingData,
         usage: usageData,
-        analytics: analyticsData
+        analytics: analyticsData,
+        paymentMethods: paymentMethodsData
       });
+
+      // Handle payment methods data
+      if (paymentMethodsData?.payment_methods) {
+        setPaymentMethods(paymentMethodsData.payment_methods);
+      } else if (Array.isArray(paymentMethodsData)) {
+        setPaymentMethods(paymentMethodsData);
+      } else {
+        setPaymentMethods([]);
+      }
 
       // Handle subscription data
       if (subscriptionData?.subscription) {
@@ -80,25 +96,8 @@ const BillingManagement = () => {
       } else if (subscriptionData) {
         setSubscription(subscriptionData);
       } else {
-        // Mock data for demonstration when no real subscription exists
-        setSubscription({
-          plan: {
-            name: 'Professional Plan',
-            price: 0.00,
-            billing_cycle: 'monthly',
-            currency: 'USD'
-          },
-          status: 'trialing',
-          next_payment_date: null,
-          current_period_start: new Date().toISOString(),
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          billing_info: {
-            next_billing_amount: 0.00,
-            currency: 'USD',
-            billing_cycle: 'monthly',
-            auto_renew: true
-          }
-        });
+        // No subscription found - user might not have one yet
+        setSubscription(null);
       }
 
       // Handle billing history
@@ -135,9 +134,23 @@ const BillingManagement = () => {
   };
 
   const handleUpdatePaymentMethod = () => {
-    // Implementation for updating payment method
-    console.log('Updating payment method');
-    // This would open a payment method update modal
+    // Navigate to payment methods management
+    if (setActiveTab) {
+      setActiveTab('payment-methods');
+    } else {
+      // Fallback: Navigate to a payment methods page
+      window.location.href = '/subscription/payment-methods';
+    }
+  };
+
+  const handleAddPaymentMethod = () => {
+    // Navigate to payment methods management to add new method
+    if (setActiveTab) {
+      setActiveTab('payment-methods');
+    } else {
+      // Fallback: Navigate to a payment methods page
+      window.location.href = '/subscription/payment-methods';
+    }
   };
 
   const handleViewAllInvoices = () => {
@@ -199,6 +212,26 @@ const BillingManagement = () => {
     );
   }
 
+  if (!subscription) {
+    return (
+      <Alert className="border-blue-200 bg-blue-50">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          <div className="flex items-center justify-between">
+            <span>No active subscription found. Please subscribe to a plan to view billing information.</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setActiveTab && setActiveTab('choose-plan')}
+            >
+              Choose Plan
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (error) {
     return (
       <Alert className="border-red-200 bg-red-50">
@@ -216,11 +249,16 @@ const BillingManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with refresh */}
+      {/* Header with refresh and debug info */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Billing & Payments</h2>
           <p className="text-gray-600 mt-1">Manage your subscription billing and payment methods</p>
+          {import.meta.env.DEV && (
+            <p className="text-xs text-blue-600 mt-1">
+              🔄 Data loaded from API • Last updated: {new Date().toLocaleTimeString()}
+            </p>
+          )}
         </div>
         <Button 
           variant="outline" 
@@ -242,11 +280,19 @@ const BillingManagement = () => {
               <div>
                 <p className="text-sm text-gray-600">Current Plan Cost</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(subscription?.plan?.price || subscription?.billing_info?.next_billing_amount)}
+                  {subscription?.plan?.price !== undefined ? 
+                    formatCurrency(subscription.plan.price) : 
+                    subscription?.billing_info?.next_billing_amount !== undefined ?
+                      formatCurrency(subscription.billing_info.next_billing_amount) :
+                      '$0.00'
+                  }
                   <span className="text-sm font-normal text-gray-600">
                     /{subscription?.plan?.billing_cycle || subscription?.billing_info?.billing_cycle || 'month'}
                   </span>
                 </p>
+                {subscription?.status === 'trialing' && (
+                  <p className="text-xs text-blue-600 mt-1">Free trial period</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -357,30 +403,45 @@ const BillingManagement = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center gap-3">
-              <CreditCard className="h-6 w-6 text-gray-600" />
-              <div>
-                <p className="font-medium">•••• •••• •••• 4242</p>
-                <p className="text-sm text-gray-600">Expires 12/25</p>
-                <Badge variant="outline" className="mt-1">Default</Badge>
+          {/* Show real payment methods if available */}
+          {paymentMethods.length > 0 ? (
+            <div className="space-y-3">
+              {paymentMethods.map((method, index) => (
+                <div key={method.id || index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-6 w-6 text-gray-600" />
+                    <div>
+                      <p className="font-medium">
+                        •••• •••• •••• {method.card?.last4 || method.last_four || method.last4 || '****'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {method.card?.brand || method.brand || 'Card'} • Expires {method.card?.exp_month || method.exp_month}/{method.card?.exp_year || method.exp_year}
+                      </p>
+                      {(method.is_default || method.default) && (
+                        <Badge variant="outline" className="mt-1">Default</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge className="bg-green-100 text-green-800">Active</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm font-medium text-yellow-800">No Payment Method on File</span>
               </div>
+              <p className="text-sm text-yellow-700 mt-1">
+                Add a payment method to ensure uninterrupted service when your trial ends.
+              </p>
+              <Button size="sm" className="mt-2" onClick={handleAddPaymentMethod}>
+                Add Payment Method
+              </Button>
             </div>
-            <div className="text-right">
-              <Badge className="bg-green-100 text-green-800">Active</Badge>
-            </div>
-          </div>
-          
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-800">No Payment Method on File</span>
-            </div>
-            <p className="text-sm text-yellow-700 mt-1">
-              Add a payment method to ensure uninterrupted service when your trial ends.
-            </p>
-            <Button size="sm" className="mt-2">Add Payment Method</Button>
-          </div>
+          )}
         </CardContent>
       </Card>
 

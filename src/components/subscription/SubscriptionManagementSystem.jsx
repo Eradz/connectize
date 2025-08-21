@@ -389,7 +389,10 @@ const SubscriptionManagementSystem = () => {
 
           {/* Billing Tab */}
           <TabsContent value="billing" className="space-y-6">
-            <BillingManagement />
+            <BillingManagement 
+              setActiveTab={setActiveTab}
+              onUpdatePaymentMethod={() => setActiveTab('payment-methods')}
+            />
           </TabsContent>
 
           {/* Choose Plan Tab */}

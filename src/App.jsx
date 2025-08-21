@@ -100,6 +100,9 @@ import SubscriptionPlanDetail from "./pages/subscription/SubscriptionPlanDetail"
 // Enhanced Subscription System
 import SubscriptionRoutes from "./routes/SubscriptionRoutes";
 
+// Debug Components
+import SubscriptionDebug from "./debug/SubscriptionDebug";
+
 // Inventory Management Components
 import InventoryDashboard from "./pages/inventory/InventoryDashboard";
 import InventoryItems from "./pages/inventory/InventoryItems";
@@ -179,6 +182,9 @@ function App() {
           
           {/* Enhanced Subscription System Routes */}
           <Route path="/subscriptions/*" element={<SubscriptionRoutes />} />
+          
+          {/* Debug Routes */}
+          <Route path="/debug/subscription" element={<SubscriptionDebug />} />
           
           {/* Legacy subscription routes for backward compatibility */}
           <Route path={webRoutes.subscriptions} element={<SubscriptionsPage />} />

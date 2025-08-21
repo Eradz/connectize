@@ -49,11 +49,14 @@ const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
 
     try {
       // Create setup intent
+      console.log('Creating setup intent...');
       const { data: setupIntentData } = await subscriptionsApi.createSetupIntent();
+      console.log('Setup intent created:', setupIntentData);
       
       const cardElement = elements.getElement(CardElement);
 
-      // Confirm setup intent
+      // Confirm setup intent with proper error handling
+      console.log('Confirming setup intent with client secret:', setupIntentData.client_secret);
       const { error, setupIntent } = await stripe.confirmCardSetup(
         setupIntentData.client_secret,
         {
@@ -67,9 +70,29 @@ const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
       );
 
       if (error) {
-        onError(error.message);
+        console.error('SetupIntent confirmation error:', error);
+        
+        // Handle specific error types
+        if (error.type === 'authentication_required') {
+          onError('Your card requires authentication. Please try again with a different card or contact your bank.');
+        } else if (error.type === 'card_error') {
+          onError(`Card error: ${error.message}`);
+        } else if (error.code === 'setup_intent_authentication_failure') {
+          onError('Card authentication failed. Please try again or use a different payment method.');
+        } else {
+          onError(error.message || 'Failed to add payment method');
+        }
         return;
       }
+
+      // Check setup intent status
+      if (setupIntent.status !== 'succeeded') {
+        console.error('SetupIntent status:', setupIntent.status);
+        onError('Payment method setup was not completed. Please try again.');
+        return;
+      }
+
+      console.log('Setup intent succeeded:', setupIntent);
 
       // Add payment method via API
       const { data } = await subscriptionsApi.addPaymentMethod({
@@ -119,6 +142,11 @@ const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
             }}
           />
         </div>
+        {import.meta.env.DEV && (
+          <p className="text-xs text-gray-500 mt-1">
+            Test cards: 4242424242424242 (succeeds), 4000002500003155 (requires auth), 4000000000009995 (declined)
+          </p>
+        )}
       </div>
       
       <div className="flex gap-3 pt-4">
@@ -376,10 +404,42 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
               <div>
                 <p className="text-sm text-gray-600">Next Charge Date</p>
                 <p className="text-lg font-semibold">
-                  {subscription?.next_payment_date ? 
-                    new Date(subscription.next_payment_date).toLocaleDateString() : 
-                    'N/A'
-                  }
+                  {(() => {
+                    // For active subscriptions, current_period_end is the next billing date
+                    if (subscription?.status === 'active' && subscription?.current_period_end) {
+                      return new Date(subscription.current_period_end).toLocaleDateString();
+                    }
+                    
+                    // Try other possible date fields from API
+                    const nextDate = subscription?.next_payment_date || 
+                                   subscription?.next_billing_date ||
+                                   subscription?.billing_info?.next_payment_date ||
+                                   subscription?.billing_info?.next_billing_date;
+                    
+                    if (nextDate) {
+                      return new Date(nextDate).toLocaleDateString();
+                    }
+                    
+                    // For trial subscriptions, also use current_period_end
+                    if (subscription?.status === 'trialing' && subscription?.current_period_end) {
+                      return new Date(subscription.current_period_end).toLocaleDateString();
+                    }
+                    
+                    // If still no date and we have a trial period, estimate
+                    if (subscription?.status === 'trialing' && subscription?.current_period_start) {
+                      const startDate = new Date(subscription.current_period_start);
+                      const estimatedEnd = new Date(startDate);
+                      estimatedEnd.setMonth(estimatedEnd.getMonth() + 1); // Add 1 month
+                      return estimatedEnd.toLocaleDateString();
+                    }
+                    
+                    // Fallback to current_period_end regardless of status
+                    if (subscription?.current_period_end) {
+                      return new Date(subscription.current_period_end).toLocaleDateString();
+                    }
+                    
+                    return 'N/A';
+                  })()}
                 </p>
               </div>
               <div>
