@@ -125,13 +125,12 @@ const SubscriptionManagementSystem = () => {
       const billingData = safeExtract(billingResult, { results: [] });
 
       // Update state with extracted data - handle the actual API response structure
-        subscription: subscriptionData,
-        plans: plansData,
-        features: featuresData,
-        usage: usageData,
-        analytics: analyticsData,
-        billing: billingData
-      });
+      setCurrentSubscription(subscriptionData?.subscription || subscriptionData);
+      setAvailablePlans(plansData?.results || plansData || []);
+      setFeatures(featuresData?.features_by_category || featuresData || {});
+      setUsage(usageData?.usage || usageData);
+      setAnalytics(analyticsData);
+      setBillingHistory(billingData?.results || billingData || []);
 
       // Handle subscription data structure from /api/v1/subscriptions/current/
       const subscription = subscriptionData?.subscription || subscriptionData;

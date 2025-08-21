@@ -100,6 +100,10 @@ const SubscriptionPlanDetail = () => {
         })
       ]);
 
+      // Initialize features data structure early to avoid reference errors
+      let featuresData = {};
+      let allPlanFeatures = [];
+
       // Extract features directly from the plan data
       let planFeaturesResult = { features_by_category: {} };
       if (planResult?.data?.features || planResult?.data?.plan?.features) {
@@ -419,13 +423,15 @@ const SubscriptionPlanDetail = () => {
 
 
       // Extract features data - prioritize plan-specific features from enhanced plans API
-      let featuresData = {};
-      let allPlanFeatures = [];
+      // Reset the variables for processing
+      featuresData = {};
+      allPlanFeatures = [];
 
       // First, try to use plan-specific features from enhanced plans API
       if (actualFeaturesResult?.features) {
         featuresData = actualFeaturesResult.features;
         allPlanFeatures = Object.values(featuresData).flat();
+        console.log('🔍 Plan-specific features found:', {
           totalFeatures: allPlanFeatures.length,
           categories: Object.keys(featuresData).length,
           planId: planId
@@ -460,6 +466,7 @@ const SubscriptionPlanDetail = () => {
         currentSubscription: currentSubscriptionResult?.subscription_plan || planResult?.data?.current_subscription
       };
       
+      console.log('🔍 Final plan data summary:', {
         plan: finalPlanData.plan,
         featuresCount: finalPlanData.features.length,
         categoriesCount: Object.keys(finalPlanData.featuresCategories).length,

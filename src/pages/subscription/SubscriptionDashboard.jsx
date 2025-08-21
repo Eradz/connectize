@@ -82,12 +82,16 @@ const SubscriptionDashboard = () => {
         })
       ]);
 
+      // Debug: Log API responses
+      console.log('🔍 API Responses:', {
         plansResponse: plansResult,
         featuresResponse: featuresResult,
         analyticsResponse: analyticsResult,
         currentSubscriptionResponse: currentSubscriptionResult
       });
 
+      // Debug: Log current subscription data structure
+      console.log('🔍 Current Subscription Debug:', {
         rawData: currentSubscriptionResult?.data,
         subscriptionNested: currentSubscriptionResult?.data?.subscription,
         directSubscription: currentSubscriptionResult?.data,
@@ -95,6 +99,8 @@ const SubscriptionDashboard = () => {
         status: currentSubscriptionResult?.data?.subscription?.status || currentSubscriptionResult?.data?.status
       });
 
+      // Debug: Log count data
+      console.log('🔍 Count Data:', {
         plans: plansResult?.data?.results?.length || 0,
         features: Object.keys(featuresResult?.data?.features_by_category || {}).length,
         analytics: !!analyticsResult?.data
@@ -104,12 +110,17 @@ const SubscriptionDashboard = () => {
       const featuresData = featuresResult?.data?.features_by_category || {};
       const allFeatures = Object.values(featuresData).flat();
 
+      // Debug: Log flattened features data
+      console.log('🔍 Flattened Features Data:', {
         plans: plansResult?.data?.results?.length || 0,
         features: allFeatures.length || 0,
         analytics: !!analyticsResult?.data
       });
 
       const extractedSubscription = currentSubscriptionResult?.data?.subscription || null;
+      
+      // Debug: Log extracted subscription
+      console.log('🔍 Extracted Subscription:', {
         extracted: extractedSubscription,
         planName: extractedSubscription?.plan?.name,
         status: extractedSubscription?.status,
