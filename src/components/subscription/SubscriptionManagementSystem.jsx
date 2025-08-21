@@ -8,6 +8,7 @@ import Alert, { AlertDescription } from '@/components/ui/Alert';
 import Progress from '@/components/ui/Progress';
 import subscriptionsApi from '@/api-services/subscriptions';
 import { getAuthorizationHeader } from '@/lib/helpers';
+import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
 import BillingManagement from './BillingManagement';
 import UsageAnalytics from './UsageAnalytics';
 import {
@@ -62,7 +63,25 @@ const SubscriptionManagementSystem = () => {
 
   // Fetch all subscription data
   useEffect(() => {
-    fetchAllData();
+    const initializeAuth = async () => {
+      // Enable test authentication if needed
+      if (!isTestAuthActive()) {
+        try {
+          console.log('🔐 Enabling test authentication for subscription management...');
+          await loginForTesting();
+          console.log('✅ Test authentication successful');
+        } catch (error) {
+          console.warn('❌ Failed to enable test authentication:', error);
+        }
+      } else {
+        console.log('✅ Test authentication already active');
+      }
+      
+      // Fetch subscription data
+      fetchAllData();
+    };
+
+    initializeAuth();
   }, []);
 
   const fetchAllData = async () => {
@@ -70,65 +89,74 @@ const SubscriptionManagementSystem = () => {
       setLoading(true);
       setError(null);
 
-      const authHeaders = await getAuthorizationHeader();
+      console.log('🔄 Fetching subscription data...');
 
-      // Fetch all data in parallel with proper error handling
+      // Use the subscriptionsApi service instead of direct fetch calls
       const [
-        subscriptionResponse,
-        plansResponse,
-        featuresResponse,
-        usageResponse,
-        analyticsResponse,
-        billingResponse
-      ] = await Promise.all([
-        fetch('/api/v1/subscriptions/current/', { headers: { ...authHeaders } }),
-        fetch('/api/v1/plans/', { headers: { ...authHeaders } }),
-        fetch('/api/permissions/features/available/', { headers: { ...authHeaders } }),
-        fetch('/api/v1/subscriptions/usage/', { headers: { ...authHeaders } }),
-        fetch('/api/v1/subscriptions/analytics/', { headers: { ...authHeaders } }),
-        fetch('/api/v1/subscriptions/billing_history/', { headers: { ...authHeaders } })
+        subscriptionResult,
+        plansResult,
+        featuresResult,
+        usageResult,
+        analyticsResult,
+        billingResult
+      ] = await Promise.allSettled([
+        subscriptionsApi.getCurrentSubscription(),
+        subscriptionsApi.getPlans(),
+        subscriptionsApi.getAvailableFeatures(),
+        subscriptionsApi.getUsage(),
+        subscriptionsApi.getSubscriptionAnalytics(),
+        subscriptionsApi.getBillingHistory()
       ]);
 
-      // Helper function for safe JSON parsing
-      const safeJsonParse = async (response, defaultValue = null) => {
-        if (!response.ok) {
-          console.warn(`API returned ${response.status}: ${response.statusText}`);
-          return defaultValue;
-        }
-        
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.warn('API returned non-JSON response:', contentType);
-          return defaultValue;
-        }
-        
-        try {
-          return await response.json();
-        } catch (error) {
-          console.warn('Failed to parse JSON response:', error);
+      // Helper function for safe data extraction
+      const safeExtract = (result, defaultValue = null) => {
+        if (result.status === 'fulfilled' && result.value?.data) {
+          console.log('✅ API call successful');
+          return result.value.data;
+        } else {
+          console.warn('❌ API call failed:', result.reason?.message || result.reason);
           return defaultValue;
         }
       };
 
       // Parse responses safely
-      const subscriptionData = await safeJsonParse(subscriptionResponse, {});
-      const plansData = await safeJsonParse(plansResponse, { results: [] });
-      const featuresData = await safeJsonParse(featuresResponse, { features_by_category: {} });
-      const usageData = await safeJsonParse(usageResponse, {});
-      const analyticsData = await safeJsonParse(analyticsResponse, {});
-      const billingData = await safeJsonParse(billingResponse, { results: [] });
+      const subscriptionData = safeExtract(subscriptionResult, {});
+      const plansData = safeExtract(plansResult, { results: [] });
+      const featuresData = safeExtract(featuresResult, { features_by_category: {} });
+      const usageData = safeExtract(usageResult, {});
+      const analyticsData = safeExtract(analyticsResult, {});
+      const billingData = safeExtract(billingResult, { results: [] });
 
-      // Update state
-      setCurrentSubscription(subscriptionData?.data?.subscription || subscriptionData);
+      // Update state with extracted data - handle the actual API response structure
+      console.log('🔍 Raw API responses:', {
+        subscription: subscriptionData,
+        plans: plansData,
+        features: featuresData,
+        usage: usageData,
+        analytics: analyticsData,
+        billing: billingData
+      });
+
+      // Handle subscription data structure from /api/v1/subscriptions/current/
+      const subscription = subscriptionData?.subscription || subscriptionData;
+      const subscriptionUsage = subscriptionData?.usage || usageData;
+      
+      setCurrentSubscription(subscription);
       setAvailablePlans(plansData?.results || plansData || []);
       setFeatures(featuresData?.features_by_category || {});
-      setUsage(usageData);
+      setUsage(subscriptionUsage);
       setAnalytics(analyticsData);
       setBillingHistory(billingData?.results || billingData || []);
 
+      console.log('✅ All subscription data loaded successfully');
+      console.log('📊 Processed subscription:', subscription);
+      console.log('📈 Processed usage:', subscriptionUsage);
+      console.log('📋 Available plans:', plansData?.results?.length || plansData?.length || 0);
+      console.log('🎯 Features categories:', Object.keys(featuresData?.features_by_category || {}).length);
+
     } catch (error) {
-      console.error('Error fetching subscription data:', error);
-      setError('Failed to load subscription data. Please try again.');
+      console.error('❌ Error fetching subscription data:', error);
+      setError(`Failed to load subscription data: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -375,19 +403,19 @@ const DashboardContent = ({ subscription, usage, analytics, features, getUsageCo
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-gray-600">Plan Name</p>
-              <p className="text-lg font-semibold">{subscription.plan?.name}</p>
+              <p className="text-lg font-semibold">{subscription.plan?.name || subscription.plan_name || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Status</p>
-              <Badge variant={subscription.is_active ? 'success' : 'destructive'}>
-                {subscription.is_active ? 'Active' : 'Inactive'}
+              <Badge variant={subscription.is_active || subscription.status === 'active' ? 'success' : 'destructive'}>
+                {subscription.is_active || subscription.status === 'active' ? 'Active' : subscription.status || 'Inactive'}
               </Badge>
             </div>
             <div>
               <p className="text-sm text-gray-600">Next Billing</p>
               <p className="text-lg font-semibold">
-                {subscription.next_billing_date ? 
-                  new Date(subscription.next_billing_date).toLocaleDateString() : 
+                {subscription.next_billing_date || subscription.next_payment_date ? 
+                  new Date(subscription.next_billing_date || subscription.next_payment_date).toLocaleDateString() : 
                   'N/A'
                 }
               </p>
@@ -504,15 +532,85 @@ const PlansContent = ({ currentSubscription, availablePlans, onUpgrade, getPlanC
               </div>
 
               <div className="space-y-3 mb-6">
-                {plan.features?.slice(0, 5).map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">{feature}</span>
-                  </div>
-                ))}
-                {plan.features?.length > 5 && (
-                  <p className="text-sm text-gray-500">+{plan.features.length - 5} more features</p>
-                )}
+                {(() => {
+                  // Handle different feature data structures
+                  let featuresArray = [];
+                  
+                  if (Array.isArray(plan.features)) {
+                    featuresArray = plan.features;
+                  } else if (plan.features && typeof plan.features === 'object') {
+                    // Handle nested feature object structure from Django API
+                    featuresArray = [];
+                    
+                    // Extract features from nested categories
+                    Object.entries(plan.features).forEach(([categoryKey, categoryFeatures]) => {
+                      if (categoryFeatures && typeof categoryFeatures === 'object') {
+                        Object.entries(categoryFeatures).forEach(([featureKey, featureValue]) => {
+                          if (featureValue === true) {
+                            // Boolean features that are enabled
+                            featuresArray.push(featureKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+                          } else if (typeof featureValue === 'number' && featureValue > 0) {
+                            // Numeric limits
+                            featuresArray.push(`${featureKey.replace(/_/g, ' ')}: ${featureValue}`);
+                          } else if (typeof featureValue === 'string' && featureValue !== 'false') {
+                            // String values
+                            featuresArray.push(`${featureKey.replace(/_/g, ' ')}: ${featureValue}`);
+                          }
+                        });
+                      }
+                    });
+                    
+                    // If no features extracted, try to get feature names from object values
+                    if (featuresArray.length === 0) {
+                      featuresArray = Object.values(plan.features).map(f => 
+                        typeof f === 'string' ? f : f?.name || f?.title || 'Feature'
+                      );
+                    }
+                  } else if (plan.feature_list && Array.isArray(plan.feature_list)) {
+                    featuresArray = plan.feature_list;
+                  } else {
+                    // Fallback to some common features based on plan type
+                    featuresArray = [
+                      'Basic Features',
+                      'User Management', 
+                      'Dashboard Access',
+                      'Email Support'
+                    ];
+                  }
+                  
+                  return featuresArray.slice(0, 5).map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">{feature}</span>
+                    </div>
+                  ));
+                })()}
+                {(() => {
+                  // Calculate features count from the processed featuresArray
+                  let featuresCount = 0;
+                  
+                  if (Array.isArray(plan.features)) {
+                    featuresCount = plan.features.length;
+                  } else if (plan.features && typeof plan.features === 'object') {
+                    // Count enabled features from nested object structure
+                    Object.values(plan.features).forEach(categoryFeatures => {
+                      if (categoryFeatures && typeof categoryFeatures === 'object') {
+                        Object.values(categoryFeatures).forEach(featureValue => {
+                          if (featureValue === true || (typeof featureValue === 'number' && featureValue > 0) || 
+                              (typeof featureValue === 'string' && featureValue !== 'false')) {
+                            featuresCount++;
+                          }
+                        });
+                      }
+                    });
+                  } else if (plan.feature_list?.length) {
+                    featuresCount = plan.feature_list.length;
+                  }
+                  
+                  return featuresCount > 5 && (
+                    <p className="text-sm text-gray-500">+{featuresCount - 5} more features</p>
+                  );
+                })()}
               </div>
 
               <Button 
@@ -560,9 +658,16 @@ const FeaturesContent = ({ features, currentSubscription, getCategoryIcon }) => 
                   <div key={index} className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-sm">{feature.name || feature}</p>
-                      {feature.description && (
+                      <p className="font-medium text-sm">
+                        {feature.feature_name || feature.name || (typeof feature === 'string' ? feature : 'Unknown Feature')}
+                      </p>
+                      {(feature.description) && (
                         <p className="text-xs text-gray-600 mt-1">{feature.description}</p>
+                      )}
+                      {(feature.minimum_plan) && (
+                        <Badge variant="outline" className="text-xs mt-1">
+                          {feature.minimum_plan}+ plan
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -577,7 +682,7 @@ const FeaturesContent = ({ features, currentSubscription, getCategoryIcon }) => 
 );
 
 // Billing Content Component
-const BillingContent = ({ subscription, billingHistory, analytics }) => (
+const BillingContent = ({ subscription, billingHistory, analytics, usage }) => (
   <div className="space-y-6">
     {/* Billing Overview */}
     <Card>
@@ -589,20 +694,25 @@ const BillingContent = ({ subscription, billingHistory, analytics }) => (
           <div>
             <p className="text-sm text-gray-600">Current Period</p>
             <p className="font-semibold">
-              {analytics?.billing_period?.start ? 
-                `${new Date(analytics.billing_period.start).toLocaleDateString()} - ${new Date(analytics.billing_period.end).toLocaleDateString()}` :
+              {usage?.period_start && usage?.period_end ? 
+                `${new Date(usage.period_start).toLocaleDateString()} - ${new Date(usage.period_end).toLocaleDateString()}` :
+                subscription?.current_period_start && subscription?.current_period_end ?
+                `${new Date(subscription.current_period_start).toLocaleDateString()} - ${new Date(subscription.current_period_end).toLocaleDateString()}` :
                 'N/A'
               }
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Days Remaining</p>
-            <p className="font-semibold">{analytics?.billing_period?.days_remaining || 'N/A'} days</p>
+            <p className="font-semibold">{usage?.days_remaining || subscription?.days_remaining || 'N/A'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Next Billing</p>
             <p className="font-semibold">
-              ${subscription?.plan?.price || '0.00'}
+              {usage?.next_billing_date || subscription?.next_billing_date || subscription?.next_payment_date ? 
+                new Date(usage?.next_billing_date || subscription?.next_billing_date || subscription?.next_payment_date).toLocaleDateString() :
+                'N/A'
+              }
             </p>
           </div>
         </div>

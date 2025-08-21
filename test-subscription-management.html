@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Subscription Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Subscription Management Test</h1>
+    
+    <div id="status"></div>
+    
+    <button onclick="testAuthentication()">Test Authentication</button>
+    <button onclick="testSubscriptionData()">Test Subscription Data</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'https://backend.connectize.co/api';
+        
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+
+        function showResults(data, title) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function testAuthentication() {
+            log('Testing authentication with info@connectize.co...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'info@connectize.co',
+                        password: 'Access2024'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Store the session data
+                    const sessionData = {
+                        user: data.user,
+                        token: data.token,
+                        isAuthenticated: true
+                    };
+                    localStorage.setItem('user_session', JSON.stringify(sessionData));
+                    
+                    log('✅ Authentication successful!', 'success');
+                    showResults(data, 'Authentication Response');
+                } else {
+                    log(`❌ Authentication failed: ${data.message || 'Unknown error'}`, 'error');
+                    showResults(data, 'Authentication Error');
+                }
+            } catch (error) {
+                log(`❌ Authentication error: ${error.message}`, 'error');
+                showResults({error: error.message}, 'Authentication Error');
+            }
+        }
+
+        async function testSubscriptionData() {
+            log('Testing subscription data fetch...', 'info');
+            
+            // Check if authenticated
+            const session = JSON.parse(localStorage.getItem('user_session') || '{}');
+            if (!session.token) {
+                log('❌ Not authenticated. Please test authentication first.', 'error');
+                return;
+            }
+
+            try {
+                // Test multiple subscription endpoints
+                const endpoints = [
+                    '/subscriptions/current/',
+                    '/subscriptions/plans/',
+                    '/subscriptions/features/',
+                    '/subscriptions/usage/',
+                    '/subscriptions/billing-history/'
+                ];
+
+                const results = {};
+
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(`${API_BASE}${endpoint}`, {
+                            headers: {
+                                'Authorization': `Bearer ${session.token}`,
+                                'Content-Type': 'application/json',
+                            }
+                        });
+
+                        const data = await response.json();
+                        results[endpoint] = {
+                            status: response.status,
+                            ok: response.ok,
+                            data: data
+                        };
+
+                        if (response.ok) {
+                            log(`✅ ${endpoint}: Success`, 'success');
+                        } else {
+                            log(`❌ ${endpoint}: ${response.status} - ${data.message || 'Error'}`, 'error');
+                        }
+                    } catch (error) {
+                        results[endpoint] = {
+                            error: error.message
+                        };
+                        log(`❌ ${endpoint}: ${error.message}`, 'error');
+                    }
+                }
+
+                showResults(results, 'Subscription API Results');
+            } catch (error) {
+                log(`❌ Subscription data error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            log('🧹 Storage cleared', 'info');
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Check initial authentication status
+        window.onload = function() {
+            const session = JSON.parse(localStorage.getItem('user_session') || '{}');
+            if (session.user) {
+                log(`Current user: ${session.user.email}`, 'info');
+            } else {
+                log('Not authenticated', 'info');
+            }
+        };
+    </script>
+</body>
+</html>

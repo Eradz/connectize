@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 // New comprehensive subscription management system
 import SubscriptionManagementSystem from '../components/subscription/SubscriptionManagementSystem';
+import TestSubscriptionManagement from '../components/TestSubscriptionManagement';
+import SimpleSubscriptionManagement from '../components/SimpleSubscriptionManagement';
 
 // Enhanced subscription components for specific use cases
 import SubscriptionManagementCenter from '../components/enhanced/SubscriptionManagementCenter';
@@ -19,6 +21,17 @@ const SubscriptionRoutes = () => {
       {/* Main comprehensive subscription management system */}
       <Route 
         path="/" 
+        element={<SubscriptionManagementSystem />} 
+      />
+      
+      {/* Subscription management routes */}
+      <Route 
+        path="/management" 
+        element={<SubscriptionManagementSystem />} 
+      />
+      
+      <Route 
+        path="/manage" 
         element={<SubscriptionManagementSystem />} 
       />
       

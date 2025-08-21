@@ -6,13 +6,18 @@ import SubscriptionPlanDetail from '@/pages/subscription/SubscriptionPlanDetail'
 import EnhancedSubscriptionDashboard from '@/components/enhanced/EnhancedSubscriptionDashboard';
 import SubscriptionManagementCenter from '@/components/enhanced/SubscriptionManagementCenter';
 import EnhancedPlanComparison from '@/components/enhanced/EnhancedPlanComparison';
+import SubscriptionDataTest from '@/components/subscription/SubscriptionDataTest';
 
 const SubscriptionRoutes = () => {
   return (
     <Routes>
+      {/* Test route for debugging */}
+      <Route path="/test" element={<SubscriptionDataTest />} />
+      
       {/* Main subscription management system */}
       <Route path="/" element={<SubscriptionManagementSystem />} />
       <Route path="/manage" element={<SubscriptionManagementSystem />} />
+      <Route path="/management" element={<SubscriptionManagementSystem />} />
       
       {/* Legacy routes - redirected to main system with appropriate tab */}
       <Route path="/dashboard" element={<Navigate to="/subscriptions?tab=dashboard" replace />} />
