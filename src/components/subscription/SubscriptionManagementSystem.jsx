@@ -363,7 +363,12 @@ const SubscriptionManagementSystem = () => {
                 />
               </div>
               <div>
-                <UsageAnalytics />
+                <UsageAnalytics 
+                  usage={usage}
+                  analytics={analytics}
+                  subscription={currentSubscription}
+                  billingHistory={billingHistory}
+                />
               </div>
             </div>
           </TabsContent>
@@ -450,10 +455,26 @@ const DashboardContent = ({ subscription, usage, analytics, features, getUsageCo
             <div>
               <p className="text-sm text-gray-600">Next Billing</p>
               <p className="text-lg font-semibold">
-                {subscription.next_billing_date || subscription.next_payment_date ? 
-                  new Date(subscription.next_billing_date || subscription.next_payment_date).toLocaleDateString() : 
-                  'N/A'
-                }
+                {(() => {
+                  // Use same logic as PaymentMethodManager for consistency
+                  if (subscription?.status === 'active' && subscription?.current_period_end) {
+                    return new Date(subscription.current_period_end).toLocaleDateString();
+                  }
+                  
+                  const nextDate = subscription?.next_payment_date || 
+                                 subscription?.next_billing_date ||
+                                 subscription?.billing_info?.next_payment_date;
+                  
+                  if (nextDate) {
+                    return new Date(nextDate).toLocaleDateString();
+                  }
+                  
+                  if (subscription?.current_period_end) {
+                    return new Date(subscription.current_period_end).toLocaleDateString();
+                  }
+                  
+                  return 'N/A';
+                })()}
               </p>
             </div>
           </div>

@@ -275,35 +275,6 @@ const SubscriptionDashboard = () => {
           
           {/* View Mode Toggle */}
           <div className="flex items-center space-x-2">
-            {!isTestAuthActive() && (
-              <Button
-                onClick={() => {
-                  loginForTesting();
-                  window.location.reload();
-                }}
-                variant="outline"
-                size="sm"
-              >
-                🔑 Enable Test Auth
-              </Button>
-            )}
-            <Button
-              onClick={async () => {
-                console.log('🧪 Manual API Test');
-                try {
-                  const plans = await subscriptionsApi.getPlans();
-                  console.log('Plans API Response:', plans);
-                  const features = await subscriptionsApi.getAvailableFeatures();
-                  console.log('Features API Response:', features);
-                } catch (error) {
-                  console.error('API Test Error:', error);
-                }
-              }}
-              variant="outline"
-              size="sm"
-            >
-              🧪 Test APIs
-            </Button>
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"

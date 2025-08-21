@@ -95,10 +95,13 @@ const SubscriptionPlanDetail = () => {
           console.error('Current subscription fetch error:', err);
           return { subscription_plan: null };
         }),
-        // Get actual features count from permissions API (same as dashboard)
-        subscriptionsApi.getAvailableFeatures().catch(err => {
-          console.error('Failed to load actual features count:', err);
-          return { data: { features_by_category: {} } };
+        // Get plan-specific features using the enhanced plans API
+        makeApiRequest({
+          url: `api/permissions/api/v2/enhanced-plans/${planId}/`,
+          method: 'GET'
+        }).catch(err => {
+          console.error('Failed to load plan-specific features:', err);
+          return { features: { features_by_category: {} } };
         })
       ]);
 
@@ -437,24 +440,25 @@ const SubscriptionPlanDetail = () => {
       console.log('🔍 Detailed features response:', JSON.stringify(planFeaturesResult, null, 2));
       console.log('🔍 Plan data:', JSON.stringify(planResult?.data, null, 2));
 
-      // Extract features data - prioritize actual features from permissions API
+      // Extract features data - prioritize plan-specific features from enhanced plans API
       let featuresData = {};
       let allPlanFeatures = [];
 
-      // First, try to use actual features from permissions API (same as dashboard)
-      if (actualFeaturesResult?.data?.features_by_category) {
-        featuresData = actualFeaturesResult.data.features_by_category;
+      // First, try to use plan-specific features from enhanced plans API
+      if (actualFeaturesResult?.features) {
+        featuresData = actualFeaturesResult.features;
         allPlanFeatures = Object.values(featuresData).flat();
-        console.log('✅ Using actual features from permissions API:', {
+        console.log('✅ Using plan-specific features from enhanced plans API:', {
           totalFeatures: allPlanFeatures.length,
-          categories: Object.keys(featuresData).length
+          categories: Object.keys(featuresData).length,
+          planId: planId
         });
       }
       // Fallback to manual features from plan data if API features not available
       else if (planFeaturesResult?.features_by_category) {
         featuresData = planFeaturesResult.features_by_category;
         allPlanFeatures = Object.values(featuresData).flat();
-        console.log('⚠️ Using fallback manual features from plan data');
+        console.log('⚠️ Using fallback manual features from plan data for plan:', planId);
       }
 
       console.log('� Final features processing:', {
@@ -530,28 +534,22 @@ const SubscriptionPlanDetail = () => {
     return colors[planType?.toLowerCase()] || colors.trial;
   };
 
-  // Get plan features for this specific plan (only included features)
+  // Get plan features for this specific plan (all features from API)
   const getPlanFeatures = (planType) => {
-    if (!planData.features.length) return [];
-    
-    const planHierarchy = {
-      'trial': ['trial'],
-      'starter': ['trial', 'starter'],
-      'professional': ['trial', 'starter', 'professional'],
-      'enterprise': ['trial', 'starter', 'professional', 'enterprise'],
-      'custom': ['trial', 'starter', 'professional', 'enterprise', 'custom']
-    };
-
-    const availablePlans = planHierarchy[planType?.toLowerCase()] || ['trial'];
-    
-    return planData.features.filter(feature => 
-      availablePlans.includes(feature.minimum_plan?.toLowerCase())
-    );
+    // Use all features returned by the API - they are already filtered for this plan
+    return planData.features || [];
   };
 
-  // Categorize features by their category
+  // Categorize features by their category (use API-provided categories first)
   const categorizeFeatures = (features) => {
-    // Always categorize the filtered features passed as parameter
+    // If we have API-provided categories, use them directly
+    if (planData.featuresCategories && Object.keys(planData.featuresCategories).length > 0) {
+      console.log('✅ Using API-provided feature categories:', planData.featuresCategories);
+      return planData.featuresCategories;
+    }
+    
+    // Fallback: categorize the filtered features passed as parameter
+    console.log('⚠️ Falling back to manual categorization of features:', features);
     const categories = {};
     features.forEach(feature => {
       const category = feature.feature_category || feature.category || 'General Features';
