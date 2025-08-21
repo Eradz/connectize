@@ -69,14 +69,11 @@ const SubscriptionManagementSystem = () => {
       // Enable test authentication if needed
       if (!isTestAuthActive()) {
         try {
-          console.log('🔐 Enabling test authentication for subscription management...');
           await loginForTesting();
-          console.log('✅ Test authentication successful');
         } catch (error) {
           console.warn('❌ Failed to enable test authentication:', error);
         }
       } else {
-        console.log('✅ Test authentication already active');
       }
       
       // Fetch subscription data
@@ -91,7 +88,6 @@ const SubscriptionManagementSystem = () => {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Fetching subscription data...');
 
       // Use the subscriptionsApi service instead of direct fetch calls
       const [
@@ -113,7 +109,6 @@ const SubscriptionManagementSystem = () => {
       // Helper function for safe data extraction
       const safeExtract = (result, defaultValue = null) => {
         if (result.status === 'fulfilled' && result.value?.data) {
-          console.log('✅ API call successful');
           return result.value.data;
         } else {
           console.warn('❌ API call failed:', result.reason?.message || result.reason);
@@ -130,7 +125,6 @@ const SubscriptionManagementSystem = () => {
       const billingData = safeExtract(billingResult, { results: [] });
 
       // Update state with extracted data - handle the actual API response structure
-      console.log('🔍 Raw API responses:', {
         subscription: subscriptionData,
         plans: plansData,
         features: featuresData,
@@ -150,11 +144,6 @@ const SubscriptionManagementSystem = () => {
       setAnalytics(analyticsData);
       setBillingHistory(billingData?.results || billingData || []);
 
-      console.log('✅ All subscription data loaded successfully');
-      console.log('📊 Processed subscription:', subscription);
-      console.log('📈 Processed usage:', subscriptionUsage);
-      console.log('📋 Available plans:', plansData?.results?.length || plansData?.length || 0);
-      console.log('🎯 Features categories:', Object.keys(featuresData?.features_by_category || {}).length);
 
     } catch (error) {
       console.error('❌ Error fetching subscription data:', error);

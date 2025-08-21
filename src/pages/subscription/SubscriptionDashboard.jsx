@@ -58,11 +58,9 @@ const SubscriptionDashboard = () => {
 
       // Check if test auth is active, if not, set it up for testing
       if (!isTestAuthActive()) {
-        console.log('🔑 Setting up test authentication...');
         await loginForTesting();
       }
 
-      console.log('🔄 SubscriptionDashboard: Loading dashboard data...');
 
       // Load all data in parallel
       const [plansResult, featuresResult, analyticsResult, currentSubscriptionResult] = await Promise.all([
@@ -84,14 +82,12 @@ const SubscriptionDashboard = () => {
         })
       ]);
 
-      console.log('📊 Raw API responses:', {
         plansResponse: plansResult,
         featuresResponse: featuresResult,
         analyticsResponse: analyticsResult,
         currentSubscriptionResponse: currentSubscriptionResult
       });
 
-      console.log('🔍 Current subscription analysis:', {
         rawData: currentSubscriptionResult?.data,
         subscriptionNested: currentSubscriptionResult?.data?.subscription,
         directSubscription: currentSubscriptionResult?.data,
@@ -99,7 +95,6 @@ const SubscriptionDashboard = () => {
         status: currentSubscriptionResult?.data?.subscription?.status || currentSubscriptionResult?.data?.status
       });
 
-      console.log('📊 Extracted data:', {
         plans: plansResult?.data?.results?.length || 0,
         features: Object.keys(featuresResult?.data?.features_by_category || {}).length,
         analytics: !!analyticsResult?.data
@@ -109,14 +104,12 @@ const SubscriptionDashboard = () => {
       const featuresData = featuresResult?.data?.features_by_category || {};
       const allFeatures = Object.values(featuresData).flat();
 
-      console.log('📊 Dashboard data loaded:', {
         plans: plansResult?.data?.results?.length || 0,
         features: allFeatures.length || 0,
         analytics: !!analyticsResult?.data
       });
 
       const extractedSubscription = currentSubscriptionResult?.data?.subscription || null;
-      console.log('🔧 Subscription extraction result:', {
         extracted: extractedSubscription,
         planName: extractedSubscription?.plan?.name,
         status: extractedSubscription?.status,
@@ -207,7 +200,6 @@ const SubscriptionDashboard = () => {
 
   // Handle view plan details
   const handleViewPlanDetails = (plan) => {
-    console.log('🔍 Viewing plan details for:', plan);
     // Navigate to plan detail page with plan ID
     navigate(webRoutes.subscriptionPlanDetail.replace(':planId', plan.id));
   };

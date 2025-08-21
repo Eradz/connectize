@@ -58,23 +58,18 @@ const SubscriptionPlanDetail = () => {
       setLoading(true);
       setError(null);
 
-      // Check if test auth is active
+            // Check if test auth is active
       if (!isTestAuthActive()) {
-        console.log('🔑 Setting up test authentication...');
         loginForTesting();
       }
-
-      console.log('📊 Loading plan details for ID:', planId);
 
       // Load plan details and related data using the correct API endpoints
       const [planResult, currentSubscriptionResult, actualFeaturesResult] = await Promise.all([
         // Get specific plan details using the existing subscription API
         subscriptionsApi.getPlanDetails(planId).catch(err => {
-          console.log('⚠️ Plan details not available, trying regular plan endpoint:', err);
           return subscriptionsApi.getPlan(planId).catch(planErr => {
             console.error('❌ Plan fetch error:', planErr);
             // Create fallback plan data if the API fails
-            console.log('🔧 Using fallback plan data for ID:', planId);
             return { 
               data: {
                 id: planId,
@@ -109,15 +104,9 @@ const SubscriptionPlanDetail = () => {
       let planFeaturesResult = { features_by_category: {} };
       if (planResult?.data?.features || planResult?.data?.plan?.features) {
         const planFeatures = planResult.data.features || planResult.data.plan.features;
-        console.log('📋 Using actual plan features from database:', planFeatures);
-        
-        const featuresData = {};
-        
-        console.log('🔍 Processing plan features:', planFeatures);
         
         // Content Limits Features
         if (planFeatures.content_limits) {
-          console.log('✅ Processing content_limits:', planFeatures.content_limits);
           featuresData['Content Limits'] = [];
           
           const limits = planFeatures.content_limits;
@@ -157,7 +146,6 @@ const SubscriptionPlanDetail = () => {
         
         // Technical Features
         if (planFeatures.technical_limits) {
-          console.log('✅ Processing technical_limits:', planFeatures.technical_limits);
           featuresData['Technical Features'] = [];
           
           const tech = planFeatures.technical_limits;
@@ -197,7 +185,6 @@ const SubscriptionPlanDetail = () => {
         
         // Analytics Features
         if (planFeatures.analytics_features) {
-          console.log('✅ Processing analytics_features:', planFeatures.analytics_features);
           featuresData['Analytics Features'] = [];
           
           const analytics = planFeatures.analytics_features;
@@ -234,7 +221,6 @@ const SubscriptionPlanDetail = () => {
         
         // AI Features
         if (planFeatures.ai_features) {
-          console.log('✅ Processing ai_features:', planFeatures.ai_features);
           featuresData['AI Features'] = [];
           
           const ai = planFeatures.ai_features;
@@ -291,7 +277,6 @@ const SubscriptionPlanDetail = () => {
         
         // Advertising Features
         if (planFeatures.advertising_features) {
-          console.log('✅ Processing advertising_features:', planFeatures.advertising_features);
           featuresData['Advertising Features'] = [];
           
           const ads = planFeatures.advertising_features;
@@ -339,7 +324,6 @@ const SubscriptionPlanDetail = () => {
         
         // Support Features
         if (planFeatures.support_features) {
-          console.log('✅ Processing support_features:', planFeatures.support_features);
           featuresData['Support Features'] = [];
           
           const support = planFeatures.support_features;
@@ -388,7 +372,6 @@ const SubscriptionPlanDetail = () => {
         
         // Branding Features
         if (planFeatures.branding_features) {
-          console.log('✅ Processing branding_features:', planFeatures.branding_features);
           featuresData['Branding Features'] = [];
           
           const branding = planFeatures.branding_features;
@@ -414,18 +397,15 @@ const SubscriptionPlanDetail = () => {
         }
         
         // Clean up empty categories
-        console.log('🔧 Features before cleanup:', featuresData);
         Object.keys(featuresData).forEach(category => {
           if (featuresData[category].length === 0) {
             console.log(`❌ Removing empty category: ${category}`);
             delete featuresData[category];
           } else {
-            console.log(`✅ Keeping category "${category}" with ${featuresData[category].length} features`);
           }
         });
         
         planFeaturesResult = { features_by_category: featuresData };
-        console.log('✅ Successfully converted plan features:', featuresData);
       } else {
         console.log('❌ No features found in plan data - checking structure:');
         console.log('planResult.data:', planResult?.data);
@@ -437,8 +417,6 @@ const SubscriptionPlanDetail = () => {
         currentSubscriptionResponse: currentSubscriptionResult
       });
 
-      console.log('🔍 Detailed features response:', JSON.stringify(planFeaturesResult, null, 2));
-      console.log('🔍 Plan data:', JSON.stringify(planResult?.data, null, 2));
 
       // Extract features data - prioritize plan-specific features from enhanced plans API
       let featuresData = {};
@@ -448,7 +426,6 @@ const SubscriptionPlanDetail = () => {
       if (actualFeaturesResult?.features) {
         featuresData = actualFeaturesResult.features;
         allPlanFeatures = Object.values(featuresData).flat();
-        console.log('✅ Using plan-specific features from enhanced plans API:', {
           totalFeatures: allPlanFeatures.length,
           categories: Object.keys(featuresData).length,
           planId: planId
@@ -458,7 +435,6 @@ const SubscriptionPlanDetail = () => {
       else if (planFeaturesResult?.features_by_category) {
         featuresData = planFeaturesResult.features_by_category;
         allPlanFeatures = Object.values(featuresData).flat();
-        console.log('⚠️ Using fallback manual features from plan data for plan:', planId);
       }
 
       console.log('� Final features processing:', {
@@ -484,7 +460,6 @@ const SubscriptionPlanDetail = () => {
         currentSubscription: currentSubscriptionResult?.subscription_plan || planResult?.data?.current_subscription
       };
       
-      console.log('✅ Setting final plan data:', {
         plan: finalPlanData.plan,
         featuresCount: finalPlanData.features.length,
         categoriesCount: Object.keys(finalPlanData.featuresCategories).length,
@@ -544,12 +519,10 @@ const SubscriptionPlanDetail = () => {
   const categorizeFeatures = (features) => {
     // If we have API-provided categories, use them directly
     if (planData.featuresCategories && Object.keys(planData.featuresCategories).length > 0) {
-      console.log('✅ Using API-provided feature categories:', planData.featuresCategories);
       return planData.featuresCategories;
     }
     
     // Fallback: categorize the filtered features passed as parameter
-    console.log('⚠️ Falling back to manual categorization of features:', features);
     const categories = {};
     features.forEach(feature => {
       const category = feature.feature_category || feature.category || 'General Features';
