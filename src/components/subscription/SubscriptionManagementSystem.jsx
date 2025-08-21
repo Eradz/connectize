@@ -11,6 +11,8 @@ import { getAuthorizationHeader } from '@/lib/helpers';
 import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
 import BillingManagement from './BillingManagement';
 import UsageAnalytics from './UsageAnalytics';
+import PlanSelector from './PlanSelector';
+import PaymentMethodManager from './PaymentMethodManager';
 import {
   Crown,
   TrendingUp,
@@ -319,7 +321,7 @@ const SubscriptionManagementSystem = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Dashboard
@@ -328,6 +330,10 @@ const SubscriptionManagementSystem = () => {
               <Crown className="h-4 w-4" />
               Plans
             </TabsTrigger>
+            <TabsTrigger value="choose-plan" className="flex items-center gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Choose Plan
+            </TabsTrigger>
             <TabsTrigger value="features" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
               Features
@@ -335,6 +341,10 @@ const SubscriptionManagementSystem = () => {
             <TabsTrigger value="billing" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
               Billing
+            </TabsTrigger>
+            <TabsTrigger value="payment-methods" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Payment
             </TabsTrigger>
           </TabsList>
 
@@ -380,6 +390,29 @@ const SubscriptionManagementSystem = () => {
           {/* Billing Tab */}
           <TabsContent value="billing" className="space-y-6">
             <BillingManagement />
+          </TabsContent>
+
+          {/* Choose Plan Tab */}
+          <TabsContent value="choose-plan" className="space-y-6">
+            <PlanSelector 
+              currentSubscription={currentSubscription}
+              onPlanSelected={(subscriptionData) => {
+                // Refresh data after plan selection
+                fetchAllData();
+                setActiveTab('dashboard');
+              }}
+            />
+          </TabsContent>
+
+          {/* Payment Methods Tab */}
+          <TabsContent value="payment-methods" className="space-y-6">
+            <PaymentMethodManager 
+              subscription={currentSubscription}
+              onUpdate={() => {
+                // Refresh data after payment method changes
+                fetchAllData();
+              }}
+            />
           </TabsContent>
         </Tabs>
       </div>

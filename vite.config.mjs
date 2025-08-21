@@ -13,6 +13,8 @@ export default defineConfig({
     port: 3000,
     host: true, // Allow external connections
     cors: true, // Enable CORS
+    // Enable HTTPS for Stripe compatibility in development
+    https: process.env.VITE_STRIPE_DEV_MODE ? false : undefined,
     hmr: {
       port: 3001 // Use different port for HMR to avoid conflicts
     }

@@ -13,6 +13,18 @@
       name="keywords"
       content="social media, connect, chat, share, friends, networking, oil and gas networking, energy professionals, oil and gas social platform, energy industry collaboration, oil and gas jobs, upstream, midstream, downstream, energy sector networking, oil and gas suppliers, industry insights, oil and gas investments"
     />
+    
+    <!-- Content Security Policy to prevent extension interference in development -->
+    <meta http-equiv="Content-Security-Policy" content="
+      frame-src 'self' https://js.stripe.com https://*.stripe.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.stripe.com;
+      connect-src 'self' https://api.stripe.com https://*.stripe.com http://localhost:8000 http://127.0.0.1:8000 ws://localhost:* ws://127.0.0.1:*;
+      default-src 'self';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https:;
+    ">
+    
     <link rel="apple-touch-icon" href="/icons/icon-192.webp" />
 
     <link rel="manifest" href="/manifest.json" />

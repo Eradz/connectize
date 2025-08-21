@@ -66,4 +66,16 @@ export default {
   calculateCostSavings: (currentPlanId, targetPlanId) => api.get(`${SUBSCRIPTION_BASE_URL}/plans/cost_savings/`, {
     params: { current_plan: currentPlanId, target_plan: targetPlanId }
   }),
+
+  // Payment Methods
+  getPaymentMethods: () => api.get(`${SUBSCRIPTION_BASE_URL}/payment-methods/`),
+  addPaymentMethod: (data) => api.post(`${SUBSCRIPTION_BASE_URL}/payment-methods/`, data),
+  removePaymentMethod: (paymentMethodId) => api.delete(`${SUBSCRIPTION_BASE_URL}/payment-methods/${paymentMethodId}/`),
+  setDefaultPaymentMethod: (paymentMethodId) => api.post(`${SUBSCRIPTION_BASE_URL}/payment-methods/${paymentMethodId}/set_default/`),
+  createSetupIntent: () => api.post(`${SUBSCRIPTION_BASE_URL}/payment-methods/create_setup_intent/`),
+  
+  // Subscription Payments
+  createSubscriptionPayment: (data) => api.post(`${SUBSCRIPTION_BASE_URL}/subscription-payments/create_subscription_payment/`, data),
+  upgradeSubscriptionPayment: (data) => api.post(`${SUBSCRIPTION_BASE_URL}/subscription-payments/upgrade_subscription_payment/`, data),
+  processPaymentIntent: (data) => api.post(`${SUBSCRIPTION_BASE_URL}/subscription-payments/process_payment_intent/`, data),
 };

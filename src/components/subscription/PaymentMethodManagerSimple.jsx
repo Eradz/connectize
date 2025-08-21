@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Alert, { AlertDescription } from '@/components/ui/Alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
-import Input from '@/components/ui/Input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import {
   CreditCard,
@@ -19,18 +19,6 @@ import {
 } from 'lucide-react';
 import { stripePromise } from '@/lib/stripeUtils';
 import subscriptionsApi from '@/api-services/subscriptions';
-
-// Stripe Elements configuration for development
-const elementsOptions = {
-  // Development-friendly options
-  ...(import.meta.env.DEV && {
-    fonts: [
-      {
-        cssSrc: 'https://fonts.googleapis.com/css?family=Roboto'
-      }
-    ]
-  })
-};
 
 // Stripe Card Form Component
 const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
@@ -252,16 +240,28 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
           <p className="text-sm text-gray-600">Manage your payment methods and billing preferences</p>
         </div>
         
-        {/* Only show Add button in header if there are existing payment methods */}
-        {paymentMethods.length > 0 && (
-          <Button 
-            onClick={() => setShowAddCard(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Payment Method
-          </Button>
-        )}
+        <Elements stripe={stripePromise}>
+          <Dialog open={showAddCard} onOpenChange={setShowAddCard}>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Add Payment Method
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add Payment Method</DialogTitle>
+              </DialogHeader>
+              
+              <CardForm
+                onSuccess={handleAddSuccess}
+                onError={handleAddError}
+                loading={loading}
+                setLoading={setLoading}
+              />
+            </DialogContent>
+          </Dialog>
+        </Elements>
       </div>
 
       {/* Payment Methods List */}
@@ -339,10 +339,28 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
             <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Payment Methods</h3>
             <p className="text-gray-600 mb-4">Add a payment method to ensure uninterrupted service</p>
-            <Button onClick={() => setShowAddCard(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Payment Method
-            </Button>
+            <Elements stripe={stripePromise}>
+              <Dialog open={showAddCard} onOpenChange={setShowAddCard}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Your First Payment Method
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add Payment Method</DialogTitle>
+                  </DialogHeader>
+                  
+                  <CardForm
+                    onSuccess={handleAddSuccess}
+                    onError={handleAddError}
+                    loading={loading}
+                    setLoading={setLoading}
+                  />
+                </DialogContent>
+              </Dialog>
+            </Elements>
           </CardContent>
         </Card>
       )}
@@ -398,24 +416,6 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
           </CardContent>
         </Card>
       )}
-
-      {/* Single Add Payment Method Dialog */}
-      <Elements stripe={stripePromise} options={elementsOptions}>
-        <Dialog open={showAddCard} onOpenChange={setShowAddCard}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Payment Method</DialogTitle>
-            </DialogHeader>
-            
-            <CardForm
-              onSuccess={handleAddSuccess}
-              onError={handleAddError}
-              loading={loading}
-              setLoading={setLoading}
-            />
-          </DialogContent>
-        </Dialog>
-      </Elements>
     </div>
   );
 };
