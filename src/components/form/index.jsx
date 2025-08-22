@@ -30,6 +30,7 @@ export default function Form({
     validate,
     helpText,
     isLoading,
+    loadingText,
   }) => {
     return (
       <section className="w-full my-2.5 md:my-3" key={name}>
@@ -70,6 +71,8 @@ export default function Form({
             isLoading={isLoading}
             formik={formik}
             name={name}
+            loadingText={loadingText}
+            disabled={disabled}
             placeholder={placeholder}
             options={options}
           />
@@ -96,7 +99,9 @@ export default function Form({
   };
 
   const renderGridInputs = (gridInputs, disabled) =>
-    gridInputs.map((input) => renderInput({ ...input, disabled }));
+    gridInputs.map((input) =>
+      renderInput({ ...input, disabled: disabled || input.disabled })
+    );
 
   const renderField = (field, index) => {
     const { type, gridInputs, disabled } = field;

@@ -54,7 +54,7 @@ export default function CustomShareButton({
         url={url}
         title={modalTitle}
       />
-      <button onClick={share}>{children}</button>
+      <div onClick={share}>{children}</div>
     </>
   );
 }

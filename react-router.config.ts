@@ -4,7 +4,9 @@ export default {
   appDirectory: "src/app",
   buildDirectory: "build",
   ssr: false,
-  serverModuleFormat: "cjs",
+  serverModuleFormat: "esm",
+
+  // serverModuleFormat: "cjs",
 
   //   prerender: ["/", "/about"],
 } satisfies Config;

@@ -248,13 +248,16 @@ export const CustomSelect = ({
   formik,
   name,
   placeholder,
+  loadingText,
   isLoading,
+  disabled,
   options = [""],
 }) => (
   <Select
     id={name}
     name={name}
-    placeholder={placeholder}
+    placeholder={isLoading ? loadingText || "Loading..." : placeholder}
+    disabled={disabled}
     onChange={(e) => {
       localStorage.setItem(name, e.currentTarget.value);
       formik.handleChange(e);
@@ -263,7 +266,7 @@ export const CustomSelect = ({
       localStorage.setItem(name, e.currentTarget.value);
       formik.handleChange(e);
     }}
-    value={isLoading ? "Loading..." : formik.values[`${name}`]}
+    value={isLoading ? loadingText || "Loading..." : formik.values[`${name}`]}
     className="!w-full !bg-background px-3 !text-sm mt-2 border-gray-100"
   >
     {options?.map((option, index) => (

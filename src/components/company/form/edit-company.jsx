@@ -82,29 +82,32 @@ export default function EditCompanyForm({ company }) {
   const countryName = formik.values["country"];
   const stateName = formik.values["state"];
 
-  const { data: citiesForState, isLoading: isLoadingGetCitiesForState } =
-    useQuery({
-      queryKey: ["cities", { countryName, stateName }],
-      initialData: [],
-      queryFn: async () => {
-        if (!countryName || !stateName) return [];
-        try {
-          const res = await axios.get(
-            process.env.NODE_ENV === "production"
-              ? ""
-              : `http://192.168.8.116:4000`,
-            { params: { country: countryName, state: stateName } }
-          );
+  const {
+    data: citiesForState,
+    isLoading: isLoadingGetCitiesForState,
+    isFetching,
+  } = useQuery({
+    queryKey: ["cities", { countryName, stateName }],
+    initialData: [],
+    queryFn: async () => {
+      if (!countryName || !stateName) return [];
+      try {
+        const res = await axios.get(
+          process.env.NODE_ENV === "production"
+            ? ""
+            : `http://192.168.8.116:3000/cities`,
+          { params: { country: countryName, state: stateName } }
+        );
 
-          return res.data?.map((city) => city.name) || [];
-        } catch (error) {
-          toast.error(
-            "Could not get list of cities for " + stateName + " " + countryName
-          );
-          throw error;
-        }
-      },
-    });
+        return res.data?.map((city) => city.name) || [];
+      } catch (error) {
+        toast.error(
+          "Could not get list of cities for " + stateName + " " + countryName
+        );
+        throw error;
+      }
+    },
+  });
 
   // const citiesForState =
   //   cities
@@ -164,8 +167,10 @@ export default function EditCompanyForm({ company }) {
           type: "select",
           label: "Region/City",
           placeholder: "Select city",
+          disabled: isLoadingGetCitiesForState || isFetching,
           options: citiesForState,
-          isLoading: isLoadingGetCitiesForState,
+          isLoading: isLoadingGetCitiesForState || isFetching,
+          loadingText: "Loading cites...",
         },
         {
           name: "organization_type",

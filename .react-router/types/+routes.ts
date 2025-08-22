@@ -142,7 +142,7 @@ type Pages = {
 };
 
 type RouteFiles = {
-  "root.tsx": {
+  "root.jsx": {
     id: "root";
     page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
   };

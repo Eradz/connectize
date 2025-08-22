@@ -7,10 +7,22 @@ import { loginUser } from "../../api-services/authentication";
 import { getCurrentUser } from "../../api-services/users";
 import Form from "../../components/form";
 import HeadingText from "../../components/HeadingText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 import LightParagraph from "../../components/ParagraphText";
+// import "../../index.css";
 
+export const meta = () =>
+  createSEO({
+    title: "Login to connectize",
+    description: "Connect, Collaborate and Thrive with Connectize",
+  });
+// export function meta() {
+//   return createSEO({
+//     title: "Login to connectize",
+//     description: "Connect, Collaborate and Thrive with Connectize",
+//   });
+// }
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .email("Invalid Email Address")
@@ -29,7 +41,7 @@ function Login() {
   const { user, setUser } = useAuth();
   const [searchParams] = useSearchParams();
 
-  setUser(null);
+  // setUser(null);
 
   const nextParam = searchParams.get("next");
 
@@ -37,8 +49,8 @@ function Login() {
     user && user?.is_first_time_user
       ? "/profile"
       : searchParams.has("next")
-      ? nextParam
-      : "/";
+        ? nextParam
+        : "/";
 
   const formValues = {
     username: "",
@@ -85,10 +97,10 @@ function Login() {
 
   return (
     <section className="space-y-4">
-      <SEO
+      {/* <SEO
         title="Login to connectize"
         description="Connect, Collaborate and Thrive with Connectize"
-      />
+      /> */}
       <HeadingText>Login to your account</HeadingText>
 
       <Form

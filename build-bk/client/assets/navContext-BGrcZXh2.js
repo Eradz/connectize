@@ -1,1 +1,0 @@
-import{r as e,j as v}from"./chunk-UH6JLGW7-CryfoZLB.js";const r=e.createContext(),c=({children:t})=>{const[s,o]=e.useState(!1),a=n=>{o(n)};return v.jsx(r.Provider,{value:{navOpen:s,toggleNav:a},children:t})},x=()=>{const t=e.useContext(r);if(!t)throw new Error("useNav must be used within a NavProvider");return t};export{c as N,x as u};

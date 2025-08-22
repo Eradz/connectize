@@ -1,2 +1,5 @@
 - migrated to react-router-v7
 - removed the 34mb cities json and used an api instead
+
+-
+- Completed the migration to react-router-v7

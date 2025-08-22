@@ -53,12 +53,12 @@ function DiscoverPosts({
   const finalArray = isSearch
     ? searchArray
     : companyName
-    ? posts?.filter(
-        (post) =>
-          post?.company?.company_name?.toLowerCase() ===
-          companyName?.toLowerCase()
-      )
-    : posts;
+      ? posts?.filter(
+          (post) =>
+            post?.company?.company_name?.toLowerCase() ===
+            companyName?.toLowerCase()
+        )
+      : posts;
   const postLoading = isSearch ? searchLoading : isLoading;
 
   return (
@@ -444,13 +444,13 @@ const CommentSection = ({
             />
           ))}
       <div className="mt-4 border-t pt-4 relative">
-        <ReactQuill
+        {/* <ReactQuill
           value={comment}
           onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
           theme="snow"
           placeholder="Type your comment here"
           // style={{ height: "200px" }}
-        />
+        /> */}
         <button
           className="absolute bottom-1.5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
           onClick={handleComment}

@@ -5,11 +5,11 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
-    //react(),
     reactRouter(),
-    visualizer({
-      open: true,
-    }),
+    // react(),
+    // visualizer({
+    //   open: true,
+    // }),
   ],
   server: { port: 3000 },
   build: { outDir: "build" },

@@ -88,7 +88,7 @@ const FormatPostText = ({ text, isSinglePost = false, postId }) => {
   );
 
   return (
-    <LightParagraph>
+    <LightParagraph asDiv={true}>
       {isSinglePost ? (
         <Markdown options={options}>{sanitizedText}</Markdown>
       ) : (

@@ -1,1 +1,0 @@
-import{j as a}from"./chunk-UH6JLGW7-CryfoZLB.js";import{c as r}from"./clsx-B-dksMZM.js";function c({children:t,center:e,justify:s}){return a.jsx("p",{className:r("!max-w-screen-sm lg:max-w-screen-md text-gray-500 xs:!text-sm !text-base text-balance",{"text-center":e,"text-justify":s}),children:t})}export{c as L};
