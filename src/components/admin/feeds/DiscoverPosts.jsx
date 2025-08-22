@@ -107,7 +107,7 @@ export const DiscoverPostItem = ({
   const { user: currentUser } = useAuth();
 
   const postTitle = `Connectize Post by ${
-    postItem?.user?.first_name
+    postItem?.user?.full_name
   } | ${capitalizeFirst(postItem?.company?.company_name)} Company`;
 
   // const userHasLikedPost = postItem?.likes.find(
