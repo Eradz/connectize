@@ -68,6 +68,8 @@ export function Layout({ children }) {
         />
         <Analytics />
         {/* <ScrollRestoration /> */}
+
+        {/* <script></script> */}
         <Scripts />
       </body>
     </html>
