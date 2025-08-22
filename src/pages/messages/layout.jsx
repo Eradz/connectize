@@ -2,7 +2,7 @@ import MessagingPage from "../messages/messaging";
 
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import clsx from "clsx";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";

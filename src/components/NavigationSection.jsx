@@ -1,7 +1,7 @@
 import { LogoutOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { logOutCurrentUser } from "../api-services/users";
 import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";

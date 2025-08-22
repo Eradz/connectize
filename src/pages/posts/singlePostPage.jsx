@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/react";
 import { ArrowBackIos } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { getPosts } from "../../api-services/posts";
 import {
   DiscoverPostItem,

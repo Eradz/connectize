@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useAuth } from "../../../context/userContext";
 import { useGetCurrentCompany } from "../../../hooks";
 import { CompanyUserType } from "../../../lib/helpers/types";

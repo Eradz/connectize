@@ -3,7 +3,7 @@ import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { bookmarkProduct } from "../../../api-services/products";

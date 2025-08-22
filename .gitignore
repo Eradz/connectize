@@ -4,6 +4,10 @@
 # ignoring bun.lock because the project actually uses yarn but i use bun.
 bun.lock
 
+
+#
+/.react-router
+
 # ignoring folders i backed up
 /android-backup
 capacitor.config.ts.backup
@@ -18,6 +22,7 @@ capacitor.config.ts.backup
 
 # production
 /build
+/build-bk
 
 # misc
 .DS_Store

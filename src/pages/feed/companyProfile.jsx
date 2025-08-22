@@ -2,7 +2,7 @@ import { LocationOnOutlined } from "@mui/icons-material";
 import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import React, { useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";

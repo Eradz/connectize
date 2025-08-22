@@ -1,4 +1,6 @@
-const plugin = require("tailwindcss/plugin");
+// const plugin = require("tailwindcss/plugin");
+
+// import plugin from "tailwindcss/plugin"
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -6,7 +8,7 @@ module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
-    "app/**/*.{ts,tsx}",
+    "app/**/*.{js,jsx,ts,tsx}",
     "components/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
@@ -44,5 +46,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  // plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };

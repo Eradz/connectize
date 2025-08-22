@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { VerifiedIcon } from "../icon";
 
 export default function Username({ user, noClick = false }) {

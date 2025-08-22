@@ -3,7 +3,7 @@ import { bookmarkService } from "../../api-services/services";
 import PageLoading from "../PageLoading";
 import { useEffect, useState } from "react";
 import LightParagraph from "../ParagraphText";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { motion } from "framer-motion";
 import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
 import { Share1Icon, TrashIcon } from "@radix-ui/react-icons";

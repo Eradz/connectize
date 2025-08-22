@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import EditCompanyForm from "../../../components/company/form/edit-company";
 import HeadingText from "../../../components/HeadingText";
 import NoPage from "../../../components/NoPage";

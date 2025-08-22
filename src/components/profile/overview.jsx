@@ -24,7 +24,7 @@ import { AvatarUpload } from "../form/customInput";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router";
 
 const FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const SUPPORTED_FORMATS = [
