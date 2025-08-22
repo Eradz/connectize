@@ -1,11 +1,4 @@
-import {
-  isRouteErrorResponse,
-  Meta,
-  Outlet,
-  Scripts,
-  useLocation,
-  useNavigation,
-} from "react-router";
+import { Links, Meta, Outlet, Scripts, useNavigation } from "react-router";
 import { Analytics } from "@vercel/analytics/react";
 import MyProvider from "../context/provider";
 import { Toaster } from "sonner";
@@ -34,7 +27,6 @@ export function Layout({ children }) {
         <link rel="icon" href="/favicon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#F7F7F7 " />
-
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -46,14 +38,14 @@ export function Layout({ children }) {
           rel="stylesheet"
         />
 
-        {/* <meta
+        <meta
           name="description"
           content="Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors. Network, collaborate on projects, share insights, and explore job opportunities in the energy sector. Join today!"
         />
         <meta
           name="keywords"
           content="social media, connect, chat, share, friends, networking, oil and gas networking, energy professionals, oil and gas social platform, energy industry collaboration, oil and gas jobs, upstream, midstream, downstream, energy sector networking, oil and gas suppliers, industry insights, oil and gas investments"
-        /> */}
+        />
         <link rel="apple-touch-icon" href="/icons/icon-192.webp" />
 
         <link rel="manifest" href="/manifest.json" />
@@ -63,6 +55,7 @@ export function Layout({ children }) {
         {/* <title>Welcome to connectize</title> */}
 
         <Meta />
+        <Links />
       </head>
       <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -106,6 +99,8 @@ function GlobalSpinner() {
     if (!ref.current) return;
 
     if (!isNavigating && intervalId.current) {
+      console.log("Closed Loader");
+
       reset();
     } else {
       // console.log("About Interval called");
@@ -119,13 +114,15 @@ function GlobalSpinner() {
           ? currentWidthRef.current + 25
           : 75;
 
-        if (currentWidthRef.current > 100) {
+        if (currentWidthRef.current >= 100) {
           currentWidthRef.current = 95;
-          clearInterval(intervalId.current);
+          updateProgress(currentWidthRef.current);
+          // clearInterval(intervalId.current);
+          reset();
           console.log("Cleared Loader Interval");
+        } else {
+          updateProgress(currentWidthRef.current);
         }
-
-        updateProgress(currentWidthRef.current);
         // console.log("Interval called", currentWidthRef);
       }, 2000);
 

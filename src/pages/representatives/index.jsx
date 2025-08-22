@@ -8,7 +8,7 @@ import HeadingText from "../../components/HeadingText";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
 import RepresentativeCard from "../../components/representatives/RepresentativeCard";
-import SEO from "../../components/SEO";
+// import SEO from "../../components/SEO";
 import { usePollAllCompanies } from "../../hooks/usePolling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 import { usePageination } from "../../hooks/usePagination";
@@ -16,6 +16,12 @@ import { Link, useSearchParams } from "react-router";
 import PrimaryButton from "../../components/PrimaryButton";
 import clsx from "clsx";
 import { useGetSingleCompany } from "../../hooks";
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Representatives | Connectize",
+  });
 
 export default function RepresentativesPage() {
   const { data: users, isLoading } = useQuery({
@@ -75,7 +81,7 @@ export default function RepresentativesPage() {
 
   return (
     <section className="space-y-4">
-      <SEO title="Representatives | Connectize" />
+      {/* <SEO title="Representatives | Connectize" /> */}
       <section className="flex flex-wrap justify-between gap-4 items-center">
         <HeadingText>
           Representatives {companyId && <br />}{" "}

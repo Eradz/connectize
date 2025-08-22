@@ -1,11 +1,17 @@
 import { Link, useSearchParams } from "react-router";
 import Carousel from "../../components/admin/markets/carousel";
 import NewlyListed from "../../components/admin/markets/newlyListed";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import HeadingText from "../../components/HeadingText";
 import ServiceMain from "../../components/admin/services/serviceMain";
 import { useGetSingleCompany } from "../../hooks";
 
+export const meta = () =>
+  createSEO({
+    title: "Connectize Marketplace",
+    description:
+      "Discover Connectize, Connect with trusted suppliers and buyers, explore the latest listings, and grow your business in the global energy sector.",
+  });
 function constructUrlWithParams({ isServices = false, company, pcat, scat }) {
   const url = new URL(
     process.env.NODE_ENV === "production"
@@ -43,10 +49,10 @@ export default function Market() {
 
   return (
     <section className="space-y-8 w-full bg-background">
-      <SEO
+      {/* <SEO
         title="Connectize Marketplace"
         description="Discover Connectize, Connect with trusted suppliers and buyers, explore the latest listings, and grow your business in the global energy sector."
-      />
+      /> */}
 
       <div className="flex items-center container">
         <div className="flex-1">

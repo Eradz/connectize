@@ -17,12 +17,7 @@ export const meta = () =>
     title: "Login to connectize",
     description: "Connect, Collaborate and Thrive with Connectize",
   });
-// export function meta() {
-//   return createSEO({
-//     title: "Login to connectize",
-//     description: "Connect, Collaborate and Thrive with Connectize",
-//   });
-// }
+
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .email("Invalid Email Address")
