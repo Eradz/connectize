@@ -198,11 +198,28 @@ const logistics = {
     return response.data;
   },
 
+  // Status update methods for requests
+  approveRequest: async (id) => {
+    const response = await api.patch(`/api/v1/logistics/requests/${id}/`, {
+      status: 'approved'
+    });
+    return response.data;
+  },
+
+  rejectRequest: async (id) => {
+    const response = await api.patch(`/api/v1/logistics/requests/${id}/`, {
+      status: 'rejected'
+    });
+    return response.data;
+  },
+
   // Aliases for backward compatibility
   getRequests: function(params) { return this.getShipmentRequests(params); },
   getRequest: function(id) { return this.getShipmentRequest(id); },
   updateRequest: function(id, data) { return this.updateShipmentRequest(id, data); },
   deleteRequest: function(id) { return this.deleteShipmentRequest(id); },
+  deleteLogisticsRequest: function(id) { return this.deleteShipmentRequest(id); },
+  getLogisticsRequests: function(params) { return this.getShipmentRequests(params); },
   updateShipmentStatus: function(id, data) { return this.updateShipment(id, data); },
   adjustStock: function(id, data) { return this.updateInventoryItem(id, data); },
   getTrackingById: function(id) { return this.getShipmentTrackingById(id); },

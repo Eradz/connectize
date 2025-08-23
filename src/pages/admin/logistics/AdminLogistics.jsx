@@ -36,25 +36,35 @@ const AdminLogistics = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log('🔄 Loading logistics data for tab:', activeTab);
+      
       if (activeTab === 'requests') {
-        const response = await logisticsAPI.getLogisticsRequests({
+        console.log('📋 Fetching logistics requests...');
+        const response = await logisticsAPI.getShipmentRequests({
           page: currentPage,
           search: searchTerm,
           status: statusFilter !== 'all' ? statusFilter : undefined
         });
+        console.log('✅ Requests response:', response);
         setRequests(response.results || []);
       } else if (activeTab === 'shipments') {
+        console.log('🚛 Fetching shipments...');
         const response = await logisticsAPI.getShipments({
           page: currentPage,
           search: searchTerm,
           status: statusFilter !== 'all' ? statusFilter : undefined
         });
+        console.log('✅ Shipments response:', response);
         setShipments(response.results || []);
       } else if (activeTab === 'inventory') {
+        console.log('📦 Fetching inventory...');
         const response = await logisticsAPI.getInventoryItems();
+        console.log('✅ Inventory response:', response);
         setInventory(response.results || []);
       }
     } catch (err) {
+      console.error('❌ Error loading logistics data:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -73,7 +83,7 @@ const AdminLogistics = () => {
         }
         if (action === 'delete') {
           if (activeTab === 'requests') {
-            return logisticsAPI.deleteLogisticsRequest(id);
+            return logisticsAPI.deleteShipmentRequest(id);
           } else if (activeTab === 'inventory') {
             return logisticsAPI.deleteInventoryItem(id);
           }
@@ -111,7 +121,7 @@ const AdminLogistics = () => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         if (activeTab === 'requests') {
-          await logisticsAPI.deleteLogisticsRequest(id);
+          await logisticsAPI.deleteShipmentRequest(id);
         } else if (activeTab === 'inventory') {
           await logisticsAPI.deleteInventoryItem(id);
         }
@@ -283,6 +293,23 @@ const AdminLogistics = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
+          <h3 className="text-red-800 font-semibold mb-2">Error Loading Logistics Data</h3>
+          <p className="text-red-600">{error}</p>
+          <button 
+            onClick={loadData}
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
