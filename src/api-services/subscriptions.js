@@ -37,27 +37,27 @@ const subscriptions = {
 
   // User Subscriptions
   getUserSubscriptions: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/user-subscriptions/', { params });
+    const response = await api.get('/api/v1/subscriptions/', { params });
     return response.data;
   },
 
   getUserSubscription: async (id) => {
-    const response = await api.get(`/api/v1/subscriptions/user-subscriptions/${id}/`);
+    const response = await api.get(`/api/v1/subscriptions/${id}/`);
     return response.data;
   },
 
   createUserSubscription: async (data) => {
-    const response = await api.post('/api/v1/subscriptions/user-subscriptions/', data);
+    const response = await api.post('/api/v1/subscriptions/', data);
     return response.data;
   },
 
   updateUserSubscription: async (id, data) => {
-    const response = await api.put(`/api/v1/subscriptions/user-subscriptions/${id}/`, data);
+    const response = await api.put(`/api/v1/subscriptions/${id}/`, data);
     return response.data;
   },
 
   cancelUserSubscription: async (id, reason = '') => {
-    const response = await api.patch(`/api/v1/subscriptions/user-subscriptions/${id}/`, {
+    const response = await api.patch(`/api/v1/subscriptions/${id}/`, {
       status: 'cancelled',
       cancellation_reason: reason
     });
@@ -65,7 +65,7 @@ const subscriptions = {
   },
 
   deleteUserSubscription: async (id) => {
-    const response = await api.delete(`/api/v1/subscriptions/user-subscriptions/${id}/`);
+    const response = await api.delete(`/api/v1/subscriptions/${id}/`);
     return response.data;
   },
 

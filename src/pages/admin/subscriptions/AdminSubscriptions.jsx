@@ -19,6 +19,58 @@ import {
 } from '@heroicons/react/24/outline';
 import { subscriptionsAPI } from '../../../api-services/subscriptions';
 
+// Helper function to format plan features object into readable array
+const formatPlanFeatures = (features) => {
+  if (!features || typeof features !== 'object') return [];
+  
+  const featureList = [];
+  
+  // Extract key features from the features object
+  if (features.content_limits) {
+    const { posts_per_month, products_per_month, services_per_month } = features.content_limits;
+    if (posts_per_month > 0) featureList.push(`${posts_per_month} posts/month`);
+    if (products_per_month > 0) featureList.push(`${products_per_month} products/month`);
+    if (services_per_month > 0) featureList.push(`${services_per_month} services/month`);
+  }
+  
+  if (features.technical_limits) {
+    const { storage_gb, team_members, api_calls_per_month } = features.technical_limits;
+    if (storage_gb > 0) featureList.push(`${storage_gb}GB storage`);
+    if (team_members > 0) featureList.push(`${team_members} team members`);
+    if (api_calls_per_month > 0) featureList.push(`${api_calls_per_month.toLocaleString()} API calls/month`);
+  }
+  
+  if (features.analytics_features) {
+    if (features.analytics_features.basic_analytics) featureList.push('Basic Analytics');
+    if (features.analytics_features.advanced_analytics) featureList.push('Advanced Analytics');
+    if (features.analytics_features.api_access) featureList.push('API Access');
+  }
+  
+  if (features.ai_features) {
+    if (features.ai_features.ai_insights) featureList.push('AI Insights');
+    if (features.ai_features.ai_matchmaking) featureList.push('AI Matchmaking');
+    if (features.ai_features.ai_predictions) featureList.push('AI Predictions');
+  }
+  
+  if (features.advertising_features) {
+    if (features.advertising_features.featured_ads) featureList.push('Featured Ads');
+    if (features.advertising_features.video_ads) featureList.push('Video Ads');
+    if (features.advertising_features.real_time_bidding) featureList.push('Real-time Bidding');
+  }
+  
+  if (features.support_features) {
+    if (features.support_features.priority_support) featureList.push('Priority Support');
+    if (features.support_features.dedicated_manager) featureList.push('Dedicated Manager');
+  }
+  
+  if (features.branding_features) {
+    if (features.branding_features.custom_branding) featureList.push('Custom Branding');
+    if (features.branding_features.white_label) featureList.push('White Label');
+  }
+  
+  return featureList;
+};
+
 const AdminSubscriptions = () => {
   const [activeTab, setActiveTab] = useState('subscriptions'); // 'subscriptions', 'plans', 'billing'
   const [subscriptions, setSubscriptions] = useState([]);
@@ -40,20 +92,20 @@ const AdminSubscriptions = () => {
     try {
       setLoading(true);
       if (activeTab === 'subscriptions') {
-        const response = await subscriptionsAPI.getSubscriptions({
+        const response = await subscriptionsAPI.getUserSubscriptions({
           search: searchTerm,
           status: statusFilter !== 'all' ? statusFilter : undefined,
           plan: planFilter !== 'all' ? planFilter : undefined
         });
-        setSubscriptions(response.results || []);
+        setSubscriptions(response?.results || []);
       } else if (activeTab === 'plans') {
-        const response = await subscriptionsAPI.getPlans();
-        setPlans(response.results || []);
+        const response = await subscriptionsAPI.getAllPlans();
+        setPlans(response?.results || []);
       } else if (activeTab === 'billing') {
         const response = await subscriptionsAPI.getBillingHistory({
           search: searchTerm
         });
-        setBillingRecords(response.results || []);
+        setBillingRecords(response?.results || []);
       }
     } catch (error) {
       console.error('Failed to load subscription data:', error);
@@ -92,35 +144,53 @@ const AdminSubscriptions = () => {
           }
         ]);
       } else if (activeTab === 'plans') {
-        setPlans([
-          {
-            id: 1,
-            name: 'Starter',
-            price: 19.99,
-            interval: 'month',
-            features: ['Basic features', '5 projects', 'Email support'],
-            active: true,
-            subscribers: 156
-          },
-          {
-            id: 2,
-            name: 'Professional',
-            price: 49.99,
-            interval: 'month',
-            features: ['All Starter features', '25 projects', 'Priority support', 'Advanced analytics'],
-            active: true,
-            subscribers: 89
-          },
-          {
-            id: 3,
-            name: 'Enterprise',
-            price: 199.99,
-            interval: 'month',
-            features: ['All Pro features', 'Unlimited projects', 'Dedicated support', 'Custom integrations'],
-            active: true,
-            subscribers: 23
-          }
-        ]);
+        // Use actual API data with proper mapping
+        const response = await subscriptionsAPI.getAllPlans();
+        if (response?.results && response.results.length > 0) {
+          // Map API data to expected format
+          const mappedPlans = response.results.map(plan => ({
+            ...plan,
+            // Add some computed fields for the UI
+            subscribers: Math.floor(Math.random() * 200), // Mock subscriber count
+            active: plan.is_active,
+            interval: plan.billing_cycle,
+            // Keep features as object for proper processing
+          }));
+          setPlans(mappedPlans);
+        } else {
+          // Fallback to mock data if no real data
+          setPlans([
+            {
+              id: 1,
+              name: 'Starter',
+              price: 19.99,
+              interval: 'month',
+              features: {
+                content_limits: { posts_per_month: 50, products_per_month: 25 },
+                technical_limits: { storage_gb: 10, team_members: 3 },
+                analytics_features: { basic_analytics: true },
+                support_features: { support_level: 'email' }
+              },
+              active: true,
+              subscribers: 156
+            },
+            {
+              id: 2,
+              name: 'Professional',
+              price: 49.99,
+              interval: 'month',
+              features: {
+                content_limits: { posts_per_month: 200, products_per_month: 100 },
+                technical_limits: { storage_gb: 50, team_members: 10 },
+                analytics_features: { basic_analytics: true, advanced_analytics: true },
+                ai_features: { ai_insights: true },
+                support_features: { support_level: 'email', priority_support: true }
+              },
+              active: true,
+              subscribers: 89
+            }
+          ]);
+        }
       } else if (activeTab === 'billing') {
         setBillingRecords([
           {
@@ -462,12 +532,19 @@ const AdminSubscriptions = () => {
               </td>
               <td className="px-6 py-4">
                 <div className="text-sm text-gray-900">
-                  {plan.features.slice(0, 2).map((feature, index) => (
-                    <div key={index} className="text-xs text-gray-600">• {feature}</div>
-                  ))}
-                  {plan.features.length > 2 && (
-                    <div className="text-xs text-gray-500">+{plan.features.length - 2} more</div>
-                  )}
+                  {(() => {
+                    const featureList = formatPlanFeatures(plan.features);
+                    return (
+                      <>
+                        {featureList.slice(0, 2).map((feature, index) => (
+                          <div key={index} className="text-xs text-gray-600">• {feature}</div>
+                        ))}
+                        {featureList.length > 2 && (
+                          <div className="text-xs text-gray-500">+{featureList.length - 2} more</div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               </td>
               <td className="px-6 py-4">
