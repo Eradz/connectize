@@ -76,17 +76,82 @@ const AdminSubscriptions = () => {
   const [subscriptions, setSubscriptions] = useState([]);
   const [plans, setPlans] = useState([]);
   const [billingRecords, setBillingRecords] = useState([]);
+  // Pagination meta
+  const [subsCount, setSubsCount] = useState(0);
+  const [plansCount, setPlansCount] = useState(0);
+  const [billingCount, setBillingCount] = useState(0);
+  const [page, setPage] = useState({ subscriptions: 1, plans: 1, billing: 1 });
+  const [pageSize, setPageSize] = useState({ subscriptions: 10, plans: 10, billing: 10 });
   const [loading, setLoading] = useState(true);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
   const [selectedItems, setSelectedItems] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  // legacy pagination state removed; using server pagination
+  const [showCreateSubscriptionModal, setShowCreateSubscriptionModal] = useState(false);
+  const [showCreatePlanModal, setShowCreatePlanModal] = useState(false);
+  const [newSubscription, setNewSubscription] = useState({ user_id: '', plan_id: '', status: 'active' });
+  const [newPlan, setNewPlan] = useState({
+    name: '', plan_type: 'starter', billing_cycle: 'monthly', price: 0, currency: 'USD',
+    max_posts_per_month: 10, max_products_per_month: 5, max_services_per_month: 5,
+    max_storage_gb: 1, max_team_members: 1, max_api_calls_per_month: 1000,
+    max_ad_campaigns: 3, max_ad_spend_monthly: 1000,
+    analytics_enabled: false, advanced_analytics: false, api_access_enabled: false,
+    priority_support: false, custom_branding: false, white_label: false,
+    ai_insights_enabled: false, ai_matchmaking_enabled: false, ai_predictions_enabled: false,
+    ai_compliance_monitoring: false, custom_ai_models: false,
+    featured_ads_enabled: false, promoted_listings: 0, spotlight_ads: 0, banner_ads: 0,
+    video_ads_enabled: false, real_time_bidding: false,
+    support_level: 'email', sla_response_hours: 48, dedicated_account_manager: false,
+    description: '', tagline: '', popular: false, recommended: false,
+    feature_highlights: [], feature_comparison: {}, estimated_roi: '',
+    business_value_props: [], use_cases: [], success_stories: [],
+    onboarding_included: false, dedicated_support: false, implementation_time: '',
+    stripe_product_id: '', stripe_price_monthly_id: '', stripe_price_annual_id: '',
+    is_active: true
+  });
+  const [editingSubscription, setEditingSubscription] = useState(null);
+  const [editingSubscriptionData, setEditingSubscriptionData] = useState({ status: 'active', auto_renew: true, plan_id: '' });
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [editingPlanData, setEditingPlanData] = useState(null);
 
+  // Load all data initially for tab counts
   useEffect(() => {
-    loadData();
-  }, [activeTab, currentPage, statusFilter, searchTerm, planFilter]);
+    loadAllDataForCounts();
+  }, []);
+
+  // Load specific data when tab changes or filters change (but not on initial mount)
+  useEffect(() => {
+    if (initialDataLoaded) {
+      loadData();
+    }
+  }, [activeTab, page, pageSize, statusFilter, searchTerm, planFilter, initialDataLoaded]);
+
+  const loadAllDataForCounts = async () => {
+    try {
+      setLoading(true);
+      // Load all data in parallel to get accurate counts
+      const [subscriptionsRes, plansRes, billingRes] = await Promise.all([
+        subscriptionsAPI.getUserSubscriptions({ page: page.subscriptions, page_size: pageSize.subscriptions }),
+        subscriptionsAPI.getAllPlans({ page: page.plans, page_size: pageSize.plans }),
+        subscriptionsAPI.getBillingHistory({ page: page.billing, page_size: pageSize.billing })
+      ]);
+
+      setSubscriptions(subscriptionsRes?.results || subscriptionsRes || []);
+      setSubsCount(subscriptionsRes?.count ?? (subscriptionsRes?.results ? subscriptionsRes.results.length : 0));
+      setPlans(plansRes?.results || plansRes || []);
+      setPlansCount(plansRes?.count ?? (plansRes?.results ? plansRes.results.length : 0));
+      setBillingRecords(billingRes?.results || billingRes?.billing_history || []);
+      setBillingCount(billingRes?.count ?? (billingRes?.results ? billingRes.results.length : (billingRes?.billing_history ? billingRes.billing_history.length : 0)));
+      setInitialDataLoaded(true);
+    } catch (error) {
+      console.error('Failed to load initial data for counts:', error);
+      setInitialDataLoaded(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -95,172 +160,34 @@ const AdminSubscriptions = () => {
         const response = await subscriptionsAPI.getUserSubscriptions({
           search: searchTerm,
           status: statusFilter !== 'all' ? statusFilter : undefined,
-          plan: planFilter !== 'all' ? planFilter : undefined
+          plan: planFilter !== 'all' ? planFilter : undefined,
+          page: page.subscriptions,
+          page_size: pageSize.subscriptions
         });
-        setSubscriptions(response?.results || []);
+        setSubscriptions(response?.results || response || []);
+        setSubsCount(response?.count ?? (response?.results ? response.results.length : 0));
       } else if (activeTab === 'plans') {
-        const response = await subscriptionsAPI.getAllPlans();
-        setPlans(response?.results || []);
+        const response = await subscriptionsAPI.getAllPlans({ page: page.plans, page_size: pageSize.plans });
+        setPlans(response?.results || response || []);
+        setPlansCount(response?.count ?? (response?.results ? response.results.length : 0));
       } else if (activeTab === 'billing') {
         const response = await subscriptionsAPI.getBillingHistory({
-          search: searchTerm
+          search: searchTerm,
+          page: page.billing,
+          page_size: pageSize.billing
         });
-        setBillingRecords(response?.results || []);
+        setBillingRecords(response?.results || response?.billing_history || []);
+        setBillingCount(response?.count ?? (response?.results ? response.results.length : (response?.billing_history ? response.billing_history.length : 0)));
       }
     } catch (error) {
       console.error('Failed to load subscription data:', error);
-      
-      // Use mock data for demonstration based on active tab
+      // Show error state instead of mock data
       if (activeTab === 'subscriptions') {
-        setSubscriptions([
-          {
-            id: 1,
-            user: { name: 'John Doe', email: 'john@example.com' },
-            plan: { name: 'Professional', price: 49.99 },
-            status: 'active',
-            current_period_start: '2024-08-01T00:00:00Z',
-            current_period_end: '2024-09-01T00:00:00Z',
-            created_at: '2024-07-15T10:30:00Z',
-            payment_method: 'card_ending_4242'
-          },
-          {
-            id: 2,
-            user: { name: 'Jane Smith', email: 'jane@example.com' },
-            plan: { name: 'Enterprise', price: 199.99 },
-            status: 'past_due',
-            current_period_start: '2024-07-15T00:00:00Z',
-            current_period_end: '2024-08-15T00:00:00Z',
-            created_at: '2024-06-20T14:15:00Z',
-            payment_method: 'card_ending_1234'
-          },
-          {
-            id: 3,
-            user: { name: 'Bob Wilson', email: 'bob@example.com' },
-            plan: { name: 'Starter', price: 19.99 },
-            status: 'trialing',
-            current_period_start: '2024-08-10T00:00:00Z',
-            current_period_end: '2024-08-24T00:00:00Z',
-            created_at: '2024-08-10T09:00:00Z',
-            payment_method: null
-          }
-        ]);
+        setSubscriptions([]);
       } else if (activeTab === 'plans') {
-        // Use actual API data with proper mapping
-        const response = await subscriptionsAPI.getAllPlans();
-        if (response?.results && response.results.length > 0) {
-          // Map API data to expected format
-          const mappedPlans = response.results.map(plan => ({
-            ...plan,
-            // Add some computed fields for the UI
-            subscribers: Math.floor(Math.random() * 200), // Mock subscriber count
-            active: plan.is_active,
-            interval: plan.billing_cycle,
-            // Keep features as object for proper processing
-          }));
-          setPlans(mappedPlans);
-        } else {
-          // Fallback to mock data if no real data
-          setPlans([
-            {
-              id: 1,
-              name: 'Starter',
-              price: 19.99,
-              interval: 'month',
-              features: {
-                content_limits: { posts_per_month: 50, products_per_month: 25 },
-                technical_limits: { storage_gb: 10, team_members: 3 },
-                analytics_features: { basic_analytics: true },
-                support_features: { support_level: 'email' }
-              },
-              active: true,
-              subscribers: 156
-            },
-            {
-              id: 2,
-              name: 'Professional',
-              price: 49.99,
-              interval: 'month',
-              features: {
-                content_limits: { posts_per_month: 200, products_per_month: 100 },
-                technical_limits: { storage_gb: 50, team_members: 10 },
-                analytics_features: { basic_analytics: true, advanced_analytics: true },
-                ai_features: { ai_insights: true },
-                support_features: { support_level: 'email', priority_support: true }
-              },
-              active: true,
-              subscribers: 89
-            }
-          ]);
-        }
+        setPlans([]);
       } else if (activeTab === 'billing') {
-        setBillingRecords([
-          {
-            id: 1,
-            subscription_id: 1,
-            user: { name: 'John Doe', email: 'john@example.com' },
-            amount: 49.99,
-            status: 'paid',
-            invoice_date: '2024-08-01T00:00:00Z',
-            payment_method: 'card_ending_4242',
-            description: 'Professional Plan - Monthly',
-            transaction_type: 'charge'
-          },
-          {
-            id: 2,
-            subscription_id: 2,
-            user: { name: 'Jane Smith', email: 'jane@example.com' },
-            amount: 199.99,
-            status: 'failed',
-            invoice_date: '2024-08-15T00:00:00Z',
-            payment_method: 'card_ending_1234',
-            description: 'Enterprise Plan - Monthly',
-            transaction_type: 'charge'
-          },
-          {
-            id: 3,
-            subscription_id: 3,
-            user: { name: 'Bob Wilson', email: 'bob@example.com' },
-            amount: 19.99,
-            status: 'paid',
-            invoice_date: '2024-08-10T00:00:00Z',
-            payment_method: 'card_ending_9876',
-            description: 'Starter Plan - Monthly',
-            transaction_type: 'charge'
-          },
-          {
-            id: 4,
-            subscription_id: 1,
-            user: { name: 'John Doe', email: 'john@example.com' },
-            amount: 49.99,
-            status: 'paid',
-            invoice_date: '2024-07-01T00:00:00Z',
-            payment_method: 'card_ending_4242',
-            description: 'Professional Plan - Monthly',
-            transaction_type: 'charge'
-          },
-          {
-            id: 5,
-            subscription_id: 4,
-            user: { name: 'Sarah Chen', email: 'sarah@example.com' },
-            amount: 299.99,
-            status: 'paid',
-            invoice_date: '2024-08-20T00:00:00Z',
-            payment_method: 'card_ending_5555',
-            description: 'Enterprise Plan - Monthly',
-            transaction_type: 'charge'
-          },
-          {
-            id: 6,
-            subscription_id: 2,
-            user: { name: 'Jane Smith', email: 'jane@example.com' },
-            amount: -99.99,
-            status: 'processed',
-            invoice_date: '2024-08-16T00:00:00Z',
-            payment_method: 'card_ending_1234',
-            description: 'Partial refund for failed payment',
-            transaction_type: 'refund'
-          }
-        ]);
+        setBillingRecords([]);
       }
     } finally {
       setLoading(false);
@@ -299,7 +226,7 @@ const AdminSubscriptions = () => {
     try {
       await subscriptionsAPI.createSubscription(subscriptionData);
       loadData();
-      // Show success message or close modal
+  setShowCreateSubscriptionModal(false);
     } catch (error) {
       console.error('Failed to create subscription:', error);
     }
@@ -329,7 +256,7 @@ const AdminSubscriptions = () => {
     try {
       await subscriptionsAPI.createPlan(planData);
       loadData();
-      // Show success message or close modal
+  setShowCreatePlanModal(false);
     } catch (error) {
       console.error('Failed to create plan:', error);
     }
@@ -375,7 +302,8 @@ const AdminSubscriptions = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      active: { color: 'bg-green-100 text-green-800', label: 'Active' },
+  active: { color: 'bg-green-100 text-green-800', label: 'Active' },
+  cancelled: { color: 'bg-gray-200 text-gray-700', label: 'Cancelled' },
       trialing: { color: 'bg-blue-100 text-blue-800', label: 'Trial' },
       past_due: { color: 'bg-red-100 text-red-800', label: 'Past Due' },
       canceled: { color: 'bg-gray-100 text-gray-800', label: 'Canceled' },
@@ -410,9 +338,9 @@ const AdminSubscriptions = () => {
   };
 
   const tabs = [
-    { id: 'subscriptions', label: 'Subscriptions', icon: CreditCardIcon, count: subscriptions.length },
-    { id: 'plans', label: 'Plans', icon: DocumentTextIcon, count: plans.length },
-    { id: 'billing', label: 'Billing', icon: BanknotesIcon, count: billingRecords.length }
+    { id: 'subscriptions', label: 'Subscriptions', icon: CreditCardIcon, count: subsCount },
+    { id: 'plans', label: 'Plans', icon: DocumentTextIcon, count: plansCount },
+    { id: 'billing', label: 'Billing', icon: BanknotesIcon, count: billingCount }
   ];
 
   const renderSubscriptionsTable = () => (
@@ -517,7 +445,14 @@ const AdminSubscriptions = () => {
                     }
                   </button>
                   <button
-                    onClick={() => {/* Handle edit */}}
+                    onClick={() => {
+                      setEditingSubscription(subscription);
+                      setEditingSubscriptionData({
+                        status: subscription.status,
+                        auto_renew: subscription.auto_renew,
+                        plan_id: subscription.plan?.id || ''
+                      });
+                    }}
                     className="text-indigo-600 hover:text-indigo-700"
                     title="Edit Subscription"
                   >
@@ -575,7 +510,7 @@ const AdminSubscriptions = () => {
                 </div>
               </td>
               <td className="px-6 py-4">
-                {getStatusBadge(plan.active ? 'active' : 'inactive')}
+                {getStatusBadge(plan.is_active ? 'active' : 'inactive')}
               </td>
               <td className="px-6 py-4">
                 <div className="text-sm text-gray-900">
@@ -604,14 +539,17 @@ const AdminSubscriptions = () => {
                     <EyeIcon className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => {/* Handle edit */}}
+                    onClick={() => {
+                      setEditingPlan(plan);
+                      setEditingPlanData({ ...plan });
+                    }}
                     className="text-indigo-600 hover:text-indigo-700"
                     title="Edit Plan"
                   >
                     <PencilIcon className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => {/* Handle delete */}}
+                    onClick={() => handleDeletePlan(plan.id)}
                     className="text-red-600 hover:text-red-700"
                     title="Delete Plan"
                   >
@@ -737,6 +675,22 @@ const AdminSubscriptions = () => {
               <ChartBarIcon className="w-4 h-4 mr-2" />
               Analytics
             </button>
+            {activeTab === 'subscriptions' && (
+              <button
+                onClick={() => setShowCreateSubscriptionModal(true)}
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-medium"
+              >
+                New Subscription
+              </button>
+            )}
+            {activeTab === 'plans' && (
+              <button
+                onClick={() => setShowCreatePlanModal(true)}
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-medium"
+              >
+                New Plan
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -752,7 +706,7 @@ const AdminSubscriptions = () => {
                 onClick={() => {
                   setActiveTab(tab.id);
                   setSelectedItems([]);
-                  setCurrentPage(1);
+                  setPage(prev => ({ ...prev, [tab.id]: 1 }));
                 }}
                 className={`flex-1 py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center transition-all duration-300 ${
                   activeTab === tab.id
@@ -873,6 +827,379 @@ const AdminSubscriptions = () => {
               </div>
             )}
           </div>
+          {/* Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-lg p-4 border">
+            <div className="flex items-center gap-2 text-sm">
+              <span>Rows per page:</span>
+              <select
+                className="border rounded px-2 py-1"
+                value={pageSize[activeTab]}
+                onChange={e => {
+                  const val = parseInt(e.target.value, 10) || 10;
+                  setPageSize(ps => ({ ...ps, [activeTab]: val }));
+                  setPage(p => ({ ...p, [activeTab]: 1 }));
+                }}
+              >
+                {[10,20,50,100].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+              <span className="text-gray-500">
+                {(() => {
+                  const currentPage = page[activeTab];
+                  const size = pageSize[activeTab];
+                  const total = activeTab === 'subscriptions' ? subsCount : activeTab === 'plans' ? plansCount : billingCount;
+                  const start = total === 0 ? 0 : (currentPage - 1) * size + 1;
+                  const end = Math.min(currentPage * size, total);
+                  return `${start}-${end} of ${total}`;
+                })()}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3 py-1 border rounded disabled:opacity-40"
+                disabled={page[activeTab] === 1}
+                onClick={() => setPage(p => ({ ...p, [activeTab]: Math.max(1, p[activeTab]-1) }))}
+              >Prev</button>
+              <span className="text-sm">Page {page[activeTab]}</span>
+              <button
+                className="px-3 py-1 border rounded disabled:opacity-40"
+                disabled={(() => {
+                  const total = activeTab === 'subscriptions' ? subsCount : activeTab === 'plans' ? plansCount : billingCount;
+                  return page[activeTab] * pageSize[activeTab] >= total;
+                })()}
+                onClick={() => setPage(p => ({ ...p, [activeTab]: p[activeTab] + 1 }))}
+              >Next</button>
+            </div>
+          </div>
+          {/* Create Subscription Modal */}
+          {showCreateSubscriptionModal && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Create Subscription</h3>
+                  <button onClick={() => setShowCreateSubscriptionModal(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+                    <input value={newSubscription.user_id} onChange={e=>setNewSubscription({...newSubscription,user_id:e.target.value})} className="w-full border rounded-lg px-3 py-2" placeholder="UUID of user" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Plan ID</label>
+                    <input value={newSubscription.plan_id} onChange={e=>setNewSubscription({...newSubscription,plan_id:e.target.value})} className="w-full border rounded-lg px-3 py-2" placeholder="UUID of plan" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select value={newSubscription.status} onChange={e=>setNewSubscription({...newSubscription,status:e.target.value})} className="w-full border rounded-lg px-3 py-2">
+                      <option value="active">Active</option>
+                      <option value="trialing">Trialing</option>
+                      <option value="past_due">Past Due</option>
+                    </select>
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button onClick={()=>setShowCreateSubscriptionModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
+                    <button onClick={()=>handleCreateSubscription(newSubscription)} className="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Create Plan Modal */}
+          {showCreatePlanModal && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Create Plan</h3>
+                  <button onClick={() => setShowCreatePlanModal(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div className="space-y-8">
+                  {/* Basic Info */}
+                  <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Name</label>
+                      <input value={newPlan.name} onChange={e=>setNewPlan({...newPlan,name:e.target.value})} className="w-full border rounded-lg px-3 py-2"/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Plan Type</label>
+                      <select value={newPlan.plan_type} onChange={e=>setNewPlan({...newPlan,plan_type:e.target.value})} className="w-full border rounded-lg px-3 py-2">
+                        {['trial','starter','professional','enterprise','custom'].map(p=> <option key={p} value={p}>{p}</option> )}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Billing Cycle</label>
+                      <select value={newPlan.billing_cycle} onChange={e=>setNewPlan({...newPlan,billing_cycle:e.target.value})} className="w-full border rounded-lg px-3 py-2">
+                        {['monthly','yearly'].map(c=> <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Price</label>
+                      <input type="number" value={newPlan.price} onChange={e=>setNewPlan({...newPlan,price:Number(e.target.value)})} className="w-full border rounded-lg px-3 py-2" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Currency</label>
+                      <input value={newPlan.currency} onChange={e=>setNewPlan({...newPlan,currency:e.target.value.toUpperCase()})} className="w-full border rounded-lg px-3 py-2" />
+                    </div>
+                    <div className="flex items-center gap-2 mt-6">
+                      <input type="checkbox" checked={newPlan.is_active} onChange={e=>setNewPlan({...newPlan,is_active:e.target.checked})}/>
+                      <span className="text-sm">Active</span>
+                    </div>
+                  </section>
+                  {/* Limits */}
+                  <section>
+                    <h4 className="font-semibold mb-2 text-sm">Limits</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+                      {[
+                        ['max_posts_per_month','Posts'],['max_products_per_month','Products'],['max_services_per_month','Services'],
+                        ['max_storage_gb','Storage GB'],['max_team_members','Team'],['max_api_calls_per_month','API Calls'],
+                        ['max_ad_campaigns','Ad Campaigns'],['max_ad_spend_monthly','Ad Spend']
+                      ].map(([k,label])=> (
+                        <div key={k}>
+                          <label className="block text-xs mb-1">{label}</label>
+                          <input type="number" value={newPlan[k]} onChange={e=>setNewPlan({...newPlan,[k]:Number(e.target.value)})} className="w-full border rounded px-2 py-1 text-sm"/>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                  {/* Toggles */}
+                  <section>
+                    <h4 className="font-semibold mb-2 text-sm">Feature Flags</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                      {[
+                        'analytics_enabled','advanced_analytics','api_access_enabled','priority_support','custom_branding','white_label',
+                        'ai_insights_enabled','ai_matchmaking_enabled','ai_predictions_enabled','ai_compliance_monitoring','custom_ai_models',
+                        'featured_ads_enabled','video_ads_enabled','real_time_bidding','dedicated_account_manager','onboarding_included','dedicated_support','popular','recommended'
+                      ].map(flag => (
+                        <label key={flag} className="flex items-center gap-2">
+                          <input type="checkbox" checked={newPlan[flag]} onChange={e=>setNewPlan({...newPlan,[flag]:e.target.checked})}/>
+                          <span className="capitalize">{flag.replace(/_/g,' ')}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </section>
+                  {/* Ads counts */}
+                  <section>
+                    <h4 className="font-semibold mb-2 text-sm">Ads Inventory</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        ['promoted_listings','Promoted'],['spotlight_ads','Spotlight'],['banner_ads','Banner']
+                      ].map(([k,label])=> (
+                        <div key={k}>
+                          <label className="block text-xs mb-1">{label}</label>
+                          <input type="number" value={newPlan[k]} onChange={e=>setNewPlan({...newPlan,[k]:Number(e.target.value)})} className="w-full border rounded px-2 py-1 text-sm"/>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                  {/* Support */}
+                  <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm mb-1">Support Level</label>
+                      <input value={newPlan.support_level} onChange={e=>setNewPlan({...newPlan,support_level:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">SLA Hours</label>
+                      <input type="number" value={newPlan.sla_response_hours} onChange={e=>setNewPlan({...newPlan,sla_response_hours:Number(e.target.value)})} className="w-full border rounded px-2 py-2 text-sm"/>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">Implementation Time</label>
+                      <input value={newPlan.implementation_time} onChange={e=>setNewPlan({...newPlan,implementation_time:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                    </div>
+                  </section>
+                  {/* Descriptive Fields */}
+                  <section className="space-y-3">
+                    {[
+                      ['tagline','Tagline'],['estimated_roi','Estimated ROI']
+                    ].map(([k,label])=> (
+                      <div key={k}>
+                        <label className="block text-sm mb-1">{label}</label>
+                        <input value={newPlan[k]} onChange={e=>setNewPlan({...newPlan,[k]:e.target.value})} className="w-full border rounded px-3 py-2 text-sm"/>
+                      </div>
+                    ))}
+                    <div>
+                      <label className="block text-sm mb-1">Description</label>
+                      <textarea rows={3} value={newPlan.description} onChange={e=>setNewPlan({...newPlan,description:e.target.value})} className="w-full border rounded px-3 py-2 text-sm"/>
+                    </div>
+                  </section>
+                  {/* Provider IDs */}
+                  <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      ['stripe_product_id','Stripe Product'],['stripe_price_monthly_id','Stripe Monthly Price'],['stripe_price_annual_id','Stripe Annual Price']
+                    ].map(([k,label]) => (
+                      <div key={k}>
+                        <label className="block text-sm mb-1">{label}</label>
+                        <input value={newPlan[k]||''} onChange={e=>setNewPlan({...newPlan,[k]:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                      </div>
+                    ))}
+                  </section>
+                  {/* Arrays (comma delimited) */}
+                  <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      ['feature_highlights','Feature Highlights'],['business_value_props','Business Value Props'],['use_cases','Use Cases']
+                    ].map(([k,label])=> (
+                      <div key={k}>
+                        <label className="block text-sm mb-1">{label} (comma separated)</label>
+                        <input value={newPlan[k].join(',')} onChange={e=>setNewPlan({...newPlan,[k]:e.target.value.split(',').map(v=>v.trim()).filter(Boolean)})} className="w-full border rounded px-2 py-2 text-sm"/>
+                      </div>
+                    ))}
+                  </section>
+                  <div className="flex justify-end gap-2 sticky bottom-0 bg-white pt-4">
+                    <button onClick={()=>setShowCreatePlanModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
+                    <button onClick={()=>handleCreatePlan(newPlan)} className="px-4 py-2 rounded-lg bg-blue-600 text-white">Create Plan</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Edit Subscription Modal */}
+          {editingSubscription && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Edit Subscription</h3>
+                  <button onClick={() => setEditingSubscription(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Status</label>
+                    <select value={editingSubscriptionData.status} onChange={e=>setEditingSubscriptionData({...editingSubscriptionData,status:e.target.value})} className="w-full border rounded px-3 py-2 text-sm">
+                      {['active','trialing','past_due','canceled','cancelled','unpaid','paused'].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" checked={editingSubscriptionData.auto_renew} onChange={e=>setEditingSubscriptionData({...editingSubscriptionData,auto_renew:e.target.checked})} />
+                    <span className="text-sm">Auto Renew</span>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Plan ID (change)</label>
+                    <input value={editingSubscriptionData.plan_id} onChange={e=>setEditingSubscriptionData({...editingSubscriptionData,plan_id:e.target.value})} className="w-full border rounded px-3 py-2 text-sm"/>
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button onClick={()=>setEditingSubscription(null)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
+                    <button onClick={async ()=>{ await handleEditSubscription(editingSubscription.id, editingSubscriptionData); setEditingSubscription(null); }} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Edit Plan Modal */}
+          {editingPlan && editingPlanData && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Edit Plan</h3>
+                  <button onClick={() => { setEditingPlan(null); setEditingPlanData(null); }} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs mb-1">Name</label>
+                    <input value={editingPlanData.name} onChange={e=>setEditingPlanData({...editingPlanData,name:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Plan Type</label>
+                    <select value={editingPlanData.plan_type} onChange={e=>setEditingPlanData({...editingPlanData,plan_type:e.target.value})} className="w-full border rounded px-2 py-2 text-sm">
+                      {['trial','starter','professional','enterprise','custom'].map(p=> <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Billing Cycle</label>
+                    <select value={editingPlanData.billing_cycle} onChange={e=>setEditingPlanData({...editingPlanData,billing_cycle:e.target.value})} className="w-full border rounded px-2 py-2 text-sm">
+                      {['monthly','yearly'].map(c=> <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Price</label>
+                    <input type="number" value={editingPlanData.price} onChange={e=>setEditingPlanData({...editingPlanData,price:Number(e.target.value)})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Currency</label>
+                    <input value={editingPlanData.currency} onChange={e=>setEditingPlanData({...editingPlanData,currency:e.target.value.toUpperCase()})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                  <div className="flex items-center gap-2 mt-6">
+                    <input type="checkbox" checked={editingPlanData.is_active} onChange={e=>setEditingPlanData({...editingPlanData,is_active:e.target.checked})}/>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </section>
+                <section>
+                  <h4 className="font-semibold mb-2 text-sm">Limits</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+                    {['max_posts_per_month','max_products_per_month','max_services_per_month','max_storage_gb','max_team_members','max_api_calls_per_month','max_ad_campaigns','max_ad_spend_monthly'].map(k => (
+                      <div key={k}>
+                        <label className="block text-xs mb-1">{k.replace(/_/g,' ')}</label>
+                        <input type="number" value={editingPlanData[k]} onChange={e=>setEditingPlanData({...editingPlanData,[k]:Number(e.target.value)})} className="w-full border rounded px-2 py-1 text-xs"/>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+                <section>
+                  <h4 className="font-semibold mb-2 text-sm">Feature Flags</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                    {['analytics_enabled','advanced_analytics','api_access_enabled','priority_support','custom_branding','white_label','ai_insights_enabled','ai_matchmaking_enabled','ai_predictions_enabled','ai_compliance_monitoring','custom_ai_models','featured_ads_enabled','video_ads_enabled','real_time_bidding','dedicated_account_manager','onboarding_included','dedicated_support','popular','recommended'].map(flag => (
+                      <label key={flag} className="flex items-center gap-2">
+                        <input type="checkbox" checked={editingPlanData[flag]} onChange={e=>setEditingPlanData({...editingPlanData,[flag]:e.target.checked})}/>
+                        <span className="capitalize">{flag.replace(/_/g,' ')}</span>
+                      </label>
+                    ))}
+                  </div>
+                </section>
+                <section>
+                  <h4 className="font-semibold mb-2 text-sm">Ads Inventory</h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    {['promoted_listings','spotlight_ads','banner_ads'].map(k => (
+                      <div key={k}>
+                        <label className="block text-xs mb-1">{k.replace(/_/g,' ')}</label>
+                        <input type="number" value={editingPlanData[k]} onChange={e=>setEditingPlanData({...editingPlanData,[k]:Number(e.target.value)})} className="w-full border rounded px-2 py-1 text-xs"/>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs mb-1">Support Level</label>
+                    <input value={editingPlanData.support_level} onChange={e=>setEditingPlanData({...editingPlanData,support_level:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">SLA Hours</label>
+                    <input type="number" value={editingPlanData.sla_response_hours} onChange={e=>setEditingPlanData({...editingPlanData,sla_response_hours:Number(e.target.value)})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                  <div>
+                    <label className="block text-xs mb-1">Implementation Time</label>
+                    <input value={editingPlanData.implementation_time} onChange={e=>setEditingPlanData({...editingPlanData,implementation_time:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                </section>
+                <section className="space-y-2">
+                  {['tagline','estimated_roi'].map(k => (
+                    <div key={k}>
+                      <label className="block text-xs mb-1">{k.replace(/_/g,' ')}</label>
+                      <input value={editingPlanData[k]||''} onChange={e=>setEditingPlanData({...editingPlanData,[k]:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                    </div>
+                  ))}
+                  <div>
+                    <label className="block text-xs mb-1">Description</label>
+                    <textarea rows={3} value={editingPlanData.description||''} onChange={e=>setEditingPlanData({...editingPlanData,description:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                  </div>
+                </section>
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['stripe_product_id','stripe_price_monthly_id','stripe_price_annual_id'].map(k => (
+                    <div key={k}>
+                      <label className="block text-xs mb-1">{k.replace(/_/g,' ')}</label>
+                      <input value={editingPlanData[k]||''} onChange={e=>setEditingPlanData({...editingPlanData,[k]:e.target.value})} className="w-full border rounded px-2 py-2 text-sm"/>
+                    </div>
+                  ))}
+                </section>
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['feature_highlights','business_value_props','use_cases'].map(k => (
+                    <div key={k}>
+                      <label className="block text-xs mb-1">{k.replace(/_/g,' ')} (comma separated)</label>
+                      <input value={(editingPlanData[k]||[]).join(',')} onChange={e=>setEditingPlanData({...editingPlanData,[k]:e.target.value.split(',').map(v=>v.trim()).filter(Boolean)})} className="w-full border rounded px-2 py-2 text-sm"/>
+                    </div>
+                  ))}
+                </section>
+                <div className="flex justify-end gap-2 sticky bottom-0 bg-white pt-4">
+                  <button onClick={()=>{setEditingPlan(null); setEditingPlanData(null);}} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
+                  <button onClick={async ()=>{ await handleEditPlan(editingPlan.id, editingPlanData); setEditingPlan(null); setEditingPlanData(null); }} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
   );
 };

@@ -10,28 +10,28 @@ const subscriptions = {
   },
 
   // Get all available plans (public endpoint - no auth required)
-  getAllPlans: async () => {
-    const response = await api.get('/api/v1/plans/');
+  getAllPlans: async (params = {}) => {
+    const response = await api.get('/api/v1/plans/', { params });
     return response.data;
   },
 
   getSubscriptionPlan: async (id) => {
-    const response = await api.get(`/api/v1/subscriptions/plans/${id}/`);
+    const response = await api.get(`/api/v1/plans/${id}/`);
     return response.data;
   },
 
   createSubscriptionPlan: async (data) => {
-    const response = await api.post('/api/v1/subscriptions/plans/', data);
+    const response = await api.post('/api/v1/plans/', data);
     return response.data;
   },
 
   updateSubscriptionPlan: async (id, data) => {
-    const response = await api.put(`/api/v1/subscriptions/plans/${id}/`, data);
+    const response = await api.patch(`/api/v1/plans/${id}/`, data);
     return response.data;
   },
 
   deleteSubscriptionPlan: async (id) => {
-    const response = await api.delete(`/api/v1/subscriptions/plans/${id}/`);
+    const response = await api.delete(`/api/v1/plans/${id}/`);
     return response.data;
   },
 
@@ -117,7 +117,7 @@ const subscriptions = {
   },
 
   // Billing and Invoices
-  getBillingHistory: async (params = {}) => {
+    getBillingHistory: async (params = {}) => {
     const response = await api.get('/api/v1/subscriptions/billing_history/', { params });
     return response.data;
   },
