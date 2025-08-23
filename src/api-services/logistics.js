@@ -3,10 +3,16 @@ import api from './crud';
 const logistics = {
   // Shipment Requests
   getShipmentRequests: async (params = {}) => {
-    const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
-    console.log('🔗 Making requests API call to:', '/api/v1/logistics/requests/', 'with params:', cleanParams);
-    const response = await api.get('/api/v1/logistics/requests/', { params: cleanParams });
-    return response.data;
+    try {
+      const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
+      console.log('🔗 Making requests API call to:', '/api/v1/logistics/requests/', 'with params:', cleanParams);
+      const response = await api.get('/api/v1/logistics/requests/', { params: cleanParams });
+      console.log('📋 Requests API response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Requests API error:', error);
+      throw error;
+    }
   },
 
   getShipmentRequest: async (id) => {
@@ -31,8 +37,15 @@ const logistics = {
 
   // Shipments
   getShipments: async (params = {}) => {
-    const response = await api.get('/api/v1/logistics/shipments/', { params });
-    return response.data;
+    try {
+      console.log('🚛 Making shipments API call with params:', params);
+      const response = await api.get('/api/v1/logistics/shipments/', { params });
+      console.log('🚛 Shipments API response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Shipments API error:', error);
+      throw error;
+    }
   },
 
   getShipment: async (id) => {
@@ -91,8 +104,15 @@ const logistics = {
 
   // Logistics Providers
   getLogisticsProviders: async (params = {}) => {
-    const response = await api.get('/api/v1/logistics/providers/', { params });
-    return response.data;
+    try {
+      console.log('🏢 Making providers API call with params:', params);
+      const response = await api.get('/api/v1/logistics/providers/', { params });
+      console.log('🏢 Providers API response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Providers API error:', error);
+      throw error;
+    }
   },
 
   // Get available providers for requests
@@ -118,8 +138,15 @@ const logistics = {
 
   // Inventory Items
   getInventoryItems: async (params = {}) => {
-    const response = await api.get('/api/v1/logistics/inventory-items/', { params });
-    return response.data;
+    try {
+      console.log('📦 Making inventory API call with params:', params);
+      const response = await api.get('/api/v1/logistics/inventory-items/', { params });
+      console.log('📦 Inventory API response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Inventory API error:', error);
+      throw error;
+    }
   },
 
   createInventoryItem: async (data) => {
