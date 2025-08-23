@@ -109,7 +109,8 @@ const AdminSubscriptions = () => {
       }
     } catch (error) {
       console.error('Failed to load subscription data:', error);
-      // Use mock data for demonstration
+      
+      // Use mock data for demonstration based on active tab
       if (activeTab === 'subscriptions') {
         setSubscriptions([
           {
@@ -201,7 +202,8 @@ const AdminSubscriptions = () => {
             status: 'paid',
             invoice_date: '2024-08-01T00:00:00Z',
             payment_method: 'card_ending_4242',
-            description: 'Professional Plan - Monthly'
+            description: 'Professional Plan - Monthly',
+            transaction_type: 'charge'
           },
           {
             id: 2,
@@ -211,7 +213,52 @@ const AdminSubscriptions = () => {
             status: 'failed',
             invoice_date: '2024-08-15T00:00:00Z',
             payment_method: 'card_ending_1234',
-            description: 'Enterprise Plan - Monthly'
+            description: 'Enterprise Plan - Monthly',
+            transaction_type: 'charge'
+          },
+          {
+            id: 3,
+            subscription_id: 3,
+            user: { name: 'Bob Wilson', email: 'bob@example.com' },
+            amount: 19.99,
+            status: 'paid',
+            invoice_date: '2024-08-10T00:00:00Z',
+            payment_method: 'card_ending_9876',
+            description: 'Starter Plan - Monthly',
+            transaction_type: 'charge'
+          },
+          {
+            id: 4,
+            subscription_id: 1,
+            user: { name: 'John Doe', email: 'john@example.com' },
+            amount: 49.99,
+            status: 'paid',
+            invoice_date: '2024-07-01T00:00:00Z',
+            payment_method: 'card_ending_4242',
+            description: 'Professional Plan - Monthly',
+            transaction_type: 'charge'
+          },
+          {
+            id: 5,
+            subscription_id: 4,
+            user: { name: 'Sarah Chen', email: 'sarah@example.com' },
+            amount: 299.99,
+            status: 'paid',
+            invoice_date: '2024-08-20T00:00:00Z',
+            payment_method: 'card_ending_5555',
+            description: 'Enterprise Plan - Monthly',
+            transaction_type: 'charge'
+          },
+          {
+            id: 6,
+            subscription_id: 2,
+            user: { name: 'Jane Smith', email: 'jane@example.com' },
+            amount: -99.99,
+            status: 'processed',
+            invoice_date: '2024-08-16T00:00:00Z',
+            payment_method: 'card_ending_1234',
+            description: 'Partial refund for failed payment',
+            transaction_type: 'refund'
           }
         ]);
       }

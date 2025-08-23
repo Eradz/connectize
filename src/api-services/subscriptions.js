@@ -118,7 +118,7 @@ const subscriptions = {
 
   // Billing and Invoices
   getBillingHistory: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/billing-history/', { params });
+    const response = await api.get('/api/v1/subscriptions/billing_history/', { params });
     return response.data;
   },
 
