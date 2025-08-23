@@ -4,8 +4,14 @@ const subscriptions = {
   // Subscription Plans
   getSubscriptionPlans: async (params = {}) => {
     const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
-    console.log('🔗 Making subscription plans API call to:', '/api/v1/subscriptions/plans/', 'with params:', cleanParams);
-    const response = await api.get('/api/v1/subscriptions/plans/', { params: cleanParams });
+    console.log('🔗 Making subscription plans API call to:', '/api/v1/plans/', 'with params:', cleanParams);
+    const response = await api.get('/api/v1/plans/', { params: cleanParams });
+    return response.data;
+  },
+
+  // Get all available plans (public endpoint - no auth required)
+  getAllPlans: async () => {
+    const response = await api.get('/api/v1/plans/');
     return response.data;
   },
 

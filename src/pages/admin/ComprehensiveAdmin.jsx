@@ -40,6 +40,7 @@ import AdminWorkforce from './workforce/AdminWorkforce';
 import AdminLogistics from './logistics/AdminLogistics';
 import AdminKnowledge from './knowledge/AdminKnowledge';
 import AdminSubscriptions from './subscriptions/AdminSubscriptions';
+import AdminAuth from './AdminAuth';
 
 // Enhanced API Helper with comprehensive error handling and live data support
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -1258,6 +1259,7 @@ const ComprehensiveAdmin = () => {
   return (
     <Routes>
       <Route path="login" element={<AdminLogin />} />
+      <Route path="auth" element={<AdminAuth />} />
       <Route path="/*" element={
         <ProtectedRoute>
           <AdminLayout>

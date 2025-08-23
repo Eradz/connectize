@@ -26,153 +26,153 @@ apiClient.interceptors.request.use((config) => {
 export const knowledgeHubAPI = {
   // Articles Management
   getArticles: (params = {}) => {
-    return apiClient.get('/knowledge-hub/articles/', { params });
+    return apiClient.get('/v1/knowledge/articles/', { params });
   },
 
   getArticle: (id) => {
-    return apiClient.get(`/knowledge-hub/articles/${id}/`);
+    return apiClient.get(`/v1/knowledge/articles/${id}/`);
   },
 
   createArticle: (data) => {
-    return apiClient.post('/knowledge-hub/articles/', data);
+    return apiClient.post('/v1/knowledge/articles/', data);
   },
 
   updateArticle: (id, data) => {
-    return apiClient.put(`/knowledge-hub/articles/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/articles/${id}/`, data);
   },
 
   deleteArticle: (id) => {
-    return apiClient.delete(`/knowledge-hub/articles/${id}/`);
+    return apiClient.delete(`/v1/knowledge/articles/${id}/`);
   },
 
   publishArticle: (id) => {
-    return apiClient.post(`/knowledge-hub/articles/${id}/publish/`);
+    return apiClient.post(`/v1/knowledge/articles/${id}/publish/`);
   },
 
   unpublishArticle: (id) => {
-    return apiClient.post(`/knowledge-hub/articles/${id}/unpublish/`);
+    return apiClient.post(`/v1/knowledge/articles/${id}/unpublish/`);
   },
 
   // Categories Management
   getCategories: (params = {}) => {
-    return apiClient.get('/knowledge-hub/categories/', { params });
+    return apiClient.get('/v1/knowledge/categories/', { params });
   },
 
   getCategory: (id) => {
-    return apiClient.get(`/knowledge-hub/categories/${id}/`);
+    return apiClient.get(`/v1/knowledge/categories/${id}/`);
   },
 
   createCategory: (data) => {
-    return apiClient.post('/knowledge-hub/categories/', data);
+    return apiClient.post('/v1/knowledge/categories/', data);
   },
 
   updateCategory: (id, data) => {
-    return apiClient.put(`/knowledge-hub/categories/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/categories/${id}/`, data);
   },
 
   deleteCategory: (id) => {
-    return apiClient.delete(`/knowledge-hub/categories/${id}/`);
+    return apiClient.delete(`/v1/knowledge/categories/${id}/`);
   },
 
   // Tags Management
   getTags: (params = {}) => {
-    return apiClient.get('/knowledge-hub/tags/', { params });
+    return apiClient.get('/v1/knowledge/tags/', { params });
   },
 
   createTag: (data) => {
-    return apiClient.post('/knowledge-hub/tags/', data);
+    return apiClient.post('/v1/knowledge/tags/', data);
   },
 
   updateTag: (id, data) => {
-    return apiClient.put(`/knowledge-hub/tags/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/tags/${id}/`, data);
   },
 
   deleteTag: (id) => {
-    return apiClient.delete(`/knowledge-hub/tags/${id}/`);
+    return apiClient.delete(`/v1/knowledge/tags/${id}/`);
   },
 
   // Forums Management
   getForums: (params = {}) => {
-    return apiClient.get('/knowledge-hub/forums/', { params });
+    return apiClient.get('/v1/knowledge/forums/', { params });
   },
 
   getForum: (id) => {
-    return apiClient.get(`/knowledge-hub/forums/${id}/`);
+    return apiClient.get(`/v1/knowledge/forums/${id}/`);
   },
 
   createForum: (data) => {
-    return apiClient.post('/knowledge-hub/forums/', data);
+    return apiClient.post('/v1/knowledge/forums/', data);
   },
 
   updateForum: (id, data) => {
-    return apiClient.put(`/knowledge-hub/forums/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/forums/${id}/`, data);
   },
 
   deleteForum: (id) => {
-    return apiClient.delete(`/knowledge-hub/forums/${id}/`);
+    return apiClient.delete(`/v1/knowledge/forums/${id}/`);
   },
 
   // Forum Topics Management
   getTopics: (forumId, params = {}) => {
-    return apiClient.get(`/knowledge-hub/forums/${forumId}/topics/`, { params });
+    return apiClient.get(`/v1/knowledge/forums/${forumId}/topics/`, { params });
   },
 
   getTopic: (id) => {
-    return apiClient.get(`/knowledge-hub/topics/${id}/`);
+    return apiClient.get(`/v1/knowledge/topics/${id}/`);
   },
 
   createTopic: (data) => {
-    return apiClient.post('/knowledge-hub/topics/', data);
+    return apiClient.post('/v1/knowledge/topics/', data);
   },
 
   updateTopic: (id, data) => {
-    return apiClient.put(`/knowledge-hub/topics/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/topics/${id}/`, data);
   },
 
   deleteTopic: (id) => {
-    return apiClient.delete(`/knowledge-hub/topics/${id}/`);
+    return apiClient.delete(`/v1/knowledge/topics/${id}/`);
   },
 
   lockTopic: (id) => {
-    return apiClient.post(`/knowledge-hub/topics/${id}/lock/`);
+    return apiClient.post(`/v1/knowledge/topics/${id}/lock/`);
   },
 
   unlockTopic: (id) => {
-    return apiClient.post(`/knowledge-hub/topics/${id}/unlock/`);
+    return apiClient.post(`/v1/knowledge/topics/${id}/unlock/`);
   },
 
   pinTopic: (id) => {
-    return apiClient.post(`/knowledge-hub/topics/${id}/pin/`);
+    return apiClient.post(`/v1/knowledge/topics/${id}/pin/`);
   },
 
   unpinTopic: (id) => {
-    return apiClient.post(`/knowledge-hub/topics/${id}/unpin/`);
+    return apiClient.post(`/v1/knowledge/topics/${id}/unpin/`);
   },
 
   // Posts Management
   getPosts: (topicId, params = {}) => {
-    return apiClient.get(`/knowledge-hub/topics/${topicId}/posts/`, { params });
+    return apiClient.get(`/v1/knowledge/topics/${topicId}/posts/`, { params });
   },
 
   getPost: (id) => {
-    return apiClient.get(`/knowledge-hub/posts/${id}/`);
+    return apiClient.get(`/v1/knowledge/posts/${id}/`);
   },
 
   createPost: (data) => {
-    return apiClient.post('/knowledge-hub/posts/', data);
+    return apiClient.post('/v1/knowledge/posts/', data);
   },
 
   updatePost: (id, data) => {
-    return apiClient.put(`/knowledge-hub/posts/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/posts/${id}/`, data);
   },
 
   deletePost: (id) => {
-    return apiClient.delete(`/knowledge-hub/posts/${id}/`);
+    return apiClient.delete(`/v1/knowledge/posts/${id}/`);
   },
 
   // Moderation
   moderateContent: (contentType, contentId, action, reason = '') => {
-    return apiClient.post('/knowledge-hub/moderate/', {
+    return apiClient.post('/v1/knowledge/moderate/', {
       content_type: contentType,
       content_id: contentId,
       action: action,
@@ -181,11 +181,11 @@ export const knowledgeHubAPI = {
   },
 
   getReportedContent: (params = {}) => {
-    return apiClient.get('/knowledge-hub/reported-content/', { params });
+    return apiClient.get('/v1/knowledge/moderation/', { params });
   },
 
   resolveReport: (reportId, action, reason = '') => {
-    return apiClient.post(`/knowledge-hub/reports/${reportId}/resolve/`, {
+    return apiClient.post(`/v1/knowledge/reports/${reportId}/resolve/`, {
       action: action,
       reason: reason
     });
@@ -193,65 +193,65 @@ export const knowledgeHubAPI = {
 
   // Comments Management
   getComments: (articleId, params = {}) => {
-    return apiClient.get(`/knowledge-hub/articles/${articleId}/comments/`, { params });
+    return apiClient.get(`/v1/knowledge/articles/${articleId}/comments/`, { params });
   },
 
   createComment: (data) => {
-    return apiClient.post('/knowledge-hub/comments/', data);
+    return apiClient.post('/v1/knowledge/comments/', data);
   },
 
   updateComment: (id, data) => {
-    return apiClient.put(`/knowledge-hub/comments/${id}/`, data);
+    return apiClient.put(`/v1/knowledge/comments/${id}/`, data);
   },
 
   deleteComment: (id) => {
-    return apiClient.delete(`/knowledge-hub/comments/${id}/`);
+    return apiClient.delete(`/v1/knowledge/comments/${id}/`);
   },
 
   moderateComment: (id, action) => {
-    return apiClient.post(`/knowledge-hub/comments/${id}/moderate/`, { action });
+    return apiClient.post(`/v1/knowledge/comments/${id}/moderate/`, { action });
   },
 
   // Search and Analytics
   searchContent: (query, filters = {}) => {
-    return apiClient.get('/knowledge-hub/search/', {
+    return apiClient.get('/v1/knowledge/search/', {
       params: { q: query, ...filters }
     });
   },
 
   getAnalytics: (params = {}) => {
-    return apiClient.get('/knowledge-hub/analytics/', { params });
+    return apiClient.get('/v1/knowledge/analytics/', { params });
   },
 
   getPopularContent: (contentType = 'articles', period = '7d') => {
-    return apiClient.get('/knowledge-hub/popular/', {
+    return apiClient.get('/v1/knowledge/popular/', {
       params: { content_type: contentType, period: period }
     });
   },
 
   // User Interactions
   likeContent: (contentType, contentId) => {
-    return apiClient.post('/knowledge-hub/like/', {
+    return apiClient.post('/v1/knowledge/like/', {
       content_type: contentType,
       content_id: contentId
     });
   },
 
   unlikeContent: (contentType, contentId) => {
-    return apiClient.delete('/knowledge-hub/like/', {
+    return apiClient.delete('/v1/knowledge/like/', {
       data: { content_type: contentType, content_id: contentId }
     });
   },
 
   bookmarkContent: (contentType, contentId) => {
-    return apiClient.post('/knowledge-hub/bookmark/', {
+    return apiClient.post('/v1/knowledge/bookmark/', {
       content_type: contentType,
       content_id: contentId
     });
   },
 
   unbookmarkContent: (contentType, contentId) => {
-    return apiClient.delete('/knowledge-hub/bookmark/', {
+    return apiClient.delete('/v1/knowledge/bookmark/', {
       data: { content_type: contentType, content_id: contentId }
     });
   },
@@ -262,7 +262,7 @@ export const knowledgeHubAPI = {
     formData.append('file', file);
     formData.append('purpose', purpose);
     
-    return apiClient.post('/knowledge-hub/upload/', formData, {
+    return apiClient.post('/v1/knowledge/upload/', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -271,21 +271,21 @@ export const knowledgeHubAPI = {
 
   // Bulk operations
   bulkUpdateArticles: (articleIds, updateData) => {
-    return apiClient.post('/knowledge-hub/articles/bulk-update/', {
+    return apiClient.post('/v1/knowledge/articles/bulk-update/', {
       article_ids: articleIds,
       update_data: updateData
     });
   },
 
   bulkDeleteContent: (contentType, contentIds) => {
-    return apiClient.post('/knowledge-hub/bulk-delete/', {
+    return apiClient.post('/v1/knowledge/bulk-delete/', {
       content_type: contentType,
       content_ids: contentIds
     });
   },
 
   exportContent: (contentType, filters = {}) => {
-    return apiClient.get('/knowledge-hub/export/', {
+    return apiClient.get('/v1/knowledge/export/', {
       params: { content_type: contentType, ...filters },
       responseType: 'blob'
     });

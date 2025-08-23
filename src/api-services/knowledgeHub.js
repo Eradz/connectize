@@ -49,6 +49,7 @@ export const knowledgeHubAPI = {
 
   // Moderation Queue
   getModerationQueue: (params = {}) => api.get(`${KNOWLEDGE_BASE_URL}/moderation/`, { params }),
+  getReportedContent: (params = {}) => api.get(`${KNOWLEDGE_BASE_URL}/moderation/`, { params }),
   approveContent: (id) => api.post(`${KNOWLEDGE_BASE_URL}/moderation/${id}/approve/`),
   rejectContent: (id) => api.post(`${KNOWLEDGE_BASE_URL}/moderation/${id}/reject/`),
 
