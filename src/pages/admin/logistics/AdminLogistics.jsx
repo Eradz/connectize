@@ -301,6 +301,8 @@ const AdminLogistics = () => {
         // Create new item
         if (activeTab === 'requests') {
           await logisticsAPI.createShipmentRequest(formData);
+        } else if (activeTab === 'shipments') {
+          await logisticsAPI.createShipment(formData);
         } else if (activeTab === 'inventory') {
           await logisticsAPI.createInventoryItem(formData);
         } else if (activeTab === 'providers') {
@@ -1122,7 +1124,778 @@ const AdminLogistics = () => {
           </div>
         )}
       </div>
+
+      {/* Create/Edit Modal */}
+      {(showCreateModal || showEditModal) && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                {editingItem ? 'Edit' : 'Create'} {activeTab.slice(0, -1).charAt(0).toUpperCase() + activeTab.slice(0, -1).slice(1)}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircleIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <LogisticsForm
+              type={activeTab}
+              initialData={editingItem}
+              onSave={handleSave}
+              onCancel={() => {
+                setShowCreateModal(false);
+                setShowEditModal(false);
+                setEditingItem(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
+
+// Logistics Form Component
+const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
+  const [formData, setFormData] = useState(getInitialFormData(type, initialData));
+  const [loading, setLoading] = useState(false);
+
+  function getInitialFormData(type, data) {
+    switch (type) {
+      case 'requests':
+        return {
+          sender_name: data?.sender_name || '',
+          sender_email: data?.sender_email || '',
+          sender_phone: data?.sender_phone || '',
+          recipient_name: data?.recipient_name || '',
+          recipient_email: data?.recipient_email || '',
+          recipient_phone: data?.recipient_phone || '',
+          origin_address: data?.origin_address || '',
+          destination_address: data?.destination_address || '',
+          package_description: data?.package_description || '',
+          package_weight: data?.package_weight || '',
+          package_dimensions: data?.package_dimensions || '',
+          delivery_type: data?.delivery_type || 'standard',
+          priority: data?.priority || 'normal',
+          special_instructions: data?.special_instructions || '',
+        };
+      case 'shipments':
+        return {
+          tracking_number: data?.tracking_number || '',
+          status: data?.status || 'pending',
+          provider_name: data?.provider_name || '',
+          estimated_delivery: data?.estimated_delivery || '',
+          actual_delivery: data?.actual_delivery || '',
+          delivery_notes: data?.delivery_notes || '',
+        };
+      case 'inventory':
+        return {
+          name: data?.name || '',
+          description: data?.description || '',
+          sku: data?.sku || '',
+          category: data?.category || 'drilling_equipment',
+          current_stock: data?.current_stock || 0,
+          unit_cost: data?.unit_cost || 0,
+          location: data?.location || '',
+          warehouse: data?.warehouse || '',
+          bin_location: data?.bin_location || '',
+          minimum_stock: data?.minimum_stock || 0,
+          maximum_stock: data?.maximum_stock || 0,
+          reorder_point: data?.reorder_point || 0,
+          unit: data?.unit || 'pcs',
+          supplier: data?.supplier || '',
+          manufacturer: data?.manufacturer || '',
+          status: data?.status || 'available',
+          condition: data?.condition || 'excellent',
+        };
+      case 'providers':
+        return {
+          company_name: data?.company_name || '',
+          contact_person: data?.contact_person || '',
+          email: data?.email || '',
+          phone: data?.phone || '',
+          address: data?.address || '',
+          license_number: data?.license_number || '',
+          service_types: data?.service_types || ['standard'],
+          coverage_type: data?.coverage_type || 'local',
+          service_regions: data?.service_regions || [],
+          coverage_areas: data?.coverage_areas || '',
+          insurance_coverage: data?.insurance_coverage || 0,
+          rating: data?.rating || 0,
+          is_active: data?.is_active !== undefined ? data?.is_active : true,
+          user: data?.user || 1, // Default to user ID 1
+        };
+      default:
+        return {};
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const renderFormFields = () => {
+    switch (type) {
+      case 'requests':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sender Name</label>
+                <input
+                  type="text"
+                  value={formData.sender_name}
+                  onChange={(e) => handleInputChange('sender_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sender Email</label>
+                <input
+                  type="email"
+                  value={formData.sender_email}
+                  onChange={(e) => handleInputChange('sender_email', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sender Phone</label>
+                <input
+                  type="tel"
+                  value={formData.sender_phone}
+                  onChange={(e) => handleInputChange('sender_phone', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
+                <input
+                  type="text"
+                  value={formData.recipient_name}
+                  onChange={(e) => handleInputChange('recipient_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Recipient Email</label>
+                <input
+                  type="email"
+                  value={formData.recipient_email}
+                  onChange={(e) => handleInputChange('recipient_email', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Recipient Phone</label>
+                <input
+                  type="tel"
+                  value={formData.recipient_phone}
+                  onChange={(e) => handleInputChange('recipient_phone', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Origin Address</label>
+              <textarea
+                value={formData.origin_address}
+                onChange={(e) => handleInputChange('origin_address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="2"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Destination Address</label>
+              <textarea
+                value={formData.destination_address}
+                onChange={(e) => handleInputChange('destination_address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="2"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Package Description</label>
+              <textarea
+                value={formData.package_description}
+                onChange={(e) => handleInputChange('package_description', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="3"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.package_weight}
+                  onChange={(e) => handleInputChange('package_weight', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+                <select
+                  value={formData.delivery_type}
+                  onChange={(e) => handleInputChange('delivery_type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="standard">Standard</option>
+                  <option value="express">Express</option>
+                  <option value="overnight">Overnight</option>
+                  <option value="same_day">Same Day</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                <select
+                  value={formData.priority}
+                  onChange={(e) => handleInputChange('priority', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Dimensions (L x W x H cm)</label>
+              <input
+                type="text"
+                value={formData.package_dimensions}
+                onChange={(e) => handleInputChange('package_dimensions', e.target.value)}
+                placeholder="e.g., 30 x 20 x 15"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+              <textarea
+                value={formData.special_instructions}
+                onChange={(e) => handleInputChange('special_instructions', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="2"
+                placeholder="Any special handling instructions..."
+              />
+            </div>
+          </div>
+        );
+
+      case 'shipments':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tracking Number</label>
+                <input
+                  type="text"
+                  value={formData.tracking_number}
+                  onChange={(e) => handleInputChange('tracking_number', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in_transit">In Transit</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="returned">Returned</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Provider Name</label>
+                <input
+                  type="text"
+                  value={formData.provider_name}
+                  onChange={(e) => handleInputChange('provider_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Delivery</label>
+                <input
+                  type="datetime-local"
+                  value={formData.estimated_delivery}
+                  onChange={(e) => handleInputChange('estimated_delivery', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Actual Delivery</label>
+                <input
+                  type="datetime-local"
+                  value={formData.actual_delivery}
+                  onChange={(e) => handleInputChange('actual_delivery', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Notes</label>
+              <textarea
+                value={formData.delivery_notes}
+                onChange={(e) => handleInputChange('delivery_notes', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="3"
+                placeholder="Any delivery notes or special instructions..."
+              />
+            </div>
+          </div>
+        );
+
+      case 'inventory':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                <input
+                  type="text"
+                  value={formData.sku}
+                  onChange={(e) => handleInputChange('sku', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="3"
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => handleInputChange('category', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="drilling_equipment">Drilling Equipment</option>
+                  <option value="safety_equipment">Safety Equipment</option>
+                  <option value="tools">Tools</option>
+                  <option value="consumables">Consumables</option>
+                  <option value="spare_parts">Spare Parts</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="office_supplies">Office Supplies</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Current Stock</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.current_stock}
+                  onChange={(e) => handleInputChange('current_stock', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                <select
+                  value={formData.unit}
+                  onChange={(e) => handleInputChange('unit', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="pcs">Pieces</option>
+                  <option value="kg">Kilograms</option>
+                  <option value="lbs">Pounds</option>
+                  <option value="liters">Liters</option>
+                  <option value="gallons">Gallons</option>
+                  <option value="meters">Meters</option>
+                  <option value="feet">Feet</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unit Cost</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.unit_cost}
+                  onChange={(e) => handleInputChange('unit_cost', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="available">Available</option>
+                  <option value="reserved">Reserved</option>
+                  <option value="issued">Issued</option>
+                  <option value="returned">Returned</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="disposed">Disposed</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse</label>
+                <input
+                  type="text"
+                  value={formData.warehouse}
+                  onChange={(e) => handleInputChange('warehouse', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bin Location</label>
+                <input
+                  type="text"
+                  value={formData.bin_location}
+                  onChange={(e) => handleInputChange('bin_location', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Stock</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.minimum_stock}
+                  onChange={(e) => handleInputChange('minimum_stock', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Stock</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.maximum_stock}
+                  onChange={(e) => handleInputChange('maximum_stock', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Reorder Point</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.reorder_point}
+                  onChange={(e) => handleInputChange('reorder_point', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Supplier</label>
+                <input
+                  type="text"
+                  value={formData.supplier}
+                  onChange={(e) => handleInputChange('supplier', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Manufacturer</label>
+                <input
+                  type="text"
+                  value={formData.manufacturer}
+                  onChange={(e) => handleInputChange('manufacturer', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+              <select
+                value={formData.condition}
+                onChange={(e) => handleInputChange('condition', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="poor">Poor</option>
+                <option value="damaged">Damaged</option>
+              </select>
+            </div>
+          </div>
+        );
+
+      case 'providers':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                <input
+                  type="text"
+                  value={formData.company_name}
+                  onChange={(e) => handleInputChange('company_name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                <input
+                  type="text"
+                  value={formData.contact_person}
+                  onChange={(e) => handleInputChange('contact_person', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="2"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">License Number</label>
+                <input
+                  type="text"
+                  value={formData.license_number}
+                  onChange={(e) => handleInputChange('license_number', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Coverage Type</label>
+                <select
+                  value={formData.coverage_type}
+                  onChange={(e) => handleInputChange('coverage_type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="local">Local</option>
+                  <option value="national">National</option>
+                  <option value="international">International</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="5"
+                  value={formData.rating}
+                  onChange={(e) => handleInputChange('rating', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Coverage (USD)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.insurance_coverage}
+                  onChange={(e) => handleInputChange('insurance_coverage', parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Service Types</label>
+              <div className="space-y-2">
+                {['standard', 'express', 'economy', 'overnight', 'same_day'].map(service => (
+                  <label key={service} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.service_types.includes(service)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          handleInputChange('service_types', [...formData.service_types, service]);
+                        } else {
+                          handleInputChange('service_types', formData.service_types.filter(s => s !== service));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 capitalize">{service.replace('_', ' ')}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Coverage Areas</label>
+              <textarea
+                value={formData.coverage_areas}
+                onChange={(e) => handleInputChange('coverage_areas', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows="2"
+                placeholder="e.g., Lagos, Abuja, Port Harcourt, etc."
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={formData.is_active}
+                  onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Active Provider</span>
+              </label>
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Form not available for this type</div>;
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {renderFormFields()}
+      
+      <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <div className="flex items-center">
+              <ArrowPathIcon className="w-4 h-4 mr-2 animate-spin" />
+              {initialData ? 'Updating...' : 'Creating...'}
+            </div>
+          ) : (
+            initialData ? 'Update' : 'Create'
+          )}
+        </button>
+      </div>
+    </form>
   );
 };
 

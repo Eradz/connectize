@@ -26,7 +26,7 @@ const logistics = {
   },
 
   updateShipmentRequest: async (id, data) => {
-    const response = await api.put(`/api/v1/logistics/requests/${id}/`, data);
+    const response = await api.patch(`/api/v1/logistics/requests/${id}/`, data);
     return response.data;
   },
 
@@ -59,7 +59,7 @@ const logistics = {
   },
 
   updateShipment: async (id, data) => {
-    const response = await api.put(`/api/v1/logistics/shipments/${id}/`, data);
+    const response = await api.patch(`/api/v1/logistics/shipments/${id}/`, data);
     return response.data;
   },
 
@@ -127,7 +127,7 @@ const logistics = {
   },
 
   updateLogisticsProvider: async (id, data) => {
-    const response = await api.put(`/api/v1/logistics/providers/${id}/`, data);
+    const response = await api.patch(`/api/v1/logistics/providers/${id}/`, data);
     return response.data;
   },
 
@@ -155,7 +155,7 @@ const logistics = {
   },
 
   updateInventoryItem: async (id, data) => {
-    const response = await api.put(`/api/v1/logistics/inventory-items/${id}/`, data);
+    const response = await api.patch(`/api/v1/logistics/inventory-items/${id}/`, data);
     return response.data;
   },
 
