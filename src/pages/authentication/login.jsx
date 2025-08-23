@@ -29,16 +29,27 @@ function Login() {
   const { user, setUser } = useAuth();
   const [searchParams] = useSearchParams();
 
-  setUser(null);
+  // Ensure we don't call setState during render
+  useEffect(() => {
+    setUser(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const nextParam = searchParams.get("next");
+  const nextParamRaw = searchParams.get("next");
+  const isAuthPath = (p) => [
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/confirm-reset-password",
+    "/verify-account",
+    "/reactivate-account",
+  ].some((ap) => (p || "").startsWith(ap));
+  const nextParam = nextParamRaw && !isAuthPath(nextParamRaw) ? nextParamRaw : "/";
 
   const navigateTo =
     user && user?.is_first_time_user
       ? "/profile"
-      : searchParams.has("next")
-      ? nextParam
-      : "/";
+      : nextParam || "/";
 
   const formValues = {
     username: "",
@@ -50,15 +61,32 @@ function Login() {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async ({ email, password }, { resetForm }) => {
+      console.log('📝 Login form submitted:', { email });
+      
       const success = await loginUser({ email, password, resetForm });
+      console.log('🔐 Login result:', { success });
 
       if (success) {
-        setUser(await getCurrentUser());
+        console.log('✅ Login successful, fetching current user...');
+        const currentUser = await getCurrentUser();
+        console.log('👤 Setting user:', { hasUser: !!currentUser, userId: currentUser?.id });
+        setUser(currentUser);
+      } else {
+        console.log('❌ Login failed');
       }
     },
   });
 
-  if (user) navigate(navigateTo);
+  // Navigate after render when user becomes available
+  useEffect(() => {
+    console.log('🚀 Navigation effect triggered:', { hasUser: !!user, userId: user?.id, navigateTo });
+    
+    if (user) {
+      console.log('🚀 Navigating to:', navigateTo);
+      navigate(navigateTo, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     formik.setValues(formValues);

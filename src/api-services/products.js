@@ -1,6 +1,6 @@
 import { redirect } from "react-router-dom";
 import { toast } from "sonner";
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 import { getSession } from "../lib/session";
 import { capitalizeFirst } from "../lib/utils";
 import { getCompanyByIdOrEmail } from "./companies";
@@ -168,5 +168,28 @@ export const bookmarkProduct = async (productId, data, hasBookmarked) => {
     method: "POST",
     data: { company: data.company.company_name },
     // data: { ...data, company_id: data.company.id },
+  });
+};
+
+export const deleteProduct = async (id) => {
+  return await makeApiRequest({
+    url: `api/products/${id}/`,
+    method: "DELETE",
+  });
+};
+
+export const updateProduct = async (id, data) => {
+  return await makeApiRequest({
+    url: `api/products/${id}/`,
+    method: "PATCH",
+    data,
+  });
+};
+
+export const bulkDeleteProducts = async (ids) => {
+  return await makeApiRequest({
+    url: `api/products/bulk-delete/`,
+    method: "POST",
+    data: { ids },
   });
 };

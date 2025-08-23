@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { editCompanyInformation } from "../../../api-services/companies";
-import cities from "../../../lib/data/cities.json";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
 
@@ -77,10 +76,8 @@ export default function EditCompanyForm({ company }) {
     countries.find((country) => country.name === formik.values["country"])
       ?.states || [];
 
-  const citiesForState =
-    cities
-      .filter((city) => city.state_name === formik.values["state"])
-      .map((city) => city.name) || [];
+  // Removed heavy cities.json dependency to avoid large JSON loading issues in the browser.
+  // Use a simple free-text input for city to keep the form responsive and reliable.
 
   const companyFields = [
     {
@@ -132,10 +129,9 @@ export default function EditCompanyForm({ company }) {
         },
         {
           name: "city",
-          type: "select",
+          type: "text",
           label: "Region/City",
-          placeholder: "Select city",
-          options: citiesForState,
+          placeholder: "Enter your city or region",
         },
         {
           name: "organization_type",

@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 import { capitalizeFirst } from "../lib/utils";
 import { getCompanyByIdOrEmail } from "./companies";
 import { getCurrentUser } from "./users";
@@ -135,5 +135,28 @@ export const bookmarkService = async (serviceId, data, hasBookmarked) => {
     url: `api/services/${serviceId}/like/`,
     method: "POST",
     data: { company: data.company.company_name },
+  });
+};
+
+export const deleteService = async (id) => {
+  return await makeApiRequest({
+    url: `api/services/${id}/`,
+    method: "DELETE",
+  });
+};
+
+export const updateService = async (id, data) => {
+  return await makeApiRequest({
+    url: `api/services/${id}/`,
+    method: "PATCH",
+    data,
+  });
+};
+
+export const bulkDeleteServices = async (ids) => {
+  return await makeApiRequest({
+    url: `api/services/bulk-delete/`,
+    method: "POST",
+    data: { ids },
   });
 };

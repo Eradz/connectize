@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { goToLogin, makeApiRequest } from "../lib/helpers";
+import { goToLogin, makeApiRequest } from "../lib/helpers/index";
 import { getSession } from "../lib/session";
 import { capitalizeFirst } from "../lib/utils";
 import { authenticationService } from "./authentication";
@@ -25,11 +25,14 @@ export const getUserById = async (id) => {
 };
 
 export const getCurrentUser = async () => {
+  console.log('👤 Fetching current user...');
+  
   const user = await makeApiRequest({
     url: `api/current-user/`,
     method: "GET",
   });
 
+  console.log('👤 Current user response:', { hasUser: !!user, userId: user?.id, email: user?.email });
   return user || null;
 };
 

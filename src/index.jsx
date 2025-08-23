@@ -11,6 +11,25 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "./index.css";
 
+console.log("Index.jsx is loading");
+
+// Filter out Grammarly extension errors in development
+if (import.meta.env.DEV) {
+  const originalError = console.error;
+  console.error = (...args) => {
+    // Filter out Grammarly and extension-related Stripe errors
+    const message = args[0]?.toString() || '';
+    if (
+      message.includes('Grammarly.js') ||
+      message.includes('mainCS.common.chunk.js') ||
+      (message.includes('Blocked a frame') && message.includes('js.stripe.com') && message.includes('localhost:3000'))
+    ) {
+      return; // Suppress these errors
+    }
+    originalError.apply(console, args);
+  };
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

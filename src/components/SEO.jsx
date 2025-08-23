@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
-import { frontendUrl } from "../lib/helpers";
+import { frontendUrl } from "../lib/helpers/index";
 
 const SEO = ({
   title = "Connectize - The Social Hub",
