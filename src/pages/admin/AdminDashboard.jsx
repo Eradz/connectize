@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   AnalyticsIcon,
   UsersIcon,
@@ -24,102 +24,146 @@ import StatsCard from "../../components/admin/dashboard/StatsCard";
 import ChartCardSimple from "../../components/admin/dashboard/ChartCardSimple";
 import RecentActivityCard from "../../components/admin/dashboard/RecentActivityCard";
 import QuickActionsCard from "../../components/admin/dashboard/QuickActionsCard";
+import adminStatsAPI from "../../api-services/adminStats";
 
 const AdminDashboard = () => {
-  // Mock data - Replace with real API calls
-  const stats = [
-    {
-      title: "Total Users",
-      value: "12,453",
-      change: "+12%",
-      changeType: "increase",
-      icon: UsersIcon,
-      color: "blue",
-    },
-    {
-      title: "Active Companies",
-      value: "1,234",
-      change: "+8%",
-      changeType: "increase",
-      icon: CompanyIcon,
-      color: "green",
-    },
-    {
-      title: "Total Products",
-      value: "5,678",
-      change: "+15%",
-      changeType: "increase",
-      icon: ProductIcon,
-      color: "purple",
-    },
-    {
-      title: "Active Services",
-      value: "2,345",
-      change: "+6%",
-      changeType: "increase",
-      icon: ServiceIcon,
-      color: "orange",
-    },
-    {
-      title: "Monthly Revenue",
-      value: "$89,234",
-      change: "+23%",
-      changeType: "increase",
-      icon: MoneyIcon,
-      color: "emerald",
-    },
-    {
-      title: "Posts Created",
-      value: "8,901",
-      change: "+18%",
-      changeType: "increase",
-      icon: PostIcon,
-      color: "indigo",
-    },
-  ];
+  const [stats, setStats] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const recentActivities = [
-    {
-      id: 1,
-      type: "user_registration",
-      message: "New user John Doe registered",
-      timestamp: "2 minutes ago",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john",
-      status: "success",
-    },
-    {
-      id: 2,
-      type: "company_verification",
-      message: "Company 'Oil Tech Solutions' verification completed",
-      timestamp: "15 minutes ago",
-      avatar: "https://api.dicebear.com/7.x/shapes/svg?seed=company",
-      status: "success",
-    },
-    {
-      id: 3,
-      type: "product_approval",
-      message: "Product 'Industrial Valve' approved",
-      timestamp: "32 minutes ago",
-      avatar: "https://api.dicebear.com/7.x/shapes/svg?seed=product",
-      status: "warning",
-    },
-    {
-      id: 4,
-      type: "service_posting",
-      message: "New service 'Equipment Maintenance' posted",
-      timestamp: "1 hour ago",
-      avatar: "https://api.dicebear.com/7.x/shapes/svg?seed=service",
-      status: "primary",
-    },
-    {
-      id: 5,
-      type: "user_report",
-      message: "User content reported - requires review",
-      timestamp: "2 hours ago",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=report",
-      status: "error",
-    },
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch admin stats from backend
+      const [statsData, activitiesData] = await Promise.all([
+        adminStatsAPI.getAdminStats(),
+        adminStatsAPI.getRecentActivities(5)
+      ]);
+
+      // Transform backend data to frontend format
+      const transformedStats = [
+        {
+          title: "Total Users",
+          value: statsData.total_users?.toLocaleString() || "0",
+          change: `${statsData.user_growth > 0 ? '+' : ''}${statsData.user_growth}%`,
+          changeType: statsData.user_growth >= 0 ? "increase" : "decrease",
+          icon: UsersIcon,
+          color: "blue",
+        },
+        {
+          title: "Active Companies",
+          value: statsData.active_companies?.toLocaleString() || "0",
+          change: `${statsData.company_growth > 0 ? '+' : ''}${statsData.company_growth}%`,
+          changeType: statsData.company_growth >= 0 ? "increase" : "decrease",
+          icon: CompanyIcon,
+          color: "green",
+        },
+        {
+          title: "Total Products",
+          value: statsData.total_products?.toLocaleString() || "0",
+          change: `${statsData.product_growth > 0 ? '+' : ''}${statsData.product_growth}%`,
+          changeType: statsData.product_growth >= 0 ? "increase" : "decrease",
+          icon: ProductIcon,
+          color: "purple",
+        },
+        {
+          title: "Active Services",
+          value: statsData.total_services?.toLocaleString() || "0",
+          change: `${statsData.service_growth > 0 ? '+' : ''}${statsData.service_growth}%`,
+          changeType: statsData.service_growth >= 0 ? "increase" : "decrease",
+          icon: ServiceIcon,
+          color: "orange",
+        },
+        {
+          title: "Monthly Revenue",
+          value: `$${statsData.monthly_revenue?.toLocaleString() || "0"}`,
+          change: `${statsData.revenue_growth > 0 ? '+' : ''}${statsData.revenue_growth}%`,
+          changeType: statsData.revenue_growth >= 0 ? "increase" : "decrease",
+          icon: MoneyIcon,
+          color: "emerald",
+        },
+        {
+          title: "Posts Created",
+          value: statsData.posts_created?.toLocaleString() || "0",
+          change: `${statsData.posts_growth > 0 ? '+' : ''}${statsData.posts_growth}%`,
+          changeType: statsData.posts_growth >= 0 ? "increase" : "decrease",
+          icon: PostIcon,
+          color: "indigo",
+        },
+      ];
+
+      // Transform activities data
+      const transformedActivities = activitiesData.map(activity => ({
+        id: activity.id,
+        type: activity.type,
+        message: activity.message,
+        timestamp: formatTimeAgo(activity.timestamp),
+        avatar: activity.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${activity.id}`,
+        status: getActivityStatus(activity.type),
+      }));
+
+      setStats(transformedStats);
+      setRecentActivities(transformedActivities);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+      setError('Failed to load dashboard data. Please try again.');
+      
+      // Fallback to some basic data structure to prevent UI breaking
+      setStats([
+        { title: "Total Users", value: "Loading...", change: "0%", changeType: "increase", icon: UsersIcon, color: "blue" },
+        { title: "Active Companies", value: "Loading...", change: "0%", changeType: "increase", icon: CompanyIcon, color: "green" },
+        { title: "Total Products", value: "Loading...", change: "0%", changeType: "increase", icon: ProductIcon, color: "purple" },
+        { title: "Active Services", value: "Loading...", change: "0%", changeType: "increase", icon: ServiceIcon, color: "orange" },
+        { title: "Monthly Revenue", value: "Loading...", change: "0%", changeType: "increase", icon: MoneyIcon, color: "emerald" },
+        { title: "Posts Created", value: "Loading...", change: "0%", changeType: "increase", icon: PostIcon, color: "indigo" },
+      ]);
+      setRecentActivities([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  const getActivityStatus = (type) => {
+    const statusMap = {
+      user_registration: 'success',
+      company_verification: 'success',
+      product_created: 'primary',
+      product_approval: 'warning',
+      service_posting: 'primary',
+      post_published: 'primary',
+      user_report: 'error'
+    };
+    return statusMap[type] || 'primary';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600 dark:text-gray-400 mt-4">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in">
@@ -145,9 +189,31 @@ const AdminDashboard = () => {
                   <SecurityIcon size={16} />
                   All systems operational
                 </div>
+                {error && (
+                  <div className="status-badge status-badge-error">
+                    <InfoIcon size={16} />
+                    Data load failed
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex-shrink-0">
+              <div className="flex items-center gap-3 mb-4">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={fetchDashboardData}
+                >
+                  <AnalyticsIcon className="w-4 h-4" />
+                  Refresh Data
+                </Button>
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm">
+                    {error}
+                  </div>
+                )}
+              </div>
               <div className="glass rounded-2xl p-6 border border-white/20">
                 <div className="flex items-center gap-4">
                   <div className="text-right">

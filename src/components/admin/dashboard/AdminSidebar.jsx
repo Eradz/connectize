@@ -15,6 +15,10 @@ import {
   WrenchScrewdriverIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  BriefcaseIcon,
+  TruckIcon,
+  AcademicCapIcon,
+  CreditCardIcon,
 } from "@heroicons/react/24/outline";
 
 const AdminSidebar = ({ isCollapsed = false, onToggle }) => {
@@ -108,6 +112,71 @@ const AdminSidebar = ({ isCollapsed = false, onToggle }) => {
         { title: "Message Overview", path: "/admin/messages" },
         { title: "Message Analytics", path: "/admin/messages/analytics" },
         { title: "Reported Messages", path: "/admin/messages/reports" },
+      ],
+    },
+    {
+      title: "Deal Rooms",
+      icon: BriefcaseIcon,
+      path: "/admin/deals",
+      submenu: [
+        { title: "All Deal Rooms", path: "/admin/deals" },
+        { title: "Deal Analytics", path: "/admin/deals/analytics" },
+        { title: "Deal Approvals", path: "/admin/deals/approvals" },
+        { title: "Deal Categories", path: "/admin/deals/categories" },
+        { title: "Deal Reports", path: "/admin/deals/reports" },
+      ],
+    },
+    {
+      title: "Workforce",
+      icon: UsersIcon,
+      path: "/admin/workforce",
+      submenu: [
+        { title: "Job Postings", path: "/admin/workforce/jobs" },
+        { title: "Professional Profiles", path: "/admin/workforce/profiles" },
+        { title: "Job Analytics", path: "/admin/workforce/analytics" },
+        { title: "Job Approvals", path: "/admin/workforce/approvals" },
+        { title: "Workforce Events", path: "/admin/workforce/events" },
+        { title: "Applications", path: "/admin/workforce/applications" },
+      ],
+    },
+    {
+      title: "Logistics Hub",
+      icon: TruckIcon,
+      path: "/admin/logistics",
+      submenu: [
+        { title: "Logistics Requests", path: "/admin/logistics/requests" },
+        { title: "Shipments", path: "/admin/logistics/shipments" },
+        { title: "Inventory", path: "/admin/logistics/inventory" },
+        { title: "Logistics Analytics", path: "/admin/logistics/analytics" },
+        { title: "Logistics Providers", path: "/admin/logistics/providers" },
+        { title: "Tracking", path: "/admin/logistics/tracking" },
+      ],
+    },
+    {
+      title: "Knowledge Hub",
+      icon: AcademicCapIcon,
+      path: "/admin/knowledge",
+      submenu: [
+        { title: "Articles", path: "/admin/knowledge/articles" },
+        { title: "Forums", path: "/admin/knowledge/forums" },
+        { title: "Categories", path: "/admin/knowledge/categories" },
+        { title: "Moderation", path: "/admin/knowledge/moderation" },
+        { title: "Knowledge Analytics", path: "/admin/knowledge/analytics" },
+        { title: "Content Approval", path: "/admin/knowledge/approvals" },
+      ],
+    },
+    {
+      title: "Subscriptions",
+      icon: CreditCardIcon,
+      path: "/admin/subscriptions",
+      submenu: [
+        { title: "All Subscriptions", path: "/admin/subscriptions" },
+        { title: "Subscription Plans", path: "/admin/subscriptions/plans" },
+        { title: "Billing Management", path: "/admin/subscriptions/billing" },
+        { title: "Payment Methods", path: "/admin/subscriptions/payments" },
+        { title: "Subscription Analytics", path: "/admin/subscriptions/analytics" },
+        { title: "Revenue Reports", path: "/admin/subscriptions/revenue" },
+        { title: "Plan Management", path: "/admin/subscriptions/plan-management" },
       ],
     },
     {

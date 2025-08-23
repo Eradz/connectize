@@ -265,7 +265,7 @@ const PlatformDashboard = () => {
                 </Link>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link
                   to={webRoutes.dealRooms}
                   className="p-4 border rounded-lg hover:bg-gray-50 transition-colors group"
@@ -334,6 +334,20 @@ const PlatformDashboard = () => {
                   </div>
                   <p className="text-sm text-gray-600">Promote your content across the platform</p>
                   <p className="text-xs text-yellow-600 mt-2">{dashboardData.ads.active} active</p>
+                </Link>
+
+                <Link
+                  to={webRoutes.subscriptionManagement}
+                  className="p-4 border rounded-lg hover:bg-gray-50 transition-colors group"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="bg-indigo-100 p-2 rounded-lg mr-3 group-hover:bg-indigo-200">
+                      <Shield className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <h3 className="font-medium text-gray-900">Subscription</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">Manage your plan, billing, and account settings</p>
+                  <p className="text-xs text-indigo-600 mt-2">Manage plan</p>
                 </Link>
               </div>
             </div>

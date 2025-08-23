@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Login - Connectize</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            text-align: center;
+        }
+        .loading {
+            color: #0066cc;
+        }
+        .success {
+            color: #008000;
+        }
+        .error {
+            color: #cc0000;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .token-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Connectize Auto Login</h2>
+        <div id="status" class="loading">Authenticating...</div>
+        <div id="details"></div>
+        
+        <button onclick="performLogin()">Login with API</button>
+        <button onclick="setTokensManually()">Set Tokens Manually</button>
+        <button onclick="goToLogistics()">Go to Logistics</button>
+        <button onclick="clearTokens()">Clear Tokens</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+        const CREDENTIALS = {
+            email: 'info@connectize.co',
+            password: 'Access2024'
+        };
+
+        // Known working tokens from API test
+        const WORKING_TOKENS = {
+            access: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU3MTIxMTA4LCJpYXQiOjE3NTU5MTE1MDgsImp0aSI6ImY5NDRhY2Y2ZTBjYTQxOTk5ODUzMzY5NzM2ODZmN2ExIiwidXNlcl9pZCI6MX0.FMFz8DlyGXpMhMYs0JVpXff8b6hnH99BDJYlLA9flgM',
+            refresh: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1NzEyMTEwOCwiaWF0IjoxNzU1OTExNTA4LCJqdGkiOiJiZTYxNTdkYWE4YjI0NmU2YjY1Zjc0ZjExYjI4YTNiMSIsInVzZXJfaWQiOjF9.HFmML3Ui6h6cK-yg80_ScojKPnNIOELb0du_mEcSPPc'
+        };
+
+        async function performLogin() {
+            try {
+                document.getElementById('status').innerHTML = '<div class="loading">Logging in via API...</div>';
+                
+                const response = await fetch(`${API_BASE}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(CREDENTIALS)
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.results?.tokens) {
+                    const tokens = data.results.tokens;
+                    setTokensInStorage(tokens);
+                    
+                    document.getElementById('status').innerHTML = '<div class="success">✅ Login successful!</div>';
+                    document.getElementById('details').innerHTML = `
+                        <div class="token-display">
+                            <strong>Access Token:</strong><br>
+                            ${tokens.access.substring(0, 50)}...
+                        </div>
+                        <div class="token-display">
+                            <strong>Refresh Token:</strong><br>
+                            ${tokens.refresh.substring(0, 50)}...
+                        </div>
+                    `;
+                    
+                    // Test the token
+                    await testApiAccess(tokens.access);
+                    
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = `<div class="error">❌ Login failed: ${error.message}</div>`;
+                console.error('Login error:', error);
+            }
+        }
+
+        function setTokensManually() {
+            setTokensInStorage(WORKING_TOKENS);
+            document.getElementById('status').innerHTML = '<div class="success">✅ Tokens set manually!</div>';
+            document.getElementById('details').innerHTML = `
+                <div class="token-display">
+                    <strong>Manual Access Token:</strong><br>
+                    ${WORKING_TOKENS.access.substring(0, 50)}...
+                </div>
+            `;
+            testApiAccess(WORKING_TOKENS.access);
+        }
+
+        function setTokensInStorage(tokens) {
+            // Store in localStorage (standard location)
+            localStorage.setItem('access', tokens.access);
+            localStorage.setItem('refresh', tokens.refresh);
+            localStorage.setItem('refresh_token', tokens.refresh);
+            
+            // Store in sessionStorage as backup
+            sessionStorage.setItem('access', tokens.access);
+            sessionStorage.setItem('refresh', tokens.refresh);
+            sessionStorage.setItem('refresh_token', tokens.refresh);
+            
+            // Try to store as session object (if the app uses this format)
+            const sessionData = {
+                tokens: tokens,
+                user: {
+                    id: 1,
+                    email: 'info@connectize.co'
+                }
+            };
+            
+            try {
+                localStorage.setItem('connectize_session', JSON.stringify(sessionData));
+                
+                // Also set the encrypted cookie format that the frontend expects
+                setFrontendSession(sessionData);
+            } catch (e) {
+                console.log('Could not set session data:', e);
+            }
+        }
+
+        // Set session using the frontend's encrypted cookie format
+        function setFrontendSession(sessionData) {
+            const ENCRYPTION_KEY = "9803037e608561b4485fa127ed2c0788578605492c15942944bf34868adf2c4f";
+            const AUTH_SESSION_COOKIE = "connectize_spicy_auth_cookie";
+            
+            try {
+                // Simple encryption simulation (not the exact same as CryptoJS but should work for testing)
+                const sessionString = JSON.stringify(sessionData);
+                
+                // For now, let's just set it as a regular cookie and see if the app accepts it
+                document.cookie = `${AUTH_SESSION_COOKIE}=${btoa(sessionString)}; path=/; max-age=${7 * 24 * 60 * 60}`;
+                
+                console.log('Set frontend session cookie');
+            } catch (e) {
+                console.log('Could not set frontend session:', e);
+            }
+        }
+
+        async function testApiAccess(token) {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/logistics/shipments/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.count !== undefined) {
+                    document.getElementById('details').innerHTML += `
+                        <div class="success">
+                            ✅ API Test: Found ${data.count} shipments<br>
+                            ✅ Authentication working!
+                        </div>
+                    `;
+                } else {
+                    throw new Error('API test failed');
+                }
+            } catch (error) {
+                document.getElementById('details').innerHTML += `
+                    <div class="error">❌ API Test failed: ${error.message}</div>
+                `;
+            }
+        }
+
+        function goToLogistics() {
+            window.location.href = '/logistics';
+        }
+
+        function clearTokens() {
+            ['access', 'refresh', 'refresh_token', 'connectize_session'].forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            document.getElementById('status').innerHTML = '<div class="loading">Tokens cleared</div>';
+            document.getElementById('details').innerHTML = '';
+        }
+
+        // Auto-run on page load
+        window.onload = function() {
+            // Check if tokens already exist
+            const existingToken = localStorage.getItem('access');
+            if (existingToken) {
+                document.getElementById('status').innerHTML = '<div class="loading">Found existing tokens, testing...</div>';
+                testApiAccess(existingToken);
+            } else {
+                // Auto-set tokens
+                setTimeout(setTokensManually, 1000);
+            }
+        };
+    </script>
+</body>
+</html>

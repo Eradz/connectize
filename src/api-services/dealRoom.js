@@ -15,17 +15,37 @@ export const dealRoomAPI = {
   leaveDealRoom: (id) => api.post(`${DEAL_ROOM_BASE_URL}/deal-rooms/${id}/leave/`),
   addParticipant: (id, data) => api.post(`${DEAL_ROOM_BASE_URL}/deal-rooms/${id}/add_participant/`, data),
   
-  // Deal Participants
-  getParticipants: (dealRoomId) => api.get(`${DEAL_ROOM_BASE_URL}/participants/`, { 
-    params: { deal_room: dealRoomId } 
-  }),
+  // Deal Participants - Fixed to handle both filtered and unfiltered calls
+  getParticipants: (params = {}) => {
+    // If dealRoomId is passed as first parameter (legacy), convert to params
+    if (typeof params === 'string') {
+      params = { deal_room: params };
+    }
+    return api.get(`${DEAL_ROOM_BASE_URL}/participants/`, { params });
+  },
+  getAllParticipants: (params = {}) => api.get(`${DEAL_ROOM_BASE_URL}/participants/`, { params }),
+  createParticipant: (data) => api.post(`${DEAL_ROOM_BASE_URL}/participants/`, data),
   updateParticipant: (id, data) => api.put(`${DEAL_ROOM_BASE_URL}/participants/${id}/`, data),
   removeParticipant: (id) => api.delete(`${DEAL_ROOM_BASE_URL}/participants/${id}/`),
   
-  // Deal Documents
-  getDocuments: (dealRoomId) => api.get(`${DEAL_ROOM_BASE_URL}/documents/`, { 
-    params: { deal_room: dealRoomId } 
-  }),
+  // Deal Documents - Fixed to handle both filtered and unfiltered calls
+  getDocuments: (params = {}) => {
+    // If dealRoomId is passed as first parameter (legacy), convert to params
+    if (typeof params === 'string') {
+      params = { deal_room: params };
+    }
+    return api.get(`${DEAL_ROOM_BASE_URL}/documents/`, { params });
+  },
+  getAllDocuments: (params = {}) => api.get(`${DEAL_ROOM_BASE_URL}/documents/`, { params }),
+  createDocument: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+      formData.append(key, data[key]);
+    });
+    return api.post(`${DEAL_ROOM_BASE_URL}/documents/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   uploadDocument: (data) => {
     const formData = new FormData();
     Object.keys(data).forEach(key => {
@@ -35,25 +55,40 @@ export const dealRoomAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+  updateDocument: (id, data) => api.put(`${DEAL_ROOM_BASE_URL}/documents/${id}/`, data),
   deleteDocument: (id) => api.delete(`${DEAL_ROOM_BASE_URL}/documents/${id}/`),
   
   // Deal Activities
-  getActivities: (dealRoomId) => api.get(`${DEAL_ROOM_BASE_URL}/activities/`, { 
-    params: { deal_room: dealRoomId } 
-  }),
+  getActivities: (params = {}) => {
+    // If dealRoomId is passed as first parameter (legacy), convert to params
+    if (typeof params === 'string') {
+      params = { deal_room: params };
+    }
+    return api.get(`${DEAL_ROOM_BASE_URL}/activities/`, { params });
+  },
   
-  // Deal Milestones
-  getMilestones: (dealRoomId) => api.get(`${DEAL_ROOM_BASE_URL}/milestones/`, { 
-    params: { deal_room: dealRoomId } 
-  }),
+  // Deal Milestones - Fixed to handle both filtered and unfiltered calls
+  getMilestones: (params = {}) => {
+    // If dealRoomId is passed as first parameter (legacy), convert to params
+    if (typeof params === 'string') {
+      params = { deal_room: params };
+    }
+    return api.get(`${DEAL_ROOM_BASE_URL}/milestones/`, { params });
+  },
+  getAllMilestones: (params = {}) => api.get(`${DEAL_ROOM_BASE_URL}/milestones/`, { params }),
   createMilestone: (data) => api.post(`${DEAL_ROOM_BASE_URL}/milestones/`, data),
   updateMilestone: (id, data) => api.put(`${DEAL_ROOM_BASE_URL}/milestones/${id}/`, data),
+  deleteMilestone: (id) => api.delete(`${DEAL_ROOM_BASE_URL}/milestones/${id}/`),
   completeMilestone: (id) => api.post(`${DEAL_ROOM_BASE_URL}/milestones/${id}/complete/`),
   
   // Deal Valuations
-  getValuations: (dealRoomId) => api.get(`${DEAL_ROOM_BASE_URL}/valuations/`, { 
-    params: { deal_room: dealRoomId } 
-  }),
+  getValuations: (params = {}) => {
+    // If dealRoomId is passed as first parameter (legacy), convert to params
+    if (typeof params === 'string') {
+      params = { deal_room: params };
+    }
+    return api.get(`${DEAL_ROOM_BASE_URL}/valuations/`, { params });
+  },
   createValuation: (data) => api.post(`${DEAL_ROOM_BASE_URL}/valuations/`, data),
   updateValuation: (id, data) => api.put(`${DEAL_ROOM_BASE_URL}/valuations/${id}/`, data),
 };

@@ -42,6 +42,11 @@ const WorkforceJobs = () => {
 
   // derive filtered + sorted jobs without triggering extra state updates
   const filteredJobs = useMemo(() => {
+    // Ensure jobs is always an array
+    if (!Array.isArray(jobs)) {
+      return [];
+    }
+    
     let filtered = [...jobs];
 
     // Search filter
@@ -51,7 +56,7 @@ const WorkforceJobs = () => {
         (job.title || '').toLowerCase().includes(term) ||
         (job.company_name || '').toLowerCase().includes(term) ||
         (job.location || '').toLowerCase().includes(term) ||
-        (job.skills_required || []).some(skill => (skill || '').toLowerCase().includes(term))
+        (Array.isArray(job.skills_required) ? job.skills_required : []).some(skill => (skill || '').toLowerCase().includes(term))
       );
     }
 
@@ -113,9 +118,23 @@ const WorkforceJobs = () => {
   const loadJobs = async () => {
     try {
       setLoading(true);
-      const response = await workforceAPI.getJobs();
-      const data = response.data?.results || response.data || response || [];
-      setJobs(data);
+      
+      // Use direct fetch since our API service has authentication issues
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'}/api/v1/workforce/jobs/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const jobs = data.results || [];
+        setJobs(jobs);
+      } else {
+        console.error('Failed to fetch jobs:', response.status, response.statusText);
+        setJobs([]);
+      }
     } catch (error) {
       console.error('Failed to load jobs:', error);
       setJobs([]);

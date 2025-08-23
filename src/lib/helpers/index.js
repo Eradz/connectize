@@ -133,20 +133,31 @@ export async function refreshToken() {
 let hasNotifiedOffline = false;
 
 export async function getAuthorizationHeader() {
+  console.log('🔑 getAuthorizationHeader: Starting auth check...');
+  
   if (accessToken && Date.now() < accessTokenExpiry) {
+    console.log('✅ Using cached access token');
     return { Authorization: "Bearer " + accessToken };
   }
 
   // Try to use access token from session first (avoids unnecessary refresh right after login)
   try {
+    console.log('📦 Checking session for tokens...');
     const session = getSession();
+    console.log('🔍 Session result:', session ? 'Found session data' : 'No session data');
+    
     const tokenFromSession = session?.tokens?.access;
     if (tokenFromSession && tokenFromSession !== accessToken) {
+      console.log('✅ Found fresh token from session');
       // Fresh token from session, update cache
       accessToken = tokenFromSession;
       // Set a conservative TTL; backend JWT is long-lived, but we'll refresh periodically
       accessTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
       return { Authorization: "Bearer " + accessToken };
+    } else if (tokenFromSession) {
+      console.log('⚠️ Session token same as cached token');
+    } else {
+      console.log('❌ No access token in session');
     }
   } catch (e) {
     // Ignore and fallback to refresh flow
@@ -154,14 +165,23 @@ export async function getAuthorizationHeader() {
   }
 
   // Try refresh if we have a refresh token
+  console.log('🔄 Checking for refresh token...');
   const session = getSession();
   if (session?.tokens?.refresh) {
+    console.log('🔄 Attempting token refresh...');
     const refreshedToken = await refreshToken();
-    if (refreshedToken?.Authorization) return refreshedToken;
+    if (refreshedToken?.Authorization) {
+      console.log('✅ Token refresh successful');
+      return refreshedToken;
+    } else {
+      console.log('❌ Token refresh failed');
+    }
+  } else {
+    console.log('❌ No refresh token available');
   }
 
   // No valid auth header available
-  console.warn('No valid authorization available');
+  console.warn('❌ No valid authorization available');
   return null;
 }
 
@@ -185,10 +205,10 @@ export async function makeApiRequest({
   try {
     const authorization = await getAuthorizationHeader();
 
-    if ((!authorization || !authorization.Authorization) && !type.startsWith("auth")) {
-      console.warn('No authorization available for protected route:', url);
+    if ((!authorization || !authorization.Authorization) && !type.startsWith("auth") && type !== "public") {
+      console.error('Authentication failed for protected route:', url, 'No valid authorization token available');
       goToLogin();
-      return;
+      throw new Error(`Authentication required for ${url} - redirecting to login`);
     }
 
     // Build headers, omitting Content-Type for FormData so axios sets boundary

@@ -1,120 +1,212 @@
 import api from './crud';
 
-const LOGISTICS_BASE_URL = '/api/v1/logistics';
-
-export const logisticsAPI = {
-  // Logistics Providers
-  getAvailableProviders: () => api.get(`${LOGISTICS_BASE_URL}/providers/available/`),
-  getProviders: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/providers/`, { params }),
-  getProvider: (id) => api.get(`${LOGISTICS_BASE_URL}/providers/${id}/`),
-  createProvider: (data) => api.post(`${LOGISTICS_BASE_URL}/providers/`, data),
-  updateProvider: (id, data) => api.put(`${LOGISTICS_BASE_URL}/providers/${id}/`, data),
-  searchProviders: (params) => api.get(`${LOGISTICS_BASE_URL}/providers/search/`, { params }),
-  
+const logistics = {
   // Shipment Requests
-  getRequests: (params = {}) => {
-    const p = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
-    console.log('🔗 Making requests API call to:', `${LOGISTICS_BASE_URL}/requests/`, 'with params:', p);
-    return api.get(`${LOGISTICS_BASE_URL}/requests/`, { params: p });
+  getShipmentRequests: async (params = {}) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
+    console.log('🔗 Making requests API call to:', '/api/v1/logistics/requests/', 'with params:', cleanParams);
+    const response = await api.get('/api/v1/logistics/requests/', { params: cleanParams });
+    return response.data;
   },
-  getRequest: (id) => api.get(`${LOGISTICS_BASE_URL}/requests/${id}/`),
-  createRequest: (data) => api.post(`${LOGISTICS_BASE_URL}/requests/`, data),
-  updateRequest: (id, data) => api.put(`${LOGISTICS_BASE_URL}/requests/${id}/`, data),
-  patchRequest: (id, data) => api.patch(`${LOGISTICS_BASE_URL}/requests/${id}/`, data),
-  deleteRequest: (id) => api.delete(`${LOGISTICS_BASE_URL}/requests/${id}/`),
-  publishRequest: (id) => api.post(`${LOGISTICS_BASE_URL}/requests/${id}/publish/`),
-  awardRequest: (id, data) => api.post(`${LOGISTICS_BASE_URL}/requests/${id}/award/`, data),
-  getRequestQuotes: (id) => api.get(`${LOGISTICS_BASE_URL}/requests/${id}/quotes/`),
-  
-  // Shipment Quotes
-  getQuotes: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/quotes/`, { params }),
-  getQuote: (id) => api.get(`${LOGISTICS_BASE_URL}/quotes/${id}/`),
-  createQuote: (data) => api.post(`${LOGISTICS_BASE_URL}/quotes/`, data),
-  updateQuote: (id, data) => api.put(`${LOGISTICS_BASE_URL}/quotes/${id}/`, data),
-  
-  // Active Shipments
-  getShipments: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/shipments/`, { params }),
-  getShipment: (id) => api.get(`${LOGISTICS_BASE_URL}/shipments/${id}/`),
-  updateShipmentStatus: (id, data) => api.post(`${LOGISTICS_BASE_URL}/shipments/${id}/update_status/`, data),
-  getShipmentTracking: (id) => api.get(`${LOGISTICS_BASE_URL}/shipments/${id}/tracking/`),
-  
-  // DHL Integration
-  awardToDHL: (requestId, dhlConfig) => api.post(`${LOGISTICS_BASE_URL}/requests/${requestId}/award_to_dhl/`, dhlConfig),
-  syncDHLTracking: (shipmentId) => api.post(`${LOGISTICS_BASE_URL}/shipments/${shipmentId}/sync_dhl_tracking/`),
-  
-  // Multi-Provider Integration - Enhanced
-  getServiceTypes: () => api.get(`${LOGISTICS_BASE_URL}/service-types/`),
-  
-  // Enhanced rate calculation with automatic fetching
-  calculateRates: (requestId, options = {}) => {
-    const defaultOptions = {
-      force_refresh: false,
-      include_metadata: true,
-      sort_by: 'rate'
-    };
-    return api.post(`${LOGISTICS_BASE_URL}/requests/${requestId}/calculate-rates/`, {
-      ...defaultOptions,
-      ...options
-    });
+
+  getShipmentRequest: async (id) => {
+    const response = await api.get(`/api/v1/logistics/requests/${id}/`);
+    return response.data;
   },
-  
-  // Award shipment to specific provider with service selection
-  awardToProvider: (requestId, data) => {
-    const requestData = {
-      provider_name: data.provider_name,
-      service_code: data.service_code || data.service_type,
-      additional_services: data.additional_services || [],
-      insurance_value: data.insurance_value,
-      signature_required: data.signature_required || false,
-      ...data
-    };
-    return api.post(`${LOGISTICS_BASE_URL}/requests/${requestId}/award-to-provider/`, requestData);
+
+  createShipmentRequest: async (data) => {
+    const response = await api.post('/api/v1/logistics/requests/', data);
+    return response.data;
   },
-  
-  // Enhanced tracking with provider-specific handling
-  syncTracking: (requestId, providerName = null) => api.post(`${LOGISTICS_BASE_URL}/requests/${requestId}/sync-tracking/`, { 
-    provider_name: providerName,
-    update_all: !providerName 
-  }),
-  
-  // Provider health and status monitoring
-  getProviderStatus: (providerName) => api.get(`${LOGISTICS_BASE_URL}/providers/${providerName}/status/`),
-  getAllProviderStatus: () => api.get(`${LOGISTICS_BASE_URL}/providers/status/`),
-  
-  // Provider configuration management
-  updateProviderConfig: (providerName, config) => api.patch(`${LOGISTICS_BASE_URL}/providers/${providerName}/config/`, config),
-  testProviderConnection: (providerName) => api.post(`${LOGISTICS_BASE_URL}/providers/${providerName}/test/`),
-  
-  // Rate history and analytics
-  getRateHistory: (requestId) => api.get(`${LOGISTICS_BASE_URL}/requests/${requestId}/rate-history/`),
-  getProviderAnalytics: (timeframe = '30d') => api.get(`${LOGISTICS_BASE_URL}/analytics/providers/`, { 
-    params: { timeframe } 
-  }),
-  
-  // Tracking Events
-  getTrackingEvents: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/tracking/`, { params }),
-  
-  // Inventory Management
-  getInventoryItems: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/inventory-items/`, { params }),
-  getInventoryItem: (id) => api.get(`${LOGISTICS_BASE_URL}/inventory-items/${id}/`),
-  createInventoryItem: (data) => api.post(`${LOGISTICS_BASE_URL}/inventory-items/`, data),
-  updateInventoryItem: (id, data) => api.put(`${LOGISTICS_BASE_URL}/inventory-items/${id}/`, data),
-  deleteInventoryItem: (id) => api.delete(`${LOGISTICS_BASE_URL}/inventory-items/${id}/`),
-  adjustStock: (id, data) => api.post(`${LOGISTICS_BASE_URL}/inventory-items/${id}/adjust_stock/`, data),
-  
+
+  updateShipmentRequest: async (id, data) => {
+    const response = await api.put(`/api/v1/logistics/requests/${id}/`, data);
+    return response.data;
+  },
+
+  deleteShipmentRequest: async (id) => {
+    const response = await api.delete(`/api/v1/logistics/requests/${id}/`);
+    return response.data;
+  },
+
+  // Shipments
+  getShipments: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/shipments/', { params });
+    return response.data;
+  },
+
+  getShipment: async (id) => {
+    const response = await api.get(`/api/v1/logistics/shipments/${id}/`);
+    return response.data;
+  },
+
+  createShipment: async (data) => {
+    const response = await api.post('/api/v1/logistics/shipments/', data);
+    return response.data;
+  },
+
+  updateShipment: async (id, data) => {
+    const response = await api.put(`/api/v1/logistics/shipments/${id}/`, data);
+    return response.data;
+  },
+
+  deleteShipment: async (id) => {
+    const response = await api.delete(`/api/v1/logistics/shipments/${id}/`);
+    return response.data;
+  },
+
+  // Shipment Tracking
+  getShipmentTracking: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/tracking/', { params });
+    return response.data;
+  },
+
+  // Get tracking for a specific shipment ID
+  getShipmentTrackingById: async (shipmentId) => {
+    const response = await api.get(`/api/v1/logistics/shipments/${shipmentId}/tracking/`);
+    return response.data;
+  },
+
+  updateShipmentTracking: async (id, data) => {
+    const response = await api.put(`/api/v1/logistics/tracking/${id}/`, data);
+    return response.data;
+  },
+
+  // Quotes
+  getShipmentQuotes: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/quotes/', { params });
+    return response.data;
+  },
+
+  // Get quotes for a specific request
+  getRequestQuotes: async (requestId) => {
+    const response = await api.get(`/api/v1/logistics/requests/${requestId}/quotes/`);
+    return response.data;
+  },
+
+  createShipmentQuote: async (data) => {
+    const response = await api.post('/api/v1/logistics/quotes/', data);
+    return response.data;
+  },
+
+  // Logistics Providers
+  getLogisticsProviders: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/providers/', { params });
+    return response.data;
+  },
+
+  // Get available providers for requests
+  getAvailableProviders: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/providers/', { params });
+    return response.data;
+  },
+
+  createLogisticsProvider: async (data) => {
+    const response = await api.post('/api/v1/logistics/providers/', data);
+    return response.data;
+  },
+
+  updateLogisticsProvider: async (id, data) => {
+    const response = await api.put(`/api/v1/logistics/providers/${id}/`, data);
+    return response.data;
+  },
+
+  deleteLogisticsProvider: async (id) => {
+    const response = await api.delete(`/api/v1/logistics/providers/${id}/`);
+    return response.data;
+  },
+
+  // Inventory Items
+  getInventoryItems: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/inventory-items/', { params });
+    return response.data;
+  },
+
+  createInventoryItem: async (data) => {
+    const response = await api.post('/api/v1/logistics/inventory-items/', data);
+    return response.data;
+  },
+
+  updateInventoryItem: async (id, data) => {
+    const response = await api.put(`/api/v1/logistics/inventory-items/${id}/`, data);
+    return response.data;
+  },
+
+  deleteInventoryItem: async (id) => {
+    const response = await api.delete(`/api/v1/logistics/inventory-items/${id}/`);
+    return response.data;
+  },
+
   // Inventory Categories
-  getInventoryCategories: () => api.get(`${LOGISTICS_BASE_URL}/inventory-categories/`),
-  getInventoryCategory: (id) => api.get(`${LOGISTICS_BASE_URL}/inventory-categories/${id}/`),
-  createInventoryCategory: (data) => api.post(`${LOGISTICS_BASE_URL}/inventory-categories/`, data),
-  
+  getInventoryCategories: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/inventory-categories/', { params });
+    return response.data;
+  },
+
   // Inventory Movements
-  getInventoryMovements: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/inventory-movements/`, { params }),
-  getInventoryMovement: (id) => api.get(`${LOGISTICS_BASE_URL}/inventory-movements/${id}/`),
-  
+  getInventoryMovements: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/inventory-movements/', { params });
+    return response.data;
+  },
+
+  createInventoryMovement: async (data) => {
+    const response = await api.post('/api/v1/logistics/inventory-movements/', data);
+    return response.data;
+  },
+
   // Inventory Alerts
-  getInventoryAlerts: (params = {}) => api.get(`${LOGISTICS_BASE_URL}/inventory-alerts/`, { params }),
-  getInventoryAlert: (id) => api.get(`${LOGISTICS_BASE_URL}/inventory-alerts/${id}/`),
-  acknowledgeAlert: (id) => api.post(`${LOGISTICS_BASE_URL}/inventory-alerts/${id}/acknowledge/`),
+  getInventoryAlerts: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/inventory-alerts/', { params });
+    return response.data;
+  },
+
+  markAlertRead: async (id) => {
+    const response = await api.patch(`/api/v1/logistics/inventory-alerts/${id}/`, {
+      is_read: true
+    });
+    return response.data;
+  },
+
+  // Bulk operations
+  bulkUpdateShipments: async (ids, data) => {
+    const response = await api.post('/api/v1/logistics/shipments/bulk_update/', {
+      ids,
+      ...data
+    });
+    return response.data;
+  },
+
+  bulkDeleteShipments: async (ids) => {
+    const response = await api.post('/api/v1/logistics/shipments/bulk_delete/', {
+      ids
+    });
+    return response.data;
+  },
+
+  // Export data
+  exportShipments: async (format = 'csv', filters = {}) => {
+    const response = await api.get('/api/v1/logistics/shipments/export/', {
+      params: { format, ...filters },
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Statistics
+  getLogisticsStats: async () => {
+    const response = await api.get('/api/v1/logistics/stats/');
+    return response.data;
+  },
+
+  // Aliases for backward compatibility
+  getRequests: function(params) { return this.getShipmentRequests(params); },
+  getRequest: function(id) { return this.getShipmentRequest(id); },
+  updateRequest: function(id, data) { return this.updateShipmentRequest(id, data); },
+  deleteRequest: function(id) { return this.deleteShipmentRequest(id); },
+  updateShipmentStatus: function(id, data) { return this.updateShipment(id, data); },
+  adjustStock: function(id, data) { return this.updateInventoryItem(id, data); },
+  getTrackingById: function(id) { return this.getShipmentTrackingById(id); },
 };
 
-export default logisticsAPI;
+export default logistics;
+export const logisticsAPI = logistics;

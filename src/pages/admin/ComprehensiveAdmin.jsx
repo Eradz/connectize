@@ -14,8 +14,8 @@ import {
   SystemIcon
 } from '../../components/ui/ModernIcon';
 
-// Import Dashboard Component
-import AdminDashboardComponent from './AdminDashboardComponent';
+// Import Dashboard Component - Use the enhanced version
+import AdminDashboard from './AdminDashboard';
 import AdminUsersManagement from './AdminUsersManagement';
 import AdminCompaniesManagement from './AdminCompaniesManagement';
 import AdminContentManagement from './AdminContentManagement';
@@ -33,6 +33,13 @@ import AdminServiceDetail from './details/AdminServiceDetail';
 import AdminNotificationDetail from './details/AdminNotificationDetail';
 import AdminMessagesManagement from './AdminMessagesManagement';
 import PlaceholderPage from './PlaceholderPage';
+
+// Import the new admin modules with correct paths
+import AdminDeals from './deals/AdminDeals';
+import AdminWorkforce from './workforce/AdminWorkforce';
+import AdminLogistics from './logistics/AdminLogistics';
+import AdminKnowledge from './knowledge/AdminKnowledge';
+import AdminSubscriptions from './subscriptions/AdminSubscriptions';
 
 // Enhanced API Helper with comprehensive error handling and live data support
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -897,6 +904,66 @@ const AdminLayout = ({ children }) => {
       ]
     },
     {
+      name: 'Deal Rooms',
+      path: '/admin/deals',
+      icon: CompanyIcon, // Using CompanyIcon as placeholder
+      permission: 'admin',
+      subItems: [
+        { name: 'All Deals', path: '/admin/deals', permission: 'admin' },
+        { name: 'Active Deals', path: '/admin/deals/active', permission: 'admin' },
+        { name: 'Completed Deals', path: '/admin/deals/completed', permission: 'admin' },
+        { name: 'Deal Analytics', path: '/admin/deals/analytics', permission: 'admin' }
+      ]
+    },
+    {
+      name: 'Workforce',
+      path: '/admin/workforce',
+      icon: UsersIcon,
+      permission: 'admin',
+      subItems: [
+        { name: 'All Workforce', path: '/admin/workforce', permission: 'admin' },
+        { name: 'Job Postings', path: '/admin/workforce/jobs', permission: 'admin' },
+        { name: 'Applications', path: '/admin/workforce/applications', permission: 'admin' },
+        { name: 'Workforce Analytics', path: '/admin/workforce/analytics', permission: 'admin' }
+      ]
+    },
+    {
+      name: 'Logistics',
+      path: '/admin/logistics',
+      icon: ServiceIcon, // Using ServiceIcon as placeholder
+      permission: 'admin',
+      subItems: [
+        { name: 'All Logistics', path: '/admin/logistics', permission: 'admin' },
+        { name: 'Shipments', path: '/admin/logistics/shipments', permission: 'admin' },
+        { name: 'Warehouses', path: '/admin/logistics/warehouses', permission: 'admin' },
+        { name: 'Logistics Analytics', path: '/admin/logistics/analytics', permission: 'admin' }
+      ]
+    },
+    {
+      name: 'Knowledge Hub',
+      path: '/admin/knowledge',
+      icon: DocumentIcon,
+      permission: 'admin',
+      subItems: [
+        { name: 'All Articles', path: '/admin/knowledge', permission: 'admin' },
+        { name: 'Categories', path: '/admin/knowledge/categories', permission: 'admin' },
+        { name: 'FAQs', path: '/admin/knowledge/faqs', permission: 'admin' },
+        { name: 'Knowledge Analytics', path: '/admin/knowledge/analytics', permission: 'admin' }
+      ]
+    },
+    {
+      name: 'Subscriptions',
+      path: '/admin/subscriptions',
+      icon: TrendingIcon,
+      permission: 'admin',
+      subItems: [
+        { name: 'All Subscriptions', path: '/admin/subscriptions', permission: 'admin' },
+        { name: 'Plans', path: '/admin/subscriptions/plans', permission: 'admin' },
+        { name: 'Billing', path: '/admin/subscriptions/billing', permission: 'admin' },
+        { name: 'Subscription Analytics', path: '/admin/subscriptions/analytics', permission: 'admin' }
+      ]
+    },
+    {
       name: 'Content',
       path: '/admin/content',
       icon: DocumentIcon,
@@ -1197,46 +1264,97 @@ const ComprehensiveAdmin = () => {
             <ErrorBoundary>
             <Routes>
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<RequirePermission permission="admin"><AdminDashboardComponent /></RequirePermission>} />
+              <Route path="dashboard" element={<RequirePermission permission="admin"><AdminDashboard /></RequirePermission>} />
+              
+              {/* User Management Routes */}
               <Route path="users" element={<RequirePermission permission="users.view"><AdminUsersManagement /></RequirePermission>} />
               <Route path="users/:id" element={<RequirePermission permission="users.view"><AdminUserDetail /></RequirePermission>} />
               <Route path="users/add" element={<RequirePermission permission="users.add"><AdminUsersManagement /></RequirePermission>} />
               <Route path="users/roles" element={<RequirePermission permission="users.change"><PlaceholderPage title="User Roles Management" subtitle="Manage user roles and permissions" /></RequirePermission>} />
+              
+              {/* Company Management Routes */}
               <Route path="companies" element={<RequirePermission permission="companies.view"><AdminCompaniesManagement /></RequirePermission>} />
               <Route path="companies/:id" element={<RequirePermission permission="companies.view"><AdminCompanyDetail /></RequirePermission>} />
               <Route path="companies/add" element={<RequirePermission permission="companies.add"><AdminCompaniesManagement /></RequirePermission>} />
               <Route path="companies/verify" element={<RequirePermission permission="companies.change"><PlaceholderPage title="Company Verification" subtitle="Manage company verification requests and status updates" /></RequirePermission>} />
+              
+              {/* Deal Rooms Management Routes */}
+              <Route path="deals" element={<RequirePermission permission="admin"><AdminDeals /></RequirePermission>} />
+              <Route path="deals/active" element={<RequirePermission permission="admin"><AdminDeals /></RequirePermission>} />
+              <Route path="deals/completed" element={<RequirePermission permission="admin"><AdminDeals /></RequirePermission>} />
+              <Route path="deals/analytics" element={<RequirePermission permission="admin"><AdminDeals /></RequirePermission>} />
+              
+              {/* Workforce Management Routes */}
+              <Route path="workforce" element={<RequirePermission permission="admin"><AdminWorkforce /></RequirePermission>} />
+              <Route path="workforce/jobs" element={<RequirePermission permission="admin"><AdminWorkforce /></RequirePermission>} />
+              <Route path="workforce/applications" element={<RequirePermission permission="admin"><AdminWorkforce /></RequirePermission>} />
+              <Route path="workforce/analytics" element={<RequirePermission permission="admin"><AdminWorkforce /></RequirePermission>} />
+              
+              {/* Logistics Management Routes */}
+              <Route path="logistics" element={<RequirePermission permission="admin"><AdminLogistics /></RequirePermission>} />
+              <Route path="logistics/shipments" element={<RequirePermission permission="admin"><AdminLogistics /></RequirePermission>} />
+              <Route path="logistics/warehouses" element={<RequirePermission permission="admin"><AdminLogistics /></RequirePermission>} />
+              <Route path="logistics/analytics" element={<RequirePermission permission="admin"><AdminLogistics /></RequirePermission>} />
+              
+              {/* Knowledge Hub Management Routes */}
+              <Route path="knowledge" element={<RequirePermission permission="admin"><AdminKnowledge /></RequirePermission>} />
+              <Route path="knowledge/categories" element={<RequirePermission permission="admin"><AdminKnowledge /></RequirePermission>} />
+              <Route path="knowledge/faqs" element={<RequirePermission permission="admin"><AdminKnowledge /></RequirePermission>} />
+              <Route path="knowledge/analytics" element={<RequirePermission permission="admin"><AdminKnowledge /></RequirePermission>} />
+              
+              {/* Subscription Management Routes */}
+              <Route path="subscriptions" element={<RequirePermission permission="admin"><AdminSubscriptions /></RequirePermission>} />
+              <Route path="subscriptions/plans" element={<RequirePermission permission="admin"><AdminSubscriptions /></RequirePermission>} />
+              <Route path="subscriptions/billing" element={<RequirePermission permission="admin"><AdminSubscriptions /></RequirePermission>} />
+              <Route path="subscriptions/analytics" element={<RequirePermission permission="admin"><AdminSubscriptions /></RequirePermission>} />
+              
+              {/* Content Management Routes */}
               <Route path="content" element={<RequirePermission permission="content.view"><AdminPostsManagement /></RequirePermission>} />
               <Route path="content/:id" element={<RequirePermission permission="content.view"><AdminPostDetail /></RequirePermission>} />
               <Route path="content/create" element={<RequirePermission permission="content.add"><AdminPostsManagement /></RequirePermission>} />
               <Route path="content/comments" element={<RequirePermission permission="content.view"><AdminContentManagement /></RequirePermission>} />
               <Route path="content/media" element={<RequirePermission permission="content.view"><AdminContentManagement /></RequirePermission>} />
+              
+              {/* Product & Service Routes */}
               <Route path="products" element={<RequirePermission permission="products.view"><AdminProductsManagement /></RequirePermission>} />
               <Route path="products/:id" element={<RequirePermission permission="products.view"><AdminProductDetail /></RequirePermission>} />
               <Route path="services" element={<RequirePermission permission="services.view"><AdminServicesManagement /></RequirePermission>} />
               <Route path="services/:id" element={<RequirePermission permission="services.view"><AdminServiceDetail /></RequirePermission>} />
+              
+              {/* Notification Routes */}
               <Route path="notifications" element={<RequirePermission permission="notifications.view"><AdminNotifications /></RequirePermission>} />
               <Route path="notifications/:id" element={<RequirePermission permission="notifications.view"><AdminNotificationDetail /></RequirePermission>} />
               <Route path="notifications/create" element={<RequirePermission permission="notifications.add"><AdminNotifications /></RequirePermission>} />
               <Route path="notifications/templates" element={<RequirePermission permission="notifications.view"><PlaceholderPage title="Notification Templates" subtitle="Manage and customize notification templates" /></RequirePermission>} />
               <Route path="notifications/analytics" element={<RequirePermission permission="notifications.view"><PlaceholderPage title="Notification Analytics" subtitle="View notification performance and engagement metrics" /></RequirePermission>} />
+              
+              {/* Message Routes */}
               <Route path="messages" element={<RequirePermission permission="messages.view"><AdminMessagesManagement /></RequirePermission>} />
+              
+              {/* Analytics Routes */}
               <Route path="analytics" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/users" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/content" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/export" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
-              {/* Optional direct aliases for completeness */}
               <Route path="analytics/engagement" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/retention" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
               <Route path="analytics/performance" element={<RequirePermission permission="admin"><AdminAnalyticsReports /></RequirePermission>} />
+              
+              {/* Settings Routes */}
               <Route path="settings" element={<RequirePermission permission="admin"><AdminSystemSettings /></RequirePermission>} />
               <Route path="settings/email" element={<RequirePermission permission="admin"><PlaceholderPage title="Email Configuration" subtitle="Configure email settings and SMTP servers" /></RequirePermission>} />
               <Route path="settings/security" element={<RequirePermission permission="admin"><PlaceholderPage title="Security Settings" subtitle="Manage security policies and authentication settings" /></RequirePermission>} />
               <Route path="settings/integrations" element={<RequirePermission permission="admin"><PlaceholderPage title="Integrations" subtitle="Configure third-party integrations and API settings" /></RequirePermission>} />
+              
+              {/* System Routes */}
               <Route path="system/settings" element={<RequirePermission permission="system.manage"><PlaceholderPage title="System Settings" subtitle="Configure system-wide settings and preferences" /></RequirePermission>} />
               <Route path="system/logs" element={<RequirePermission permission="system.manage"><PlaceholderPage title="System Logs" subtitle="View and manage system logs and error reports" /></RequirePermission>} />
               <Route path="system/backups" element={<RequirePermission permission="system.manage"><PlaceholderPage title="System Backups" subtitle="Manage database backups and restore points" /></RequirePermission>} />
+              
+              {/* Profile Route */}
               <Route path="profile" element={<AdminProfile />} />
+              
+              {/* Fallback Route */}
               <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
             </Routes>
             </ErrorBoundary>

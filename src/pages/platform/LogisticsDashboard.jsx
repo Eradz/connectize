@@ -51,17 +51,42 @@ const LogisticsDashboard = () => {
     try {
       setLoading(true);
       
+      console.log('🔍 Loading logistics dashboard data...');
+      console.log('🔑 Checking authentication state...');
+      
+      // Check localStorage for tokens
+      const accessToken = localStorage.getItem('access');
+      const refreshToken = localStorage.getItem('refresh');
+      console.log('📦 LocalStorage tokens:', { 
+        hasAccess: !!accessToken, 
+        hasRefresh: !!refreshToken,
+        accessPreview: accessToken ? accessToken.substring(0, 30) + '...' : null
+      });
+      
       // Fetch real data from APIs
+      console.log('🚀 Making API calls...');
       const [shipmentsResponse, inventoryResponse, requestsResponse] = await Promise.all([
         logisticsAPI.getShipments(),
         logisticsAPI.getInventoryItems(),
         logisticsAPI.getRequests()
       ]);
 
+      console.log('📊 API responses received:', {
+        shipments: shipmentsResponse,
+        inventory: inventoryResponse,
+        requests: requestsResponse
+      });
+
       // Handle paginated responses
       const shipments = shipmentsResponse.data?.results || shipmentsResponse.data || [];
       const inventory = inventoryResponse.data?.results || inventoryResponse.data || [];
       const requests = requestsResponse.data?.results || requestsResponse.data || [];
+
+      console.log('✅ Processed data:', {
+        shipmentsCount: shipments.length,
+        inventoryCount: inventory.length,
+        requestsCount: requests.length
+      });
 
       // Calculate analytics from real data with corrected field mappings
       const totalShipments = shipments.length;
@@ -103,8 +128,26 @@ const LogisticsDashboard = () => {
         }
       });
     } catch (error) {
-      console.error('Failed to load logistics data:', error);
-      // Initialize with empty data instead of mock data
+      console.error('❌ Failed to load logistics data:', error);
+      console.error('🔍 Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      
+      // Check if it's an authentication error
+      if (error.response?.status === 401 || error.message?.includes('Authentication required')) {
+        console.log('🔐 Authentication error detected - user needs to login');
+        console.log('🔑 Current tokens:', {
+          access: localStorage.getItem('access') ? 'present' : 'missing',
+          refresh: localStorage.getItem('refresh') ? 'present' : 'missing'
+        });
+        // The makeApiRequest will already redirect to login, but we can add additional handling here
+        return; // Don't set empty data if redirecting to login
+      }
+      
+      // Initialize with empty data when API calls fail
       setDashboardData({
         shipments: { total: 0, data: [] },
         inventory: { total: 0, data: [] },

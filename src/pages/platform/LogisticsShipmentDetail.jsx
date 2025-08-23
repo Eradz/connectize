@@ -82,7 +82,7 @@ const LogisticsShipmentDetail = () => {
           
           // Load tracking data if available
           try {
-            const trackingResponse = await logisticsAPI.getShipmentTracking(shipmentData.id);
+            const trackingResponse = await logisticsAPI.getShipmentTrackingById(shipmentData.id);
             const trackingData = trackingResponse?.data ?? trackingResponse;
             const events = Array.isArray(trackingData)
               ? trackingData

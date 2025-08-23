@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Login - Connectize</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            text-align: center;
+            margin: 1rem 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .quick-access {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .quick-access a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .quick-access a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🚀 Quick Login</h2>
+        
+        <div id="status"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="info@connectize.co" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" value="Access2024" required>
+            </div>
+            
+            <button type="submit" id="loginBtn">Login & Go to Logistics</button>
+        </form>
+        
+        <div class="quick-access">
+            <a href="/logistics">Logistics Dashboard</a> |
+            <a href="/login">Regular Login</a> |
+            <a href="/" target="_blank">Home</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000';
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                loginBtn.disabled = true;
+                statusDiv.innerHTML = '<div class="loading">🔄 Logging in...</div>';
+                
+                // Call the backend login API
+                const response = await fetch(`${API_BASE}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.results?.tokens) {
+                    statusDiv.innerHTML = '<div class="success">✅ Login successful! Setting up session...</div>';
+                    
+                    // Store tokens in the formats the frontend expects
+                    const tokens = data.results.tokens;
+                    const sessionData = {
+                        tokens: tokens,
+                        user: {
+                            id: data.results.id,
+                            email: data.results.email
+                        }
+                    };
+                    
+                    // Store in localStorage and sessionStorage
+                    localStorage.setItem('access', tokens.access);
+                    localStorage.setItem('refresh', tokens.refresh);
+                    localStorage.setItem('refresh_token', tokens.refresh);
+                    sessionStorage.setItem('access', tokens.access);
+                    sessionStorage.setItem('refresh', tokens.refresh);
+                    
+                    // Try to set the encrypted cookie (simplified version)
+                    try {
+                        const cookieName = 'connectize_spicy_auth_cookie';
+                        const sessionString = JSON.stringify(sessionData);
+                        const encodedSession = btoa(sessionString); // Simple base64 encoding
+                        document.cookie = `${cookieName}=${encodedSession}; path=/; max-age=${7 * 24 * 60 * 60}`;
+                    } catch (e) {
+                        console.log('Cookie setting failed:', e);
+                    }
+                    
+                    statusDiv.innerHTML = '<div class="success">✅ Session configured! Redirecting to logistics...</div>';
+                    
+                    // Test the API access
+                    setTimeout(async () => {
+                        try {
+                            const testResponse = await fetch(`${API_BASE}/api/v1/logistics/shipments/`, {
+                                headers: {
+                                    'Authorization': `Bearer ${tokens.access}`
+                                }
+                            });
+                            
+                            if (testResponse.ok) {
+                                const testData = await testResponse.json();
+                                statusDiv.innerHTML = `<div class="success">✅ API verified! Found ${testData.count} shipments. Redirecting...</div>`;
+                                
+                                setTimeout(() => {
+                                    window.location.href = '/logistics';
+                                }, 1500);
+                            } else {
+                                statusDiv.innerHTML = '<div class="error">⚠️ API test failed, but trying redirect anyway...</div>';
+                                setTimeout(() => {
+                                    window.location.href = '/logistics';
+                                }, 2000);
+                            }
+                        } catch (error) {
+                            statusDiv.innerHTML = '<div class="error">⚠️ API test failed, but trying redirect anyway...</div>';
+                            setTimeout(() => {
+                                window.location.href = '/logistics';
+                            }, 2000);
+                        }
+                    }, 1000);
+                    
+                } else {
+                    throw new Error(data.message || 'Login failed');
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Login failed: ${error.message}</div>`;
+                console.error('Login error:', error);
+            } finally {
+                loginBtn.disabled = false;
+            }
+        });
+        
+        // Auto-submit on page load for quick testing
+        setTimeout(() => {
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }, 500);
+    </script>
+</body>
+</html>

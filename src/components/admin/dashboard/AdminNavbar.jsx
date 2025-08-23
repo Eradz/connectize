@@ -102,7 +102,7 @@ const AdminNavbar = () => {
                   name={`${currentUser?.first_name} ${currentUser?.last_name}`}
                   src={currentUser?.profile_picture}
                   size="sm"
-                  style={avatarStyle}
+                  className={avatarStyle}
                 />
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium text-gray-900">

@@ -79,6 +79,49 @@ const webRoutes = {
   adminSettingsSystem: "/admin/settings/system",
   adminSettingsApi: "/admin/settings/api",
   
+  // Admin Deal Rooms
+  adminDeals: "/admin/deals",
+  adminDealsAnalytics: "/admin/deals/analytics",
+  adminDealsApprovals: "/admin/deals/approvals",
+  adminDealsCategories: "/admin/deals/categories",
+  adminDealsReports: "/admin/deals/reports",
+  
+  // Admin Workforce
+  adminWorkforce: "/admin/workforce",
+  adminWorkforceJobs: "/admin/workforce/jobs",
+  adminWorkforceProfiles: "/admin/workforce/profiles",
+  adminWorkforceAnalytics: "/admin/workforce/analytics",
+  adminWorkforceApprovals: "/admin/workforce/approvals",
+  adminWorkforceEvents: "/admin/workforce/events",
+  adminWorkforceApplications: "/admin/workforce/applications",
+  
+  // Admin Logistics
+  adminLogistics: "/admin/logistics",
+  adminLogisticsRequests: "/admin/logistics/requests",
+  adminLogisticsShipments: "/admin/logistics/shipments",
+  adminLogisticsInventory: "/admin/logistics/inventory",
+  adminLogisticsAnalytics: "/admin/logistics/analytics",
+  adminLogisticsProviders: "/admin/logistics/providers",
+  adminLogisticsTracking: "/admin/logistics/tracking",
+  
+  // Admin Knowledge Hub
+  adminKnowledge: "/admin/knowledge",
+  adminKnowledgeArticles: "/admin/knowledge/articles",
+  adminKnowledgeForums: "/admin/knowledge/forums",
+  adminKnowledgeCategories: "/admin/knowledge/categories",
+  adminKnowledgeModeration: "/admin/knowledge/moderation",
+  adminKnowledgeAnalytics: "/admin/knowledge/analytics",
+  adminKnowledgeApprovals: "/admin/knowledge/approvals",
+  
+  // Admin Subscriptions
+  adminSubscriptions: "/admin/subscriptions",
+  adminSubscriptionsPlans: "/admin/subscriptions/plans",
+  adminSubscriptionsBilling: "/admin/subscriptions/billing",
+  adminSubscriptionsPayments: "/admin/subscriptions/payments",
+  adminSubscriptionsAnalytics: "/admin/subscriptions/analytics",
+  adminSubscriptionsRevenue: "/admin/subscriptions/revenue",
+  adminSubscriptionsPlanManagement: "/admin/subscriptions/plan-management",
+  
   // Oil & Gas Platform Routes
   // Deal Management
   dealRooms: "/deals",

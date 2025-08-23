@@ -364,7 +364,7 @@ export class DealValuationService extends CrudService {
 
   async runAnalysis(valuationId, analysisType) {
     return makeApiRequest({
-      url: `${this.basePath}/${valuationId}/run_analysis/`,
+      url: `${this.basePath}${valuationId}/run_analysis/`,
       method: "POST",
       data: { analysis_type: analysisType },
     });
@@ -507,7 +507,7 @@ export class LogisticsShipmentService extends CrudService {
 
   async trackShipment(trackingNumber) {
     return makeApiRequest({
-      url: `${this.basePath}/track/`,
+      url: `${this.basePath}track/`,
       method: "GET",
       params: { tracking_number: trackingNumber },
     });
@@ -515,7 +515,7 @@ export class LogisticsShipmentService extends CrudService {
 
   async updateStatus(shipmentId, status, location) {
     return makeApiRequest({
-      url: `${this.basePath}/${shipmentId}/update_status/`,
+      url: `${this.basePath}${shipmentId}/update_status/`,
       method: "POST",
       data: { status, location },
     });
@@ -570,7 +570,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async checkAvailability(itemId, quantity) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/check_availability/`,
+      url: `${this.basePath}${itemId}/check_availability/`,
       method: "GET",
       params: { quantity },
     });
@@ -578,7 +578,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async reserveItems(itemId, quantity, reservationData) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/reserve/`,
+      url: `${this.basePath}${itemId}/reserve/`,
       method: "POST",
       data: { quantity, ...reservationData },
     });
@@ -586,7 +586,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async adjustStock(itemId, adjustmentData) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/adjust_stock/`,
+      url: `${this.basePath}${itemId}/adjust_stock/`,
       method: "POST",
       data: adjustmentData,
     });
@@ -594,28 +594,28 @@ export class LogisticsInventoryService extends CrudService {
 
   async getLowStockAlerts() {
     return makeApiRequest({
-      url: `${this.basePath}/low_stock_alerts/`,
+      url: `${this.basePath}low_stock_alerts/`,
       method: "GET",
     });
   }
 
   async getCategories() {
     return makeApiRequest({
-      url: `${this.basePath}/categories/`,
+      url: `${this.basePath}categories/`,
       method: "GET",
     });
   }
 
   async getSummary() {
     return makeApiRequest({
-      url: `${this.basePath}/summary/`,
+      url: `${this.basePath}summary/`,
       method: "GET",
     });
   }
 
   async getMovements(itemId, params = {}) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/movements/`,
+      url: `${this.basePath}${itemId}/movements/`,
       method: "GET",
       params,
     });
@@ -623,7 +623,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async getRecentMovements(limit = 10) {
     return makeApiRequest({
-      url: `${this.basePath}/recent_movements/`,
+      url: `${this.basePath}recent_movements/`,
       method: "GET",
       params: { limit },
     });
@@ -653,7 +653,7 @@ export class LogisticsInventoryService extends CrudService {
   // Enhanced inventory management methods
   async bulkUpdate(updates) {
     return makeApiRequest({
-      url: `${this.basePath}/bulk_update/`,
+      url: `${this.basePath}bulk_update/`,
       method: "POST",
       data: { updates },
     });
@@ -661,7 +661,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async exportInventory(format = 'csv', filters = {}) {
     return makeApiRequest({
-      url: `${this.basePath}/export/`,
+      url: `${this.basePath}export/`,
       method: "GET",
       params: { format, ...filters },
     });
@@ -669,7 +669,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async importInventory(fileData) {
     return makeApiRequest({
-      url: `${this.basePath}/import/`,
+      url: `${this.basePath}import/`,
       method: "POST",
       data: fileData,
       contentType: "multipart/form-data",
@@ -678,7 +678,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async getStockHistory(itemId, startDate, endDate) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/stock_history/`,
+      url: `${this.basePath}${itemId}/stock_history/`,
       method: "GET",
       params: { start_date: startDate, end_date: endDate },
     });
@@ -686,14 +686,14 @@ export class LogisticsInventoryService extends CrudService {
 
   async generateBarcode(itemId) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/generate_barcode/`,
+      url: `${this.basePath}${itemId}/generate_barcode/`,
       method: "POST",
     });
   }
 
   async getValuationReport(filters = {}) {
     return makeApiRequest({
-      url: `${this.basePath}/valuation_report/`,
+      url: `${this.basePath}valuation_report/`,
       method: "GET",
       params: filters,
     });
@@ -701,7 +701,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async getUsageAnalytics(itemId, period = '30d') {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/usage_analytics/`,
+      url: `${this.basePath}${itemId}/usage_analytics/`,
       method: "GET",
       params: { period },
     });
@@ -709,7 +709,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async setReorderRules(itemId, rules) {
     return makeApiRequest({
-      url: `${this.basePath}/${itemId}/reorder_rules/`,
+      url: `${this.basePath}${itemId}/reorder_rules/`,
       method: "POST",
       data: rules,
     });
@@ -717,7 +717,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async getRecommendations(type = 'reorder') {
     return makeApiRequest({
-      url: `${this.basePath}/recommendations/`,
+      url: `${this.basePath}recommendations/`,
       method: "GET",
       params: { type },
     });
@@ -725,7 +725,7 @@ export class LogisticsInventoryService extends CrudService {
 
   async cycleCounting(items) {
     return makeApiRequest({
-      url: `${this.basePath}/cycle_counting/`,
+      url: `${this.basePath}cycle_counting/`,
       method: "POST",
       data: { items },
     });

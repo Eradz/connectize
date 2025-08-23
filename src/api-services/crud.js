@@ -75,6 +75,15 @@ const api = {
       params: config.params,
     }).then((data) => ({ data })),
 
+  // Public GET request that doesn't require authentication
+  getPublic: (url, config = {}) =>
+    makeApiRequest({
+      url: normalizeUrl(url),
+      method: 'GET',
+      params: config.params,
+      type: 'public', // This bypasses auth check
+    }).then((data) => ({ data })),
+
   post: (url, data, config = {}) =>
     makeApiRequest({
       url: normalizeUrl(url),

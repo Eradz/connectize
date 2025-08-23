@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Testing Workforce API</h1>
+    <button onclick="testAPI()">Test API Call</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            try {
+                console.log('Testing API call...');
+                const response = await fetch('http://localhost:8000/api/v1/workforce/jobs/', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                document.getElementById('result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    
+            } catch (error) {
+                console.error('API call failed:', error);
+                document.getElementById('result').innerHTML = 
+                    `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

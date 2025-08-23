@@ -101,7 +101,7 @@ const LogisticsRequestDetail = () => {
       // Load initial tracking if a shipment was created
       try {
         if (requestData?.shipment_id) {
-          const trackingResp = await logisticsAPI.getShipmentTracking(requestData.shipment_id);
+          const trackingResp = await logisticsAPI.getShipmentTrackingById(requestData.shipment_id);
           const events = trackingResp?.data || trackingResp || [];
           setInitialTracking(Array.isArray(events) ? events : []);
         } else {
