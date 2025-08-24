@@ -14,3 +14,8 @@
 -
 
 - The login page no longer loads the notification.jsx and Discoverposts.jsx chunks which reduce the size of the page by about 3.5MB
+
+-
+
+- Imported all missing imports in the new `ButtonWithTooltipIcon` component
+- Edit company route now uses the live server's url to get cities instead of localhost

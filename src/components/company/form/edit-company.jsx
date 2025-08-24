@@ -12,6 +12,7 @@ import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { makeApiRequest } from "../../../lib/helpers";
 
 export default function EditCompanyForm({ company }) {
   const countries = getCountries();
@@ -92,14 +93,13 @@ export default function EditCompanyForm({ company }) {
     queryFn: async () => {
       if (!countryName || !stateName) return [];
       try {
-        const res = await axios.get(
-          process.env.NODE_ENV === "production"
-            ? ""
-            : `http://192.168.8.116:3000/cities`,
-          { params: { country: countryName, state: stateName } }
-        );
+        const cities = await makeApiRequest({
+          url: "api/cities/",
+          method: "GET",
+          params: { country: countryName, state: stateName },
+        });
 
-        return res.data?.map((city) => city.name) || [];
+        return cities?.map((city) => city.name) || [];
       } catch (error) {
         toast.error(
           "Could not get list of cities for " + stateName + " " + countryName

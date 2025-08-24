@@ -41,6 +41,7 @@ import SocialShareModal from "../../CustomShareButton";
 import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 
 function DiscoverPosts({
   searchArray,
