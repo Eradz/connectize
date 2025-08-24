@@ -16,7 +16,7 @@ import {
   timeAgo,
 } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";

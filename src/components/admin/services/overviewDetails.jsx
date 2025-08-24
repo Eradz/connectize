@@ -8,7 +8,7 @@ import { BookMarkButton } from "../feeds/DiscoverPostTabs";
 import LightParagraph from "../../ParagraphText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import ServiceAdminMain from "./serviceAdminMain";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import { useAuth } from "../../../context/userContext";
 import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 

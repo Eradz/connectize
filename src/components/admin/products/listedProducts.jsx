@@ -5,7 +5,7 @@ import { Heart, StarFilledIcon, StarOutlinedIcon } from "../../../icon";
 import { formatNumber, shareThis } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
 import ProfileSection from "../../userProfile/profile-section";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import { Link } from "react-router";
 
 const ListedProducts = ({ company }) => {

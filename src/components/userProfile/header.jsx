@@ -15,7 +15,7 @@ import { uploadDisplayPicture } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
 import { useGetCurrentCompany } from "../../hooks";
 import { avatarStyle } from "../ResponsiveNav";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 
 const fileSchema = yup
   .mixed()
@@ -221,8 +221,8 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                     ? "Change logo"
                     : "Change display picture"
                   : isCompanyHeader
-                  ? "Add logo"
-                  : "Add display picture"
+                    ? "Add logo"
+                    : "Add display picture"
               }
               onClick={() => document.getElementById("logo").click()}
               iconClassName={"size-5"}

@@ -6,7 +6,7 @@ import { Link } from "react-router";
 import { bookmarkProduct, getProducts } from "../../api-services/products";
 import { useAuth } from "../../context/userContext";
 import { shareThis } from "../../lib/utils";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import PageLoading from "../PageLoading";
 import LightParagraph from "../ParagraphText";
 import { Avatar } from "@chakra-ui/react";

@@ -22,7 +22,7 @@ import useNotificationWebSocket from "../hooks/useNotificationWebSocket";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
 import { useAuth } from "../context/userContext";
-import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import CompanyName from "./company/CompanyName";
 import CustomTabs from "./custom/tabs";
 import { avatarStyle } from "./ResponsiveNav";

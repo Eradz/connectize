@@ -64,10 +64,10 @@
     "zustand": "^5.0.7"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "react-router dev",
     "start": "vite preview",
     "predeploy": "npm run build",
-    "build": "vite build",
+    "build": "react-router build",
     "generate-sitemap": "node ./scripts/generate-sitemap.mjs",
     "generate-routes": "node ./scripts/generate-app-routes.mjs",
     "routes": "node ./scripts/structured-app-routes.mjs",

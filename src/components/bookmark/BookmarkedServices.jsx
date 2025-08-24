@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import LightParagraph from "../ParagraphText";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { shareThis } from "../../lib/utils";
 import { useAuth } from "../../context/userContext";

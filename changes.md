@@ -10,3 +10,7 @@
 - Fixed the undefined showing in the download post feature in home page
 
 - Made the height for products and services in the slider in home page have even/the same height.
+
+-
+
+- The login page no longer loads the notification.jsx and Discoverposts.jsx chunks which reduce the size of the page by about 3.5MB

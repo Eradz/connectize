@@ -2,7 +2,7 @@ import { DownloadIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { generatePDF } from "../lib/generatePDF";
-import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import ReusableModal from "./custom/ResusableModal";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;

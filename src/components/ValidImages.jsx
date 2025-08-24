@@ -1,6 +1,6 @@
 import { CloseButton } from "@chakra-ui/react";
 import React from "react";
-import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 
 export default function ValidImages({
   validImages,

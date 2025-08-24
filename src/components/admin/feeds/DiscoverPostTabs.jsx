@@ -13,10 +13,9 @@ import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
-import {
-  ButtonWithTooltipIcon,
-  ConjoinedAvatarSkeleton,
-} from "./DiscoverPosts";
+import { ConjoinedAvatarSkeleton } from "./DiscoverPosts";
+
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import { cn } from "../../../lib/utils";
 import { useGetServicesFirstPage } from "../../../hooks/useServices";
 import { useGetProductsFirstPage } from "../../../hooks/useProduct";

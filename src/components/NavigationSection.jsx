@@ -7,7 +7,7 @@ import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";
 import { feedNavItems } from "../lib/data";
 import { getSession } from "../lib/session";
-import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
 

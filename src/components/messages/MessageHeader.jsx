@@ -7,7 +7,7 @@ import { webRoutes } from "../../lib/webRoutes";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { avatarStyle } from "../ResponsiveNav";
 import Username from "../Username";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
 import { useAuth } from "../../context/userContext";
 

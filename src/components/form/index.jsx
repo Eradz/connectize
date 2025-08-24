@@ -1,7 +1,7 @@
 import { Textarea } from "@chakra-ui/react";
 import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import CustomInput, {
   CustomSelect,
   CustomTextArea,

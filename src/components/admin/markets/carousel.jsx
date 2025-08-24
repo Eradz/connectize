@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router";
 import { SwiperSlide } from "swiper/react";
 import { getRecommendedProducts } from "../../../api-services/products";
 import HeadingText from "../../HeadingText";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import { PostSlider } from "../feeds/DiscoverPostTabs";
 import { ChatSellerLink, ListCardSkeleton } from "./newlyListed";
 

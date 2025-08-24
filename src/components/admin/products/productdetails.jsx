@@ -21,7 +21,7 @@ import { ChatSellerLink } from "../markets/newlyListed";
 import { useGetCurrentCompany } from "../../../hooks";
 import NewListing from "../listing/newListing";
 import NoPage from "../../NoPage";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 
 function Productdetails({ product }) {
   const swiperRef = useRef(null);
