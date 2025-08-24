@@ -91,6 +91,7 @@ export function SuggestionList({
   hasSeeMore,
   associated = false,
   thisUser,
+  companyId,
   viewMoreUrl,
 }) {
   const { user: currentUser } = useAuth();
@@ -103,8 +104,8 @@ export function SuggestionList({
   const { data: shownUsers = [], isLoading } = useQuery({
     queryKey,
     queryFn: associated
-      ? () => getPeopleAssociatedForUser(thisUser)
-      : getSuggestedUsersForCurrentUser,
+      ? () => getPeopleAssociatedForUser(thisUser, companyId)
+      : () => getSuggestedUsersForCurrentUser(),
     enabled: !!currentUser && !!thisUser?.id,
     keepPreviousData: true,
   });

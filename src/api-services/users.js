@@ -100,7 +100,7 @@ export const getSuggestedUsersForCurrentUser = async () => {
   return allUsersInLocation;
 };
 
-export const getPeopleAssociatedForUser = async (thisUser) => {
+export const getPeopleAssociatedForUser = async (thisUser, companyId) => {
   if (!thisUser) return [];
 
   const nonProfessionalEmailDomains = new Set([
@@ -115,19 +115,19 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
     "admin.com",
     "superadmin.com",
   ]);
-
   const [allUsers, representatives] = await Promise.all([
     getAllUsers(),
-    getAllRepresentatives({ company_id: thisUser?.companies?.[0] }),
+    getAllRepresentatives({ company_id: companyId }),
   ]);
 
   // Fetch representatives' associated users
   const representativesAssociated = await Promise.all(
     representatives.map(async (rep) => {
-      if (rep.user === thisUser.id) {
-        const companyUser = await getCompanyByIdOrEmail(rep.company);
-        return companyUser?.[0]?.user || null;
-      }
+      // if (rep.user === thisUser.id) {
+      //   const companyUser = await getCompanyByIdOrEmail(rep.company);
+      //   return companyUser?.[0]?.user || null;
+      // }
+
       return getUserById(rep.user);
     })
   );

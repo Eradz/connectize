@@ -56,7 +56,7 @@ export default function RepresentativesPage() {
       { company: companyId, user: userIdParam },
     ],
     queryFn: async ({ pageParam }) =>
-      await getAllRepresentatives(
+      getAllRepresentatives(
         {
           // status: "True",
           company_id: companyId,
@@ -73,7 +73,7 @@ export default function RepresentativesPage() {
   const { data: representativeCategories, isLoading: repsCatLoading } =
     useQuery({
       queryKey: ["representatives-categories"],
-      queryFn: getOrCreateRepresentativeCategory,
+      queryFn: () => getOrCreateRepresentativeCategory(),
     });
 
   if (isLoading || companyLoading || repsLoading || repsCatLoading)

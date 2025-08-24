@@ -19,3 +19,6 @@
 
 - Imported all missing imports in the new `ButtonWithTooltipIcon` component
 - Edit company route now uses the live server's url to get cities instead of localhost
+
+-
+- Fixed some minor issues with the People associated section of the companies details page. The correct list of reps now show up there.
