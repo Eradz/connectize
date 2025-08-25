@@ -33,8 +33,10 @@ const TopServiceSuggestions = () => {
 export default TopServiceSuggestions;
 
 export function TopServices() {
+  //
   const { data: services, isLoading } = useGetServicesFirstPage();
   const service = services?.[0];
+  //
 
   return (
     <section className="w-full">

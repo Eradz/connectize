@@ -22,3 +22,6 @@
 
 -
 - Fixed some minor issues with the People associated section of the companies details page. The correct list of reps now show up there.
+
+-
+- Update the reps page to use the new implementation on the server

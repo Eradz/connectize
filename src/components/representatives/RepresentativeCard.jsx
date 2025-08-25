@@ -24,7 +24,7 @@ export default function RepresentativeCard({ user, company, role }) {
             href: `/${company?.slug}`,
           },
           {
-            name: `${user?.first_name} ${user?.last_name}`,
+            name: `${user?.full_name}`,
             src: user?.avatar,
             href: `/co/${user?.id}`,
           },
@@ -34,11 +34,10 @@ export default function RepresentativeCard({ user, company, role }) {
       />
       <div className="flex flex-col items-center text-center">
         <Username user={user} />
+        <small className="text-gray-400 capitalize line-clamp-2">{role}</small>
         <small className="text-gray-400 line-clamp-2">
-          {capitalizeFirst(user?.role)}
-        </small>
-        <small className="text-gray-400 line-clamp-2">
-          {capitalizeFirst(role)} representative at{" "}
+          <span className="capitalize">{role}</span>
+          {role} representative at{" "}
           <Link to={`/${company?.slug}`} className="!text-black keep-all">
             {company?.company_name}
           </Link>

@@ -17,6 +17,7 @@ import PrimaryButton from "../../components/PrimaryButton";
 import clsx from "clsx";
 import { useGetSingleCompany } from "../../hooks";
 import { createSEO } from "../../components/SEO";
+import { usePaginatedRepresentatives } from "../../hooks/useRepresentatives";
 
 export const meta = () =>
   createSEO({
@@ -42,6 +43,7 @@ export default function RepresentativesPage() {
 
   const { data: companyDetails, isLoading: isLoadingCompanyDetails } =
     useGetSingleCompany(companySlug, { enabled: !!companySlug });
+
   const {
     data: paginatedData,
     fetchNextPage,
@@ -49,23 +51,9 @@ export default function RepresentativesPage() {
     isFetching,
     isFetchingNextPage,
     isLoading: repsLoading,
-  } = usePageination({
-    queryKey: [
-      "representatives",
-      "all",
-      { company: companyId, user: userIdParam },
-    ],
-    queryFn: async ({ pageParam }) =>
-      getAllRepresentatives(
-        {
-          // status: "True",
-          company_id: companyId,
-          user: userIdParam,
-          page_size: 2,
-          page: pageParam,
-        },
-        true
-      ),
+  } = usePaginatedRepresentatives({
+    companyId,
+    userId: userIdParam,
   });
 
   const repsFirstPage = paginatedData?.pages?.[0]?.data;
@@ -113,23 +101,28 @@ export default function RepresentativesPage() {
                   reps?.company !== null &&
                   reps?.role !== null
               )
-              .map((reps) => {
-                const user = users?.find((user) => reps?.user === user?.id);
-                const company = companies?.results?.find(
-                  (company) => reps?.company === company?.id
-                );
+              .map((rep) => {
+                // const user = users?.find((user) => rep?.user === user?.id);
+                // const company = companies?.results?.find(
+                //   (company) => rep?.company === company?.id
+                // );
                 const role = representativeCategories?.find(
-                  (category) => category?.id === reps?.category
+                  (category) => category?.id === rep?.category
                 )?.type;
 
-                const formattedRepsData = {
-                  user,
-                  company,
-                  role,
-                };
+                // const formattedRepsData = {
+                //   user,
+                //   company,
+                //   role,
+                // };
 
                 return (
-                  <RepresentativeCard key={reps?.id} {...formattedRepsData} />
+                  <RepresentativeCard
+                    key={rep?.id}
+                    company={rep.company}
+                    role={role}
+                    user={rep.user}
+                  />
                 );
               });
           })
