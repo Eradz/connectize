@@ -1,9 +1,13 @@
 import { getAllRepresentatives } from "../api-services/representatives";
 import { usePageination } from "./usePagination";
 
-export function usePaginatedRepresentatives({ companyId, userId } = {}) {
+export function usePaginatedRepresentatives(
+  { companyId, userId } = {},
+  { enabled = true }
+) {
   return usePageination({
     queryKey: ["representatives", "all", { company: companyId, user: userId }],
+    enabled,
     queryFn: async ({ pageParam }) =>
       getAllRepresentatives(
         {

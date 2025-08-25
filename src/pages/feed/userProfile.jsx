@@ -171,7 +171,7 @@ export default function UserProfile() {
           <ProfileSection title="People Associated" className="h-fit lg:w-1/3">
             <SuggestionList
               hasSeeMore
-              associated
+              associated={false}
               thisUser={paramUser}
               viewMoreUrl={`/co/representatives/?user=${paramUser?.id}&status=True`}
             />

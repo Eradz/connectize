@@ -4,8 +4,8 @@ import clsx from "clsx";
 import { useEffect } from "react";
 import { getServices } from "../../../api-services/services";
 import {
-  getPeopleAssociatedForUser,
-  getSuggestedUsersForCurrentUser,
+  // getPeopleAssociatedForUser,
+  getAssociatedUsersForUser,
 } from "../../../api-services/users";
 import { useAuth } from "../../../context/userContext";
 import { queryClient } from "../../../lib/utils";
@@ -19,6 +19,7 @@ import {
   useGetServicesFirstPage,
   usePageinatedServices,
 } from "../../../hooks/useServices";
+import { usePaginatedRepresentatives } from "../../../hooks/useRepresentatives";
 
 const TopServiceSuggestions = () => {
   return (
@@ -98,17 +99,34 @@ export function SuggestionList({
 }) {
   const { user: currentUser } = useAuth();
 
-  const queryKey = [
-    associated ? "associatedUsers" : "suggestedUsers",
-    thisUser?.id,
-  ];
+  const queryKey = ["associatedUsers"];
 
-  const { data: shownUsers = [], isLoading } = useQuery({
+  // const queryKey = [
+  //   associated ? "associatedUsers" : "suggestedUsers",
+  //   thisUser?.id,
+  // ];
+
+  const { data: paginatedData, isLoading: isRepsLoading } =
+    usePaginatedRepresentatives(
+      {
+        companyId,
+        // userId: userIdParam,
+      },
+      { enabled: associated && !!companyId }
+    );
+
+  const repsFirstPage = paginatedData?.pages?.[0]?.data;
+
+  const { data: associatedUsers = [], isLoading } = useQuery({
     queryKey,
-    queryFn: associated
-      ? () => getPeopleAssociatedForUser(thisUser, companyId)
-      : () => getSuggestedUsersForCurrentUser(),
-    enabled: !!currentUser && !!thisUser?.id,
+
+    queryFn: () => getAssociatedUsersForUser(),
+    enabled: !associated && !!currentUser && !!thisUser?.id,
+    // enabled:
+    // queryFn: associated
+    //   ? () => getPeopleAssociatedForUser(thisUser, companyId)
+    //   : () => getSuggestedUsersForCurrentUser(),
+    // enabled: !!currentUser && !!thisUser?.id,
     keepPreviousData: true,
   });
 
@@ -121,18 +139,33 @@ export function SuggestionList({
   return (
     <section>
       <ul className="space-y-2 divide-y divide-gray-100">
-        {isLoading ? (
+        {isLoading || isRepsLoading ? (
           Array.from({ length: 6 }, (_, index) => (
             <CircleTitleSubtitleSkeleton key={index} />
           ))
-        ) : shownUsers?.length <= 0 ? (
+        ) : (associated ? repsFirstPage?.length : associatedUsers?.length) <=
+          0 ? (
           <LightParagraph>
             {associated
               ? "No users associated yet. Connect more to see user associated"
               : "No suggested users yet"}
           </LightParagraph>
+        ) : associated ? (
+          repsFirstPage.map(({ user }) => {
+            return (
+              <SuggestionListItem
+                key={user.id}
+                avatar={user.avatar}
+                hashtag={user.email}
+                id={user.id}
+                rep={true}
+                user={user}
+                full_name={user.full_name}
+              />
+            );
+          })
         ) : (
-          shownUsers?.map((user) => {
+          associatedUsers?.map((user) => {
             const {
               first_name,
               last_name,
@@ -144,33 +177,56 @@ export function SuggestionList({
             } = user;
 
             return (
-              <li className="flex items-center gap-2.5 pt-2" key={id}>
-                <Avatar
-                  src={avatar}
-                  name={first_name ? `${first_name} ${last_name}` : hashtag}
-                  size="sm"
-                  className={avatarStyle}
-                />
-                <div>
-                  <div className="flex items-center gap-1">
-                    <Username user={user} />
-                    {(rep || domain) && (
-                      <Badge className="!text-[.6rem]">
-                        {rep ? "Representative" : "Domain"}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-400 -mt-1">{hashtag}</p>
-                </div>
-              </li>
+              <SuggestionListItem
+                key={id}
+                avatar={avatar}
+                hashtag={hashtag}
+                user={user}
+                id={id}
+                rep={rep}
+                domain={domain}
+                full_name={`${first_name} ${last_name}`}
+              />
             );
           })
         )}
       </ul>
-      {hasSeeMore && shownUsers?.length > 1 && (
+      {hasSeeMore && associatedUsers?.length > 1 && (
         <SeeMoreLink url={viewMoreUrl} />
       )}
     </section>
+  );
+}
+
+function SuggestionListItem({
+  id,
+  avatar,
+  full_name,
+  hashtag,
+  rep = false,
+  domain = false,
+  user,
+}) {
+  return (
+    <li className="flex items-center gap-2.5 pt-2" key={id}>
+      <Avatar
+        src={avatar}
+        name={full_name ? full_name : hashtag}
+        size="sm"
+        className={avatarStyle}
+      />
+      <div>
+        <div className="flex items-center gap-1">
+          <Username user={user} />
+          {(rep || domain) && (
+            <Badge className="!text-[.6rem]">
+              {rep ? "Representative" : "Domain"}
+            </Badge>
+          )}
+        </div>
+        <p className="text-sm text-gray-400 -mt-1">{hashtag}</p>
+      </div>
+    </li>
   );
 }
 
