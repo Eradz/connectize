@@ -25,3 +25,4 @@
 
 -
 - Update the reps page to use the new implementation on the server
+- Fixed the slowness of the people assoiciated section of the user details and company details pages
