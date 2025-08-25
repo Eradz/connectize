@@ -1,8 +1,8 @@
 {
-	"appId": "com.connectize.app",
+	"appId": "co.connectize.app",
 	"appName": "Connectize",
 	"webDir": "build",
-	"android": {},
+	"ios": {},
 	"plugins": {
 		"SplashScreen": {
 			"launchShowDuration": 0,
