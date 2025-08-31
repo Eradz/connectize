@@ -17,43 +17,38 @@ const decryptData = (encryptedData) => {
   return bytes.toString(CryptoJS.enc.Utf8);
 };
 
-// Set session with multiple storage fallbacks (for Capacitor compatibility)
+// Set session with Capacitor compatibility
 export const setSession = (value, expiresInDays = 7) => {
   const sessionString = JSON.stringify(value);
   const encryptedSession = encryptData(sessionString);
 
   try {
-    // Primary: Use cookies (works in browsers)
+    // Use cookies for web browsers and HTTPS/Capacitor environments
     Cookies.set(AUTH_SESSION_COOKIE, encryptedSession, {
       expires: expiresInDays,
       sameSite: 'Lax',
       secure: location.protocol === 'https:' || location.protocol === 'capacitor:',
     });
-  } catch (e) {
-    console.warn('Cookie storage failed:', e);
-  }
-
-  try {
-    // Fallback: Use localStorage (works in Capacitor apps)
+    
+    // Also store in localStorage as fallback for Capacitor apps
     localStorage.setItem(AUTH_SESSION_STORAGE, encryptedSession);
-    // Store expiry time for localStorage cleanup
     const expiryTime = new Date().getTime() + (expiresInDays * 24 * 60 * 60 * 1000);
     localStorage.setItem(AUTH_SESSION_STORAGE + '_expiry', expiryTime.toString());
+    
+    console.log('✅ Session stored successfully');
   } catch (e) {
-    console.warn('localStorage storage failed:', e);
+    console.error('Session storage failed:', e);
   }
-
-  console.log('✅ Session stored successfully');
 };
 
-// Get session with multiple storage fallbacks
+// Get session with Capacitor compatibility
 export const getSession = () => {
   try {
     // Try cookies first
     let encryptedSession = Cookies.get(AUTH_SESSION_COOKIE);
     let source = 'cookie';
 
-    // If no cookie, try localStorage
+    // If no cookie, try localStorage (important for Capacitor apps)
     if (!encryptedSession) {
       encryptedSession = localStorage.getItem(AUTH_SESSION_STORAGE);
       source = 'localStorage';
@@ -71,7 +66,7 @@ export const getSession = () => {
     }
 
     if (!encryptedSession) {
-      console.log('❌ No session found in any storage');
+      console.log('❌ No session found');
       return null;
     }
 
@@ -80,7 +75,7 @@ export const getSession = () => {
 
     console.log(`✅ Session retrieved from ${source}`);
 
-    // Re-sync storage (ensure both have the data)
+    // Re-sync storage for cross-platform compatibility
     if (source === 'localStorage' && session) {
       setSession(session);
     }
@@ -98,16 +93,10 @@ export const getSession = () => {
 export const removeSession = () => {
   try {
     Cookies.remove(AUTH_SESSION_COOKIE);
-  } catch (e) {
-    console.warn('Cookie removal failed:', e);
-  }
-
-  try {
     localStorage.removeItem(AUTH_SESSION_STORAGE);
     localStorage.removeItem(AUTH_SESSION_STORAGE + '_expiry');
+    console.log('🗑️ Session removed from all storage');
   } catch (e) {
-    console.warn('localStorage removal failed:', e);
+    console.error('Session removal failed:', e);
   }
-
-  console.log('🗑️ Session removed from all storage');
 };

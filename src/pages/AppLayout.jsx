@@ -9,15 +9,16 @@ const AppLayout = () => {
   const isHomeRoute = pathname === "/" || pathname.startsWith("/messages");
   const isMessagesRoute = pathname.startsWith("/messages");
   return (
-    <main className="bg-background w-full  overflow-x-  h-screen flex flex-col">
+  <main className="bg-background w-full h-full flex flex-col flex-1 safe-area-top safe-area-bottom">
       <Navbar />
 
-      <section
+  <section
         className={clsx(
           "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4 md:container",
           {
             "py-6 px-2": !isSinglePostRoute && !isHomeRoute,
-            "flex-1 h-[calc(100%_-_64px)]": isMessagesRoute,
+    // Subtract navbar height (64px) plus dynamic safe areas handled via padding
+    "flex-1": isMessagesRoute,
           }
         )}
       >
@@ -31,6 +32,8 @@ const AppLayout = () => {
           <Outlet />
         </section>
       </section>
+  {/* Spacer to ensure scrollable content isn't hidden behind fixed bottom nav (height + safe area) */}
+  <div className="h-20 md:hidden" aria-hidden="true" />
     </main>
   );
 };

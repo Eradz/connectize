@@ -10,6 +10,43 @@
   --grey: #828282;
   --light-grey: #e5e5e5;
   --mid-grey: #373737;
+  /* Safe area CSS variables (fallback 0 if not supported) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Safe area utility classes (support old iOS constant() syntax) */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top); /* modern */
+  padding-top: constant(safe-area-inset-top); /* legacy */
+}
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom);
+}
+.safe-area-y {
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom);
+}
+.safe-area-x {
+  padding-left: env(safe-area-inset-left);
+  padding-left: constant(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-right: constant(safe-area-inset-right);
+}
+.safe-area-p {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: constant(safe-area-inset-top) constant(safe-area-inset-right) constant(safe-area-inset-bottom) constant(safe-area-inset-left);
+}
+
+/* Utility to prevent inadvertent horizontal overflow when children use 100vw */
+.no-horizontal-overflow {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Stop document body from scrolling because of attachment popover when the messages panel is opened */

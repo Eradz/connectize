@@ -80,9 +80,9 @@ export default function MessageControl() {
 
   const renderEmojiGifPickers = useMemo(
     () => (
-      <section className="fixed top-0 left-0 w-screen h-screen z-[4000] flex items-center justify-center bg-transparent">
+    <section className="fixed inset-0 w-full h-full z-[4000] flex items-center justify-center bg-transparent safe-area-p">
         <div
-          className="bg-black/30 fixed top-0 left-0 w-screen h-screen"
+      className="bg-black/30 fixed inset-0 w-full h-full"
           onClick={() => {
             setShowEmojiPicker(false);
           }}

@@ -14,18 +14,21 @@ import "./index.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <MyProvider>
-        <App />
-      </MyProvider>
-      <Toaster
-        position="top-center"
-        closeButton
-        duration={5000}
-        pauseWhenPageIsHidden
-      />
-    </BrowserRouter>
-    <Analytics />
+    {/* Root safe-area wrapper ensures entire app respects notches & home indicator */}
+    <div className="safe-area-x safe-area-y min-h-screen flex flex-col no-horizontal-overflow" id="app-safe-wrapper">
+      <BrowserRouter>
+        <MyProvider>
+          <App />
+        </MyProvider>
+        <Toaster
+          position="top-center"
+          closeButton
+          duration={5000}
+          pauseWhenPageIsHidden
+        />
+      </BrowserRouter>
+      <Analytics />
+    </div>
   </React.StrictMode>
 );
 
