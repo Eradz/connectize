@@ -3,7 +3,7 @@ import { usePageination } from "./usePagination";
 
 export function usePaginatedRepresentatives(
   { companyId, userId } = {},
-  { enabled = true }
+  { enabled = true } = {},
 ) {
   return usePageination({
     queryKey: ["representatives", "all", { company: companyId, user: userId }],
@@ -17,7 +17,7 @@ export function usePaginatedRepresentatives(
           page_size: 6,
           page: pageParam,
         },
-        true
+        true,
       ),
   });
 }

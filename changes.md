@@ -26,3 +26,7 @@
 -
 - Update the reps page to use the new implementation on the server
 - Fixed the slowness of the people assoiciated section of the user details and company details pages
+
+-
+
+- Added labels to the bottom nav on mobile and moved the bookmarks tab to the top profile dropdown

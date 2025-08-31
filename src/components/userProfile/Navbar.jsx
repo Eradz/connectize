@@ -72,8 +72,8 @@ const Navbar = () => {
 
       <motion.nav
         className="md:hidden bg-mid_grey fixed bottom-0 left-0 w-full z-[99999]"
-        // initial={{ y: 0 }}
-        // animate={{ y: 100 }} // showBottomNav ? 0 :
+      // initial={{ y: 0 }}
+      // animate={{ y: 100 }} // showBottomNav ? 0 :
       >
         <section className="container">
           <NavigationSection hasHeader isSmallNavigation />

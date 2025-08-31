@@ -24,6 +24,7 @@ import { logOutCurrentUser } from "../api-services/users";
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
 import { LogoutOutlined } from "@ant-design/icons";
+import { webRoutes } from "../lib/webRoutes";
 
 function ResponsiveNav() {
   const { toggleNav } = useNav();
@@ -77,7 +78,7 @@ export const JoinedUserCompanyImages = () => {
     );
 
     if (container) {
-      container.style.setProperty("overflow-x", "");
+      container.style.setProperty("overflow", "");
       setIsPopoverOpen(true);
     }
   }
@@ -87,7 +88,7 @@ export const JoinedUserCompanyImages = () => {
     );
 
     if (container) {
-      container.style.setProperty("overflow-x", "hidden");
+      container.style.setProperty("overflow", "hidden");
 
       setIsPopoverOpen(false);
     }
@@ -119,9 +120,8 @@ export const JoinedUserCompanyImages = () => {
           <PopoverTrigger>
             <Avatar
               src={currentUser?.avatar || ""}
-              name={`${currentUser?.first_name || ""} ${
-                currentUser?.last_name || "" || currentUser?.email
-              }`}
+              name={`${currentUser?.first_name || ""} ${currentUser?.last_name || "" || currentUser?.email
+                }`}
               size={"sm"}
               style={{
                 transform: `translateX(-${6 * 0}px)`,
@@ -148,6 +148,15 @@ export const JoinedUserCompanyImages = () => {
                 <User className="mr-2 text-gray-500" />{" "}
                 <span className="!leading-none">My Account</span>
               </Link>
+
+              <Link
+                to={webRoutes.bookmarks}
+                className="flex px-3 py-3 items-center transition-all active:scale-90 duration-300 hover:text-mid_grey text-gray-500 text-sm"
+              >
+                <User className="mr-2 text-gray-500" />{" "}
+                <span className="!leading-none">My Boolmarks</span>
+              </Link>
+
               <Link
                 to="/co/settings"
                 className="flex px-3 py-3 items-center transition-all active:scale-90 duration-300 hover:text-mid_grey text-gray-500 text-sm"
@@ -197,9 +206,8 @@ export const JoinedUserCompanyImages = () => {
           array={[
             {
               src: currentUser?.avatar || "",
-              name: `${currentUser?.first_name || ""} ${
-                currentUser?.last_name || "" || currentUser?.email
-              }`,
+              name: `${currentUser?.first_name || ""} ${currentUser?.last_name || "" || currentUser?.email
+                }`,
               href: `/co/${currentUser?.id}`,
             },
 
