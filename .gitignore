@@ -8,8 +8,6 @@ bun.lock
 #
 /.react-router
 
-# android builds
-/android
 
 # ignoring folders i backed up
 /android-backup
