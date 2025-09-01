@@ -4,6 +4,9 @@
 # ignoring bun.lock because the project actually uses yarn but i use bun.
 bun.lock
 
+# android builds
+/android
+
 # ignoring folders i backed up
 /android-backup
 capacitor.config.ts.backup
