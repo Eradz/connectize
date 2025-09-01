@@ -59,17 +59,22 @@ export function Layout({ children }) {
       </head>
       <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
-        <MyProvider>{children}</MyProvider>
-        <Toaster
-          position="top-center"
-          closeButton
-          duration={5000}
-          pauseWhenPageIsHidden
-        />
-        <Analytics />
-        {/* <ScrollRestoration /> */}
 
-        {/* <script></script> */}
+        {/* Root safe-area wrapper ensures entire app respects notches & home indicator */}
+
+        <div
+          className="safe-area-x safe-area-y min-h-screen flex flex-col no-horizontal-overflow"
+          id="app-safe-wrapper"
+        >
+          <MyProvider>{children}</MyProvider>
+          <Toaster
+            position="top-center"
+            closeButton
+            duration={5000}
+            pauseWhenPageIsHidden
+          />
+        </div>
+        <Analytics />
         <Scripts />
       </body>
     </html>
