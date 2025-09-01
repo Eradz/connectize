@@ -10,9 +10,9 @@ import Heading from "../../components/company/Heading";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import PrimaryButton from "../../components/PrimaryButton";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 import { usePollAllCompanies } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
@@ -20,6 +20,12 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getAllCompanies } from "../../api-services/companies";
 import { useMemo } from "react";
 
+export const meta = () =>
+  createSEO({
+    title: "Companies | Connectize",
+    description:
+      "Discover top companies in the oil and gas industry on Connectize. Create or explore detailed company profiles, connect with industry professionals, showcase services, attract investors, and collaborate on innovative projects. Join the leading platform transforming energy sector networking.",
+  });
 const sortOptions = [
   "company name",
   "company type",
@@ -103,10 +109,10 @@ export default function CompaniesPage() {
 
   return (
     <section className="space-y-6 px-2 md:px-0">
-      <SEO
+      {/* <SEO
         title="Companies | Connectize"
         description="Discover top companies in the oil and gas industry on Connectize. Create or explore detailed company profiles, connect with industry professionals, showcase services, attract investors, and collaborate on innovative projects. Join the leading platform transforming energy sector networking."
-      />
+      /> */}
       <section className="flex items-center justify-between">
         <Heading />
         {currentUser &&

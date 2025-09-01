@@ -2,12 +2,12 @@ import { PhoneOutlined } from "@ant-design/icons";
 import { Avatar, Text, useStatStyles } from "@chakra-ui/react";
 import { ChevronLeftRounded } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router";
 import { webRoutes } from "../../lib/webRoutes";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { avatarStyle } from "../ResponsiveNav";
 import Username from "../Username";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
 import { useAuth } from "../../context/userContext";
 

@@ -10,7 +10,7 @@ import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import {
   deleteAllNotifications,
   deleteNotification,
@@ -22,7 +22,7 @@ import useNotificationWebSocket from "../hooks/useNotificationWebSocket";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
 import { useAuth } from "../context/userContext";
-import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import CompanyName from "./company/CompanyName";
 import CustomTabs from "./custom/tabs";
 import { avatarStyle } from "./ResponsiveNav";

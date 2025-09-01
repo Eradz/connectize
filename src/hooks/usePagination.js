@@ -1,16 +1,19 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-export const usePageination = ({
-  queryKey,
-  queryFn,
-  initialPageParam = 1,
-  //   page_size = 3,
-} = {}) => {
+export const usePageination = (
+  {
+    queryKey,
+    queryFn,
+    initialPageParam = 1,
+    //   page_size = 3,
+  } = {},
+  { enabled = true } = {},
+) => {
   return useInfiniteQuery({
     queryKey,
     initialPageParam,
     queryFn,
-
+    enabled,
     getNextPageParam: (lastPage) => {
       if (!lastPage || !lastPage.next) return;
 

@@ -1,6 +1,6 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useQuery } from "@tanstack/react-query";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import LightParagraph from "../../components/ParagraphText";
 import Restricted from "../../components/Restricted";

@@ -2,14 +2,17 @@ import { Button } from "@chakra-ui/react";
 import { getCountries } from "@loophq/country-state-list";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { editCompanyInformation } from "../../../api-services/companies";
-import cities from "../../../lib/data/cities.json";
+// import cities from "../../../lib/data/cities.json";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { makeApiRequest } from "../../../lib/helpers";
 
 export default function EditCompanyForm({ company }) {
   const countries = getCountries();
@@ -77,10 +80,39 @@ export default function EditCompanyForm({ company }) {
     countries.find((country) => country.name === formik.values["country"])
       ?.states || [];
 
-  const citiesForState =
-    cities
-      .filter((city) => city.state_name === formik.values["state"])
-      .map((city) => city.name) || [];
+  const countryName = formik.values["country"];
+  const stateName = formik.values["state"];
+
+  const {
+    data: citiesForState,
+    isLoading: isLoadingGetCitiesForState,
+    isFetching,
+  } = useQuery({
+    queryKey: ["cities", { countryName, stateName }],
+    initialData: [],
+    queryFn: async () => {
+      if (!countryName || !stateName) return [];
+      try {
+        const cities = await makeApiRequest({
+          url: "api/cities/",
+          method: "GET",
+          params: { country: countryName, state: stateName },
+        });
+
+        return cities?.map((city) => city.name) || [];
+      } catch (error) {
+        toast.error(
+          "Could not get list of cities for " + stateName + " " + countryName
+        );
+        throw error;
+      }
+    },
+  });
+
+  // const citiesForState =
+  //   cities
+  //     .filter((city) => city.state_name === formik.values["state"])
+  //     .map((city) => city.name) || [];
 
   const companyFields = [
     {
@@ -135,7 +167,10 @@ export default function EditCompanyForm({ company }) {
           type: "select",
           label: "Region/City",
           placeholder: "Select city",
+          disabled: isLoadingGetCitiesForState || isFetching,
           options: citiesForState,
+          isLoading: isLoadingGetCitiesForState || isFetching,
+          loadingText: "Loading cites...",
         },
         {
           name: "organization_type",

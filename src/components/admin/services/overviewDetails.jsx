@@ -2,13 +2,13 @@ import { useEffect } from "react";
 import { Location, Pencil } from "../../../icon";
 import { getSingleService } from "../../../api-services/services";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router";
 import NoPage from "../../NoPage";
 import { BookMarkButton } from "../feeds/DiscoverPostTabs";
 import LightParagraph from "../../ParagraphText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import ServiceAdminMain from "./serviceAdminMain";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import { useAuth } from "../../../context/userContext";
 import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 

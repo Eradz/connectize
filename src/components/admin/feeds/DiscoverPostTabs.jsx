@@ -3,7 +3,7 @@ import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
 import React, { useCallback, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { bookmarkProduct } from "../../../api-services/products";
@@ -13,10 +13,9 @@ import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
-import {
-  ButtonWithTooltipIcon,
-  ConjoinedAvatarSkeleton,
-} from "./DiscoverPosts";
+import { ConjoinedAvatarSkeleton } from "./DiscoverPosts";
+
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import { cn } from "../../../lib/utils";
 import { useGetServicesFirstPage } from "../../../hooks/useServices";
 import { useGetProductsFirstPage } from "../../../hooks/useProduct";
@@ -135,8 +134,8 @@ export const PostSlider = ({
         {children
           ? children
           : array.map((item, index) => (
-              <SwiperSlide key={index}>
-                <PostCard {...item} />
+              <SwiperSlide className="h-auto self-stretch" key={index}>
+                <PostCard {...item} className={"h-full"} />
               </SwiperSlide>
             ))}
       </Swiper>
@@ -184,7 +183,7 @@ export const PostCard = ({
         ))}
       </div> */}
 
-      <div className="my-3 flex gap-2 flex-1">
+      <div className="mt-3 flex gap-2 flex-1">
         <div className="line-clamp-3 shrink-0 w-[70%]">
           <MarkdownComponent
             markdownContent={
@@ -210,7 +209,7 @@ export const PostCard = ({
         />
       )} */}
 
-      <div className="flex items-center justify-between gap-4 mt-4 py-3 border-t">
+      <div className="flex items-center justify-between gap-4 mt-4 pt-3 border-t">
         <div className="flex gap-2 items-center">
           <Link to={`/${slug || companyName}`} className="relative">
             <Avatar
@@ -280,10 +279,10 @@ export const BookMarkButton = ({ service, product }) => {
         (serviceProp) => serviceProp?.user?.id === currentUser?.id
       )
     : product
-    ? product?.likes?.find(
-        (productProp) => productProp?.user?.id === currentUser?.id
-      )
-    : false;
+      ? product?.likes?.find(
+          (productProp) => productProp?.user?.id === currentUser?.id
+        )
+      : false;
   const [bookmarked, setBookmarked] = useState(userHasBookmarked);
   const [disabled, setDisabled] = useState(false);
 

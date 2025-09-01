@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
 import Markdown from "markdown-to-jsx";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import LightParagraph from "./ParagraphText";
 
 const CustomLink = ({ children, ...props }) => (
@@ -88,7 +88,7 @@ const FormatPostText = ({ text, isSinglePost = false, postId }) => {
   );
 
   return (
-    <LightParagraph>
+    <LightParagraph asDiv={true}>
       {isSinglePost ? (
         <Markdown options={options}>{sanitizedText}</Markdown>
       ) : (

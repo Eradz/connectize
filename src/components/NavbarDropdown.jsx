@@ -6,7 +6,7 @@ import {
 } from "@chakra-ui/react";
 import { PlusIcon } from "@radix-ui/react-icons";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useAuth } from "../context/userContext";
 import { StarOutlined } from "@ant-design/icons";
 import { BriefCaseIcon, CompanyIcon, UserGroup } from "../icon";

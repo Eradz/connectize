@@ -2,7 +2,7 @@ import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useMediaQuery } from "react-responsive";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { getAllCompanies } from "../../../api-services/companies";
 import { useNav } from "../../../context/navContext";
 import { useAuth } from "../../../context/userContext";

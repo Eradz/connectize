@@ -6,10 +6,15 @@ import ReusableModal from "../../components/custom/ResusableModal";
 import CustomInput from "../../components/form/customInput";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 import { goToLogin } from "../../lib/helpers";
 import ChangePassword from "./components/ChangePassword";
+
+export const meta = () =>
+  createSEO({
+    title: "Settings | connectize",
+  });
 
 const SettingsPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -44,7 +49,7 @@ const SettingsPage = () => {
 
   return (
     <main className="p-6 bg-white rounded-md h-screen space-y-6 overflow-y-auto">
-      <SEO title="Settings | connectize" />
+      {/* <SEO title="Settings | connectize" /> */}
       <HeadingText weight="semibold">Settings</HeadingText>
 
       <section className="space-y-8">

@@ -1,13 +1,13 @@
 import { LogoutOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { logOutCurrentUser } from "../api-services/users";
 import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";
 import { feedNavItems } from "../lib/data";
 import { getSession } from "../lib/session";
-import { ButtonWithTooltipIcon } from "./admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
 
@@ -20,7 +20,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   const [loading, setLoading] = useState(false);
 
   const navigators = useMemo(
-    () => (isSmallNavigation ? feedNavItems.slice(0, 6) : feedNavItems),
+    () => (isSmallNavigation ? feedNavItems.slice(0, 5) : feedNavItems),
     [isSmallNavigation]
   );
 
@@ -33,7 +33,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   return (
     <ul
       className={clsx("xs:text-sm", {
-        "flex items-center justify-between h-12": hasHeader,
+        "flex items-center justify-between": hasHeader,
         "bg-background rounded p-2 mb-6 space-y-1":
           !hasHeader && !isSmallNavigation,
       })}
@@ -68,7 +68,8 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   }
                 )}
               />
-              <span className="max-md:sr-only lg:!text-sm">{name}</span>
+              <span className="max-md:hidden lg:!text-sm">{name}</span>
+              <span className="text-xs text-gray-100 md:hidden leading-none">{isSmallNavigation && name == "Representatives" ? "Reps" : name}</span>
             </Link>
           </li>
         );
