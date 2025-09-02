@@ -2,14 +2,19 @@ import MessagingPage from "../messages/messaging";
 
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import clsx from "clsx";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 
 import MessagesPage from "../messages";
+
+export const meta = () =>
+  createSEO({
+    title: "Messaging in connectize",
+  });
 
 export default function MessagesLayout() {
   const [searchParams] = useSearchParams();

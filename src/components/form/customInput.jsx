@@ -231,8 +231,8 @@ export const CustomTextArea = ({ formik, name, placeholder }) => {
               {textLength === 0
                 ? ""
                 : textLength > 1
-                ? "characters"
-                : "character"}
+                  ? "characters"
+                  : "character"}
             </div>
           </TabPanel>
           <TabPanel className="mb-4 !px-0">
@@ -244,11 +244,20 @@ export const CustomTextArea = ({ formik, name, placeholder }) => {
   );
 };
 
-export const CustomSelect = ({ formik, name, placeholder, options = [""] }) => (
+export const CustomSelect = ({
+  formik,
+  name,
+  placeholder,
+  loadingText,
+  isLoading,
+  disabled,
+  options = [""],
+}) => (
   <Select
     id={name}
     name={name}
-    placeholder={placeholder}
+    placeholder={isLoading ? loadingText || "Loading..." : placeholder}
+    disabled={disabled}
     onChange={(e) => {
       localStorage.setItem(name, e.currentTarget.value);
       formik.handleChange(e);
@@ -257,7 +266,7 @@ export const CustomSelect = ({ formik, name, placeholder, options = [""] }) => (
       localStorage.setItem(name, e.currentTarget.value);
       formik.handleChange(e);
     }}
-    value={formik.values[`${name}`]}
+    value={isLoading ? loadingText || "Loading..." : formik.values[`${name}`]}
     className="!w-full !bg-background px-3 !text-sm mt-2 border-gray-100"
   >
     {options?.map((option, index) => (

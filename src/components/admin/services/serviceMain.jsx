@@ -7,7 +7,7 @@ import ReusableModal from "../../custom/ResusableModal";
 import { useState } from "react";
 import { usePageination } from "../../../hooks/usePagination";
 import { getServiceCategories } from "../../../api-services/services";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import HeadingText from "../../HeadingText";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { FilterOutlined } from "@ant-design/icons";

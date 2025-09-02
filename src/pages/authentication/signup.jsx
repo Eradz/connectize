@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import * as Yup from "yup";
 import { authenticationService } from "../../api-services/authentication";
 import Form from "../../components/form";

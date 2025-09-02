@@ -12,7 +12,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { toast } from "sonner";
 import {
   commentOnPost,
@@ -41,6 +41,7 @@ import SocialShareModal from "../../CustomShareButton";
 import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 
 function DiscoverPosts({
   searchArray,
@@ -53,12 +54,12 @@ function DiscoverPosts({
   const finalArray = isSearch
     ? searchArray
     : companyName
-    ? posts?.filter(
-        (post) =>
-          post?.company?.company_name?.toLowerCase() ===
-          companyName?.toLowerCase()
-      )
-    : posts;
+      ? posts?.filter(
+          (post) =>
+            post?.company?.company_name?.toLowerCase() ===
+            companyName?.toLowerCase()
+        )
+      : posts;
   const postLoading = isSearch ? searchLoading : isLoading;
 
   return (
@@ -107,7 +108,7 @@ export const DiscoverPostItem = ({
   const { user: currentUser } = useAuth();
 
   const postTitle = `Connectize Post by ${
-    postItem?.user?.first_name
+    postItem?.user?.full_name
   } | ${capitalizeFirst(postItem?.company?.company_name)} Company`;
 
   // const userHasLikedPost = postItem?.likes.find(
@@ -444,13 +445,13 @@ const CommentSection = ({
             />
           ))}
       <div className="mt-4 border-t pt-4 relative">
-        <ReactQuill
+        {/* <ReactQuill
           value={comment}
           onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
           theme="snow"
           placeholder="Type your comment here"
           // style={{ height: "200px" }}
-        />
+        /> */}
         <button
           className="absolute bottom-1.5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
           onClick={handleComment}
@@ -503,65 +504,65 @@ const CommentBlock = ({ comment, postUserId }) => {
 
 const MemoizedCommentBlock = memo(CommentBlock);
 
-export function ButtonWithTooltipIcon({
-  IconName,
-  text,
-  onClick,
-  tip,
-  className,
-  tooltipClassName,
-  iconClassName,
-  textClassName,
-  loading = false,
-  disabled = false,
-  thisKey,
-  hasArrow = false,
-  type = "button",
-}) {
-  return (
-    <Tooltip
-      label={loading ? "" : tip}
-      fontSize="12"
-      placement="auto"
-      className={clsx(
-        "!rounded-md !bg-white !text-custom_blue border mx-3 text-sm",
-        tooltipClassName
-      )}
-      hasArrow={hasArrow}
-      colorScheme="whiteAlpha"
-    >
-      <button
-        type={type}
-        onClick={onClick}
-        disabled={loading || disabled}
-        className={clsx(
-          "flex items-center text-sm gap-1 bg-transparent text-gray-600 hover:text-custom_blue active:scale-95 transition-all duration-300 overflow-hidden disabled:cursor-not-allowed",
-          className
-        )}
-      >
-        {IconName && !loading && (
-          <IconName
-            className={clsx("", iconClassName, {
-              "xs:!size-4 !size-6 xs:!text-[14px] !text-[20px]": !iconClassName,
-            })}
-          />
-        )}
-        {loading && <Spinner size="xs" className="text-gold" />}
-        {text && (
-          <motion.span
-            initial={{ y: 30, opacity: 0.25 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -30, opacity: 0.25 }}
-            key={thisKey || text}
-            className={`${textClassName} overflow-hidden`}
-          >
-            {text}
-          </motion.span>
-        )}
-      </button>
-    </Tooltip>
-  );
-}
+// export function ButtonWithTooltipIcon({
+//   IconName,
+//   text,
+//   onClick,
+//   tip,
+//   className,
+//   tooltipClassName,
+//   iconClassName,
+//   textClassName,
+//   loading = false,
+//   disabled = false,
+//   thisKey,
+//   hasArrow = false,
+//   type = "button",
+// }) {
+//   return (
+//     <Tooltip
+//       label={loading ? "" : tip}
+//       fontSize="12"
+//       placement="auto"
+//       className={clsx(
+//         "!rounded-md !bg-white !text-custom_blue border mx-3 text-sm",
+//         tooltipClassName
+//       )}
+//       hasArrow={hasArrow}
+//       colorScheme="whiteAlpha"
+//     >
+//       <button
+//         type={type}
+//         onClick={onClick}
+//         disabled={loading || disabled}
+//         className={clsx(
+//           "flex items-center text-sm gap-1 bg-transparent text-gray-600 hover:text-custom_blue active:scale-95 transition-all duration-300 overflow-hidden disabled:cursor-not-allowed",
+//           className
+//         )}
+//       >
+//         {IconName && !loading && (
+//           <IconName
+//             className={clsx("", iconClassName, {
+//               "xs:!size-4 !size-6 xs:!text-[14px] !text-[20px]": !iconClassName,
+//             })}
+//           />
+//         )}
+//         {loading && <Spinner size="xs" className="text-gold" />}
+//         {text && (
+//           <motion.span
+//             initial={{ y: 30, opacity: 0.25 }}
+//             animate={{ y: 0, opacity: 1 }}
+//             exit={{ y: -30, opacity: 0.25 }}
+//             key={thisKey || text}
+//             className={`${textClassName} overflow-hidden`}
+//           >
+//             {text}
+//           </motion.span>
+//         )}
+//       </button>
+//     </Tooltip>
+//   );
+// }
 
 export const DiscoverPostSkeleton = ({ hasImage }) => {
   return (

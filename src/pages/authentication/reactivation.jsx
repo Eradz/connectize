@@ -1,17 +1,22 @@
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import * as Yup from "yup";
 import { authenticationService } from "../../api-services/authentication";
 import Form from "../../components/form";
 import HeadingText from "../../components/HeadingText";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import {
   REACTIVATE_ACCOUNT_KEY,
   SUCCESS_TYPE_KEY,
 } from "../../lib/data/authentication";
+
+export const meta = () =>
+  createSEO({
+    title: "Account Reactivation | Connectize",
+  });
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -75,7 +80,7 @@ function ReactivateAccount() {
 
   return (
     <section className="space-y-4">
-      <SEO title="Account Reactivation | Connectize" />
+      {/* <SEO title="Account Reactivation | Connectize" /> */}
       <HeadingText>Account Reactivation</HeadingText>
       <LightParagraph>
         Please enter your email address to receive an account reactivation

@@ -2,7 +2,7 @@ import { Avatar, Button, Divider } from "@chakra-ui/react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
@@ -21,7 +21,7 @@ import { ChatSellerLink } from "../markets/newlyListed";
 import { useGetCurrentCompany } from "../../../hooks";
 import NewListing from "../listing/newListing";
 import NoPage from "../../NoPage";
-import { ButtonWithTooltipIcon } from "../feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 
 function Productdetails({ product }) {
   const swiperRef = useRef(null);

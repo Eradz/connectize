@@ -5,7 +5,7 @@ import { CheckboxIcon, CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { usePollMessages } from "../../hooks/usePolling";
 import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
@@ -16,7 +16,7 @@ import {
   timeAgo,
 } from "../../lib/utils";
 import { webRoutes } from "../../lib/webRoutes";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import LightParagraph from "../ParagraphText";
 import { avatarStyle } from "../ResponsiveNav";
 import TimeAgo from "../TimeAgo";

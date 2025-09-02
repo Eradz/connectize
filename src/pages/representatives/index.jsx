@@ -8,14 +8,21 @@ import HeadingText from "../../components/HeadingText";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
 import RepresentativeCard from "../../components/representatives/RepresentativeCard";
-import SEO from "../../components/SEO";
+// import SEO from "../../components/SEO";
 import { usePollAllCompanies } from "../../hooks/usePolling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 import { usePageination } from "../../hooks/usePagination";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import PrimaryButton from "../../components/PrimaryButton";
 import clsx from "clsx";
 import { useGetSingleCompany } from "../../hooks";
+import { createSEO } from "../../components/SEO";
+import { usePaginatedRepresentatives } from "../../hooks/useRepresentatives";
+
+export const meta = () =>
+  createSEO({
+    title: "Representatives | Connectize",
+  });
 
 export default function RepresentativesPage() {
   const { data: users, isLoading } = useQuery({
@@ -36,6 +43,7 @@ export default function RepresentativesPage() {
 
   const { data: companyDetails, isLoading: isLoadingCompanyDetails } =
     useGetSingleCompany(companySlug, { enabled: !!companySlug });
+
   const {
     data: paginatedData,
     fetchNextPage,
@@ -43,23 +51,9 @@ export default function RepresentativesPage() {
     isFetching,
     isFetchingNextPage,
     isLoading: repsLoading,
-  } = usePageination({
-    queryKey: [
-      "representatives",
-      "all",
-      { company: companyId, user: userIdParam },
-    ],
-    queryFn: async ({ pageParam }) =>
-      await getAllRepresentatives(
-        {
-          // status: "True",
-          company_id: companyId,
-          user: userIdParam,
-          page_size: 2,
-          page: pageParam,
-        },
-        true
-      ),
+  } = usePaginatedRepresentatives({
+    companyId,
+    userId: userIdParam,
   });
 
   const repsFirstPage = paginatedData?.pages?.[0]?.data;
@@ -67,7 +61,7 @@ export default function RepresentativesPage() {
   const { data: representativeCategories, isLoading: repsCatLoading } =
     useQuery({
       queryKey: ["representatives-categories"],
-      queryFn: getOrCreateRepresentativeCategory,
+      queryFn: () => getOrCreateRepresentativeCategory(),
     });
 
   if (isLoading || companyLoading || repsLoading || repsCatLoading)
@@ -75,7 +69,7 @@ export default function RepresentativesPage() {
 
   return (
     <section className="space-y-4">
-      <SEO title="Representatives | Connectize" />
+      {/* <SEO title="Representatives | Connectize" /> */}
       <section className="flex flex-wrap justify-between gap-4 items-center">
         <HeadingText>
           Representatives {companyId && <br />}{" "}
@@ -107,23 +101,28 @@ export default function RepresentativesPage() {
                   reps?.company !== null &&
                   reps?.role !== null
               )
-              .map((reps) => {
-                const user = users?.find((user) => reps?.user === user?.id);
-                const company = companies?.results?.find(
-                  (company) => reps?.company === company?.id
-                );
+              .map((rep) => {
+                // const user = users?.find((user) => rep?.user === user?.id);
+                // const company = companies?.results?.find(
+                //   (company) => rep?.company === company?.id
+                // );
                 const role = representativeCategories?.find(
-                  (category) => category?.id === reps?.category
+                  (category) => category?.id === rep?.category
                 )?.type;
 
-                const formattedRepsData = {
-                  user,
-                  company,
-                  role,
-                };
+                // const formattedRepsData = {
+                //   user,
+                //   company,
+                //   role,
+                // };
 
                 return (
-                  <RepresentativeCard key={reps?.id} {...formattedRepsData} />
+                  <RepresentativeCard
+                    key={rep?.id}
+                    company={rep.company}
+                    role={role}
+                    user={rep.user}
+                  />
                 );
               });
           })

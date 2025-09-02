@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Tooltip } from "@chakra-ui/react";
 import clsx from "clsx";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useAuth } from "../../context/userContext";
 import { Setting } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";

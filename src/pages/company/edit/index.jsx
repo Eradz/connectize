@@ -1,13 +1,20 @@
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import EditCompanyForm from "../../../components/company/form/edit-company";
 import HeadingText from "../../../components/HeadingText";
 import NoPage from "../../../components/NoPage";
 import PageLoading from "../../../components/PageLoading";
-import SEO from "../../../components/SEO";
+import SEO, { createSEO } from "../../../components/SEO";
 import { useGetCurrentCompany } from "../../../hooks";
 
+export const meta = () =>
+  createSEO({
+    title: "Edit your Company Information | Connectize",
+    description:
+      "Edit your company profile on Connectize, the leading social platform for the oil and gas industry. Showcase your business, connect with professionals, attract investors, and collaborate on industry projects. Build your network and grow your brand today!",
+    relativeImagePath: "create-company.png",
+  });
 function EditCompanyPage() {
   const { company: companyName } = useParams();
 

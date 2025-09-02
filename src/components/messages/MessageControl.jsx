@@ -27,11 +27,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../../context/userContext";
 import { useMessagesStore } from "../../stores/messagesStore";
-import { ButtonWithTooltipIcon } from "../admin/feeds/DiscoverPosts";
+import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
 import ValidImages from "../ValidImages";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 
 const isImageSize = (files) => {
   const imageSize = 4 * 1024 * 1024; // 4MB
@@ -144,8 +144,8 @@ export default function MessageControl() {
             ? audioBlob
               ? "Audio conversation"
               : validImages?.length > 0
-              ? "Sent with attachment"
-              : ""
+                ? "Sent with attachment"
+                : ""
             : message,
         images: validImages?.map((image) => URL.createObjectURL(image)) || [],
         audio: audioBlob ? URL.createObjectURL(audioBlob) : null,

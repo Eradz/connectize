@@ -8,7 +8,7 @@ import { Badge } from "@chakra-ui/react";
 import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { getUserById } from "../../api-services/users";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
@@ -171,7 +171,7 @@ export default function UserProfile() {
           <ProfileSection title="People Associated" className="h-fit lg:w-1/3">
             <SuggestionList
               hasSeeMore
-              associated
+              associated={false}
               thisUser={paramUser}
               viewMoreUrl={`/co/representatives/?user=${paramUser?.id}&status=True`}
             />

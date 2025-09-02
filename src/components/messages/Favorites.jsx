@@ -1,7 +1,7 @@
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { getAllCompanies } from "../../api-services/companies";
 import { getAllUsers } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";

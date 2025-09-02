@@ -2,7 +2,7 @@ import { LocationOnOutlined } from "@mui/icons-material";
 import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import React, { useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
@@ -10,7 +10,7 @@ import ListedProducts from "../../components/admin/products/listedProducts";
 import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
 import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
@@ -18,6 +18,11 @@ import { usePollCurrentCompany } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
 import { ProfileAboutList } from "./userProfile";
+
+export const meta = () =>
+  createSEO({
+    title: "Connectize Companies",
+  });
 
 const CompanyProfile = React.memo(() => {
   const { company: companyName } = useParams();
@@ -41,7 +46,7 @@ const CompanyProfile = React.memo(() => {
 
   return (
     <section className="rounded-md overflow-hidden w-full">
-      <SEO title={`${company?.company_name || ""} | Connectize Companies`} />
+      {/* <SEO title={`${company?.company_name || ""} | Connectize Companies`} /> */}
       <Header {...headerProps} />
 
       <section className="mt-12 md:mt-20 flex max-xl:flex-col items-start gap-2 relative sm:px-2">

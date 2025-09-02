@@ -82,25 +82,43 @@ export const updateCurrentUserInfo = async (values) => {
   });
 };
 
-export const getSuggestedUsersForCurrentUser = async () => {
-  const currentUser = await getCurrentUser();
+export const getAssociatedUsersForUser = async (userId) => {
+  // const currentUser = await getCurrentUser();
 
-  const allUsers = await getAllUsers();
+  // const allUsers = await getAllUsers();
 
-  const allUsersInLocation = allUsers.filter(
-    (user) =>
-      currentUser.id !== user.id &&
-      user.first_name &&
-      (user.city === currentUser.city ||
-        user.region === currentUser.region ||
-        user.country === currentUser.country ||
-        user)
-  );
+  // const allUsersInLocation = allUsers.filter(
+  //   (user) =>
+  //     currentUser.id !== user.id &&
+  //     user.first_name &&
+  //     (user.city === currentUser.city ||
+  //       user.region === currentUser.region ||
+  //       user.country === currentUser.country ||
+  //       user)
+  // );
 
-  return allUsersInLocation;
+  return [];
+  // return allUsersInLocation;
 };
+// export const getSuggestedUsersForCurrentUser = async () => {
+//   const currentUser = await getCurrentUser();
 
-export const getPeopleAssociatedForUser = async (thisUser) => {
+//   const allUsers = await getAllUsers();
+
+//   const allUsersInLocation = allUsers.filter(
+//     (user) =>
+//       currentUser.id !== user.id &&
+//       user.first_name &&
+//       (user.city === currentUser.city ||
+//         user.region === currentUser.region ||
+//         user.country === currentUser.country ||
+//         user)
+//   );
+
+//   return allUsersInLocation;
+// };
+
+export const getPeopleAssociatedForUser = async (thisUser, companyId) => {
   if (!thisUser) return [];
 
   const nonProfessionalEmailDomains = new Set([
@@ -115,19 +133,19 @@ export const getPeopleAssociatedForUser = async (thisUser) => {
     "admin.com",
     "superadmin.com",
   ]);
-
   const [allUsers, representatives] = await Promise.all([
     getAllUsers(),
-    getAllRepresentatives({ company_id: thisUser?.companies?.[0] }),
+    getAllRepresentatives({ company_id: companyId }),
   ]);
 
   // Fetch representatives' associated users
   const representativesAssociated = await Promise.all(
     representatives.map(async (rep) => {
-      if (rep.user === thisUser.id) {
-        const companyUser = await getCompanyByIdOrEmail(rep.company);
-        return companyUser?.[0]?.user || null;
-      }
+      // if (rep.user === thisUser.id) {
+      //   const companyUser = await getCompanyByIdOrEmail(rep.company);
+      //   return companyUser?.[0]?.user || null;
+      // }
+
       return getUserById(rep.user);
     })
   );
