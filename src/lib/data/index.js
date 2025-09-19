@@ -5,6 +5,7 @@ import {
   Message,
   Setting,
   StoreIcon,
+  Support,
   UserGroup,
 } from "../../icon";
 import { webRoutes } from "../webRoutes";
@@ -69,6 +70,12 @@ export const feedNavItems = [
     name: "Settings",
     to: webRoutes.settings,
     icon: Setting,
+    smallNavigation: false,
+  },
+  {
+    name: "Support",
+    to: webRoutes.support,
+    icon: Support,
     smallNavigation: false,
   },
   // { name: "Analysis", to: webRoutes.analysis, icon: ChartBar, smallNavigation: false },
