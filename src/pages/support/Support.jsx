@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import { validate } from 'uuid';
 import Form from '../../components/form';
 import { sendSupportMessage } from '../../api-services/support';
+import { ImageSelect } from '../../components/form/customInput';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -12,21 +13,21 @@ const validationSchema = Yup.object().shape({
   full_name: Yup.string().required("Add Full Name"),
   message: Yup.string().required("What do you need support with?").min(10),
   subject: Yup.string().optional(),
+  images: Yup.mixed().optional()
 })
 const formValues = {
   email: "",
   full_name:"",
   message: "",
   subject:"",
-  image: ""
+  images: File
 }
 const Support = () => {
   const formik = useFormik({
     initialValues: formValues,
     validationSchema: validationSchema,
-    onSubmit: async({email,full_name,message,subject,image}, {resetForm}) =>{
-      const success = await sendSupportMessage({email, full_name, message, subject, image})
-      console.log(success)
+    onSubmit: async({email,full_name,message,subject,images}, {resetForm}) =>{
+      const success = await sendSupportMessage({email, full_name, message, subject, images, resetForm})
       if(success) {
         return
       }
@@ -51,8 +52,8 @@ const Support = () => {
     {
       name: "subject",
       type: "text",
-      label: "Subject",
-      placeholder: "Enter a subject to the topic (Optional)",
+      label: "Subject (Optional)",
+      placeholder: "Enter a subject to the topic",
       validate: false,
     },
     {
@@ -61,13 +62,6 @@ const Support = () => {
       label: "Message",
       placeholder: "What do you need support with?",
       validate: true,
-    },
-    {
-      name: "images",
-      type: "file",
-      label: "Image",
-      placeholder: "Upload an image for the issue (Optional)",
-      validate: false
     }
   ];
   return (
@@ -76,6 +70,14 @@ const Support = () => {
         formik={formik}
         status={"none"}
         inputArray={fields}
+        bottomCustomComponents={
+          <ImageSelect
+       hasCaption={false}
+       formik={formik}
+       name="images"
+       accept=".png, .jpeg"
+     />
+        }
         button={{
           type: "submit",
           text: "Send",
