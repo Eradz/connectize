@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import { validate } from 'uuid';
 import Form from '../../components/form';
+import { sendSupportMessage } from '../../api-services/support';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -24,8 +25,8 @@ const Support = () => {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async({email,full_name,message,subject,image}, {resetForm}) =>{
-      const success = true
-  
+      const success = await sendSupportMessage({email, full_name, message, subject, image})
+      console.log(success)
       if(success) {
         return
       }
@@ -36,7 +37,7 @@ const Support = () => {
     {
       name: "email",
       type: "email",
-      label: "User email",
+      label: "Email",
       placeholder: "Enter a valid email address",
       validate: true,
     },
