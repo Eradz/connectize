@@ -1,32 +1,87 @@
 import React from 'react'
+import * as Yup from "yup";
+import { useFormik } from "formik";
+import { validate } from 'uuid';
+import Form from '../../components/form';
 
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+  .email("Invalid Email Address")
+  .required("Fill in a valid email address"),
+  full_name: Yup.string().required("Add Full Name"),
+  message: Yup.string().required("What do you need support with?").min(10),
+  subject: Yup.string().optional(),
+})
+const formValues = {
+  email: "",
+  full_name:"",
+  message: "",
+  subject:"",
+  image: ""
+}
 const Support = () => {
+  const formik = useFormik({
+    initialValues: formValues,
+    validationSchema: validationSchema,
+    onSubmit: async({email,full_name,message,subject,image}, {resetForm}) =>{
+      const success = true
+  
+      if(success) {
+        return
+      }
+    }
+  })
+  
+  const fields = [
+    {
+      name: "email",
+      type: "email",
+      label: "User email",
+      placeholder: "Enter a valid email address",
+      validate: true,
+    },
+    {
+      name: "full_name",
+      type: "text",
+      label: "Full Name",
+      placeholder: "Enter your Full Name",
+      validate: true,
+    },
+    {
+      name: "subject",
+      type: "text",
+      label: "Subject",
+      placeholder: "Enter a subject to the topic (Optional)",
+      validate: false,
+    },
+    {
+      name: "message",
+      type: "textarea",
+      label: "Message",
+      placeholder: "What do you need support with?",
+      validate: true,
+    },
+    {
+      name: "images",
+      type: "file",
+      label: "Image",
+      placeholder: "Upload an image for the issue (Optional)",
+      validate: false
+    }
+  ];
   return (
-    <div>
-    <section id="contact" class="bg-gray-100 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-bold text-center mb-12">Contact Our Support Team</h2>
-      <div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-sm">
-        <div class="space-y-6">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-            <input type="text" id="name" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600" placeholder="Your name"/>
-          </div>
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" id="email" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600" placeholder="Your email"/>
-          </div>
-          <div>
-            <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-            <textarea id="message" rows="4" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600" placeholder="How can we help you?"></textarea>
-          </div>
-          <button class="w-full bg-gold text-white py-3 rounded-lg hover:bg-dark transition">
-            Send Message
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
+    <div className='bg-white rounded-lg p-6'>
+      <Form
+        formik={formik}
+        status={"none"}
+        inputArray={fields}
+        button={{
+          type: "submit",
+          text: "Send",
+          submitText: "Sending...",
+          style: "!md:w-[60%] mt-4",
+        }}
+      />
     </div>
   )
 }
