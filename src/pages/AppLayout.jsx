@@ -15,31 +15,35 @@ const AppLayout = () => {
   const isMessagesRoute = pathname.startsWith("/messages");
 
   return (
-  <main className="bg-background w-full h-full flex flex-col flex-1 safe-area-top safe-area-bottom">
+    <main className="bg-background w-full h-full flex flex-col flex-1 safe-area-top safe-area-bottom overflow-x-hidden">
       <Navbar />
-
-  <section
+      <section
         className={clsx(
-          "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4 md:container",
+          // Added overflow-x-hidden and max-w-full to stop child 100vw elements causing shift
+          "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4 md:container overflow-x-hidden max-w-full",
           {
             "py-6 px-2": !isSinglePostRoute && !isHomeRoute,
-    // Subtract navbar height (64px) plus dynamic safe areas handled via padding
-    "flex-1": isMessagesRoute,
+            // Subtract navbar height (64px) plus dynamic safe areas handled via padding
+            "flex-1": isMessagesRoute,
           }
         )}
       >
         <Sidebar />
         <section
           className={clsx(
-            "md:px-0 gap-2 w-full max-md:mb-16 h-full",
+            // Added relative and overflow-x-hidden to isolate scroll context & prevent horizontal bleed
+            "md:px-0 gap-2 w-full max-md:mb-16 h-full overflow-x-hidden relative",
             !isMessagesRoute && "grid grid-cols-1"
           )}
         >
-          <Outlet />
+          {/* Wrap Outlet to enforce full-width clamp */}
+          <div className="w-full max-w-full overflow-x-hidden">
+            <Outlet />
+          </div>
         </section>
       </section>
-  {/* Spacer to ensure scrollable content isn't hidden behind fixed bottom nav (height + safe area) */}
-  <div className="h-20 md:hidden" aria-hidden="true" />
+      {/* Spacer to ensure scrollable content isn't hidden behind fixed bottom nav (height + safe area) */}
+      <div className="h-20 md:hidden" aria-hidden="true" />
     </main>
   );
 };
@@ -63,7 +67,7 @@ export function ErrorBoundary({ error }) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
+    <main className="pt-16 p-4 container mx-auto overflow-x-hidden">
       <h1>{message}</h1>
       <p>{details}</p>
       {stack && (

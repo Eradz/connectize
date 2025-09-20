@@ -42,7 +42,14 @@ const Navbar = () => {
   return (
     <>
       <Headroom>
-        <nav className="w-full h-16 flex items-center bg-white z-[99999] safe-area-top">
+        <nav 
+          className="w-full min-h-16 flex items-center bg-white z-[99999] safe-area-top md:pt-0"
+          style={{ 
+            paddingTop: window.innerWidth < 768 ? '30px' : '0px',
+            backgroundColor: '#ffffff',
+            borderBottom: '2px solid #f1c644' // Visual indicator
+          }}
+        >
           <section
             id="header-mobile-popover-container"
             className="sm:container max-xs:px-2 max-sm:px-4 w-full py-2 flex items-center justify-between !gap-2 lg:!gap-10 xl:!gap-14 shadow-sm"
@@ -72,10 +79,14 @@ const Navbar = () => {
 
       <motion.nav
         className="md:hidden bg-mid_grey fixed bottom-0 left-0 w-full z-[99999] safe-area-bottom"
+        style={{
+          paddingBottom: '30px',
+          borderTop: '2px solid #f1c644' // Visual indicator
+        }}
         // initial={{ y: 0 }}
         // animate={{ y: 100 }} // showBottomNav ? 0 :
       >
-        <section className="container">
+        <section className="container pb-safe">
           <NavigationSection hasHeader isSmallNavigation />
         </section>
       </motion.nav>

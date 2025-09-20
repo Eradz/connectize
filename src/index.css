@@ -51,6 +51,21 @@
   overflow-x: hidden;
 }
 
+/* Defensive clamp: any element with full-viewport width should not exceed parent padding box */
+.clamp-viewport,
+[data-clamp-viewport="true"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Neutralize accidental 100vw usage inside padded containers (common mobile horizontal scroll cause) */
+[class*="100vw"],
+[style*="100vw"] {
+  max-width: 100% !important;
+}
+
 /* Stop document body from scrolling because of attachment popover when the messages panel is opened */
 
 .messages-opened {

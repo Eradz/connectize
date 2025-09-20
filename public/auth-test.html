@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test - Connectize</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2563eb; margin-bottom: 30px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .section h3 { margin-top: 0; color: #374151; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #1d4ed8; }
+        button.success { background: #10b981; }
+        button.error { background: #ef4444; }
+        .output { background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; border-radius: 6px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .status { padding: 10px; border-radius: 6px; margin: 10px 0; }
+        .status.success { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; }
+        .status.error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+        .token-info { font-size: 12px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Authentication Test Tool</h1>
+        <p>This tool helps debug authentication issues with the Connectize API.</p>
+
+        <div class="section">
+            <h3>1. Check Current Authentication State</h3>
+            <button onclick="checkAuthState()">Check Auth State</button>
+            <div id="authState" class="output"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. Test API Authentication</h3>
+            <button onclick="testAPIAuth()">Test API Access</button>
+            <div id="apiTest" class="output"></div>
+        </div>
+
+        <div class="section">
+            <h3>3. Manual Login</h3>
+            <div>
+                <input type="email" id="email" placeholder="Email" value="info@connectize.co" style="padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <input type="password" id="password" placeholder="Password" value="Access2024" style="padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <button onclick="doLogin()">Login</button>
+            </div>
+            <div id="loginResult" class="output"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. Test Logistics APIs</h3>
+            <button onclick="testLogisticsAPIs()">Test Logistics Endpoints</button>
+            <div id="logisticsTest" class="output"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function log(element, message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const output = document.getElementById(element);
+            
+            let prefix = '';
+            if (type === 'success') prefix = '✅ ';
+            else if (type === 'error') prefix = '❌ ';
+            else if (type === 'info') prefix = 'ℹ️  ';
+            
+            output.textContent += `[${timestamp}] ${prefix}${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearLog(element) {
+            document.getElementById(element).textContent = '';
+        }
+
+        function checkAuthState() {
+            clearLog('authState');
+            
+            // Check localStorage
+            const access = localStorage.getItem('access');
+            const refresh = localStorage.getItem('refresh');
+            
+            log('authState', 'LocalStorage tokens:');
+            log('authState', `Access Token: ${access ? 'Present (' + access.substring(0, 30) + '...)' : 'Missing'}`);
+            log('authState', `Refresh Token: ${refresh ? 'Present (' + refresh.substring(0, 30) + '...)' : 'Missing'}`);
+            
+            // Check sessionStorage
+            const sessionAccess = sessionStorage.getItem('access');
+            const sessionRefresh = sessionStorage.getItem('refresh');
+            
+            log('authState', '\nSessionStorage tokens:');
+            log('authState', `Access Token: ${sessionAccess ? 'Present (' + sessionAccess.substring(0, 30) + '...)' : 'Missing'}`);
+            log('authState', `Refresh Token: ${sessionRefresh ? 'Present (' + sessionRefresh.substring(0, 30) + '...)' : 'Missing'}`);
+            
+            // Check cookies
+            const cookies = document.cookie;
+            const authCookie = cookies.includes('connectize_spicy_auth_cookie');
+            
+            log('authState', '\nCookies:');
+            log('authState', `Auth Cookie: ${authCookie ? 'Present' : 'Missing'}`);
+            
+            if (authCookie) {
+                // Try to get cookie value
+                const cookieValue = getCookie('connectize_spicy_auth_cookie');
+                log('authState', `Cookie Value: ${cookieValue ? cookieValue.substring(0, 50) + '...' : 'Empty'}`);
+            }
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        async function testAPIAuth() {
+            clearLog('apiTest');
+            
+            const access = localStorage.getItem('access') || sessionStorage.getItem('access');
+            
+            if (!access) {
+                log('apiTest', 'No access token found in storage', 'error');
+                return;
+            }
+            
+            try {
+                log('apiTest', 'Testing API with stored token...');
+                
+                const response = await fetch(`${API_BASE}/api/auth/me/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${access}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('apiTest', 'API Authentication successful!', 'success');
+                    log('apiTest', `User: ${data.email || data.username || 'Unknown'}`);
+                } else {
+                    log('apiTest', `API Authentication failed: ${response.status} ${response.statusText}`, 'error');
+                    const errorData = await response.text();
+                    log('apiTest', `Error details: ${errorData}`);
+                }
+                
+            } catch (error) {
+                log('apiTest', `API request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function doLogin() {
+            clearLog('loginResult');
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('loginResult', 'Please enter email and password', 'error');
+                return;
+            }
+            
+            try {
+                log('loginResult', 'Attempting login...');
+                
+                const response = await fetch(`${API_BASE}/api/auth/login/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('loginResult', 'Login successful!', 'success');
+                    
+                    // Store tokens
+                    if (data.access) {
+                        localStorage.setItem('access', data.access);
+                        log('loginResult', 'Access token stored in localStorage');
+                    }
+                    if (data.refresh) {
+                        localStorage.setItem('refresh', data.refresh);
+                        log('loginResult', 'Refresh token stored in localStorage');
+                    }
+                    
+                    log('loginResult', `User: ${data.user?.email || 'Unknown'}`);
+                } else {
+                    log('loginResult', `Login failed: ${response.status} ${response.statusText}`, 'error');
+                    const errorData = await response.text();
+                    log('loginResult', `Error details: ${errorData}`);
+                }
+                
+            } catch (error) {
+                log('loginResult', `Login request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogisticsAPIs() {
+            clearLog('logisticsTest');
+            
+            const access = localStorage.getItem('access') || sessionStorage.getItem('access');
+            
+            if (!access) {
+                log('logisticsTest', 'No access token found. Please login first.', 'error');
+                return;
+            }
+            
+            const endpoints = [
+                '/api/v1/logistics/shipments/',
+                '/api/v1/logistics/inventory-items/',
+                '/api/v1/logistics/requests/'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    log('logisticsTest', `Testing ${endpoint}...`);
+                    
+                    const response = await fetch(`${API_BASE}${endpoint}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${access}`,
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const count = data.results ? data.results.length : (Array.isArray(data) ? data.length : 'Unknown');
+                        log('logisticsTest', `✅ ${endpoint}: ${count} items`, 'success');
+                    } else {
+                        log('logisticsTest', `❌ ${endpoint}: ${response.status} ${response.statusText}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    log('logisticsTest', `❌ ${endpoint}: ${error.message}`, 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

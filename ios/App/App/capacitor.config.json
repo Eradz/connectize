@@ -1,6 +1,22 @@
 {
 	"appId": "co.connectize.app",
 	"appName": "App",
-	"webDir": "build",
-	"packageClassList": []
+	"webDir": "build/client",
+	"android": {},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0,
+			"launchAutoHide": true,
+			"backgroundColor": "#fff"
+		},
+		"StatusBar": {
+			"style": "default",
+			"backgroundColor": "#ffffff",
+			"overlaysWebView": false
+		}
+	},
+	"packageClassList": [
+		"SplashScreenPlugin",
+		"StatusBarPlugin"
+	]
 }

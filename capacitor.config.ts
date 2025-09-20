@@ -23,6 +23,11 @@ const config: CapacitorConfig = {
       launchAutoHide: true,
       backgroundColor: "#fff",
     },
+    StatusBar: {
+      style: "default",
+      backgroundColor: "#ffffff",
+      overlaysWebView: false,
+    },
   },
 };
 
