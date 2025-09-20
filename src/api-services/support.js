@@ -5,7 +5,7 @@ export const sendSupportMessage = async ({email,full_name,message,subject,images
     const result = await makeApiRequest({
       url: `api/support/`,
       method: "POST",
-      data: {email,full_name,message,subject,images},
+      data: images? {email,full_name,message,subject,images}: {email,full_name,message,subject},
       resetForm,
       contentType: "multipart/form-data",
     });
