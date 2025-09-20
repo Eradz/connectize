@@ -20,7 +20,7 @@ const formValues = {
   full_name:"",
   message: "",
   subject:"",
-  images: File
+  images: ""
 }
 const Support = () => {
   const formik = useFormik({
