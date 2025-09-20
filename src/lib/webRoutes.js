@@ -38,6 +38,7 @@ const webRoutes = {
   signup: "/signup",
   singlePost: "/posts/:id",
   success: "/success",
+  support:"/support",
   termsAndConditions: "/terms-and-conditions",
   userProfile: "/co/:userId",
   verifyAccount: "/verify-account",
