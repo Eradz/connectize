@@ -85,6 +85,7 @@ export function ImageSelect({
   hasCaption = true,
   captionName,
   accept = "image/*",
+  multiple
 }) {
   return (
     <div>
@@ -101,13 +102,14 @@ export function ImageSelect({
           className="w-full file:border-0 file:rounded-md text-gray-500 text-xs file:!text-xs file:p-2"
           type="file"
           accept={accept}
-          name={name}
+          name={ multiple ? `${name}[]` : name}
           onChange={(event) => {
-            formik.setFieldValue(name, event.currentTarget.files?.[0]);
+            multiple ? formik.setFieldValue(name, Array.from(event.target.files)) : formik.setFieldValue(name, event.currentTarget.files?.[0]);
           }}
           onBlur={(event) => {
-            formik.setFieldValue(name, event.currentTarget.files?.[0]);
+            multiple ? formik.setFieldValue(name, Array.from(event.target.files)) : formik.setFieldValue(name, event.currentTarget.files?.[0]);
           }}
+          multiple = {multiple ? multiple : false}
         />
         <ImageIcon className="text-custom_grey/20" />
         {hasCaption && (

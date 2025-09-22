@@ -20,7 +20,7 @@ const formValues = {
   full_name:"",
   message: "",
   subject:"",
-  images: ""
+  images: []
 }
 const Support = () => {
   const formik = useFormik({
@@ -76,6 +76,7 @@ const Support = () => {
        formik={formik}
        name="images"
        accept=".png, .jpeg"
+       multiple={true}
      />
         }
         button={{
