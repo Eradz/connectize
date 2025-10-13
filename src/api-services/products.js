@@ -170,3 +170,21 @@ export const bookmarkProduct = async (productId, data, hasBookmarked) => {
     // data: { ...data, company_id: data.company.id },
   });
 };
+
+/**
+ * Get bookmarked products for the current user with pagination
+ * @param {Object} params - Query parameters including page, page_size
+ * @param {boolean} returnFullRes - Whether to return full response with pagination
+ * @returns {Promise} - Bookmarked products
+ */
+export const getBookmarkedProducts = async (params = {}, returnFullRes = false) => {
+  const { results: products, next } = await makeApiRequest({
+    url: `api/products/bookmarked/`,
+    method: "GET",
+    params,
+  });
+
+  if (returnFullRes) return { data: products, next };
+
+  return products || [];
+};

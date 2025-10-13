@@ -17,6 +17,15 @@ const config: CapacitorConfig = {
     },
   },
 
+  ios: {
+    contentInset: "automatic",
+    scrollEnabled: true,
+  },
+
+  server: {
+    cleartext: true,
+  },
+
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
@@ -27,6 +36,11 @@ const config: CapacitorConfig = {
       style: "default",
       backgroundColor: "#ffffff",
       overlaysWebView: false,
+    },
+    Keyboard: {
+      resize: "body",
+      style: "light",
+      resizeOnFullScreen: true,
     },
   },
 };

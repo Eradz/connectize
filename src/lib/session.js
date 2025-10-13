@@ -66,14 +66,12 @@ export const getSession = () => {
     }
 
     if (!encryptedSession) {
-      console.log('❌ No session found');
+      // Normal case for unauthenticated users - no logging needed
       return null;
     }
 
     const decryptedSession = decryptData(encryptedSession);
     const session = JSON.parse(decryptedSession);
-
-    console.log(`✅ Session retrieved from ${source}`);
 
     // Re-sync storage for cross-platform compatibility
     if (source === 'localStorage' && session) {

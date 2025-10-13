@@ -3,6 +3,13 @@
 	"appName": "App",
 	"webDir": "build/client",
 	"android": {},
+	"ios": {
+		"contentInset": "automatic",
+		"scrollEnabled": true
+	},
+	"server": {
+		"cleartext": true
+	},
 	"plugins": {
 		"SplashScreen": {
 			"launchShowDuration": 0,
@@ -13,6 +20,11 @@
 			"style": "default",
 			"backgroundColor": "#ffffff",
 			"overlaysWebView": false
+		},
+		"Keyboard": {
+			"resize": "body",
+			"style": "light",
+			"resizeOnFullScreen": true
 		}
 	},
 	"packageClassList": [

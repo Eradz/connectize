@@ -19,8 +19,26 @@ const validationSchema = Yup.object().shape({
   bio: Yup.string().trim().required("This field is required"),
   website_url: Yup.string()
     .trim()
-    .url("Invalid url")
-    .required("This field is required"),
+    .transform((value) => {
+      // Transform happens first: auto-add https:// if no protocol is present
+      if (!value) return value;
+      if (!/^https?:\/\//i.test(value)) {
+        return `https://${value}`;
+      }
+      return value;
+    })
+    .test('is-valid-url', 'Invalid url - please enter a valid website (e.g., example.com)', function(value) {
+      if (!value || value.trim() === '') return true; // Allow empty (optional field)
+      
+      // At this point, value should have protocol from transform
+      try {
+        const url = new URL(value);
+        // Check that it's at least a valid domain structure
+        return url.hostname.includes('.');
+      } catch {
+        return false;
+      }
+    }),
   social_media_url: Yup.string().trim().optional(),
 });
 
@@ -72,13 +90,13 @@ function Bio() {
           name: website_urlKey,
           type: "text",
           label: "Website link",
-          placeholder: "westlandoil.com",
+          placeholder: "example.com or https://example.com",
         },
         {
           name: social_media_urlKey,
           type: "text",
           label: "Social media link",
-          placeholder: "e.g linkedin",
+          placeholder: "linkedin.com/in/yourname",
         },
       ],
     },
@@ -86,7 +104,7 @@ function Bio() {
       name: bioKey,
       type: "textarea",
       label: "Bio",
-      placeholder: "say something",
+      placeholder: "Tell us about yourself...",
     },
   ];
   return (

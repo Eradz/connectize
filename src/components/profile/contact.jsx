@@ -15,7 +15,15 @@ import useRedirect from "../../hooks/useRedirect";
 import { useAuth } from "../../context/userContext";
 
 const validationSchema = Yup.object().shape({
-  phone_number: Yup.string().required("This field is required"),
+  phone_number: Yup.string()
+    .required("This field is required")
+    .test('is-valid-phone', 'Please enter a valid phone number', function(value) {
+      if (!value) return false;
+      // Remove all non-digit characters except +
+      const cleaned = value.replace(/[^\d+]/g, '');
+      // Must have at least 10 digits (US/Canada format) or start with + and have 10+ digits
+      return cleaned.length >= 10;
+    }),
   personal_email: Yup.string()
     .email("Invalid Email")
     .required("This field is required"),
@@ -66,9 +74,9 @@ function Contact() {
       gridInputs: [
         {
           name: phone_numberKey,
-          type: "number",
+          type: "tel",
           label: "Phone Number",
-          placeholder: "090000000101",
+          placeholder: "+1 5551234567 or 5551234567",
         },
         {
           name: personal_emailKey,

@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { bookmarkService } from "../../api-services/services";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { bookmarkService, getBookmarkedServices } from "../../api-services/services";
 import PageLoading from "../PageLoading";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LightParagraph from "../ParagraphText";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
@@ -9,48 +9,35 @@ import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { Share1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { shareThis } from "../../lib/utils";
 import { useAuth } from "../../context/userContext";
-import { getServices } from "../../api-services/services";
-import { Avatar, Menu } from "@chakra-ui/react";
+import { Avatar } from "@chakra-ui/react";
 import { VerifiedIcon } from "../../icon";
 import { avatarStyle } from "../ResponsiveNav";
 
 export const BookmarkedServices = () => {
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+  
   const { data: services, isLoading } = useQuery({
-    queryKey: ["services"],
-    queryFn: () => getServices(),
+    queryKey: ["bookmarked-services"],
+    queryFn: () => getBookmarkedServices(),
     enabled: !!currentUser,
+    staleTime: 1 * 60 * 1000, // 1 minute cache
   });
-
-  const bookmarkedServices = services?.filter((service) =>
-    service?.likes?.find((like) => like?.user?.id === currentUser?.id)
-  );
-
-  const [cachedServices, setCachedServices] = useState(
-    bookmarkedServices || []
-  );
-
-  useEffect(() => {
-    setCachedServices(bookmarkedServices);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!bookmarkedServices]);
 
   if (isLoading) return <PageLoading hasLogo={false} />;
 
   return (
     <section className="space-y-4">
-      {bookmarkedServices?.length <= 0 ? (
+      {!services || services?.length <= 0 ? (
         <div className="p-4 text-center">
           <LightParagraph>No bookmarked service yet</LightParagraph>
         </div>
       ) : (
-        bookmarkedServices?.map((service) => (
+        services?.map((service) => (
           <BookmarkedServicesCard
-            setCachedServices={setCachedServices}
-            cachedServices={cachedServices}
             service={service}
             key={service?.id}
+            queryClient={queryClient}
           />
         ))
       )}
@@ -58,12 +45,9 @@ export const BookmarkedServices = () => {
   );
 };
 
-const BookmarkedServicesCard = ({
-  service,
-  setCachedServices,
-  cachedServices,
-}) => {
+const BookmarkedServicesCard = ({ service, queryClient }) => {
   const { user: currentUser } = useAuth();
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const hasBookmarkedService = service?.likes?.find(
     (serviceProp) => serviceProp?.user?.id === currentUser?.id
@@ -72,11 +56,24 @@ const BookmarkedServicesCard = ({
   const company = service.company;
 
   const handleBookmark = async () => {
-    setCachedServices(
-      cachedServices?.filter((cacheservice) => cacheservice?.id !== service?.id)
-    );
-    await bookmarkService(service.id, service, hasBookmarkedService);
+    setIsRemoving(true);
+    try {
+      await bookmarkService(service.id, service, hasBookmarkedService);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(["bookmarked-services"], (oldData) => {
+        return oldData?.filter((s) => s.id !== service?.id);
+      });
+      
+      // Invalidate to refetch fresh data
+      queryClient.invalidateQueries(["bookmarked-services"]);
+    } catch (error) {
+      console.error("Error removing bookmark:", error);
+      setIsRemoving(false);
+    }
   };
+  
+  if (isRemoving) return null;
 
   return (
     <motion.div

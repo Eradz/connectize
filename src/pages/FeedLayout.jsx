@@ -9,8 +9,8 @@ function FeedLayout() {
   useRedirect(!session, "/login");
   if (!session) return <PageLoading text="Getting page ready" />;
   return (
-    <section className="w-full flex max-xl:flex-col gap-3 lg:gap-6">
-      <section className="w-full xl:w-[55%] shrink-0 space-y-6">
+    <section className="w-full max-w-full flex max-xl:flex-col gap-3 lg:gap-6 overflow-hidden">
+      <section className="w-full xl:w-[55%] shrink-0 space-y-6 overflow-hidden">
         <Outlet />
       </section>
       <TopServiceSuggestions />

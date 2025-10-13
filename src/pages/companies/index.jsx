@@ -75,10 +75,11 @@ export default function CompaniesPage() {
   } = useInfiniteQuery({
     queryKey: ["companies", "all", { sortBy }],
     initialPageParam: 1,
+    staleTime: 5 * 60 * 1000, // ✅ Cache for 5 minutes
     queryFn: async ({ pageParam }) => {
       const res = await getAllCompanies(
         {
-          page_size: 6,
+          page_size: 12, // ✅ Increased from 6 to reduce requests
           page: pageParam,
           ordering: sortBy ? "-" + sortBy : undefined,
         },

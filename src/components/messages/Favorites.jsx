@@ -20,14 +20,17 @@ export default function Favorites() {
   // });
 
   const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users-favorites"],
     queryFn: getAllUsers,
     enabled: !!currentUser,
+    staleTime: 10 * 60 * 1000, // ✅ Cache for 10 minutes (favorites don't change often)
+    select: (data) => 
+      data
+        ?.filter((user) => user.first_name && user?.id !== currentUser?.id)
+        ?.slice(0, 10), // ✅ Filter and limit in select for better memoization
   });
 
-  const filteredUsers = users
-    ?.filter((user) => user.first_name && user?.id !== currentUser?.id)
-    ?.slice(0, 10);
+  const filteredUsers = users;
 
   console.log({ filteredUsers });
 

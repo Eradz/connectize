@@ -31,7 +31,8 @@ export default function MessagesPage() {
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["users"],
     queryFn: getAllUsers,
-    enabled: !!currentUser,
+    enabled: !!currentUser && isOpen, // ✅ Only fetch when modal is open
+    staleTime: 5 * 60 * 1000, // ✅ Cache for 5 minutes
   });
 
   const filteredUsers = useMemo(() => {

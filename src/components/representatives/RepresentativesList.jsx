@@ -107,7 +107,7 @@ const RepsTile = ({
         <div className="flex flex-col">
           <Username user={user} />
           <small className="text-gray-400 !-my-1 line-clamp-2">
-            {capitalizeFirst(user?.role)}{" "}
+            {role ? capitalizeFirst(role) : "Representative"}{" "}
             <>
               &bull;{" "}
               <Badge

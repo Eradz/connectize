@@ -57,10 +57,22 @@ function Login() {
     initialValues: formValues,
     validationSchema: validationSchema,
     onSubmit: async ({ email, password }, { resetForm }) => {
-      const success = await loginUser({ email, password, resetForm });
+      try {
+        console.log("🔐 Starting login process...");
+        const success = await loginUser({ email, password, resetForm });
+        console.log("Login result:", success);
 
-      if (success) {
-        setUser(await getCurrentUser());
+        if (success) {
+          console.log("✅ Login successful, fetching user data...");
+          const userData = await getCurrentUser();
+          console.log("User data:", userData);
+          setUser(userData);
+        } else {
+          console.error("❌ Login failed - success is false");
+        }
+      } catch (error) {
+        console.error("❌ Login error caught:", error);
+        console.error("Error stack:", error.stack);
       }
     },
   });

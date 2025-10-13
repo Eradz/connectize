@@ -7,6 +7,7 @@ import CustomInput, {
   CustomTextArea,
   inputClassNames,
 } from "./customInput";
+import PhoneInput from "./PhoneInput";
 import FormikErrorResponse from "./formError";
 
 export default function Form({
@@ -75,6 +76,17 @@ export default function Form({
             disabled={disabled}
             placeholder={placeholder}
             options={options}
+          />
+        ) : type === "tel" ? (
+          <PhoneInput
+            name={name}
+            placeholder={placeholder}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values[`${name}`]}
+            className={clsx({ "opacity-80 pointer-events-none": disabled })}
+            validate={formik.touched[name] && validate}
+            error={formik.touched[name] && formik.errors[name]}
           />
         ) : (
           <CustomInput

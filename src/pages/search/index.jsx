@@ -30,52 +30,28 @@ export default function Search() {
 
 function useSearchResults(searchQuery) {
   const { user: currentUser } = useAuth();
-  const { data: companies, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ["search", { searchQuery, types: "companies" }],
-    queryFn: () =>
-      getSearchResults({ searchTerm: searchQuery, types: "companies" }),
+  
+  // Optimized: Use a single API call instead of 5 separate calls
+  const { data: searchResults, isLoading } = useQuery({
+    queryKey: ["search", { searchQuery }],
+    queryFn: () => getSearchResults({ searchTerm: searchQuery }),
     enabled: !!searchQuery && !!currentUser,
-  });
-  const { data: posts, isLoading: isLoadingPosts } = useQuery({
-    queryKey: ["search", { searchQuery, types: "posts" }],
-    queryFn: () =>
-      getSearchResults({ searchTerm: searchQuery, types: "posts" }),
-    enabled: !!searchQuery && !!currentUser,
-  });
-
-  const { data: products, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ["search", { searchQuery, types: "products" }],
-    queryFn: () =>
-      getSearchResults({ searchTerm: searchQuery, types: "products" }),
-    enabled: !!searchQuery && !!currentUser,
-  });
-
-  const { data: services, isLoading: isLoadingServices } = useQuery({
-    queryKey: ["search", { searchQuery, types: "services" }],
-    queryFn: () =>
-      getSearchResults({ searchTerm: searchQuery, types: "services" }),
-    enabled: !!searchQuery && !!currentUser,
-  });
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ["search", { searchQuery, types: "users" }],
-    queryFn: () =>
-      getSearchResults({ searchTerm: searchQuery, types: "users" }),
-    enabled: !!searchQuery && !!currentUser,
+    staleTime: 30 * 1000, // Cache for 30 seconds
   });
 
   return {
-    companies,
-    posts,
-    users,
-    services,
-    products,
+    companies: searchResults?.companies || [],
+    posts: searchResults?.posts || [],
+    users: searchResults?.users || [],
+    services: searchResults?.services || [],
+    products: searchResults?.products || [],
 
-    //
-    isLoadingCompanies,
-    isLoadingPosts,
-    isLoadingProducts,
-    isLoadingServices,
-    isLoadingUsers,
+    // Single loading state for all
+    isLoadingCompanies: isLoading,
+    isLoadingPosts: isLoading,
+    isLoadingProducts: isLoading,
+    isLoadingServices: isLoading,
+    isLoadingUsers: isLoading,
   };
 }
 
@@ -254,6 +230,23 @@ export const SearchTab = () => {
   );
 
   const tabsPanels = filteredTabs.map((tab) => tab.content);
+
+  // Show loading state while searching
+  if (isAnyLoading && searchQuery) {
+    return (
+      <section className="flex items-center justify-center flex-col gap-4 px-4 py-8 min-h-[40vh]">
+        <DotLottieReact
+          src="/lottie/notification.lottie"
+          loop
+          autoplay
+          className="size-32 shrink-0 pointer-events-none"
+        />
+        <LightParagraph center>
+          Searching for <b className="!text-gold">{searchQuery}</b>...
+        </LightParagraph>
+      </section>
+    );
+  }
 
   return tabsHeading?.length <= 0 ? (
     <section
