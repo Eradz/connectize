@@ -150,25 +150,26 @@ export default function CompaniesPage() {
             );
           })}
         </div>
-        {companyPages?.pages?.map((page, index) => {
-          return <CompaniesArray companies={page?.data} key={index} />;
-        })}
-
-        {hasNextPage && (
-          <div
-            className={clsx("mt-10 flex mx-auto justify-center", {
-              "animate-pulse": isFetching,
-            })}
-          >
-            <PrimaryButton
-              onClick={fetchNextPage}
-              disabled={!hasNextPage || isFetching || isFetchingNextPage}
-            >
-              Load More
-            </PrimaryButton>
-          </div>
-        )}
       </div>
+
+      {companyPages?.pages?.map((page, index) => {
+        return <CompaniesArray companies={page?.data} key={index} />;
+      })}
+
+      {hasNextPage && (
+        <div
+          className={clsx("mt-10 flex mx-auto justify-center", {
+            "animate-pulse": isFetching,
+          })}
+        >
+          <PrimaryButton
+            onClick={fetchNextPage}
+            disabled={!hasNextPage || isFetching || isFetchingNextPage}
+          >
+            Load More
+          </PrimaryButton>
+        </div>
+      )}
     </section>
   );
 }
