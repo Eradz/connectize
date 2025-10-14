@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useEffect } from "react";
 import {
   isRouteErrorResponse,
   Outlet,
@@ -10,6 +11,11 @@ import Navbar from "../components/userProfile/Navbar";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
+
+  // Cleanup any stuck scroll-blocking classes when navigating between routes
+  useEffect(() => {
+    document.body.classList.remove('messages-opened');
+  }, [pathname]);
   const isSinglePostRoute = pathname.startsWith("/posts/");
   const isHomeRoute = pathname === "/" || pathname.startsWith("/messages");
   const isMessagesRoute = pathname.startsWith("/messages");
