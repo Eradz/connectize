@@ -7,7 +7,7 @@ import {
   Textarea,
   Tooltip,
 } from "@chakra-ui/react";
-import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { HeartIcon, Pencil1Icon, TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useState } from "react";
@@ -43,7 +43,6 @@ import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import ReportModal from "../../moderation/ReportModal";
-import { FlagIcon } from "@radix-ui/react-icons";
 
 function DiscoverPosts({
   searchArray,
@@ -224,7 +223,7 @@ export const DiscoverPostItem = ({
             <div className="flex flex-col gap-2">
               <ButtonWithTooltipIcon
                 text="Report post"
-                IconName={FlagIcon}
+                IconName={ExclamationTriangleIcon}
                 onClick={() => setShowReportModal(true)}
                 className="!text-red-600 hover:!text-red-500"
               />
