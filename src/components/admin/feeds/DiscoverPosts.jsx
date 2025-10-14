@@ -42,6 +42,8 @@ import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
+import ReportModal from "../../moderation/ReportModal";
+import { FlagIcon } from "@radix-ui/react-icons";
 
 function DiscoverPosts({
   searchArray,
@@ -159,6 +161,7 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   return (
     <motion.article
@@ -192,7 +195,7 @@ export const DiscoverPostItem = ({
           </section>
         </section>
 
-        {postItem?.user?.id === currentUser?.id && (
+        {postItem?.user?.id === currentUser?.id ? (
           <MoreOptions className="shrink-0 !max-w-[120px]">
             <div className="flex flex-col gap-2">
               <ButtonWithTooltipIcon
@@ -213,6 +216,17 @@ export const DiscoverPostItem = ({
                   setTimeout(() => setRefetchInterval(false), 2000);
                 }}
                 className="!text-red-700 hover:!text-red-500"
+              />
+            </div>
+          </MoreOptions>
+        ) : (
+          <MoreOptions className="shrink-0 !max-w-[120px]">
+            <div className="flex flex-col gap-2">
+              <ButtonWithTooltipIcon
+                text="Report post"
+                IconName={FlagIcon}
+                onClick={() => setShowReportModal(true)}
+                className="!text-red-600 hover:!text-red-500"
               />
             </div>
           </MoreOptions>
@@ -346,6 +360,15 @@ export const DiscoverPostItem = ({
         postItem={postItem}
         refetchComments={refetchComments}
         isLoading={isLoadingComments}
+      />
+
+      {/* Report Modal - App Store Compliance */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        contentType="post"
+        contentId={postItem?.id}
+        reportedUserId={postItem?.user?.id}
       />
     </motion.article>
   );

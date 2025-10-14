@@ -8,6 +8,7 @@ import { Link } from "react-router";
 import { useAuth } from "../../context/userContext";
 import ConnectButton from "../ConnectButton";
 import { useState } from "react";
+import BlockUserButton from "../moderation/BlockUserButton";
 
 export default function UserProfileHeadings({
   first_name,
@@ -58,11 +59,17 @@ export default function UserProfileHeadings({
           {is_first_time_user ? "Complete your profile" : "Edit profile"}
         </Link>
       ) : (
-        <ConnectButton
-          id={id}
-          setCachedConnections={setCachedConnections}
-          first_name={first_name}
-        />
+        <div className="flex items-center gap-2">
+          <ConnectButton
+            id={id}
+            setCachedConnections={setCachedConnections}
+            first_name={first_name}
+          />
+          <BlockUserButton
+            userId={id}
+            userName={`${first_name} ${last_name || ""}`}
+          />
+        </div>
       )}
     </section>
   );

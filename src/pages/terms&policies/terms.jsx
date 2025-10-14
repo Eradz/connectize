@@ -39,6 +39,14 @@ const terms = [
         heading: "Acceptable Use",
         text: "By using Connectize, you agree to abide by all applicable laws. Prohibited activities include, but are not limited to: Posting false, misleading, or deceptive content. Engaging in any form of harassment, discrimination, or abusive behavior. Uploading viruses, malicious software, spam, or unauthorized advertisements. Violating intellectual property rights or privacy laws.",
       },
+      {
+        heading: "Zero-Tolerance Policy for Objectionable Content",
+        text: "Connectize maintains a strict zero-tolerance policy for objectionable content and abusive behavior. We do not tolerate content that contains hate speech, harassment, bullying, violence, threats, nudity, sexual content, spam, fraud, or any form of discrimination. Users who post such content or engage in abusive behavior will face immediate consequences including content removal, account suspension, or permanent termination. We provide mechanisms for users to report objectionable content and block abusive users. All reports are reviewed by our moderation team within 24 hours.",
+      },
+      {
+        heading: "Content Moderation and User Safety",
+        text: "To maintain a safe and professional environment, Connectize employs automated content filtering and manual moderation. Users can flag inappropriate content and block other users directly from their profiles. We reserve the right to remove any content that violates our community guidelines without prior notice. Repeated violations will result in permanent account termination. By using Connectize, you acknowledge and agree to these content moderation policies.",
+      },
     ],
   },
 ];
