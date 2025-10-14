@@ -1,7 +1,7 @@
 import { LocationOnOutlined } from "@mui/icons-material";
-import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
+import { EnvelopeClosedIcon, GlobeIcon, DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
@@ -18,6 +18,9 @@ import { usePollCurrentCompany } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
 import { ProfileAboutList } from "./userProfile";
+import BlockCompanyButton from "../../components/moderation/BlockCompanyButton";
+import ReportModal from "../../components/moderation/ReportModal";
+import { Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
 
 export const meta = () =>
   createSEO({
@@ -91,6 +94,7 @@ const ProductSidebar = React.memo(({ company }) => {
   );
 
   const { user: currentUser } = useAuth();
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const isCurrentUser = currentUser?.id === company?.user?.id;
 
@@ -112,6 +116,40 @@ const ProductSidebar = React.memo(({ company }) => {
             <StatsText key={index} text={text} />
           ))}
         </div>
+        
+        {!isCurrentUser && (
+          <div className="flex items-center gap-2">
+            <BlockCompanyButton 
+              companyId={company?.id} 
+              companyName={company?.company_name}
+            />
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<DotsHorizontalIcon />}
+                variant="ghost"
+                size="sm"
+                aria-label="More options"
+              />
+              <MenuList>
+                <MenuItem 
+                  icon={<ExclamationTriangleIcon />}
+                  onClick={() => setShowReportModal(true)}
+                >
+                  Report Company
+                </MenuItem>
+              </MenuList>
+            </Menu>
+            
+            <ReportModal
+              isOpen={showReportModal}
+              onClose={() => setShowReportModal(false)}
+              contentType="company"
+              contentId={company?.id}
+              reportedUserId={null}
+            />
+          </div>
+        )}
       </section>
       <ProfileSection title="About" className="!relative">
         {isCurrentUser && (

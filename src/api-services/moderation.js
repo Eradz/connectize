@@ -133,6 +133,80 @@ export const isUserBlocked = async (user_id) => {
 };
 
 /**
+ * Block a company
+ * @param {number} company_id - ID of company to block
+ * @param {string} reason - Optional reason for blocking
+ */
+export const blockCompany = async (company_id, reason = "") => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/blocked-companies/block_company/",
+      method: "POST",
+      data: { company_id, reason },
+    });
+
+    toast.success(`Company blocked successfully`);
+    return response;
+  } catch (error) {
+    toast.error("Failed to block company. Please try again.");
+    throw error;
+  }
+};
+
+/**
+ * Unblock a company
+ * @param {number} company_id - ID of company to unblock
+ */
+export const unblockCompany = async (company_id) => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/blocked-companies/unblock_company/",
+      method: "POST",
+      data: { company_id },
+    });
+
+    toast.success(`Company unblocked successfully`);
+    return response;
+  } catch (error) {
+    toast.error("Failed to unblock company. Please try again.");
+    throw error;
+  }
+};
+
+/**
+ * Get list of blocked companies
+ */
+export const getBlockedCompanies = async () => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/blocked-companies/my_blocked_companies/",
+      method: "GET",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching blocked companies:", error);
+    return [];
+  }
+};
+
+/**
+ * Check if a specific company is blocked
+ * @param {number} company_id - ID of company to check
+ */
+export const isCompanyBlocked = async (company_id) => {
+  try {
+    const response = await makeApiRequest({
+      url: `api/blocked-companies/is_blocked/?company_id=${company_id}`,
+      method: "GET",
+    });
+    return response.is_blocked || false;
+  } catch (error) {
+    console.error("Error checking company block status:", error);
+    return false;
+  }
+};
+
+/**
  * Accept Terms of Service
  * @param {string} terms_version - Version of terms being accepted (default: "1.0")
  */

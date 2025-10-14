@@ -74,11 +74,37 @@ const ReportModal = ({
     onClose();
   };
 
+  const getModalTitle = () => {
+    switch (contentType) {
+      case "user":
+        return "Report User";
+      case "company":
+        return "Report Company";
+      case "post":
+        return "Report Post";
+      case "comment":
+        return "Report Comment";
+      default:
+        return "Report Content";
+    }
+  };
+
+  const getDescriptionPlaceholder = () => {
+    switch (contentType) {
+      case "user":
+        return "Please describe the issue with this user's behavior or profile...";
+      case "company":
+        return "Please describe the issue with this company or its activities...";
+      default:
+        return "Please provide specific details about why you're reporting this content...";
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="md">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Report Content</ModalHeader>
+        <ModalHeader>{getModalTitle()}</ModalHeader>
         <ModalCloseButton />
         <ModalBody className="space-y-4">
           <FormControl>
@@ -105,7 +131,7 @@ const ReportModal = ({
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Please provide specific details about why you're reporting this content..."
+              placeholder={getDescriptionPlaceholder()}
               rows={4}
               className="!text-sm"
               resize="none"

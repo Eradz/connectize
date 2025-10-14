@@ -1,4 +1,5 @@
-import { Avatar } from "@chakra-ui/react";
+import { Avatar, Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
+import { DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { VerifiedIcon } from "../../icon";
 import { formatNumber } from "../../lib/utils";
 import { StatsText } from "../../pages/feed/companyProfile";
@@ -9,6 +10,7 @@ import { useAuth } from "../../context/userContext";
 import ConnectButton from "../ConnectButton";
 import { useState } from "react";
 import BlockUserButton from "../moderation/BlockUserButton";
+import ReportModal from "../moderation/ReportModal";
 
 export default function UserProfileHeadings({
   first_name,
@@ -23,6 +25,7 @@ export default function UserProfileHeadings({
 }) {
   const { user: currentUser } = useAuth();
   const [cachedConnections, setCachedConnections] = useState(followers_count);
+  const [showReportModal, setShowReportModal] = useState(false);
   return (
     <section className="flex max-md:flex-col md:items-center gap-4 md:justify-between">
       <section className="space-y-1">
@@ -68,6 +71,31 @@ export default function UserProfileHeadings({
           <BlockUserButton
             userId={id}
             userName={`${first_name} ${last_name || ""}`}
+          />
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              icon={<DotsHorizontalIcon />}
+              variant="ghost"
+              size="sm"
+              aria-label="More options"
+            />
+            <MenuList>
+              <MenuItem 
+                icon={<ExclamationTriangleIcon />}
+                onClick={() => setShowReportModal(true)}
+              >
+                Report User
+              </MenuItem>
+            </MenuList>
+          </Menu>
+          
+          <ReportModal
+            isOpen={showReportModal}
+            onClose={() => setShowReportModal(false)}
+            contentType="user"
+            contentId={id}
+            reportedUserId={id}
           />
         </div>
       )}

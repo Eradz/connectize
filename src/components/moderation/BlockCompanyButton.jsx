@@ -1,14 +1,14 @@
 /**
- * Block User Button
- * Allows users to block abusive users
+ * Block Company Button
+ * Allows users to block companies and hide their content
  * App Store Compliance Requirement
  */
 import React, { useState, useEffect } from "react";
 import { Button } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { blockUser, unblockUser, isUserBlocked } from "../../api-services/moderation";
+import { blockCompany, unblockCompany, isCompanyBlocked } from "../../api-services/moderation";
 
-const BlockUserButton = ({ userId, userName, size = "sm", variant = "outline" }) => {
+const BlockCompanyButton = ({ companyId, companyName, size = "sm", variant = "outline" }) => {
   const [isBlocked, setIsBlocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -16,17 +16,17 @@ const BlockUserButton = ({ userId, userName, size = "sm", variant = "outline" })
 
   useEffect(() => {
     checkBlockStatus();
-  }, [userId]);
+  }, [companyId]);
 
   const checkBlockStatus = async () => {
-    if (!userId) return;
+    if (!companyId) return;
     
     setChecking(true);
     try {
-      const blocked = await isUserBlocked(userId);
+      const blocked = await isCompanyBlocked(companyId);
       setIsBlocked(blocked);
     } catch (error) {
-      console.error("Error checking block status:", error);
+      console.error("Error checking company block status:", error);
     } finally {
       setChecking(false);
     }
@@ -35,14 +35,14 @@ const BlockUserButton = ({ userId, userName, size = "sm", variant = "outline" })
   const handleBlock = async () => {
     setLoading(true);
     try {
-      await blockUser(userId);
+      await blockCompany(companyId);
       setIsBlocked(true);
       
-      // Invalidate queries to refresh feed and hide blocked user's content
+      // Invalidate queries to refresh feed and hide company posts
       queryClient.invalidateQueries(['posts']);
-      queryClient.invalidateQueries(['comments']);
+      queryClient.invalidateQueries(['companies']);
     } catch (error) {
-      console.error("Error blocking user:", error);
+      console.error("Error blocking company:", error);
     } finally {
       setLoading(false);
     }
@@ -51,14 +51,14 @@ const BlockUserButton = ({ userId, userName, size = "sm", variant = "outline" })
   const handleUnblock = async () => {
     setLoading(true);
     try {
-      await unblockUser(userId);
+      await unblockCompany(companyId);
       setIsBlocked(false);
       
-      // Invalidate queries to refresh feed and show user's content again
+      // Invalidate queries to refresh feed and show company posts again
       queryClient.invalidateQueries(['posts']);
-      queryClient.invalidateQueries(['comments']);
+      queryClient.invalidateQueries(['companies']);
     } catch (error) {
-      console.error("Error unblocking user:", error);
+      console.error("Error unblocking company:", error);
     } finally {
       setLoading(false);
     }
@@ -77,9 +77,9 @@ const BlockUserButton = ({ userId, userName, size = "sm", variant = "outline" })
       isLoading={loading}
       className="!text-sm"
     >
-      {isBlocked ? "Unblock" : "Block User"}
+      {isBlocked ? "Unblock" : "Block Company"}
     </Button>
   );
 };
 
-export default BlockUserButton;
+export default BlockCompanyButton;
