@@ -48,6 +48,9 @@ type Pages = {
   "/analysis": {
     params: {};
   };
+  "/co/blocked-users": {
+    params: {};
+  };
   "/co/bookmarks": {
     params: {};
   };
@@ -147,11 +150,11 @@ type Pages = {
 type RouteFiles = {
   "root.jsx": {
     id: "root";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
   };
   "../pages/AppLayout.jsx": {
     id: "../pages/AppLayout";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support";
   };
   "../pages/FeedLayout.jsx": {
     id: "../pages/FeedLayout";
@@ -212,6 +215,10 @@ type RouteFiles = {
   "../pages/market/analysis.jsx": {
     id: "../pages/market/analysis";
     page: "/analysis";
+  };
+  "../pages/blocked-users/index.jsx": {
+    id: "../pages/blocked-users/index";
+    page: "/co/blocked-users";
   };
   "../pages/bookmark/index.jsx": {
     id: "../pages/bookmark/index";

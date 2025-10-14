@@ -239,3 +239,111 @@ export const checkTermsAcceptance = async () => {
     return false;
   }
 };
+
+// ========================================
+// USER CONTENT PREFERENCES
+// ========================================
+
+/**
+ * Get current user's content filtering preferences
+ */
+export const getContentPreferences = async () => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/content-preferences/my_preferences/",
+      method: "GET",
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching content preferences:", error);
+    // Return default preferences if fetch fails
+    return {
+      safe_mode_enabled: false,
+      profanity_filter_enabled: true,
+      hide_sensitive_content: false,
+      hide_reported_content: true,
+    };
+  }
+};
+
+/**
+ * Update content filtering preferences
+ * @param {Object} preferences - Preference settings
+ * @param {boolean} preferences.safe_mode_enabled
+ * @param {boolean} preferences.profanity_filter_enabled
+ * @param {boolean} preferences.hide_sensitive_content
+ * @param {boolean} preferences.hide_reported_content
+ */
+export const updateContentPreferences = async (preferences) => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/content-preferences/update_preferences/",
+      method: "POST",
+      data: preferences,
+    });
+
+    toast.success("Content preferences updated");
+    return response;
+  } catch (error) {
+    toast.error("Failed to update preferences");
+    throw error;
+  }
+};
+
+/**
+ * Toggle safe mode on/off
+ * @param {boolean} enabled - Enable or disable safe mode
+ */
+export const toggleSafeMode = async (enabled) => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/content-preferences/toggle_safe_mode/",
+      method: "POST",
+      data: { enabled },
+    });
+
+    toast.success(response.message || `Safe mode ${enabled ? "enabled" : "disabled"}`);
+    return response;
+  } catch (error) {
+    toast.error("Failed to toggle safe mode");
+    throw error;
+  }
+};
+
+/**
+ * Toggle profanity filter on/off
+ * @param {boolean} enabled - Enable or disable profanity filter
+ */
+export const toggleProfanityFilter = async (enabled) => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/content-preferences/toggle_profanity_filter/",
+      method: "POST",
+      data: { enabled },
+    });
+
+    toast.success(response.message || `Profanity filter ${enabled ? "enabled" : "disabled"}`);
+    return response;
+  } catch (error) {
+    toast.error("Failed to toggle profanity filter");
+    throw error;
+  }
+};
+
+/**
+ * Reset content preferences to default values
+ */
+export const resetContentPreferences = async () => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/content-preferences/reset_to_defaults/",
+      method: "POST",
+    });
+
+    toast.success("Preferences reset to defaults");
+    return response;
+  } catch (error) {
+    toast.error("Failed to reset preferences");
+    throw error;
+  }
+};
