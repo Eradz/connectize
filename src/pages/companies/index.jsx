@@ -282,7 +282,7 @@ export const CompaniesArray = ({
                   <div className="flex items-center text-gray-400">
                     <LocationOnOutlined className="sm:!size-4 !size-5" />
                     <span className="text-sm sm:text-xs">
-                      {company?.address} {company?.city}, {company?.state},{" "}
+                      {company?.office_address} {company?.city}, {company?.state},{" "}
                       {company?.country}.
                     </span>
                   </div>
