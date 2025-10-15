@@ -18,6 +18,15 @@ export const getPosts = async (page = 1, pageSize = 10) => {
   };
 };
 
+export const getPostById = async (id) => {
+  const post = await makeApiRequest({
+    url: `api/posts/${id}/`,
+    method: "GET",
+  });
+
+  return post;
+};
+
 export const createPost = async (formData) => {
   const companies = await getCompanyByIdOrEmail();
   const company = companies?.[0];

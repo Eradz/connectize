@@ -1,35 +1,27 @@
 import { Button } from "@chakra-ui/react";
 import { ArrowBackIos } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { useParams } from "react-router";
-import { getPosts } from "../../api-services/posts";
+import { getPostById } from "../../api-services/posts";
 import {
   DiscoverPostItem,
   DiscoverPostSkeleton,
 } from "../../components/admin/feeds/DiscoverPosts";
 import LightParagraph from "../../components/ParagraphText";
-import { useCustomQuery } from "../../context/queryContext";
 
 function SinglePostPage() {
   const { id } = useParams();
-  const { refetchInterval } = useCustomQuery();
 
-  const { data: postsData, isLoading } = useQuery({
-    queryKey: ["posts"],
-    queryFn: getPosts,
-    refetchInterval,
+  const { data: postItem, isLoading, isError } = useQuery({
+    queryKey: ["post", id],
+    queryFn: () => getPostById(id),
     staleTime: 300000,
     cacheTime: 600000,
+    enabled: !!id, // Only run query if id exists
   });
 
-  const postItem = useMemo(
-    () => postsData?.posts?.find((post) => post.id.toString() === id),
-    [postsData, id]
-  );
-
   if (isLoading) return <DiscoverPostSkeleton />;
-  if (!postItem) return <LightParagraph>No post found</LightParagraph>;
+  if (isError || !postItem) return <LightParagraph>No post found</LightParagraph>;
 
   return (
     <section className="space-y-4">
