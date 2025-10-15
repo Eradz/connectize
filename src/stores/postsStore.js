@@ -9,8 +9,10 @@ export const usePostsStore = create((set, get) => ({
     // set({ loading: true });
     try {
       const data = await getPosts();
-      if (!isEqual(data, get().posts)) {
-        set({ posts: data });
+      // Extract the posts array from the response object
+      const postsArray = data?.posts || [];
+      if (!isEqual(postsArray, get().posts)) {
+        set({ posts: postsArray });
       }
     } catch (error) {
       console.error("Failed to fetch posts", error);

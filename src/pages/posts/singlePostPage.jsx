@@ -15,7 +15,7 @@ function SinglePostPage() {
   const { id } = useParams();
   const { refetchInterval } = useCustomQuery();
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: postsData, isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: getPosts,
     refetchInterval,
@@ -24,8 +24,8 @@ function SinglePostPage() {
   });
 
   const postItem = useMemo(
-    () => posts?.find((post) => post.id.toString() === id),
-    [posts, id]
+    () => postsData?.posts?.find((post) => post.id.toString() === id),
+    [postsData, id]
   );
 
   if (isLoading) return <DiscoverPostSkeleton />;
