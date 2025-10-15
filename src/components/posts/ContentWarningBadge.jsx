@@ -30,10 +30,9 @@ const ContentWarningBadge = ({ flagReason, isOwner = false }) => {
       <Badge
         colorScheme={config.colorScheme}
         variant="subtle"
-        className="flex items-center gap-1 px-2 py-1 text-xs cursor-help"
+        className="flex items-center justify-center p-1.5 text-sm cursor-help"
       >
         {config.icon}
-        <span>{config.title}</span>
       </Badge>
     </Tooltip>
   );

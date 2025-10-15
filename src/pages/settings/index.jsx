@@ -5,7 +5,8 @@ import { deactivateAccount } from "../../api-services/authentication";
 import { 
   getContentPreferences, 
   updateContentPreferences,
-  getBlockedUsers 
+  getBlockedUsers,
+  getBlockedCompanies 
 } from "../../api-services/moderation";
 import ReusableModal from "../../components/custom/ResusableModal";
 import CustomInput from "../../components/form/customInput";
@@ -37,11 +38,13 @@ const SettingsPage = () => {
   });
   const [preferencesLoading, setPreferencesLoading] = useState(true);
   const [blockedUsersCount, setBlockedUsersCount] = useState(0);
+  const [blockedCompaniesCount, setBlockedCompaniesCount] = useState(0);
 
   // Load preferences on mount
   useEffect(() => {
     loadPreferences();
     loadBlockedUsersCount();
+    loadBlockedCompaniesCount();
   }, []);
 
   const loadPreferences = async () => {
@@ -67,6 +70,15 @@ const SettingsPage = () => {
       setBlockedUsersCount(blocked?.length || 0);
     } catch (error) {
       console.error("Failed to load blocked users:", error);
+    }
+  };
+
+  const loadBlockedCompaniesCount = async () => {
+    try {
+      const blocked = await getBlockedCompanies();
+      setBlockedCompaniesCount(blocked?.length || 0);
+    } catch (error) {
+      console.error("Failed to load blocked companies:", error);
     }
   };
 
@@ -243,6 +255,21 @@ const SettingsPage = () => {
                   onClick={() => (window.location.href = "/co/blocked-users")}
                 >
                   View Blocked Users ({blockedUsersCount})
+                </Button>
+              </div>
+
+              {/* Blocked Companies */}
+              <div className="pt-4 border-t">
+                <p className="font-medium text-base">Blocked Companies</p>
+                <p className="text-sm text-gray-600 mt-1 mb-3">
+                  Manage companies you've blocked from interacting with you
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => (window.location.href = "/co/blocked-companies")}
+                >
+                  View Blocked Companies ({blockedCompaniesCount})
                 </Button>
               </div>
             </div>
