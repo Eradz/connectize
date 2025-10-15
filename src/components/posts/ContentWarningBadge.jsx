@@ -27,13 +27,13 @@ const ContentWarningBadge = ({ flagReason, isOwner = false }) => {
   
   return (
     <Tooltip label={config.message} placement="top" hasArrow>
-      <Badge
-        colorScheme={config.colorScheme}
-        variant="subtle"
-        className="flex items-center justify-center p-1.5 text-sm cursor-help"
+      <span
+        className={`flex items-center justify-center cursor-help ${
+          config.colorScheme === 'orange' ? 'text-orange-500' : 'text-yellow-600'
+        }`}
       >
         {config.icon}
-      </Badge>
+      </span>
     </Tooltip>
   );
 };
