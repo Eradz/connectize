@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 import { getAllCompanies, getSingleCompany } from "../api-services/companies";
@@ -36,10 +36,13 @@ export const useSafePoll = (callback, interval, deps = []) => {
   }, [interval, ...deps]);
 };
 
-export const usePollPosts = (interval = 10000000) => {
-  return useQuery({
+export const usePollPosts = (interval = 30000) => {
+  return useInfiniteQuery({
     queryKey: ["posts"],
-    queryFn: getPosts,
+    queryFn: ({ pageParam = 1 }) => getPosts(pageParam, 10),
+    getNextPageParam: (lastPage) => 
+      lastPage.hasMore ? lastPage.nextPage : undefined,
+    initialPageParam: 1,
     refetchInterval: interval,
   });
 };

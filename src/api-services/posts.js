@@ -2,13 +2,20 @@ import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
 import { getCompanyByIdOrEmail } from "./companies";
 
-export const getPosts = async () => {
-  const { results: posts } = await makeApiRequest({
-    url: `api/posts/`,
+export const getPosts = async (page = 1, pageSize = 10) => {
+  const response = await makeApiRequest({
+    url: `api/posts/?page=${page}&page_size=${pageSize}`,
     method: "GET",
   });
 
-  return posts.filter((post) => post.status.toUpperCase() === "PUBLISHED");
+  return {
+    posts: response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED"),
+    count: response.count,
+    next: response.next,
+    previous: response.previous,
+    hasMore: !!response.next,
+    nextPage: page + 1
+  };
 };
 
 export const createPost = async (formData) => {
