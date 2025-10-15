@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { HeartIcon, Pencil1Icon, TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import ContentWarningBadge from "../../posts/ContentWarningBadge";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
@@ -181,10 +182,18 @@ export const DiscoverPostItem = ({
           />
 
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
-            <CompanyName
-              name={postItem?.company?.slug}
-              verified={postItem?.company?.verify}
-            />
+            <div className="flex items-center gap-2">
+              <CompanyName
+                name={postItem?.company?.slug}
+                verified={postItem?.company?.verify}
+              />
+              {postItem?.is_flagged && (
+                <ContentWarningBadge 
+                  flagReason={postItem?.flag_reason} 
+                  isOwner={postItem?.user?.id === currentUser?.id}
+                />
+              )}
+            </div>
             <small className="text-gray-400 lowercase shrink-0">
               <Link to={`/co/${postItem?.user?.id}`}>
                 @{postItem.user.first_name}{" "}
