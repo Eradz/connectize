@@ -121,7 +121,7 @@ const BlockedCompaniesPage = () => {
               {/* Company Info */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar
-                  name={blockedCompany.company?.company_name || "Company"}
+                  name={blockedCompany.company_name || "Company"}
                   src={blockedCompany.company?.logo}
                   size="md"
                   className={avatarStyle}
@@ -130,7 +130,7 @@ const BlockedCompaniesPage = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-gray-900 truncate">
-                      {blockedCompany.company?.company_name || "Unknown Company"}
+                      {blockedCompany.company_name || "Unknown Company"}
                     </h3>
                   </div>
                   
@@ -174,14 +174,14 @@ const BlockedCompaniesPage = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
             <Avatar
-              name={selectedCompany?.company?.company_name || "Company"}
+              name={selectedCompany?.company_name || "Company"}
               src={selectedCompany?.company?.logo}
               size="md"
               className={avatarStyle}
             />
             <div>
               <p className="font-semibold text-gray-900">
-                {selectedCompany?.company?.company_name || "Unknown Company"}
+                {selectedCompany?.company_name || "Unknown Company"}
               </p>
               <p className="text-sm text-gray-500">
                 @{selectedCompany?.company?.slug || "company"}
