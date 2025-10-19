@@ -163,12 +163,16 @@ export const DiscoverPostItem = ({
   isSinglePost = false,
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allComments, setAllComments] = useState([]);
+  
   const {
-    data: comments,
+    data: commentsResponse,
     refetch: refetchComments,
     isLoading: isLoadingComments,
+    isFetching: isFetchingComments,
   } = useGetPostComments(
-    { postId: postItem.id },
+    { postId: postItem.id, page: currentPage },
     {
       enabled: showCommentSection,
     }
@@ -197,10 +201,27 @@ export const DiscoverPostItem = ({
   const [disabled, setDisabled] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
+  // Update allComments when new data is fetched
   useEffect(() => {
-    if (isLoadingComments || !comments) return;
-    setCommentsLength(comments?.length);
-  }, [comments?.length]);
+    if (!commentsResponse?.results) return;
+    
+    if (currentPage === 1) {
+      // First page - replace all comments
+      setAllComments(commentsResponse.results);
+    } else {
+      // Subsequent pages - append new comments
+      setAllComments(prev => [...prev, ...commentsResponse.results]);
+    }
+  }, [commentsResponse?.results, currentPage]);
+
+  useEffect(() => {
+    if (isLoadingComments || !commentsResponse) return;
+    setCommentsLength(commentsResponse?.count || allComments?.length);
+  }, [commentsResponse?.count, allComments?.length]);
+
+  const handleLoadMoreComments = () => {
+    setCurrentPage(prev => prev + 1);
+  };
 
   const handleLikePost = async () => {
     const currentIsLiked = liked;
@@ -433,10 +454,13 @@ export const DiscoverPostItem = ({
       <CommentSection
         showCommentSection={showCommentSection}
         setShowCommentSection={setShowCommentSection}
-        commentsData={comments}
+        commentsData={allComments}
         postItem={postItem}
         refetchComments={refetchComments}
         isLoading={isLoadingComments}
+        hasMore={commentsResponse?.hasMore || false}
+        onLoadMore={handleLoadMoreComments}
+        isLoadingMore={isFetchingComments && currentPage > 1}
       />
 
       {/* Report Modal - App Store Compliance */}
@@ -464,6 +488,9 @@ const CommentSection = ({
   // setCommentsLength.
   postItem,
   refetchComments,
+  hasMore = false,
+  onLoadMore,
+  isLoadingMore = false,
 }) => {
   const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
@@ -633,6 +660,35 @@ const CommentSection = ({
               companies={companies}
             />
           ))}
+      
+      {/* Load More Comments Button */}
+      {hasMore && !isLoading && (
+        <div className="mt-4 mb-4 flex justify-center">
+          <button
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            className="px-6 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isLoadingMore ? (
+              <>
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </>
+            ) : (
+              <>
+                Load More Comments
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      
       <div className="mt-4 border-t pt-4">
         {/* Comment as selector - only shows if user has companies */}
         <CommentAsSelector
