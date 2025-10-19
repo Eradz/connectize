@@ -167,6 +167,14 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
   const [results, setResults] = useState([]);
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
+  // Debug: Log when plugin receives data
+  useEffect(() => {
+    console.log('🔌 UnifiedMentionPlugin initialized with:', {
+      users: users?.length || 0,
+      companies: companies?.length || 0
+    });
+  }, [users, companies]);
+
   useEffect(() => {
     if (!editor.hasNodes([MentionNode])) {
       throw new Error(
