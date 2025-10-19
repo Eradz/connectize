@@ -3,7 +3,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
 import ToolbarPlugin from './ToolbarPlugin';
 import UnifiedMentionPlugin, { MentionNode } from './UnifiedMentionPlugin';
