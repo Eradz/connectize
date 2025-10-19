@@ -129,3 +129,17 @@ export const likeComment = async (commentId, hasLiked = false, companyId = null)
 
   return result;
 };
+
+export const likeReply = async (replyId, hasLiked = false, companyId = null) => {
+  const url = hasLiked 
+    ? `api/replies/${replyId}/unlike/`
+    : `api/replies/${replyId}/like/`;
+    
+  const result = await makeApiRequest({
+    url,
+    method: "POST",
+    data: companyId ? { company_id: companyId } : {},
+  });
+
+  return result;
+};

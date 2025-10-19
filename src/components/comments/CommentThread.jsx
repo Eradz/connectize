@@ -16,6 +16,7 @@ const CommentThread = memo(({
   currentUser,
   onReply,
   onLike,
+  onLikeReply,
   users = [],
   companies = [],
   level = 0 
@@ -24,11 +25,12 @@ const CommentThread = memo(({
   const [replyContent, setReplyContent] = useState({ text: '', mentions: [] });
   const [isReplying, setIsReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(true);
-  const [liked, setLiked] = useState(false); // TODO: Check if user already liked
+  const [liked, setLiked] = useState(() => !!comment.isLikedByUser);
 
   const isAuthor = comment.user?.id === postUserId;
   const hasReplies = comment.replies && comment.replies.length > 0;
   const isNested = level > 0;
+  const isReply = level > 0; // Replies are nested comments
 
   const handleReplySubmit = async () => {
     if (!replyContent.text.trim()) return;
@@ -47,10 +49,16 @@ const CommentThread = memo(({
 
   const handleLike = async () => {
     try {
-      await onLike(comment.id, liked);
+      if (isReply && onLikeReply) {
+        // This is a reply, use reply like endpoint
+        await onLikeReply(comment.id, liked);
+      } else {
+        // This is a top-level comment
+        await onLike(comment.id, liked);
+      }
       setLiked(!liked);
     } catch (error) {
-      console.error('Failed to like comment:', error);
+      console.error('Failed to like:', error);
     }
   };
 
@@ -176,6 +184,7 @@ const CommentThread = memo(({
                   currentUser={currentUser}
                   onReply={onReply}
                   onLike={onLike}
+                  onLikeReply={onLikeReply}
                   users={users}
                   companies={companies}
                   level={level + 1}

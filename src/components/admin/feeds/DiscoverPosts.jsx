@@ -22,6 +22,7 @@ import {
   likePost,
   replyToComment,
   likeComment,
+  likeReply,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
@@ -569,6 +570,21 @@ const CommentSection = ({
     }
   }, [refetchComments]);
 
+  const handleLikeReply = useCallback(async (replyId, hasLiked = false) => {
+    try {
+      // TODO: Allow users to like as their company
+      // For now, always like as user (company_id = null)
+      await likeReply(replyId, hasLiked, null);
+      
+      // Refetch comments to update like counts
+      refetchComments();
+      toast.success(hasLiked ? "Unliked reply!" : "Liked reply!");
+    } catch (error) {
+      console.error('Failed to like reply:', error);
+      toast.error("Failed to like reply");
+    }
+  }, [refetchComments]);
+
   useEffect(() => {
     if (!showCommentSection) setCommentData({ text: '', mentions: [], html: '', editorState: '' });
   }, [showCommentSection]);
@@ -611,6 +627,7 @@ const CommentSection = ({
               currentUser={user}
               onReply={handleReply}
               onLike={handleLike}
+              onLikeReply={handleLikeReply}
               users={users}
               companies={companies}
             />
