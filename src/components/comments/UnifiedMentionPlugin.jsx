@@ -98,12 +98,14 @@ const UnifiedMentionTypeahead = ({
     return null;
   }
 
+  console.log('🎨 Rendering dropdown at position:', position, 'with items:', items.length);
+  
   return (
     <div
-      className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto w-72"
+      className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto w-72"
       style={{
-        top: position.top,
-        left: position.left,
+        top: `${position.top}px`,
+        left: `${position.left}px`,
       }}
     >
       {items.map((item, index) => (
@@ -276,10 +278,12 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
             if (domSelection && domSelection.rangeCount > 0) {
               const range = domSelection.getRangeAt(0);
               const rect = range.getBoundingClientRect();
-              setPosition({
+              const calculatedPosition = {
                 top: rect.bottom + window.scrollY + 5,
                 left: rect.left + window.scrollX,
-              });
+              };
+              console.log('📍 Dropdown position calculated:', calculatedPosition, 'Rect:', rect);
+              setPosition(calculatedPosition);
             }
           } else {
             setQueryString(null);
