@@ -44,6 +44,10 @@ import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import ReportModal from "../../moderation/ReportModal";
+import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
+import CommentThread from "../../comments/CommentThread";
+import { useUserSearch } from "../../../hooks/useUserSearch";
+import { useCompanySearch } from "../../../hooks/useCompanySearch";
 
 function DiscoverPosts({
   searchArray,
@@ -456,46 +460,64 @@ const CommentSection = ({
   postItem,
   refetchComments,
 }) => {
-  const [comment, setComment] = useState("");
+  const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  // Fetch users and companies for mention autocomplete
+  const { users } = useUserSearch();
+  const { companies } = useCompanySearch();
 
   const handleComment = useCallback(async () => {
-    if (comment.trim().length < 1) return;
+    if (commentData.text.trim().length < 1) return;
 
     setLoading(true);
     try {
-      const newComment = await commentOnPost(postItem.id, postItem, comment);
+      const newComment = await commentOnPost(
+        postItem.id, 
+        postItem, 
+        commentData.text, 
+        commentData.mentions,
+        commentData.companyMentions
+      );
       const { id } = newComment;
 
       queryClient.setQueryData(
         ["comments", { postId: postItem.id }],
         (oldComments) => {
-          // const lastComment = oldComments?.at(0);
-          // const clone = { ...lastComment, id: Math.random(), content: comment };
-
           return [...oldComments, newComment];
         }
       );
 
       refetchComments().catch((e) =>
-        console.log("Could not update to lastest comments")
+        console.log("Could not update to latest comments")
       );
       if (id) toast.success("Comment has been added");
 
-      // setRefetchInterval(1000);
-      // setTimeout(() => setRefetchInterval(false), 2000);
-      setComment("");
+      setCommentData({ text: '', mentions: [], html: '', editorState: '' });
     } catch (error) {
       toast.error("Failed to submit the comment. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [comment, postItem, setRefetchInterval]);
+  }, [commentData, postItem, queryClient, refetchComments]);
+
+  const handleReply = useCallback(async (commentId, replyData) => {
+    // TODO: Implement reply API call
+    console.log('Reply to comment:', commentId, replyData);
+    toast.info('Reply feature coming soon!');
+  }, []);
+
+  const handleLike = useCallback(async (commentId) => {
+    // TODO: Implement like API call
+    console.log('Like comment:', commentId);
+    toast.info('Like comment feature coming soon!');
+  }, []);
 
   useEffect(() => {
-    if (!showCommentSection) setComment("");
+    if (!showCommentSection) setCommentData({ text: '', mentions: [], html: '', editorState: '' });
   }, [showCommentSection]);
 
   return (
@@ -529,27 +551,36 @@ const CommentSection = ({
             );
           })
         : commentsData.map((comment) => (
-            <MemoizedCommentBlock
+            <CommentThread
               key={comment.id}
               comment={comment}
               postUserId={postItem.user.id}
+              currentUser={user}
+              onReply={handleReply}
+              onLike={handleLike}
+              users={users}
+              companies={companies}
             />
           ))}
-      <div className="mt-4 border-t pt-4 relative">
-        {/* <ReactQuill
-          value={comment}
-          onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
-          theme="snow"
-          placeholder="Type your comment here"
-          // style={{ height: "200px" }}
-        /> */}
-        <button
-          className="absolute bottom-1.5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
-          onClick={handleComment}
-          disabled={loading || comment.trim().length < 1}
-        >
-          {loading ? "Commenting..." : "Comment"}
-        </button>
+      <div className="mt-4 border-t pt-4">
+        <LexicalCommentEditor
+          onChange={setCommentData}
+          placeholder="Write a comment..."
+          users={users}
+          companies={companies}
+        />
+        <div className="flex justify-between items-center mt-3">
+          <p className="text-xs text-gray-400">
+            Type @ to mention users or companies • Cmd/Ctrl+Enter to submit
+          </p>
+          <button
+            className="bg-gold disabled:bg-gray-300 hover:bg-custom_yellow text-sm px-6 py-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed font-medium"
+            onClick={handleComment}
+            disabled={loading || commentData.text.trim().length < 1}
+          >
+            {loading ? "Commenting..." : "Comment"}
+          </button>
+        </div>
       </div>
     </section>
   );

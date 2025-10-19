@@ -87,11 +87,17 @@ export const likePost = async (id, data, hasLikedPost) => {
   });
 };
 
-export const commentOnPost = async (id, data, comment) => {
+export const commentOnPost = async (id, data, comment, mentions = [], companyMentions = []) => {
   const result = await makeApiRequest({
     url: `api/posts/${id}/comment/`,
     method: "POST",
-    data: { ...data, company_id: data.company.id, comment },
+    data: { 
+      ...data, 
+      company_id: data.company.id, 
+      comment,
+      mentions, // User mentions
+      company_mentions: companyMentions // Company mentions
+    },
   });
 
   return result;
