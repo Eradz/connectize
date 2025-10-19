@@ -20,6 +20,8 @@ import {
   deletePost,
   editPost,
   likePost,
+  replyToComment,
+  likeComment,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
@@ -462,6 +464,7 @@ const CommentSection = ({
 }) => {
   const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
+  const [editorKey, setEditorKey] = useState(0); // Key to force editor reset
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -496,7 +499,9 @@ const CommentSection = ({
       );
       if (id) toast.success("Comment has been added");
 
+      // Reset the editor by changing its key
       setCommentData({ text: '', mentions: [], html: '', editorState: '' });
+      setEditorKey(prev => prev + 1); // Force editor to remount and clear
     } catch (error) {
       toast.error("Failed to submit the comment. Please try again.");
     } finally {
@@ -505,16 +510,37 @@ const CommentSection = ({
   }, [commentData, postItem, queryClient, refetchComments]);
 
   const handleReply = useCallback(async (commentId, replyData) => {
-    // TODO: Implement reply API call
-    console.log('Reply to comment:', commentId, replyData);
-    toast.info('Reply feature coming soon!');
-  }, []);
+    if (!replyData.text?.trim()) return;
+    
+    try {
+      await replyToComment(
+        commentId,
+        replyData.text,
+        replyData.userMentions || [],
+        replyData.companyMentions || []
+      );
+      
+      // Refetch comments to show new reply
+      refetchComments();
+      toast.success("Reply added!");
+    } catch (error) {
+      console.error('Failed to reply:', error);
+      toast.error("Failed to post reply");
+    }
+  }, [refetchComments]);
 
-  const handleLike = useCallback(async (commentId) => {
-    // TODO: Implement like API call
-    console.log('Like comment:', commentId);
-    toast.info('Like comment feature coming soon!');
-  }, []);
+  const handleLike = useCallback(async (commentId, hasLiked = false) => {
+    try {
+      await likeComment(commentId, hasLiked);
+      
+      // Refetch comments to update like counts
+      refetchComments();
+      toast.success(hasLiked ? "Unliked!" : "Liked!");
+    } catch (error) {
+      console.error('Failed to like comment:', error);
+      toast.error("Failed to like comment");
+    }
+  }, [refetchComments]);
 
   useEffect(() => {
     if (!showCommentSection) setCommentData({ text: '', mentions: [], html: '', editorState: '' });
@@ -564,6 +590,7 @@ const CommentSection = ({
           ))}
       <div className="mt-4 border-t pt-4">
         <LexicalCommentEditor
+          key={editorKey}
           onChange={setCommentData}
           placeholder="Write a comment..."
           users={users}

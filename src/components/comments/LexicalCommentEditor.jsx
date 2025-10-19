@@ -27,7 +27,8 @@ export default function LexicalCommentEditor({
   users = [],
   companies = [],
   initialValue = "",
-  editorRef
+  editorRef,
+  key // Add key prop to force re-render when needed
 }) {
   const initialConfig = {
     namespace: 'CommentEditor',
@@ -40,7 +41,7 @@ export default function LexicalCommentEditor({
       const text = $createTextNode(initialValue);
       paragraph.append(text);
       root.append(paragraph);
-    } : undefined,
+    } : null, // Changed from undefined to null for better reset
   };
 
   const handleChange = (editorState, editor) => {

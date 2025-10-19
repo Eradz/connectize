@@ -47,7 +47,7 @@ const CommentThread = memo(({
 
   const handleLike = async () => {
     try {
-      await onLike(comment.id);
+      await onLike(comment.id, liked);
       setLiked(!liked);
     } catch (error) {
       console.error('Failed to like comment:', error);

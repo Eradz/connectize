@@ -102,3 +102,30 @@ export const commentOnPost = async (id, data, comment, mentions = [], companyMen
 
   return result;
 };
+
+export const replyToComment = async (commentId, content, mentions = [], companyMentions = []) => {
+  const result = await makeApiRequest({
+    url: `api/comments/${commentId}/reply/`,
+    method: "POST",
+    data: {
+      content,
+      mentions,
+      company_mentions: companyMentions
+    },
+  });
+
+  return result;
+};
+
+export const likeComment = async (commentId, hasLiked = false) => {
+  const url = hasLiked 
+    ? `api/comments/${commentId}/unlike/`
+    : `api/comments/${commentId}/like/`;
+    
+  const result = await makeApiRequest({
+    url,
+    method: "POST",
+  });
+
+  return result;
+};
