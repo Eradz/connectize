@@ -15,6 +15,7 @@ export const useCompanySearch = () => {
     setError(null);
     
     try {
+      console.log('🏢 Fetching companies for mentions...');
       // Fetch paginated companies - adjust page_size as needed
       const response = await makeApiRequest({
         url: 'api/companies/?page_size=100', // Get first 100 companies
@@ -31,9 +32,11 @@ export const useCompanySearch = () => {
         verified: company.verify,
       }));
 
+      console.log('✅ Companies fetched for mentions:', transformedCompanies.length);
+      console.log('Sample company:', transformedCompanies[0]);
       setCompanies(transformedCompanies);
     } catch (err) {
-      console.error('Failed to fetch companies:', err);
+      console.error('❌ Failed to fetch companies:', err);
       setError(err);
       setCompanies([]); // Fall back to empty array
     } finally {

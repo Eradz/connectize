@@ -183,6 +183,7 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
       }
 
       const lowerQuery = query.toLowerCase();
+      console.log('🔎 Searching for:', query, '| Users available:', users.length, '| Companies available:', companies.length);
 
       // Search users
       const matchedUsers = users
@@ -220,6 +221,8 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         .slice(0, 3) // Limit to 3 companies
         .map((company) => ({ ...company, type: 'company' }));
 
+      console.log('📊 Search results:', { users: matchedUsers.length, companies: matchedCompanies.length, total: matchedUsers.length + matchedCompanies.length });
+      
       // Combine and sort: users first, then companies
       setResults([...matchedUsers, ...matchedCompanies]);
     },
@@ -244,6 +247,7 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         for (let i = cursorPosition - 1; i >= 0; i--) {
           if (text[i] === '@') {
             atIndex = i;
+            console.log('✨ @ symbol detected at position:', i);
             break;
           }
           if (text[i] === ' ') break; // Stop at space
@@ -252,6 +256,7 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         if (atIndex !== -1) {
           const query = text.slice(atIndex + 1, cursorPosition);
           if (query.indexOf(' ') === -1) {
+            console.log('🎯 Triggering mention search for:', query);
             setQueryString(query);
             updateResults(query);
 

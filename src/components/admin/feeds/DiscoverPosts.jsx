@@ -48,8 +48,10 @@ import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
 import ReportModal from "../../moderation/ReportModal";
 import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import CommentThread from "../../comments/CommentThread";
+import CommentAsSelector from "../../comments/CommentAsSelector";
 import { useUserSearch } from "../../../hooks/useUserSearch";
 import { useCompanySearch } from "../../../hooks/useCompanySearch";
+import { useUserCompanies } from "../../../hooks/useUserCompanies";
 
 function DiscoverPosts({
   searchArray,
@@ -465,6 +467,11 @@ const CommentSection = ({
   const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
   const [editorKey, setEditorKey] = useState(0); // Key to force editor reset
+  
+  // State for comment as user/company selection
+  const [commentAsType, setCommentAsType] = useState('user'); // 'user' or 'company'
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -472,18 +479,32 @@ const CommentSection = ({
   // Fetch users and companies for mention autocomplete
   const { users } = useUserSearch();
   const { companies } = useCompanySearch();
+  
+  // Fetch companies owned by current user
+  const { companies: userCompanies } = useUserCompanies(user?.id);
+
+  // Handle selection change from CommentAsSelector
+  const handleCommentAsChange = useCallback((type, companyId) => {
+    setCommentAsType(type);
+    setSelectedCompanyId(companyId);
+    console.log('💬 Comment as:', type, companyId ? `Company ID: ${companyId}` : 'Personal');
+  }, []);
 
   const handleComment = useCallback(async () => {
     if (commentData.text.trim().length < 1) return;
 
     setLoading(true);
     try {
+      // Pass selectedCompanyId if commenting as company
+      const companyIdForComment = commentAsType === 'company' ? selectedCompanyId : null;
+      
       const newComment = await commentOnPost(
         postItem.id, 
         postItem, 
         commentData.text, 
         commentData.mentions,
-        commentData.companyMentions
+        commentData.companyMentions,
+        companyIdForComment // Pass the company ID if commenting as company
       );
       const { id } = newComment;
 
@@ -497,7 +518,12 @@ const CommentSection = ({
       refetchComments().catch((e) =>
         console.log("Could not update to latest comments")
       );
-      if (id) toast.success("Comment has been added");
+      if (id) {
+        const commentedAs = commentAsType === 'company' 
+          ? userCompanies.find(c => c.id === selectedCompanyId)?.company_name 
+          : 'you';
+        toast.success(`Comment added as ${commentedAs}`);
+      }
 
       // Reset the editor by changing its key
       setCommentData({ text: '', mentions: [], html: '', editorState: '' });
@@ -507,7 +533,7 @@ const CommentSection = ({
     } finally {
       setLoading(false);
     }
-  }, [commentData, postItem, queryClient, refetchComments]);
+  }, [commentData, postItem, queryClient, refetchComments, commentAsType, selectedCompanyId, userCompanies]);
 
   const handleReply = useCallback(async (commentId, replyData) => {
     if (!replyData.text?.trim()) return;
@@ -531,7 +557,9 @@ const CommentSection = ({
 
   const handleLike = useCallback(async (commentId, hasLiked = false) => {
     try {
-      await likeComment(commentId, hasLiked);
+      // TODO: Allow users to like as their company
+      // For now, always like as user (company_id = null)
+      await likeComment(commentId, hasLiked, null);
       
       // Refetch comments to update like counts
       refetchComments();
@@ -589,6 +617,15 @@ const CommentSection = ({
             />
           ))}
       <div className="mt-4 border-t pt-4">
+        {/* Comment as selector - only shows if user has companies */}
+        <CommentAsSelector
+          user={user}
+          userCompanies={userCompanies}
+          selectedType={commentAsType}
+          selectedCompanyId={selectedCompanyId}
+          onSelectionChange={handleCommentAsChange}
+        />
+        
         <LexicalCommentEditor
           key={editorKey}
           onChange={setCommentData}

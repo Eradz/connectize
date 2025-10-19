@@ -87,13 +87,13 @@ export const likePost = async (id, data, hasLikedPost) => {
   });
 };
 
-export const commentOnPost = async (id, data, comment, mentions = [], companyMentions = []) => {
+export const commentOnPost = async (id, data, comment, mentions = [], companyMentions = [], commentAsCompanyId = null) => {
   const result = await makeApiRequest({
     url: `api/posts/${id}/comment/`,
     method: "POST",
     data: { 
       ...data, 
-      company_id: data.company.id, 
+      company_id: commentAsCompanyId || data.company?.id, // Use commentAsCompanyId if provided, otherwise fall back to post's company
       comment,
       mentions, // User mentions
       company_mentions: companyMentions // Company mentions
@@ -117,7 +117,7 @@ export const replyToComment = async (commentId, content, mentions = [], companyM
   return result;
 };
 
-export const likeComment = async (commentId, hasLiked = false) => {
+export const likeComment = async (commentId, hasLiked = false, companyId = null) => {
   const url = hasLiked 
     ? `api/comments/${commentId}/unlike/`
     : `api/comments/${commentId}/like/`;
@@ -125,6 +125,7 @@ export const likeComment = async (commentId, hasLiked = false) => {
   const result = await makeApiRequest({
     url,
     method: "POST",
+    data: companyId ? { company_id: companyId } : {},
   });
 
   return result;

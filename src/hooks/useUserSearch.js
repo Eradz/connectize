@@ -15,6 +15,7 @@ export const useUserSearch = () => {
     setError(null);
     
     try {
+      console.log('🔍 Fetching users for mentions...');
       // Fetch paginated users - adjust page_size as needed
       const response = await makeApiRequest({
         url: 'api/users/?page_size=100', // Get first 100 users
@@ -32,9 +33,11 @@ export const useUserSearch = () => {
         username: user.first_name?.toLowerCase() || user.email?.split('@')[0]
       }));
 
+      console.log('✅ Users fetched for mentions:', transformedUsers.length);
+      console.log('Sample user:', transformedUsers[0]);
       setUsers(transformedUsers);
     } catch (err) {
-      console.error('Failed to fetch users:', err);
+      console.error('❌ Failed to fetch users:', err);
       setError(err);
       setUsers([]); // Fall back to empty array
     } finally {
