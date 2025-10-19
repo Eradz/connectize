@@ -18,26 +18,47 @@ export const useUserSearch = () => {
       console.log('🔍 Fetching users for mentions...');
       // Fetch paginated users - adjust page_size as needed
       const response = await makeApiRequest({
-        url: 'api/users/?page_size=100', // Get first 100 users
+        url: '/api/users/?page_size=100', // Get first 100 users
         method: 'GET',
       });
 
       // Transform users to match mention plugin format
-      const transformedUsers = (response.results || []).map(user => ({
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        full_name: `${user.first_name} ${user.last_name}`,
-        email: user.email,
-        avatar: user.avatar,
-        username: user.first_name?.toLowerCase() || user.email?.split('@')[0]
-      }));
+      const transformedUsers = (response.results || []).map(user => {
+        // Create username from first_name and last_name, or email
+        const firstName = user.first_name || '';
+        const lastName = user.last_name || '';
+        const emailPrefix = user.email?.split('@')[0] || '';
+        
+        // Username format: firstname-lastname or email prefix
+        const username = firstName && lastName 
+          ? `${firstName.toLowerCase()}-${lastName.toLowerCase()}`.replace(/\s+/g, '-')
+          : emailPrefix.toLowerCase();
+        
+        return {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          full_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+          email: user.email,
+          avatar: user.avatar,
+          username: username
+        };
+      });
 
       console.log('✅ Users fetched for mentions:', transformedUsers.length);
-      console.log('Sample user:', transformedUsers[0]);
+      if (transformedUsers.length > 0) {
+        console.log('Sample user:', transformedUsers[0]);
+      } else {
+        console.warn('⚠️ No users found in the database');
+      }
       setUsers(transformedUsers);
     } catch (err) {
       console.error('❌ Failed to fetch users:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setError(err);
       setUsers([]); // Fall back to empty array
     } finally {

@@ -18,7 +18,7 @@ export const useCompanySearch = () => {
       console.log('🏢 Fetching companies for mentions...');
       // Fetch paginated companies - adjust page_size as needed
       const response = await makeApiRequest({
-        url: 'api/companies/?page_size=100', // Get first 100 companies
+        url: '/api/companies/?page_size=100', // Get first 100 companies
         method: 'GET',
       });
 
@@ -33,10 +33,19 @@ export const useCompanySearch = () => {
       }));
 
       console.log('✅ Companies fetched for mentions:', transformedCompanies.length);
-      console.log('Sample company:', transformedCompanies[0]);
+      if (transformedCompanies.length > 0) {
+        console.log('Sample company:', transformedCompanies[0]);
+      } else {
+        console.warn('⚠️ No companies found in the database');
+      }
       setCompanies(transformedCompanies);
     } catch (err) {
       console.error('❌ Failed to fetch companies:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       setError(err);
       setCompanies([]); // Fall back to empty array
     } finally {
