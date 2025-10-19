@@ -5,9 +5,9 @@ import { ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import { HeartIcon, ChatBubbleOvalLeftIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
-import TimeAgo from '../../TimeAgo';
-import { MarkdownComponent } from '../../MarkDownComponent';
-import { avatarStyle } from '../../ResponsiveNav';
+import TimeAgo from '../TimeAgo';
+import { MarkdownComponent } from '../MarkDownComponent';
+import { avatarStyle } from '../ResponsiveNav';
 import LexicalCommentEditor from './LexicalCommentEditor';
 
 const CommentThread = memo(({ 
