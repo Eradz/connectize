@@ -24,7 +24,7 @@ const CommentThread = memo(({
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState({ text: '', mentions: [] });
   const [isReplying, setIsReplying] = useState(false);
-  const [showReplies, setShowReplies] = useState(true);
+  const [showReplies, setShowReplies] = useState(false);
   const [liked, setLiked] = useState(() => !!comment.isLikedByUser);
 
   const isAuthor = comment.user?.id === postUserId;

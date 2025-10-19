@@ -214,10 +214,13 @@ export const DiscoverPostItem = ({
     }
   }, [commentsResponse?.results, currentPage]);
 
-  useEffect(() => {
-    if (isLoadingComments || !commentsResponse) return;
-    setCommentsLength(commentsResponse?.count || allComments?.length);
-  }, [commentsResponse?.count, allComments?.length]);
+  // Keep the displayed comment count stable from backend (includes replies).
+  // Do not overwrite it with the paginated count which only includes top-level comments.
+  // We'll increment locally on successful comment/reply instead.
+
+  const incrementCommentCount = useCallback(() => {
+    setCommentsLength((prev) => prev + 1);
+  }, []);
 
   const handleLoadMoreComments = () => {
     setCurrentPage(prev => prev + 1);
@@ -461,6 +464,7 @@ export const DiscoverPostItem = ({
         hasMore={commentsResponse?.hasMore || false}
         onLoadMore={handleLoadMoreComments}
         isLoadingMore={isFetchingComments && currentPage > 1}
+        onIncrementCount={incrementCommentCount}
       />
 
       {/* Report Modal - App Store Compliance */}
@@ -491,6 +495,7 @@ const CommentSection = ({
   hasMore = false,
   onLoadMore,
   isLoadingMore = false,
+  onIncrementCount,
 }) => {
   const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
@@ -542,14 +547,15 @@ const CommentSection = ({
         }
       );
 
-      refetchComments().catch((e) =>
-        console.log("Could not update to latest comments")
-      );
+      // Refetch comments to pull latest list
+      refetchComments().catch(() => {});
       if (id) {
         const commentedAs = commentAsType === 'company' 
           ? userCompanies.find(c => c.id === selectedCompanyId)?.company_name 
           : 'you';
         toast.success(`Comment added as ${commentedAs}`);
+        // Increment the visible comment count (includes replies in backend count)
+        onIncrementCount && onIncrementCount();
       }
 
       // Reset the editor by changing its key
@@ -577,6 +583,8 @@ const CommentSection = ({
       // Refetch comments to show new reply
       refetchComments();
       toast.success("Reply added!");
+      // Increment the visible comment count for replies too
+      onIncrementCount && onIncrementCount();
     } catch (error) {
       console.error('Failed to reply:', error);
       toast.error("Failed to post reply");
