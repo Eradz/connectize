@@ -25,7 +25,7 @@ function AuthLayout({ redirectUrl = "/" }) {
           <a
             href="https://about.connectize.co"
             target="_blank"
-            className="text-sm rounded-full py-2 px-3 bg-black hover:opacity-80 mt-2.5 md:mt-0"
+            className="text-sm rounded-full py-2 px-3 bg-black hover:opacity-80 mt-[20px] md:mt-0"
           >
             About Us
           </a>
@@ -33,7 +33,7 @@ function AuthLayout({ redirectUrl = "/" }) {
       </nav>
       <main className="flex justify-center flex-1 w-full max-w-full overflow-x-hidden">
         <section className="size-full max-h-screen overflow-y-auto flex flex-col items-center lg:!w-1/2 shrink-0 scrollbar-hidden w-full max-w-full">
-          <section className="w-full max-xs:h-ful flex-1 flex flex-col justify-center py-4 max-w-xl lg:max-w-md px-0">
+          <section className="w-full max-xs:h-ful flex-1 flex flex-col justify-center pt-[11px] md:pt-4 pb-4 max-w-xl lg:max-w-md px-0">
             <Logo url="/login" />
             <motion.section
               initial={{ opacity: 0, y: -20 }}
