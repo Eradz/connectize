@@ -31,6 +31,10 @@ const CommentThread = memo(({
   const hasReplies = comment.replies && comment.replies.length > 0;
   const isNested = level > 0;
   const isReply = level > 0; // Replies are nested comments
+  
+  // Limit reply nesting to prevent 500 errors (Reply model can only point to Comment, not Reply)
+  const MAX_REPLY_DEPTH = 1;
+  const canReply = level < MAX_REPLY_DEPTH;
 
   const handleReplySubmit = async () => {
     if (!replyContent.text.trim()) return;
@@ -115,13 +119,21 @@ const CommentThread = memo(({
               <span>{comment.likes?.length || 0}</span>
             </button>
 
-            <button
-              onClick={() => setShowReplyInput(!showReplyInput)}
-              className="flex items-center gap-1 hover:text-blue-600 transition-colors"
-            >
-              <ChatBubbleOvalLeftIcon className="w-4 h-4" />
-              <span>Reply</span>
-            </button>
+            {canReply && (
+              <button
+                onClick={() => setShowReplyInput(!showReplyInput)}
+                className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+              >
+                <ChatBubbleOvalLeftIcon className="w-4 h-4" />
+                <span>Reply</span>
+              </button>
+            )}
+            
+            {!canReply && (
+              <span className="text-xs text-gray-400 italic">
+                Max reply depth reached
+              </span>
+            )}
 
             {hasReplies && (
               <button
