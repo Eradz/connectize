@@ -87,14 +87,13 @@ export const likePost = async (id, data, hasLikedPost) => {
   });
 };
 
-export const commentOnPost = async (id, data, comment, mentions = [], companyMentions = [], commentAsCompanyId = null) => {
+export const commentOnPost = async (id, comment, mentions = [], companyMentions = [], commentAsCompanyId = null) => {
   const result = await makeApiRequest({
     url: `api/posts/${id}/comment/`,
     method: "POST",
     data: { 
-      ...data, 
-      company_id: commentAsCompanyId || data.company?.id, // Use commentAsCompanyId if provided, otherwise fall back to post's company
       comment,
+      company_id: commentAsCompanyId, // Pass company_id only if commenting as company (null otherwise)
       mentions, // User mentions
       company_mentions: companyMentions // Company mentions
     },

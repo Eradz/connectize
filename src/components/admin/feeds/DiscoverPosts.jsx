@@ -500,10 +500,9 @@ const CommentSection = ({
       
       const newComment = await commentOnPost(
         postItem.id, 
-        postItem, 
         commentData.text, 
-        commentData.mentions,
-        commentData.companyMentions,
+        commentData.mentions || [],
+        commentData.companyMentions || [],
         companyIdForComment // Pass the company ID if commenting as company
       );
       const { id } = newComment;
