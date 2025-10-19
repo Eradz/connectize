@@ -481,18 +481,6 @@ const CommentSection = ({
   const { users, loading: usersLoading, error: usersError } = useUserSearch();
   const { companies, loading: companiesLoading, error: companiesError } = useCompanySearch();
   
-  // Debug logging for mention data
-  useEffect(() => {
-    console.log('📥 Mention Data Loaded:', { 
-      users: users?.length || 0, 
-      companies: companies?.length || 0,
-      usersLoading,
-      companiesLoading,
-      usersError: usersError ? usersError.message : null,
-      companiesError: companiesError ? companiesError.message : null
-    });
-  }, [users, companies, usersLoading, companiesLoading, usersError, companiesError]);
-  
   // Fetch companies owned by current user
   const { companies: userCompanies } = useUserCompanies(user?.id);
 

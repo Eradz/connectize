@@ -97,8 +97,6 @@ const UnifiedMentionTypeahead = ({
   if (!items || items.length === 0) {
     return null;
   }
-
-  console.log('🎨 Rendering dropdown at position:', position, 'with items:', items.length);
   
   return (
     <div
@@ -169,14 +167,6 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
   const [results, setResults] = useState([]);
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
-  // Debug: Log when plugin receives data
-  useEffect(() => {
-    console.log('🔌 UnifiedMentionPlugin initialized with:', {
-      users: users?.length || 0,
-      companies: companies?.length || 0
-    });
-  }, [users, companies]);
-
   useEffect(() => {
     if (!editor.hasNodes([MentionNode])) {
       throw new Error(
@@ -193,7 +183,6 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
       }
 
       const lowerQuery = query.toLowerCase();
-      console.log('🔎 Searching for:', query, '| Users available:', users.length, '| Companies available:', companies.length);
 
       // Search users
       const matchedUsers = users
@@ -230,8 +219,6 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         })
         .slice(0, 3) // Limit to 3 companies
         .map((company) => ({ ...company, type: 'company' }));
-
-      console.log('📊 Search results:', { users: matchedUsers.length, companies: matchedCompanies.length, total: matchedUsers.length + matchedCompanies.length });
       
       // Combine and sort: users first, then companies
       setResults([...matchedUsers, ...matchedCompanies]);
@@ -251,16 +238,12 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         const node = selection.anchor.getNode();
         const text = node.getTextContent();
         const cursorPosition = selection.anchor.offset;
-        
-        // Debug: Log every text change
-        console.log('📝 Text changed:', { text, cursorPosition, lastChar: text[cursorPosition - 1] });
 
         // Find @ symbol before cursor
         let atIndex = -1;
         for (let i = cursorPosition - 1; i >= 0; i--) {
           if (text[i] === '@') {
             atIndex = i;
-            console.log('✨ @ symbol detected at position:', i, '| Text:', text.substring(i, cursorPosition));
             break;
           }
           if (text[i] === ' ') break; // Stop at space
@@ -269,7 +252,6 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         if (atIndex !== -1) {
           const query = text.slice(atIndex + 1, cursorPosition);
           if (query.indexOf(' ') === -1) {
-            console.log('🎯 Triggering mention search for:', query);
             setQueryString(query);
             updateResults(query);
 
@@ -282,7 +264,6 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
                 top: rect.bottom + window.scrollY + 5,
                 left: rect.left + window.scrollX,
               };
-              console.log('📍 Dropdown position calculated:', calculatedPosition, 'Rect:', rect);
               setPosition(calculatedPosition);
             }
           } else {

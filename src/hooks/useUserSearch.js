@@ -15,10 +15,9 @@ export const useUserSearch = () => {
     setError(null);
     
     try {
-      console.log('🔍 Fetching users for mentions...');
-      // Fetch paginated users - adjust page_size as needed
+      // Fetch paginated users
       const response = await makeApiRequest({
-        url: '/api/users/?page_size=100', // Get first 100 users
+        url: '/api/users/?page_size=100',
         method: 'GET',
       });
 
@@ -45,20 +44,9 @@ export const useUserSearch = () => {
         };
       });
 
-      console.log('✅ Users fetched for mentions:', transformedUsers.length);
-      if (transformedUsers.length > 0) {
-        console.log('Sample user:', transformedUsers[0]);
-      } else {
-        console.warn('⚠️ No users found in the database');
-      }
       setUsers(transformedUsers);
     } catch (err) {
-      console.error('❌ Failed to fetch users:', err);
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
+      console.error('Failed to fetch users for mentions:', err);
       setError(err);
       setUsers([]); // Fall back to empty array
     } finally {
