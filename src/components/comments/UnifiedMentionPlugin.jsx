@@ -249,13 +249,16 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
         const node = selection.anchor.getNode();
         const text = node.getTextContent();
         const cursorPosition = selection.anchor.offset;
+        
+        // Debug: Log every text change
+        console.log('📝 Text changed:', { text, cursorPosition, lastChar: text[cursorPosition - 1] });
 
         // Find @ symbol before cursor
         let atIndex = -1;
         for (let i = cursorPosition - 1; i >= 0; i--) {
           if (text[i] === '@') {
             atIndex = i;
-            console.log('✨ @ symbol detected at position:', i);
+            console.log('✨ @ symbol detected at position:', i, '| Text:', text.substring(i, cursorPosition));
             break;
           }
           if (text[i] === ' ') break; // Stop at space

@@ -30,6 +30,13 @@ export default function LexicalCommentEditor({
   editorRef,
   key // Add key prop to force re-render when needed
 }) {
+  // Debug: Log props received
+  console.log('🎨 LexicalCommentEditor received:', {
+    users: users?.length || 0,
+    companies: companies?.length || 0,
+    placeholder
+  });
+  
   const initialConfig = {
     namespace: 'CommentEditor',
     theme,
