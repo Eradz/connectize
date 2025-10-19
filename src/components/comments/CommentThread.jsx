@@ -128,12 +128,6 @@ const CommentThread = memo(({
                 <span>Reply</span>
               </button>
             )}
-            
-            {!canReply && (
-              <span className="text-xs text-gray-400 italic">
-                Max reply depth reached
-              </span>
-            )}
 
             {hasReplies && (
               <button
