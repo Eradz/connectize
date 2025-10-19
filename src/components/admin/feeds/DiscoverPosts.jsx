@@ -243,7 +243,8 @@ export const DiscoverPostItem = ({
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
             <div className="flex items-center gap-2">
               <CompanyName
-                name={postItem?.company?.slug}
+                slug={postItem?.company?.slug}
+                name={postItem?.company?.company_name}
                 verified={postItem?.company?.verify}
               />
               {postItem?.is_flagged && (

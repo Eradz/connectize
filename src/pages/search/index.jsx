@@ -210,6 +210,7 @@ export const SearchTab = () => {
                 title={service?.title}
                 summary={service?.sub_title}
                 url={`/services/${service?.id}`}
+                slug={service?.company?.slug}
                 whole={service}
                 isService
               />

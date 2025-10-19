@@ -60,7 +60,7 @@ export function TopServices() {
             logo={service?.company?.logo}
             summary={service?.description}
             url={"/services/" + service?.id}
-            // slug={`services/${service?.company?.id}`}
+            slug={service?.company?.slug}
             title={service?.title}
             verified={service?.featured}
           />

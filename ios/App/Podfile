@@ -1,5 +1,8 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
+# Explicitly specify the Xcode project to avoid ambiguity
+project 'Connectize.xcodeproj'
+
 platform :ios, '14.0'
 # Use static frameworks to improve module stability (prevents intermittent module 'Cordova' not found during verify-module)
 use_frameworks! :linkage => :static

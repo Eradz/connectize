@@ -52,3 +52,10 @@ export const deactivateAccount = async ({ email, password }) => {
     url: "deactivate-account",
   });
 };
+
+export const deleteAccount = async ({ confirmation_text }) => {
+  return await authenticationService({
+    values: { confirmation_text },
+    url: "delete-account",
+  });
+};

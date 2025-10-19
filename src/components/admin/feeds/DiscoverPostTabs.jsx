@@ -37,7 +37,7 @@ const DiscoverPostTabs = () => {
       logo: product?.company?.logo,
       verified: product?.featured,
       url: "/products/" + product.id,
-      slug: `${product?.company?.company_name}`,
+      slug: product?.company?.slug,
       whole: product,
     };
   });
@@ -51,7 +51,7 @@ const DiscoverPostTabs = () => {
       logo: service?.company?.logo,
       verified: service?.featured,
       url: "/services/" + service.id,
-      slug: `${service?.company?.company_name}`,
+      slug: service?.company?.slug,
       whole: service,
     };
   });
