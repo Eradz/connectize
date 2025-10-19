@@ -555,7 +555,8 @@ const CommentSection = ({
         commentId,
         replyData.text,
         replyData.userMentions || [],
-        replyData.companyMentions || []
+        replyData.companyMentions || [],
+        replyData.parentReplyId || null  // NEW: Pass parent reply ID for nested replies
       );
       
       // Refetch comments to show new reply

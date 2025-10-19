@@ -32,16 +32,22 @@ const CommentThread = memo(({
   const isNested = level > 0;
   const isReply = level > 0; // Replies are nested comments
   
-  // Limit reply nesting to prevent 500 errors (Reply model can only point to Comment, not Reply)
-  const MAX_REPLY_DEPTH = 1;
-  const canReply = level < MAX_REPLY_DEPTH;
+  // Infinite reply depth now supported with parent_reply field
+  const canReply = true; // Always allow replies
 
   const handleReplySubmit = async () => {
     if (!replyContent.text.trim()) return;
     
     setIsReplying(true);
     try {
-      await onReply(comment.id, replyContent);
+      // If this is a reply (level > 0), pass the reply ID as parent_reply_id
+      // The comment ID is always the root comment
+      const replyDataWithParent = {
+        ...replyContent,
+        parentReplyId: isReply ? comment.id : null
+      };
+      
+      await onReply(comment.comment_id || comment.id, replyDataWithParent);
       setReplyContent({ text: '', mentions: [] });
       setShowReplyInput(false);
     } catch (error) {
