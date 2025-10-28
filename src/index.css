@@ -45,6 +45,17 @@
   padding: constant(safe-area-inset-top) constant(safe-area-inset-right) constant(safe-area-inset-bottom) constant(safe-area-inset-left);
 }
 
+/* Safe area classes for both iOS and Android */
+.ios-safe-top {
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top);
+}
+
+.ios-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: constant(safe-area-inset-bottom);
+}
+
 /* Utility to prevent inadvertent horizontal overflow when children use 100vw */
 .no-horizontal-overflow {
   max-width: 100%;
@@ -176,6 +187,7 @@ html, body {
   left: 0;
   right: 0;
   bottom: 0;
+  background-color: #ffffff;
 }
 
 /* Make the app wrapper scrollable since body is fixed */

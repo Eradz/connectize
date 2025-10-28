@@ -5,7 +5,6 @@
   "type": "module",
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
-    "@capacitor/splash-screen": "^7.0.3",
     "@capacitor/status-bar": "^7.0.3",
     "@chakra-ui/react": "^2.10.9",
     "@emotion/react": "^11.14.0",
@@ -60,6 +59,7 @@
     "react-share": "^5.2.2",
     "recharts": "^2.15.4",
     "sitemap": "^8.0.0",
+    "slice-ansi": "^7.1.2",
     "sonner": "^1.7.4",
     "swiper": "^11.2.10",
     "tailwind-merge": "^2.6.0",
@@ -106,7 +106,6 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/plugin-transform-private-property-in-object": "^7.27.1",
     "@capacitor/android": "^7.4.2",
-    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^7.4.3",
     "@capacitor/core": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
@@ -117,8 +116,10 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "gh-pages": "^6.3.0",
     "globals": "^15.15.0",
+    "lru-cache": "^11.2.2",
     "rollup-plugin-visualizer": "^6.0.3",
     "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.3",
     "vite-plugin-pwa": "^1.0.3"
   }
 }

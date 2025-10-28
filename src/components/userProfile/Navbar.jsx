@@ -43,11 +43,10 @@ const Navbar = () => {
     <>
       <Headroom>
         <nav 
-          className="w-full min-h-16 flex items-center bg-white z-[99999] safe-area-top md:pt-0"
+          className="w-full min-h-16 flex items-center bg-white z-[99999] ios-safe-top"
           style={{ 
-            paddingTop: window.innerWidth < 768 ? '30px' : '0px',
             backgroundColor: '#ffffff',
-            borderBottom: '2px solid #f1c644' // Visual indicator
+            borderBottom: '2px solid #f1c644',
           }}
         >
           <section
@@ -78,15 +77,15 @@ const Navbar = () => {
       </Headroom>
 
       <motion.nav
-        className="md:hidden bg-mid_grey fixed bottom-0 left-0 w-full z-[99999] safe-area-bottom"
+        className="md:hidden bg-mid_grey fixed bottom-0 left-0 w-full z-[99999] ios-safe-bottom"
         style={{
-          paddingBottom: '30px',
-          borderTop: '2px solid #f1c644' // Visual indicator
+          borderTop: '2px solid #f1c644',
+          backgroundColor: '#373737',
         }}
         // initial={{ y: 0 }}
         // animate={{ y: 100 }} // showBottomNav ? 0 :
       >
-        <section className="container pb-safe">
+        <section className="w-full px-2">
           <NavigationSection hasHeader isSmallNavigation />
         </section>
       </motion.nav>

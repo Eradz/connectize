@@ -14,12 +14,11 @@
 		"SplashScreen": {
 			"launchShowDuration": 0,
 			"launchAutoHide": true,
-			"backgroundColor": "#fff"
+			"backgroundColor": "#ffffff",
+			"showSpinner": false
 		},
 		"StatusBar": {
-			"style": "default",
-			"backgroundColor": "#ffffff",
-			"overlaysWebView": false
+			"style": "light"
 		},
 		"Keyboard": {
 			"resize": "body",
@@ -28,7 +27,6 @@
 		}
 	},
 	"packageClassList": [
-		"SplashScreenPlugin",
 		"StatusBarPlugin"
 	]
 }

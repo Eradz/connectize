@@ -12,8 +12,6 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
-	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -29,11 +27,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Connectize uses your camera to capture photos and videos for your business profile, product listings, and posts. For example, you can take photos of your products to create inventory listings or share business updates with your network.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Connectize needs access to your photo library to select images for your business profile, product listings, and posts. For example, you can choose existing photos of your products or services to showcase in your inventory.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Connectize saves photos and documents to your photo library when you download business materials, product images, or shared content. For example, you can save invoices or product specifications for offline reference.</string>
+	<string>This app needs access to your camera to take photos and videos.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

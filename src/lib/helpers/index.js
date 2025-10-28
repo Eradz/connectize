@@ -118,7 +118,7 @@ export async function refreshToken() {
       });
 
       accessToken = newTokens.access;
-      accessTokenExpiry = Date.now() + 15 * 60 * 1000;
+      accessTokenExpiry = null; // No expiration - tokens are long-lived
 
       return "Bearer " + newTokens.access;
     })();
@@ -149,8 +149,8 @@ export async function refreshToken() {
 let hasNotifiedOffline = false;
 
 export async function getAuthorizationHeader() {
-  // Use cached token if still valid
-  if (accessToken && Date.now() < accessTokenExpiry) {
+  // Use cached token (no expiration check - tokens are long-lived)
+  if (accessToken) {
     return { Authorization: "Bearer " + accessToken };
   }
 
@@ -159,11 +159,11 @@ export async function getAuthorizationHeader() {
     const session = getSession();
 
     const tokenFromSession = session?.tokens?.access;
-    if (tokenFromSession && tokenFromSession !== accessToken) {
+    if (tokenFromSession) {
       // Fresh token from session, update cache
       accessToken = tokenFromSession;
-      // Set a conservative TTL; backend JWT is long-lived, but we'll refresh periodically
-      accessTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+      // No expiration - tokens are managed by the backend
+      accessTokenExpiry = null;
       return { Authorization: "Bearer " + accessToken };
     }
     

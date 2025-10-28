@@ -17,8 +17,8 @@ const decryptData = (encryptedData) => {
   return bytes.toString(CryptoJS.enc.Utf8);
 };
 
-// Set session with Capacitor compatibility
-export const setSession = (value, expiresInDays = 7) => {
+// Set session with Capacitor compatibility (no expiration)
+export const setSession = (value, expiresInDays = 730) => { // 2 years - essentially permanent
   const sessionString = JSON.stringify(value);
   const encryptedSession = encryptData(sessionString);
 
@@ -30,12 +30,13 @@ export const setSession = (value, expiresInDays = 7) => {
       secure: location.protocol === 'https:' || location.protocol === 'capacitor:',
     });
     
-    // Also store in localStorage as fallback for Capacitor apps
+    // Also store in localStorage as fallback for Capacitor apps (no expiration check)
     localStorage.setItem(AUTH_SESSION_STORAGE, encryptedSession);
+    // Store a very far future expiry time (essentially permanent)
     const expiryTime = new Date().getTime() + (expiresInDays * 24 * 60 * 60 * 1000);
     localStorage.setItem(AUTH_SESSION_STORAGE + '_expiry', expiryTime.toString());
     
-    console.log('✅ Session stored successfully');
+    console.log('✅ Session stored successfully (long-term)');
   } catch (e) {
     console.error('Session storage failed:', e);
   }

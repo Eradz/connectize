@@ -21,14 +21,14 @@ const AppLayout = () => {
   const isMessagesRoute = pathname.startsWith("/messages");
 
   return (
-    <main className="bg-background w-full h-full flex flex-col flex-1 safe-area-top safe-area-bottom overflow-x-hidden">
+    <main className="bg-background w-full h-full flex flex-col flex-1 overflow-x-hidden">
       <Navbar />
       <section
         className={clsx(
           // Added overflow-x-hidden and max-w-full to stop child 100vw elements causing shift
           "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4 md:container overflow-x-hidden max-w-full",
           {
-            "py-6 px-2": !isSinglePostRoute && !isHomeRoute,
+            "pt-4 px-2 md:py-6": !isSinglePostRoute && !isHomeRoute,
             // Subtract navbar height (64px) plus dynamic safe areas handled via padding
             "flex-1": isMessagesRoute,
           }
@@ -38,7 +38,7 @@ const AppLayout = () => {
         <section
           className={clsx(
             // Added relative and overflow-x-hidden to isolate scroll context & prevent horizontal bleed
-            "md:px-0 gap-2 w-full max-md:mb-16 h-full overflow-x-hidden relative",
+            "md:px-0 gap-2 w-full h-full overflow-x-hidden relative pb-24 md:pb-0",
             !isMessagesRoute && "grid grid-cols-1"
           )}
         >
@@ -48,8 +48,6 @@ const AppLayout = () => {
           </div>
         </section>
       </section>
-      {/* Spacer to ensure scrollable content isn't hidden behind fixed bottom nav (height + safe area) */}
-      <div className="h-20 md:hidden" aria-hidden="true" />
     </main>
   );
 };

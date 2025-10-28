@@ -87,10 +87,10 @@ export function Layout({ children }) {
       <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
 
-        {/* Root safe-area wrapper ensures entire app respects notches & home indicator */}
+        {/* Root wrapper for the entire app */}
 
         <div
-          className="safe-area-x safe-area-y min-h-screen flex flex-col no-horizontal-overflow w-full max-w-full mx-auto"
+          className="min-h-screen flex flex-col no-horizontal-overflow w-full max-w-full mx-auto"
           id="app-safe-wrapper"
           style={{ maxWidth: '100vw', width: '100%', overflowX: 'hidden' }}
         >
