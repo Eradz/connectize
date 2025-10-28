@@ -4,6 +4,8 @@ const webRoutes = {
   analysis: "/analysis",
   assignRepresentative: "/co/representatives/manage",
   bio: "/bio",
+  blockedUsers: "/co/blocked-users",
+  blockedCompanies: "/co/blocked-companies",
   bookmarks: "/co/bookmarks",
   company: "/:company",
   companyEditProfile: "/:company/edit-profile",

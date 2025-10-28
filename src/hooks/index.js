@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import {
   getAllCompanies,
   getCompanyByIdOrEmail,
@@ -67,9 +67,12 @@ export const useGetMessages = () => {
 };
 
 export const usePosts = () => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["posts"],
-    queryFn: getPosts,
-    refetchInterval: 3000,
+    queryFn: ({ pageParam = 1 }) => getPosts(pageParam, 10),
+    getNextPageParam: (lastPage) => 
+      lastPage.hasMore ? lastPage.nextPage : undefined,
+    initialPageParam: 1,
+    refetchInterval: 30000, // Reduced from 3s to 30s to avoid too many requests
   });
 };

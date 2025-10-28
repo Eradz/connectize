@@ -37,7 +37,7 @@ const DiscoverPostTabs = () => {
       logo: product?.company?.logo,
       verified: product?.featured,
       url: "/products/" + product.id,
-      slug: `${product?.company?.company_name}`,
+      slug: product?.company?.slug,
       whole: product,
     };
   });
@@ -51,7 +51,7 @@ const DiscoverPostTabs = () => {
       logo: service?.company?.logo,
       verified: service?.featured,
       url: "/services/" + service.id,
-      slug: `${service?.company?.company_name}`,
+      slug: service?.company?.slug,
       whole: service,
     };
   });
@@ -160,7 +160,7 @@ export const PostCard = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={cn(
-        "p-4 lg:!px-3 !w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0",
+        "p-4 lg:!px-3 !w-full max-w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0 overflow-hidden min-h-[280px]",
         className
       )}
     >
@@ -168,10 +168,12 @@ export const PostCard = ({
         <h3 className="font-bold capitalize text-lg line-clamp-1">
           {title || "Remote Monitoring and Control"}
         </h3>
-        <BookMarkButton
-          service={isService ? whole : null}
-          product={!isService ? whole : null}
-        />
+        <div className="mr-5">
+          <BookMarkButton
+            service={isService ? whole : null}
+            product={!isService ? whole : null}
+          />
+        </div>
       </div>
 
       {/* <div className="flex mt-2">
@@ -183,8 +185,8 @@ export const PostCard = ({
         ))}
       </div> */}
 
-      <div className="mt-3 flex gap-2 flex-1">
-        <div className="line-clamp-3 shrink-0 w-[70%]">
+      <div className="mt-3 flex gap-2 min-h-0 overflow-hidden min-w-0">
+        <div className="line-clamp-3 flex-1 overflow-hidden break-words min-w-0">
           <MarkdownComponent
             markdownContent={
               summary ||
@@ -209,9 +211,9 @@ export const PostCard = ({
         />
       )} */}
 
-      <div className="flex items-center justify-between gap-4 mt-4 pt-3 border-t">
-        <div className="flex gap-2 items-center">
-          <Link to={`/${slug || companyName}`} className="relative">
+      <div className="flex items-center justify-between gap-4 mt-4 pt-3 border-t shrink-0 min-w-0">
+        <div className="flex gap-2 items-center min-w-0 flex-1">
+          <Link to={`/${slug || companyName}`} className="relative shrink-0">
             <Avatar
               src={logo || "images/default-company-logo.png"}
               alt={companyName}
@@ -223,7 +225,7 @@ export const PostCard = ({
           </Link>
           <Link
             to={`/${slug || companyName}`}
-            className="text-sm font-bold capitalize line-clamp-1"
+            className="text-sm font-bold capitalize line-clamp-1 min-w-0 overflow-hidden text-ellipsis"
           >
             {companyName || "West Land Oil"}
           </Link>
@@ -232,7 +234,7 @@ export const PostCard = ({
         <Link
           to={url || ""}
           // replace
-          className="bg-gold hover:opacity-60 rounded-full py-2 px-6 text-sm"
+          className="bg-gold hover:opacity-60 rounded-full py-2 px-6 text-sm shrink-0 whitespace-nowrap mr-5"
         >
           View
         </Link>

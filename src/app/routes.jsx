@@ -39,6 +39,8 @@ export default [
     ]),
 
     route(webRoutes.analysis, "../pages/market/analysis.jsx"),
+    route(webRoutes.blockedUsers, "../pages/blocked-users/index.jsx"),
+    route(webRoutes.blockedCompanies, "../pages/blocked-companies/index.jsx"),
     route(webRoutes.bookmarks, "../pages/bookmark/index.jsx"),
     route(webRoutes.companies, "../pages/companies/index.jsx"),
 

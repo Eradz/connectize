@@ -1,9 +1,9 @@
 import { Share1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
-import { bookmarkProduct, getProducts } from "../../api-services/products";
+import { bookmarkProduct, getBookmarkedProducts } from "../../api-services/products";
 import { useAuth } from "../../context/userContext";
 import { shareThis } from "../../lib/utils";
 import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
@@ -11,42 +11,33 @@ import PageLoading from "../PageLoading";
 import LightParagraph from "../ParagraphText";
 import { Avatar } from "@chakra-ui/react";
 import { avatarStyle } from "../ResponsiveNav";
+import { VerifiedIcon } from "../../icon";
 
 export const BookmarkedProducts = () => {
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+  
   const { data: products, isLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: () => getProducts(),
+    queryKey: ["bookmarked-products"],
+    queryFn: () => getBookmarkedProducts(),
     enabled: !!currentUser,
+    staleTime: 1 * 60 * 1000, // 1 minute cache
   });
-
-  const bookmarkedProducts = products?.filter((product) =>
-    product?.likes?.find((like) => like?.user?.id === currentUser?.id)
-  );
-
-  const [cachedProducts, setCachedProducts] = useState(
-    bookmarkedProducts || []
-  );
-
-  useEffect(() => {
-    setCachedProducts(bookmarkedProducts);
-  }, [!!bookmarkedProducts]);
 
   if (isLoading) return <PageLoading hasLogo={false} />;
 
   return (
     <section className="space-y-4">
-      {cachedProducts?.length <= 0 ? (
+      {!products || products?.length <= 0 ? (
         <div className="p-4 text-center">
           <LightParagraph>No bookmarked product yet</LightParagraph>
         </div>
       ) : (
-        cachedProducts?.map((product) => (
+        products?.map((product) => (
           <BookmarkedProductsCard
-            setCachedProducts={setCachedProducts}
-            cachedProducts={cachedProducts}
             product={product}
             key={product?.id}
+            queryClient={queryClient}
           />
         ))
       )}
@@ -54,25 +45,35 @@ export const BookmarkedProducts = () => {
   );
 };
 
-const BookmarkedProductsCard = ({
-  product,
-  setCachedProducts,
-  cachedProducts,
-}) => {
+const BookmarkedProductsCard = ({ product, queryClient }) => {
   const { user: currentUser } = useAuth();
+  const [isRemoving, setIsRemoving] = useState(false);
+  
   const hasBookmarked = product?.likes?.some(
-    (like) => like.user.id === currentUser?.id
+    (like) => like?.user?.id === currentUser?.id
   );
 
   const handleBookmark = async () => {
-    await bookmarkProduct(product.id, product, hasBookmarked);
-
-    setCachedProducts(
-      cachedProducts?.filter((cacheProduct) => cacheProduct.id !== product?.id)
-    );
+    setIsRemoving(true);
+    try {
+      await bookmarkProduct(product.id, product, hasBookmarked);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(["bookmarked-products"], (oldData) => {
+        return oldData?.filter((p) => p.id !== product?.id);
+      });
+      
+      // Invalidate to refetch fresh data
+      queryClient.invalidateQueries(["bookmarked-products"]);
+    } catch (error) {
+      console.error("Error removing bookmark:", error);
+      setIsRemoving(false);
+    }
   };
 
   const company = product.company;
+  
+  if (isRemoving) return null;
 
   return (
     <motion.section

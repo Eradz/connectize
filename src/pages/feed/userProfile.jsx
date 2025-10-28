@@ -22,7 +22,7 @@ import UserProfileHeadings from "../../components/userProfile/user-profile-headi
 import { useAuth } from "../../context/userContext";
 import { VerifiedIcon } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
-import { capitalizeFirst } from "../../lib/utils";
+import { capitalizeFirst, formatPhoneNumber, ensureUrlProtocol } from "../../lib/utils";
 
 const emptyWord = "Not Added";
 
@@ -146,7 +146,7 @@ export default function UserProfile() {
                 <ProfileAboutList
                   Icon={PhoneOutlined}
                   title="Phone number"
-                  value={phone_number}
+                  value={formatPhoneNumber(phone_number, country)}
                 />
                 <ProfileAboutList
                   Icon={MailOutlined}
@@ -185,21 +185,46 @@ export default function UserProfile() {
 export const ProfileAboutList = ({ title = "", value = "", Icon }) => {
   const formattedTitle = title?.toString().toLowerCase();
   const formattedValue = value?.toString().toLowerCase();
+  
+  // Check if this is a website/URL field
+  const isWebsiteField = formattedTitle?.includes("website") || 
+                         formattedTitle?.includes("link") ||
+                         formattedTitle?.includes("url");
+  
+  // Check if value looks like a URL (has dots and no spaces, or contains http)
+  const looksLikeUrl = value && (
+    formattedValue?.includes("http") || 
+    (formattedValue?.includes(".") && !formattedValue?.includes(" "))
+  );
+  
   return (
     <li className="flex gap-2 items-start pt-4">
       <Icon className="!size-6 xs:!size-5" />
       <div className="flex gap-1 items-baseline max-sm:flex-col">
         <strong className="leading-none">{title}:</strong>
         <LightParagraph>
-          {value && formattedValue?.includes("http") ? (
-            <a href={value} target="__blank" className="!underline">
+          {(isWebsiteField || looksLikeUrl) && value ? (
+            <a 
+              href={ensureUrlProtocol(value)} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="!text-gold font-bold hover:!underline"
+            >
               {value}
             </a>
           ) : formattedTitle?.includes("email") &&
             formattedValue?.includes("@") ? (
             <a
               href={`mailto:${value}`}
-              target="__blank"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="!text-gold font-bold hover:!underline"
+            >
+              {value}
+            </a>
+          ) : formattedTitle?.includes("phone") && value ? (
+            <a
+              href={`tel:${value?.replace(/\s/g, "")}`}
               className="!text-gold font-bold hover:!underline"
             >
               {value}

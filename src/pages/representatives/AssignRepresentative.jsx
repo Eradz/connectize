@@ -25,7 +25,8 @@ export default function AssignRepresentative() {
   const { data: users, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: getAllUsers,
-    refetchInterval,
+    enabled: username.length > 0, // ✅ Only fetch when searching
+    staleTime: 5 * 60 * 1000, // ✅ Cache for 5 minutes
   });
 
   const { data: companies, isLoading: companyLoading } = useQuery({
@@ -42,7 +43,7 @@ export default function AssignRepresentative() {
     queryKey: ["representatives", company_id],
     queryFn: () => getAllRepresentatives({ company_id }),
     enabled: !!company_id,
-    refetchInterval,
+    staleTime: 2 * 60 * 1000, // ✅ Cache for 2 minutes, no constant polling
   });
 
   const { data: representativeCategories, isLoading: repsCatLoading } =
@@ -81,23 +82,40 @@ export default function AssignRepresentative() {
     setCachedReps(representatives);
   }, [representatives]);
 
-  const memoizedRepresentatives = cachedReps?.map((reps) => {
-    const user = users?.find((user) => reps?.user === user?.id);
-    const role = representativeCategories?.find(
-      (category) => category?.id === reps?.category
-    );
+  // ✅ Memoize category lookup map for O(1) access
+  const categoryMap = useMemo(() => {
+    return representativeCategories?.reduce((acc, cat) => {
+      acc[cat.id] = cat;
+      return acc;
+    }, {});
+  }, [representativeCategories]);
 
-    const company = companies?.[0];
-    return {
-      id: reps?.id,
-      user,
-      company,
-      status: reps?.status,
-      role: role?.type,
-      category: role?.id,
-      invited: reps?.invited,
-    };
-  });
+  // ✅ Memoize user lookup map for O(1) access  
+  const userMap = useMemo(() => {
+    return users?.reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+  }, [users]);
+
+  const memoizedRepresentatives = useMemo(() => {
+    return cachedReps?.map((reps) => {
+      // ✅ API returns nested objects, not IDs
+      const user = typeof reps?.user === 'object' ? reps.user : userMap?.[reps?.user];
+      const category = typeof reps?.category === 'object' ? reps.category : categoryMap?.[reps?.category];
+      const company = typeof reps?.company === 'object' ? reps.company : companies?.[0];
+      
+      return {
+        id: reps?.id,
+        user,
+        company,
+        status: reps?.status,
+        role: category?.type,
+        category: category?.id,
+        invited: reps?.invited,
+      };
+    });
+  }, [cachedReps, userMap, categoryMap, companies]);
 
   // console.log("Com", company_id, "Reps", representatives);
   return currentUser?.user_type === UserType ? (

@@ -1,15 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
   getAllRepresentatives,
   getOrCreateRepresentativeCategory,
 } from "../../api-services/representatives";
-import { getAllUsers } from "../../api-services/users";
 import HeadingText from "../../components/HeadingText";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
 import RepresentativeCard from "../../components/representatives/RepresentativeCard";
 // import SEO from "../../components/SEO";
-import { usePollAllCompanies } from "../../hooks/usePolling";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 import { usePageination } from "../../hooks/usePagination";
 import { Link, useSearchParams } from "react-router";
@@ -25,11 +24,6 @@ export const meta = () =>
   });
 
 export default function RepresentativesPage() {
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["users"],
-    queryFn: getAllUsers,
-  });
-
   const [searchParams] = useSearchParams();
 
   const companyParam = searchParams.get("company") || "";
@@ -38,8 +32,6 @@ export default function RepresentativesPage() {
   const companySlug = splittedCompanyParam[1] || null;
 
   const userIdParam = searchParams.get("user") || undefined;
-
-  const { data: companies, isLoading: companyLoading } = usePollAllCompanies();
 
   const { data: companyDetails, isLoading: isLoadingCompanyDetails } =
     useGetSingleCompany(companySlug, { enabled: !!companySlug });
@@ -58,13 +50,22 @@ export default function RepresentativesPage() {
 
   const repsFirstPage = paginatedData?.pages?.[0]?.data;
 
-  const { data: representativeCategories, isLoading: repsCatLoading } =
-    useQuery({
-      queryKey: ["representatives-categories"],
-      queryFn: () => getOrCreateRepresentativeCategory(),
-    });
+  // Categories are already included in the API response, no need to fetch separately
+  // const { data: representativeCategories, isLoading: repsCatLoading } =
+  //   useQuery({
+  //     queryKey: ["representatives-categories"],
+  //     queryFn: () => getOrCreateRepresentativeCategory(),
+  //   });
 
-  if (isLoading || companyLoading || repsLoading || repsCatLoading)
+  // // Memoize category lookup for better performance
+  // const categoryMap = useMemo(() => {
+  //   return representativeCategories?.reduce((acc, cat) => {
+  //     acc[cat.id] = cat.type;
+  //     return acc;
+  //   }, {});
+  // }, [representativeCategories]);
+
+  if (repsLoading)
     return <PageLoading hasLogo={false} />;
 
   return (
@@ -99,22 +100,11 @@ export default function RepresentativesPage() {
                 (reps) =>
                   reps?.user !== null &&
                   reps?.company !== null &&
-                  reps?.role !== null
+                  reps?.category !== null
               )
               .map((rep) => {
-                // const user = users?.find((user) => rep?.user === user?.id);
-                // const company = companies?.results?.find(
-                //   (company) => rep?.company === company?.id
-                // );
-                const role = representativeCategories?.find(
-                  (category) => category?.id === rep?.category
-                )?.type;
-
-                // const formattedRepsData = {
-                //   user,
-                //   company,
-                //   role,
-                // };
+                // API returns category as an object with {id, type}
+                const role = typeof rep?.category === 'object' ? rep.category.type : rep?.category;
 
                 return (
                   <RepresentativeCard

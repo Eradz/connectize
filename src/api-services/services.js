@@ -137,3 +137,21 @@ export const bookmarkService = async (serviceId, data, hasBookmarked) => {
     data: { company: data.company.company_name },
   });
 };
+
+/**
+ * Get bookmarked services for the current user with pagination
+ * @param {Object} params - Query parameters including page, page_size
+ * @param {boolean} returnFullRes - Whether to return full response with pagination
+ * @returns {Promise} - Bookmarked services
+ */
+export const getBookmarkedServices = async (params = {}, returnFullRes = false) => {
+  const { results: services, next } = await makeApiRequest({
+    url: `api/services/bookmarked/`,
+    method: "GET",
+    params,
+  });
+
+  if (returnFullRes) return { data: services, next };
+
+  return services || [];
+};

@@ -2,13 +2,29 @@ import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
 import { getCompanyByIdOrEmail } from "./companies";
 
-export const getPosts = async () => {
-  const { results: posts } = await makeApiRequest({
-    url: `api/posts/`,
+export const getPosts = async (page = 1, pageSize = 10) => {
+  const response = await makeApiRequest({
+    url: `api/posts/?page=${page}&page_size=${pageSize}`,
     method: "GET",
   });
 
-  return posts.filter((post) => post.status.toUpperCase() === "PUBLISHED");
+  return {
+    posts: response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED"),
+    count: response.count,
+    next: response.next,
+    previous: response.previous,
+    hasMore: !!response.next,
+    nextPage: page + 1
+  };
+};
+
+export const getPostById = async (id) => {
+  const post = await makeApiRequest({
+    url: `api/posts/${id}/`,
+    method: "GET",
+  });
+
+  return post;
 };
 
 export const createPost = async (formData) => {
@@ -71,11 +87,59 @@ export const likePost = async (id, data, hasLikedPost) => {
   });
 };
 
-export const commentOnPost = async (id, data, comment) => {
+export const commentOnPost = async (id, comment, mentions = [], companyMentions = [], commentAsCompanyId = null) => {
   const result = await makeApiRequest({
     url: `api/posts/${id}/comment/`,
     method: "POST",
-    data: { ...data, company_id: data.company.id, comment },
+    data: { 
+      comment,
+      company_id: commentAsCompanyId, // Pass company_id only if commenting as company (null otherwise)
+      mentions, // User mentions
+      company_mentions: companyMentions // Company mentions
+    },
+  });
+
+  return result;
+};
+
+export const replyToComment = async (commentId, content, mentions = [], companyMentions = [], parentReplyId = null) => {
+  const result = await makeApiRequest({
+    url: `api/comments/${commentId}/reply/`,
+    method: "POST",
+    data: {
+      content,
+      mentions,
+      company_mentions: companyMentions,
+      parent_reply_id: parentReplyId  // NEW: For nested replies
+    },
+  });
+
+  return result;
+};
+
+export const likeComment = async (commentId, hasLiked = false, companyId = null) => {
+  const url = hasLiked 
+    ? `api/comments/${commentId}/unlike/`
+    : `api/comments/${commentId}/like/`;
+    
+  const result = await makeApiRequest({
+    url,
+    method: "POST",
+    data: companyId ? { company_id: companyId } : {},
+  });
+
+  return result;
+};
+
+export const likeReply = async (replyId, hasLiked = false, companyId = null) => {
+  const url = hasLiked 
+    ? `api/replies/${replyId}/unlike/`
+    : `api/replies/${replyId}/like/`;
+    
+  const result = await makeApiRequest({
+    url,
+    method: "POST",
+    data: companyId ? { company_id: companyId } : {},
   });
 
   return result;

@@ -1,6 +1,32 @@
 {
 	"appId": "co.connectize.app",
-	"appName": "App",
-	"webDir": "build",
-	"packageClassList": []
+	"appName": "Connectize",
+	"webDir": "build/client",
+	"android": {},
+	"ios": {
+		"contentInset": "automatic",
+		"scrollEnabled": true
+	},
+	"server": {
+		"cleartext": true
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0,
+			"launchAutoHide": true,
+			"backgroundColor": "#ffffff",
+			"showSpinner": false
+		},
+		"StatusBar": {
+			"style": "light"
+		},
+		"Keyboard": {
+			"resize": "body",
+			"style": "light",
+			"resizeOnFullScreen": true
+		}
+	},
+	"packageClassList": [
+		"StatusBarPlugin"
+	]
 }

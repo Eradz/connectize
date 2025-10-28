@@ -28,42 +28,44 @@ const ReusableModal = ({
   loading = false,
 }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={size} isCentered>
+    <Modal isOpen={isOpen} onClose={onClose} size={size} isCentered scrollBehavior="inside">
       <ModalOverlay />
-      <ModalContent className="rounded-lg shadow-lg !mx-2 max-h-[77vh] md:max-h-[90vh]">
+      <ModalContent className="rounded-lg shadow-lg !mx-2 !my-4 max-h-[90vh]">
         {title && (
           <>
-            <ModalHeader className="!text-lg !font-semibold text-gray-800">
+            <ModalHeader className="!text-lg !font-semibold text-gray-800 !py-3">
               {title}
             </ModalHeader>
             <Divider className="mb-0.5 mx-auto !w-[95%]" />
             <ModalCloseButton className="focus:!outline-none" />
           </>
         )}
-        <ModalBody className="text-gray-700 overflow-y-auto scrollbar-hidden">
+        <ModalBody className="text-gray-700 !py-4">
           {children}
         </ModalBody>
-        <ModalFooter className="flex justify-end space-x-3">
-          {footerContent || (
-            <>
-              <Button onClick={onClose} className="!text-sm">
-                {secondaryText}
-              </Button>
-              {primaryAction && (
-                <Button
-                  colorScheme={colorScheme}
-                  onClick={primaryAction}
-                  disabled={disabled}
-                  className={clsx("!text-sm", {
-                    "!bg-gold !text-black": !colorScheme,
-                  })}
-                >
-                  {loading ? <Spinner /> : primaryText}
+        {(footerContent || primaryAction) && (
+          <ModalFooter className="flex justify-end space-x-3 !py-3">
+            {footerContent || (
+              <>
+                <Button onClick={onClose} className="!text-sm">
+                  {secondaryText}
                 </Button>
-              )}
-            </>
-          )}
-        </ModalFooter>
+                {primaryAction && (
+                  <Button
+                    colorScheme={colorScheme}
+                    onClick={primaryAction}
+                    disabled={disabled}
+                    className={clsx("!text-sm", {
+                      "!bg-gold !text-black": !colorScheme,
+                    })}
+                  >
+                    {loading ? <Spinner /> : primaryText}
+                  </Button>
+                )}
+              </>
+            )}
+          </ModalFooter>
+        )}
       </ModalContent>
     </Modal>
   );

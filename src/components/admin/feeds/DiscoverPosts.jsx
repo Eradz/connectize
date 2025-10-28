@@ -7,10 +7,11 @@ import {
   Textarea,
   Tooltip,
 } from "@chakra-ui/react";
-import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { HeartIcon, Pencil1Icon, TrashIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import ContentWarningBadge from "../../posts/ContentWarningBadge";
 import { motion } from "framer-motion";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState, useRef } from "react";
 import ReactQuill from "react-quill";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -19,6 +20,9 @@ import {
   deletePost,
   editPost,
   likePost,
+  replyToComment,
+  likeComment,
+  likeReply,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
@@ -42,6 +46,13 @@ import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
+import ReportModal from "../../moderation/ReportModal";
+import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
+import CommentThread from "../../comments/CommentThread";
+import CommentAsSelector from "../../comments/CommentAsSelector";
+import { useUserSearch } from "../../../hooks/useUserSearch";
+import { useCompanySearch } from "../../../hooks/useCompanySearch";
+import { useUserCompanies } from "../../../hooks/useUserCompanies";
 
 function DiscoverPosts({
   searchArray,
@@ -49,18 +60,54 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { data: posts, isLoading } = usePollPosts();
+  const { 
+    data, 
+    isLoading, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = usePollPosts();
+  
+  const observerRef = useRef();
+  const lastPostRef = useRef();
+
+  // Flatten all pages of posts
+  const allPosts = data?.pages?.flatMap((page) => page.posts) ?? [];
 
   const finalArray = isSearch
     ? searchArray
     : companyName
-      ? posts?.filter(
+      ? allPosts?.filter(
           (post) =>
             post?.company?.company_name?.toLowerCase() ===
             companyName?.toLowerCase()
         )
-      : posts;
+      : allPosts;
   const postLoading = isSearch ? searchLoading : isLoading;
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (isSearch || companyName) return; // Disable infinite scroll for filtered views
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.5, rootMargin: '200px' }
+    );
+
+    if (lastPostRef.current) {
+      observer.observe(lastPostRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.disconnect();
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName]);
 
   return (
     <section className="space-y-1.5 md:space-y-6 mt-6">
@@ -70,16 +117,39 @@ function DiscoverPosts({
         ))
       ) : finalArray?.length < 1 ? (
         <LightParagraph>
-          {isSearch ? "No post found in search" : ""}
+          {isSearch ? "No post found in search" : "No posts available"}
         </LightParagraph>
       ) : (
-        finalArray?.map((post, index) => (
-          <DiscoverPostItem
-            hasImage={post?.images?.length > 0}
-            key={index}
-            postItem={post}
-          />
-        ))
+        <>
+          {finalArray?.map((post, index) => (
+            <div
+              key={post.id}
+              ref={index === finalArray.length - 1 ? lastPostRef : null}
+            >
+              <DiscoverPostItem
+                hasImage={post?.images?.length > 0}
+                postItem={post}
+              />
+            </div>
+          ))}
+          
+          {/* Loading indicator for next page */}
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Spinner size="md" color="blue.500" />
+              <LightParagraph className="ml-2">Loading more posts...</LightParagraph>
+            </div>
+          )}
+          
+          {/* End of posts message */}
+          {!hasNextPage && !isSearch && finalArray.length > 0 && (
+            <div className="text-center py-6">
+              <LightParagraph className="text-gray-500">
+                You've reached the end! No more posts to load.
+              </LightParagraph>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
@@ -93,12 +163,16 @@ export const DiscoverPostItem = ({
   isSinglePost = false,
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allComments, setAllComments] = useState([]);
+  
   const {
-    data: comments,
+    data: commentsResponse,
     refetch: refetchComments,
     isLoading: isLoadingComments,
+    isFetching: isFetchingComments,
   } = useGetPostComments(
-    { postId: postItem.id },
+    { postId: postItem.id, page: currentPage },
     {
       enabled: showCommentSection,
     }
@@ -127,10 +201,30 @@ export const DiscoverPostItem = ({
   const [disabled, setDisabled] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
+  // Update allComments when new data is fetched
   useEffect(() => {
-    if (isLoadingComments || !comments) return;
-    setCommentsLength(comments?.length);
-  }, [comments?.length]);
+    if (!commentsResponse?.results) return;
+    
+    if (currentPage === 1) {
+      // First page - replace all comments
+      setAllComments(commentsResponse.results);
+    } else {
+      // Subsequent pages - append new comments
+      setAllComments(prev => [...prev, ...commentsResponse.results]);
+    }
+  }, [commentsResponse?.results, currentPage]);
+
+  // Keep the displayed comment count stable from backend (includes replies).
+  // Do not overwrite it with the paginated count which only includes top-level comments.
+  // We'll increment locally on successful comment/reply instead.
+
+  const incrementCommentCount = useCallback(() => {
+    setCommentsLength((prev) => prev + 1);
+  }, []);
+
+  const handleLoadMoreComments = () => {
+    setCurrentPage(prev => prev + 1);
+  };
 
   const handleLikePost = async () => {
     const currentIsLiked = liked;
@@ -159,6 +253,7 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   return (
     <motion.article
@@ -179,10 +274,19 @@ export const DiscoverPostItem = ({
           />
 
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
-            <CompanyName
-              name={postItem?.company?.slug}
-              verified={postItem?.company?.verify}
-            />
+            <div className="flex items-center gap-2">
+              <CompanyName
+                slug={postItem?.company?.slug}
+                name={postItem?.company?.company_name}
+                verified={postItem?.company?.verify}
+              />
+              {postItem?.is_flagged && (
+                <ContentWarningBadge 
+                  flagReason={postItem?.flag_reason} 
+                  isOwner={postItem?.user?.id === currentUser?.id}
+                />
+              )}
+            </div>
             <small className="text-gray-400 lowercase shrink-0">
               <Link to={`/co/${postItem?.user?.id}`}>
                 @{postItem.user.first_name}{" "}
@@ -192,7 +296,7 @@ export const DiscoverPostItem = ({
           </section>
         </section>
 
-        {postItem?.user?.id === currentUser?.id && (
+        {postItem?.user?.id === currentUser?.id ? (
           <MoreOptions className="shrink-0 !max-w-[120px]">
             <div className="flex flex-col gap-2">
               <ButtonWithTooltipIcon
@@ -213,6 +317,17 @@ export const DiscoverPostItem = ({
                   setTimeout(() => setRefetchInterval(false), 2000);
                 }}
                 className="!text-red-700 hover:!text-red-500"
+              />
+            </div>
+          </MoreOptions>
+        ) : (
+          <MoreOptions className="shrink-0 !max-w-[120px]">
+            <div className="flex flex-col gap-2">
+              <ButtonWithTooltipIcon
+                text="Report post"
+                IconName={ExclamationTriangleIcon}
+                onClick={() => setShowReportModal(true)}
+                className="!text-red-600 hover:!text-red-500"
               />
             </div>
           </MoreOptions>
@@ -342,10 +457,23 @@ export const DiscoverPostItem = ({
       <CommentSection
         showCommentSection={showCommentSection}
         setShowCommentSection={setShowCommentSection}
-        commentsData={comments}
+        commentsData={allComments}
         postItem={postItem}
         refetchComments={refetchComments}
         isLoading={isLoadingComments}
+        hasMore={commentsResponse?.hasMore || false}
+        onLoadMore={handleLoadMoreComments}
+        isLoadingMore={isFetchingComments && currentPage > 1}
+        onIncrementCount={incrementCommentCount}
+      />
+
+      {/* Report Modal - App Store Compliance */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        contentType="post"
+        contentId={postItem?.id}
+        reportedUserId={postItem?.user?.id}
       />
     </motion.article>
   );
@@ -364,47 +492,137 @@ const CommentSection = ({
   // setCommentsLength.
   postItem,
   refetchComments,
+  hasMore = false,
+  onLoadMore,
+  isLoadingMore = false,
+  onIncrementCount,
 }) => {
-  const [comment, setComment] = useState("");
+  const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
+  const [editorKey, setEditorKey] = useState(0); // Key to force editor reset
+  
+  // State for comment as user/company selection
+  const [commentAsType, setCommentAsType] = useState('user'); // 'user' or 'company'
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  // Fetch users and companies for mention autocomplete
+  const { users, loading: usersLoading, error: usersError } = useUserSearch();
+  const { companies, loading: companiesLoading, error: companiesError } = useCompanySearch();
+  
+  // Fetch companies owned by current user
+  const { companies: userCompanies } = useUserCompanies(user?.id);
+
+  // Handle selection change from CommentAsSelector
+  const handleCommentAsChange = useCallback((type, companyId) => {
+    setCommentAsType(type);
+    setSelectedCompanyId(companyId);
+    console.log('💬 Comment as:', type, companyId ? `Company ID: ${companyId}` : 'Personal');
+  }, []);
 
   const handleComment = useCallback(async () => {
-    if (comment.trim().length < 1) return;
+    if (commentData.text.trim().length < 1) return;
 
     setLoading(true);
     try {
-      const newComment = await commentOnPost(postItem.id, postItem, comment);
+      // Pass selectedCompanyId if commenting as company
+      const companyIdForComment = commentAsType === 'company' ? selectedCompanyId : null;
+      
+      const newComment = await commentOnPost(
+        postItem.id, 
+        commentData.text, 
+        commentData.mentions || [],
+        commentData.companyMentions || [],
+        companyIdForComment // Pass the company ID if commenting as company
+      );
       const { id } = newComment;
 
       queryClient.setQueryData(
         ["comments", { postId: postItem.id }],
         (oldComments) => {
-          // const lastComment = oldComments?.at(0);
-          // const clone = { ...lastComment, id: Math.random(), content: comment };
-
           return [...oldComments, newComment];
         }
       );
 
-      refetchComments().catch((e) =>
-        console.log("Could not update to lastest comments")
-      );
-      if (id) toast.success("Comment has been added");
+      // Refetch comments to pull latest list
+      refetchComments().catch(() => {});
+      if (id) {
+        const commentedAs = commentAsType === 'company' 
+          ? userCompanies.find(c => c.id === selectedCompanyId)?.company_name 
+          : 'you';
+        toast.success(`Comment added as ${commentedAs}`);
+        // Increment the visible comment count (includes replies in backend count)
+        onIncrementCount && onIncrementCount();
+      }
 
-      // setRefetchInterval(1000);
-      // setTimeout(() => setRefetchInterval(false), 2000);
-      setComment("");
+      // Reset the editor by changing its key
+      setCommentData({ text: '', mentions: [], html: '', editorState: '' });
+      setEditorKey(prev => prev + 1); // Force editor to remount and clear
     } catch (error) {
       toast.error("Failed to submit the comment. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [comment, postItem, setRefetchInterval]);
+  }, [commentData, postItem, queryClient, refetchComments, commentAsType, selectedCompanyId, userCompanies]);
+
+  const handleReply = useCallback(async (commentId, replyData) => {
+    if (!replyData.text?.trim()) return;
+    
+    try {
+      await replyToComment(
+        commentId,
+        replyData.text,
+        replyData.userMentions || [],
+        replyData.companyMentions || [],
+        replyData.parentReplyId || null  // NEW: Pass parent reply ID for nested replies
+      );
+      
+      // Refetch comments to show new reply
+      refetchComments();
+      toast.success("Reply added!");
+      // Increment the visible comment count for replies too
+      onIncrementCount && onIncrementCount();
+    } catch (error) {
+      console.error('Failed to reply:', error);
+      toast.error("Failed to post reply");
+    }
+  }, [refetchComments]);
+
+  const handleLike = useCallback(async (commentId, hasLiked = false) => {
+    try {
+      // TODO: Allow users to like as their company
+      // For now, always like as user (company_id = null)
+      await likeComment(commentId, hasLiked, null);
+      
+      // Refetch comments to update like counts
+      refetchComments();
+      toast.success(hasLiked ? "Unliked!" : "Liked!");
+    } catch (error) {
+      console.error('Failed to like comment:', error);
+      toast.error("Failed to like comment");
+    }
+  }, [refetchComments]);
+
+  const handleLikeReply = useCallback(async (replyId, hasLiked = false) => {
+    try {
+      // TODO: Allow users to like as their company
+      // For now, always like as user (company_id = null)
+      await likeReply(replyId, hasLiked, null);
+      
+      // Refetch comments to update like counts
+      refetchComments();
+      toast.success(hasLiked ? "Unliked reply!" : "Liked reply!");
+    } catch (error) {
+      console.error('Failed to like reply:', error);
+      toast.error("Failed to like reply");
+    }
+  }, [refetchComments]);
 
   useEffect(() => {
-    if (!showCommentSection) setComment("");
+    if (!showCommentSection) setCommentData({ text: '', mentions: [], html: '', editorState: '' });
   }, [showCommentSection]);
 
   return (
@@ -438,27 +656,76 @@ const CommentSection = ({
             );
           })
         : commentsData.map((comment) => (
-            <MemoizedCommentBlock
+            <CommentThread
               key={comment.id}
               comment={comment}
               postUserId={postItem.user.id}
+              currentUser={user}
+              onReply={handleReply}
+              onLike={handleLike}
+              onLikeReply={handleLikeReply}
+              users={users}
+              companies={companies}
             />
           ))}
-      <div className="mt-4 border-t pt-4 relative">
-        {/* <ReactQuill
-          value={comment}
-          onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
-          theme="snow"
-          placeholder="Type your comment here"
-          // style={{ height: "200px" }}
-        /> */}
-        <button
-          className="absolute bottom-1.5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
-          onClick={handleComment}
-          disabled={loading || comment.trim().length < 1}
-        >
-          {loading ? "Commenting..." : "Comment"}
-        </button>
+      
+      {/* Load More Comments Button */}
+      {hasMore && !isLoading && (
+        <div className="mt-4 mb-4 flex justify-center">
+          <button
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            className="px-6 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isLoadingMore ? (
+              <>
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </>
+            ) : (
+              <>
+                Load More Comments
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+      
+      <div className="mt-4 border-t pt-4">
+        {/* Comment as selector - only shows if user has companies */}
+        <CommentAsSelector
+          user={user}
+          userCompanies={userCompanies}
+          selectedType={commentAsType}
+          selectedCompanyId={selectedCompanyId}
+          onSelectionChange={handleCommentAsChange}
+        />
+        
+        <LexicalCommentEditor
+          key={editorKey}
+          onChange={setCommentData}
+          placeholder="Write a comment..."
+          users={users}
+          companies={companies}
+        />
+        <div className="flex justify-between items-center mt-3">
+          <p className="text-xs text-gray-400">
+            Type @ to mention users or companies • Cmd/Ctrl+Enter to submit
+          </p>
+          <button
+            className="bg-gold disabled:bg-gray-300 hover:bg-custom_yellow text-sm px-6 py-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed font-medium"
+            onClick={handleComment}
+            disabled={loading || commentData.text.trim().length < 1}
+          >
+            {loading ? "Commenting..." : "Comment"}
+          </button>
+        </div>
       </div>
     </section>
   );

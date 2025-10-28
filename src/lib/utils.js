@@ -161,3 +161,101 @@ export async function copyTextToClipboard(text) {
     await navigator.clipboard.writeText(text);
   }
 }
+
+/**
+ * Format a phone number with country code
+ * @param {string} phoneNumber - The phone number to format
+ * @param {string} countryName - The country name (e.g., "United States", "Nigeria")
+ * @returns {string} - Formatted phone number with country code
+ */
+export function formatPhoneNumber(phoneNumber, countryName = "") {
+  if (!phoneNumber) return "";
+
+  // If the number already starts with a country code (+ or 00), return as is
+  if (phoneNumber.startsWith("+") || phoneNumber.startsWith("00")) {
+    return phoneNumber;
+  }
+
+  // Remove any non-digit characters from the phone number
+  const cleanNumber = phoneNumber.replace(/\D/g, "");
+
+  // Default to +1 if the number is 10 digits (likely US/Canada)
+  // This takes priority over country name to handle cases where country might be wrong
+  if (cleanNumber.length === 10) {
+    return `+1 ${cleanNumber}`;
+  }
+
+  // Country code mapping - add more as needed
+  const countryCodeMap = {
+    "united states": "+1",
+    "usa": "+1",
+    "us": "+1",
+    "canada": "+1",
+    "nigeria": "+234",
+    "ng": "+234",
+    "ghana": "+233",
+    "gh": "+233",
+    "kenya": "+254",
+    "ke": "+254",
+    "south africa": "+27",
+    "za": "+27",
+    "united kingdom": "+44",
+    "uk": "+44",
+    "gb": "+44",
+    "india": "+91",
+    "in": "+91",
+    "china": "+86",
+    "cn": "+86",
+    "australia": "+61",
+    "au": "+61",
+    "germany": "+49",
+    "de": "+49",
+    "france": "+33",
+    "fr": "+33",
+    "italy": "+39",
+    "it": "+39",
+    "spain": "+34",
+    "es": "+34",
+    "brazil": "+55",
+    "br": "+55",
+    "mexico": "+52",
+    "mx": "+52",
+    "japan": "+81",
+    "jp": "+81",
+    "south korea": "+82",
+    "kr": "+82",
+  };
+
+  // Get country code from the country name if provided
+  if (countryName) {
+    const countryKey = countryName.toLowerCase().trim();
+    const countryCode = countryCodeMap[countryKey];
+
+    // If we have a country code, format the number
+    if (countryCode) {
+      return `${countryCode} ${cleanNumber}`;
+    }
+  }
+
+  // If we can't determine the country code, just return the number as is
+  return phoneNumber;
+}
+
+/**
+ * Ensure URL has a protocol (http/https)
+ * @param {string} url - The URL to format
+ * @returns {string} - URL with protocol
+ */
+export function ensureUrlProtocol(url) {
+  if (!url) return "";
+  
+  const trimmedUrl = url.trim();
+  
+  // If already has protocol, return as is
+  if (/^https?:\/\//i.test(trimmedUrl)) {
+    return trimmedUrl;
+  }
+  
+  // Add https:// by default
+  return `https://${trimmedUrl}`;
+}

@@ -68,6 +68,7 @@ export default function CompaniesPage() {
   const {
     data: companyPages,
     isLoading,
+    error,
     hasNextPage,
     isFetchingNextPage,
     isFetching,
@@ -75,10 +76,16 @@ export default function CompaniesPage() {
   } = useInfiniteQuery({
     queryKey: ["companies", "all", { sortBy }],
     initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
+    staleTime: 10 * 60 * 1000, // ✅ Cache for 10 minutes
+    gcTime: 15 * 60 * 1000, // ✅ Keep in cache for 15 minutes
+    refetchOnWindowFocus: false, // ✅ Don't refetch on tab switch
+    refetchOnMount: false, // ✅ Use cache on mount
+    retry: 2, // ✅ Only retry twice
+    retryDelay: 1000, // ✅ Wait 1 second between retries
+    queryFn: async ({ pageParam, signal }) => {
       const res = await getAllCompanies(
         {
-          page_size: 6,
+          page_size: 12, // ✅ Increased from 6 to reduce requests
           page: pageParam,
           ordering: sortBy ? "-" + sortBy : undefined,
         },
@@ -106,6 +113,32 @@ export default function CompaniesPage() {
 
   if (isLoading)
     return <PageLoading hasLogo={false} text="Getting companies" />;
+
+  // Error state
+  if (error) {
+    return (
+      <section className="space-y-6 px-2 md:px-0 text-center py-10">
+        <LightParagraph>Failed to load companies. Please try again.</LightParagraph>
+        <PrimaryButton onClick={() => window.location.reload()}>
+          Retry
+        </PrimaryButton>
+      </section>
+    );
+  }
+
+  // Empty state
+  if (!isLoading && companyPages?.pages?.[0]?.data?.length === 0) {
+    return (
+      <section className="space-y-6 px-2 md:px-0 text-center py-10">
+        <LightParagraph>No companies found.</LightParagraph>
+        {currentUser && currentUser?.user_type === CompanyUserType && (
+          <Link to="/create-company">
+            <PrimaryButton>Create Company</PrimaryButton>
+          </Link>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-6 px-2 md:px-0">
@@ -149,25 +182,26 @@ export default function CompaniesPage() {
             );
           })}
         </div>
-        {companyPages?.pages?.map((page, index) => {
-          return <CompaniesArray companies={page?.data} key={index} />;
-        })}
-
-        {hasNextPage && (
-          <div
-            className={clsx("mt-10 flex mx-auto justify-center", {
-              "animate-pulse": isFetching,
-            })}
-          >
-            <PrimaryButton
-              onClick={fetchNextPage}
-              disabled={!hasNextPage || isFetching || isFetchingNextPage}
-            >
-              Load More
-            </PrimaryButton>
-          </div>
-        )}
       </div>
+
+      {companyPages?.pages?.map((page, index) => {
+        return <CompaniesArray companies={page?.data} key={index} />;
+      })}
+
+      {hasNextPage && (
+        <div
+          className={clsx("mt-10 flex mx-auto justify-center", {
+            "animate-pulse": isFetching,
+          })}
+        >
+          <PrimaryButton
+            onClick={fetchNextPage}
+            disabled={!hasNextPage || isFetching || isFetchingNextPage}
+          >
+            Load More
+          </PrimaryButton>
+        </div>
+      )}
     </section>
   );
 }
@@ -248,7 +282,7 @@ export const CompaniesArray = ({
                   <div className="flex items-center text-gray-400">
                     <LocationOnOutlined className="sm:!size-4 !size-5" />
                     <span className="text-sm sm:text-xs">
-                      {company?.address} {company?.city}, {company?.state},{" "}
+                      {company?.office_address} {company?.city}, {company?.state},{" "}
                       {company?.country}.
                     </span>
                   </div>

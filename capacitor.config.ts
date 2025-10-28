@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "co.connectize.app",
-  appName: "App",
+  appName: "Connectize",
   webDir: "build/client",
 
   android: {
@@ -17,11 +17,29 @@ const config: CapacitorConfig = {
     },
   },
 
+  ios: {
+    contentInset: "automatic",
+    scrollEnabled: true,
+  },
+
+  server: {
+    cleartext: true,
+  },
+
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
       launchAutoHide: true,
-      backgroundColor: "#fff",
+      backgroundColor: "#ffffff",
+      showSpinner: false,
+    },
+    StatusBar: {
+      style: "light", // Light status bar for dark text
+    },
+    Keyboard: {
+      resize: "body",
+      style: "light",
+      resizeOnFullScreen: true,
     },
   },
 };

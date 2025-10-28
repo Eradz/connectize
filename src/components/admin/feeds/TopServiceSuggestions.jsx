@@ -23,7 +23,7 @@ import { usePaginatedRepresentatives } from "../../../hooks/useRepresentatives";
 
 const TopServiceSuggestions = () => {
   return (
-    <section className="max-md:container !p-0 lg:p-4 h-fit w-full xl:w-[45%] flex items-start flex-col sm:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:right-4">
+    <section className="max-md:container !p-0 lg:p-4 h-fit w-full xl:w-[45%] flex items-start flex-col sm:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-2 max-h-[97vh] overflow-y-auto">
       <TopServices />
 
       <Suggestions />
@@ -40,7 +40,7 @@ export function TopServices() {
   //
 
   return (
-    <section className="w-full">
+    <section className="w-full max-w-full overflow-hidden">
       {isLoading ? (
         <>
           <div className="p-3 sm:p-4 lg:!px-2">
@@ -60,7 +60,7 @@ export function TopServices() {
             logo={service?.company?.logo}
             summary={service?.description}
             url={"/services/" + service?.id}
-            // slug={`services/${service?.company?.id}`}
+            slug={service?.company?.slug}
             title={service?.title}
             verified={service?.featured}
           />

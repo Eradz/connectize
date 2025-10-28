@@ -1,4 +1,4 @@
-import { makeApiRequest, REGISTER_EMAIL_KEY } from "../lib/helpers";
+import { makeApiRequest, REGISTER_EMAIL_KEY, clearTokenCache } from "../lib/helpers";
 import { setSession } from "../lib/session";
 
 export const authenticationService = async ({
@@ -9,7 +9,7 @@ export const authenticationService = async ({
   resetForm,
 }) => {
   try {
-    const { results } = await makeApiRequest({
+    const response = await makeApiRequest({
       url: `api/auth/${url}/`,
       method,
       data: values,
@@ -17,8 +17,13 @@ export const authenticationService = async ({
       type: "auth-" + type,
     });
 
-    if (type === "login") {
+    // Safely handle response structure
+    const results = response?.results || response;
+
+    if (type === "login" && results) {
       setSession(results);
+      // Clear token cache so the new session tokens are used immediately
+      clearTokenCache();
     } else if (type === "register" && values?.email) {
       localStorage.setItem(REGISTER_EMAIL_KEY, values.email);
     }
@@ -45,5 +50,12 @@ export const deactivateAccount = async ({ email, password }) => {
   return await authenticationService({
     values: { email, password },
     url: "deactivate-account",
+  });
+};
+
+export const deleteAccount = async ({ confirmation_text }) => {
+  return await authenticationService({
+    values: { confirmation_text },
+    url: "delete-account",
   });
 };

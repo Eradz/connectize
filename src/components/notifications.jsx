@@ -17,7 +17,6 @@ import {
   getNotificationsForUser,
   markAllNotificationsAsRead,
 } from "../api-services/notifications";
-import { useCompanies, useUsers } from "../hooks";
 import useNotificationWebSocket from "../hooks/useNotificationWebSocket";
 import { Notification } from "../icon";
 import { useNotificationsStore } from "../stores/notificationsStore";
@@ -99,8 +98,9 @@ export const NotificationItem = ({ isPopover = false }) => {
   const fetchNotifications = useNotificationsStore((s) => s.fetchNotifications);
   const markAllAsRead = useNotificationsStore((s) => s.markAllAsRead);
   const deleteAll = useNotificationsStore((s) => s.deleteAll);
-  const { data: companies, isLoading: companiesLoading } = useCompanies();
-  const { data: users, isLoading: usersLoading } = useUsers();
+  
+  // Only fetch notifications data, removed expensive useCompanies and useUsers hooks
+  const isLoading = !notifications; // Simple loading check based on notifications state
 
   const tabsHeader = ["General", "Promotions"];
 
@@ -148,7 +148,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 
   return (
     <>
-      {companiesLoading || usersLoading ? (
+      {isLoading ? (
         <NotificationsSkeleton />
       ) : (
         <section className={clsx("bg-white rounded-md p-3 space-y-2 w-full")}>
@@ -185,16 +185,12 @@ export const NotificationItem = ({ isPopover = false }) => {
                 key="general"
                 fallback="general"
                 notifications={generalNotifications}
-                companies={companies}
-                users={users}
                 isPopover={isPopover}
               />,
               <NotificationsArray
                 key="promotions"
                 notifications={promotionsNotifications}
                 fallback="promotion"
-                companies={companies}
-                users={users}
                 isPopover={isPopover}
               />,
             ]}
@@ -210,7 +206,7 @@ export const NotificationItem = ({ isPopover = false }) => {
 };
 
 const NotificationsArray = memo(
-  ({ notifications, fallback, companies, users, isPopover }) => {
+  ({ notifications, fallback, isPopover }) => {
     return (
       <section
         className={clsx("space-y-2 divide-y divide-gray-100", {
@@ -224,17 +220,10 @@ const NotificationsArray = memo(
           </p>
         ) : (
           notifications?.map((notification, index) => {
-            const user = users?.find(
-              (user) => user?.id === notification?.sender
-            );
-            const company = companies?.results?.find(
-              (company) => company?.profile === user?.email
-            );
             return (
               <NotificationTile
                 key={notification?.id}
                 index={index}
-                company={company}
                 notification={notification}
               />
             );
@@ -245,7 +234,7 @@ const NotificationsArray = memo(
   }
 );
 
-const NotificationTile = memo(({ notification, index, company }) => {
+const NotificationTile = memo(({ notification, index }) => {
   const { markAsRead, deleteNotification: deleteThis } =
     useNotificationsStore();
 
@@ -262,6 +251,17 @@ const NotificationTile = memo(({ notification, index, company }) => {
     }
   };
 
+  // Extract company/sender info from notification object if it exists
+  // Backend should include this data in the notification response
+  const senderData = notification?.sender_data || {};
+  const companyData = notification?.company_data || {};
+  
+  // Fallback to default values if data not provided by backend
+  const companyName = companyData?.company_name || senderData?.company_name || "";
+  const companySlug = companyData?.slug || senderData?.slug || "";
+  const companyLogo = companyData?.logo || senderData?.logo || "/images/default-company-logo.png";
+  const isVerified = companyData?.verify || senderData?.verify || false;
+
   return (
     <motion.div
       initial={{ x: 10, opacity: 0 }}
@@ -271,17 +271,17 @@ const NotificationTile = memo(({ notification, index, company }) => {
       className="flex items-stretch gap-2 pt-2"
     >
       <Avatar
-        src={company?.logo || "/images/default-company-logo.png"}
-        alt={company?.company_name}
+        src={companyLogo}
+        alt={companyName}
         size="sm"
-        name={company?.company_name}
+        name={companyName}
         className={avatarStyle}
       />
       <div className="space-y-0 flex-1">
         <CompanyName
-          slug={company?.slug}
-          name={company?.company_name}
-          verified={company?.verify}
+          slug={companySlug}
+          name={companyName}
+          verified={isVerified}
         />
         <Link
           to={

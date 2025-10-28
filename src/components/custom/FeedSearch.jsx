@@ -41,19 +41,18 @@ function FeedSearch({ className }) {
       <ReusableModal
         isOpen={searchQuery && pathname !== "/search"}
         onClose={() => updateSearchParams({ search_query: null })}
-        footerContent={<></>}
         title={
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-1 flex-wrap">
             <span>Search Results for</span>{" "}
             <Link
               to={`/search?search_query=${searchQuery}`}
-              className="!underline !text-gray-500"
+              className="!underline !text-gray-500 hover:!text-gold transition-colors"
             >
               {searchQuery}
             </Link>
           </div>
         }
-        size="2xl"
+        size="3xl"
       >
         <SearchTab />
       </ReusableModal>
