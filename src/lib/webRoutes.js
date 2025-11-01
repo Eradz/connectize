@@ -7,6 +7,7 @@ const webRoutes = {
   blockedUsers: "/co/blocked-users",
   blockedCompanies: "/co/blocked-companies",
   bookmarks: "/co/bookmarks",
+  businessHub: "/business-hub",
   company: "/:company",
   companyEditProfile: "/:company/edit-profile",
   companyDocuments: "/company-documents",
