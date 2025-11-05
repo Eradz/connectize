@@ -41,6 +41,7 @@ const webRoutes = {
   singlePost: "/posts/:id",
   success: "/success",
   support:"/support",
+  dealRoom: "/deal-room",
   termsAndConditions: "/terms-and-conditions",
   userProfile: "/co/:userId",
   verifyAccount: "/verify-account",

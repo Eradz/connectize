@@ -6,6 +6,7 @@ declare module "react-router" {
   interface Register {
     pages: Pages
     routeFiles: RouteFiles
+    routeModules: RouteModules
   }
 }
 
@@ -121,6 +122,9 @@ type Pages = {
   "/support": {
     params: {};
   };
+  "/deal-room": {
+    params: {};
+  };
   "/signup": {
     params: {};
   };
@@ -153,11 +157,11 @@ type Pages = {
 type RouteFiles = {
   "root.jsx": {
     id: "root";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deal-room" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
   };
   "../pages/AppLayout.jsx": {
     id: "../pages/AppLayout";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deal-room";
   };
   "../pages/FeedLayout.jsx": {
     id: "../pages/FeedLayout";
@@ -303,6 +307,10 @@ type RouteFiles = {
     id: "../pages/support/Support";
     page: "/support";
   };
+  "../pages/dealRoom/dealRoom.jsx": {
+    id: "../pages/dealRoom/dealRoom";
+    page: "/deal-room";
+  };
   "../pages/authentication/AuthLayout.jsx": {
     id: "../pages/authentication/AuthLayout";
     page: "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success";
@@ -347,4 +355,57 @@ type RouteFiles = {
     id: "../pages/terms&policies/policy";
     page: "/privacy-policy";
   };
+};
+
+type RouteModules = {
+  "root": typeof import("./src/app/root.jsx");
+  "../pages/AppLayout": typeof import("./src/app/../pages/AppLayout.jsx");
+  "../pages/FeedLayout": typeof import("./src/app/../pages/FeedLayout.jsx");
+  "../pages/feed/newsFeed": typeof import("./src/app/../pages/feed/newsFeed.jsx");
+  "../pages/posts/singlePostPage": typeof import("./src/app/../pages/posts/singlePostPage.jsx");
+  "../components/profile/profile": typeof import("./src/app/../components/profile/profile.jsx");
+  "../components/profile/layout": typeof import("./src/app/../components/profile/layout.jsx");
+  "../components/profile/address": typeof import("./src/app/../components/profile/address.jsx");
+  "../components/profile/bio": typeof import("./src/app/../components/profile/bio.jsx");
+  "../components/profile/contact": typeof import("./src/app/../components/profile/contact.jsx");
+  "../components/profile/home": typeof import("./src/app/../components/profile/home.jsx");
+  "../components/profile/overview": typeof import("./src/app/../components/profile/overview.jsx");
+  "../pages/company/layout": typeof import("./src/app/../pages/company/layout.jsx");
+  "../pages/company/index": typeof import("./src/app/../pages/company/index.jsx");
+  "../pages/company/CompanyDocuments": typeof import("./src/app/../pages/company/CompanyDocuments.jsx");
+  "../pages/company/CompanyInformation": typeof import("./src/app/../pages/company/CompanyInformation.jsx");
+  "../pages/market/analysis": typeof import("./src/app/../pages/market/analysis.jsx");
+  "../pages/blocked-users/index": typeof import("./src/app/../pages/blocked-users/index.jsx");
+  "../pages/blocked-companies/index": typeof import("./src/app/../pages/blocked-companies/index.jsx");
+  "../pages/bookmark/index": typeof import("./src/app/../pages/bookmark/index.jsx");
+  "../pages/companies/index": typeof import("./src/app/../pages/companies/index.jsx");
+  "../components/notifications": typeof import("./src/app/../components/notifications.jsx");
+  "../pages/feed/companyProfile": typeof import("./src/app/../pages/feed/companyProfile.jsx");
+  "../pages/company/edit/index": typeof import("./src/app/../pages/company/edit/index.jsx");
+  "../pages/market/market": typeof import("./src/app/../pages/market/market.jsx");
+  "../pages/messages/layout": typeof import("./src/app/../pages/messages/layout.jsx");
+  "../pages/market/product": typeof import("./src/app/../pages/market/product.jsx");
+  "../pages/market/listing": typeof import("./src/app/../pages/market/listing.jsx");
+  "../pages/representatives/index": typeof import("./src/app/../pages/representatives/index.jsx");
+  "../pages/representatives/AssignRepresentative": typeof import("./src/app/../pages/representatives/AssignRepresentative.jsx");
+  "../pages/representatives/AcceptRepresentation": typeof import("./src/app/../pages/representatives/AcceptRepresentation.jsx");
+  "../pages/search/index": typeof import("./src/app/../pages/search/index.jsx");
+  "../pages/service/service": typeof import("./src/app/../pages/service/service.jsx");
+  "../pages/service/serviceAdmin": typeof import("./src/app/../pages/service/serviceAdmin.jsx");
+  "../pages/service/serviceOverview": typeof import("./src/app/../pages/service/serviceOverview.jsx");
+  "../pages/settings/index": typeof import("./src/app/../pages/settings/index.jsx");
+  "../pages/feed/userProfile": typeof import("./src/app/../pages/feed/userProfile.jsx");
+  "../pages/support/Support": typeof import("./src/app/../pages/support/Support.jsx");
+  "../pages/dealRoom/dealRoom": typeof import("./src/app/../pages/dealRoom/dealRoom.jsx");
+  "../pages/authentication/AuthLayout": typeof import("./src/app/../pages/authentication/AuthLayout.jsx");
+  "../pages/authentication/signup": typeof import("./src/app/../pages/authentication/signup.jsx");
+  "../pages/authentication/login": typeof import("./src/app/../pages/authentication/login.jsx");
+  "../pages/authentication/reactivation": typeof import("./src/app/../pages/authentication/reactivation.jsx");
+  "../pages/authentication/verify-account": typeof import("./src/app/../pages/authentication/verify-account.jsx");
+  "../pages/authentication/reset-password": typeof import("./src/app/../pages/authentication/reset-password.jsx");
+  "../pages/authentication/confirmPasswordReset": typeof import("./src/app/../pages/authentication/confirmPasswordReset.jsx");
+  "../pages/authentication/successpage": typeof import("./src/app/../pages/authentication/successpage.jsx");
+  "../pages/terms&policies/termsLayout": typeof import("./src/app/../pages/terms&policies/termsLayout.jsx");
+  "../pages/terms&policies/terms": typeof import("./src/app/../pages/terms&policies/terms.jsx");
+  "../pages/terms&policies/policy": typeof import("./src/app/../pages/terms&policies/policy.jsx");
 };
