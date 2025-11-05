@@ -10,9 +10,9 @@ export default function BusinessHubDashboard() {
 
       <div className="py-2">
         <div className="flex flex-col gap-6">
-          <div className="flex gap-6 h-[610px]">
+          <div className="flex flex-col md:flex-row gap-6 h-fit md:h-[610px]">
             <PlatformModules />
-            <div className="w-[30%]">
+            <div className="w-full md:w-[30%]">
             <RecentActivities />
             </div>
           </div>

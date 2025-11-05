@@ -1,4 +1,3 @@
-import { Star } from "@mui/icons-material";
 import DealIcon from "../../../icon/deal";
 import StarIcon from "../../../icon/StarIcon";
 import CardIcon from "../../../icon/CardIcon";
@@ -56,7 +55,7 @@ export default function PlatformModules() {
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Platform Modules</h2>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((module, index) => (
           <div
             key={index}
@@ -67,9 +66,9 @@ export default function PlatformModules() {
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">{module.title}</h3>
             <p className="text-xs text-gray-500 mb-3">{module.description}</p>
-            <a href="#" className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-              {module.link} →
-            </a>
+            <p className="text-xs text-[#E5A800] font-medium">
+              {module.link}
+            </p>
           </div>
         ))}
       </div>

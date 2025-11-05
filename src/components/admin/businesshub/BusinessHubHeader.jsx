@@ -5,11 +5,11 @@ import DollarSignIcon from "../../../icon/dollarsign"
 import StarIcon from "../../../icon/StarIcon"
 export default function BusinessHubHeader() {
   const stats = [
-    { label: "Total value", value: "12,000", icon: <DealIcon />, sublabel: "3 Active" },
-    { label: "Active Room Deals", value: "12", icon: <CardIcon />, sublabel: "3 Active" },
-    { label: "Active Jobs", value: "30", icon: <BriefCaseIcon />, sublabel: "3 Active" },
-    { label: "Featured Ads", value: "10", icon: <DollarSignIcon />, sublabel: "3 Active" },
-    { label: "Subscription", value: "Premium", icon: <StarIcon />, sublabel: "3 Active" }
+    { label: "Total value", value: "12,000", icon: <DollarSignIcon />, sublabel: "3 Active" },
+    { label: "Active Room Deals", value: "12", icon: <DealIcon />, sublabel: "3 Active" },
+    { label: "Active Jobs", value: "30", icon: <BriefCaseIcon />, sublabel: "12 Opening Position" },
+    { label: "Featured Ads", value: "10", icon: <StarIcon />, sublabel: "3 Active" },
+    { label: "Subscription", value: "Premium", icon: <CardIcon />, sublabel: "3 Active" }
   ];
 
   const quickActions = [
@@ -30,7 +30,7 @@ export default function BusinessHubHeader() {
 
         
         <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-6 w-full">
-          <div className="font-bold mr-6">Quick Actions</div>
+          <div className="font-bold md:w-[15%]">Quick Action</div>
           <div className="flex flex-wrap md:flex-nowrap w-full gap-3 px-3">
             {quickActions.map((action, index) => (
               <button
@@ -50,14 +50,14 @@ export default function BusinessHubHeader() {
         </div>
 
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-lg p-4 border border-gray-200">
+            <div key={index} className={`${index === 4 ? "col-span-2 lg:col-span-1" : ""} rounded-lg p-4 border border-gray-200 bg-white`}>
               <span>{stat.icon}</span>
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between mt-4">
                 <div className="flex-1">
                   <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <p className={ index === 4 ? "bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-transparent bg-clip-text" : "text-gray-900" + "text-[32px] font-medium "}>{stat.value}</p>
                   <p className="text-xs text-gray-400 mt-1">{stat.sublabel}</p>
                 </div>
               </div>
