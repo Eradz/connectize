@@ -163,3 +163,16 @@
 // // function AppWithoutRouter =
 
 // export default App;
+
+
+import BusinessHubDashboard from './components/admin/businesshub/BusinessHubDashboard';
+
+function App() {
+  return (
+    <div>
+      <BusinessHubDashboard />
+    </div>
+  );
+}
+
+export default App;

@@ -73,6 +73,7 @@
   },
   "scripts": {
     "dev": "react-router dev",
+    "dev-local": "vite",
     "start": "vite preview",
     "predeploy": "npm run build",
     "build": "react-router build",
