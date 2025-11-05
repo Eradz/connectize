@@ -21,14 +21,14 @@ const AppLayout = () => {
   const isMessagesRoute = pathname.startsWith("/messages");
 
   return (
-    <main className="bg-background w-full h-full flex flex-col flex-1 overflow-x-hidden">
+    <main className="bg-background w-full h-full flex flex-col flex-1 overflow-x-hidden ">
       <Navbar />
       <section
         className={clsx(
           // Added overflow-x-hidden and max-w-full to stop child 100vw elements causing shift
-          "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 md:p-4 md:container overflow-x-hidden max-w-full",
+          "flex flex-col items-start md:flex-row gap-4 xl:!gap-5 overflow-x-hidden max-w-full overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           {
-            "pt-4 px-2 md:py-6": !isSinglePostRoute && !isHomeRoute,
+            "": !isSinglePostRoute && !isHomeRoute,
             // Subtract navbar height (64px) plus dynamic safe areas handled via padding
             "flex-1": isMessagesRoute,
           }
@@ -38,12 +38,12 @@ const AppLayout = () => {
         <section
           className={clsx(
             // Added relative and overflow-x-hidden to isolate scroll context & prevent horizontal bleed
-            "md:px-0 gap-2 w-full h-full overflow-x-hidden relative pb-24 md:pb-0",
+            "md:px-3 gap-2 w-full h-full overflow-x-hidden relative pb-24 md:pb-0",
             !isMessagesRoute && "grid grid-cols-1"
           )}
         >
           {/* Wrap Outlet to enforce full-width clamp */}
-          <div className="w-full max-w-full overflow-x-hidden">
+          <div className="w-full max-w-full overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Outlet />
           </div>
         </section>

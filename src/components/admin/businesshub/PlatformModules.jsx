@@ -1,52 +1,54 @@
+import { Star } from "@mui/icons-material";
+import DealIcon from "../../../icon/deal";
+import StarIcon from "../../../icon/StarIcon";
+import CardIcon from "../../../icon/CardIcon";
+import LogisticIcon from "../../../icon/LogisticIcon";
+import AIIcon from "../../../icon/AIIcon";
+import WorkForceIcon from "../../../icon/WorkForceIcon";
+
 export default function PlatformModules() {
   const modules = [
     {
-      icon: "📁",
+      icon: <DealIcon/>,
       title: "Deal Rooms",
-      description: "Manage deal flow with partners",
-      link: "12 deal rooms",
+      description: "Secure collaboration spaces for M&A and partnerships",
+      link: "0 active",
       bgColor: "bg-yellow-50",
-      iconBg: "bg-yellow-100"
     },
     {
-      icon: "👥",
+      icon: <WorkForceIcon/>,
       title: "Work Force",
-      description: "Manage and deploy skilled professionals",
-      link: "8 AI Services",
+      description: "Professional marketplace and talent acquisition",
+      link: "24 positions",
       bgColor: "bg-blue-50",
-      iconBg: "bg-blue-100"
     },
     {
-      icon: "✨",
+      icon: <AIIcon/>,
       title: "AI Services",
-      description: "Intelligent solutions for your business",
-      link: "16 AI Services",
+      description: "Intelligent matching and market insights",
+      link: "1 opportunity",
       bgColor: "bg-purple-50",
-      iconBg: "bg-purple-100"
     },
     {
-      icon: "📦",
+      icon: <LogisticIcon/>,
       title: "Logistics Hub",
-      description: "Supply chain and freight management",
-      link: "5 registrants",
+      description: "Supply chain and transportation management",
+      link: "Global network",
       bgColor: "bg-green-50",
-      iconBg: "bg-green-100"
     },
     {
-      icon: "📢",
+      icon: <StarIcon/>,
       title: "Featured Ads",
-      description: "Showcase your business listings",
-      link: "3 Active",
+      description: "Promote your content across the platform",
+      link: "0 Active",
       bgColor: "bg-orange-50",
-      iconBg: "bg-orange-100"
     },
     {
-      icon: "📋",
+      icon: <CardIcon/>,
       title: "Subscription",
-      description: "Manage subscription plans and billing",
-      link: "Settings",
+      description: "Manage your plans, billings and account settings",
+      link: "Manage plan",
       bgColor: "bg-indigo-50",
-      iconBg: "bg-indigo-100"
     }
   ];
 
@@ -58,9 +60,9 @@ export default function PlatformModules() {
         {modules.map((module, index) => (
           <div
             key={index}
-            className={`${module.bgColor} rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer border border-gray-100`}
+            className={`rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer border border-[#D9D9D9]`}
           >
-            <div className={`${module.iconBg} w-12 h-12 rounded-lg flex items-center justify-center text-2xl mb-3`}>
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl mb-3`}>
               {module.icon}
             </div>
             <h3 className="font-semibold text-gray-900 mb-1">{module.title}</h3>

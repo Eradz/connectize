@@ -11,7 +11,7 @@ export default function RecentActivities() {
   ];
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 h-fit">
+    <div className="bg-white rounded-lg border border-gray-200 p-6 overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden h-[610px]">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activities</h2>
       
       <div className="space-y-4">

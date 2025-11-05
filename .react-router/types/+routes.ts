@@ -164,7 +164,7 @@ type RouteFiles = {
   };
   "../pages/AppLayout.jsx": {
     id: "../pages/AppLayout";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/business-hub" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deal-room";
   };
   "../pages/FeedLayout.jsx": {
     id: "../pages/FeedLayout";
@@ -385,6 +385,7 @@ type RouteModules = {
   "../pages/blocked-users/index": typeof import("./src/app/../pages/blocked-users/index.jsx");
   "../pages/blocked-companies/index": typeof import("./src/app/../pages/blocked-companies/index.jsx");
   "../pages/bookmark/index": typeof import("./src/app/../pages/bookmark/index.jsx");
+  "../pages/businesshub/BusinessHub": typeof import("./src/app/../pages/businesshub/BusinessHub.jsx");
   "../pages/companies/index": typeof import("./src/app/../pages/companies/index.jsx");
   "../components/notifications": typeof import("./src/app/../components/notifications.jsx");
   "../pages/feed/companyProfile": typeof import("./src/app/../pages/feed/companyProfile.jsx");

@@ -29,10 +29,10 @@ export default function RecentDealRooms() {
     },
     {
       title: "Carbon Credit Portfolio Acquisition",
-      subtitle: "",
-      type: "",
-      value: "",
-      status: "",
+      subtitle: "Strategic carbon credit portfolio acquisition with significant value creation potential and operational synergies.",
+      type: "Acquisition",
+      value: "5,000,000",
+      status: "Active",
       progress: 85,
       statusColor: "bg-gray-100 text-gray-800"
     }
@@ -45,12 +45,12 @@ export default function RecentDealRooms() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Deal Title</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Type</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Value</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Status</th>
-              <th className="text-left py-3 px-4 text-xs font-semibold text-gray-600">Progress</th>
+            <tr className="font-bold border-b border-gray-200">
+              <th className="font-medium text-left py-3 px-4 text-xs text-gray-600">Deal Title</th>
+              <th className="font-medium text-left py-3 px-4 text-xs text-gray-600">Type</th>
+              <th className="font-medium text-left py-3 px-4 text-xs text-gray-600">Value</th>
+              <th className="font-medium text-left py-3 px-4 text-xs text-gray-600">Status</th>
+              <th className="font-medium text-left py-3 px-4 text-xs text-gray-600">Progress</th>
             </tr>
           </thead>
           <tbody>

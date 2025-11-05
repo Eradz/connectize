@@ -2,8 +2,6 @@ import BusinessHubDashboard from "../../components/admin/businesshub/BusinessHub
 
 export default function BusinessHub() {
   return (
-    <>
       <BusinessHubDashboard />
-    </>
   );
 }
