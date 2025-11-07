@@ -13,6 +13,22 @@
       name="keywords"
       content="social media, connect, chat, share, friends, networking, oil and gas networking, energy professionals, oil and gas social platform, energy industry collaboration, oil and gas jobs, upstream, midstream, downstream, energy sector networking, oil and gas suppliers, industry insights, oil and gas investments"
     />
+    
+    <!-- Content Security Policy to prevent extension interference in development -->
+    <meta http-equiv="Content-Security-Policy" content="
+      frame-src 'self' https://js.stripe.com https://*.stripe.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.stripe.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://va.vercel-scripts.com;
+      connect-src 'self' https: wss: ws: http://localhost:* http://127.0.0.1:*;
+      default-src 'self';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com;
+      font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com blob:;
+      img-src 'self' data: https: http: blob:;
+      media-src 'self' data: https: http:;
+      object-src 'none';
+      base-uri 'self';
+      frame-ancestors 'self';
+    ">
+    
     <link rel="apple-touch-icon" href="/icons/icon-192.webp" />
     <link rel="manifest" href="/manifest.json" />
     <title>Welcome to Connectize</title>

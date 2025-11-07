@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 import { capitalizeFirst } from "../lib/utils";
 import { getCompanyByIdOrEmail } from "./companies";
 import { getCurrentUser } from "./users";
@@ -138,20 +138,25 @@ export const bookmarkService = async (serviceId, data, hasBookmarked) => {
   });
 };
 
-/**
- * Get bookmarked services for the current user with pagination
- * @param {Object} params - Query parameters including page, page_size
- * @param {boolean} returnFullRes - Whether to return full response with pagination
- * @returns {Promise} - Bookmarked services
- */
-export const getBookmarkedServices = async (params = {}, returnFullRes = false) => {
-  const { results: services, next } = await makeApiRequest({
-    url: `api/services/bookmarked/`,
-    method: "GET",
-    params,
+export const deleteService = async (id) => {
+  return await makeApiRequest({
+    url: `api/services/${id}/`,
+    method: "DELETE",
   });
+};
 
-  if (returnFullRes) return { data: services, next };
+export const updateService = async (id, data) => {
+  return await makeApiRequest({
+    url: `api/services/${id}/`,
+    method: "PATCH",
+    data,
+  });
+};
 
-  return services || [];
+export const bulkDeleteServices = async (ids) => {
+  return await makeApiRequest({
+    url: `api/services/bulk-delete/`,
+    method: "POST",
+    data: { ids },
+  });
 };

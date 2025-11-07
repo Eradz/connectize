@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { baseURL } from "../lib/helpers";
+import { baseURL } from "../lib/helpers/index";
 import { getSession } from "../lib/session";
 
 /**

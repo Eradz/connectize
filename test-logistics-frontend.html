@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Logistics Frontend API</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Logistics API Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testLogisticsAPI() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // First get auth token
+                resultsDiv.innerHTML += '<p>Getting auth token...</p>';
+                const authResponse = await axios.post('http://localhost:8000/api/auth/token/', {
+                    email: 'info@connectize.co',
+                    password: 'Access2024'
+                });
+                
+                const token = authResponse.data.access;
+                resultsDiv.innerHTML += '<p>✅ Auth token received</p>';
+                
+                // Set up axios with token
+                const api = axios.create({
+                    baseURL: 'http://localhost:8000',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                // Test logistics endpoints
+                resultsDiv.innerHTML += '<p>Testing logistics/requests...</p>';
+                const requestsResponse = await api.get('/api/v1/logistics/requests/');
+                resultsDiv.innerHTML += `<p>✅ Requests: ${requestsResponse.data.count} items</p>`;
+                
+                resultsDiv.innerHTML += '<p>Testing logistics/shipments...</p>';
+                const shipmentsResponse = await api.get('/api/v1/logistics/shipments/');
+                resultsDiv.innerHTML += `<p>✅ Shipments: ${shipmentsResponse.data.count} items</p>`;
+                
+                resultsDiv.innerHTML += '<p>Testing logistics/inventory-items...</p>';
+                const inventoryResponse = await api.get('/api/v1/logistics/inventory-items/');
+                resultsDiv.innerHTML += `<p>✅ Inventory: ${inventoryResponse.data.count} items</p>`;
+                
+                resultsDiv.innerHTML += '<h3>✅ All API endpoints working!</h3>';
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `<p style="color: red;">❌ Error: ${error.message}</p>`;
+                if (error.response) {
+                    resultsDiv.innerHTML += `<p style="color: red;">Status: ${error.response.status}</p>`;
+                    resultsDiv.innerHTML += `<p style="color: red;">Data: ${JSON.stringify(error.response.data)}</p>`;
+                }
+            }
+        }
+        
+        // Run test on page load
+        testLogisticsAPI();
+    </script>
+</body>
+</html>

@@ -39,19 +39,13 @@ export function goToLogin() {
     ? "/"
     : pathname;
 
-  const url =
-    nextPath && nextPath !== "/" ? `/login?next=${nextPath}` : "/login";
+  const url = nextPath && nextPath !== "/" ? `/login?next=${nextPath}` : "/login";
   window.location.replace(url);
 }
 
-// Configure Axios Defaults (single host)
-export const baseURL = (
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV
-    ? "https://about.connectize.co"
-    : // ? "http://localhost:8000"
-      "https://about.connectize.co")
-).replace(/\/$/, "");
+// Configure Axios Defaults
+export const baseURL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.DEV ? "http://localhost:8000" : "https://about.connectize.co");
 
 axios.defaults.withCredentials = true;
 
@@ -76,16 +70,13 @@ export async function refreshToken() {
   const session = getSession();
 
   if (!session?.tokens?.refresh) {
-    // Normal case for unauthenticated users - don't warn
+    console.warn('No refresh token available');
     return undefined;
   }
 
   // Check if refresh token looks valid (basic validation)
-  if (
-    typeof session.tokens.refresh !== "string" ||
-    session.tokens.refresh.length < 10
-  ) {
-    console.warn("Invalid refresh token format");
+  if (typeof session.tokens.refresh !== 'string' || session.tokens.refresh.length < 10) {
+    console.warn('Invalid refresh token format');
     removeSession();
     return undefined;
   }
@@ -98,13 +89,14 @@ export async function refreshToken() {
 
   try {
     refreshPromise = (async () => {
+      console.log('Attempting token refresh...');
       const { data } = await axios.post(`${baseURL}/api/auth/refresh-token/`, {
         refresh: session.tokens.refresh,
       });
 
       // Validate response
       if (!data?.access || !data?.refresh) {
-        throw new Error("Invalid refresh response format");
+        throw new Error('Invalid refresh response format');
       }
 
       const newTokens = {
@@ -120,25 +112,26 @@ export async function refreshToken() {
       accessToken = newTokens.access;
       accessTokenExpiry = null; // No expiration - tokens are long-lived
 
+      console.log('Token refresh successful');
       return "Bearer " + newTokens.access;
     })();
 
     const authorizationHeader = await refreshPromise;
     return { Authorization: authorizationHeader };
   } catch (error) {
-    console.error("Token refresh failed:", error);
-
+    console.error('Token refresh failed:', error);
+    
     // If refresh fails, clear session and redirect to login
     removeSession();
     accessToken = null;
     accessTokenExpiry = null;
-
+    
     // Only redirect if we're not already on an auth page
     const currentPath = window.location.pathname;
-    if (!currentPath.includes("/login") && !currentPath.includes("/signup")) {
+    if (!currentPath.includes('/login') && !currentPath.includes('/signup')) {
       goToLogin();
     }
-
+    
     return undefined;
   } finally {
     isRefreshing = false;
@@ -149,44 +142,62 @@ export async function refreshToken() {
 let hasNotifiedOffline = false;
 
 export async function getAuthorizationHeader() {
-  // Use cached token (no expiration check - tokens are long-lived)
-  if (accessToken) {
+  console.log('🔑 getAuthorizationHeader: Starting auth check...');
+  
+  if (accessToken && Date.now() < accessTokenExpiry) {
+    console.log('✅ Using cached access token');
     return { Authorization: "Bearer " + accessToken };
   }
 
   // Try to use access token from session first (avoids unnecessary refresh right after login)
   try {
+    console.log('📦 Checking session for tokens...');
     const session = getSession();
-
+    console.log('🔍 Session result:', session ? 'Found session data' : 'No session data');
+    
     const tokenFromSession = session?.tokens?.access;
-    if (tokenFromSession) {
+    if (tokenFromSession && tokenFromSession !== accessToken) {
+      console.log('✅ Found fresh token from session');
       // Fresh token from session, update cache
       accessToken = tokenFromSession;
-      // No expiration - tokens are managed by the backend
-      accessTokenExpiry = null;
+      // Set a conservative TTL; backend JWT is long-lived, but we'll refresh periodically
+      accessTokenExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
       return { Authorization: "Bearer " + accessToken };
-    }
-    
-    // Try refresh if we have a refresh token
-    if (session?.tokens?.refresh) {
-      const refreshedToken = await refreshToken();
-      if (refreshedToken?.Authorization) {
-        return refreshedToken;
-      }
+    } else if (tokenFromSession) {
+      console.log('⚠️ Session token same as cached token');
+    } else {
+      console.log('❌ No access token in session');
     }
   } catch (e) {
-    // Ignore and fallback
-    console.debug("Session token retrieval failed:", e);
+    // Ignore and fallback to refresh flow
+    console.warn('Session token retrieval failed:', e);
   }
 
-  // No valid auth header available - this is normal for unauthenticated users
+  // Try refresh if we have a refresh token
+  console.log('🔄 Checking for refresh token...');
+  const session = getSession();
+  if (session?.tokens?.refresh) {
+    console.log('🔄 Attempting token refresh...');
+    const refreshedToken = await refreshToken();
+    if (refreshedToken?.Authorization) {
+      console.log('✅ Token refresh successful');
+      return refreshedToken;
+    } else {
+      console.log('❌ Token refresh failed');
+    }
+  } else {
+    console.log('❌ No refresh token available');
+  }
+
+  // No valid auth header available
+  console.warn('❌ No valid authorization available');
   return null;
 }
 
 // Build absolute URL with proper path normalization
 const buildUrl = (baseUrl, path) => {
-  const cleanBase = baseUrl.replace(/\/+$/, ""); // Remove trailing slashes
-  const cleanPath = path.replace(/^\/+/, ""); // Remove leading slashes
+  const cleanBase = baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
+  const cleanPath = path.replace(/^\/+/, ''); // Remove leading slashes
   return `${cleanBase}/${cleanPath}`;
 };
 
@@ -209,32 +220,23 @@ export async function makeApiRequest({
   try {
     const authorization = await getAuthorizationHeader();
 
-    if (
-      (!authorization || !authorization.Authorization) &&
-      !type.startsWith("auth") &&
-      type !== "public"
-    ) {
-      console.error(
-        "Authentication failed for protected route:",
-        url,
-        "No valid authorization token available"
-      );
+    if ((!authorization || !authorization.Authorization) && !type.startsWith("auth") && type !== "public") {
+      console.error('Authentication failed for protected route:', url, 'No valid authorization token available');
       goToLogin();
-      throw new Error(
-        `Authentication required for ${url} - redirecting to login`
-      );
+      throw new Error(`Authentication required for ${url} - redirecting to login`);
     }
 
     // Build headers, omitting Content-Type for FormData so axios sets boundary
     const headers = { ...(authorization || {}) };
-    const isFormData =
-      typeof FormData !== "undefined" && data instanceof FormData;
+    const isFormData = (typeof FormData !== 'undefined') && data instanceof FormData;
     if (!isFormData && contentType) {
       headers["Content-Type"] = contentType;
     }
 
+    console.log('Making API request:', { url: buildUrl(baseURL, url), method });
+
     const response = await axios({
-      url: requestUrl,
+      url: buildUrl(baseURL, url),
       method,
       data,
       headers,
@@ -257,25 +259,18 @@ export async function makeApiRequest({
         toast.success(responseMessage);
       }
       // Only log successful responses for debugging if needed
-      if (method !== "GET") {
-        console.log("API request successful:", {
-          url,
-          status: response.status,
-          hasData: !!response.data,
-        });
+      if (method !== 'GET') {
+        console.log('API request successful:', { url, status: response.status });
       }
       return response.data;
     }
   } catch (error) {
+    console.error('API request failed:', { url, error: error.message, status: error.response?.status });
+    
     if (!navigator.onLine && !hasNotifiedOffline) {
       hasNotifiedOffline = true;
-
-      //
       toast.error("Network error. Please check your internet connection.");
-
-      // this set timeout helps to allow network error to still show up once in a while. Instead of showing once and never again.
       setTimeout(() => (hasNotifiedOffline = false), 30000);
-      console.error("Network error:", error);
       return;
     }
 
@@ -304,11 +299,12 @@ export async function makeApiRequest({
     if (errorCode === "token_not_valid") {
       // Retry after refreshing token
       try {
+        console.log('Token invalid, attempting refresh...');
         const authorization = await refreshToken();
         if (authorization) {
           // Retry the original request
           const response = await axios({
-            url: requestUrl,
+            url: buildUrl(baseURL, url),
             method,
             data,
             headers: {
@@ -336,7 +332,7 @@ export async function makeApiRequest({
     if (errorMsg && method?.toLowerCase() !== "get") {
       toast.error(errorMsg);
     }
-
+    
     // Return null for failed requests to prevent infinite loading
     return null;
   }
@@ -346,7 +342,7 @@ function extractErrorMessage(errorResponse) {
   if (!errorResponse) return null;
   const apiErrorResponse = errorResponse?.errors?.[0] ?? errorResponse;
 
-  const direct =
+  const direct = (
     apiErrorResponse?.message ||
     apiErrorResponse?.__all__?.[0] ||
     apiErrorResponse?.username?.[0] ||
@@ -358,16 +354,17 @@ function extractErrorMessage(errorResponse) {
     apiErrorResponse?.detail ||
     errorResponse?.message ||
     errorResponse?.detail ||
-    null;
+    null
+  );
   if (direct) return direct;
 
   // Fallback: pick the first field error from object responses
-  if (typeof apiErrorResponse === "object") {
+  if (typeof apiErrorResponse === 'object') {
     const keys = Object.keys(apiErrorResponse);
     for (const k of keys) {
       const v = apiErrorResponse[k];
       if (Array.isArray(v) && v.length) return String(v[0]);
-      if (typeof v === "string") return v;
+      if (typeof v === 'string') return v;
     }
   }
   return null;

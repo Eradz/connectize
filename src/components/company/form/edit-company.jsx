@@ -7,7 +7,6 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { editCompanyInformation } from "../../../api-services/companies";
-// import cities from "../../../lib/data/cities.json";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
 import { useQuery } from "@tanstack/react-query";
@@ -80,39 +79,8 @@ export default function EditCompanyForm({ company }) {
     countries.find((country) => country.name === formik.values["country"])
       ?.states || [];
 
-  const countryName = formik.values["country"];
-  const stateName = formik.values["state"];
-
-  const {
-    data: citiesForState,
-    isLoading: isLoadingGetCitiesForState,
-    isFetching,
-  } = useQuery({
-    queryKey: ["cities", { countryName, stateName }],
-    initialData: [],
-    queryFn: async () => {
-      if (!countryName || !stateName) return [];
-      try {
-        const cities = await makeApiRequest({
-          url: "api/cities/",
-          method: "GET",
-          params: { country: countryName, state: stateName },
-        });
-
-        return cities?.map((city) => city.name) || [];
-      } catch (error) {
-        toast.error(
-          "Could not get list of cities for " + stateName + " " + countryName
-        );
-        throw error;
-      }
-    },
-  });
-
-  // const citiesForState =
-  //   cities
-  //     .filter((city) => city.state_name === formik.values["state"])
-  //     .map((city) => city.name) || [];
+  // Removed heavy cities.json dependency to avoid large JSON loading issues in the browser.
+  // Use a simple free-text input for city to keep the form responsive and reliable.
 
   const companyFields = [
     {
@@ -164,13 +132,9 @@ export default function EditCompanyForm({ company }) {
         },
         {
           name: "city",
-          type: "select",
+          type: "text",
           label: "Region/City",
-          placeholder: "Select city",
-          disabled: isLoadingGetCitiesForState || isFetching,
-          options: citiesForState,
-          isLoading: isLoadingGetCitiesForState || isFetching,
-          loadingText: "Loading cites...",
+          placeholder: "Enter your city or region",
         },
         {
           name: "organization_type",

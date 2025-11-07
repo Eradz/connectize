@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Auth State Check</title>
+</head>
+<body>
+    <h1>Frontend Authentication State</h1>
+    <div id="auth-status"></div>
+    <button onclick="checkAuthState()">Check Auth State</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <button onclick="testLogin()">Test Login</button>
+    
+    <script>
+        function checkAuthState() {
+            const statusDiv = document.getElementById('auth-status');
+            statusDiv.innerHTML = '<h3>Checking authentication state...</h3>';
+            
+            // Check localStorage
+            const localKeys = Object.keys(localStorage);
+            statusDiv.innerHTML += '<h4>LocalStorage:</h4>';
+            localKeys.forEach(key => {
+                const value = localStorage.getItem(key);
+                statusDiv.innerHTML += `<p><strong>${key}:</strong> ${value?.substring(0, 100)}${value?.length > 100 ? '...' : ''}</p>`;
+            });
+            
+            // Check sessionStorage
+            const sessionKeys = Object.keys(sessionStorage);
+            statusDiv.innerHTML += '<h4>SessionStorage:</h4>';
+            sessionKeys.forEach(key => {
+                const value = sessionStorage.getItem(key);
+                statusDiv.innerHTML += `<p><strong>${key}:</strong> ${value?.substring(0, 100)}${value?.length > 100 ? '...' : ''}</p>`;
+            });
+            
+            // Check cookies
+            statusDiv.innerHTML += '<h4>Cookies:</h4>';
+            statusDiv.innerHTML += `<p>${document.cookie || 'No cookies found'}</p>`;
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            document.getElementById('auth-status').innerHTML = '<p style="color: green;">✅ All storage cleared</p>';
+        }
+        
+        async function testLogin() {
+            const statusDiv = document.getElementById('auth-status');
+            try {
+                statusDiv.innerHTML = '<p>Testing login...</p>';
+                
+                const response = await fetch('http://localhost:8000/api/auth/token/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'info@connectize.co',
+                        password: 'Access2024'
+                    })
+                });
+                
+                const data = await response.json();
+                statusDiv.innerHTML += '<p style="color: green;">✅ Login successful</p>';
+                statusDiv.innerHTML += `<p>Access Token: ${data.access?.substring(0, 50)}...</p>`;
+                statusDiv.innerHTML += `<p>Refresh Token: ${data.refresh?.substring(0, 50)}...</p>`;
+                
+                // Try to save to localStorage like the app might
+                localStorage.setItem('connectize_session', JSON.stringify({
+                    tokens: data,
+                    user: { email: 'info@connectize.co' }
+                }));
+                
+                statusDiv.innerHTML += '<p style="color: blue;">💾 Tokens saved to localStorage</p>';
+                
+            } catch (error) {
+                statusDiv.innerHTML += `<p style="color: red;">❌ Login failed: ${error.message}</p>`;
+            }
+        }
+        
+        // Auto-check on load
+        window.onload = checkAuthState;
+    </script>
+</body>
+</html>

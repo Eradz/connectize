@@ -1,6 +1,6 @@
 import { redirect } from "react-router";
 import { toast } from "sonner";
-import { makeApiRequest } from "../lib/helpers";
+import { makeApiRequest } from "../lib/helpers/index";
 import { getSession } from "../lib/session";
 import { capitalizeFirst } from "../lib/utils";
 import { getCompanyByIdOrEmail } from "./companies";
@@ -171,20 +171,25 @@ export const bookmarkProduct = async (productId, data, hasBookmarked) => {
   });
 };
 
-/**
- * Get bookmarked products for the current user with pagination
- * @param {Object} params - Query parameters including page, page_size
- * @param {boolean} returnFullRes - Whether to return full response with pagination
- * @returns {Promise} - Bookmarked products
- */
-export const getBookmarkedProducts = async (params = {}, returnFullRes = false) => {
-  const { results: products, next } = await makeApiRequest({
-    url: `api/products/bookmarked/`,
-    method: "GET",
-    params,
+export const deleteProduct = async (id) => {
+  return await makeApiRequest({
+    url: `api/products/${id}/`,
+    method: "DELETE",
   });
+};
 
-  if (returnFullRes) return { data: products, next };
+export const updateProduct = async (id, data) => {
+  return await makeApiRequest({
+    url: `api/products/${id}/`,
+    method: "PATCH",
+    data,
+  });
+};
 
-  return products || [];
+export const bulkDeleteProducts = async (ids) => {
+  return await makeApiRequest({
+    url: `api/products/bulk-delete/`,
+    method: "POST",
+    data: { ids },
+  });
 };
