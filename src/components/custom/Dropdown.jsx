@@ -68,6 +68,7 @@ export default function Dropdown({
     onChange,
     disabled = false,
     className = "",
+    width = "",
 }) {
     const rootRef = useRef(null);
     const listRef = useRef(null);
@@ -188,6 +189,7 @@ export default function Dropdown({
                 style={{
                     ...styles.toggle,
                     opacity: disabled ? 0.6 : 1,
+                    width:  width ? width : "100%",
                 }}
                 className="dropdown-toggle"
             >

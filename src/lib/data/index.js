@@ -1,4 +1,3 @@
-import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import {
   CompanyIcon,
   HomeIcon,
@@ -9,6 +8,9 @@ import {
   UserGroup,
 } from "../../icon";
 import { webRoutes } from "../webRoutes";
+import BusinessHub from "../../icon/BusinessHub";
+import UserIcon from "../../icon/UserIcon";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 export const months = [
   "January",
@@ -37,9 +39,9 @@ export const days = [
 export const feedNavItems = [
   { name: "Home", to: webRoutes.feed, icon: HomeIcon, smallNavigation: true },
   {
-    name: "Messages",
-    to: webRoutes.messages,
-    icon: Message,
+    name: "Profile",
+    to: webRoutes.userProfile,
+    icon: UserCircleIcon,
     smallNavigation: true,
   },
   {
@@ -49,22 +51,16 @@ export const feedNavItems = [
     smallNavigation: true,
   },
   {
+    name: "Messages",
+    to: webRoutes.messages,
+    icon: Message,
+    smallNavigation: true,
+  },
+  {
     name: "Companies",
     to: webRoutes.companies,
     icon: CompanyIcon,
     smallNavigation: true,
-  },
-  {
-    name: "Market",
-    to: webRoutes.market,
-    icon: StoreIcon,
-    smallNavigation: true,
-  },
-  {
-    name: "Bookmarks",
-    to: webRoutes.bookmarks,
-    icon: BookmarkFilledIcon,
-    smallNavigation: false,
   },
   {
     name: "Settings",
@@ -73,9 +69,27 @@ export const feedNavItems = [
     smallNavigation: false,
   },
   {
-    name: "Support",
-    to: webRoutes.support,
-    icon: Support,
+    name: "Market",
+    to: webRoutes.market,
+    icon: StoreIcon,
+    smallNavigation: true,
+  },
+  // {
+  //   name: "Bookmarks",
+  //   to: webRoutes.bookmarks,
+  //   icon: BookmarkFilledIcon,
+  //   smallNavigation: false,
+  // },
+  // {
+  //   name: "Support",
+  //   to: webRoutes.support,
+  //   icon: Support,
+  //   smallNavigation: false,
+  // },
+  {
+    name: "Business Hub",
+    to: webRoutes.businessHub,
+    icon: BusinessHub,
     smallNavigation: false,
   },
   // { name: "Analysis", to: webRoutes.analysis, icon: ChartBar, smallNavigation: false },
