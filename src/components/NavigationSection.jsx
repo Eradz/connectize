@@ -10,6 +10,7 @@ import { getSession } from "../lib/session";
 import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
+import BusinessHubDropDown from "./custom/BusinessHubNavDropDown";
 
 export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   const { pathname } = useLocation();
@@ -34,7 +35,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
     <ul
       className={clsx("xs:text-sm", {
         "flex items-center justify-between": hasHeader,
-        "bg-background rounded p-2 mb-6 space-y-1":
+        "bg-white rounded p-2 mb-6 space-y-1":
           !hasHeader && !isSmallNavigation,
       })}
     >
@@ -73,7 +74,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             </Link>
           </li>
         );
-      })}
+      })}       <BusinessHubDropDown />
       {currentUser && session && !isSmallNavigation && (
         <>
           <ReusableModal

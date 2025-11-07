@@ -1,6 +1,7 @@
 const webRoutes = {
   acceptRepresentation: "/co/representatives/accept",
   address: "/address",
+  aiServices: "/ai-services",
   analysis: "/analysis",
   assignRepresentative: "/co/representatives/manage",
   bio: "/bio",
@@ -17,9 +18,12 @@ const webRoutes = {
   contact: "/contact",
   coNotifications: "/co/notifications",
   createCompany: "/create-company",
+  dashboard: "/dashboard",
+  dealRoom: "/deal-room",
   feed: "/",
   home: "/update-profile",
   login: "/login",
+  logisticsHub: "/logistics-hub",
   market: "/market",
   messages: "/messages",
   messagesRoom: "/messages/:room_name",
@@ -42,10 +46,10 @@ const webRoutes = {
   singlePost: "/posts/:id",
   success: "/success",
   support:"/support",
-  dealRoom: "/deal-room",
   termsAndConditions: "/terms-and-conditions",
   userProfile: "/co/:userId",
   verifyAccount: "/verify-account",
+  workforce: "/workforce",
 };
 
 export { webRoutes };

@@ -8,7 +8,6 @@ import {
   UserGroup,
 } from "../../icon";
 import { webRoutes } from "../webRoutes";
-import BusinessHub from "../../icon/BusinessHub";
 import UserIcon from "../../icon/UserIcon";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 
@@ -86,12 +85,6 @@ export const feedNavItems = [
   //   icon: Support,
   //   smallNavigation: false,
   // },
-  {
-    name: "Business Hub",
-    to: webRoutes.businessHub,
-    icon: BusinessHub,
-    smallNavigation: false,
-  },
   // { name: "Analysis", to: webRoutes.analysis, icon: ChartBar, smallNavigation: false },
 ];
 

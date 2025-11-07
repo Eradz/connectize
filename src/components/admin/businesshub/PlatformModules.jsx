@@ -1,4 +1,4 @@
-import DealIcon from "../../../icon/deal";
+import {DealIcon} from "../../../icon/deal";
 import StarIcon from "../../../icon/StarIcon";
 import CardIcon from "../../../icon/CardIcon";
 import LogisticIcon from "../../../icon/LogisticIcon";
