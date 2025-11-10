@@ -1,4 +1,4 @@
-import {DealIcon} from "../../../icon/deal";
+import DealIcon from "../../../icon/deal";
 import CardIcon from "../../../icon/CardIcon";
 import BriefCaseIcon from "../../../icon/briefCaseIcon"
 import DollarSignIcon from "../../../icon/dollarsign"
