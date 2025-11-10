@@ -1,0 +1,24 @@
+{
+  "default_branch": "eradz",
+  "branches": [
+    "BusinessHub_Merged",
+    "Eradz",
+    "chidi",
+    "eradz",
+    "origin"
+  ],
+  "parent": {
+    "BusinessHub_Merged": "eradz",
+    "Eradz": "eradz",
+    "chidi": "eradz",
+    "eradz": null,
+    "origin": "eradz"
+  },
+  "order": [
+    "eradz",
+    "BusinessHub_Merged",
+    "Eradz",
+    "chidi",
+    "origin"
+  ]
+}
