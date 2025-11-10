@@ -314,8 +314,8 @@ type RouteFiles = {
     id: "../pages/support/Support";
     page: "/support";
   };
-  "../pages/dealRoom/dealRoom.jsx": {
-    id: "../pages/dealRoom/dealRoom";
+  "../components/dealRoom/DealRooms.jsx": {
+    id: "../components/dealRoom/DealRooms";
     page: "/deal-room";
   };
   "../pages/authentication/AuthLayout.jsx": {
@@ -404,7 +404,7 @@ type RouteModules = {
   "../pages/settings/index": typeof import("./src/app/../pages/settings/index.jsx");
   "../pages/feed/userProfile": typeof import("./src/app/../pages/feed/userProfile.jsx");
   "../pages/support/Support": typeof import("./src/app/../pages/support/Support.jsx");
-  "../pages/dealRoom/dealRoom": typeof import("./src/app/../pages/dealRoom/dealRoom.jsx");
+  "../components/dealRoom/DealRooms": typeof import("./src/app/../components/dealRoom/DealRooms.jsx");
   "../pages/authentication/AuthLayout": typeof import("./src/app/../pages/authentication/AuthLayout.jsx");
   "../pages/authentication/signup": typeof import("./src/app/../pages/authentication/signup.jsx");
   "../pages/authentication/login": typeof import("./src/app/../pages/authentication/login.jsx");

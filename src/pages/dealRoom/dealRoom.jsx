@@ -49,12 +49,12 @@ const dealRoom = () => {
                     }
                 <div className='flex justify-between items-center bg-white px-3 w-full'>
                     <div className='flex items-center gap-1 cursor-pointer'>
-                        <GridIcon />
+                        <GridIcon fill={viewMode === 'grid' ? "#E5A800" : "#374957"} />
                         <span>Grid</span>
                     </div>
                     <span className='w-[1px] h-[23px] bg-[#00000033]'></span>
                     <div className='flex items-center gap-1 cursor-pointer'>
-                        <ListIcon />
+                        <ListIcon fill={viewMode === 'list' ? "#E5A800" : "#374957"} />
                         <span>List</span>
                     </div>
                 </div>
