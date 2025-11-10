@@ -18,7 +18,7 @@ const dealRoom = () => {
                 <h1 className='text-[40px]'>Deal Room</h1>
                 <p className='text-[24px]'>Secure collaboration space for oil and gas deals</p>
                 </div>
-                <div className='bg-[#FFE7A4] py-[10px] px-3 text-[20px] rounded-[10px] h-[50px]'>
+                <div className='bg-pale_yellow py-[10px] px-3 text-[20px] rounded-[10px] h-[50px]'>
                     + New Deal Room
                 </div>
             </div>

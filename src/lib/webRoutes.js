@@ -20,6 +20,7 @@ const webRoutes = {
   createCompany: "/create-company",
   dashboard: "/dashboard",
   dealRoom: "/deal-room",
+  dealRoomCreate: "/deals/create",
   feed: "/",
   home: "/update-profile",
   login: "/login",

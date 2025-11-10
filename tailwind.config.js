@@ -28,6 +28,8 @@ module.exports = {
         gold: "#F1C644", // f1c644
         custom_yellow: "#FFFAB7",
         services_yellow: "#f0d77f",
+        pale_yellow: "#FFE7A4",
+        light_yellow: "#FFEF9A",
         custom_grey: " #828282",
         light_grey: " #e5e5e5",
         mid_grey: "#373737",

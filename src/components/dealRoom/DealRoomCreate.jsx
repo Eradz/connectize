@@ -1,15 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { 
-  ArrowLeft, 
-  Upload, 
-  Users, 
-  Calendar, 
-  DollarSign, 
+  ArrowLeft,  
   FileText, 
   Lock, 
-  Eye, 
-  Globe,
   AlertCircle,
   CheckCircle,
   Plus,
@@ -200,19 +194,19 @@ const DealRoomCreate = () => {
 
   const StepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center">
         {[1, 2, 3, 4].map((step) => (
           <React.Fragment key={step}>
             <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-              step < currentStep ? 'bg-blue-600 border-blue-600 text-white' :
-              step === currentStep ? 'border-blue-600 text-blue-600' :
-              'border-gray-300 text-gray-300'
+              step < currentStep ? 'bg-pale_yellow border-pale_yellow text-white' :
+              step === currentStep ? 'border-pale_yellow text-black bg-pale_yellow' :
+              'border-gray-300 text-black'
             }`}>
               {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
             </div>
             {step < 4 && (
-              <div className={`w-12 h-0.5 ${
-                step < currentStep ? 'bg-blue-600' : 'bg-gray-300'
+              <div className={`w-20 h-0.5 ${
+                step < currentStep ? 'bg-pale_yellow' : 'bg-gray-300'
               }`} />
             )}
           </React.Fragment>
@@ -229,9 +223,10 @@ const DealRoomCreate = () => {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
               
-              <div className="space-y-4">
+              <div className="flex gap-5">
+                <div className='flex flex-col gap-5 w-[40%]'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-[16px] font-medium text-gray-700 mb-2">
                     Deal Room Title *
                   </label>
                   <input
@@ -243,21 +238,34 @@ const DealRoomCreate = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Provide a detailed description of the deal..."
-                  />
-                </div>
+                    <div>
+                      <label className="block text-[16px] font-medium text-gray-700 mb-2">
+                        Description *
+                      </label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => handleInputChange('description', e.target.value)}
+                        rows={4}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Provide a detailed description of the deal..."
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div>
+                      <label className="block text-[16px] font-medium text-gray-700 mb-2">
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => handleInputChange('location', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., North Sea, Gulf of Mexico, West Africa"
+                      />
+                    </div>
+                </div>
+                <div className='w-[60%]'>
+                  <label className="block text-[16px] font-medium text-gray-700 mb-2">
                     Deal Type *
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -265,9 +273,9 @@ const DealRoomCreate = () => {
                       <div
                         key={type.value}
                         onClick={() => handleInputChange('deal_type', type.value)}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                        className={`px-2 py-4 border-2 rounded-lg cursor-pointer transition-colors ${
                           formData.deal_type === type.value
-                            ? 'border-blue-600 bg-blue-50'
+                            ? 'border-pale_yellow  bg-gradient-to-br to-[#FFC000] from-[#FF8400] '
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
@@ -277,19 +285,8 @@ const DealRoomCreate = () => {
                     ))}
                   </div>
                 </div>
+                
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => handleInputChange('location', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., North Sea, Gulf of Mexico, West Africa"
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -362,7 +359,7 @@ const DealRoomCreate = () => {
                     <button
                       type="button"
                       onClick={addTag}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-blue-700"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -377,7 +374,7 @@ const DealRoomCreate = () => {
                         <button
                           type="button"
                           onClick={() => removeTag(tag)}
-                          className="ml-2 hover:text-blue-600"
+                          className="ml-2 hover:text-pale_yellow"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -409,7 +406,7 @@ const DealRoomCreate = () => {
                           type="checkbox"
                           checked={formData.is_confidential}
                           onChange={(e) => handleInputChange('is_confidential', e.target.checked)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-pale_yellow focus:ring-blue-500"
                         />
                       </label>
                     </div>
@@ -429,7 +426,7 @@ const DealRoomCreate = () => {
                           type="checkbox"
                           checked={formData.requires_nda}
                           onChange={(e) => handleInputChange('requires_nda', e.target.checked)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-pale_yellow focus:ring-blue-500"
                         />
                       </label>
                     </div>
@@ -462,7 +459,7 @@ const DealRoomCreate = () => {
                       <button
                         type="button"
                         onClick={addParticipant}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-blue-700"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -580,7 +577,7 @@ const DealRoomCreate = () => {
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 text-pale_yellow mt-0.5" />
                   <div>
                     <h4 className="text-sm font-medium text-blue-900">Next Steps</h4>
                     <p className="text-sm text-blue-700">
@@ -600,14 +597,14 @@ const DealRoomCreate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="">
+        <div className="max-w-4xl ">
           <div className="flex items-center py-6">
             <button
               onClick={() => navigate(webRoutes.dealRooms)}
-              className="mr-4 p-2 hover:bg-gray-100 rounded-lg"
+              className=" bg-white mr-4 p-2 hover:bg-gray-100 rounded-lg"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
@@ -619,17 +616,17 @@ const DealRoomCreate = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl">
         <div className="bg-white rounded-xl shadow-sm border p-8">
           <StepIndicator />
           <StepContent />
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between pt-8 border-t border-gray-200">
+          <div className="flex justify-between pt-8">
             <button
               onClick={prevStep}
               disabled={currentStep === 1}
-              className={`px-6 py-2 border rounded-lg font-medium ${
+              className={`px-6 py-2 bg-light_yellow border rounded-lg font-medium ${
                 currentStep === 1
                   ? 'border-gray-200 text-gray-400 cursor-not-allowed'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-50'
@@ -649,7 +646,7 @@ const DealRoomCreate = () => {
               {currentStep < 4 ? (
                 <button
                   onClick={nextStep}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+                  className="px-6 py-2 bg-gold text-white rounded-lg font-medium hover:bg-services_yellow"
                 >
                   Next
                 </button>
@@ -657,7 +654,7 @@ const DealRoomCreate = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  className="px-6 py-2 bg-gold text-white rounded-lg font-medium hover:bg-pale_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   {loading ? (
                     <>
@@ -676,5 +673,6 @@ const DealRoomCreate = () => {
     </div>
   );
 };
+
 
 export default DealRoomCreate;

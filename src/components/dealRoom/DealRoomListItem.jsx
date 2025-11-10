@@ -1,0 +1,88 @@
+  import { 
+  FileText, 
+  Users,  
+  MapPin,
+  Lock,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Download,
+  Share2
+} from 'lucide-react';
+  
+ const formatCompactNumber = (num) => {
+    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+    return num.toString();
+  };
+
+    const getDealTypeIcon = (type) => {
+    switch (type) {
+      case 'acquisition': return <TrendingUp className="w-4 h-4" />;
+      case 'joint_venture': return <Users className="w-4 h-4" />;
+      case 'service_contract': return <FileText className="w-4 h-4" />;
+      case 'equipment_lease': return <AlertCircle className="w-4 h-4" />;
+      case 'exploration_rights': return <MapPin className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
+    }
+  };
+export const DealRoomListItem = ({ deal }) => (
+    <div className="bg-white border rounded-lg p-6 hover:shadow-sm transition-shadow">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4 flex-1">
+          <div className="bg-blue-100 p-2 rounded-lg">
+            {getDealTypeIcon(deal.deal_type)}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-3">
+              <h3 className="font-semibold text-gray-900 text-lg">{deal.title}</h3>
+              {deal.is_confidential && <Lock className="w-4 h-4 text-orange-500" />}
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(deal.status)}`}>
+                {deal.status}
+              </span>
+            </div>
+            <p className="text-gray-600 text-sm mt-1">{deal.description}</p>
+            <div className="flex items-center space-x-6 mt-2 text-sm text-gray-500">
+              <span className="capitalize">{deal.deal_type?.replace('_', ' ')}</span>
+              <span>{formatCompactNumber(deal.estimated_value)}</span>
+              <span>Due: {new Date(deal.target_close_date).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Users className="w-4 h-4 mr-1" />
+              {deal.participants_count || 0}
+            </div>
+            <div className="flex items-center">
+              <FileText className="w-4 h-4 mr-1" />
+              {deal.documents_count || 0}
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-1" />
+              {deal.milestones_count || 0}
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button className="p-2 hover:bg-gray-100 rounded-lg">
+              <Share2 className="w-4 h-4 text-gray-400" />
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-lg">
+              <Download className="w-4 h-4 text-gray-400" />
+            </button>
+            <Link
+              to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
+              className="bg-pale_yellow  text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            >
+              View Details
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
