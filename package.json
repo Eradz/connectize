@@ -36,7 +36,6 @@
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
-    "date-fns": "^4.1.0",
     "dompurify": "^3.2.6",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
@@ -78,11 +77,11 @@
     "zustand": "^5.0.7"
   },
   "scripts": {
-    "dev": "react-router dev",
+    "dev": "node api.js && react-router dev",
     "dev-local": "vite",
-    "start": "vite preview",
+    "start": "node api.js && vite preview",
     "predeploy": "npm run build",
-    "build": "react-router build",
+    "build": "node api.js && react-router build",
     "ios:build": "bash ./scripts/build-ios.sh",
     "ios:build:release": "bash ./scripts/build-ios.sh --release",
     "ios:build:skip-sync": "bash ./scripts/build-ios.sh --no-sync",
