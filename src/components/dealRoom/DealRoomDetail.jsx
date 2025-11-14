@@ -10,11 +10,11 @@ import { baseURL, getAuthorizationHeader, makeApiRequest } from "../../lib/helpe
 import { dealDocumentService, dealValuationService } from "../../api-services/oilgas";
 import axios from "axios";
 import { toast as notify } from "sonner";
-import ActivityTimeline from '../../components/deals/ActivityTimeline';
+import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3 } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon } from "lucide-react";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -373,36 +373,17 @@ export default function DealRoomDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* Breadcrumbs */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-2">
-              <li><Link to={webRoutes.platformDashboard} className="text-gray-500 hover:text-gray-700">Dashboard</Link></li>
-              <li><span className="text-gray-400">/</span></li>
-              <li><Link to={webRoutes.dealRooms} className="text-gray-500 hover:text-gray-700">Deal Rooms</Link></li>
-              <li><span className="text-gray-400">/</span></li>
-              <li><span className="text-gray-900">Deal #{id}</span></li>
-              <li><span className="text-gray-400">/</span></li>
-              <li><span className="text-blue-600 capitalize">{active}</span></li>
-            </ol>
-          </nav>
-        </div>
-      </div>
-
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="">
+        <div className="max-w-7xl mx-auto  py-6">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="w-[70%]">
+              <div className="flex items-center gap-4">
               <h1 className="text-2xl font-bold text-gray-900">
                 {deal?.title || `Deal Room #${id.slice(0, 8)}...`}
               </h1>
-              <div className="flex items-center space-x-4 mt-2">
-                <p className="text-gray-600">
-                  {deal?.description ? deal.description.slice(0, 100) + (deal.description.length > 100 ? '...' : '') : 'Manage documents, participants, milestones, and more.'}
-                </p>
-                {deal?.status && (
+              {deal?.status && (
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                     deal.status === 'active' ? 'bg-green-100 text-green-800' :
                     deal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -414,10 +395,18 @@ export default function DealRoomDetail() {
                   </span>
                 )}
               </div>
+              <div className="flex items-center space-x-4 mt-2">
+                <p className="text-gray-600">
+                  {deal?.description ? deal.description.slice(0, 100) + (deal.description.length > 100 ? '...' : '') : 'Manage documents, participants, milestones, and more.'}
+                </p>
+                
+              </div>
             </div>
             <div className="flex space-x-2">
-              <Link to={webRoutes.dealRooms} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">Back to Deals</Link>
-              <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Edit Deal Room</Link>
+              <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-pale_yellow">
+              <PencilIcon className= "w-4 h-4"/>
+              Edit Deal Room
+              </Link>
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}
@@ -438,37 +427,14 @@ export default function DealRoomDetail() {
               <BarChart3 className="h-4 w-4 mr-2" />
               Run Valuation
             </Link>
-            
-            {/* Quick Stats */}
-            <div className="ml-auto flex items-center space-x-4 text-sm text-gray-600">
-              {deal?.estimated_value && (
-                <div className="flex items-center">
-                  <span className="font-medium">Value:</span>
-                  <span className="ml-1 text-green-600 font-semibold">
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: deal?.currency || 'USD',
-                      notation: 'compact',
-                      maximumFractionDigits: 1,
-                    }).format(parseFloat(deal.estimated_value))}
-                  </span>
-                </div>
-              )}
-              {deal?.target_close_date && (
-                <div className="flex items-center">
-                  <span className="font-medium">Target Close:</span>
-                  <span className="ml-1">{new Date(deal.target_close_date).toLocaleDateString()}</span>
-                </div>
-              )}
-            </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
             {tabs.map((t) => (
               <Link
                 key={t.key}
                 to={linkFor(t.key)}
-                className={`px-3 py-2 rounded-md text-sm ${
-                  active === t.key ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className={`px-3 py-2 rounded-[100px] text-sm ${
+                  active === t.key ? "bg-gold text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {t.label}
@@ -478,7 +444,7 @@ export default function DealRoomDetail() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto  py-8">
         <div className="bg-white border rounded-xl p-6">
           {loading ? (
             <div className="space-y-4">
@@ -529,10 +495,18 @@ export default function DealRoomDetail() {
                   {/* Enhanced Deal Overview */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-600 mb-2">Deal Information</h4>
-                      <div className="space-y-2 text-sm">
-                        <div><span className="font-medium">Title:</span> {deal?.title || `Deal #${id}`}</div>
-                        <div><span className="font-medium">Status:</span> 
+                      <h4 className="text-[20px] font-medium text-[#212529] mb-2">Deal Information</h4>
+                      <div className="space-y-2 text-[12px]">
+                        <div className="flex justify-between text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
+                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
+                          {deal?.access_code || "N/A"}
+                        </div>
+                         <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Type:</span> 
+                          <span className="ml-2 capitalize">
+                            {deal?.deal_type ? deal.deal_type.replace(/_/g, ' ') : "Not specified"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Status:</span> 
                           <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             deal?.status === 'active' ? 'bg-green-100 text-green-800' :
                             deal?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -543,24 +517,14 @@ export default function DealRoomDetail() {
                             {deal?.status ? deal.status.charAt(0).toUpperCase() + deal.status.slice(1) : "Unknown"}
                           </span>
                         </div>
-                        <div><span className="font-medium">Type:</span> 
-                          <span className="ml-2 capitalize">
-                            {deal?.deal_type ? deal.deal_type.replace(/_/g, ' ') : "Not specified"}
-                          </span>
-                        </div>
-                        <div><span className="font-medium">Access Code:</span> 
-                          <code className="ml-2 bg-gray-200 px-2 py-1 rounded text-xs">
-                            {deal?.access_code || "N/A"}
-                          </code>
-                        </div>
                       </div>
                     </div>
 
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-600 mb-2">Financial Details</h4>
-                      <div className="space-y-2 text-sm">
-                        <div><span className="font-medium">Estimated Value:</span></div>
-                        <div className="text-lg font-bold text-green-600">
+                      <h4 className="text-[20px] font-medium text-[#212529] mb-2">Financial Details</h4>
+                      <div className="space-y-2 text-[12px]">
+                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Estimated Value:</span>
+                        <span>
                           {deal?.estimated_value ? 
                             new Intl.NumberFormat('en-US', {
                               style: 'currency',
@@ -570,9 +534,10 @@ export default function DealRoomDetail() {
                             }).format(parseFloat(deal.estimated_value)) :
                             "Not specified"
                           }
+                        </span>
                         </div>
-                        <div><span className="font-medium">Currency:</span> {deal?.currency || "USD"}</div>
-                        <div><span className="font-medium">Target Close:</span> 
+                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Currency:</span> {deal?.currency || "USD"}</div>
+                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Target Close:</span> 
                           {deal?.target_close_date ? 
                             new Date(deal.target_close_date).toLocaleDateString() : 
                             "Not set"
@@ -582,19 +547,19 @@ export default function DealRoomDetail() {
                     </div>
 
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-600 mb-2">Activity Summary</h4>
-                      <div className="space-y-2 text-sm">
+                      <h4 className="text-[20px] font-medium text-[#212529] mb-2">Activity Summary</h4>
+                      <div className="space-y-2 text-[12px]">
                         <div className="flex justify-between">
                           <span className="font-medium">Participants:</span>
-                          <span className="text-blue-600 font-semibold">{deal?.participants_count ?? 0}</span>
+                          <span className="text-[#6C757D] font-semibold">{deal?.participants_count ?? 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="font-medium">Documents:</span>
-                          <span className="text-blue-600 font-semibold">{deal?.documents_count ?? 0}</span>
+                          <span className="text-[#6C757D] font-semibold">{deal?.documents_count ?? 0}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="font-medium">Milestones:</span>
-                          <span className="text-blue-600 font-semibold">{deal?.milestones_count ?? 0}</span>
+                          <span className="text-[#6C757D] font-semibold">{deal?.milestones_count ?? 0}</span>
                         </div>
                         <div><span className="font-medium">Created:</span> 
                           {deal?.created_at ? 
@@ -605,17 +570,18 @@ export default function DealRoomDetail() {
                       </div>
                     </div>
                   </div>
+                  <div className="flex justify-between">
 
                   {/* Deal Description */}
                   {deal?.description && (
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="bg-gray-50 rounded-lg p-4 w-[48%]">
                       <h4 className="text-sm font-medium text-gray-600 mb-2">Description</h4>
                       <p className="text-gray-700">{deal.description}</p>
                     </div>
                   )}
 
                   {/* Security & Confidentiality */}
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="bg-gray-50 rounded-lg p-4 w-[48%]">
                     <h4 className="text-sm font-medium text-gray-600 mb-2">Security & Access</h4>
                     <div className="flex flex-wrap gap-2">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -630,6 +596,7 @@ export default function DealRoomDetail() {
                       </span>
                     </div>
                   </div>
+                          </div>
 
                   {/* Recent Activities */}
                   {deal?.recent_activities && deal.recent_activities.length > 0 && (

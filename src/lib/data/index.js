@@ -87,6 +87,92 @@ export const feedNavItems = [
   // },
   // { name: "Analysis", to: webRoutes.analysis, icon: ChartBar, smallNavigation: false },
 ];
+// Hub Navigation Items - Oil & Gas Platform Features
+export const hubNavItems = [
+  {
+    name: "Platform Dashboard",
+    to: webRoutes.platformDashboard,
+    icon: "LayoutDashboard",
+    description: "Overview of platform activities"
+  },
+  {
+    name: "Deal Rooms",
+    to: webRoutes.dealRooms,
+    icon: "FileText",
+    description: "Manage oil & gas deals",
+    subItems: [
+      { name: "All Deal Rooms", to: webRoutes.dealRooms },
+      { name: "Create Deal Room", to: webRoutes.dealRoomCreate },
+      { name: "My Participations", to: webRoutes.myParticipations }
+    ]
+  },
+  {
+    name: "Workforce",
+    to: webRoutes.workforceJobs,
+    icon: "Users",
+    description: "Job marketplace and events",
+    subItems: [
+      { name: "Job Marketplace", to: webRoutes.workforceJobs },
+      { name: "My Posted Jobs", to: webRoutes.workforceMyPostedJobs },
+      { name: "My Applications", to: webRoutes.workforceApplications },
+      { name: "Professionals", to: webRoutes.workforceProfiles },
+      { name: "Industry Events", to: webRoutes.workforceEvents },
+      { name: "My Registered Events", to: webRoutes.workforceMyRegistrations },
+      { name: "My Created Events", to: webRoutes.workforceMyEvents }
+    ]
+  },
+  {
+    name: "AI Services",
+    to: webRoutes.aiDashboard,
+    icon: "Brain",
+    description: "AI-powered insights",
+    subItems: [
+      { name: "AI Dashboard", to: webRoutes.aiDashboard },
+      { name: "Smart Matching", to: webRoutes.aiMatching },
+      { name: "Opportunities", to: webRoutes.aiOpportunities }
+    ]
+  },
+  {
+    name: "Logistics Hub",
+    to: webRoutes.logisticsDashboard,
+    icon: "Truck",
+    description: "Supply chain management",
+    subItems: [
+      { name: "Logistics Overview", to: webRoutes.logisticsDashboard },
+      { name: "Shipment Requests", to: webRoutes.logisticsRequests },
+      { name: "Inventory", to: webRoutes.logisticsInventory },
+      { name: "Shipments", to: webRoutes.logisticsShipments }
+    ]
+  },
+  {
+    name: "Knowledge Hub",
+    to: webRoutes.knowledgeHub,
+    icon: "BookOpen",
+    description: "Industry knowledge base",
+    subItems: [
+      { name: "Articles", to: webRoutes.knowledgeArticles },
+      { name: "Forums", to: webRoutes.knowledgeForums },
+      { name: "Topics", to: webRoutes.knowledgeTopics }
+    ]
+  },
+  {
+    name: "Subscriptions",
+    to: webRoutes.subscriptions,
+    icon: "CreditCard",
+    description: "Manage your subscription"
+  }
+];
+
+// Admin Navigation Items
+export const adminNavItems = [
+  {
+    name: "Admin Dashboard",
+    to: "/admin/dashboard",
+    icon: "Shield",
+    description: "Comprehensive admin panel",
+    requiresAdmin: true
+  }
+];
 
 // index key for complete profile
 

@@ -157,6 +157,7 @@ function DiscoverPosts({
 
 export default DiscoverPosts;
 
+
 export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,

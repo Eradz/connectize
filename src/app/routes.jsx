@@ -37,7 +37,7 @@ export default [
     route(webRoutes.blockedUsers, "../pages/blocked-users/index.jsx"),
     route(webRoutes.blockedCompanies, "../pages/blocked-companies/index.jsx"),
     route(webRoutes.bookmarks, "../pages/bookmark/index.jsx"),
-    route(webRoutes.businessHub, "../pages/businesshub/BusinessHub.jsx"),
+    route(webRoutes.dashboard, "../pages/businesshub/BusinessHub.jsx"),
     route(webRoutes.companies, "../pages/companies/index.jsx"),
     route(webRoutes.coNotifications, "../components/notifications.jsx"),
     route(webRoutes.company, "../pages/feed/companyProfile.jsx"),
@@ -65,8 +65,9 @@ export default [
     route(webRoutes.settings, "../pages/settings/index.jsx"),
     route(webRoutes.userProfile, "../pages/feed/userProfile.jsx"),
     route(webRoutes.support, "../pages/support/Support.jsx"),
-    route(webRoutes.dealRoom, "../components/dealRoom/DealRooms.jsx"),
-    route(webRoutes.dealRoomCreate, "../components/dealRoom/DealRoomCreate.jsx"),
+    route(webRoutes.dealRooms, "../components/dealRoom/DealRooms.jsx"),
+    route(webRoutes.dealRoomDetail, "../components/dealRoom/DealRoomDetail.jsx"),
+    route(webRoutes.dealRoomEdit, "../components/dealRoom/DealRoomEdit.jsx"),
 
     //
   ]),
