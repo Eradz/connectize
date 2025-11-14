@@ -1,5 +1,3 @@
-import React from 'react'
-
 const EmptyDealRoom = () => {
   return (
     <div className='flex flex-col items-center text-center py-10'>

@@ -68,7 +68,12 @@ export default [
     route(webRoutes.dealRooms, "../components/dealRoom/DealRooms.jsx"),
     route(webRoutes.dealRoomCreate, "../components/dealRoom/DealRoomCreate.jsx"),
     route(webRoutes.dealRoomDetail, "../components/dealRoom/DealRoomDetail.jsx"),
-    route(webRoutes.dealRoomEdit, "../components/dealRoom/DealRoomEdit.jsx"),
+    // route(webRoutes.dealRoomActivities, "../components/dealRoom/DealRoomDetail.jsx"),
+    // route(webRoutes.dealRoomDocuments, "../components/dealRoom/DealRoomDetail.jsx"),
+    // route(webRoutes.dealRoomMilestones, "../components/dealRoom/DealRoomDetail.jsx"),
+    // route(webRoutes.dealRoomParticipants, "../components/dealRoom/DealRoomDetail.jsx"),
+    // route(webRoutes.dealRoomReports, "../components/dealRoom/DealRoomDetail.jsx"),
+    // route(webRoutes.dealRoomValuations, "../components/dealRoom/DealRoomDetail.jsx"),
 
     //
   ]),
