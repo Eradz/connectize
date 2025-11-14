@@ -128,6 +128,9 @@ type Pages = {
   "/deals": {
     params: {};
   };
+  "/deals/create": {
+    params: {};
+  };
   "/deals/:id": {
     params: {
       "id": string;
@@ -170,11 +173,11 @@ type Pages = {
 type RouteFiles = {
   "root.jsx": {
     id: "root";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/dashboard" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deals" | "/deals/:id" | "/deals/:id/edit" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/dashboard" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deals" | "/deals/create" | "/deals/:id" | "/deals/:id/edit" | "/signup" | "/login" | "/reactivate-account" | "/verify-account" | "/reset-password" | "/confirm-reset-password" | "/success" | "/terms-and-conditions" | "/privacy-policy";
   };
   "../pages/AppLayout.jsx": {
     id: "../pages/AppLayout";
-    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/dashboard" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deals" | "/deals/:id" | "/deals/:id/edit";
+    page: "/" | "/posts/:id" | "/profile" | "/address" | "/bio" | "/contact" | "/update-profile" | "/overview" | "/create-company" | "/company-documents" | "/company-information" | "/analysis" | "/co/blocked-users" | "/co/blocked-companies" | "/co/bookmarks" | "/dashboard" | "/companies" | "/co/notifications" | "/:company" | "/:company/edit-profile" | "/market" | "/messages" | "/products/:id" | "/products/listing" | "/co/representatives" | "/co/representatives/manage" | "/co/representatives/accept" | "/search" | "/services" | "/services/add" | "/services/:id" | "/co/settings" | "/co/:userId" | "/support" | "/deals" | "/deals/create" | "/deals/:id" | "/deals/:id/edit";
   };
   "../pages/FeedLayout.jsx": {
     id: "../pages/FeedLayout";
@@ -328,6 +331,10 @@ type RouteFiles = {
     id: "../components/dealRoom/DealRooms";
     page: "/deals";
   };
+  "../components/dealRoom/DealRoomCreate.jsx": {
+    id: "../components/dealRoom/DealRoomCreate";
+    page: "/deals/create";
+  };
   "../components/dealRoom/DealRoomDetail.jsx": {
     id: "../components/dealRoom/DealRoomDetail";
     page: "/deals/:id";
@@ -423,6 +430,7 @@ type RouteModules = {
   "../pages/feed/userProfile": typeof import("./src/app/../pages/feed/userProfile.jsx");
   "../pages/support/Support": typeof import("./src/app/../pages/support/Support.jsx");
   "../components/dealRoom/DealRooms": typeof import("./src/app/../components/dealRoom/DealRooms.jsx");
+  "../components/dealRoom/DealRoomCreate": typeof import("./src/app/../components/dealRoom/DealRoomCreate.jsx");
   "../components/dealRoom/DealRoomDetail": typeof import("./src/app/../components/dealRoom/DealRoomDetail.jsx");
   "../components/dealRoom/DealRoomEdit": typeof import("./src/app/../components/dealRoom/DealRoomEdit.jsx");
   "../pages/authentication/AuthLayout": typeof import("./src/app/../pages/authentication/AuthLayout.jsx");

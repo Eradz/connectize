@@ -19,7 +19,6 @@ const webRoutes = {
   coNotifications: "/co/notifications",
   createCompany: "/create-company",
   dashboard: "/dashboard",
-  dealRoomCreate: "/deals/create",
   feed: "/",
   home: "/update-profile",
   knowledgeHub: "/knowledge-hub",

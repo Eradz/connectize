@@ -14,7 +14,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft } from "lucide-react";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -45,7 +45,7 @@ export default function DealRoomDetail() {
     console.warn('Invalid deal ID detected, redirecting:', id);
     setTimeout(() => navigate(webRoutes.dealRooms, { replace: true }), 0);
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen border border-[#D9D9D9] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Redirecting...</p>
@@ -376,8 +376,16 @@ export default function DealRoomDetail() {
     <div className="min-h-screen ">
       {/* Breadcrumbs */}
       <div className="">
-        <div className="max-w-7xl mx-auto  py-6">
+        <div className="max-w-7xl mx-auto  py-4">
           <div className="flex items-center justify-between">
+            <Link to={webRoutes.dealRooms} className="flex items-center py-6">
+              <button
+              onClick={() => navigate(webRoutes.dealRooms)}
+              className=" bg-white mr-4 p-2 hover:bg-gray-100 rounded-lg"
+              >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            </Link>
             <div className="w-[70%]">
               <div className="flex items-center gap-4">
               <h1 className="text-2xl font-bold text-gray-900">
@@ -411,19 +419,19 @@ export default function DealRoomDetail() {
           </div>
           {/* Enhanced Quick Actions and Stats */}
           <div className="mt-4 flex flex-wrap gap-2">
-            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
+            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               <Plus className="h-4 w-4 mr-2" />
               Upload Document
             </button>
-            <button onClick={() => setShowParticipantModal(true)} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
+            <button onClick={() => setShowParticipantModal(true)} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               <UserPlus className="h-4 w-4 mr-2" />
               Invite Participant
             </button>
-            <Link to={linkFor("milestones")} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
+            <Link to={linkFor("milestones")} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               <Settings className="h-4 w-4 mr-2" />
               Update Milestones
             </Link>
-            <Link to={linkFor("valuations")} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
+            <Link to={linkFor("valuations")} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               <BarChart3 className="h-4 w-4 mr-2" />
               Run Valuation
             </Link>
@@ -494,19 +502,19 @@ export default function DealRoomDetail() {
                 <div className="space-y-6">
                   {/* Enhanced Deal Overview */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-4">
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Deal Information</h4>
                       <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
-                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
+                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
+                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
                           {deal?.access_code || "N/A"}
                         </div>
-                         <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Type:</span> 
+                         <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Type:</span> 
                           <span className="ml-2 capitalize">
                             {deal?.deal_type ? deal.deal_type.replace(/_/g, ' ') : "Not specified"}
                           </span>
                         </div>
-                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Status:</span> 
+                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Status:</span> 
                           <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             deal?.status === 'active' ? 'bg-green-100 text-green-800' :
                             deal?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -520,10 +528,10 @@ export default function DealRoomDetail() {
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-4">
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Financial Details</h4>
                       <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Estimated Value:</span>
+                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Estimated Value:</span>
                         <span>
                           {deal?.estimated_value ? 
                             new Intl.NumberFormat('en-US', {
@@ -536,8 +544,8 @@ export default function DealRoomDetail() {
                           }
                         </span>
                         </div>
-                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Currency:</span> {deal?.currency || "USD"}</div>
-                        <div className="flex justify-between text-[#6C757D]"><span className="font-medium text-[#212529]">Target Close:</span> 
+                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Currency:</span> {deal?.currency || "USD"}</div>
+                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Target Close:</span> 
                           {deal?.target_close_date ? 
                             new Date(deal.target_close_date).toLocaleDateString() : 
                             "Not set"
@@ -546,22 +554,22 @@ export default function DealRoomDetail() {
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-4">
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Activity Summary</h4>
                       <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between border-b border-[#D9D9D9]">
                           <span className="font-medium">Participants:</span>
                           <span className="text-[#6C757D] font-semibold">{deal?.participants_count ?? 0}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between border-b border-[#D9D9D9]">
                           <span className="font-medium">Documents:</span>
                           <span className="text-[#6C757D] font-semibold">{deal?.documents_count ?? 0}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between border-b border-[#D9D9D9]">
                           <span className="font-medium">Milestones:</span>
                           <span className="text-[#6C757D] font-semibold">{deal?.milestones_count ?? 0}</span>
                         </div>
-                        <div><span className="font-medium">Created:</span> 
+                        <div className=" flex justify-between border-b border-[#D9D9D9]"><span className="font-medium">Created:</span> 
                           {deal?.created_at ? 
                             new Date(deal.created_at).toLocaleDateString() : 
                             "Unknown"
@@ -574,14 +582,14 @@ export default function DealRoomDetail() {
 
                   {/* Deal Description */}
                   {deal?.description && (
-                    <div className="bg-gray-50 rounded-lg p-4 w-[48%]">
+                    <div className="border border-[#D9D9D9] rounded-lg p-4 w-[48%]">
                       <h4 className="text-sm font-medium text-gray-600 mb-2">Description</h4>
-                      <p className="text-gray-700">{deal.description}</p>
+                      <p className="border-b border-[#D9D9D9] text-gray-700">{deal.description}</p>
                     </div>
                   )}
 
                   {/* Security & Confidentiality */}
-                  <div className="bg-gray-50 rounded-lg p-4 w-[48%]">
+                  <div className="border border-[#D9D9D9] rounded-lg p-4 w-[48%]">
                     <h4 className="text-sm font-medium text-gray-600 mb-2">Security & Access</h4>
                     <div className="flex flex-wrap gap-2">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -600,7 +608,7 @@ export default function DealRoomDetail() {
 
                   {/* Recent Activities */}
                   {deal?.recent_activities && deal.recent_activities.length > 0 && (
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-4">
                       <h4 className="text-sm font-medium text-gray-600 mb-3">Recent Activity</h4>
                       <div className="space-y-2">
                         {deal.recent_activities.slice(0, 3).map((activity, index) => (
@@ -771,7 +779,7 @@ export default function DealRoomDetail() {
                           };
                           
                           return (
-                            <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                            <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
                               <div className="flex items-center space-x-3">
                                 <FileText className="h-5 w-5 text-gray-400" />
                                 <div>
@@ -862,7 +870,7 @@ export default function DealRoomDetail() {
                           return matchesSearch && matchesRole;
                         })
                         .map((p, i) => (
-                          <div key={p.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                          <div key={p.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
                             <div className="flex items-center space-x-3">
                               <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
                                 <span className="text-sm font-medium text-blue-600">
@@ -934,7 +942,7 @@ export default function DealRoomDetail() {
                     <EmptyMilestones onCreate={() => notify.info("Milestone creation coming soon")} />
                   ) : (
                     milestones.map((m, i) => (
-                      <div key={m.id || i} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div key={m.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <div className="font-medium text-gray-800">{m.title || m.name || `Milestone ${i + 1}`}</div>
@@ -1156,7 +1164,7 @@ export default function DealRoomDetail() {
             <button
               type="button"
               onClick={() => setShowMilestoneModal(false)}
-              className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border rounded text-gray-700 hover:border border-[#D9D9D9]"
             >
               Cancel
             </button>
@@ -1295,7 +1303,7 @@ export default function DealRoomDetail() {
                         setUserSearch(label);
                         setUserResults([]);
                       }}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                      className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
                     >
                       <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
                       <div className="text-xs text-gray-500">{u.email}</div>
@@ -1340,7 +1348,7 @@ export default function DealRoomDetail() {
             <button
               type="button"
               onClick={() => setShowParticipantModal(false)}
-              className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border rounded text-gray-700 hover:border border-[#D9D9D9]"
             >
               Cancel
             </button>

@@ -4,29 +4,34 @@ import CardIcon from "../../../icon/CardIcon";
 import LogisticIcon from "../../../icon/LogisticIcon";
 import AIIcon from "../../../icon/AIIcon";
 import WorkForceIcon from "../../../icon/WorkForceIcon";
+import { webRoutes } from "../../../lib/webRoutes";
+import { Link } from "react-router";
 
-export default function PlatformModules() {
+export default function PlatformModules({dashboardData}) {
   const modules = [
     {
       icon: <DealIcon/>,
       title: "Deal Rooms",
       description: "Secure collaboration spaces for M&A and partnerships",
-      link: "0 active",
+      link: `${dashboardData.dealRooms.count} active`,
       bgColor: "bg-yellow-50",
+      to: webRoutes.dealRooms
     },
     {
       icon: <WorkForceIcon/>,
       title: "Work Force",
       description: "Professional marketplace and talent acquisition",
-      link: "24 positions",
+      link: `${dashboardData.jobs.count} positions`,
       bgColor: "bg-blue-50",
+      to: webRoutes.workforceJobs
     },
     {
       icon: <AIIcon/>,
       title: "AI Services",
       description: "Intelligent matching and market insights",
-      link: "1 opportunity",
+      link: `${dashboardData.opportunities.count} opportunity`,
       bgColor: "bg-purple-50",
+      to: webRoutes.aiDashboard
     },
     {
       icon: <LogisticIcon/>,
@@ -34,13 +39,15 @@ export default function PlatformModules() {
       description: "Supply chain and transportation management",
       link: "Global network",
       bgColor: "bg-green-50",
+      to: webRoutes.logisticsDashboard
     },
     {
       icon: <StarIcon/>,
       title: "Featured Ads",
       description: "Promote your content across the platform",
-      link: "0 Active",
+      link: `${dashboardData.ads.active} Active`,
       bgColor: "bg-orange-50",
+      to: webRoutes.featuredAds
     },
     {
       icon: <CardIcon/>,
@@ -48,6 +55,7 @@ export default function PlatformModules() {
       description: "Manage your plans, billings and account settings",
       link: "Manage plan",
       bgColor: "bg-indigo-50",
+      to: webRoutes.subscriptionDashboard
     }
   ];
 
@@ -57,7 +65,8 @@ export default function PlatformModules() {
       
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((module, index) => (
-          <div
+          <Link
+            to={module.to}
             key={index}
             className={`rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer border border-[#D9D9D9]`}
           >
@@ -69,7 +78,7 @@ export default function PlatformModules() {
             <p className="text-xs text-[#E5A800] font-medium">
               {module.link}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

@@ -66,6 +66,7 @@ export default [
     route(webRoutes.userProfile, "../pages/feed/userProfile.jsx"),
     route(webRoutes.support, "../pages/support/Support.jsx"),
     route(webRoutes.dealRooms, "../components/dealRoom/DealRooms.jsx"),
+    route(webRoutes.dealRoomCreate, "../components/dealRoom/DealRoomCreate.jsx"),
     route(webRoutes.dealRoomDetail, "../components/dealRoom/DealRoomDetail.jsx"),
     route(webRoutes.dealRoomEdit, "../components/dealRoom/DealRoomEdit.jsx"),
 
