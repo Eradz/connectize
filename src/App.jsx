@@ -53,7 +53,7 @@ import ComprehensiveAdmin from "./pages/admin/ComprehensiveAdmin";
 
 // Oil & Gas Platform Components
 import PlatformLayout from "./pages/platform/PlatformLayout";
-import PlatformDashboard from "./pages/platform/PlatformDashboard";
+import PlatformDashboard from "./pages/businesshub/BusinessHub";
 import DealRooms from "./components/dealRoom/DealRooms";
 import DealRoomCreate from "./components/dealRoom/DealRoomCreate";
 import DealRoomEdit from "./components/dealRoom/DealRoomEdit";

@@ -90,7 +90,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   build: {
-    outDir: "build",
+    outDir: "build/client",
     sourcemap: true, // Enable source maps for debugging
     rollupOptions: {
       output: {

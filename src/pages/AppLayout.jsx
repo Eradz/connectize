@@ -21,7 +21,7 @@ const AppLayout = () => {
   const isMessagesRoute = pathname.startsWith("/messages");
 
   return (
-    <main className="bg-background w-full h-full flex flex-col flex-1 overflow-x-hidden ">
+    <main className="bg-background w-full h-screen flex flex-col flex-1 overflow-x-hidden ">
       <Navbar />
       <section
         className={clsx(
@@ -43,7 +43,7 @@ const AppLayout = () => {
           )}
         >
           {/* Wrap Outlet to enforce full-width clamp */}
-          <div className="w-full max-w-full overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="w-full h-full max-w-full overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Outlet />
           </div>
         </section>
