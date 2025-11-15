@@ -3,7 +3,7 @@ import {
   acceptRepRequest,
   cancelOrDeclineRepRequest,
 } from "../../api-services/representatives";
-import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import clsx from "clsx";

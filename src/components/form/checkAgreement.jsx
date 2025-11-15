@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import FormikErrorResponse from "../form/formError";
 
 export default function CheckAgreement({ formik }) {

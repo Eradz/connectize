@@ -1,7 +1,7 @@
 import { Avatar } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Link, useLocation, useSearchParams } from "react-router";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getProductCategories } from "../../../api-services/products";
 import { getServiceCategories } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";

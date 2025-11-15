@@ -17,19 +17,25 @@ export const authenticationService = async ({
       type: "auth-" + type,
     });
 
-    // Safely handle response structure
-    const results = response?.results || response;
-
-    if (type === "login" && results) {
-      setSession(results);
-      // Clear token cache so the new session tokens are used immediately
-      clearTokenCache();
+   // Handle different response structures
+    const payload = response?.results || response?.data || response;
+    const success = Boolean(response?.success ?? payload?.success ?? true);
+    console.log(`✅ Authentication ${type} response:`, { success, hasTokens: !!(payload?.tokens) });
+    if (type === "login") {
+      const tokens = payload?.tokens;
+      console.log('🔑 Setting session with tokens:', { hasAccess: !!(tokens?.access), hasRefresh: !!(tokens?.refresh) });
+      if (tokens?.access && tokens?.refresh) {
+        setSession(payload);
+      } else {
+        console.warn("Login succeeded response but no tokens present; skipping session set");
+        return false;
+      }
     } else if (type === "register" && values?.email) {
       localStorage.setItem(REGISTER_EMAIL_KEY, values.email);
     }
-    return true;
+    return success;
   } catch (error) {
-    console.error("Auth submission error:", error);
+    console.error("❌ Auth submission error:", error);
     return false;
   }
 };

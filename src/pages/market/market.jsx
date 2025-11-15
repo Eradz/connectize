@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import Carousel from "../../components/admin/markets/carousel";
 import NewlyListed from "../../components/admin/markets/newlyListed";
 import SEO, { createSEO } from "../../components/SEO";

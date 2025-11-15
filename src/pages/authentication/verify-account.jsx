@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import Form from "../../components/form";
 import { useFormik } from "formik";
 import { authenticationService } from "../../api-services/authentication";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   SUCCESS_TYPE_KEY,
   VERIFY_ACCOUNT_KEY,

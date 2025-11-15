@@ -1,6 +1,6 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useEffect } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import HeadingText from "../../components/HeadingText";
 import Logo from "../../components/logo";
 import LightParagraph from "../../components/ParagraphText";

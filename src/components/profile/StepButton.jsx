@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@chakra-ui/react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 

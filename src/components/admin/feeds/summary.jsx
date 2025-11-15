@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import CustomTabs from "../../custom/tabs";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";

@@ -4,7 +4,7 @@ import BriefCaseIcon from "../../../icon/briefCaseIcon"
 import DollarSignIcon from "../../../icon/dollarsign"
 import StarIcon from "../../../icon/StarIcon"
 import { webRoutes } from "../../../lib/webRoutes";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import SubscriptionCard from "../../dashboard/SubscriptionCard";
 export default function BusinessHubHeader({dashboardData}) {
   const formatCompactNumber = (num) => {

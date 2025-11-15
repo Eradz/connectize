@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { dealRoomService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast as notify } from 'sonner';

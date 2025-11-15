@@ -8,7 +8,7 @@ import { Badge } from "@chakra-ui/react";
 import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { getUserById } from "../../api-services/users";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";

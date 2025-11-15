@@ -1,7 +1,7 @@
 import { Avatar, Button, Spinner, useDisclosure } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { getBlockedCompanies, unblockCompany } from "../../api-services/moderation";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";

@@ -9,7 +9,7 @@
   Download,
   Share2
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';
   
  const formatCompactNumber = (num) => {

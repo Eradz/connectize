@@ -5,7 +5,7 @@ import {
   Outlet,
   useLocation,
   useNavigation,
-} from "react-router";
+} from "react-router-dom";
 import Sidebar from "../components/admin/markets/sidebar";
 import Navbar from "../components/userProfile/Navbar";
 

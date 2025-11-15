@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Location, Pencil } from "../../../icon";
 import { getSingleService } from "../../../api-services/services";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams, useSearchParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import NoPage from "../../NoPage";
 import { BookMarkButton } from "../feeds/DiscoverPostTabs";
 import LightParagraph from "../../ParagraphText";

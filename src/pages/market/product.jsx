@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Productdetails from "../../components/admin/products/productdetails";
 import NewProducts from "../../components/admin/products/newProducts";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { getSingleProduct } from "../../api-services/products";
 import { useQuery } from "@tanstack/react-query";
 // import { useCustomQuery } from "../../context/queryContext";

@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
 import Markdown from "markdown-to-jsx";
 import React from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import LightParagraph from "./ParagraphText";
 
 const CustomLink = ({ children, ...props }) => (

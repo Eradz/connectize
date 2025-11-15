@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom";
 import TopServiceSuggestions from "../components/admin/feeds/TopServiceSuggestions";
 import PageLoading from "../components/PageLoading";
 import useRedirect from "../hooks/useRedirect";

@@ -2,7 +2,7 @@ import { ChevronRight } from "@mui/icons-material";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import { getProducts } from "../../../api-services/products";
 import { useAuth } from "../../../context/userContext";
 import { webRoutes } from "../../../lib/webRoutes";

@@ -1,4 +1,4 @@
-import { redirect } from "react-router";
+import { redirect } from "react-router-dom";
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
 import { getSession } from "../lib/session";

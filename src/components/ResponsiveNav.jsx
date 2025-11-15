@@ -9,7 +9,7 @@ import {
 import { ChevronLeft, Menu } from "@mui/icons-material";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";
 import { useGetCurrentCompany } from "../hooks";

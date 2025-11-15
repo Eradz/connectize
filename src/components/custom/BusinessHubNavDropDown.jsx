@@ -5,7 +5,7 @@ import BriefCaseIcon  from '../../icon/briefCaseIcon';
 import AISecondIcon from "../../icon/AISecondIcon"
 import LogisticIcon from "../../icon/LogisticIcon"
 import {ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import {DealIcon} from '../../icon/deal';
 import {OuterBusinessHub} from "../../icon/BusinessHub";
 

@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { webRoutes } from "../../../lib/webRoutes";
 
 export default function RecentDealRooms({dashboardData}) {

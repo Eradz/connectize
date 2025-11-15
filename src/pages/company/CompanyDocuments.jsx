@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { createCompany } from "../../api-services/companies";

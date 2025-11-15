@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useFormik } from "formik";
 import { useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import { loginUser } from "../../api-services/authentication";
 import { getCurrentUser } from "../../api-services/users";

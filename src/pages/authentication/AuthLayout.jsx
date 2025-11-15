@@ -1,6 +1,6 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { motion } from "framer-motion";
-import { Navigate, Outlet, useLocation } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Logo from "../../components/logo";
 import { getSession } from "../../lib/session";
 import LightParagraph from "../../components/ParagraphText";

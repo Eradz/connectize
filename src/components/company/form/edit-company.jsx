@@ -3,7 +3,7 @@ import { getCountries } from "@loophq/country-state-list";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
 import { editCompanyInformation } from "../../../api-services/companies";

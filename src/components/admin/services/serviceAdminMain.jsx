@@ -5,7 +5,7 @@ import { useFormik } from "formik";
 import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { createService } from "../../../api-services/services";
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "../../../icon";
 
 const validationSchema = Yup.object().shape({

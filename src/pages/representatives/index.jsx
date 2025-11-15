@@ -11,7 +11,7 @@ import RepresentativeCard from "../../components/representatives/RepresentativeC
 // import SEO from "../../components/SEO";
 import { ManageRepresentativesLink } from "../feed/companyProfile";
 import { usePageination } from "../../hooks/usePagination";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import PrimaryButton from "../../components/PrimaryButton";
 import clsx from "clsx";
 import { useGetSingleCompany } from "../../hooks";

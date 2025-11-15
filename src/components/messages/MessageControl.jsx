@@ -31,7 +31,7 @@ import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
 import ValidImages from "../ValidImages";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 const isImageSize = (files) => {
   const imageSize = 4 * 1024 * 1024; // 4MB

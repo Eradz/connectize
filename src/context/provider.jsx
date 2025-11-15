@@ -1,6 +1,6 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClientProvider } from "@tanstack/react-query";
-// import { HelmetProvider } from "react-helmet-async";
+import { HelmetProvider } from "react-helmet-async";
 import { queryClient } from "../lib/utils";
 import { NavProvider } from "./navContext";
 import { QueryProvider } from "./queryContext";
@@ -8,7 +8,7 @@ import { UserProvider } from "./userContext";
 
 const MyProvider = ({ children }) => {
   return (
-    // <HelmetProvider>
+    <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <UserProvider>
         <NavProvider>
@@ -18,7 +18,7 @@ const MyProvider = ({ children }) => {
         </NavProvider>
       </UserProvider>
     </QueryClientProvider>
-    // </HelmetProvider>
+    </HelmetProvider>
   );
 };
 

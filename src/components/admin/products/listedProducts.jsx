@@ -6,7 +6,7 @@ import { formatNumber, shareThis } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
 import ProfileSection from "../../userProfile/profile-section";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 const ListedProducts = ({ company }) => {
   return (

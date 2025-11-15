@@ -5,7 +5,7 @@ import LogisticIcon from "../../../icon/LogisticIcon";
 import AIIcon from "../../../icon/AIIcon";
 import WorkForceIcon from "../../../icon/WorkForceIcon";
 import { webRoutes } from "../../../lib/webRoutes";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export default function PlatformModules({dashboardData}) {
   const modules = [

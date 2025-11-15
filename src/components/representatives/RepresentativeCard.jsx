@@ -3,7 +3,7 @@ import Username from "../Username";
 import { ConJoinedImages } from "../ResponsiveNav";
 import { motion } from "framer-motion";
 import { capitalizeFirst } from "../../lib/utils";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import ConnectButton from "../ConnectButton";
 import { useAuth } from "../../context/userContext";
 

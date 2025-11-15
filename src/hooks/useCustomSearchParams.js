@@ -1,4 +1,4 @@
-import { useLocation, useSearchParams } from "react-router";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 export const useCustomSearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams();

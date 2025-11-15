@@ -13,7 +13,7 @@ import ContentWarningBadge from "../../posts/ContentWarningBadge";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useState, useRef } from "react";
 import ReactQuill from "react-quill";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   commentOnPost,

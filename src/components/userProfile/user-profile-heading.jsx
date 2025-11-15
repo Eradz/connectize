@@ -5,7 +5,7 @@ import { formatNumber } from "../../lib/utils";
 import { StatsText } from "../../pages/feed/companyProfile";
 import clsx from "clsx";
 import { avatarStyle } from "../ResponsiveNav";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import ConnectButton from "../ConnectButton";
 import { useState } from "react";

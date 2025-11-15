@@ -1,6 +1,6 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import { getAllCompanies, getSingleCompany } from "../api-services/companies";
 import { getMessagesForUser } from "../api-services/messaging";
 import { getNotificationsForUser } from "../api-services/notifications";
