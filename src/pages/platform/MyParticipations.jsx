@@ -70,7 +70,7 @@ export default function MyParticipations() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Participations</h1>
+          <h1 className="text-2xl font-bold text-gray-900">My Participants</h1>
           <p className="text-gray-600 mt-1">
             Deal rooms where you are a participant
           </p>
@@ -127,18 +127,15 @@ export default function MyParticipations() {
           </div>
         )
       ) : (
-        <div className="grid gap-6">
+        <div className="grid grid-col-1 md:grid-cols-2 gap-6">
           {filteredParticipations.map((deal) => (
-            <div key={deal.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={deal.id} className="bg-white hover:bg-gold/20 rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">
                       {deal.title || `Deal Room #${deal.id?.slice(0, 8)}`}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(deal.status)}`}>
-                      {deal.status || 'Active'}
-                    </span>
                   </div>
                   
                   {deal.description && (
@@ -170,7 +167,7 @@ export default function MyParticipations() {
                 <div className="flex items-center gap-2 ml-4">
                   <Link
                     to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gold"
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     View
