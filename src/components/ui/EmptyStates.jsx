@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Plus, FileText, Users, Target, BarChart3 } from "lucide-react";
+import { Search, Plus, FileText, Users2Icon, Target, BarChart3 } from "lucide-react";
 
 export function EmptyState({ 
   icon: Icon = FileText, 
@@ -10,7 +10,7 @@ export function EmptyState({
   className = "" 
 }) {
   return (
-    <div className={`text-center py-12 ${className}`}>
+    <div className={`text-center py-12 w-[50%] border-dashed border-2 border-gray-200 mx-auto ${className}`}>
       <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
         <Icon className="h-12 w-12" />
       </div>
@@ -19,7 +19,7 @@ export function EmptyState({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm bg-gold hover:bg-gold/20"
         >
           <Plus className="h-4 w-4 mr-2" />
           {actionLabel}
@@ -44,7 +44,7 @@ export function EmptyDocuments({ onUpload }) {
 export function EmptyParticipants({ onInvite }) {
   return (
     <EmptyState
-      icon={Users}
+      icon={Users2Icon}
       title="No participants yet"
       description="Invite team members to collaborate on this deal room."
       actionLabel="Invite Participant"

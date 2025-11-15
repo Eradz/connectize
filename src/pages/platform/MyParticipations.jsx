@@ -4,7 +4,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { dealRoomService } from '../../api-services/oilgas';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { EmptySearch } from '../../components/ui/EmptyStates';
-import { Search, Eye, Users, FileText, TrendingUp, Calendar } from 'lucide-react';
+import { Search, Eye, Users, FileText, TrendingUp, Calendar, PlusIcon, UsersIcon, Users2Icon } from 'lucide-react';
 
 export default function MyParticipations() {
   const [loading, setLoading] = useState(true);
@@ -112,17 +112,18 @@ export default function MyParticipations() {
             onClear={() => setSearchTerm('')}
           />
         ) : (
-          <div className="text-center py-12">
-            <Users className="mx-auto h-12 w-12 text-gray-400" />
+          <div className="text-center py-12 border-dashed border-2 border-gray-200 w-[60%] mx-auto">
+            <Users2Icon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No participations</h3>
             <p className="mt-1 text-sm text-gray-500">
-              You haven't participated in any deal rooms yet.
+              Invite team members to collaborate on this deal room
             </p>
             <Link
               to={webRoutes.dealRooms}
-              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gold hover:bg-gold/20"
             >
-              Explore Deal Rooms
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Invite participants
             </Link>
           </div>
         )

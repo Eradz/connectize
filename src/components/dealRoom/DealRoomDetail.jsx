@@ -453,7 +453,7 @@ export default function DealRoomDetail() {
       </div>
 
       <div className="max-w-7xl mx-auto  py-8">
-        <div className="bg-white border rounded-xl p-6">
+        <div className="">
           {loading ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -469,6 +469,7 @@ export default function DealRoomDetail() {
             <div className="text-red-600">{error}</div>
           ) : (
             <>
+              <h2 className="text-lg font-semibold text-[#6C757D] mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
               {/* Search and Filter Bar */}
               {(active === "documents" || active === "participants" || active === "activities") && (
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -497,7 +498,6 @@ export default function DealRoomDetail() {
                 </div>
               )}
 
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
               {active === "overview" && (
                 <div className="space-y-6">
                   {/* Enhanced Deal Overview */}
@@ -927,13 +927,13 @@ export default function DealRoomDetail() {
                     </div>
                   )}
                   
-                  <button
+                  {/* <button
                     onClick={() => setShowParticipantModal(true)}
                     className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors"
                   >
                     <UserPlus className="h-6 w-6 mx-auto text-gray-400 mb-2" />
                     <span className="text-gray-600">Invite New Participant</span>
-                  </button>
+                  </button> */}
                 </div>
               )}
               {active === "milestones" && (

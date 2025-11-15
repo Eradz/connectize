@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from 'date-fns';
+import ListChecksIcon from '../../icon/ListChecksIcon';
 
 const ActivityIcon = ({ type }) => {
   const iconMap = {
@@ -230,13 +231,15 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
       {/* Timeline */}
       <div className="space-y-6">
         {Object.keys(groupedActivities).length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <div className="text-gray-400 text-6xl mb-4">📋</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No activities found</h3>
+          <div className="text-center py-12 border-2 border-dashed border-gray-200 w-[50%] mx-auto rounded-lg">
+            <div className="text-gray-400 text-6xl mb-4 px-[40%]">
+            <ListChecksIcon/>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No activity found</h3>
             <p className="text-gray-500">
               {searchTerm || filter !== 'all' 
                 ? 'Try adjusting your search or filter criteria'
-                : 'Activities will appear here as the deal progresses'}
+                : `Activities will appear here as the deal progresses`}
             </p>
           </div>
         ) : (
