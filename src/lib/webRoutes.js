@@ -50,7 +50,26 @@ const webRoutes = {
   termsAndConditions: "/terms-and-conditions",
   userProfile: "/co/:userId",
   verifyAccount: "/verify-account",
-  workforceJobs: "/workforce",
+
+  // Workforce Marketplace
+  workforceJobs: "/jobs",
+  workforceJobDetail: "/jobs/:id",
+  workforceJobCreate: "/jobs/create",
+  workforceJobApply: "/jobs/:id/apply",
+  workforceMyPostedJobs: "/jobs/my-posted",
+  workforceProfiles: "/professionals",
+  workforceProfileDetail: "/professionals/:id",
+  workforceProfileCreate: "/professionals/create",
+  workforceProfileEdit: "/professionals/:id/edit",
+  workforceEvents: "/events",
+  workforceEventDetail: "/events/:id",
+  workforceEventCreate: "/events/create",
+  workforceEventEdit: "/events/:id/edit",
+  workforceMyEvents: "/events/my-events",
+  workforceMyRegistrations: "/events/my-registrations",
+  workforceApplications: "/applications",
+  workforceApplicationsManage: "/applications/manage",
+  workforceDashboard: "/workforce/dashboard",
 
    // Dashboard & Overview
   platformDashboard: "/dashboard",

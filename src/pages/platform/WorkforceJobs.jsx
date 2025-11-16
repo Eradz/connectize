@@ -18,10 +18,12 @@ import {
   Briefcase,
   GraduationCap,
   Award,
-  TrendingUp
+  TrendingUp,
+  LucideChartNoAxesCombined
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
+import { BriefCaseIcon } from '../../icon';
 
 const WorkforceJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -344,7 +346,7 @@ const WorkforceJobs = () => {
               </Link>
               <Link
                 to={webRoutes.workforceJobCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Post a Job
@@ -358,9 +360,9 @@ const WorkforceJobs = () => {
         {/* Job Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center">
-              <div className="bg-blue-100 p-3 rounded-lg mr-4">
-                <Briefcase className="w-6 h-6 text-blue-600" />
+            <div className="flex flex-col text-center gap-1 items-center">
+              <div className="bg-[#FFF1C6] p-3 rounded-lg">
+                <BriefCaseIcon className="w-6 h-6 text-[#495057]" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{jobs.length}</p>
@@ -370,9 +372,9 @@ const WorkforceJobs = () => {
           </div>
           
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-lg mr-4">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+            <div className="flex flex-col text-center gap-1 items-center">
+              <div className="bg-[#FFF1C6] p-3 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-[#495057]" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">25%</p>
@@ -382,9 +384,9 @@ const WorkforceJobs = () => {
           </div>
           
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center">
-              <div className="bg-purple-100 p-3 rounded-lg mr-4">
-                <Star className="w-6 h-6 text-purple-600" />
+            <div className="flex flex-col text-center gap-1 items-center">
+              <div className="bg-[#FFF1C6] p-3 rounded-lg">
+                <Star className="w-6 h-6 text-[#495057]" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">4.8</p>
@@ -394,9 +396,9 @@ const WorkforceJobs = () => {
           </div>
           
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center">
-              <div className="bg-orange-100 p-3 rounded-lg mr-4">
-                <Award className="w-6 h-6 text-orange-600" />
+            <div className="flex flex-col text-center gap-1 items-center">
+              <div className="bg-[#FFF1C6] p-3 rounded-lg">
+                <LucideChartNoAxesCombined className="w-6 h-6 text-[#495057]" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">98%</p>
@@ -514,7 +516,7 @@ const WorkforceJobs = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.workforceJobCreate}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-gold/20"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Post a Job
