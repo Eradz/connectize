@@ -308,7 +308,7 @@ const WorkforceMyPostedJobs = () => {
               {!searchTerm && filterStatus === 'all' && (
                 <Link
                   to={webRoutes.workforceJobCreate}
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/70 transition-colors"
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   Post Your First Job

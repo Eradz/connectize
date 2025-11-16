@@ -356,19 +356,19 @@ const WorkforceJobCreate = () => {
 
   const StepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center">
         {[1, 2, 3, 4].map((step) => (
           <div key={step} className="flex items-center">
             <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-              step < currentStep ? 'bg-green-600 border-green-600 text-white' :
-              step === currentStep ? 'border-green-600 text-green-600' :
-              'border-gray-300 text-gray-300'
+              step < currentStep ? 'bg-pale_yellow border-pale_yellow' :
+              step === currentStep ? 'bg-pale_yellow' :
+              'border-gray-300'
             }`}>
               {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
             </div>
             {step < 4 && (
-              <div className={`w-12 h-0.5 ml-4 ${
-                step < currentStep ? 'bg-green-600' : 'bg-gray-300'
+              <div className={`w-12 h-0.5 ${
+                step < currentStep ? 'bg-pale_yellow' : 'bg-gray-300'
               }`} />
             )}
           </div>
@@ -966,8 +966,8 @@ const WorkforceJobCreate = () => {
               disabled={currentStep === 1}
               className={`px-6 py-2 border rounded-lg font-medium ${
                 currentStep === 1
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-light_yellow/80 text-gray-400 cursor-not-allowed'
+                  : 'bg-light_yellow text-gray-700 hover:bg-gold'
               }`}
             >
               Previous
@@ -985,9 +985,9 @@ const WorkforceJobCreate = () => {
                 <button
                   onClick={nextStep}
                   disabled={userCompanies.length === 0}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-gold rounded-lg font-medium hover:bg-gold/70 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {`Next >`}
                 </button>
               ) : (
                 <button
