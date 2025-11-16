@@ -336,22 +336,13 @@ const WorkforceJobs = () => {
               <h1 className="text-3xl font-bold text-gray-900">Oil & Gas Jobs</h1>
               <p className="text-gray-600 mt-1">Find your next opportunity in the energy sector</p>
             </div>
-            <div className="flex space-x-3">
-              <Link
-                to={webRoutes.workforceProfiles}
-                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Browse Professionals
-              </Link>
-              <Link
+            <Link
                 to={webRoutes.workforceJobCreate}
                 className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Post a Job
+                 New deal room
               </Link>
-            </div>
           </div>
         </div>
       </div>
@@ -519,7 +510,7 @@ const WorkforceJobs = () => {
                 className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-gold/20"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Post a Job
+                 New deal room
               </Link>
             </div>
           </div>

@@ -11,7 +11,7 @@ import {
   Phone,
   Mail,
   ExternalLink,
-  UserPlus,
+  Plus,
   Eye,
   MessageCircle,
   Award,
@@ -21,7 +21,8 @@ import {
   Globe,
   Download,
   BookOpen,
-  TrendingUp
+  TrendingUp,
+  User2
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -274,7 +275,7 @@ const WorkforceProfessionals = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -296,9 +297,9 @@ const WorkforceProfessionals = () => {
                 ) : (
                   <Link
                     to={webRoutes.workforceProfileCreate}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                    className="bg-pale_yellow text-white px-4 py-2 rounded-lg hover:bg-gold flex items-center"
                   >
-                    <UserPlus className="w-4 h-4 mr-2" />
+                    <Plus className="w-4 h-4 mr-2" />
                     Create Profile
                   </Link>
                 )
@@ -308,7 +309,7 @@ const WorkforceProfessionals = () => {
                   to="/login"
                   className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center"
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
+                  <Plus className="w-4 h-4 mr-2" />
                   Login to Create Profile
                 </Link>
               )}
@@ -317,7 +318,7 @@ const WorkforceProfessionals = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto py-8">
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
@@ -423,10 +424,10 @@ const WorkforceProfessionals = () => {
         {/* Professionals Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProfessionals.map((professional) => (
-            <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
-              <div className="p-6">
+            <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow ">
+              <div className="p-6 h-full">
                 {/* Header */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-4 h-[20%]">
                   <div className="flex items-center space-x-3">
                     <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
@@ -444,7 +445,7 @@ const WorkforceProfessionals = () => {
                         <CheckCircle className="w-3 h-3 inline mr-1" />Verified
                       </span>
                     )}
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
                       professional.availability_status === 'available' 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-yellow-100 text-yellow-800'
@@ -453,6 +454,39 @@ const WorkforceProfessionals = () => {
                     </span>
                   </div>
                 </div>
+                <div className="h-[65%]">
+                 {/* Skills */}
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Key Skills</p>
+                  <div className="flex flex-wrap gap-1">
+          {(professional.user_skills && professional.user_skills.length > 0) ? (
+                      <>
+            {professional.user_skills
+              .filter(skill => skill && skill.skill_name) // Filter out null/undefined skills
+              .slice(0, 3)
+              .map((skill, index) => (
+                          <span key={skill.id || index} className="rounded-full bg-[#F8F9FA] text-[#495057] text-xs px-2 py-1">
+              {skill.skill_name}
+                          </span>
+                        ))}
+                        {professional.user_skills.filter(skill => skill && skill.skill_name).length > 3 && (
+                          <span className="text-xs text-gray-500 px-2 py-1">
+                            +{professional.user_skills.filter(skill => skill && skill.skill_name).length - 3} more
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-500 px-2 py-1">No skills listed</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Rate */}
+                  <div className="flex justify-between items-center py-2">
+                    <span className="font-semibold text-gray-600">
+                      ${professional.hourly_rate || '0'}/hr
+                    </span>
+                  </div>
 
                 {/* Details */}
                 <div className="space-y-3 mb-4">
@@ -472,35 +506,11 @@ const WorkforceProfessionals = () => {
                   )}
                 </div>
 
-                {/* Skills */}
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Key Skills</p>
-                  <div className="flex flex-wrap gap-1">
-          {(professional.user_skills && professional.user_skills.length > 0) ? (
-                      <>
-            {professional.user_skills
-              .filter(skill => skill && skill.skill_name) // Filter out null/undefined skills
-              .slice(0, 3)
-              .map((skill, index) => (
-                          <span key={skill.id || index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-              {skill.skill_name}
-                          </span>
-                        ))}
-                        {professional.user_skills.filter(skill => skill && skill.skill_name).length > 3 && (
-                          <span className="text-xs text-gray-500 px-2 py-1">
-                            +{professional.user_skills.filter(skill => skill && skill.skill_name).length - 3} more
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-xs text-gray-500 px-2 py-1">No skills listed</span>
-                    )}
-                  </div>
-                </div>
+               
 
                 {/* Stats */}
                                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-gray-100">
+                {/* <div className="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-gray-100">
                   <div className="text-center">
                     <p className="text-sm font-semibold text-gray-900">{professional.completed_projects || 0}</p>
                     <p className="text-xs text-gray-600">Projects</p>
@@ -513,33 +523,28 @@ const WorkforceProfessionals = () => {
                     <p className="text-sm font-semibold text-gray-900">{professional.average_response_hours || 24}h</p>
                     <p className="text-xs text-gray-600">Response</p>
                   </div>
-                </div>
+                </div> */}
 
-                {/* Rate */}
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Hourly Rate</span>
-                    <span className="font-semibold text-gray-900">
-                      ${professional.hourly_rate || '0'}/hr
-                    </span>
-                  </div>
-                </div>
+                    </div>
+
+
 
                 {/* Actions */}
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 pt-3 border-t-2 border-[#00000033]/20 h-[15%]">
                   <Link
                     to={`${webRoutes.workforceProfileDetail.replace(':id', professional.id)}`}
-                    className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                    className="w-[50%] bg-custom_yellow text-white text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
                   >
-                    <Eye className="w-4 h-4 mr-1" />
+                    <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
                   <button 
                     onClick={() => handleConnectWithProfessional(professional.id)}
-                    className="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="w-[50%] flex items-center justify-center bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
                     title="Send connection request"
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    Message
                   </button>
                 </div>
               </div>
