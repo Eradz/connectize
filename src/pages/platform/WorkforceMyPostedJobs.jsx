@@ -21,11 +21,14 @@ import {
   XCircle,
   TrendingUp,
   UserCheck,
-  MessageCircle
+  MessageCircle,
+  UserPlus2,
+  ClockCheck
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
 import { toast } from 'sonner';
+import { BriefCaseIcon } from '../../icon';
 
 const WorkforceMyPostedJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -179,7 +182,7 @@ const WorkforceMyPostedJobs = () => {
             <div className="mt-4 sm:mt-0">
               <Link
                 to={webRoutes.workforceJobCreate}
-                className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-gold transition-colors"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Post New Job
@@ -191,52 +194,52 @@ const WorkforceMyPostedJobs = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Briefcase className="w-6 h-6 text-blue-600" />
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-[#FFF1C6] rounded-lg">
+                <BriefCaseIcon className="w-6 h-6" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+              <div className="">
                 <p className="text-2xl font-bold text-gray-900">{jobs.length}</p>
+                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
               </div>
             </div>
           </div>
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-[#FFF1C6] rounded-lg">
+                <ClockCheck className="w-6 h-6" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+              <div className="">
                 <p className="text-2xl font-bold text-gray-900">
                   {jobs.filter(job => job.status === 'active').length}
                 </p>
+                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
               </div>
             </div>
           </div>
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <UserCheck className="w-6 h-6 text-purple-600" />
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-[#FFF1C6] rounded-lg">
+                <UserPlus2 className="w-6 h-6" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Applications</p>
+              <div className="">
                 <p className="text-2xl font-bold text-gray-900">
                   {jobs.reduce((sum, job) => sum + (job.application_count || 0), 0)}
                 </p>
+                <p className="text-sm font-medium text-gray-600">Total Applications</p>
               </div>
             </div>
           </div>
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-[#FFF1C6] rounded-lg">
+                <TrendingUp className="w-6 h-6" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg. Applications</p>
+              <div className="">
                 <p className="text-2xl font-bold text-gray-900">
                   {jobs.length > 0 ? Math.round(jobs.reduce((sum, job) => sum + (job.application_count || 0), 0) / jobs.length) : 0}
                 </p>
+                <p className="text-sm font-medium text-gray-600">Avg. Applications</p>
               </div>
             </div>
           </div>
