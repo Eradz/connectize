@@ -327,11 +327,11 @@ const WorkforceJobs = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center pt-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Oil & Gas Jobs</h1>
               <p className="text-gray-600 mt-1">Find your next opportunity in the energy sector</p>
@@ -347,9 +347,9 @@ const WorkforceJobs = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white my-8">
         {/* Job Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-background grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 pb-4">
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex flex-col text-center gap-1 items-center">
               <div className="bg-[#FFF1C6] p-3 rounded-lg">
@@ -400,7 +400,7 @@ const WorkforceJobs = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8 w-[95%] mx-auto ">
           <form onSubmit={handleSearch} className="mb-6">
             <div className="relative max-w-2xl">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -483,7 +483,7 @@ const WorkforceJobs = () => {
         </div>
 
         {/* Filter Results Count */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 w-[95%] mx-auto">
           <div className="text-sm text-gray-600">
             Showing {filteredJobs.length} of {jobs.length} jobs
           </div>
@@ -515,7 +515,7 @@ const WorkforceJobs = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-[95%] mx-auto">
             {filteredJobs.map((job) => (
               <JobCard key={job.id} job={job} />
             ))}
@@ -524,7 +524,7 @@ const WorkforceJobs = () => {
 
         {/* Load More Button */}
         {jobs.length > 0 && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 w-[95%] mx-auto">
             <button className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
               Load More Jobs
             </button>
