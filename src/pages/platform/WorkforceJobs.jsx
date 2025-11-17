@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
-  Filter, 
-  MapPin, 
-  Calendar, 
   DollarSign,
   Clock,
   Users,
@@ -16,13 +13,12 @@ import {
   Eye,
   ExternalLink,
   Briefcase,
-  GraduationCap,
-  Award,
   TrendingUp,
-  LucideChartNoAxesCombined
+  LucideChartNoAxesCombined,
+  ClockFading, 
+  MapPin
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { workforceAPI } from '../../api-services/workforce';
 import { BriefCaseIcon } from '../../icon';
 
 const WorkforceJobs = () => {
@@ -122,7 +118,7 @@ const WorkforceJobs = () => {
       setLoading(true);
       
       // Use direct fetch since our API service has authentication issues
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'}/api/v1/workforce/jobs/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/workforce/jobs/`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -230,7 +226,7 @@ const WorkforceJobs = () => {
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
-              <div className="bg-blue-100 p-2 rounded-lg">
+              <div className="bg-[#FFF1C6] p-2 rounded-lg">
                 {getJobTypeIcon(job.job_type)}
               </div>
               <div>
@@ -274,6 +270,12 @@ const WorkforceJobs = () => {
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">{job.description}</p>
 
         <div className="space-y-2 mb-4">
+
+          <div className="flex items-center text-sm text-gray-600">
+            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+            <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
+          </div>
+
           <div className="flex items-center text-sm text-gray-600">
             <MapPin className="w-4 h-4 mr-2 text-gray-400" />
             <span>{job.location}</span>
@@ -282,43 +284,42 @@ const WorkforceJobs = () => {
             )}
           </div>
           
-          <div className="flex items-center text-sm text-gray-600">
-            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-            <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
-          </div>
+          
 
           {job.application_deadline && (
             <div className="flex items-center text-sm text-gray-600">
-              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-              <span>Apply by {new Date(job.application_deadline).toLocaleDateString()}</span>
+              {/* <Calendar className="w-4 h-4 mr-2 text-gray-400" /> */}
+              <ClockFading className="w-4 h-4 mr-2 text-gray-400" />
+              <span>Exp: {new Date(job.application_deadline).toLocaleDateString()}</span>
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
-            <div className="flex items-center">
-              <Eye className="w-4 h-4 mr-1" />
-              {job.views_count || 0} views
-            </div>
+          <div className="flex items-center space-x-1 text-[12px] text-gray-500">
             <div className="flex items-center">
               <Users className="w-4 h-4 mr-1" />
               {job.applications_count || 0} applicants
             </div>
+            <div className="flex items-center">
+              <Eye className="w-4 h-4 mr-1" />
+              {/* <DealIcon className="w-6 h-6" fill={"#ffffff"}/> */}
+              {job.views_count || 0} views
+            </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <Link
-              to={webRoutes.workforceJobDetail.replace(':id', job.id)}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
-              View Details
-            </Link>
+          <div className="flex items-center space-x-2 text-[12px]">
             <Link
               to={webRoutes.workforceJobApply.replace(':id', job.id)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="bg-custom_yellow text-white p-2 rounded-lg hover:bg-gold transition-colors font-medium"
             >
               Apply Now
+            </Link>
+            <Link
+              to={webRoutes.workforceJobDetail.replace(':id', job.id)}
+              className="font-medium bg-pale_yellow p-2 rounded-lg"
+            >
+              View Details
             </Link>
           </div>
         </div>

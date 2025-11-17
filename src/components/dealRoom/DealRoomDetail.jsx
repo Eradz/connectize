@@ -749,7 +749,7 @@ export default function DealRoomDetail() {
                         <span>({(newDocFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                       </div>
                     )}
-                    <button disabled={docUploading} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-60">
+                    <button disabled={docUploading} className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-gold/80 disabled:opacity-60">
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                   </form>
