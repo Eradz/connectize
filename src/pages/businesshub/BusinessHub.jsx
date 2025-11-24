@@ -113,7 +113,7 @@ const PlatformDashboard = () => {
       <div className="">
 
         {/* Platform Modules */}
-        <div className="flex flex-col md:flex-row gap-6 h-fit md:h-[610px]">
+        <div className="flex flex-col md:flex-row gap-6 h-fit md:h-[510px]">
           <PlatformModules dashboardData={dashboardData} />
           <div className="w-full md:w-[30%]">
             <RecentActivities dashboardData={dashboardData} />
