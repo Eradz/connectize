@@ -39,7 +39,8 @@ export default function BusinessHubHeader({dashboardData}) {
       value: formatCompactNumber(dashboardData.analytics.revenue), 
       icon: <DollarSignIcon />, 
       sublabel: `+${dashboardData.analytics.growth}%`,
-      bgColor: "bg-[#FFF9E6]"
+      bgColor: "bg-[#FFF9E6]",
+      showTrend: true
     },
     { 
       label: "Active Room Deals", 
@@ -64,26 +65,46 @@ export default function BusinessHubHeader({dashboardData}) {
     },
   ];
 
+  // MODIFIED ORDER
   const quickActions = [
-    { label: "New Deal Room", color: "bg-[#FBD796]", icon: "+", to: webRoutes.dealRooms },
-    { label: "Get Verified", color: "bg-[#FBD796]", icon: "+", to: webRoutes.subscriptionDashboard },
-    { label: "Create Profile", color: "bg-[#B1C7FC]", icon: "+", to: webRoutes.profile },
-    { label: "Post Opening Jobs", color: "bg-[#95EB99]", icon: "+", to: webRoutes.workforceJobs }
+    { label: "New Deal Room", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.dealRooms }, 
+    { label: "Post Opening Jobs", color: "bg-[#95EB99]", icon: "+", to: webRoutes.workforceJobs },
+    { label: "Create Profile", color: "bg-[#B1C7FC]", icon: "+", to: webRoutes.profile }, 
+    { label: "Get Verified", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.subscriptionDashboard }
   ];
 
   return (
     <div className="bg-gray-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 py-6">
+
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Welcome To Business Hub</h1>
           <p className="text-sm text-gray-500 mt-1">Comprehensive Industry Collaboration Platform</p>
         </div>
 
-        {/* Quick Actions */}
+        {/* QUICK ACTION SECTION - UPDATED */}
         <div className="mb-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Quick Action</h2>
-          <div className="grid grid-cols-2 gap-3">
+          {/* Desktop: Quick Action + Buttons on SAME LINE */}
+          <div className="hidden md:flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-gray-900">Quick Action</h2>
+
+            <div className="flex gap-3">
+              {quickActions.map((action, index) => (
+                <Link
+                  to={action.to}
+                  key={index}
+                  className={`${action.color} flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:opacity-90`}
+                >
+                  <span className="text-lg font-bold">{action.icon}</span>
+                  <span>{action.label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile View (UNCHANGED) */}
+          <div className="grid grid-cols-2 gap-3 md:hidden">
             {quickActions.map((action, index) => (
               <Link
                 to={action.to}
@@ -98,7 +119,7 @@ export default function BusinessHubHeader({dashboardData}) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {stats.map((stat, index) => (
             <div 
               key={index} 
@@ -110,26 +131,25 @@ export default function BusinessHubHeader({dashboardData}) {
               <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
               <p className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</p>
               <div className="flex items-center gap-1">
-                {index === 0 && <TrendUpIcon />}
+                {stat.showTrend && <TrendUpIcon />}
                 <p className="text-xs text-gray-400">{stat.sublabel}</p>
               </div>
             </div>
           ))}
 
           {/* Subscription Card */}
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
+          <div className="bg-white rounded-lg p-4 border border-gray-200 col-span-2 md:col-span-1">
             <div className="bg-[#FFF9E6] w-10 h-10 rounded-lg flex items-center justify-center mb-3">
               <CardIcon />
             </div>
             <p className="text-xs text-gray-500 mb-1">Subscription</p>
-            <p className="text-2xl font-bold text-gray-900 mb-1">
-              {dashboardData.subscription?.plan || "No Plan"}
+            <p className="text-2xl font-bold bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-transparent bg-clip-text mb-1">
+              Premium
             </p>
-            <p className="text-xs text-gray-400">
-              {dashboardData.subscription?.plan ? `${dashboardData.subscription.duration} Months Plan` : "Choose a plan"}
-            </p>
+            <p className="text-xs text-gray-400">12 Months Plan</p>
           </div>
         </div>
+
       </div>
     </div>
   );
