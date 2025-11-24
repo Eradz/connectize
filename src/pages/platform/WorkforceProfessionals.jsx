@@ -22,7 +22,9 @@ import {
   Download,
   BookOpen,
   TrendingUp,
-  User2
+  User2,
+  ArrowLeft,
+  Target
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -247,7 +249,13 @@ const WorkforceProfessionals = () => {
     setSearchTerm('');
   };
 
-
+  // Mock stats for mobile header
+  const stats = {
+    activeJobs: 30,
+    growth: "+12,000%",
+    rating: 4.8,
+    successRate: 98
+  };
 
   if (loading) {
     return (
@@ -276,8 +284,129 @@ const WorkforceProfessionals = () => {
 
   return (
     <div className="min-h-screen">
+      {/* ========== MOBILE HEADER - ONLY VISIBLE ON MOBILE ========== */}
+      <div className="lg:hidden bg-white border-b sticky top-0 z-10">
+        <div className="px-4 py-4">
+          <div className="flex items-center mb-4">
+            <button className="mr-3">
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-gray-900">Oil & Gas Jobs</h1>
+              <p className="text-xs text-gray-600">Find Your Next Opportunity in The Energy Sector</p>
+            </div>
+            <button className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Plus className="w-5 h-5 text-black" />
+            </button>
+          </div>
+
+          {/* Mobile Stats Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
+                <Briefcase className="w-6 h-6 text-yellow-700" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.activeJobs}</p>
+              <p className="text-xs text-gray-600">Active Jobs</p>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
+                <TrendingUp className="w-6 h-6 text-yellow-700" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.growth}</p>
+              <p className="text-xs text-gray-600">Growth This Month</p>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
+                <Star className="w-6 h-6 text-yellow-700" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.rating}</p>
+              <p className="text-xs text-gray-600">Average Rating</p>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
+                <Target className="w-6 h-6 text-yellow-700" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.successRate}%</p>
+              <p className="text-xs text-gray-600">Success Rate</p>
+            </div>
+          </div>
+
+          {/* Mobile Search */}
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search Deal Rooms"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </div>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg flex items-center gap-2 flex-shrink-0"
+            >
+              <Filter className="w-4 h-4" />
+              <span className="text-sm">Filter</span>
+            </button>
+          </div>
+
+          {/* Mobile Filters Dropdown */}
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  placeholder="City, Country"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                  value={filters.location}
+                  onChange={(e) => handleFilterChange('location', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Experience</label>
+                <select
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                  value={filters.experience}
+                  onChange={(e) => handleFilterChange('experience', e.target.value)}
+                >
+                  <option value="">Any Level</option>
+                  <option value="0-2">0-2 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="6-10">6-10 years</option>
+                  <option value="10+">10+ years</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Availability</label>
+                <select
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                  value={filters.availability}
+                  onChange={(e) => handleFilterChange('availability', e.target.value)}
+                >
+                  <option value="">Any Status</option>
+                  <option value="Available">Available</option>
+                  <option value="Busy">Busy</option>
+                  <option value="Available Soon">Available Soon</option>
+                </select>
+              </div>
+              <button
+                onClick={clearFilters}
+                className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* ========== END MOBILE HEADER ========== */}
+
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="hidden lg:block bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
@@ -318,9 +447,9 @@ const WorkforceProfessionals = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-8">
+      <div className="max-w-7xl mx-auto py-4 lg:py-8 px-4 lg:px-0">
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
+        <div className="hidden lg:block bg-white rounded-xl shadow-sm border p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -421,8 +550,91 @@ const WorkforceProfessionals = () => {
           )}
         </div>
 
+        {/* ========== MOBILE PROFESSIONALS LIST - ONLY VISIBLE ON MOBILE ========== */}
+        <div className="lg:hidden space-y-4">
+          {filteredProfessionals.map((professional) => (
+            <div key={professional.id} className="bg-white rounded-xl border shadow-sm">
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
+                      alt={professional.user_name || professional.user_email || 'Professional'}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-sm">{professional.user_name || professional.user_email || 'Professional'}</h3>
+                      <p className="text-xs text-gray-600">{professional.professional_title || 'No title specified'}</p>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                    professional.availability_status === 'available' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {professional.availability_status || 'Unknown'}
+                  </span>
+                </div>
+
+                <div className="mb-3">
+                  <p className="text-xs font-medium text-gray-700 mb-2">Key Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(professional.user_skills && professional.user_skills.length > 0) ? (
+                      <>
+                        {professional.user_skills
+                          .filter(skill => skill && skill.skill_name)
+                          .slice(0, 4)
+                          .map((skill, index) => (
+                            <span key={skill.id || index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                              {skill.skill_name}
+                            </span>
+                          ))}
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-500">No skills listed</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mb-3 pb-3 border-b">
+                  <span className="text-lg font-bold text-gray-900">$ {professional.hourly_rate || '0'}/hr</span>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-start text-xs text-gray-600">
+                    <MapPin className="w-3.5 h-3.5 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>{professional.current_location || 'Location not specified'}</span>
+                  </div>
+                  <div className="flex items-center text-xs text-gray-600">
+                    <Briefcase className="w-3.5 h-3.5 mr-2" />
+                    {professional.years_of_experience || 0} Years Experience
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Link
+                    to={`${webRoutes.workforceProfileDetail.replace(':id', professional.id)}`}
+                    className="flex-1 bg-yellow-400 text-white py-2.5 rounded-lg font-medium text-sm flex items-center justify-center"
+                  >
+                    <User2 className="w-4 h-4 mr-1" />
+                    View Profile
+                  </Link>
+                  <button 
+                    onClick={() => handleConnectWithProfessional(professional.id)}
+                    className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center"
+                  >
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    Message
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* ========== END MOBILE PROFESSIONALS LIST ========== */}
+
         {/* Professionals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProfessionals.map((professional) => (
             <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow ">
               <div className="p-6 h-full">
@@ -505,25 +717,6 @@ const WorkforceProfessionals = () => {
                     </div>
                   )}
                 </div>
-
-               
-
-                {/* Stats */}
-                                {/* Stats */}
-                {/* <div className="grid grid-cols-3 gap-4 mb-4 pt-4 border-t border-gray-100">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{professional.completed_projects || 0}</p>
-                    <p className="text-xs text-gray-600">Projects</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{professional.success_rate || 0}%</p>
-                    <p className="text-xs text-gray-600">Success</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{professional.average_response_hours || 24}h</p>
-                    <p className="text-xs text-gray-600">Response</p>
-                  </div>
-                </div> */}
 
                     </div>
 
