@@ -6,6 +6,7 @@ import StarIcon from "../../../icon/StarIcon"
 import { webRoutes } from "../../../lib/webRoutes";
 import { Link } from "react-router-dom";
 import SubscriptionCard from "../../dashboard/SubscriptionCard";
+import { Plus } from "lucide-react";
 export default function BusinessHubHeader({dashboardData}) {
   const formatCompactNumber = (num) => {
   if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
@@ -51,7 +52,7 @@ export default function BusinessHubHeader({dashboardData}) {
                   'order-0 md:order-0'
                 }`}
               >
-                <span className="font-bold text-[24px] pr-2">{action.icon}</span>
+               <Plus className="p-1" />
                <p>{action.label}</p> 
               </Link>
             ))}

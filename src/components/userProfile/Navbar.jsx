@@ -15,6 +15,7 @@ import NavbarDropdown from "../NavbarDropdown";
 import { NavigationSection } from "../NavigationSection";
 import { NotificationPopOver } from "../notifications";
 import { JoinedUserCompanyImages } from "../ResponsiveNav";
+import { webRoutes } from "../../lib/webRoutes";
 
 const Navbar = () => {
   const { user: currentUser } = useAuth();
@@ -61,8 +62,9 @@ const Navbar = () => {
 
             <div className="flex items-center gap-3 xs:gap-5 md:gap-7 shrink-0">
               {currentUser?.user_type === CompanyUserType && <NavbarDropdown />}
-
-              <NotificationPopOver />
+              <Link to={webRoutes.coNotifications}>
+                <NotificationPopOver />
+              </Link>
 
               {/* <LinkWithTooltipIcon
                 IconName={Setting}
