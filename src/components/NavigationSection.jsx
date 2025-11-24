@@ -23,14 +23,20 @@ import {
   ChevronRight,
   Building2
 } from "lucide-react";
+import AISecondIcon from "../icon/AISecondIcon";
+import PlatformDashboard from "../icon/PlatformDashoardIcon";
+import { DealIcon } from "../icon/deal";
+import BriefCaseIcon from "../icon/briefCaseIcon";
+import {BusinessHub} from "../icon/BusinessHub"
+import LogisticIcon from "../icon/LogisticIcon";
 
 // Icon mapping for dynamic icons
 const iconMap = {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Brain,
-  Truck,
+  PlatformDashboard,
+  DealIcon,
+  BriefCaseIcon,
+  AISecondIcon,
+  LogisticIcon,
   BookOpen,
   CreditCard,
   Shield,
@@ -140,7 +146,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
     const isExpanded = expandedHubItems.has(item.name);
 
     return (
-      <li className="space-y-1">
+      <li className="">
         <div className="flex items-center">
           <Link
             to={item.to}
@@ -154,7 +160,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             )}
           >
             {IconComponent && (
-              <IconComponent className="w-5 h-5 flex-shrink-0" />
+              <IconComponent className="w-[30px] h-[30px]" fill="#F8F9FA" />
             )}
             <div className="flex-1 min-w-0">
               <span className="text-sm font-medium block truncate">{item.name}</span>
@@ -249,10 +255,10 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="">
       {/* Main Navigation */}
-      <div className="bg-background rounded p-2 space-y-1">
-        <ul className="xs:text-sm space-y-1">
+      <div className="rounded">
+        <ul className="xs:text-sm">
           {navigators.map(({ to, icon, name }, index) => {
             const isActive = to === "/" ? pathname === "/" : pathname.startsWith(to);
             return (
@@ -290,10 +296,10 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
       </div>
 
       {/* Hub Section */}
-      <div className="bg-white rounded-lg p-2 shadow-sm border">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-600" />
+      <div className="">
+        <div className={`${expandedSections.has('hub') ? 'bg-background ' : ''} flex items-center justify-between p-2 h-full rounded-t-lg` }>
+          <h3 className={` text-sm font-semibold flex items-center gap-2 `}>
+            <BusinessHub className="w-4 h-4 text-blue-600" />
             Business Hub
           </h3>
           <button
@@ -309,7 +315,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
         </div>
         
         {expandedSections.has('hub') && (
-          <ul className="space-y-1">
+          <ul className="">
             {hubNavItems.map((item, index) => (
               <HubNavItem key={index} item={item} />
             ))}
@@ -320,7 +326,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
       {/* Admin Section - Only show for admin users */}
       {isAdmin && (
         <div className="bg-gold/10 rounded-lg p-2 shadow-sm border border-gold/30">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gold flex items-center gap-2">
               <Shield className="w-4 h-4 text-gold" />
               Admin
@@ -389,7 +395,6 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
               You are about to end your current session.
             </LightParagraph>
           </ReusableModal>
-          <div className="bg-background rounded p-2">
             <button
               className="flex gap-2 items-center transition-colors duration-300 p-2 rounded hover:!text-red-600 text-gray-600 disabled:cursor-not-allowed disabled:text-red-300 w-full"
               onClick={() => setIsOpen(true)}
@@ -400,7 +405,6 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 {loading ? "Logging out..." : "Logout"}
               </span>
             </button>
-          </div>
         </>
       )}
     </div>

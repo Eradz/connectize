@@ -92,13 +92,13 @@ export const hubNavItems = [
   {
     name: "Platform Dashboard",
     to: webRoutes.platformDashboard,
-    icon: "LayoutDashboard",
+    icon: "PlatformDashboard",
     description: "Overview of platform activities"
   },
   {
     name: "Deal Rooms",
     to: webRoutes.dealRooms,
-    icon: "FileText",
+    icon: "DealIcon",
     description: "Manage oil & gas deals",
     subItems: [
       { name: "All Deal Rooms", to: webRoutes.dealRooms },
@@ -109,7 +109,7 @@ export const hubNavItems = [
   {
     name: "Workforce",
     to: webRoutes.workforceJobs,
-    icon: "Users",
+    icon: "BriefCaseIcon",
     description: "Job marketplace and events",
     subItems: [
       { name: "Job Marketplace", to: webRoutes.workforceJobs },
@@ -124,7 +124,7 @@ export const hubNavItems = [
   {
     name: "AI Services",
     to: webRoutes.aiDashboard,
-    icon: "Brain",
+    icon: "AISecondIcon",
     description: "AI-powered insights",
     subItems: [
       { name: "AI Dashboard", to: webRoutes.aiDashboard },
@@ -135,7 +135,7 @@ export const hubNavItems = [
   {
     name: "Logistics Hub",
     to: webRoutes.logisticsDashboard,
-    icon: "Truck",
+    icon: "LogisticIcon",
     description: "Supply chain management",
     subItems: [
       { name: "Logistics Overview", to: webRoutes.logisticsDashboard },
@@ -144,23 +144,23 @@ export const hubNavItems = [
       { name: "Shipments", to: webRoutes.logisticsShipments }
     ]
   },
-  {
-    name: "Knowledge Hub",
-    to: webRoutes.knowledgeHub,
-    icon: "BookOpen",
-    description: "Industry knowledge base",
-    subItems: [
-      { name: "Articles", to: webRoutes.knowledgeArticles },
-      { name: "Forums", to: webRoutes.knowledgeForums },
-      { name: "Topics", to: webRoutes.knowledgeTopics }
-    ]
-  },
-  {
-    name: "Subscriptions",
-    to: webRoutes.subscriptions,
-    icon: "CreditCard",
-    description: "Manage your subscription"
-  }
+  // {
+  //   name: "Knowledge Hub",
+  //   to: webRoutes.knowledgeHub,
+  //   icon: "BookOpen",
+  //   description: "Industry knowledge base",
+  //   subItems: [
+  //     { name: "Articles", to: webRoutes.knowledgeArticles },
+  //     { name: "Forums", to: webRoutes.knowledgeForums },
+  //     { name: "Topics", to: webRoutes.knowledgeTopics }
+  //   ]
+  // },
+  // {
+  //   name: "Subscriptions",
+  //   to: webRoutes.subscriptions,
+  //   icon: "CreditCard",
+  //   description: "Manage your subscription"
+  // }
 ];
 
 // Admin Navigation Items
