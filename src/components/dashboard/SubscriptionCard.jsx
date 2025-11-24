@@ -164,23 +164,21 @@ const SubscriptionCard = () => {
   const planType = subscription.plan?.tier || subscription.plan?.type || planName;
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
+    <div className="bg-white p-4 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
-        <div className="flex">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="flex flex-col">
              <CardIcon/>
-            <p className="text-sm md:text-[14px] font-medium text-gray-600">Subscription</p>
-            {getStatusBadge(subscription.status)}
-          </div>
+            <p className="text-xs text-gray-500 mb-1 mt-4">Subscription</p>
+            {/* {getStatusBadge(subscription.status)} */}
           
           <div className="mb-2">
-            <p className="text-xl font-bold text-gray-900">{planName}</p>
+            <p className="text-gray-900 font-bold">{planName}</p>
             <p className="text-sm text-gray-600">
               {formatPrice(subscription)}/month
             </p>
           </div>
           
-          <div className="space-y-1">
+          {/* <div className="space-y-1">
             <p className="text-xs text-gray-500">
               Next billing: {formatNextBillingDate(subscription)}
             </p>
@@ -192,12 +190,12 @@ const SubscriptionCard = () => {
               Manage subscription
               <ArrowUpRight className="w-3 h-3 ml-1" />
             </Link>
-          </div>
+          </div> */}
         </div>
         
-        <div className={`p-3 rounded-lg ${getPlanColor(planType)}`}>
+        {/* <div className={`p-3 rounded-lg ${getPlanColor(planType)}`}>
           {getPlanIcon(planType)}
-        </div>
+        </div> */}
       </div>
     </div>
   );
