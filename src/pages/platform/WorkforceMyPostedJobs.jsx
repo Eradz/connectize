@@ -3,25 +3,9 @@ import { Link } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
-  Filter, 
-  MapPin, 
-  Calendar, 
-  DollarSign,
-  Clock,
-  Users,
-  Building,
-  Star,
-  Eye,
-  ExternalLink,
   Briefcase,
-  Edit,
-  Trash2,
   AlertCircle,
-  CheckCircle,
-  XCircle,
   TrendingUp,
-  UserCheck,
-  MessageCircle,
   UserPlus2,
   ClockCheck
 } from 'lucide-react';
@@ -29,6 +13,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
 import { toast } from 'sonner';
 import { BriefCaseIcon } from '../../icon';
+import { JobCard } from '../../components/workforce/JobCard';
 
 const WorkforceMyPostedJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -107,47 +92,7 @@ const WorkforceMyPostedJobs = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active': return 'text-green-600 bg-green-100';
-      case 'closed': return 'text-red-600 bg-red-100';
-      case 'draft': return 'text-yellow-600 bg-yellow-100';
-      case 'paused': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'active': return <CheckCircle className="w-4 h-4" />;
-      case 'closed': return <XCircle className="w-4 h-4" />;
-      case 'draft': return <AlertCircle className="w-4 h-4" />;
-      case 'paused': return <Clock className="w-4 h-4" />;
-      default: return <AlertCircle className="w-4 h-4" />;
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
-      return 'N/A';
-    }
-  };
-
-  const formatSalary = (min, max, currency = 'USD') => {
-    if (!min && !max) return 'Not specified';
-    const format = (amount) => new Intl.NumberFormat('en-US').format(amount);
-    if (min && max) return `${currency} ${format(min)} - ${format(max)}`;
-    if (min) return `${currency} ${format(min)}+`;
-    if (max) return `Up to ${currency} ${format(max)}`;
-    return 'Not specified';
-  };
 
   if (loading) {
     return (
@@ -168,8 +113,8 @@ const WorkforceMyPostedJobs = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <div className="">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -245,7 +190,35 @@ const WorkforceMyPostedJobs = () => {
           </div>
         </div>
 
-        {/* Filters and Search */}
+       
+
+        {/* Jobs List */}
+        <div className="space-y-6">
+          {filteredJobs.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+              <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm || filterStatus !== 'all' ? 'No jobs found' : 'No jobs posted yet'}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {searchTerm || filterStatus !== 'all' 
+                  ? 'Try adjusting your search or filters to find what you\'re looking for.'
+                  : 'Start building your team by posting your first job opportunity.'
+                }
+              </p>
+              {!searchTerm && filterStatus === 'all' && (
+                <Link
+                  to={webRoutes.workforceJobCreate}
+                  className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/70 transition-colors"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Post Your First Job
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white p-4">
+               {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="p-6 border-b border-gray-200">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
@@ -290,120 +263,12 @@ const WorkforceMyPostedJobs = () => {
             </div>
           </div>
         </div>
-
-        {/* Jobs List */}
-        <div className="space-y-6">
-          {filteredJobs.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-              <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {searchTerm || filterStatus !== 'all' ? 'No jobs found' : 'No jobs posted yet'}
-              </h3>
-              <p className="text-gray-500 mb-6">
-                {searchTerm || filterStatus !== 'all' 
-                  ? 'Try adjusting your search or filters to find what you\'re looking for.'
-                  : 'Start building your team by posting your first job opportunity.'
-                }
-              </p>
-              {!searchTerm && filterStatus === 'all' && (
-                <Link
-                  to={webRoutes.workforceJobCreate}
-                  className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/70 transition-colors"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Post Your First Job
-                </Link>
-              )}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+              {filteredJobs.map((job) => (
+                <JobCard key={job.id} job={job} myPostedJob={true}/>
+              ))}
+        </div>
             </div>
-          ) : (
-            filteredJobs.map((job) => (
-              <div key={job.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <div className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            {job.title}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                            <span className="flex items-center">
-                              <Building className="w-4 h-4 mr-1" />
-                              {job.company?.company_name || 'Company'}
-                            </span>
-                            <span className="flex items-center">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {job.location || 'Location not specified'}
-                            </span>
-                            <span className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-1" />
-                              Posted {formatDate(job.created_at)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(job.status)}`}>
-                          {getStatusIcon(job.status)}
-                          <span className="ml-1 capitalize">{job.status}</span>
-                        </div>
-                      </div>
-
-                      <p className="text-gray-700 mb-4 line-clamp-2">
-                        {job.description}
-                      </p>
-
-                      <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-4">
-                        <span className="flex items-center">
-                          <DollarSign className="w-4 h-4 mr-1" />
-                          {formatSalary(job.salary_min, job.salary_max, job.currency)}
-                        </span>
-                        <span className="flex items-center">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {job.job_type?.replace('_', ' ') || 'Full-time'}
-                        </span>
-                        <span className="flex items-center">
-                          <UserCheck className="w-4 h-4 mr-1" />
-                          {job.application_count || 0} applications
-                        </span>
-                        {job.application_deadline && (
-                          <span className="flex items-center">
-                            <AlertCircle className="w-4 h-4 mr-1" />
-                            Deadline: {formatDate(job.application_deadline)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 mt-4 lg:mt-0 lg:ml-6">
-                      <Link
-                        to={webRoutes.workforceJobDetail.replace(':id', job.id)}
-                        className="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Link>
-                      <Link
-                        to={`${webRoutes.workforceApplicationsManage}?job=${job.id}`}
-                        className="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        Applications ({job.application_count || 0})
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setJobToDelete(job);
-                          setShowDeleteModal(true);
-                        }}
-                        className="inline-flex items-center px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
           )}
         </div>
 
