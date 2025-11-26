@@ -364,7 +364,7 @@ const WorkforceMyPostedJobs = () => {
       </div>
 
       {/* Mobile View */}
-      <div className="lg:hidden bg-gray-50 min-h-screen font-poppins">
+      <div className="lg:hidden bg-gray-50 min-h-screen">
         {/* Mobile Header */}
         <div className="bg-white px-4 py-4 sticky top-0 z-10">
           <button onClick={() => window.history.back()} className="p-2 -ml-2 mb-2">
