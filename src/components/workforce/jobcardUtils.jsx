@@ -1,4 +1,4 @@
-import { Eye, Users } from "lucide-react";
+import { Briefcase, Clock, ExternalLink, Eye, Users } from "lucide-react";
 
   export const getExperienceBadgeColor = (level) => {
     switch (level) {
@@ -40,3 +40,44 @@ import { Eye, Users } from "lucide-react";
     </div>
     )
   }
+
+    export const getJobTypeIcon = (type) => {
+      switch (type) {
+        case 'full_time': return <Briefcase className="w-4 h-4" />;
+        case 'part_time': return <Clock className="w-4 h-4" />;
+        case 'contract': return <ExternalLink className="w-4 h-4" />;
+        case 'remote': return <Users className="w-4 h-4" />;
+        default: return <Briefcase className="w-4 h-4" />;
+      }
+    };
+
+    export const toggleSaveJob = async (jobId) => {
+        try {
+          if (savedJobs.has(jobId)) {
+            await workforceJobService.unsaveJob(jobId);
+            setSavedJobs(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(jobId);
+              return newSet;
+            });
+          } else {
+            await workforceJobService.saveJob(jobId);
+            setSavedJobs(prev => new Set(prev).add(jobId));
+          }
+        } catch (error) {
+          console.error('Failed to toggle job save:', error);
+          // Don't show error to user, just log it
+        }
+      }
+
+      export  const getTimeAgo = (timestamp) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just posted';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return `${Math.floor(diffInDays / 7)}w ago`;
+  };

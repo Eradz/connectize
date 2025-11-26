@@ -338,7 +338,7 @@ export default function WorkforceJobDetail() {
         isOpen={showApplicationModal}
         onClose={() => setShowApplicationModal(false)}
         title="Job Application form"
-        className="py-1"
+        className=""
         >
         <form
           onSubmit={async (e) => {
@@ -423,14 +423,14 @@ export default function WorkforceJobDetail() {
             <button
               type="button"
               onClick={() => setShowApplicationModal(false)}
-              className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50"
+              className="w-[30%] px-6 py-2 bg-pale_yellow border rounded text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60 flex items-center"
+              className="w-[30%] px-6 py-2 bg-custom_yellow rounded hover:bg-gold disabled:opacity-60 flex items-center"
             >
               {submitting ? (
                 <>
@@ -439,8 +439,8 @@ export default function WorkforceJobDetail() {
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Submit Application
+                  {/* <Send className="h-4 w-4 mr-2" /> */}
+                  Submit
                 </>
               )}
             </button>
