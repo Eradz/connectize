@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Plus, Search, ArrowLeft } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { dealRoomService } from '../../api-services/oilgas';
 import GridIcon from '../../icon/GridIcon';
@@ -10,6 +10,7 @@ import { DealRoomCard } from './DealRoomCard';
 import { DealRoomListItem } from './DealRoomListItem';
 
 const DealRooms = () => {
+  const navigate = useNavigate();
   const [dealRooms, setDealRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,11 +74,20 @@ const DealRooms = () => {
       <div className="hidden lg:block bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Deal Room</h1>
-              <p className="text-base text-gray-600 mt-1">
-                Secure collaboration space for oil and gas deals
-              </p>
+            <div className="flex items-start gap-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-1"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-700" />
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Deal Room</h1>
+                <p className="text-base text-gray-600 mt-1">
+                  Secure collaboration space for oil and gas deals
+                </p>
+              </div>
             </div>
             <Link
               to={webRoutes.dealRoomCreate}
