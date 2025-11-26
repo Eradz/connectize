@@ -28,12 +28,20 @@ import {
   Pencil,
   BookmarkCheck,
   Bookmark,
-  ClockFading
+  ClockFading,
+  House,
+  Dot,
+  StarIcon,
+  User2,
+  CalendarDays,
+  ClockCheck
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI as workforceService } from '../../api-services/workforce';
 import { formatSalary, getExperienceBadgeColor, getJobTypeIcon, getTimeAgo, toggleSaveJob } from '../../components/workforce/jobcardUtils';
 import BackArrowButton from '../../components/BackArrowButton';
+import { StarFilledIcon } from '../../icon';
+import { MessageOutlined } from '@ant-design/icons';
 
 const WorkforceApplications = () => {
   const [savedJobs, setSavedJobs] = useState(new Set());
@@ -150,6 +158,7 @@ const WorkforceApplications = () => {
       const response = await workforceService.getApplications();
       const data = response.data?.results || response.data || response || [];
       setApplications(data);
+      console.log(applications)
   // No separate filtered state; derived via useMemo
     } catch (error) {
       console.error('Failed to load applications:', error);
@@ -174,12 +183,12 @@ const WorkforceApplications = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'submitted': return 'bg-yellow-100 text-yellow-800';
+      case 'submitted': return 'bg-green-200 text-green-900';
       case 'under_review': return 'bg-blue-100 text-blue-800';
       case 'shortlisted': return 'bg-cyan-100 text-cyan-800';
       case 'interview_scheduled': return 'bg-purple-100 text-purple-800';
       case 'offer_made': return 'bg-green-100 text-green-800';
-      case 'hired': return 'bg-green-200 text-green-900';
+      case 'hired': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent';
       case 'rejected': return 'bg-red-100 text-red-800';
       case 'withdrawn': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -210,11 +219,8 @@ const WorkforceApplications = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    if (!dateString) return 'Not Reviewed Yet';
+    return new Date(dateString).toLocaleDateString();
   };
 
   const getTabCount = (tab) => {
@@ -271,7 +277,7 @@ const WorkforceApplications = () => {
               <p className="text-gray-600 mt-1">Track and manage your job applications</p>
               </div>
             </div>
-            <div className="flex space-x-3">
+            {/* <div className="flex space-x-3">
               <button
                 onClick={loadApplications}
                 className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center"
@@ -286,7 +292,7 @@ const WorkforceApplications = () => {
                 <Plus className="w-4 h-4 mr-2" />
                 Find Jobs
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -426,71 +432,57 @@ const WorkforceApplications = () => {
             {/* Applications List */}
             <div className="flex justify-between">
               {filteredApplications.map((job) => (
-                <div className="w-[49%] bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow h-[100%]">
-                        <div className="flex items-start justify-between mb-4 h-[30%]">
+                <div className="w-[49%] bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow h-[400px]">
+                        <div className="flex items-start justify-between mb-4  h-[35%]">
                           <div className="flex-1">
                             <div className="flex justify-between items-center space-x-3 mb-2">
                                 <div className="flex gap-2">
                                     <div className="bg-[#FFF1C6] p-2 rounded-lg">
                                         {getJobTypeIcon(job.job_type)}
                                     </div>
-                                        <h3 className="font-semibold text-gray-900 text-lg">{job.title}</h3>
+                                        <h3 className="font-semibold text-gray-900 text-lg">{job.job_title}</h3>
                                 </div>
-                                {
-                            // myPostedJob ? 
-                            // <div className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
-                            //     <Pencil className="w-5 h-5" />
-                            //     <p className="text-sm">Edit</p>
-                            // </div>
-                            // :
-                          <button
-                            onClick={() => toggleSaveJob(job.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              savedJobs.has(job.id) 
-                                ? 'bg-blue-100 text-blue-600' 
-                                : 'hover:bg-gray-100 text-gray-400'
-                            }`}
-                          >
-                            {savedJobs.has(job.id) ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
-                          </button>
-                          }
+                           
+                            <div className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
+                                <Pencil className="w-5 h-5" />
+                                <p className="text-sm">Edit</p>
                             </div>
+                          </div>
                               <div className="flex items-center text-sm text-gray-600 pb-4">
                                   <Building className="w-4 h-4 mr-1" />
-                                  <span className="font-medium">{job.company_name || 'Company'}</span>
-                                  <span className="mx-2">•</span>
-                                  <span>{getTimeAgo(job.created_at)}</span>
+                                  <span className="font-medium">{job.job_company || 'Company'}</span>
+                              </div>
+                              <div className='flex items-center justify-between'>
+                                <div className='flex items-center gap-2'>
+                                  <div className="flex items-center text-sm text-gray-600">
+                                    <CalendarDays className="w-4 h-4 mr-2 " />
+                                    <span>Date Applied: {formatDate(job.submitted_at)}</span>
+                                  </div>
+                
+                                  <div className="flex items-center text-sm text-gray-600">
+                                    <ClockCheck className="w-4 h-4 mr-2 " />
+                                    <span>{`Reviewed At: ${formatDate(job.reviewed_at)}`}</span>
+                                  </div>
                                 </div>
-                            
-                            <div className="flex flex-wrap items-center gap-2 mb-3">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getExperienceBadgeColor(job.experience_level)}`}>
-                                {job.experience_level} Level
-                              </span>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                {job.job_type?.replace('_', ' ')}
-                              </span>
-                              {job.is_remote && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  Remote
-                                </span>
-                              )}
+                                <div className='flex text-xs items-center bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.5px] rounded-full'>
+                                  <span className={`bg-white font-medium px-3 py-2 capitalize rounded-full `}>
+                                    <div className={`${getStatusColor(job.status)} bg-clip-text`}>
+                                      {job.status}
+                                    </div>
+                                    </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          
-                        </div>
-                
-                        <p className="text-gray-600 text-sm my-4 line-clamp-3 h-[12%] text-ellipsis overflow-hidden">{job.description}</p>
-                
-                        <div className="space-y-2 mb-4 h-[30%]">
-                
-                          <div className="flex items-center text-sm text-gray-600">
-                            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
-                          </div>
+                          <div className="h-[30%] border-b-gray-500">
+                            <div className="flex items-center text-sm text-gray-600">
+                              <DollarSign className="w-4 h-4 mr-2 " />
+                              <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
+                            </div>
                 
                           <div className="flex items-center text-sm text-gray-600">
-                            <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{job.location}</span>
+                            <MapPin className="w-4 h-4 mr-2 " />
+                            <span>{job.job_location}</span>
                             {job.requires_relocation && (
                               <span className="ml-2 text-orange-600">(Relocation Required)</span>
                             )}
@@ -500,46 +492,64 @@ const WorkforceApplications = () => {
                 
                           {job.application_deadline && (
                             <div className="flex items-center text-sm text-gray-600">
-                              {/* <Calendar className="w-4 h-4 mr-2 text-gray-400" /> */}
-                              <ClockFading className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>Exp: {new Date(job.application_deadline).toLocaleDateString()}</span>
+                              <House className="w-4 h-4 mr-2" />
+                              <div className='flex capitalize text-[#6C757D]'>
+                                <span>{job.job_type}</span>
+                                <Dot/>
+                                <span >{job.job_level}</span>
+                              </div>
                             </div>
                           )}
+
+                          <div className='flex items-center text-sm text-[#6C757D]'>
+                            <StarFilledIcon className="mr-2"/>
+                            <span>Job Match: {job.ai_match_score || 0}%</span>
+                          </div>
+                        </div>
+
+                        <div className='flex items-center text-sm h-[15%] text-[#6C757D] border border-y-gray-400 border-x-transparent py-2'>
+                          <User2 className='w-4 h-4 mr-2'/>
+                          <div className='flex items-center gap-2'>
+                            <p>Person contact:</p>
+                            <p>{job.reviewed_by || 'No Reviewer assigned'}</p>
+                          </div>
                         </div>
                 
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-100 h-[10%]">
-                          <div className="flex items-center space-x-1 text-[12px] text-gray-500">
-                            <div className="flex items-center">
-                              <Users className="w-4 h-4 mr-1" />
-                              {job.applications_count || 0} applicants
+                        <div className="flex items-center justify-between my-2 h-[10%]">
+                          <div className="flex items-center gap-2 text-[12px]">
+                            <div className="flex items-center px-4 py-2 bg-pale_yellow rounded-lg cursor-pointer">
+                              <Download className="w-4 h-4 mr-1" />
+                              Download
                             </div>
-                            <div className="flex items-center">
-                              <Eye className="w-4 h-4 mr-1" />
-                              {/* <DealIcon className="w-6 h-6" fill={"#ffffff"}/> */}
-                              {job.views_count || 0} views
+                            <div className="flex items-center bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.5px] rounded-lg cursor-pointer">
+                              <div className='flex items-center px-4 py-2 bg-white rounded-lg'>
+                              <MessageOutlined className="w-4 h-4 mr-1 text-[#FFC000]" />
+                              <span className='text-[#FF8400]'>
+                                Message
+                              </span>
+                              </div>
                             </div>
                           </div>
                           
-                          \
-                            <div className="flex items-center space-x-2 text-[12px]">
+                          <div className="flex items-center space-x-2 text-[12px]">
                             <Link
                               to={webRoutes.workforceJobApply.replace(':id', job.id)}
-                              className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-gold transition-colors font-medium"
+                              className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-red-300 transition-colors font-medium"
                             >
                               <Trash2 className="w-4 h-4 mr-1 text-[#FF0000]" />
                               <p className="text-[#FF0000]">Delete</p>
                             </Link>
                             <Link
                               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
-                              className="flex font-medium bg-pale_yellow p-2 rounded-lg"
+                              className="flex font-medium bg-gray-100 hover:bg-gray-300 p-2 rounded-lg"
                             >
-                                <Eye className="w-4 h-4 mr-1 " />
-                                <p className="">View Details</p>
+                                <Edit className="w-4 h-4 mr-1 " />
+                                <p className="">Edit</p>
                             </Link>
                           </div>
                           
                         </div>
-                    </div>
+                </div>
               ))}
             </div>
         </div>
