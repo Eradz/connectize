@@ -74,7 +74,7 @@ const Modal = ({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-gray-200/60 dark:border-gray-700/60">
+          <div className="flex items-center justify-between p-2 border-b border-gray-200/60 dark:border-gray-700/60">
             {title && (
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white font-display">
                 {title}
@@ -84,18 +84,19 @@ const Modal = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="!p-2 !h-8 !w-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="!p-2 !h-8 border border-[#F8F9FA] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 onClick={onClose}
               >
-                <span className="sr-only">Close</span>
+                {/* <span className="sr-only">Close</span> */}
                 <CloseIcon size={20} />
+                <span className="">Close</span>
               </Button>
             )}
           </div>
         )}
         
         {/* Content */}
-        <div className="p-6">
+        <div className="p-3">
           {children}
         </div>
       </div>

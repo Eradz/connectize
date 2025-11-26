@@ -14,6 +14,7 @@ import { workforceAPI } from '../../api-services/workforce';
 import { toast } from 'sonner';
 import { BriefCaseIcon } from '../../icon';
 import { JobCard } from '../../components/workforce/JobCard';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceMyPostedJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -116,13 +117,16 @@ const WorkforceMyPostedJobs = () => {
     <div className="min-h-screen">
       <div className="">
         {/* Header */}
-        <div className="mb-8">
+        <div className="my-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
+            <div className='flex'>
+              <BackArrowButton />
+              <div>
               <h1 className="text-3xl font-bold text-gray-900">My Posted Jobs</h1>
               <p className="mt-2 text-gray-600">
                 Manage jobs you've posted and track applications
               </p>
+              </div>
             </div>
             <div className="mt-4 sm:mt-0">
               <Link
