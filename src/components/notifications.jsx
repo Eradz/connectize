@@ -70,19 +70,19 @@ const NotificationPopOver = () => {
   );
 
   return (
-    <Popover>
-      <PopoverTrigger>
+    <div>
+      <div>
         <button className="relative">
           <IndicatorBadge indicator={unreadCount} floating />
           <Notification />
         </button>
-      </PopoverTrigger>
+      </div>
 
-      <PopoverContent className="mx-2 xs:!w-[350px] lg:!w-[400px]">
+      {/* <div className="mx-2 xs:!w-[350px] lg:!w-[400px]">
         <PopoverArrow />
         <NotificationItem isPopover />
-      </PopoverContent>
-    </Popover>
+      </div> */}
+    </div>
   );
 };
 

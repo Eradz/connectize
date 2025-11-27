@@ -129,7 +129,7 @@ const WorkforceMyPostedJobs = () => {
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 text-sm">{job.title}</h3>
-            <p className="text-xs text-gray-500">{job.company_name || 'Company Name'}</p>
+            <p className="text-xs text-gray-500">{job.company_name || 'Big Kahuna Burger Ltd.'}</p>
           </div>
         </div>
         <Bookmark className="w-5 h-5 text-gray-400" />
@@ -155,7 +155,7 @@ const WorkforceMyPostedJobs = () => {
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-600">
           <MapPin className="w-4 h-4" />
-          <span className="truncate">{job.location || 'Big Kahuna Burger Ltd. Santa Ana, Illinois 85486'}</span>
+          <span className="truncate">{job.location || '2672 Westheimer Rd. Santa Ana, Illinois 85486'}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-600">
           <Calendar className="w-4 h-4" />
@@ -166,11 +166,11 @@ const WorkforceMyPostedJobs = () => {
       <div className="flex items-center justify-between mb-4 pt-3 border-t border-gray-200">
         <div className="flex items-center gap-1 text-xs text-gray-600">
           <Users className="w-4 h-4" />
-          <span>{job.application_count || 0} Applied</span>
+          <span>{job.application_count || 23} Applied</span>
         </div>
         <div className="flex items-center gap-1 text-xs text-gray-600">
           <Eye className="w-4 h-4" />
-          <span>{job.views_count || 0} Views</span>
+          <span>{job.views_count || 234} Views</span>
         </div>
       </div>
 
@@ -364,7 +364,7 @@ const WorkforceMyPostedJobs = () => {
       </div>
 
       {/* Mobile View */}
-      <div className="lg:hidden bg-gray-50 min-h-screen">
+      <div className="lg:hidden bg-gray-50 min-h-screen font-poppins">
         {/* Mobile Header */}
         <div className="bg-white px-4 py-4 sticky top-0 z-10">
           <button onClick={() => window.history.back()} className="p-2 -ml-2 mb-2">
@@ -393,7 +393,7 @@ const WorkforceMyPostedJobs = () => {
               <div className="w-10 h-10 bg-[#FFF1C6] rounded-lg flex items-center justify-center mx-auto mb-2">
                 <Briefcase className="w-5 h-5 text-gray-700" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{jobs.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{jobs.length || 30}</p>
               <p className="text-xs text-gray-600">Total Jobs</p>
             </div>
             <div className="bg-white rounded-lg p-4 text-center">
@@ -401,7 +401,7 @@ const WorkforceMyPostedJobs = () => {
                 <ClockCheck className="w-5 h-5 text-gray-700" />
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {jobs.filter(job => job.status === 'active').length}
+                {jobs.filter(job => job.status === 'active').length || 10}
               </p>
               <p className="text-xs text-gray-600">Active Jobs</p>
             </div>
@@ -410,7 +410,7 @@ const WorkforceMyPostedJobs = () => {
                 <UserPlus2 className="w-5 h-5 text-gray-700" />
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {jobs.reduce((sum, job) => sum + (job.application_count || 0), 0)}
+                {jobs.reduce((sum, job) => sum + (job.application_count || 0), 0) || '98%'}
               </p>
               <p className="text-xs text-gray-600">Total Applications</p>
             </div>
@@ -419,7 +419,7 @@ const WorkforceMyPostedJobs = () => {
                 <TrendingUp className="w-5 h-5 text-gray-700" />
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {jobs.length > 0 ? Math.round(jobs.reduce((sum, job) => sum + (job.application_count || 0), 0) / jobs.length) : 0}
+                {jobs.length > 0 ? Math.round(jobs.reduce((sum, job) => sum + (job.application_count || 0), 0) / jobs.length) : 5}
               </p>
               <p className="text-xs text-gray-600">Avg Application</p>
             </div>

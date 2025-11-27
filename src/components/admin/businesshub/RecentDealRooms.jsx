@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { webRoutes } from "../../../lib/webRoutes";
 
 export default function RecentDealRooms({dashboardData}) {
-
+  console.log(dashboardData.dealRooms.data);
     const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

@@ -203,6 +203,7 @@ function App() {
           <Route path="co/representatives" element={<RepresentativesPage />} />
           <Route path="co/:userId" element={<UserProfile />} />
           <Route path="co/:company" element={<CompanyProfile />} />
+          <Route path="co/notifications" element={<NotificationItem />} />
           
           {/* Knowledge Hub Routes */}
           <Route path="knowledge" element={<KnowledgeHubDashboard />} />

@@ -4,8 +4,8 @@ import BriefCaseIcon from "../../../icon/briefCaseIcon"
 import DollarSignIcon from "../../../icon/dollarsign"
 import StarIcon from "../../../icon/StarIcon"
 import { webRoutes } from "../../../lib/webRoutes";
-import { Link } from "react-router-dom";
-
+import { Link } from "react-router-dom"
+import { Plus } from "lucide-react";
 // Trend Up Icon Component
 const TrendUpIcon = () => (
   <svg
@@ -111,8 +111,8 @@ export default function BusinessHubHeader({dashboardData}) {
                 key={index}
                 className={`${action.color} flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:opacity-90`}
               >
-                <span className="text-xl font-bold">{action.icon}</span>
-                <span>{action.label}</span>
+               <Plus className="p-1" />
+               <p>{action.label}</p> 
               </Link>
             ))}
           </div>

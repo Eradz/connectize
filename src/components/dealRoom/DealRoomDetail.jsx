@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import {
@@ -14,7 +14,8 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload } from "lucide-react";
+import { CloudUploadOutlined } from "@ant-design/icons";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -39,6 +40,39 @@ export default function DealRoomDetail() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const active = useMemo(() => currentSection(pathname), [pathname]);
+  const fileInputRef = useRef(null);
+  const [dragActive, setDragActive] = useState(false);
+
+    const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setNewDocFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveFile = () => {
+    setNewDocFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Early validation - don't even render if ID is invalid
   if (!id || id === 'my-participations' || id === 'create' || !id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
@@ -637,6 +671,8 @@ export default function DealRoomDetail() {
               )}
               {active === "documents" && (
                 <div className="space-y-4">
+                  
+                  {documents.length === 0 ? (
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -694,20 +730,28 @@ export default function DealRoomDetail() {
                         setDocUploading(false);
                       }
                     }}
-                    className="flex flex-col gap-2 p-4 border rounded-lg"
+                    className="flex flex-col gap-2 p-4 border rounded-lg bg-white"
                   >
-                    <div className="text-sm font-medium text-gray-800">Upload Document</div>
+                    <div className="text-[32px] font-medium text-gray-800">Upload Document</div>
+                    <div className="flex w-full justify-between">
+                      <div className="flex flex-col w-[75%]">
+                    <label htmlFor="document-title" className="font-medium">Document Title</label>
                     <input
+                      id="document-title"
                       type="text"
                       value={newDocName}
                       onChange={(e) => setNewDocName(e.target.value)}
-                      placeholder="Document title"
-                      className="border rounded px-3 py-2"
+                      placeholder="Please enter the name of your document"
+                      className="border px-3 py-2 w-full rounded-lg"
                     />
+                      </div>
+                      <div className="flex flex-col w-[22%]">
+                      <label htmlFor="document-type" className="font-medium">Type</label>
                     <select
+                      id="document-type"
                       value={newDocType}
                       onChange={(e) => setNewDocType(e.target.value)}
-                      className="border rounded px-3 py-2 w-full"
+                      className="border px-3 py-2 w-full rounded-lg"
                       title="Document type"
                     >
                       <option value="financial">Financial Statement</option>
@@ -718,30 +762,75 @@ export default function DealRoomDetail() {
                       <option value="presentation">Presentation</option>
                       <option value="other">Other</option>
                     </select>
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          // Check file size (max 10MB)
-                          if (file.size > 10 * 1024 * 1024) {
-                            notify.error("File size must be less than 10MB");
-                            e.target.value = '';
-                            return;
+                    </div>
+                    </div>
+                    <div>
+                    <label htmlFor="" className="font-medium">Upload Document</label>
+                      <div
+              className={`border-2 border-dashed rounded-lg text-center transition-colors mb-8
+                ${
+                dragActive 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-blue-400 bg-white'
+              }`
+              }
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Check file size (max 10MB)
+                            if (file.size > 10 * 1024 * 1024) {
+                              notify.error("File size must be less than 10MB");
+                              e.target.value = '';
+                              return;
+                            }
+                            setNewDocFile(file);
+                            // Auto-set document name if not provided
+                            if (!newDocName) {
+                              setNewDocName(file.name.replace(/\.[^/.]+$/, ""));
+                            }
+                          } else {
+                            setNewDocFile(null);
                           }
-                          setNewDocFile(file);
-                          // Auto-set document name if not provided
-                          if (!newDocName) {
-                            setNewDocName(file.name.replace(/\.[^/.]+$/, ""));
-                          }
-                        } else {
-                          setNewDocFile(null);
-                        }
-                      }}
-                      className="border rounded px-3 py-2"
-                      title="Supported formats: PDF, Word, Excel, PowerPoint, Text, CSV, ZIP, RAR (Max 10MB)"
-                    />
+                        }}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+              />
+
+              {!newDocFile ? (
+                <div className="flex items-center justify-center p-3 gap-2">
+                  <CloudUpload className="w-6 h-6 text-gray-400" />
+                  <button
+                    onClick={handleButtonClick}
+                    className="hover:text-blue-700 font-medium text-gray-400"
+                  >
+                    Choose or upload from local storage
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-3">
+                  <File className="w-8 h-8 text-blue-600" />
+                  <span className="text-gray-700 font-medium">{newDocFile.name}</span>
+                  <span className="text-gray-500 text-sm">
+                    ({(newDocFile.size / 1024).toFixed(2)} KB)
+                  </span>
+                  <button
+                    onClick={handleRemoveFile}
+                    className="ml-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              )}
+                      </div>
+                    </div>
                     {newDocFile && (
                       <div className="text-sm text-gray-600 flex items-center gap-2">
                         <FileText className="w-4 h-4" />
@@ -753,9 +842,7 @@ export default function DealRoomDetail() {
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                   </form>
-                  
-                  {documents.length === 0 ? (
-                    <EmptyDocuments onUpload={() => document.querySelector('input[type="file"]')?.click()} />
+                    // <EmptyDocuments onUpload={() => document.querySelector('input[type="file"]')?.click()} />
                   ) : (
                     <div className="space-y-2">
                       {documents
@@ -1023,7 +1110,7 @@ export default function DealRoomDetail() {
                 />
               )}
               {active === "valuations" && (
-                <div className="space-y-4">
+                <div className="space-y-4 bg-white">
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -1083,7 +1170,7 @@ export default function DealRoomDetail() {
                       placeholder="Notes/assumptions"
                       className="border rounded px-3 py-2 w-full"
                     />
-                    <button className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Create</button>
+                    <button className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-custom_yellow">Create</button>
                   </form>
                   <ul className="list-disc pl-5 text-gray-700">
                     {valuations.length === 0 && <li>No valuations found.</li>}

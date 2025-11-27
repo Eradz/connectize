@@ -3,10 +3,14 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { toast } from "sonner";
 import { workforceJobService } from "../../api-services/oilgas";
-import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar } from "lucide-react";
+import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar, Eye, ClockFading } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { workforceAPI } from "../../api-services/workforce";
+import { formatSalary, getExperienceBadgeColor, JobCount } from "../../components/workforce/jobcardUtils";
+import { JobCard } from "../../components/workforce/JobCard";
+import BackArrowButton from "../../components/BackArrowButton";
+import DownloadButton from "../../components/DownloadButton";
 
 export default function WorkforceJobDetail() {
   const { id } = useParams();
@@ -86,39 +90,18 @@ export default function WorkforceJobDetail() {
     return () => { isMounted = false; };
   }, [job]);
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumbs */}
-      <div className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-2">
-              <li><Link to={webRoutes.platformDashboard} className="text-gray-500 hover:text-gray-700">Dashboard</Link></li>
-              <li><span className="text-gray-400">/</span></li>
-              <li><Link to={webRoutes.workforceJobs} className="text-gray-500 hover:text-gray-700">Jobs</Link></li>
-              <li><span className="text-gray-400">/</span></li>
-              <li><span className="text-gray-900">Job #{id}</span></li>
-            </ol>
-          </nav>
+    <div className="min-h-screen">
+      <div className='flex py-6'>
+        <BackArrowButton />
+        <div>
+            <h1 className="text-3xl font-bold text-gray-900">Job details</h1>
+            <p className="mt-2 text-gray-600">
+              Manage jobs you’ve posted and track application
+            </p>
         </div>
       </div>
 
-      <div className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link 
-                to={webRoutes.workforceJobs} 
-                className="inline-flex items-center px-3 py-2 rounded-lg border text-sm hover:bg-gray-50"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Jobs
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white p-3">
         {loading ? (
           <div className="bg-white border rounded-xl p-6 space-y-6">
             <div className="space-y-4">
@@ -141,10 +124,11 @@ export default function WorkforceJobDetail() {
             <div className="text-red-600">{error}</div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white border rounded-xl p-6">
+            <div className="lg:col-span-2 space-y-6 relative ">
+              <div className="bg-white border rounded-xl p-6 ">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -155,18 +139,6 @@ export default function WorkforceJobDetail() {
                         <div className="flex items-center">
                           <Building className="h-4 w-4 mr-1" />
                           {job.company_name}
-                        </div>
-                      )}
-                      {job?.location && (
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {job.location}
-                        </div>
-                      )}
-                      {job?.job_type && (
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {job.job_type}
                         </div>
                       )}
                     </div>
@@ -185,7 +157,7 @@ export default function WorkforceJobDetail() {
                         }
                       } catch (e) {}
                     }}
-                    className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm transition-colors ${
+                    className={`inline-flex absolute  top-4 right-4 items-center px-3 py-2 rounded-lg border text-sm transition-colors ${
                       saved ? 'border-blue-300 bg-blue-50 text-blue-700' : 'hover:bg-gray-50'
                     }`}
                   >
@@ -195,7 +167,7 @@ export default function WorkforceJobDetail() {
                 </div>
 
                 {/* Job Details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex flex-wrap gap-4 p-2 rounded-lg">
                   {job?.salary_range && (
                     <div className="flex items-center">
                       <DollarSign className="h-5 w-5 text-green-600 mr-2" />
@@ -206,13 +178,19 @@ export default function WorkforceJobDetail() {
                     </div>
                   )}
                   {job?.experience_level && (
-                    <div className="flex items-center">
-                      <Users className="h-5 w-5 text-blue-600 mr-2" />
-                      <div>
-                        <div className="text-sm text-gray-600">Experience</div>
-                        <div className="font-medium">{job.experience_level}</div>
-                      </div>
-                    </div>
+                     <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getExperienceBadgeColor(job.experience_level)}`}>
+                {job.experience_level} Level
+              </span>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                {job.job_type?.replace('_', ' ')}
+              </span>
+              {job.is_remote && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Remote
+                </span>
+              )}
+            </div>
                   )}
                   {job?.posted_date && (
                     <div className="flex items-center">
@@ -254,7 +232,7 @@ export default function WorkforceJobDetail() {
                 {/* Benefits */}
                 {job?.benefits && (
                   <div className="mt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Benefits</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">About Our Company</h3>
                     <div className="text-gray-600">
                       {Array.isArray(job.benefits) ? (
                         <ul className="list-disc list-inside space-y-1">
@@ -272,69 +250,86 @@ export default function WorkforceJobDetail() {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
-              <div className="bg-white border rounded-xl p-6">
-                <div className="space-y-4">
+            <div className="space-y-4">
+              <div className={`w-[90%] flex justify-between items-center space-x-1 text-['12px'] text-gray-500`}>
+                <div className="flex items-center">
+                  <Users className="w-4 h-4 mr-1" />
+                  {job.applications_count || 0} applicants
+                          </div>
+                          <span className="bg-gray-400 w-[1px] h-4"></span>
+                          <div className="flex items-center">
+                            <Eye className="w-4 h-4 mr-1" />
+                            {/* <DealIcon className="w-6 h-6" fill={"#ffffff"}/> */}
+                            {job.views_count || 0} views
+                          </div>
+              </div>
+              {/* {<JobDetails />} */}
+              <h2><b>Job Details</b></h2>
+                <div className="flex flex-col gap-2">
+                
+                          <div className="flex items-center text-sm text-gray-600">
+                            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                            <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
+                          </div>
+                
+                          <div className="flex items-center text-sm text-gray-600">
+                            <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                            <span>{job.location}</span>
+                            {job.requires_relocation && (
+                              <span className="ml-2 text-orange-600">(Relocation Required)</span>
+                            )}
+                          </div>
+                          
+                          
+                
+                          {job.application_deadline && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              {/* <Calendar className="w-4 h-4 mr-2 text-gray-400" /> */}
+                              <ClockFading className="w-4 h-4 mr-2 text-gray-400" />
+                              <span>Exp: {new Date(job.application_deadline).toLocaleDateString()}</span>
+                            </div>
+                          )}
+                        </div>
+
+              <div className="bg-white border rounded-xl p-4">
+                <div className="space-y-2">
+                  <b>Apply for this job</b>
+                  <div className="text-sm text-gray-500">
+                    Please Note: Application typically takes 2-3 minutes
+                  </div>
                   <button
                     onClick={() => setShowApplicationModal(true)}
-                    className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                    className=" bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
                   >
-                    <Send className="h-4 w-4 mr-2" />
-                    Apply for this job
+                    <Send className="h-4 w-4 mr-1" />
+                    Apply Now
                   </button>
                   
-                  <div className="text-center text-sm text-gray-500">
-                    Application typically takes 2-3 minutes
-                  </div>
                 </div>
               </div>
 
-              {/* Company Info */}
-              {job?.company_name && (
-                <div className="bg-white border rounded-xl p-6">
-                  <h3 className="font-semibold text-gray-900 mb-3">About {job.company_name}</h3>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    {job.company_description && (
-                      <p>{job.company_description}</p>
-                    )}
-                    {job.company_size && (
-                      <div>Company size: {job.company_size}</div>
-                    )}
-                    {job.industry && (
-                      <div>Industry: {job.industry}</div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Similar Jobs */}
-              <div className="bg-white border rounded-xl p-6">
-                <h3 className="font-semibold text-gray-900 mb-3">Similar Jobs</h3>
-                {similarLoading ? (
+            </div>
+          </div>
+                <div className="py-6">
+                  <b className="pb-4">Similar jobs</b>
+                  <div className="">
+                 {similarLoading ? (
                   <div className="space-y-2">
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                   </div>
                 ) : similarJobs.length > 0 ? (
-                  <div className="space-y-3">
-                    {similarJobs.map((sj) => (
-                      <Link
-                        key={sj.id}
-                        to={webRoutes.workforceJobDetail.replace(':id', sj.id)}
-                        className="block border rounded-lg p-3 hover:bg-gray-50"
-                      >
-                        <div className="font-medium text-sm text-gray-900">{sj.title || 'Untitled role'}</div>
-                        <div className="text-xs text-gray-500">{sj.company_name || 'Company'}{sj.salary_range ? ` • ${sj.salary_range}` : ''}</div>
-                      </Link>
-                    ))}
+                  <div className="grid grid-col-1 md:grid-cols-2 gap-4">
+                    {similarJobs.map(job => <JobCard key={job.id} job={job} myPostedJob={true} />)}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500">No similar jobs found.</div>
                 )}
               </div>
-            </div>
+                </div>
           </div>
+          
         )}
       </div>
 
@@ -342,9 +337,9 @@ export default function WorkforceJobDetail() {
       <Modal
         isOpen={showApplicationModal}
         onClose={() => setShowApplicationModal(false)}
-        title="Apply for this position"
-        size="lg"
-      >
+        title="Job Application form"
+        className=""
+        >
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -402,13 +397,11 @@ export default function WorkforceJobDetail() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Resume/CV
             </label>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={(e) => setResume(e.target.files?.[0] || null)}
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            <DownloadButton
+              newDocFile={resume}
+              setNewDocFile={setResume}
             />
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs text-gray-500">
               Accepted formats: PDF, DOC, DOCX (max 5MB)
             </div>
           </div>
@@ -430,14 +423,14 @@ export default function WorkforceJobDetail() {
             <button
               type="button"
               onClick={() => setShowApplicationModal(false)}
-              className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50"
+              className="w-[30%] px-6 py-2 bg-pale_yellow border rounded text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60 flex items-center"
+              className="w-[30%] px-6 py-2 bg-custom_yellow rounded hover:bg-gold disabled:opacity-60 flex items-center"
             >
               {submitting ? (
                 <>
@@ -446,8 +439,8 @@ export default function WorkforceJobDetail() {
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Submit Application
+                  {/* <Send className="h-4 w-4 mr-2" /> */}
+                  Submit
                 </>
               )}
             </button>
