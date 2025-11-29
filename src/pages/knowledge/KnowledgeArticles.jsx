@@ -87,14 +87,14 @@ const KnowledgeArticles = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Desktop View */}
       <div className="hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -308,7 +308,7 @@ const KnowledgeArticles = () => {
 
     
      {/* Mobile View */}
-      <div className="lg:hidden bg-gray-50 min-h-screen">
+      <div className="lg:hidden bg-white min-h-screen">
         {/* Mobile Header */}
         <div className="bg-white px-4 py-4">
           <button onClick={() => window.history.back()} className="mb-3">
@@ -333,14 +333,14 @@ const KnowledgeArticles = () => {
         {/* Mobile Stats */}
         <div className="px-4 py-4">
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-xl p-4">
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
               <div className="w-12 h-12 bg-[#FFF1C6] rounded-xl flex items-center justify-center mx-auto mb-3">
                 <BookOpen className="w-6 h-6 text-gray-900" />
               </div>
               <p className="text-2xl font-bold text-gray-900 text-center">{articles.length}</p>
               <p className="text-xs text-gray-600 mt-1 text-center">Total Articles</p>
             </div>
-            <div className="bg-white rounded-xl p-4">
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
               <div className="w-12 h-12 bg-[#FFF1C6] rounded-xl flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="w-6 h-6 text-gray-900" />
               </div>
@@ -349,7 +349,7 @@ const KnowledgeArticles = () => {
               </p>
               <p className="text-xs text-gray-600 mt-1 text-center">Published</p>
             </div>
-            <div className="bg-white rounded-xl p-4">
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
               <div className="w-12 h-12 bg-[#FFF1C6] rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Edit className="w-6 h-6 text-gray-900" />
               </div>
@@ -358,7 +358,7 @@ const KnowledgeArticles = () => {
               </p>
               <p className="text-xs text-gray-600 mt-1 text-center">Drafts</p>
             </div>
-            <div className="bg-white rounded-xl p-4">
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
               <div className="w-12 h-12 bg-[#FFF1C6] rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Heart className="w-6 h-6 text-gray-900" />
               </div>
@@ -423,7 +423,7 @@ const KnowledgeArticles = () => {
         {/* Mobile Articles List */}
         <div className="px-4 pb-6 space-y-3">
           {filteredArticles.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 text-center">
+            <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <h3 className="text-base font-semibold text-gray-900 mb-2">No articles found</h3>
               <p className="text-sm text-gray-500 mb-4">
@@ -432,7 +432,7 @@ const KnowledgeArticles = () => {
             </div>
           ) : (
             filteredArticles.map((article) => (
-              <div key={article.id} className="bg-white rounded-xl p-4">
+              <div key={article.id} className="bg-white rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center mb-3">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
                     Public

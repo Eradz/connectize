@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { knowledgeArticleService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 
 const KnowledgeArticleCreate = () => {
   const navigate = useNavigate();
@@ -35,54 +36,88 @@ const KnowledgeArticleCreate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Write Article</h1>
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-          {error && (
-            <div className="p-3 rounded bg-red-50 text-red-700 text-sm">{error}</div>
-          )}
-          <div>
-            <label className="block text-sm mb-1">Title</label>
-            <input
-              name="title"
-              value={form.title}
-              onChange={onChange}
-              className="w-full border rounded px-3 py-2"
-              placeholder="Enter a clear, descriptive title"
-              required
-            />
+    <div className="min-h-screen bg-white">
+      {/* Header Section */}
+      <div className="bg-white border-b">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button 
+              onClick={() => navigate(-1)}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
+            </button>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-semibold text-gray-900">Publish Article</h1>
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Write And Publish Your Article</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm mb-1">Excerpt</label>
-            <textarea
-              name="excerpt"
-              value={form.excerpt}
-              onChange={onChange}
-              className="w-full border rounded px-3 py-2"
-              rows={3}
-              placeholder="Short summary (optional)"
-            />
+        </div>
+      </div>
+
+      {/* Form Section */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <form onSubmit={onSubmit} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Write Article</h2>
+            
+            {error && (
+              <div className="p-3 rounded bg-red-50 text-red-700 text-sm">{error}</div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Title</label>
+              <input
+                name="title"
+                value={form.title}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="enter a clear, descriptive title"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Excerpt</label>
+              <textarea
+                name="excerpt"
+                value={form.excerpt}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                rows={3}
+                placeholder="short summary (optional)"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Content</label>
+              <textarea
+                name="content"
+                value={form.content}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                rows={12}
+                placeholder="write your article content here..."
+                required
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm mb-1">Content</label>
-            <textarea
-              name="content"
-              value={form.content}
-              onChange={onChange}
-              className="w-full border rounded px-3 py-2"
-              rows={10}
-              placeholder="Write your article content here..."
-              required
-            />
-          </div>
-          <div className="flex justify-end">
+
+          {/* Action Buttons - Stacked on mobile, side-by-side on desktop */}
+          <div className="border-t border-gray-200 p-4 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-0">
+            <button
+              type="button"
+              className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 order-2 sm:order-1"
+            >
+              Save To Draft
+            </button>
             <button
               type="submit"
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-gray-900 bg-yellow-400 rounded-md hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 flex items-center justify-center gap-1"
             >
-              {saving ? 'Publishing…' : 'Publish'}
+              <span>{saving ? 'Publishing…' : 'Publish'}</span>
+              <ChevronRight size={16} />
             </button>
           </div>
         </form>
