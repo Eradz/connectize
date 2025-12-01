@@ -48,12 +48,15 @@ const UpcomingEvents = ({filteredEvents}) => {
     const reg = event.attendees_count ?? 0;
     return cap ? Math.max(cap - reg, 0) : 0;
   };
-
+  const getLongestString = (themes) => {
+    const longestStringArr = themes.sort((a, b) => a.length - b.length).reverse();
+    return longestStringArr;
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {filteredEvents.map((event) => (
-                <div key={event.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl h-[450px]">
+                <div key={event.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl h-[490px]">
                 <div className="bg-white rounded-xl border h-full">
                   {/* Event Image */}
                   <div className="relative h-[30%]">
@@ -79,8 +82,8 @@ const UpcomingEvents = ({filteredEvents}) => {
                       </button>
                     </div>
                   </div>
-    
-                  <div className="p-4 pb-1 h-[55%] ">
+                      {}
+                  <div className="p-4 pb-1 h-[58%] ">
                     {/* Organizer */}
                      {/* Title */}
                     <h3 className="font-semibold text-gray-900 pb-4 line-clamp-2">
@@ -114,7 +117,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                      </div>
     
                     <div>
-                        <div className='flex gap-4 mb-2'>
+                        <div className='flex justify-between gap-6 mb-2'>
                             <h4 className="font-semibold text-gray-900">Event Type:</h4>
                             <div className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full p-[1px] text-xs font-medium text-gray-700 flex items-center">
                                 <div className='bg-white flex items-center px-[10px] py-[7px] rounded-full'>
@@ -130,7 +133,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                             {/* Topics (if any) */}
                             {Array.isArray(event.topics) && event.topics.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
-                                {event.topics.slice(0, 3).map((t, i) => (
+                                {getLongestString(event.topics.slice(0, 3)).map((t, i) => (
                                 <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
@@ -141,7 +144,7 @@ const UpcomingEvents = ({filteredEvents}) => {
     
                   </div>
                     {/* Actions */}
-                  <div className="rounded-b-xl flex space-x-2 h-[15%] py-3 px-2 border-t border-gray-300">
+                  <div className="rounded-b-xl flex space-x-2 h-[12%] py-3 px-2 border-t border-gray-300">
                       <Link
                         to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
                         className="flex-1 bg-pale_yellow text-white text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
