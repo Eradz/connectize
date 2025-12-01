@@ -128,8 +128,8 @@ const UpcomingEvents = ({filteredEvents}) => {
                             </div>
                         </div>
 
-                                <div className='flex gap-4'>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
+                          <div className='flex gap-4'>
+                            <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
                             {/* Topics (if any) */}
                             {Array.isArray(event.topics) && event.topics.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
@@ -138,8 +138,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                                 ))}
                             </div>
                             )}
-
-                                </div>
+                          </div>
                     </div>
     
                   </div>

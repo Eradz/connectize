@@ -1,32 +1,35 @@
-import Search from '../../pages/search'
-import { Settings2 } from 'lucide-react'
+import { SearchIcon, Settings2 } from 'lucide-react'
+import OngoingEventsCarousel from './OngoingEventsCarousel'
 
 const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilters, handleFilterChange, filters, clearFilters, filteredEvents}) => {
   return (
-            <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="Search events by title, organizer, or topic..."
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                    />
+            <div className="p-2 py-4 mb-8">
+              <div className="flex justify-between items-center lg:flex-row gap-4">
+                <h3 className='text-2xl font-medium w-[50%]'>Ongoing Events</h3>
+                <div className='flex flex-col lg:flex-row gap-4 w-[50%]'>
+                  <div className="flex-1">
+                    <div className="relative">
+                      <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Search events by title, organizer, or topic..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                      />
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 flex items-center"
+                  >
+                    <Settings2 className="w-4 h-4 mr-2" />
+                    Filters
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 flex items-center"
-                >
-                  <Settings2 className="w-4 h-4 mr-2" />
-                  Filters
-                </button>
               </div>
     
-              {/* {showFilters && (
+              {showFilters && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     <div>
@@ -108,7 +111,9 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
                     </span>
                   </div>
                 </div>
-              )} */}
+              )}
+
+              <OngoingEventsCarousel filteredEvents={filteredEvents} />
             </div>
   )
 }
