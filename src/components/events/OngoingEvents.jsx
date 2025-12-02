@@ -4,9 +4,9 @@ import OngoingEventsCarousel from './OngoingEventsCarousel'
 const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilters, handleFilterChange, filters, clearFilters, filteredEvents}) => {
   return (
             <div className="p-2 py-4 mb-8">
-              <div className="flex justify-between items-center lg:flex-row gap-4">
-                <h3 className='text-2xl font-medium w-[50%]'>Ongoing Events</h3>
-                <div className='flex flex-col lg:flex-row gap-4 w-[50%]'>
+              <div className="flex justify-between lg:items-center flex-col-reverse lg:flex-row gap-4 pb-4">
+                <h3 className='text-2xl font-medium w-[50%] '>Ongoing Events</h3>
+                <div className='flex gap-4 lg:w-[50%]'>
                   <div className="flex-1">
                     <div className="relative">
                       <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -112,7 +112,6 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
                   </div>
                 </div>
               )}
-
               <OngoingEventsCarousel filteredEvents={filteredEvents} />
             </div>
   )

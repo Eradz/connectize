@@ -39,6 +39,7 @@ const WorkforceEvents = () => {
     status: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   const handleFilterChange = useCallback((field, value) => {
     setFilters(prev => ({
@@ -215,10 +216,10 @@ const WorkforceEvents = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen px-5 lg:px-0">
       {/* Header */}
       <div className="">
-        <div className="">
+        <div className="flex flex-col mb-6 ">
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Industry Events</h1>
@@ -229,15 +230,39 @@ const WorkforceEvents = () => {
                 to={webRoutes.workforceEventCreate}
                 className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 md:mr-2 " />
+                <p className='hidden md:flex'>
                 Create Event
+                </p>
               </Link>
             </div>
           </div>
+          <nav className="flex gap-2" aria-label="Tabs">
+              {[
+                { key: 'all', label: 'Ongoing Events' },
+                { key: 'active', label: 'Upcoming Events' },
+                { key: 'interviews', label: 'Recent Events' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`${
+                    activeTab === tab.key
+                      ? 'border-transparent bg-[#FFDB76]'
+                      : 'border-[#D9D9D9] text-[#495057] hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap p-2 border-2 rounded-full font-medium text-sm flex items-center`}
+                >
+                  {tab.label}
+                  {/* <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                    {getTabCount(tab.key)}
+                  </span> */}
+                </button>
+              ))}
+            </nav>
         </div>
       </div>
 
-      <div className="bg-white">
+      <div className="lg:bg-white">
         {/* Search and Filters */}
         <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={filteredEvents} />
 
