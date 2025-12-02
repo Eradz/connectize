@@ -32,8 +32,8 @@ const KnowledgeArticles = () => {
   const loadArticles = async () => {
     try {
       setLoading(true);
-      const response = await knowledgeArticleService.getAll();
-      setArticles(response?.results || response?.data || response || []);
+  const response = await knowledgeArticleService.getAll();
+  setArticles(response?.results || response?.data || response || []);
     } catch (error) {
       console.error('Error loading articles:', error);
     } finally {
@@ -43,7 +43,8 @@ const KnowledgeArticles = () => {
 
   const handleLike = async (articleSlug) => {
     try {
-      await knowledgeArticleService.like(articleSlug);
+  await knowledgeArticleService.like(articleSlug);
+      // Reload articles to update like count
       loadArticles();
     } catch (error) {
       console.error('Error liking article:', error);
@@ -52,7 +53,8 @@ const KnowledgeArticles = () => {
 
   const handleShare = async (articleSlug) => {
     try {
-      await knowledgeArticleService.share(articleSlug);
+  await knowledgeArticleService.share(articleSlug);
+      // You might want to show a share dialog or copy link to clipboard
       console.log('Article shared successfully');
     } catch (error) {
       console.error('Error sharing article:', error);
@@ -71,11 +73,14 @@ const KnowledgeArticles = () => {
     switch (status) {
       case 'published':
         return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800';
       case 'draft':
+        return 'bg-yellow-100 text-yellow-800';
         return 'bg-yellow-100 text-yellow-800';
       case 'archived':
         return 'bg-gray-100 text-gray-800';
       default:
+        return 'bg-gray-100 text-gray-800';
         return 'bg-gray-100 text-gray-800';
     }
   };

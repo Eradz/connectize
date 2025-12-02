@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
+import OngoingEvents from '../../components/events/OngoingEvents';
+import UpcomingEvents from '../../components/events/UpcomingEvents';
 
 const WorkforceEvents = () => {
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,7 @@ const WorkforceEvents = () => {
     status: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   const handleFilterChange = useCallback((field, value) => {
     setFilters(prev => ({
@@ -213,10 +216,10 @@ const WorkforceEvents = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen px-5 lg:px-0">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="">
+        <div className="flex flex-col mb-6 ">
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Industry Events</h1>
@@ -225,252 +228,47 @@ const WorkforceEvents = () => {
             <div className="flex space-x-3">
               <Link
                 to={webRoutes.workforceEventCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 md:mr-2 " />
+                <p className='hidden md:flex'>
                 Create Event
+                </p>
               </Link>
             </div>
           </div>
+          <nav className="flex gap-2" aria-label="Tabs">
+              {[
+                { key: 'all', label: 'Ongoing Events' },
+                { key: 'active', label: 'Upcoming Events' },
+                { key: 'interviews', label: 'Recent Events' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`${
+                    activeTab === tab.key
+                      ? 'border-transparent bg-[#FFDB76]'
+                      : 'border-[#D9D9D9] text-[#495057] hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap p-2 border-2 rounded-full font-medium text-sm flex items-center`}
+                >
+                  {tab.label}
+                  {/* <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                    {getTabCount(tab.key)}
+                  </span> */}
+                </button>
+              ))}
+            </nav>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="lg:bg-white">
         {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search events by title, organizer, or topic..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 flex items-center"
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </button>
-          </div>
-
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={filters.category}
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                  >
-                    <option value="">All Categories</option>
-                    <option value="Conference">Conference</option>
-                    <option value="Workshop">Workshop</option>
-                    <option value="Training">Training</option>
-                    <option value="Networking">Networking</option>
-                    <option value="Seminar">Seminar</option>
-                    <option value="Trade Show">Trade Show</option>
-                    <option value="Certification">Certification</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                  <input
-                    type="text"
-                    placeholder="City, Country"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={filters.location}
-                    onChange={(e) => handleFilterChange('location', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={filters.date}
-                    onChange={(e) => handleFilterChange('date', e.target.value)}
-                  >
-                    <option value="">Any Time</option>
-                    <option value="today">Today</option>
-                    <option value="this_week">This Week</option>
-                    <option value="this_month">This Month</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={filters.type}
-                    onChange={(e) => handleFilterChange('type', e.target.value)}
-                  >
-                    <option value="">All Types</option>
-                    <option value="In-Person">In-Person</option>
-                    <option value="Virtual">Virtual</option>
-                    <option value="Hybrid">Hybrid</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={filters.status}
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                  >
-                    <option value="">All Status</option>
-                    <option value="upcoming">Upcoming</option>
-                    <option value="open">Registration Open</option>
-                    <option value="sold_out">Sold Out</option>
-                  </select>
-                </div>
-              </div>
-              <div className="mt-4 flex space-x-3">
-                <button
-                  onClick={clearFilters}
-                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
-                >
-                  Clear Filters
-                </button>
-                <span className="text-sm text-gray-500 py-2">
-                  {filteredEvents.length} events found
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+        <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={filteredEvents} />
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
-              {/* Event Image */}
-              <div className="relative">
-                <img
-                  src={event.image || 'https://picsum.photos/seed/energy-events/800/400'}
-                  alt={event.title}
-                  className="w-full h-48 object-cover rounded-t-xl"
-                />
-                <div className="absolute top-4 left-4">
-                  {(() => {
-                    const status = getEventStatus(event);
-                    return (
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-                        {status.replace('_', ' ').toUpperCase()}
-                      </span>
-                    );
-                  })()}
-                </div>
-                <div className="absolute top-4 right-4">
-                  <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 flex items-center">
-                    {getTypeIcon(event.is_virtual, event.event_type)}
-                    <span className="ml-1">{event.is_virtual ? 'Virtual' : 'In-Person'}</span>
-                  </span>
-                </div>
-                {event.is_free && (
-                  <div className="absolute bottom-4 left-4">
-                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                      FREE
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6">
-                {/* Category & Date */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                    {(event.event_type || 'event').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                  </span>
-                  <span className="text-sm text-gray-600 flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {event.start_date ? formatDate(event.start_date) : 'TBD'}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {event.title}
-                </h3>
-
-                {/* Organizer */}
-                <p className="text-sm text-gray-600 mb-3 flex items-center">
-                  <Building className="w-4 h-4 mr-1" />
-                  {event.organizer_name || 'Organizer'}
-                </p>
-
-                {/* Location & Time */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {event.is_virtual ? 'Online' : (event.venue_name || event.venue_address || 'Venue TBA')}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {event.start_date ? new Date(event.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-                    {event.end_date ? ` - ${new Date(event.end_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-4 pt-4 border-t border-gray-100">
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{event.attendees_count ?? 0}</p>
-                    <p className="text-xs text-gray-600">Registered</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-gray-900">{getAvailableSpots(event)}</p>
-                    <p className="text-xs text-gray-600">Available</p>
-                  </div>
-                </div>
-
-                {/* Topics (if any) */}
-                {Array.isArray(event.topics) && event.topics.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {event.topics.slice(0, 3).map((t, i) => (
-                      <span key={i} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">{t}</span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Price */}
-                <div className="mb-4">
-                  {event.is_free ? (
-                    <span className="text-lg font-bold text-green-600">FREE</span>
-                  ) : (
-                    <span className="text-lg font-bold text-gray-900">
-                      {event.ticket_price ?? '—'} {event.currency || ''}
-                    </span>
-                  )}
-                </div>
-
-                {/* Features placeholder intentionally minimal to match backend */}
-
-                {/* Actions */}
-                <div className="flex space-x-2">
-                  <Link
-                    to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
-                    className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    View Details
-                  </Link>
-                  <button className="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">
-                    <Bookmark className="w-4 h-4" />
-                  </button>
-                  <button className="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors">
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        
+        <UpcomingEvents filteredEvents={filteredEvents} />
 
         {/* Empty State */}
         {filteredEvents.length === 0 && (
