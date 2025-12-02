@@ -79,7 +79,10 @@ const KnowledgeForumCreate = () => {
 
       <div className="md:max-w-3xl md:mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         {/* Desktop Header */}
-        <h1 className="hidden md:block text-2xl font-bold text-gray-900 mb-6">Create Forum</h1>
+        <div className="hidden md:block mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Create Forum</h1>
+          <p className="text-sm text-gray-500 mt-1">Create Forum For Discussion</p>
+        </div>
         
         <div className="md:bg-white md:p-6 md:rounded-lg md:shadow-sm space-y-6">
           {error && (
