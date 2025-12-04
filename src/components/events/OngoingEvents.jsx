@@ -1,11 +1,12 @@
 import { SearchIcon, Settings2 } from 'lucide-react'
 import OngoingEventsCarousel from './OngoingEventsCarousel'
+import OngoingEventContent from './OngoingEventContent'
 
 const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilters, handleFilterChange, filters, clearFilters, filteredEvents}) => {
   return (
             <div className="p-2 py-4 mb-8">
               <div className="flex justify-between lg:items-center flex-col-reverse lg:flex-row gap-4 pb-4">
-                <h3 className='text-2xl font-medium w-[50%] '>Ongoing Events</h3>
+                <h3 className='text-2xl font-medium md:w-[50%] '>Ongoing Events</h3>
                 <div className='flex gap-4 lg:w-[50%]'>
                   <div className="flex-1">
                     <div className="relative">
@@ -23,8 +24,8 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
                     onClick={() => setShowFilters(!showFilters)}
                     className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 flex items-center"
                   >
-                    <Settings2 className="w-4 h-4 mr-2" />
-                    Filters
+                    Filter
+                    <Settings2 className="w-4 h-4 ml-2" />
                   </button>
                 </div>
               </div>
@@ -112,7 +113,9 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
                   </div>
                 </div>
               )}
-              <OngoingEventsCarousel filteredEvents={filteredEvents} />
+              <OngoingEventsCarousel filteredEvents={filteredEvents} >
+                <OngoingEventContent filteredEvents={filteredEvents} currentIndex={0} />
+              </OngoingEventsCarousel>
             </div>
   )
 }

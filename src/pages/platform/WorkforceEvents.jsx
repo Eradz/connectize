@@ -267,8 +267,10 @@ const WorkforceEvents = () => {
         <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={filteredEvents} />
 
         {/* Events Grid */}
-        
+        <div className='px-2'>
+              <h4 className='font-medium text-3xl mb-4'>Upcoming Events</h4>
         <UpcomingEvents filteredEvents={filteredEvents} />
+        </div>
 
         {/* Empty State */}
         {filteredEvents.length === 0 && (
