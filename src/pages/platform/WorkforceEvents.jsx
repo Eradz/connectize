@@ -272,6 +272,12 @@ const WorkforceEvents = () => {
         <UpcomingEvents filteredEvents={filteredEvents} />
         </div>
 
+        {/* Events Grid */}
+        <div className='px-2 py-6'>
+              <h4 className='font-medium text-3xl mb-4'>Recent Events</h4>
+        <UpcomingEvents filteredEvents={filteredEvents} />
+        </div>
+
         {/* Empty State */}
         {filteredEvents.length === 0 && (
           <div className="text-center py-12">
