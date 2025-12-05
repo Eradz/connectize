@@ -1,25 +1,72 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  BookOpen,
-  MessageSquare,
-  TrendingUp,
   Users,
   Eye,
   Heart,
   Share2,
-  Plus,
   Search,
-  Filter,
-  Clock,
-  Tag,
-  Star,
-  ArrowUpRight,
   Calendar,
-  ChevronRight,
   MessageCircle,
-  ThumbsUp
+  Globe,
+  Tag,
+  Menu,
+  ArrowLeft,
+  Plus,
+  X
 } from 'lucide-react';
+
+// Custom SVG Icons
+const WriteArticleIcon = (props) => (
+  <svg
+    width={24}
+    height={24}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <g clipPath="url(#clip0_496_6911)">
+      <path
+        d="M1 6H23C23.2652 6 23.5196 5.89464 23.7071 5.7071C23.8946 5.51957 24 5.26521 24 5C24 4.73478 23.8946 4.48043 23.7071 4.29289C23.5196 4.10536 23.2652 4 23 4H1C0.734784 4 0.48043 4.10536 0.292893 4.29289C0.105357 4.48043 0 4.73478 0 5C0 5.26521 0.105357 5.51957 0.292893 5.7071C0.48043 5.89464 0.734784 6 1 6Z"
+        fill="#374957"
+      />
+      <path
+        d="M5 9C4.73478 9 4.48043 9.10536 4.29289 9.29289C4.10536 9.48043 4 9.73478 4 10C4 10.2652 4.10536 10.5196 4.29289 10.7071C4.48043 10.8946 4.73478 11 5 11H19C19.2652 11 19.5196 10.8946 19.7071 10.7071C19.8946 10.5196 20 10.2652 20 10C20 9.73478 19.8946 9.48043 19.7071 9.29289C19.5196 9.10536 19.2652 9 19 9H5Z"
+        fill="#374957"
+      />
+      <path
+        d="M19 19H5C4.73478 19 4.48043 19.1054 4.29289 19.2929C4.10536 19.4804 4 19.7348 4 20C4 20.2652 4.10536 20.5196 4.29289 20.7071C4.48043 20.8947 4.73478 21 5 21H19C19.2652 21 19.5196 20.8947 19.7071 20.7071C19.8946 20.5196 20 20.2652 20 20C20 19.7348 19.8946 19.4804 19.7071 19.2929C19.5196 19.1054 19.2652 19 19 19Z"
+        fill="#374957"
+      />
+      <path
+        d="M23 14H1C0.734784 14 0.48043 14.1054 0.292893 14.2929C0.105357 14.4804 0 14.7348 0 15C0 15.2652 0.105357 15.5196 0.292893 15.7071C0.48043 15.8947 0.734784 16 1 16H23C23.2652 16 23.5196 15.8947 23.7071 15.7071C23.8946 15.5196 24 15.2652 24 15C24 14.7348 23.8946 14.4804 23.7071 14.2929C23.5196 14.1054 23.2652 14 23 14Z"
+        fill="#374957"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_496_6911">
+        <rect width={24} height={24} fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
+const StartDiscussionIcon = (props) => (
+  <svg
+    width={24}
+    height={24}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M24 15.9996V20.9996C24 21.7953 23.6839 22.5584 23.1213 23.121C22.5587 23.6836 21.7956 23.9996 21 23.9996H16C14.5971 23.9982 13.2192 23.6279 12.0047 22.9258C10.7901 22.2237 9.78145 21.2146 9.08 19.9996C9.83387 19.9943 10.5852 19.9111 11.322 19.7516C11.8832 20.4533 12.595 21.0197 13.4048 21.4088C14.2146 21.798 15.1016 21.9999 16 21.9996H21C21.2652 21.9996 21.5196 21.8943 21.7071 21.7068C21.8946 21.5192 22 21.2649 22 20.9996V15.9996C21.9998 15.1009 21.7972 14.2137 21.4074 13.4039C21.0175 12.5941 20.4504 11.8824 19.748 11.3216C19.9088 10.585 19.9933 9.83366 20 9.07965C21.215 9.7811 22.2241 10.7897 22.9262 12.0043C23.6282 13.2189 23.9986 14.5967 24 15.9996ZM17.977 9.65065C18.0705 8.36229 17.8856 7.06889 17.4348 5.85834C16.9841 4.6478 16.278 3.54847 15.3646 2.63506C14.4512 1.72166 13.3518 1.01558 12.1413 0.564802C10.9308 0.114026 9.63736 -0.0708809 8.349 0.0226448C6.06592 0.283377 3.95693 1.36982 2.41918 3.07739C0.881427 4.78496 0.0210272 6.99582 0 9.29365L0 14.3336C0 16.8656 1.507 17.9996 3 17.9996H8.7C10.9988 17.9799 13.211 17.12 14.9198 15.5822C16.6286 14.0444 17.7159 11.9347 17.977 9.65065ZM13.95 4.05065C14.6599 4.76215 15.2088 5.61784 15.5593 6.55983C15.9099 7.50182 16.054 8.50812 15.982 9.51065C15.7686 11.2943 14.9105 12.9385 13.5693 14.1336C12.2282 15.3287 10.4964 15.9924 8.7 15.9996H3C2.072 15.9996 2 14.7246 2 14.3336V9.29365C2.00834 7.49802 2.67265 5.76735 3.86792 4.42732C5.06319 3.0873 6.70699 2.23031 8.49 2.01764C8.656 2.00564 8.822 1.99964 8.988 1.99964C9.90927 1.99879 10.8217 2.17948 11.6731 2.5314C12.5245 2.88332 13.2982 3.39957 13.95 4.05065Z"
+      fill="#374957"
+    />
+  </svg>
+);
 import { webRoutes } from '../../lib/webRoutes';
 import {
   knowledgeArticleService,
@@ -33,8 +80,9 @@ const KnowledgeHubDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Data states
+  const [activeTab, setActiveTab] = useState('trending');
+  const [quickActionOpen, setQuickActionOpen] = useState(false);
+
   const [featuredArticles, setFeaturedArticles] = useState([]);
   const [trendingArticles, setTrendingArticles] = useState([]);
   const [recentArticles, setRecentArticles] = useState([]);
@@ -42,17 +90,6 @@ const KnowledgeHubDashboard = () => {
   const [categories, setCategories] = useState([]);
   const [popularTags, setPopularTags] = useState([]);
 
-  // Stats
-  const [stats, setStats] = useState({
-    totalArticles: 0,
-    totalForums: 0,
-    activeForums: 0,
-    totalTopics: 0,
-    totalMembers: 0,
-    totalViews: 0
-  });
-
-  // Generic response normalizer (handles {results:[]}, {data:[]}, direct array)
   const normalizeArray = useCallback((res) => {
     if (!res) return [];
     if (Array.isArray(res)) return res;
@@ -61,14 +98,9 @@ const KnowledgeHubDashboard = () => {
     return [];
   }, []);
 
-  const getCount = useCallback((res) => {
-    if (!res) return 0;
-    if (typeof res.count === 'number') return res.count;
-    const arr = normalizeArray(res);
-    return arr.length;
-  }, [normalizeArray]);
-
-  useEffect(() => { loadDashboardData(); }, []);
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -77,7 +109,6 @@ const KnowledgeHubDashboard = () => {
         featuredRes,
         trendingRes,
         recentRes,
-        allArticlesRes,
         forumsRes,
         categoriesRes,
         tagsRes
@@ -85,74 +116,17 @@ const KnowledgeHubDashboard = () => {
         knowledgeArticleService.getFeatured(),
         knowledgeArticleService.getTrending(),
         knowledgeArticleService.getAll({ page_size: 6, status: 'published' }),
-        knowledgeArticleService.getAll({ page_size: 1, status: 'published' }), // Just to get total count
         knowledgeForumService.getAll(),
         knowledgeCategoryService.getAll(),
         knowledgeTagService.getPopular()
       ]);
-      // Normalize all list-like responses consistently
-      const featured = normalizeArray(featuredRes);
-      const trending = normalizeArray(trendingRes);
-      const recent = normalizeArray(recentRes);
-      const forumsList = normalizeArray(forumsRes);
-      const cats = normalizeArray(categoriesRes);
-      const tags = normalizeArray(tagsRes);
 
-      setFeaturedArticles(featured);
-      setTrendingArticles(trending);
-      setRecentArticles(recent);
-      setForums(forumsList);
-      setCategories(cats);
-      setPopularTags(tags);
-
-      // Debug logging
-      console.log('Dashboard - Forums response:', forumsRes);
-      console.log('Dashboard - Forums data:', forumsRes?.results || forumsRes?.data || []);
-
-      // Calculate article & forum derived stats
-      const totalViews = recent.reduce((sum, article) => sum + (article.views || 0), 0);
-      const derivedTopics = forumsList.reduce((sum, forum) => sum + (forum.topic_count || 0), 0);
-      const derivedActiveForums = forumsList.filter(f => (f.topic_count || 0) > 0).length;
-      const derivedMembers = forumsList.reduce((sum, forum) => sum + (forum.members_count || 0), 0);
-
-      // Attempt aggregated forum stats endpoint for authoritative counts
-      let forumStats = null;
-      try {
-        forumStats = await knowledgeForumService.getStats();
-      } catch (e) {
-        console.warn('KnowledgeHubDashboard: forum stats endpoint not available', e);
-      }
-
-      // Derive active user approximation: unique authors across recent + trending
-      const authorIds = new Set();
-      [...recent, ...trending].forEach(a => {
-        const id = a.author?.id || a.author_id;
-        if (id) authorIds.add(id);
-      });
-      const derivedActiveUsers = authorIds.size;
-
-      // Placeholder real-time users (remove hard-coded; show null if none)
-      const derivedOnlineUsers = null; // Hook real-time service here later
-      
-  const totalTopics = forumStats?.total_topics ?? derivedTopics;
-  const totalForums = forumStats?.total_forums ?? forumsList.length;
-  const activeForums = forumStats?.active_forums ?? derivedActiveForums;
-  const totalMembers = forumStats?.total_members ?? derivedMembers;
-
-  console.log('Dashboard - Total topics calculated:', totalTopics);
-      console.log('Dashboard - Total forums calculated:', (forumsRes?.results || []).length);
-      
-      setStats({
-        totalArticles: getCount(allArticlesRes),
-        totalForums,
-        activeForums,
-        totalTopics,
-        totalMembers,
-        totalViews,
-        activeUsers: derivedActiveUsers || null,
-        onlineUsers: derivedOnlineUsers
-      });
-
+      setFeaturedArticles(normalizeArray(featuredRes));
+      setTrendingArticles(normalizeArray(trendingRes));
+      setRecentArticles(normalizeArray(recentRes));
+      setForums(normalizeArray(forumsRes));
+      setCategories(normalizeArray(categoriesRes));
+      setPopularTags(normalizeArray(tagsRes));
     } catch (error) {
       console.error('Error loading knowledge hub data:', error);
       toast.error('Failed to load knowledge hub data');
@@ -168,20 +142,15 @@ const KnowledgeHubDashboard = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(new Date(dateString));
-  };
-
-  const formatNumber = (num) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
+    try {
+      return new Intl.DateTimeFormat('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(new Date(dateString));
+    } catch {
+      return 'N/A';
     }
-    return num.toString();
   };
 
   if (loading) {
@@ -190,12 +159,9 @@ const KnowledgeHubDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-300 rounded w-1/4 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white p-6 rounded-lg shadow-sm border">
-                  <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="bg-gray-300 h-64 rounded-xl"></div>
               ))}
             </div>
           </div>
@@ -205,132 +171,299 @@ const KnowledgeHubDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Knowledge Hub</h1>
-              <p className="text-gray-600 mt-1">Stay informed with industry insights, analysis, and discussions</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Link
-                to={webRoutes.knowledgeArticleCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Write Article</span>
-              </Link>
-              <Link
-                to={webRoutes.knowledgeForums}
-                className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>Browse Forums</span>
-              </Link>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white">
+      {/* Header - Desktop */}
+      <div className="hidden md:block border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Knowledge Hub</h1>
+          <p className="text-sm text-gray-500">
+            Stay Informed With Industry Insights, Analysis And Discussion
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Bar */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search articles, discussions, and industry insights..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
-                />
-              </div>
-            </div>
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+      {/* Header - Mobile */}
+      <div className="md:hidden bg-white px-4 py-4">
+        <button className="mb-4">
+          <ArrowLeft className="w-6 h-6 text-gray-700" />
+        </button>
+        <h1 className="text-xl font-bold text-gray-900 mb-1">Knowledge Hub</h1>
+        <p className="text-sm text-gray-500">
+          Stay Informed With Industry Insights, Analysis And Discussion
+        </p>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
+        {/* Featured Articles - Desktop */}
+        <div className="hidden md:block mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Article</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {featuredArticles.slice(0, 2).map((article, index) => (
+              <Link
+                key={article.id || index}
+                to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
+                className="relative rounded-2xl overflow-hidden h-52 group"
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: article.featured_image
+                      ? `url(${article.featured_image})`
+                      : 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+                  }}
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        index === 0
+                          ? 'rgba(0, 0, 0, 0.5)'
+                          : 'rgba(37, 99, 235, 0.7)'
+                    }}
+                  ></div>
+                </div>
+
+                <div className="relative h-full flex flex-col justify-between p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-700">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></div>
+                      Published
+                    </span>
+                    <div className="flex items-center space-x-3 text-white text-xs">
+                      <div className="flex items-center space-x-1">
+                        <Heart className="w-3.5 h-3.5" />
+                        <span>{article.likes || 0}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>{article.shares || 0}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{article.views || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-white/90 text-xs mb-4 line-clamp-1">
+                      {article.excerpt || 'Latest Developments In The Global Oil And Gas Industry'}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 text-white/90 text-xs">
+                        <div className="flex items-center space-x-1.5">
+                          <Users className="w-3.5 h-3.5" />
+                          <span>
+                            {article.author?.first_name || article.author?.last_name
+                              ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
+                              : 'Anonymous'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{formatDate(article.published_at)}</span>
+                        </div>
+                      </div>
+
+                      <button className="bg-yellow-400 text-gray-900 px-5 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors">
+                        Read More
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Article - Mobile */}
+        <div className="md:hidden mb-6">
+          {featuredArticles.slice(0, 1).map((article, index) => (
+            <Link
+              key={article.id || index}
+              to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
+              className="relative rounded-2xl overflow-hidden block"
+              style={{ height: '280px' }}
             >
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                  backgroundImage: article.featured_image
+                    ? `url(${article.featured_image})`
+                    : 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{ background: 'rgba(0, 0, 0, 0.5)' }}
+                ></div>
+              </div>
+
+              <div className="relative h-full flex flex-col justify-between p-4">
+                <div className="flex items-start justify-between">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white text-gray-700">
+                    <Globe className="w-3 h-3 mr-1" />
+                    Published
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
+                    {article.title}
+                  </h3>
+                  <p className="text-white/90 text-xs mb-3 line-clamp-2">
+                    {article.excerpt || 'Latest Developments In The Global Oil And Gas Industry'}
+                  </p>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3 text-white/90 text-xs">
+                      <div className="flex items-center space-x-1">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>
+                          {article.author?.first_name || article.author?.last_name
+                            ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
+                            : 'Anonymous'}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{formatDate(article.published_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 text-white text-xs">
+                      <div className="flex items-center space-x-1">
+                        <Heart className="w-3.5 h-3.5" />
+                        <span>{article.likes || 0}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>{article.shares || 0}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>{article.views || 0}</span>
+                      </div>
+                    </div>
+
+                    <button className="bg-yellow-400 text-gray-900 px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-yellow-500 transition-colors">
+                      Read More
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Quick Action - Desktop */}
+        <div className="hidden md:flex w-full flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+          <h2 className="text-lg font-semibold text-[#1E1E1E]">Quick Action</h2>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button className="h-12 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
+              <WriteArticleIcon className="w-5 h-5" />
+              Write Article
+            </button>
+
+            <button className="h-12 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
+              <StartDiscussionIcon className="w-5 h-5" />
+              Start Discussion
+            </button>
+
+            <button className="h-12 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
               <Search className="w-5 h-5" />
-              <span>Search</span>
+              Advance Search
             </button>
           </div>
         </div>
 
-  {/* Stats */}
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Articles</p>
-                <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalArticles)}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <BookOpen className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            {/* Growth placeholder (hidden until comparative analytics implemented) */}
+        {/* Quick Action - Mobile with Dropdown */}
+        <div className="md:hidden mb-6 relative">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-[#1E1E1E]">Quick Action</h2>
+            <button
+              onClick={() => setQuickActionOpen(!quickActionOpen)}
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#F2C94C] text-gray-900 hover:bg-yellow-500 transition-colors"
+            >
+              {quickActionOpen ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+            </button>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Discussion Forums</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalForums}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <MessageSquare className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-600">{formatNumber(stats.totalTopics)} active topics</span>
-            </div>
-          </div>
+          {quickActionOpen && (
+            <div className="absolute right-0 top-12 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <button className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <WriteArticleIcon className="w-5 h-5" />
+                Write Article
+              </button>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Forums</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeForums}</p>
-              </div>
-              <div className="bg-teal-100 p-3 rounded-lg">
-                <MessageCircle className="w-6 h-6 text-teal-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-600">{stats.totalMembers} members</span>
-            </div>
-          </div>
+              <button className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <StartDiscussionIcon className="w-5 h-5" />
+                Start Discussion
+              </button>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalViews)}</p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-purple-600" />
-              </div>
+              <button className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <Search className="w-5 h-5" />
+                Advance Search
+              </button>
             </div>
-            {/* Views growth placeholder */}
-          </div>
+          )}
+        </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeUsers != null ? formatNumber(stats.activeUsers) : '—'}</p>
-              </div>
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <Users className="w-6 h-6 text-orange-600" />
-              </div>
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center flex-1 h-12 border border-gray-300 rounded-lg px-4 bg-white">
+              <Search className="w-5 h-10 text-gray-400 mr-3" />
+              <input
+                type="text"
+                placeholder="Search articles, forums, and more..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="flex-1 text-sm focus:outline-none"
+              />
             </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-600">{stats.onlineUsers != null ? `${stats.onlineUsers} online now` : 'Realtime data pending'}</span>
+            <button
+              onClick={handleSearch}
+              className="h-12 px-8 bg-[#F2C94C] text-black rounded-lg font-medium hover:bg-yellow-500 transition-colors"
+            >
+              Search
+            </button>
+          </div>
+        </div>
+
+        {/* Categories - Mobile Only (moved here) */}
+        <div className="md:hidden mb-8">
+          <div className="bg-white rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
+              <Link to={webRoutes.knowledgeCategories} className="text-sm font-medium underline hover:text-gray-700">
+                See All
+              </Link>
+            </div>
+            <div className="p-6 space-y-4">
+              {categories.slice(0, 8).map((category) => (
+                <Link
+                  key={category.id}
+                  to={webRoutes.knowledgeCategoryDetail.replace(':slug', category.slug)}
+                  className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+                >
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: category.color || '#3b82f6' }}
+                  ></div>
+                  <span className="text-sm text-gray-900 group-hover:text-blue-600">
+                    {category.name}
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -338,305 +471,211 @@ const KnowledgeHubDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Featured Articles */}
-            {featuredArticles.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border">
-                <div className="p-6 border-b">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Featured Articles</h2>
-                    <Link to={webRoutes.knowledgeArticles} className="text-sm text-blue-600 hover:text-blue-700">
-                      View All
-                    </Link>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="grid gap-6">
-                    {featuredArticles.slice(0, 2).map((article) => (
-                      <div key={article.id} className="flex space-x-4">
-                        {article.featured_image && (
-                          <img
-                            src={article.featured_image}
-                            alt={article.title}
-                            className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Star className="w-4 h-4 text-yellow-500" />
-                            <span className="text-sm text-yellow-600 font-medium">Featured</span>
-                            <span className="text-gray-300">•</span>
-                            <span className="text-sm text-gray-500">{formatDate(article.published_at)}</span>
-                          </div>
-                          <Link
-                            to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                            className="text-lg font-semibold text-gray-900 hover:text-blue-600 line-clamp-2"
-                          >
-                            {article.title}
-                          </Link>
-                          <p className="text-gray-600 mt-2 line-clamp-2">{article.excerpt || 'No excerpt available'}</p>
-                          <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
-                            <div className="flex items-center space-x-1">
-                              <Eye className="w-4 h-4" />
-                              <span>{formatNumber(article.views)}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Heart className="w-4 h-4" />
-                              <span>{formatNumber(article.likes)}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Share2 className="w-4 h-4" />
-                              <span>{formatNumber(article.shares)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {/* Trending / Recent Articles */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Trending</h2>
+                <Link to={webRoutes.knowledgeArticles} className="text-sm font-medium underline hover:text-gray-700">
+                  See All
+                </Link>
               </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-900">Featured Articles</h2>
-                </div>
-                <p className="text-sm text-gray-500">No featured articles available.</p>
-              </div>
-            )}
 
-            {/* Trending Articles */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Trending This Week</h2>
-                  <Link to={webRoutes.knowledgeArticles} className="text-sm text-blue-600 hover:text-blue-700">
-                    View All
-                  </Link>
+              <div className="border-b border-gray-200">
+                <div className="flex">
+                  {['trending', 'recent'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex-1 px-6 py-3 text-sm font-medium capitalize transition-colors relative ${
+                        activeTab === tab ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {tab}
+                      {activeTab === tab && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
+
               <div className="divide-y divide-gray-200">
-                {trendingArticles.length > 0 ? trendingArticles.slice(0, 5).map((article, index) => (
-                  <div key={article.id} className="p-6 hover:bg-gray-50">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-bold text-orange-600">#{index + 1}</span>
+                {(activeTab === 'trending' ? trendingArticles : recentArticles)
+                  .slice(0, 5)
+                  .map((article) => (
+                    <div key={article.id} className="p-6 bg-white hover:bg-gray-50 transition-colors">
+                      <div className="mb-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-50 text-green-600 border border-green-200">
+                          Published
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <Link
-                          to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                          className="text-base font-semibold text-gray-900 hover:text-blue-600 line-clamp-2"
-                        >
+
+                      <Link
+                        to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
+                        className="block mb-3"
+                      >
+                        <h3 className="text-lg font-bold text-gray-900 hover:text-blue-600 line-clamp-2 mb-2">
                           {article.title}
-                        </Link>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                          <span>
-                            By {(
-                              article.author?.first_name || article.author?.last_name
-                                ? `${article.author?.first_name || ''} ${article.author?.last_name || ''}`.trim()
-                                : (article.author?.username || 'Unknown Author')
-                            )}
-                          </span>
-                          <span>{formatDate(article.published_at)}</span>
-                          <div className="flex items-center space-x-1">
-                            <TrendingUp className="w-4 h-4" />
-                            <span>{formatNumber(article.views)} views</span>
+                        </h3>
+                        <p className="text-gray-600 text-sm line-clamp-2">
+                          {article.excerpt || 'Latest Developments In The Global Oil And Gas'}
+                        </p>
+                      </Link>
+
+                      <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 mb-4">
+                        <div className="flex flex-col md:flex-row md:items-center items-start gap-1.5 md:gap-4">
+                          <div className="flex items-center gap-1.5">
+                            <Users className="w-4 h-4" />
+                            <span>
+                              {article.author?.first_name || article.author?.last_name
+                                ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
+                                : 'Anonymous'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-4 h-4" />
+                            <span>{formatDate(article.published_at)}</span>
                           </div>
                         </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-1.5">
+                            <Heart className="w-4 h-4" />
+                            <span>{article.likes || 1}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Share2 className="w-4 h-4" />
+                            <span>{article.shares || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Eye className="w-4 h-4" />
+                            <span>{article.views || 0}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            navigate(webRoutes.knowledgeArticleDetail.replace(':slug', article.slug));
+                          }}
+                          className="bg-[#F2C94C] text-gray-900 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors"
+                        >
+                          Read More
+                        </button>
                       </div>
                     </div>
-                  </div>
-                )) : (
-                  <div className="p-6 text-sm text-gray-500">No trending articles yet.</div>
-                )}
+                  ))}
               </div>
             </div>
 
-            {/* Recent Articles */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Recent Articles</h2>
-                  <Link to={webRoutes.knowledgeArticles} className="text-sm text-blue-600 hover:text-blue-700">
-                    View All
-                  </Link>
-                </div>
+            {/* Active Forums */}
+            <div className="bg-white rounded-xl border border-gray-200">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Active Forums</h2>
+                <Link to={webRoutes.knowledgeForums} className="text-sm font-medium underline hover:text-gray-700">
+                  See All
+                </Link>
               </div>
+
               <div className="p-6">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {recentArticles.length > 0 ? recentArticles.slice(0, 4).map((article) => (
-                    <div key={article.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                      {article.featured_image && (
-                        <img
-                          src={article.featured_image}
-                          alt={article.title}
-                          className="w-full h-32 rounded-lg object-cover mb-4"
-                        />
-                      )}
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                          {article.article_type}
-                        </span>
-                        <span className="text-xs text-gray-500">{formatDate(article.published_at)}</span>
-                      </div>
-                      <Link
-                        to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                        className="text-base font-semibold text-gray-900 hover:text-blue-600 line-clamp-2"
-                      >
-                        {article.title}
-                      </Link>
-                      <p className="text-sm text-gray-600 mt-2 line-clamp-3">{article.excerpt || 'No excerpt available'}</p>
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center space-x-3 text-xs text-gray-500">
-                          <span>{formatNumber(article.views)} views</span>
-                          <span>{formatNumber(article.likes)} likes</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {forums.slice(0, 4).map((forum) => (
+                    <div
+                      key={forum.id}
+                      className="border border-gray-200 rounded-xl p-5 flex flex-col h-full bg-white hover:shadow-sm transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-gray-700" />
+                          <h3 className="font-semibold text-base text-gray-900">{forum.name}</h3>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                        <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-md flex-shrink-0">
+                          Public
+                        </span>
                       </div>
+
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
+                        {forum.description || 'Join the discussion on industry trends, insights, and networking.'}
+                      </p>
+
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 text-xs text-gray-500">
+                        <div className="flex items-center gap-1.5">
+                          <MessageCircle className="w-4 h-4" />
+                          <span>{forum.topic_count || 0} Topics</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Users className="w-4 h-4" />
+                          <span>{forum.members_count || 0} Members</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formatDate(forum.created_at)}</span>
+                        </div>
+                      </div>
+
+                      <Link
+                        to={webRoutes.knowledgeForumDetail.replace(':slug', forum.slug)}
+                        className="mt-auto block w-full bg-[#F2C94C] text-gray-900 text-center py-2.5 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors"
+                      >
+                        Enter Forum
+                      </Link>
                     </div>
-                  )) : (
-                    <div className="col-span-full text-sm text-gray-500">No recent articles found.</div>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - Desktop Only */}
+          <div className="hidden lg:block space-y-8">
             {/* Categories */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">Categories</h2>
+            <div className="bg-white rounded-xl border border-gray-200">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
+                <Link to={webRoutes.knowledgeCategories} className="text-sm font-medium underline hover:text-gray-700">
+                  See All
+                </Link>
               </div>
-              <div className="p-6 space-y-3">
-                {categories.length > 0 ? categories.slice(0, 8).map((category) => (
+              <div className="p-6 space-y-4">
+                {categories.slice(0, 8).map((category) => (
                   <Link
                     key={category.id}
                     to={webRoutes.knowledgeCategoryDetail.replace(':slug', category.slug)}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50"
+                    className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
                   >
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-4 h-4 rounded-full" 
-                        style={{ backgroundColor: category.color }}
-                      ></div>
-                      <span className="text-sm font-medium text-gray-900">{category.name}</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: category.color || '#3b82f6' }}
+                    ></div>
+                    <span className="text-sm text-gray-900 group-hover:text-blue-600">
+                      {category.name}
+                    </span>
                   </Link>
-                )) : (
-                  <p className="text-sm text-gray-500">No categories available.</p>
-                )}
-                <Link
-                  to={webRoutes.knowledgeCategories}
-                  className="text-sm text-blue-600 hover:text-blue-700 mt-4 block"
-                >
-                  View all categories
-                </Link>
+                ))}
               </div>
             </div>
 
             {/* Popular Tags */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">Popular Tags</h2>
+            <div className="bg-white rounded-xl border border-gray-200">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">Popular Tags</h2>
               </div>
               <div className="p-6">
                 <div className="flex flex-wrap gap-2">
-                  {popularTags.length > 0 ? popularTags.slice(0, 12).map((tag) => (
+                  {popularTags.slice(0, 15).map((tag) => (
                     <Link
                       key={tag.id}
                       to={webRoutes.knowledgeTagDetail.replace(':slug', tag.slug)}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700"
+                      className="inline-flex items-center px-3 py-1.5 rounded-full text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <Tag className="w-3 h-3 mr-1" />
                       {tag.name}
-                      <span className="ml-1 text-xs text-gray-500">({tag.usage_count})</span>
+                      <span className="ml-1 text-gray-500">({tag.usage_count || 0})</span>
                     </Link>
-                  )) : (
-                    <p className="text-sm text-gray-500">No popular tags yet.</p>
-                  )}
+                  ))}
                 </div>
-              </div>
-            </div>
-
-            {/* Active Forums */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Active Forums</h2>
-                  <Link to={webRoutes.knowledgeForums} className="text-sm text-blue-600 hover:text-blue-700">
-                    View All
-                  </Link>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                {forums.length > 0 ? forums.slice(0, 5).map((forum) => (
-                  <Link
-                    key={forum.id}
-                    to={webRoutes.knowledgeForumDetail.replace(':slug', forum.slug)}
-                    className="block p-3 border rounded-lg hover:bg-gray-50"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">{forum.name}</h3>
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{forum.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-gray-500">{forum.topic_count} topics</div>
-                        <div className="text-xs text-gray-500">{forum.post_count} posts</div>
-                      </div>
-                    </div>
-                    {forum.latest_topic && (
-                      <div className="mt-2 pt-2 border-t">
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
-                          <MessageCircle className="w-3 h-3" />
-                          <span className="truncate">Latest: {forum.latest_topic.title}</span>
-                        </div>
-                      </div>
-                    )}
-                  </Link>
-                )) : (
-                  <p className="text-sm text-gray-500">No forums available.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
-              </div>
-              <div className="p-6 space-y-3">
-                <Link
-                  to={webRoutes.knowledgeArticleCreate}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Plus className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm font-medium">Write Article</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link
-                  to={webRoutes.knowledgeForums}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="flex items-center space-x-3">
-                    <MessageSquare className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium">Start Discussion</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-gray-400" />
-                </Link>
-                <Link
-                  to={webRoutes.knowledgeSearch}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Search className="w-5 h-5 text-purple-600" />
-                    <span className="text-sm font-medium">Advanced Search</span>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-gray-400" />
-                </Link>
               </div>
             </div>
           </div>
