@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   ClockCheck,
   Globe,
-  Share2
+  Share2,
+  ClockFading
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
@@ -282,7 +283,7 @@ const WorkforceMyRegistrations = () => {
           /* Registration List */
           <div className='bg-white px-8 py-4'>
             <p className='capitalize text-3xl font-medium pb-4'>{filter}</p>
-          <div className="lg:grid grid-cols-1 md:grid-cols-2 gap-4 ">
+          <div className="flex flex-wrap justify-between gap-4 ">
             {filteredRegistrations.map((registration) => {
               // Skip registration if event is undefined
               if (!registration?.event) {
@@ -302,11 +303,21 @@ const WorkforceMyRegistrations = () => {
               console.log('Registration Status:', registration);
 
               return (
-                <div key={registration.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl min-h-[320px] max-h-[320px]">
+                <div key={registration.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl  w-full md:w-[49%]">
                 <div className="bg-white rounded-xl border h-full">
                   {/* Registration Top */}
                   <div className="p-4 pb-1 h-[70%]">
                     {/* Organizer */}
+                    <div className='flex justify-between text-sm mb-3'>
+                      <div className='flex gap-3 '>
+                        <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1'>Upcoming</span>
+                        <span className='flex items-center gap-2 bg-[#FFEFBD80]/50 rounded-full text-[#FFC000] px-2 py-1'>
+                        <ClockFading className='text-[#FF8400] w-4 h-4'/>
+                        Pending Approval
+                        </span>
+                      </div>
+                      <span className='bg-gradient-to-br from-[#258B00] to-[#53FF09] rounded-full text-white px-2 py-1'>Free Event</span>
+                    </div>
                      {/* Title */}
                     <h3 className="font-semibold text-gray-900 pb-4 line-clamp-2">
                       {registration.event.title}

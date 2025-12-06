@@ -41,6 +41,20 @@ const WorkforceEvents = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
 
+  const getTabCount = (tab) => {
+    switch (tab) {
+      case 'all':
+        return applications.length;
+      case 'active':
+        return applications.filter(app => ['submitted', 'under_review', 'shortlisted', 'interview_scheduled'].includes(app.status)).length;
+      case 'completed':
+        return applications.filter(app => ['offer_made', 'hired', 'rejected', 'withdrawn'].includes(app.status)).length;
+      case 'interviews':
+        return applications.filter(app => app.status === 'interview_scheduled').length;
+      default:
+        return 0;
+    }
+  };
   const handleFilterChange = useCallback((field, value) => {
     setFilters(prev => ({
       ...prev,
@@ -242,7 +256,7 @@ const WorkforceEvents = () => {
                 { key: 'all', label: 'Ongoing Events' },
                 { key: 'active', label: 'Upcoming Events' },
                 { key: 'interviews', label: 'Recent Events' },
-              ].map((tab) => (
+              ].map((tab) => ( 
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
