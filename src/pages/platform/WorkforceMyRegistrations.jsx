@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
+import BackArrowButton from "../../components/BackArrowButton"
 
 const WorkforceMyRegistrations = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -128,13 +129,20 @@ const WorkforceMyRegistrations = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">My Registered Events</h1>
-          <p className="mt-2 text-lg text-slate-600">
-            Track and manage your event registrations
-          </p>
+        <div className="mb-8 mt-4">
+          <div>
+            <div className='flex'>
+              <BackArrowButton />
+              <div className='flex flex-col'>
+                <h1 className="text-3xl font-bold text-slate-900">My Registered Events</h1>
+                <p className="mt-2 text-lg text-slate-600">
+                  Track and manage your event registrations
+                </p>
+              </div>
+            </div>
+          </div>
            <nav className="flex gap-2 mt-4" aria-label="Tabs">
               {[
                 { key: 'pending', label: 'Pending' },
@@ -281,9 +289,9 @@ const WorkforceMyRegistrations = () => {
           </div>
         ) : (
           /* Registration List */
-          <div className='bg-white px-8 py-4'>
+          <div className='bg-white p-4'>
             <p className='capitalize text-3xl font-medium pb-4'>{filter}</p>
-          <div className="flex flex-wrap justify-between gap-4 ">
+          <div className="flex flex-wrap gap-2">
             {filteredRegistrations.map((registration) => {
               // Skip registration if event is undefined
               if (!registration?.event) {
@@ -308,7 +316,7 @@ const WorkforceMyRegistrations = () => {
                   {/* Registration Top */}
                   <div className="p-4 pb-1 h-[70%]">
                     {/* Organizer */}
-                    <div className='flex justify-between text-sm mb-3'>
+                    <div className='flex justify-between text-[12px] mb-3'>
                       <div className='flex gap-3 '>
                         <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1'>Upcoming</span>
                         <span className='flex items-center gap-2 bg-[#FFEFBD80]/50 rounded-full text-[#FFC000] px-2 py-1'>
@@ -324,25 +332,26 @@ const WorkforceMyRegistrations = () => {
                     </h3>
                      <div>
                     <p className="text-sm text-gray-600 mb-3 flex items-center">
-                      <Building className="w-4 h-4 mr-1" />
+                      <Building className="w-5 h-5 mr-1" />
                       {registration.event.organizer_name || 'Organizer'}
                     </p>
     
                     {/* Location & Time */}
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-sm text-gray-600">
-                        <MapPin className="w-4 h-4 mr-2" />
+                        <MapPin className="w-5 h-5 mr-2" />
                         {!registration.event.is_virtual ? 'Online' : (registration.event.venue_name || registration.event.venue_address || 'Venue TBA').slice(0, 20) + "..."}
                       </div>
-                      <div className='flex items-center text-sm text-gray-600 gap-2'>
+                      <div className='flex justify-between items-center text-sm text-gray-600 gap-2'>
                         <span className='flex'>
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <Calendar className="w-5 h-5 mr-2" />
+                          <p className='mr-1'>Date:</p>
                             {registration.event.start_date ? formatDate(registration.event.start_date) : 'TBD'}
                         </span>
                         <div className="flex items-center text-sm text-gray-600">
-                            <ClockCheck className="w-4 h-4 mr-2" />
+                            <ClockCheck className="w-5 h-5 mr-2" />
+                            <p className='mr-1'>Time:</p>
                             {registration.event.start_date ? new Date(registration.event.start_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-                            {/* {registration.event.end_date ? ` - ${new Date(registration.event.end_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''} */}
                         </div>
                       </div>
                     </div>
@@ -367,7 +376,7 @@ const WorkforceMyRegistrations = () => {
                             {Array.isArray(registration.event.topics) && registration.event.topics.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
                                 {getLongestString(registration.event.topics.slice(0, 3)).map((t, i) => (
-                                <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
+                                <span key={i} className="bg-gray-100 text-gray-700 text-[12px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
                             )}
@@ -376,14 +385,14 @@ const WorkforceMyRegistrations = () => {
     
                   </div>
                             {/* Registration Details and Attendees */}
-                  <div className='flex py-3 h-[12%] text-[14px] font-medium text-gray-600 justify-center border-t border-gray-300 '>
+                  <div className='flex gap-2 py-3 h-[12%] text-[14px] font-medium text-gray-600 justify-center border-t border-gray-300 '>
                         <div className='flex' >
-                          <p className="">Registration On:</p>
+                          <p className="mr-1">Registration On:</p>
                           <p className="">{formatDate(registration.registered_at)}</p>
                         </div>
-                        <span></span>
+                        <span className='w-[1px] h-full bg-gray-300'></span>
                         <div className='flex'>
-                          <p className="">Attendees:</p>
+                          <p className="mr-1">Attendees:</p>
                           <p className="">{registration.event?.attendees_count || 0}
                               {registration.event?.max_attendees && ` / ${registration.event.max_attendees}`}</p>
                         </div>

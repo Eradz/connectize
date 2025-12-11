@@ -6,7 +6,8 @@ import {
   CheckCircle, AlertCircle, XCircle, Globe, Building, Search,
   Filter, Download, Eye, User, Badge, ChevronDown, ChevronUp,
   Star, Award, TrendingUp, MessageCircle, Heart, Copy,
-  Shield, Wifi, Coffee, Car, Gift, Zap, Target
+  Shield, Wifi, Coffee, Car, Gift, Zap, Target,
+  ClockCheck
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { workforceAPI } from '../../api-services/workforce';
@@ -204,9 +205,8 @@ const WorkforceEventDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
     return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
       year: 'numeric',
-      month: 'long',
+      month: 'numeric',
       day: 'numeric'
     });
   };
@@ -435,66 +435,28 @@ const WorkforceEventDetail = () => {
   const eventFeatures = getEventFeatures(event);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(webRoutes.workforceEvents)}
-              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-all duration-300 group bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl"
-            >
-              <ArrowLeft className="w-5 h-5 mr-3 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span className="font-semibold">Back to Events</span>
-            </button>
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={handleShare}
-                className="p-3 text-gray-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-colors"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={handleBookmark}
-                className={`p-3 rounded-xl transition-colors ${
-                  isBookmarked 
-                    ? 'text-red-500 bg-red-50 hover:bg-red-100' 
-                    : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
+    <div className="min-h-screen ">
+      <div className="py-4 lg:py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="xl:col-span-2 space-y-4 lg:space-y-6">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 ">
               {/* Decorative background pattern */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
               <div className="absolute top-0 right-0 w-48 h-48 lg:w-96 lg:h-96 bg-gradient-radial from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
-              <div className="relative p-6 lg:p-8 xl:p-12">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+              <div className="relative p-6 ">
+                <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
                   {/* Event Info */}
-                  <div className="lg:col-span-2">
+                  <div className="w-full md:w-[55%]">
                     <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-4 lg:mb-6">
                       <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
                         <StatusIcon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                         {eventStatus.label}
                       </span>
-                      <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30 capitalize">
-                        {event.event_type}
-                      </span>
-                      <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
-                        {event.is_virtual ? 'Virtual' : 'In-Person'}
-                      </span>
+                      
+                      
                       {event.is_free && (
                         <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-emerald-500 text-white">
                           Free Event
@@ -509,28 +471,47 @@ const WorkforceEventDetail = () => {
                     </div>
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 lg:mb-6 leading-tight">{event.title}</h1>
                     <p className="text-base lg:text-xl text-indigo-100 leading-relaxed mb-6 lg:mb-8">{event.description}</p>
+                    <button className='hidden md:flex'>
+                      <Link to={`/events/${event.id}/register`} className="inline-flex border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700">
+                        Register Now
+                      </Link>
+                    </button>
                   </div>
                   
                   {/* Quick Details Card */}
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
+                  <div className="mx-auto w-[90%] md:w-[40%] bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
                     <h3 className="text-base lg:text-lg font-bold text-white mb-4 lg:mb-6">Event Details</h3>
                     <div className="space-y-3 lg:space-y-4">
+                      <div className='flex gap-2'>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs lg:text-sm font-semibold  text-white border border-white capitalize">
+                          <Globe className='w-4 h-4 mr-1'/>
+                          {event.is_virtual ? 'Virtual' : 'In-Person'}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1  rounded-full text-xs lg:text-sm font-semibold  text-white border border-white capitalize">
+                        <Globe className='w-4 h-4 mr-1'/>
+                        {event.event_type}
+                      </span>
+
+                      </div>
                       <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        </div>
-                        <div>
+                        <Building className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                        <p className="text-xs lg:text-sm font-semibold text-white">
+                            {event.organizer_name || "Connectize"}
+                        </p>
+                      </div>
+                      <div className="flex items-start space-x-3 lg:space-x-4">
+                        <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                           <p className="text-xs lg:text-sm font-semibold text-white">{formatDate(event.start_date)}</p>
-                          <p className="text-xs lg:text-sm text-indigo-200">
+                      </div>
+                      <div className="flex items-start space-x-3 lg:space-x-4">
+                        <ClockCheck className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                         <p className="text-xs lg:text-sm font-semibold text-white">
                             {formatTime(event.start_date)}
                             {event.end_date && ` - ${formatTime(event.end_date)}`}
                           </p>
-                        </div>
                       </div>
                       <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <MapPin className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        </div>
+                        <MapPin className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                         <div>
                           <p className="text-xs lg:text-sm font-semibold text-white">
                             {event.is_virtual ? 'Virtual Event' : (event.venue_name || 'Venue TBA')}
@@ -543,19 +524,11 @@ const WorkforceEventDetail = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Users className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs lg:text-sm font-semibold text-white">
-                            {event.attendees_count || 0} registered
-                          </p>
-                          <p className="text-xs lg:text-sm text-indigo-200">
-                            {event.max_attendees ? `of ${event.max_attendees} spots` : 'Unlimited capacity'}
-                          </p>
-                        </div>
-                      </div>
+                      <button className='flex w-full md:hidden'>
+                      <Link to={`/events/${event.id}/register`} className="inline-flex border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700">
+                        Register Now
+                      </Link>
+                    </button>
                     </div>
                   </div>
                 </div>
@@ -563,18 +536,18 @@ const WorkforceEventDetail = () => {
             </div>
 
             {/* Organizer Spotlight */}
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-indigo-100 p-6 shadow-lg">
-              <h2 className="text-lg font-bold text-indigo-900 mb-4">Event Organizer</h2>
+            <div className="bg-white/80 rounded-lg border p-6">
+              <h2 className="text-lg font-bold mb-4">Event Organizer</h2>
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
                   <span className="text-white font-bold text-lg">
                     {organizerInfo.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
-                    <h3 className="text-lg font-bold text-indigo-900">{organizerInfo.name}</h3>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
+                    <h3 className="text-lg font-bold ">{organizerInfo.name}</h3>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
                       {organizerInfo.type}
                     </span>
                   </div>
