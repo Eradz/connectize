@@ -133,9 +133,9 @@ const WorkforceMyRegistrations = () => {
       <div className=" px-4 md:px-0">
         {/* Header */}
         <div className="mb-8 mt-4">
-          <div className='flex justify-between items-end md:items-start'>
-            <div className='flex flex-col md:flex-row'>
-                <BackArrowButton />
+          <div className='flex justify-between items-end md:items-start '>
+            <div className='flex flex-col md:flex-row md:w-[70%]'>
+                <BackArrowButton  />
               <div className='flex flex-col'>
                 <h1 className="text-xl md:text-2xl font-bold text-slate-900">My Registered Events</h1>
                 <p className="mt-2 text-sm md:text-lg text-slate-600">
