@@ -14,7 +14,8 @@ import {
   ClockCheck,
   Globe,
   Share2,
-  ClockFading
+  ClockFading,
+  Plus
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
@@ -129,19 +130,30 @@ const WorkforceMyRegistrations = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="">
+      <div className=" px-4 md:px-0">
         {/* Header */}
         <div className="mb-8 mt-4">
-          <div>
-            <div className='flex'>
-              <BackArrowButton />
+          <div className='flex justify-between items-end md:items-start'>
+            <div className='flex flex-col md:flex-row'>
+                <BackArrowButton />
               <div className='flex flex-col'>
-                <h1 className="text-3xl font-bold text-slate-900">My Registered Events</h1>
-                <p className="mt-2 text-lg text-slate-600">
+                <h1 className="text-xl md:text-2xl font-bold text-slate-900">My Registered Events</h1>
+                <p className="mt-2 text-sm md:text-lg text-slate-600">
                   Track and manage your event registrations
                 </p>
               </div>
             </div>
+            <div className="flex h-[50%]">
+               <Link
+               to={webRoutes.workforceEventCreate}
+               className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
+               >
+                <Plus className="w-4 h-4 md:mr-2 " />
+                <p className='hidden md:flex'>
+                Create Event
+                </p>
+               </Link>
+               </div>
           </div>
            <nav className="flex gap-2 mt-4" aria-label="Tabs">
               {[
@@ -183,7 +195,6 @@ const WorkforceMyRegistrations = () => {
 
             {/* Filter */}
             <div className="flex items-center space-x-2">
-              <Filter className="w-5 h-5 text-slate-500" />
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
@@ -271,7 +282,7 @@ const WorkforceMyRegistrations = () => {
 
         {/* Empty State */}
         {filteredRegistrations.length === 0 && !loading ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <div className="bg-transparent md:bg-white rounded-lg shadow-sm p-12 text-center">
             <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-900 mb-2">No Event Registrations</h3>
             <p className="text-slate-600 mb-6">
@@ -289,9 +300,9 @@ const WorkforceMyRegistrations = () => {
           </div>
         ) : (
           /* Registration List */
-          <div className='bg-white p-4'>
+          <div className='bg-transparent md:bg-white p-4'>
             <p className='capitalize text-3xl font-medium pb-4'>{filter}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-4 md:gap-2">
             {filteredRegistrations.map((registration) => {
               // Skip registration if event is undefined
               if (!registration?.event) {

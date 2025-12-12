@@ -24,7 +24,8 @@ import {
   TrendingUp,
   User2,
   ArrowLeft,
-  Target
+  Target,
+  User
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -406,8 +407,8 @@ const WorkforceProfessionals = () => {
       {/* ========== END MOBILE HEADER ========== */}
 
       {/* Header */}
-      <div className="hidden lg:block bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="hidden lg:block">
+        <div className="">
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Oil & Gas Professionals</h1>
@@ -447,9 +448,9 @@ const WorkforceProfessionals = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-4 lg:py-8 px-4 lg:px-0">
+      <div className=" bg-white p-6">
         {/* Search and Filters */}
-        <div className="hidden lg:block bg-white rounded-xl shadow-sm border p-6 mb-8">
+        <div className="hidden lg:block">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -634,18 +635,22 @@ const WorkforceProfessionals = () => {
         {/* ========== END MOBILE PROFESSIONALS LIST ========== */}
 
         {/* Professionals Grid */}
-        <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="hidden lg:flex lg:flex-wrap gap-[2%] mt-6 ">
+          {/* <h1 className="text-xl font-bold text-gray-900">Jobs {filteredProfessionals.length} of {filteredProfessionals.length}</h1> */}
           {filteredProfessionals.map((professional) => (
-            <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow ">
-              <div className="p-6 h-full">
+            <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow w-[32%] mb-2">
+              <div className="px-2 py-6 h-full">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4 h-[20%]">
-                  <div className="flex items-center space-x-3">
-                    <img
+                  <div className="flex items-start space-x-3">
+                    {/* <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
                       alt={professional.user_name || professional.user_email || 'Professional'}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
+                      className="w-10 h-10 rounded-full object-cover"
+                    /> */}
+                    <div className='rounded-full border-2 border-black'>
+                      <User fill='#6D8FAF' className="w-10 h-10 text-[#6D8FAF]" />
+                    </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{professional.user_name || professional.user_email || 'Professional'}</h3>
                       <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
@@ -733,7 +738,7 @@ const WorkforceProfessionals = () => {
                   </Link>
                   <button 
                     onClick={() => handleConnectWithProfessional(professional.id)}
-                    className="w-[50%] flex items-center justify-center bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="w-[50%] flex items-center justify-center bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
                     title="Send connection request"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
