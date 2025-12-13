@@ -284,7 +284,7 @@ function Signup() {
 
             <p className="text-center text-sm text-[#666666] mt-4">
               Already have an account?{" "}
-              <Link to="/login" className="font-semibold text-[#1a1a1a] underline">
+              <Link to="/login" className="font-bold text-black">
                 Login
               </Link>
             </p>
