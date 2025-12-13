@@ -283,35 +283,30 @@ function Signup() {
             </form>
 
             <p className="text-center text-sm text-[#666666] mt-4">
-              Don't have an account?{" "}
-              <Link to="/signup" className="font-semibold text-[#1a1a1a] underline">
-                Sign Up
+              Already have an account?{" "}
+              <Link to="/login" className="font-semibold text-[#1a1a1a] underline">
+                Login
               </Link>
             </p>
           </div>
         </div>
 
-      
+        {/* RIGHT SIDE - Background */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black">
-      
           <div className="absolute inset-0 w-full h-full">
             <SvgIcon style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
 
-       
           <div className="relative z-10 flex flex-col justify-end w-full h-full px-16 pb-16">
             <div className="text-white max-w-[600px]">
-          
-              <h2 className="text-[32px] font-normal leading-tight mb-2S">
+              <h2 className="text-[32px] font-normal leading-tight mb-2">
                 Join <span className="font-bold">Connectize.co</span> today.
               </h2>
 
-           
               <p className="text-[32px] font-normal leading-[1.1] mb-4">
                 Register now to expand your network and elevate your business
               </p>
 
-       
               <p className="text-[15px] leading-relaxed font-normal">
                 <span className="font-bold underline decoration-2 underline-offset-2">
                   Register
