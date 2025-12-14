@@ -440,7 +440,7 @@ function App() {
 
   {/* Authentication Routes (with AuthLayout) */}
 <Route path="/" element={<AuthLayout />}>
-  <Route path="login" element={<Login />} />
+  
   {/* signup removed from here */}
   <Route path="verify-account" element={<VerifyAccount />} />
   <Route path="reset-password" element={<ResetPasswordPage />} />
@@ -450,7 +450,7 @@ function App() {
 
 {/* Signup Route - Standalone (Not wrapped in AuthLayout) */}
 <Route path="/signup" element={<Signup />} />
-
+<Route path="login" element={<Login />} />
         {/* Misc Pages */}
   <Route path="/success" element={<SuccessPage />} />
   {/* Keep original terms routes for compatibility */}
