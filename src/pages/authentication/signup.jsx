@@ -182,13 +182,19 @@ function Signup() {
                 {/* Password Strength Indicators */}
                 <div className="flex gap-1.5 mt-2">
                   {[1, 2, 3, 4].map((level) => (
-                    <div
-                      key={level}
-                      className={`h-1 flex-1 rounded transition-colors ${
-                        passwordStrength >= level ? "bg-red-500" : "bg-gray-200"
-                      }`}
-                    />
-                  ))}
+  <div
+    key={level}
+    className={`h-1 flex-1 rounded transition-colors ${
+      passwordStrength >= level 
+        ? passwordStrength <= 2 
+          ? "bg-red-500" 
+          : passwordStrength === 3 
+            ? "bg-yellow-500" 
+            : "bg-green-500"
+        : "bg-gray-200"
+    }`}
+  />
+))}
                 </div>
 
                 {formik.touched.password &&
