@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { knowledgeForumService, knowledgeCategoryService } from '../../api-services/oilgas';
+import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft } from 'lucide-react';
 
 const KnowledgeForumCreate = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ 
     name: '', 
     description: '', 
@@ -9,21 +13,32 @@ const KnowledgeForumCreate = () => {
     is_public: true,
     is_moderated: false 
   });
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'General' },
-    { id: 2, name: 'Technical' },
-    { id: 3, name: 'Discussion' }
-  ]);
+  const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Auto-select first category if available
-    if (categories.length > 0) {
-      setForm(prev => ({ ...prev, category: categories[0].id }));
-    }
+    loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const response = await knowledgeCategoryService.getAll();
+      const categoryData = response?.results || response?.data || response || [];
+      setCategories(categoryData);
+      
+      // Auto-select first category if available
+      if (categoryData.length > 0) {
+        setForm(prev => ({ ...prev, category: categoryData[0].id }));
+      }
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+      setError('Failed to load categories. Please refresh the page.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -33,7 +48,8 @@ const KnowledgeForumCreate = () => {
     }));
   };
 
-  const onSubmit = () => {
+  const onSubmit = async (e) => {
+    e.preventDefault();
     setSaving(true);
     setError(null);
     
@@ -43,11 +59,20 @@ const KnowledgeForumCreate = () => {
       return;
     }
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const created = await knowledgeForumService.create(form);
+      const forum = created?.data || created;
+      if (forum?.slug) {
+        navigate(webRoutes.knowledgeForumDetail.replace(':slug', forum.slug));
+      } else {
+        navigate(webRoutes.knowledgeForums);
+      }
+    } catch (err) {
+      setError('Failed to create forum. Please check required fields or login.');
+      console.error(err);
+    } finally {
       setSaving(false);
-      alert('Forum created successfully!');
-    }, 1000);
+    }
   };
 
   const goBack = () => {

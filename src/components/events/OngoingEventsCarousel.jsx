@@ -1,9 +1,13 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useRef } from 'react'
 import { Bookmark, Building, Calendar, ClockCheck, Globe, MapPin, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const OngoingEventsCarousel = ({ filteredEvents }) => {
+const OngoingEventsCarousel = ({ filteredEvents, children }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [direction, setDirection] = useState(0)
+  const touchStartX = useRef(0)
+  const touchEndX = useRef(0)
+  const minSwipeDistance = 50
 
   // Guard against empty events
   if (!filteredEvents || filteredEvents.length === 0) {
@@ -34,15 +38,39 @@ const OngoingEventsCarousel = ({ filteredEvents }) => {
   }
 
   const goToPrevious = () => {
+    setDirection(-1)
     setCurrentIndex((prev) => (prev === 0 ? filteredEvents.length - 1 : prev - 1))
   }
 
   const goToNext = () => {
+    setDirection(1)
     setCurrentIndex((prev) => (prev === filteredEvents.length - 1 ? 0 : prev + 1))
   }
 
   const goToSlide = (index) => {
+    setDirection(index > currentIndex ? 1 : -1)
     setCurrentIndex(index)
+  }
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX
+  }
+
+  const handleTouchEnd = (e) => {
+    touchEndX.current = e.changedTouches[0].clientX
+    handleSwipe()
+  }
+
+  const handleSwipe = () => {
+    const distance = touchStartX.current - touchEndX.current
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe) {
+      goToNext()
+    } else if (isRightSwipe) {
+      goToPrevious()
+    }
   }
 
   const getTopicsDisplay = (topics) => {
@@ -53,7 +81,10 @@ const OngoingEventsCarousel = ({ filteredEvents }) => {
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Carousel Container */}
-      <div className="relative w-full overflow-hidden rounded-lg h-[500px] bg-gradient-to-br from-slate-800 to-slate-900">
+      <div className="relative w-full overflow-hidden rounded-lg h-[500px] bg-gradient-to-br from-slate-800 to-slate-900"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -65,82 +96,11 @@ const OngoingEventsCarousel = ({ filteredEvents }) => {
               x: { type: 'spring', stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 }
             }}
-            custom={1}
+            custom={direction}
             className="absolute inset-0 w-full h-full"
           >
-            <div className="w-full h-full bg-gradient-to-br from-[#FFC000] to-[#FF1A00] p-8 flex flex-col justify-between">
-              {/* Header Section */}
-              <div className="flex-1 flex flex-col justify-start">
-                <h2 className="text-4xl font-bold text-white mb-4">{currentEvent.title}</h2>
-                
-                <p className="text-lg text-blue-100 mb-6 flex items-center gap-2">
-                  <Building className="w-5 h-5" />
-                  {currentEvent.organizer_name || 'Organizer'}
-                </p>
-
-                {/* Topics/Themes */}
-                {getTopicsDisplay(currentEvent.topics).length > 0 && (
-                  <div className="mb-6 flex items-center gap-4">
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Themes:</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {getTopicsDisplay(currentEvent.topics).map((topic, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-white backdrop-blur-sm text-gray-600 text-sm px-4 py-2 rounded-full border border-white/30 hover:bg-white/30 transition-colors"
-                        >
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer Section */}
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
-                <div className="flex justify-between mb-6">
-                  {/* Left: Date & Status */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-white">
-                      <Calendar className="w-5 h-5" />
-                      <span className="text-sm font-medium">Today</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-white">
-                      <ClockCheck className="w-5 h-5" />
-                      <span className="text-sm font-medium">Currently Ongoing</span>
-                    </div>
-                  </div>
-
-                  {/* Right: Event Type & Location */}
-                    <div className="flex items-center gap-3 px-2 py-1 border text-white border-white rounded-full w-fit h-[50%]">
-                      <Globe className="w-5 h-5" />
-                      <span className="text-sm font-medium">
-                        {currentEvent.is_virtual ? 'Virtual' : currentEvent.event_type || 'In-Person'}
-                      </span>
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-between">
-                    <div className="flex gap-3 w-[50%]">
-                        <button className="flex-1 bg-white font-semibold py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg">
-                            Join This Event
-                        </button>
-                        <button className="p-3 bg-pale_yellow hover:bg-white/30 border border-white/30 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                            <Bookmark className="w-5 h-5" />
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-3 text-blue-100">
-                      <MapPin className="w-5 h-5 " />
-                      <span className="text-sm font-medium ">
-                        {currentEvent.is_virtual
-                          ? 'Online'
-                          : currentEvent.venue_name || currentEvent.venue_address || 'Venue TBA'}
-                      </span>
-                    </div>
-                </div>
-              </div>
-            </div>
+            {React.cloneElement(children, { filteredEvents: filteredEvents, currentIndex: currentIndex })}
+            {/* {children} */}
           </motion.div>
         </AnimatePresence>
 

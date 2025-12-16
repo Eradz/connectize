@@ -6,7 +6,9 @@ import {
   CheckCircle, AlertCircle, XCircle, Globe, Building, Search,
   Filter, Download, Eye, User, Badge, ChevronDown, ChevronUp,
   Star, Award, TrendingUp, MessageCircle, Heart, Copy,
-  Shield, Wifi, Coffee, Car, Gift, Zap, Target
+  Shield, Wifi, Coffee, Car, Gift, Zap, Target,
+  ClockCheck,
+  Users2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { workforceAPI } from '../../api-services/workforce';
@@ -204,9 +206,8 @@ const WorkforceEventDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
     return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
       year: 'numeric',
-      month: 'long',
+      month: 'numeric',
       day: 'numeric'
     });
   };
@@ -253,11 +254,11 @@ const WorkforceEventDetail = () => {
       case 'confirmed':
         return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
       case 'pending':
-        return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
+        return 'bg-indigo-100  border border-indigo-200';
       case 'cancelled':
         return 'bg-red-100 text-red-800 border border-red-200';
       default:
-        return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
+        return 'bg-indigo-100  border border-indigo-200';
     }
   };
 
@@ -435,66 +436,27 @@ const WorkforceEventDetail = () => {
   const eventFeatures = getEventFeatures(event);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate(webRoutes.workforceEvents)}
-              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-all duration-300 group bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl"
-            >
-              <ArrowLeft className="w-5 h-5 mr-3 group-hover:-translate-x-1 transition-transform duration-300" />
-              <span className="font-semibold">Back to Events</span>
-            </button>
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={handleShare}
-                className="p-3 text-gray-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-xl transition-colors"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={handleBookmark}
-                className={`p-3 rounded-xl transition-colors ${
-                  isBookmarked 
-                    ? 'text-red-500 bg-red-50 hover:bg-red-100' 
-                    : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+    <div className="min-h-screen ">
+      <div className=" flex py-4 lg:py-8">
           {/* Main Content */}
-          <div className="xl:col-span-2 space-y-4 lg:space-y-6">
+          <div className="bg-white space-y-8 px-4 py-6">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 ">
               {/* Decorative background pattern */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
               <div className="absolute top-0 right-0 w-48 h-48 lg:w-96 lg:h-96 bg-gradient-radial from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
-              <div className="relative p-6 lg:p-8 xl:p-12">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+              <div className="relative p-6 ">
+                <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
                   {/* Event Info */}
-                  <div className="lg:col-span-2">
+                  <div className="w-full md:w-[55%]">
                     <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-4 lg:mb-6">
                       <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
                         <StatusIcon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                         {eventStatus.label}
                       </span>
-                      <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30 capitalize">
-                        {event.event_type}
-                      </span>
-                      <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
-                        {event.is_virtual ? 'Virtual' : 'In-Person'}
-                      </span>
+                      
+                      
                       {event.is_free && (
                         <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-emerald-500 text-white">
                           Free Event
@@ -508,34 +470,53 @@ const WorkforceEventDetail = () => {
                       )}
                     </div>
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 lg:mb-6 leading-tight">{event.title}</h1>
-                    <p className="text-base lg:text-xl text-indigo-100 leading-relaxed mb-6 lg:mb-8">{event.description}</p>
+                    <p className="text-base lg:text-xl  leading-relaxed mb-6 lg:mb-8">{event.description}</p>
+                    <button className='hidden md:flex'>
+                      <Link to={`/events/${event.id}/register`} className="inline-flex border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700">
+                        Register Now
+                      </Link>
+                    </button>
                   </div>
                   
                   {/* Quick Details Card */}
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
+                  <div className="mx-auto w-[90%] md:w-[40%] bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
                     <h3 className="text-base lg:text-lg font-bold text-white mb-4 lg:mb-6">Event Details</h3>
                     <div className="space-y-3 lg:space-y-4">
+                      <div className='flex gap-2'>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs lg:text-sm font-semibold  text-white border border-white capitalize">
+                          <Globe className='w-4 h-4 mr-1'/>
+                          {event.is_virtual ? 'Virtual' : 'In-Person'}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1  rounded-full text-xs lg:text-sm font-semibold  text-white border border-white capitalize">
+                        <Globe className='w-4 h-4 mr-1'/>
+                        {event.event_type}
+                      </span>
+
+                      </div>
                       <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        </div>
-                        <div>
+                        <Building className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                        <p className="text-xs lg:text-sm font-semibold text-white">
+                            {event.organizer_name || "Connectize"}
+                        </p>
+                      </div>
+                      <div className="flex items-start space-x-3 lg:space-x-4">
+                        <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                           <p className="text-xs lg:text-sm font-semibold text-white">{formatDate(event.start_date)}</p>
-                          <p className="text-xs lg:text-sm text-indigo-200">
+                      </div>
+                      <div className="flex items-start space-x-3 lg:space-x-4">
+                        <ClockCheck className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+                         <p className="text-xs lg:text-sm font-semibold text-white">
                             {formatTime(event.start_date)}
                             {event.end_date && ` - ${formatTime(event.end_date)}`}
                           </p>
-                        </div>
                       </div>
                       <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <MapPin className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        </div>
+                        <MapPin className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                         <div>
                           <p className="text-xs lg:text-sm font-semibold text-white">
                             {event.is_virtual ? 'Virtual Event' : (event.venue_name || 'Venue TBA')}
                           </p>
-                          <p className="text-xs lg:text-sm text-indigo-200">
+                          <p className="text-xs lg:text-sm ">
                             {event.is_virtual ? 
                               (event.virtual_platform || 'Online Platform') :
                               (event.city || 'Location details pending')
@@ -543,451 +524,444 @@ const WorkforceEventDetail = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg lg:rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Users className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs lg:text-sm font-semibold text-white">
-                            {event.attendees_count || 0} registered
-                          </p>
-                          <p className="text-xs lg:text-sm text-indigo-200">
-                            {event.max_attendees ? `of ${event.max_attendees} spots` : 'Unlimited capacity'}
-                          </p>
-                        </div>
-                      </div>
+                      <button className='flex w-full md:hidden'>
+                      <Link to={`/events/${event.id}/register`} className="inline-flex border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700">
+                        Register Now
+                      </Link>
+                    </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Organizer Spotlight */}
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-indigo-100 p-6 shadow-lg">
-              <h2 className="text-lg font-bold text-indigo-900 mb-4">Event Organizer</h2>
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <span className="text-white font-bold text-lg">
-                    {organizerInfo.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <h3 className="text-lg font-bold text-indigo-900">{organizerInfo.name}</h3>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
-                      {organizerInfo.type}
-                    </span>
-                  </div>
-                  {event.organizer_description && (
-                    <p className="text-indigo-600 mt-2">
-                      {event.organizer_description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* About This Event */}
-            {event.long_description && (
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-indigo-100 p-8 shadow-lg">
-                <h2 className="text-2xl font-bold text-indigo-900 mb-6 flex items-center">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center mr-3">
-                    <MessageCircle className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  About This Event
-                </h2>
-                <div className="prose max-w-none text-indigo-700 leading-relaxed">
-                  <p className="text-lg">{event.long_description}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Agenda */}
-            {event.agenda && event.agenda.length > 0 && (
-              <div className="bg-white rounded border border-gray-200 p-3">
-                <h2 className="text-sm font-medium text-gray-900 mb-2">Schedule</h2>
-                <div className="space-y-1">
-                  {event.agenda.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-gray-600">{item.time}</span>
+            <div className='flex px-4 gap-4 '>
+                <div className='w-[70%] space-y-6 '>
+                  {/* Organizer Spotlight */}
+                  <div className="bg-white/80 rounded-lg border p-6">
+                    <h2 className="text-lg font-bold mb-4">Event Organizer</h2>
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <span className="text-white font-bold text-lg">
+                          {organizerInfo.name.charAt(0).toUpperCase()}
+                        </span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900 text-xs">{item.session}</h3>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Speakers */}
-            {event.speakers && event.speakers.length > 0 && (
-              <div className="bg-white rounded border border-gray-200 p-3">
-                <h2 className="text-sm font-medium text-gray-900 mb-2">Speakers</h2>
-                <div className="space-y-1">
-                  {event.speakers.map((speaker, index) => {
-                    // Handle both string and object formats
-                    const speakerName = typeof speaker === 'string' ? speaker : speaker.name || 'Unknown Speaker';
-                    const speakerTitle = typeof speaker === 'string' ? '' : speaker.title || '';
-                    const speakerCompany = typeof speaker === 'string' ? '' : speaker.company || '';
-                    
-                    return (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-6 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-medium text-xs">
-                            {speakerName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-bold ">{organizerInfo.name}</h3>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+                            {organizerInfo.type}
                           </span>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-900 text-xs">{speakerName}</h3>
-                          {speakerTitle && <p className="text-xs text-gray-600">{speakerTitle}</p>}
-                          {speakerCompany && <p className="text-xs text-gray-500">{speakerCompany}</p>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Event Participants Section - conditional visibility */}
-            <div className="mt-8">
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-indigo-100 overflow-hidden shadow-lg">
-                <div className="p-6 border-b border-indigo-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-                        <Users className="w-6 h-6 text-indigo-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-indigo-900">Participants</h2>
-                        <p className="text-indigo-600">Event attendees</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span className="bg-indigo-100 text-indigo-700 text-sm font-semibold px-4 py-2 rounded-xl">
-                        {(event.attendees_count ?? 0) || participants.length || 0}
-                      </span>
-                      <button
-                        onClick={exportParticipants}
-                        className="flex items-center px-4 py-2 text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-xl transition-all duration-300"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Export
-                      </button>
-                      <button
-                        onClick={handleToggleParticipants}
-                        className="flex items-center px-4 py-2 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 rounded-xl transition-all duration-300 shadow-lg"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        {showParticipants ? 'Hide' : 'View'}
-                        {showParticipants ? 
-                          <ChevronUp className="w-4 h-4 ml-2" /> : 
-                          <ChevronDown className="w-4 h-4 ml-2" />
-                        }
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {showParticipants && (
-                  <div className="p-6">
-                    {/* Search and Filter Controls */}
-                    <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                      <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-400" />
-                        <input
-                          type="text"
-                          placeholder="Search participants..."
-                          value={participantSearch}
-                          onChange={(e) => {
-                            setParticipantSearch(e.target.value);
-                            setCurrentPage(1);
-                          }}
-                          className="w-full pl-10 pr-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/70 backdrop-blur-sm transition-all duration-300"
-                        />
-                      </div>
-                      <div className="relative">
-                        <select
-                          value={participantFilter}
-                          onChange={(e) => {
-                            setParticipantFilter(e.target.value);
-                            setCurrentPage(1);
-                          }}
-                          className="appearance-none bg-white/70 backdrop-blur-sm border border-indigo-200 rounded-xl px-4 py-3 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
-                        >
-                          <option value="all">All Status</option>
-                          <option value="confirmed">Confirmed</option>
-                          <option value="pending">Pending</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                        <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-indigo-400 pointer-events-none" />
-                      </div>
-                    </div>
-
-                    {participantsLoading ? (
-                      <div className="flex items-center justify-center py-20">
-                        <div className="text-center">
-                          <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto mb-4"></div>
-                          <span className="text-lg text-indigo-600 font-medium">Loading participants...</span>
-                        </div>
-                      </div>
-                    ) : paginatedParticipants.length === 0 ? (
-                      <div className="text-center py-16">
-                        <div className="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                          <Users className="w-10 h-10 text-indigo-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-indigo-900 mb-3">
-                          {participants.length === 0 
-                            ? 'No participants visible' 
-                            : 'No participants match your search'
-                          }
-                        </h3>
-                        <p className="text-indigo-600">
-                          {participants.length === 0 
-                            ? 'Participant information is only available to event creators'
-                            : 'Try adjusting your search criteria'
-                          }
-                        </p>
-                        {isEventCreator && (event?.attendees_count || 0) > 0 && participants.length === 0 && (
-                          <div className="mt-6 space-y-3">
-                            <p className="text-sm text-indigo-500">You are the organizer and attendee count is {event.attendees_count}, but no list was returned. You can retry fetching:</p>
-                            <button
-                              onClick={loadParticipants}
-                              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm"
-                            >Retry Load Participants</button>
-                          </div>
+                        {event.organizer_description && (
+                          <p className=" mt-2">
+                            {event.organizer_description}
+                          </p>
                         )}
                       </div>
-                    ) : (
-                      <>
-                        {/* Desktop Table View */}
-                        <div className="hidden md:block overflow-x-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b border-indigo-200">
-                                <th className="text-left py-4 px-6 font-bold text-indigo-900">Participant</th>
-                                <th className="text-left py-4 px-6 font-bold text-indigo-900">Contact</th>
-                                <th className="text-left py-4 px-6 font-bold text-indigo-900">Status</th>
-                                <th className="text-left py-4 px-6 font-bold text-indigo-900">Registered</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-indigo-100">
-                              {paginatedParticipants.map((participant, index) => (
-                                <tr key={participant.id || index} className="hover:bg-indigo-50/50 transition-all duration-300 group">
-                                  <td className="py-4 px-6">
+                    </div>
+                  </div>
+
+                  {/* About This Event */}
+                  {event.long_description && (
+                    <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-indigo-100 p-8 shadow-lg">
+                      <h2 className="text-2xl font-bold  mb-6 flex items-center">
+                        <div className="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center mr-3">
+                          <MessageCircle className="w-5 h-5 " />
+                        </div>
+                        About This Event
+                      </h2>
+                      <div className="prose max-w-none  leading-relaxed">
+                        <p className="text-lg">{event.long_description}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Agenda */}
+                  {event.agenda && event.agenda.length > 0 && (
+                    <div className="bg-white rounded border border-gray-200 p-3">
+                      <h2 className="text-sm font-medium text-gray-900 mb-2">Schedule</h2>
+                      <div className="space-y-1">
+                        {event.agenda.map((item, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-medium text-gray-600">{item.time}</span>
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900 text-xs">{item.session}</h3>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Speakers */}
+                  {event.speakers && event.speakers.length > 0 && (
+                    <div className="bg-white rounded border border-gray-200 p-3">
+                      <h2 className="text-sm font-medium text-gray-900 mb-2">Speakers</h2>
+                      <div className="space-y-1">
+                        {event.speakers.map((speaker, index) => {
+                          // Handle both string and object formats
+                          const speakerName = typeof speaker === 'string' ? speaker : speaker.name || 'Unknown Speaker';
+                          const speakerTitle = typeof speaker === 'string' ? '' : speaker.title || '';
+                          const speakerCompany = typeof speaker === 'string' ? '' : speaker.company || '';
+                          
+                          return (
+                            <div key={index} className="flex items-center space-x-2">
+                              <div className="w-6 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
+                                <span className="text-white font-medium text-xs">
+                                  {speakerName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                                </span>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-medium text-gray-900 text-xs">{speakerName}</h3>
+                                {speakerTitle && <p className="text-xs text-gray-600">{speakerTitle}</p>}
+                                {speakerCompany && <p className="text-xs text-gray-500">{speakerCompany}</p>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                 
+
+                  {/* Requirements */}
+                  {event.requirements && (
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                      <h2 className="text-xl font-semibold text-slate-900 mb-4">Requirements</h2>
+                      <div className="text-slate-600">
+                        <p>{event.requirements}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                  {/* Sidebar */}
+          <div className="space-y-6 w-[30%] ">
+             {/* Event Participants Section - conditional visibility */}
+                  <div className="">
+                    <div className="overflow-hidden">
+                        <div className="flex flex-col">
+                          <div className="flex space-x-4">
+                              <h2 className="text-xl font-bold ">Participants</h2>
+                              <button
+                              onClick={handleToggleParticipants}
+                              className="flex items-center px-4 py-2 text-sm border rounded-lg"
+                            >
+                              {showParticipants ? 'Hide' : 'View'}
+                              {showParticipants ? 
+                                <ChevronUp className="w-4 h-4 ml-2" /> : 
+                                <ChevronDown className="w-4 h-4 ml-2" />
+                              }
+                            </button>
+                            </div>
+                          <div className="flex items-center space-x-1 text-sm">
+                            <Users2 className="w-4 h-4 " />
+                              <p className="">Event attendees</p>
+                            <span className="text-lg font-semibold px-4 py-2 rounded-xl">
+                              {(event.attendees_count ?? 0) || participants.length || 0}
+                            </span>
+                            {/* <button
+                              onClick={exportParticipants}
+                              className="flex items-center px-4 py-2 text-sm  hover: hover:bg-indigo-50 rounded-xl transition-all duration-300"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Export
+                            </button> */}
+                            
+                          </div>
+                        </div>
+                      
+
+                      {showParticipants && (
+                        <div className="p-6">
+                          {/* Search and Filter Controls */}
+                          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                            <div className="flex-1 relative">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 " />
+                              <input
+                                type="text"
+                                placeholder="Search participants..."
+                                value={participantSearch}
+                                onChange={(e) => {
+                                  setParticipantSearch(e.target.value);
+                                  setCurrentPage(1);
+                                }}
+                                className="w-full pl-10 pr-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/70 backdrop-blur-sm transition-all duration-300"
+                              />
+                            </div>
+                            <div className="relative">
+                              <select
+                                value={participantFilter}
+                                onChange={(e) => {
+                                  setParticipantFilter(e.target.value);
+                                  setCurrentPage(1);
+                                }}
+                                className="appearance-none bg-white/70 backdrop-blur-sm border border-indigo-200 rounded-xl px-4 py-3 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                              >
+                                <option value="all">All Status</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="pending">Pending</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5  pointer-events-none" />
+                            </div>
+                          </div>
+
+                          {participantsLoading ? (
+                            <div className="flex items-center justify-center py-20">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto mb-4"></div>
+                                <span className="text-lg  font-medium">Loading participants...</span>
+                              </div>
+                            </div>
+                          ) : paginatedParticipants.length === 0 ? (
+                            <div className="text-center py-16">
+                              <div className="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <Users className="w-10 h-10 " />
+                              </div>
+                              <h3 className="text-xl font-bold  mb-3">
+                                {participants.length === 0 
+                                  ? 'No participants visible' 
+                                  : 'No participants match your search'
+                                }
+                              </h3>
+                              <p className="">
+                                {participants.length === 0 
+                                  ? 'Participant information is only available to event creators'
+                                  : 'Try adjusting your search criteria'
+                                }
+                              </p>
+                              {isEventCreator && (event?.attendees_count || 0) > 0 && participants.length === 0 && (
+                                <div className="mt-6 space-y-3">
+                                  <p className="text-sm ">You are the organizer and attendee count is {event.attendees_count}, but no list was returned. You can retry fetching:</p>
+                                  <button
+                                    onClick={loadParticipants}
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm"
+                                  >Retry Load Participants</button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              {/* Desktop Table View */}
+                              <div className="hidden md:block overflow-x-auto">
+                                <table className="w-full">
+                                  <thead>
+                                    <tr className="border-b border-indigo-200">
+                                      <th className="text-left py-4 px-6 font-bold ">Participant</th>
+                                      <th className="text-left py-4 px-6 font-bold ">Contact</th>
+                                      <th className="text-left py-4 px-6 font-bold ">Status</th>
+                                      <th className="text-left py-4 px-6 font-bold ">Registered</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-indigo-100">
+                                    {paginatedParticipants.map((participant, index) => (
+                                      <tr key={participant.id || index} className="hover:bg-indigo-50/50 transition-all duration-300 group">
+                                        <td className="py-4 px-6">
+                                          <div className="flex items-center space-x-4">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                              <span className="text-white font-bold">
+                                                {(participant.attendee_name || 'U').charAt(0).toUpperCase()}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <p className="font-semibold ">
+                                                {participant.attendee_name || 'Unknown User'}
+                                              </p>
+                                              {participant.registration_notes && (
+                                                <p className="text-sm ">{participant.registration_notes}</p>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                          <div className="space-y-1">
+                                            {participant.attendee_email && (
+                                              <p className="text-sm  font-medium break-all">
+                                                <a href={`mailto:${participant.attendee_email}`} className="hover:underline">{participant.attendee_email}</a>
+                                              </p>
+                                            )}
+                                            {participant.attendee_phone && (
+                                              <p className="text-sm ">
+                                                <a href={`tel:${participant.attendee_phone}`} className="hover:underline">{participant.attendee_phone}</a>
+                                              </p>
+                                            )}
+                                            {!participant.attendee_email && !participant.attendee_phone && (
+                                              <p className="text-sm  italic">Contact info not available</p>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(participant.status)}`}>
+                                            {participant.status || 'pending'}
+                                          </span>
+                                        </td>
+                                        <td className="py-4 px-6">
+                                          <p className=" font-medium">
+                                            {new Date(participant.registered_at || participant.created_at).toLocaleDateString('en-US', {
+                                              month: 'short',
+                                              day: 'numeric'
+                                            })}
+                                          </p>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+
+                              {/* Mobile Card View */}
+                              <div className="md:hidden space-y-4">
+                                {paginatedParticipants.map((participant, index) => (
+                                  <div key={participant.id || index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-indigo-100 shadow-lg hover:shadow-xl transition-all duration-300">
                                     <div className="flex items-center space-x-4">
-                                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                                         <span className="text-white font-bold">
                                           {(participant.attendee_name || 'U').charAt(0).toUpperCase()}
                                         </span>
                                       </div>
-                                      <div>
-                                        <p className="font-semibold text-indigo-900">
-                                          {participant.attendee_name || 'Unknown User'}
-                                        </p>
-                                        {participant.registration_notes && (
-                                          <p className="text-sm text-indigo-600">{participant.registration_notes}</p>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <h3 className="font-bold  truncate">
+                                            {participant.attendee_name || 'Unknown User'}
+                                          </h3>
+                                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(participant.status)}`}>
+                                            {participant.status || 'pending'}
+                                          </span>
+                                        </div>
+                                        {(participant.attendee?.email || participant.user?.email) && (
+                                          <div className="space-y-0.5">
+                                            {participant.attendee_email && (
+                                              <p className="text-sm  font-medium break-all">
+                                                <a href={`mailto:${participant.attendee_email}`} className="hover:underline">{participant.attendee_email}</a>
+                                              </p>
+                                            )}
+                                            {participant.attendee_phone && (
+                                              <p className="text-sm ">
+                                                <a href={`tel:${participant.attendee_phone}`} className="hover:underline">{participant.attendee_phone}</a>
+                                              </p>
+                                            )}
+                                            {!participant.attendee_email && !participant.attendee_phone && (
+                                              <p className="text-sm  italic">Contact info not available</p>
+                                            )}
+                                          </div>
                                         )}
+                                        <p className="text-sm  mt-1">
+                                          Registered {new Date(participant.registered_at || participant.created_at).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric'
+                                          })}
+                                        </p>
                                       </div>
                                     </div>
-                                  </td>
-                                  <td className="py-4 px-6">
-                                    <div className="space-y-1">
-                                      {participant.attendee_email && (
-                                        <p className="text-sm text-indigo-700 font-medium break-all">
-                                          <a href={`mailto:${participant.attendee_email}`} className="hover:underline">{participant.attendee_email}</a>
-                                        </p>
-                                      )}
-                                      {participant.attendee_phone && (
-                                        <p className="text-sm text-indigo-600">
-                                          <a href={`tel:${participant.attendee_phone}`} className="hover:underline">{participant.attendee_phone}</a>
-                                        </p>
-                                      )}
-                                      {!participant.attendee_email && !participant.attendee_phone && (
-                                        <p className="text-sm text-indigo-500 italic">Contact info not available</p>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="py-4 px-6">
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(participant.status)}`}>
-                                      {participant.status || 'pending'}
-                                    </span>
-                                  </td>
-                                  <td className="py-4 px-6">
-                                    <p className="text-indigo-700 font-medium">
-                                      {new Date(participant.registered_at || participant.created_at).toLocaleDateString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric'
-                                      })}
-                                    </p>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Mobile Card View */}
-                        <div className="md:hidden space-y-4">
-                          {paginatedParticipants.map((participant, index) => (
-                            <div key={participant.id || index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-indigo-100 shadow-lg hover:shadow-xl transition-all duration-300">
-                              <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                                  <span className="text-white font-bold">
-                                    {(participant.attendee_name || 'U').charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h3 className="font-bold text-indigo-900 truncate">
-                                      {participant.attendee_name || 'Unknown User'}
-                                    </h3>
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(participant.status)}`}>
-                                      {participant.status || 'pending'}
-                                    </span>
                                   </div>
-                                  {(participant.attendee?.email || participant.user?.email) && (
-                                    <div className="space-y-0.5">
-                                      {participant.attendee_email && (
-                                        <p className="text-sm text-indigo-700 font-medium break-all">
-                                          <a href={`mailto:${participant.attendee_email}`} className="hover:underline">{participant.attendee_email}</a>
-                                        </p>
-                                      )}
-                                      {participant.attendee_phone && (
-                                        <p className="text-sm text-indigo-600">
-                                          <a href={`tel:${participant.attendee_phone}`} className="hover:underline">{participant.attendee_phone}</a>
-                                        </p>
-                                      )}
-                                      {!participant.attendee_email && !participant.attendee_phone && (
-                                        <p className="text-sm text-indigo-500 italic">Contact info not available</p>
-                                      )}
-                                    </div>
-                                  )}
-                                  <p className="text-sm text-indigo-500 mt-1">
-                                    Registered {new Date(participant.registered_at || participant.created_at).toLocaleDateString('en-US', {
-                                      month: 'short',
-                                      day: 'numeric'
-                                    })}
-                                  </p>
-                                </div>
+                                ))}
                               </div>
-                            </div>
-                          ))}
-                        </div>
 
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                          <div className="mt-8 flex items-center justify-between border-t border-indigo-200 pt-6">
-                            <div className="text-indigo-600 font-medium">
-                              Showing {startIndex + 1} to {Math.min(startIndex + participantsPerPage, totalParticipants)} of {totalParticipants} participants
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <button
-                                onClick={() => setCurrentPage(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className="px-4 py-2 font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-indigo-50 transition-all duration-300"
-                              >
-                                Previous
-                              </button>
-                              <div className="flex space-x-2">
-                                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                  const pageNum = i + 1;
-                                  return (
+                              {/* Pagination */}
+                              {totalPages > 1 && (
+                                <div className="mt-8 flex items-center justify-between border-t border-indigo-200 pt-6">
+                                  <div className=" font-medium">
+                                    Showing {startIndex + 1} to {Math.min(startIndex + participantsPerPage, totalParticipants)} of {totalParticipants} participants
+                                  </div>
+                                  <div className="flex items-center space-x-3">
                                     <button
-                                      key={pageNum}
-                                      onClick={() => setCurrentPage(pageNum)}
-                                      className={`px-4 py-2 font-medium rounded-xl transition-all duration-300 ${
-                                        currentPage === pageNum
-                                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
-                                          : 'text-indigo-700 hover:bg-indigo-100'
-                                      }`}
+                                      onClick={() => setCurrentPage(currentPage - 1)}
+                                      disabled={currentPage === 1}
+                                      className="px-4 py-2 font-medium  hover: disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-indigo-50 transition-all duration-300"
                                     >
-                                      {pageNum}
+                                      Previous
                                     </button>
-                                  );
-                                })}
-                              </div>
-                              <button
-                                onClick={() => setCurrentPage(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className="px-4 py-2 font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-indigo-50 transition-all duration-300"
-                              >
-                                Next
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
+                                    <div className="flex space-x-2">
+                                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                        const pageNum = i + 1;
+                                        return (
+                                          <button
+                                            key={pageNum}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`px-4 py-2 font-medium rounded-xl transition-all duration-300 ${
+                                              currentPage === pageNum
+                                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                                                : 'text-indigo-700 hover:bg-indigo-100'
+                                            }`}
+                                          >
+                                            {pageNum}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                    <button
+                                      onClick={() => setCurrentPage(currentPage + 1)}
+                                      disabled={currentPage === totalPages}
+                                      className="px-4 py-2 font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-indigo-50 transition-all duration-300"
+                                    >
+                                      Next
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Requirements */}
-            {event.requirements && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Requirements</h2>
-                <div className="text-slate-600">
-                  <p>{event.requirements}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6 lg:space-y-8">
             {/* Registration Card */}
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl lg:rounded-3xl shadow-2xl border border-indigo-100 overflow-hidden lg:sticky lg:top-28">
-              <div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-6 lg:p-8 text-white relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+            <div className="overflow-hidden">
+              <div className="">
                 <div className="relative">
-                  <h3 className="text-xl lg:text-2xl font-bold mb-2 lg:mb-3">Join This Event</h3>
-                  <p className="text-indigo-100 text-base lg:text-lg">
+                  <h3 className="text-xl lg:text-2xl font-semibold mb-2 lg:mb-3">Join This Event</h3>
+                  <p className="">
                     {event.is_free ? 'Free registration available' : 'Secure your spot today'}
                   </p>
                 </div>
               </div>
               
-              <div className="p-6 lg:p-8">
+              <div className="">
                 <div className="space-y-4 lg:space-y-6 mb-6 lg:mb-8">
                   <div className="flex justify-between items-center">
-                    <span className="text-indigo-700 font-bold text-base lg:text-lg">Price:</span>
-                    <span className="text-2xl lg:text-3xl font-bold text-indigo-900">
+                    <span className="flex font-bold text-base lg:text-lg">
+                      <User className="w-6 h-6 " />
+                      Registered:
+                      </span>
+                    <div className="text-right">
+                      <span className="text-xl lg:text-2xl font-bold ">{event.attendees_count || 0}</span>
+                      {event.max_attendees && (
+                        <span className=" text-base lg:text-lg">/{event.max_attendees}</span>
+                      )}
+                    </div>
+                  </div>
+
+                      {event.max_attendees && (
+                        <div className="w-full bg-gray-100 rounded-full h-3 shadow-inner">
+                          <div 
+                            className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] h-3 rounded-full transition-all duration-500 shadow-sm"
+                            style={{ 
+                              width: `${Math.min((event.attendees_count || 0) / event.max_attendees * 100, 100)}%` 
+                            }}
+                          ></div>
+                        </div>
+                      )}
+
+                  <div className="flex justify-between items-center">
+                    <span className=" font-bold text-base lg:text-lg">Price:</span>
+                    <span className="text-2xl lg:text-3xl font-bold ">
                       {event.is_free ? 'FREE' : `$${event.ticket_price}`}
                       {!event.is_free && event.currency && event.currency !== 'USD' && (
-                        <span className="text-base lg:text-lg text-indigo-600 ml-2">{event.currency}</span>
+                        <span className="text-base lg:text-lg  ml-2">{event.currency}</span>
                       )}
                     </span>
                   </div>
                   
-                  <div className="flex justify-between items-center">
-                    <span className="text-indigo-700 font-bold text-base lg:text-lg">Registered:</span>
-                    <div className="text-right">
-                      <span className="text-xl lg:text-2xl font-bold text-indigo-900">{event.attendees_count || 0}</span>
-                      {event.max_attendees && (
-                        <span className="text-indigo-600 text-base lg:text-lg">/{event.max_attendees}</span>
-                      )}
-                    </div>
-                  </div>
                   
-                  {event.max_attendees && (
-                    <div className="w-full bg-indigo-100 rounded-full h-3 shadow-inner">
-                      <div 
-                        className="bg-gradient-to-r from-indigo-600 to-purple-600 h-3 rounded-full transition-all duration-500 shadow-sm"
-                        style={{ 
-                          width: `${Math.min((event.attendees_count || 0) / event.max_attendees * 100, 100)}%` 
-                        }}
-                      ></div>
-                    </div>
-                  )}
                   
                   {event.max_attendees && (
                     <div className="flex justify-between items-center">
-                      <span className="text-indigo-700 font-bold">Available spots:</span>
-                      <span className="font-bold text-indigo-900 text-lg">
+                      <span className=" font-bold">Available spots:</span>
+                      <span className="font-bold  text-lg">
                         {Math.max(event.max_attendees - (event.attendees_count || 0), 0)}
                       </span>
                     </div>
@@ -1043,7 +1017,7 @@ const WorkforceEventDetail = () => {
                     <div className="grid grid-cols-2 gap-3 lg:gap-4">
                       <button
                         onClick={handleShare}
-                        className="flex items-center justify-center py-3 lg:py-4 px-4 lg:px-6 border-2 border-indigo-200 rounded-xl lg:rounded-2xl text-indigo-700 hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-semibold text-sm lg:text-base"
+                        className="flex items-center justify-center py-3 lg:py-4 px-4 lg:px-6 border-2 border-indigo-200 rounded-xl lg:rounded-2xl  hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-semibold text-sm lg:text-base"
                       >
                         <Share2 className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
                         Share
@@ -1053,7 +1027,7 @@ const WorkforceEventDetail = () => {
                         className={`flex items-center justify-center py-3 lg:py-4 px-4 lg:px-6 border-2 rounded-xl lg:rounded-2xl transition-all duration-300 font-semibold text-sm lg:text-base ${
                           isBookmarked 
                             ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100' 
-                            : 'border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-300'
+                            : 'border-indigo-200  hover:bg-indigo-50 hover:border-indigo-300'
                         }`}
                       >
                         <Heart className={`w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 ${isBookmarked ? 'fill-current' : ''}`} />
@@ -1170,7 +1144,10 @@ const WorkforceEventDetail = () => {
               </Link>
             </div>
           </div>
+
         </div>
+      </div>
+
   </div>
 
       {/* Share Modal */}
