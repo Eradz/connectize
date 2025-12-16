@@ -439,17 +439,14 @@ function App() {
         </Route>
 
   {/* Authentication Routes (with AuthLayout) */}
-<Route path="/" element={<AuthLayout />}>
-  <Route path="login" element={<Login />} />
-  {/* signup removed from here */}
-  <Route path="verify-account" element={<VerifyAccount />} />
-  <Route path="reset-password" element={<ResetPasswordPage />} />
-  <Route path="confirm-reset-password" element={<ConfirmResetPassword />} />
-  <Route path="reactivate-account" element={<ReactivationPage />} />
-</Route>
-
-{/* Signup Route - Standalone (Not wrapped in AuthLayout) */}
-<Route path="/signup" element={<Signup />} />
+  <Route path="/" element={<AuthLayout />}>
+    <Route path="login" element={<Login />} />
+    <Route path="signup" element={<Signup />} />
+    <Route path="verify-account" element={<VerifyAccount />} />
+    <Route path="reset-password" element={<ResetPasswordPage />} />
+    <Route path="confirm-reset-password" element={<ConfirmResetPassword />} />
+    <Route path="reactivate-account" element={<ReactivationPage />} />
+  </Route>
 
         {/* Misc Pages */}
   <Route path="/success" element={<SuccessPage />} />
