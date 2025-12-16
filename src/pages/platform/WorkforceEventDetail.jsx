@@ -8,15 +8,12 @@ import {
   Star, Award, TrendingUp, MessageCircle, Heart, Copy,
   Shield, Wifi, Coffee, Car, Gift, Zap, Target,
   ClockCheck,
-  Users2,
-  User2,
-  Plus
+  Users2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
-import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceEventDetail = () => {
   const { id } = useParams();
@@ -439,39 +436,18 @@ const WorkforceEventDetail = () => {
   const eventFeatures = getEventFeatures(event);
 
   return (
-    <div className="min-h-screen">
-      <div className=" flex flex-col py-4 lg:py-8">
-        {/* Header */}
-        <div className='flex justify-between items-end md:items-start px-4 py-6'>
-                    <div className='flex flex-col md:flex-row md:w-[70%]'>
-                        <BackArrowButton  />
-                      <div className='flex flex-col'>
-                        <h1 className="text-xl md:text-2xl font-bold text-slate-900">Industry Events</h1>
-                        <p className="mt-2 text-lg text-slate-600">
-                          Professional Development, Networking & training opportunity
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex h-[90%]">
-                       <Link
-                       to={webRoutes.workforceEventCreate}
-                       className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
-                       >
-                        <Bookmark className="w-5 h-5 md:mr-2 " />
-                        <p className='hidden md:flex'>
-                        Create Event
-                        </p>
-                       </Link>
-                       </div>
-                  </div>
+    <div className="min-h-screen ">
+      <div className=" flex py-4 lg:py-8">
           {/* Main Content */}
-          <div className="md:bg-white space-y-8 px-4 py-6">
+          <div className="bg-white space-y-8 px-4 py-6">
             {/* Hero Section */}
             <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 ">
-              
+              {/* Decorative background pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+              <div className="absolute top-0 right-0 w-48 h-48 lg:w-96 lg:h-96 bg-gradient-radial from-white/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2"></div>
               
               <div className="relative p-6 ">
-                <div className="flex flex-col md:flex-row md:gap-6 lg:gap-8 items-start">
+                <div className="flex flex-col md:flex-row gap-6 lg:gap-8 items-start">
                   {/* Event Info */}
                   <div className="w-full md:w-[55%]">
                     <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-4 lg:mb-6">
@@ -494,8 +470,8 @@ const WorkforceEventDetail = () => {
                       )}
                     </div>
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 lg:mb-6 leading-tight">{event.title}</h1>
-                    <p className="text-base lg:text-xl text-white leading-relaxed mb-6 lg:mb-8">{event.description}</p>
-                    <button className='hidden md:flex text-black'>
+                    <p className="text-base lg:text-xl  leading-relaxed mb-6 lg:mb-8">{event.description}</p>
+                    <button className='hidden md:flex'>
                       <Link to={`/events/${event.id}/register`} className="inline-flex border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700">
                         Register Now
                       </Link>
@@ -503,7 +479,7 @@ const WorkforceEventDetail = () => {
                   </div>
                   
                   {/* Quick Details Card */}
-                  <div className="mx-auto w-full md:w-[40%] bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
+                  <div className="mx-auto w-[90%] md:w-[40%] bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
                     <h3 className="text-base lg:text-lg font-bold text-white mb-4 lg:mb-6">Event Details</h3>
                     <div className="space-y-3 lg:space-y-4">
                       <div className='flex gap-2'>
@@ -540,15 +516,15 @@ const WorkforceEventDetail = () => {
                           <p className="text-xs lg:text-sm font-semibold text-white">
                             {event.is_virtual ? 'Virtual Event' : (event.venue_name || 'Venue TBA')}
                           </p>
-                          {/* <p className="text-xs lg:text-sm ">
+                          <p className="text-xs lg:text-sm ">
                             {event.is_virtual ? 
                               (event.virtual_platform || 'Online Platform') :
                               (event.city || 'Location details pending')
                             }
-                          </p> */}
+                          </p>
                         </div>
                       </div>
-                      <button className='flex w-full md:hidden text-black'>
+                      <button className='flex w-full md:hidden'>
                       <Link to={`/events/${event.id}/register`} className="inline-flex border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700">
                         Register Now
                       </Link>
@@ -559,10 +535,10 @@ const WorkforceEventDetail = () => {
               </div>
             </div>
 
-            <div className='flex flex-col md:flex-row md:pl-4 gap-6 md:gap-4 '>
-                <div className='md:w-[65%] space-y-6 '>
+            <div className='flex px-4 gap-4 '>
+                <div className='w-[70%] space-y-6 '>
                   {/* Organizer Spotlight */}
-                  <div className="bg-white rounded-lg border p-4 md:p-6">
+                  <div className="bg-white/80 rounded-lg border p-6">
                     <h2 className="text-lg font-bold mb-4">Event Organizer</h2>
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -603,7 +579,7 @@ const WorkforceEventDetail = () => {
 
                   {/* Agenda */}
                   {event.agenda && event.agenda.length > 0 && (
-                    <div className="bg-white rounded border border-gray-200 p-4">
+                    <div className="bg-white rounded border border-gray-200 p-3">
                       <h2 className="text-sm font-medium text-gray-900 mb-2">Schedule</h2>
                       <div className="space-y-1">
                         {event.agenda.map((item, index) => (
@@ -622,7 +598,7 @@ const WorkforceEventDetail = () => {
 
                   {/* Speakers */}
                   {event.speakers && event.speakers.length > 0 && (
-                    <div className="bg-white rounded border border-gray-200 p-4">
+                    <div className="bg-white rounded border border-gray-200 p-3">
                       <h2 className="text-sm font-medium text-gray-900 mb-2">Speakers</h2>
                       <div className="space-y-1">
                         {event.speakers.map((speaker, index) => {
@@ -663,13 +639,13 @@ const WorkforceEventDetail = () => {
                   )}
                 </div>
                   {/* Sidebar */}
-          <div className="space-y-6 md:w-[35%] ">
+          <div className="space-y-6 w-[30%] ">
              {/* Event Participants Section - conditional visibility */}
                   <div className="">
                     <div className="overflow-hidden">
                         <div className="flex flex-col">
-                          <div className="flex justify-between">
-                              <h2 className="text-xl font-medium ">Participants</h2>
+                          <div className="flex space-x-4">
+                              <h2 className="text-xl font-bold ">Participants</h2>
                               <button
                               onClick={handleToggleParticipants}
                               className="flex items-center px-4 py-2 text-sm border rounded-lg"
@@ -681,10 +657,10 @@ const WorkforceEventDetail = () => {
                               }
                             </button>
                             </div>
-                          <div className="flex items-center space-x-2 text-base text-gray-600 font-medium">
+                          <div className="flex items-center space-x-1 text-sm">
                             <Users2 className="w-4 h-4 " />
-                              <p className="">Event attendees:</p>
-                            <span className="text-xl ">
+                              <p className="">Event attendees</p>
+                            <span className="text-lg font-semibold px-4 py-2 rounded-xl">
                               {(event.attendees_count ?? 0) || participants.length || 0}
                             </span>
                             {/* <button
@@ -934,23 +910,25 @@ const WorkforceEventDetail = () => {
                     </div>
                   </div>
             {/* Registration Card */}
-            <div className="space-y-2 border border-gray-200 p-4">
-                <div className="mb-4">
-                  <h3 className="text-xl lg:text-2xl font-semibold">Join This Event</h3>
-                  <p className="font-medium text-gray-600">
+            <div className="overflow-hidden">
+              <div className="">
+                <div className="relative">
+                  <h3 className="text-xl lg:text-2xl font-semibold mb-2 lg:mb-3">Join This Event</h3>
+                  <p className="">
                     {event.is_free ? 'Free registration available' : 'Secure your spot today'}
                   </p>
                 </div>
+              </div>
               
               <div className="">
-                <div className="space-y-4 mb-6 lg:mb-8">
+                <div className="space-y-4 lg:space-y-6 mb-6 lg:mb-8">
                   <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-2 font-medium text-gray-600">
-                      <User2 className="w-6 h-6 " />
+                    <span className="flex font-bold text-base lg:text-lg">
+                      <User className="w-6 h-6 " />
                       Registered:
                       </span>
-                    <div className="text-right text-gray-600">
-                      <span className="text-xl font-medium ">{event.attendees_count || 0}</span>
+                    <div className="text-right">
+                      <span className="text-xl lg:text-2xl font-bold ">{event.attendees_count || 0}</span>
                       {event.max_attendees && (
                         <span className=" text-base lg:text-lg">/{event.max_attendees}</span>
                       )}
@@ -958,41 +936,40 @@ const WorkforceEventDetail = () => {
                   </div>
 
                       {event.max_attendees && (
-                        <div className="w-full bg-gray-100 rounded-full h-[7px] shadow-inner">
+                        <div className="w-full bg-gray-100 rounded-full h-3 shadow-inner">
                           <div 
-                            className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] h-[7px] rounded-full transition-all duration-500 shadow-sm"
+                            className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] h-3 rounded-full transition-all duration-500 shadow-sm"
                             style={{ 
                               width: `${Math.min((event.attendees_count || 0) / event.max_attendees * 100, 100)}%` 
                             }}
                           ></div>
                         </div>
                       )}
-  
-                      {event.max_attendees && (
-                        <div className="flex justify-between items-center">
-                          <span className=" font-medium text-gray-600">Available spots:</span>
-                          <span className="font-bold  text-lg">
-                            {Math.max(event.max_attendees - (event.attendees_count || 0), 0)}
-                          </span>
-                        </div>
-                      )}
+
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-600">Event Type:</span>
-                    <span className="font-semibold capitalize bg-gray-100 text-gray-600 rounded-full px-2 py-1">{event.event_type || 'Workshop'}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-600">Price:</span>
-                    <span className="text-2xl font-bold ">
+                    <span className=" font-bold text-base lg:text-lg">Price:</span>
+                    <span className="text-2xl lg:text-3xl font-bold ">
                       {event.is_free ? 'FREE' : `$${event.ticket_price}`}
                       {!event.is_free && event.currency && event.currency !== 'USD' && (
                         <span className="text-base lg:text-lg  ml-2">{event.currency}</span>
                       )}
                     </span>
                   </div>
+                  
+                  
+                  
+                  {event.max_attendees && (
+                    <div className="flex justify-between items-center">
+                      <span className=" font-bold">Available spots:</span>
+                      <span className="font-bold  text-lg">
+                        {Math.max(event.max_attendees - (event.attendees_count || 0), 0)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {eventStatus.status === 'upcoming' && (
-                  <div className="space-y-1 lg:space-y-6">
+                  <div className="space-y-4 lg:space-y-6">
                     {myRegistration ? (
                       // User is already registered
                       <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl lg:rounded-2xl border border-emerald-200 shadow-lg">
@@ -1009,47 +986,25 @@ const WorkforceEventDetail = () => {
                       </div>
                     ) : (
                       // User is not registered
-                        <div className='flex gap-2'>
-
-                            <button
-                              onClick={handleRegister}
-                              disabled={isRegistering || (event.max_attendees && event.attendees_count >= event.max_attendees)}
-                              className="w-[50%] bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white  rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] 
-                                      disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 p-2 
-                                      flex items-center justify-center text-sm shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
-                            >
-                              {isRegistering ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-5 w-5 lg:h-6 lg:w-6 border-3 border-white border-t-transparent mr-2 lg:mr-3"></div>
-                                  Registering...
-                                </>
-                              ) : (
-                                <>
-                                  <User2 className="w-5 h-5 mr-2" />
-                                  Register Now
-                                </>
-                              )}
-                            </button>
-                            <div className="flex w-[50%] gap-2">
-                              <button
-                                onClick={handleShare}
-                                className="flex w-[60%] items-center justify-center bg-gray-100 border border-gray-200 rounded-lg  hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-semibold text-sm"
-                              >
-                                <Share2 className="w-4 h-4 mr-2" />
-                                Share
-                              </button>
-                              <button
-                                onClick={handleBookmark}
-                                className={`flex w-[40%] items-center justify-center rounded-lg transition-all duration-300 font-semibold text-sm lg:text-base ${
-                                  isBookmarked 
-                                    ? 'bg-pale_yellow text-red-700 hover:bg-red-100' 
-                                    : ' bg-pale_yellow hover:bg-indigo-50 hover:border-indigo-300'
-                                }`}
-                              >
-                                <Bookmark className={`w-4 h-4 lg:w-5 lg:h-5 mx-auto ${isBookmarked ? 'fill-current' : ''}`} />
-                              </button>
-                            </div>
-                        </div>
+                      <button
+                        onClick={handleRegister}
+                        disabled={isRegistering || (event.max_attendees && event.attendees_count >= event.max_attendees)}
+                        className="w-full bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white py-3 lg:py-4 px-6 lg:px-8 rounded-xl lg:rounded-2xl hover:from-indigo-700 hover:via-indigo-800 hover:to-purple-800 
+                                 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 
+                                 flex items-center justify-center font-bold text-base lg:text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
+                      >
+                        {isRegistering ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 lg:h-6 lg:w-6 border-3 border-white border-t-transparent mr-2 lg:mr-3"></div>
+                            Registering...
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="w-5 h-5 lg:w-6 lg:h-6 mr-2 lg:mr-3" />
+                            Register Now
+                          </>
+                        )}
+                      </button>
                     )}
                     
                     {event.max_attendees && event.attendees_count >= event.max_attendees && (
@@ -1059,6 +1014,26 @@ const WorkforceEventDetail = () => {
                       </div>
                     )}
                     
+                    <div className="grid grid-cols-2 gap-3 lg:gap-4">
+                      <button
+                        onClick={handleShare}
+                        className="flex items-center justify-center py-3 lg:py-4 px-4 lg:px-6 border-2 border-indigo-200 rounded-xl lg:rounded-2xl  hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-semibold text-sm lg:text-base"
+                      >
+                        <Share2 className="w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3" />
+                        Share
+                      </button>
+                      <button
+                        onClick={handleBookmark}
+                        className={`flex items-center justify-center py-3 lg:py-4 px-4 lg:px-6 border-2 rounded-xl lg:rounded-2xl transition-all duration-300 font-semibold text-sm lg:text-base ${
+                          isBookmarked 
+                            ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100' 
+                            : 'border-indigo-200  hover:bg-indigo-50 hover:border-indigo-300'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 lg:w-5 lg:h-5 mr-2 lg:mr-3 ${isBookmarked ? 'fill-current' : ''}`} />
+                        Save
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -1088,6 +1063,37 @@ const WorkforceEventDetail = () => {
               </div>
             </div>
 
+            {/* Event Stats */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+                Event Insights
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Users className="w-5 h-5 text-blue-600 mr-3" />
+                    <span className="text-slate-700">Attendees</span>
+                  </div>
+                  <span className="text-xl font-bold text-blue-600">{event.attendees_count || 0}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Target className="w-5 h-5 text-purple-600 mr-3" />
+                    <span className="text-slate-700">Capacity</span>
+                  </div>
+                  <span className="text-xl font-bold text-purple-600">{event.max_attendees || '∞'}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Badge className="w-5 h-5 text-emerald-600 mr-3" />
+                    <span className="text-slate-700">Type</span>
+                  </div>
+                  <span className="text-emerald-600 font-semibold capitalize">{event.event_type || 'Workshop'}</span>
+                </div>
+              </div>
+            </div>
+
             {/* Contact Info */}
             {(event.contact_email || event.contact_phone) && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -1095,7 +1101,7 @@ const WorkforceEventDetail = () => {
                   <Phone className="w-5 h-5 mr-2 text-blue-600" />
                   Get in Touch
                 </h3>
-                <div className="space-y-1">
+                <div className="space-y-4">
                   {event.contact_email && (
                     <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
                       <Mail className="w-5 h-5 mr-3 text-blue-600" />
@@ -1121,6 +1127,22 @@ const WorkforceEventDetail = () => {
                 </div>
               </div>
             )}
+
+            {/* More Events */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                <ExternalLink className="w-5 h-5 mr-2 text-blue-600" />
+                Explore More
+              </h3>
+              <Link
+                to={webRoutes.workforceEvents}
+                className="flex items-center justify-center w-full py-3 px-4 border-2 border-blue-200 rounded-xl 
+                         text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 font-medium"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Browse All Events
+              </Link>
+            </div>
           </div>
 
         </div>
@@ -1142,7 +1164,7 @@ const WorkforceEventDetail = () => {
               </button>
             </div>
             
-            <div className="space-y-1">
+            <div className="space-y-4">
               <div className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg">
                 <Globe className="w-5 h-5 text-slate-500" />
                 <input
