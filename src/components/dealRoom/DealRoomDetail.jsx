@@ -14,7 +14,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 
 const tabs = [
@@ -42,6 +42,9 @@ export default function DealRoomDetail() {
   const active = useMemo(() => currentSection(pathname), [pathname]);
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
+
+
+  
 
     const handleDrag = (e) => {
     e.preventDefault();
@@ -96,6 +99,7 @@ export default function DealRoomDetail() {
   const [activities, setActivities] = useState([]);
   const [valuations, setValuations] = useState([]);
   const [participants, setParticipants] = useState([]);
+  const [valuationCreate, setValuationCreate] = useState(false);
   
   // Track locally added items to preserve them during reloads
   const [locallyAddedParticipants, setLocallyAddedParticipants] = useState([]);
@@ -149,6 +153,24 @@ export default function DealRoomDetail() {
     { value: "admin", label: "Admin (Full Access)" },
   ];
 
+  const refreshActivities = async ({active}) => {
+    setLoading(true);
+    try {
+      const res = await makeApiRequest({
+      url: `api/v1/deals/${active}/`,
+      method: "GET",
+      params: { deal_room: id, page_size: 200 },
+      });
+      const list = res?.results || res?.data || res || [];
+      setValuations(Array.isArray(list) ? list : []);
+      notify.success('Valuations refreshed');
+    } catch (error) {
+      console.error('Error refreshing Valuations:', error);
+      notify.error('Failed to refresh Valuations');
+    } finally {
+      setLoading(false);
+    }
+  }
   useEffect(() => {
     // Skip loading if we're about to redirect due to invalid ID
     if (!id || id === 'my-participations' || id === 'create' || !id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
@@ -453,21 +475,21 @@ export default function DealRoomDetail() {
           </div>
           {/* Enhanced Quick Actions and Stats */}
           <div className="mt-4 flex flex-wrap gap-2">
-            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
-              <Plus className="h-4 w-4 mr-2" />
+            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               Upload Document
+              <Plus className="h-4 w-4 ml-2" />
             </button>
-            <button onClick={() => setShowParticipantModal(true)} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
-              <UserPlus className="h-4 w-4 mr-2" />
+            <button onClick={() => setShowParticipantModal(true)} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               Invite Participant
+              <UserPlus className="h-4 w-4 ml-2" />
             </button>
-            <Link to={linkFor("milestones")} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
-              <Settings className="h-4 w-4 mr-2" />
+            <Link to={linkFor("milestones")} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               Update Milestones
+              <Settings className="h-4 w-4 ml-2" />
             </Link>
-            <Link to={linkFor("valuations")} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
-              <BarChart3 className="h-4 w-4 mr-2" />
+            <Link to={linkFor("valuations")} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
               Run Valuation
+              <BarChart3 className="h-4 w-4 ml-2" />
             </Link>
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
@@ -502,10 +524,10 @@ export default function DealRoomDetail() {
           ) : error ? (
             <div className="text-red-600">{error}</div>
           ) : (
-            <>
-              <h2 className="text-lg font-semibold text-[#6C757D] mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
+            <div className="">
+              {(active !== "overview" && active !== "activities" && active !== "valuations") && <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>}
               {/* Search and Filter Bar */}
-              {(active === "documents" || active === "participants" || active === "activities") && (
+              {(active === "documents" || active === "participants"  || active === "milestones") && (
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -533,22 +555,23 @@ export default function DealRoomDetail() {
               )}
 
               {active === "overview" && (
-                <div className="space-y-6">
+                <div className="space-y-6 bg-white p-4">
+                  <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
                   {/* Enhanced Deal Overview */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="border border-[#D9D9D9] rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-2">
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Deal Information</h4>
-                      <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
-                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
+                      <div className="space-y-4 text-[12px]">
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
                           {deal?.access_code || "N/A"}
                         </div>
-                         <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Type:</span> 
+                         <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Type:</span> 
                           <span className="ml-2 capitalize">
                             {deal?.deal_type ? deal.deal_type.replace(/_/g, ' ') : "Not specified"}
                           </span>
                         </div>
-                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Status:</span> 
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Status:</span> 
                           <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             deal?.status === 'active' ? 'bg-green-100 text-green-800' :
                             deal?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -562,10 +585,10 @@ export default function DealRoomDetail() {
                       </div>
                     </div>
 
-                    <div className="border border-[#D9D9D9] rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-2">
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Financial Details</h4>
-                      <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Estimated Value:</span>
+                      <div className="space-y-4 text-[12px]">
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Estimated Value:</span>
                         <span>
                           {deal?.estimated_value ? 
                             new Intl.NumberFormat('en-US', {
@@ -578,8 +601,8 @@ export default function DealRoomDetail() {
                           }
                         </span>
                         </div>
-                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Currency:</span> {deal?.currency || "USD"}</div>
-                        <div className="flex justify-between border-b border-[#D9D9D9] text-[#6C757D]"><span className="font-medium text-[#212529]">Target Close:</span> 
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Currency:</span> {deal?.currency || "USD"}</div>
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Target Close:</span> 
                           {deal?.target_close_date ? 
                             new Date(deal.target_close_date).toLocaleDateString() : 
                             "Not set"
@@ -588,22 +611,22 @@ export default function DealRoomDetail() {
                       </div>
                     </div>
 
-                    <div className="border border-[#D9D9D9] rounded-lg p-4">
+                    <div className="border border-[#D9D9D9] rounded-lg p-2">
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Activity Summary</h4>
-                      <div className="space-y-2 text-[12px]">
-                        <div className="flex justify-between border-b border-[#D9D9D9]">
+                      <div className="space-y-4 text-[12px]">
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30">
                           <span className="font-medium">Participants:</span>
                           <span className="text-[#6C757D] font-semibold">{deal?.participants_count ?? 0}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[#D9D9D9]">
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30">
                           <span className="font-medium">Documents:</span>
                           <span className="text-[#6C757D] font-semibold">{deal?.documents_count ?? 0}</span>
                         </div>
-                        <div className="flex justify-between border-b border-[#D9D9D9]">
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30">
                           <span className="font-medium">Milestones:</span>
                           <span className="text-[#6C757D] font-semibold">{deal?.milestones_count ?? 0}</span>
                         </div>
-                        <div className=" flex justify-between border-b border-[#D9D9D9]"><span className="font-medium">Created:</span> 
+                        <div className=" flex justify-between border-b border-[#D9D9D9]/30"><span className="font-medium">Created:</span> 
                           {deal?.created_at ? 
                             new Date(deal.created_at).toLocaleDateString() : 
                             "Unknown"
@@ -618,7 +641,7 @@ export default function DealRoomDetail() {
                   {deal?.description && (
                     <div className="border border-[#D9D9D9] rounded-lg p-4 w-[48%]">
                       <h4 className="text-sm font-medium text-gray-600 mb-2">Description</h4>
-                      <p className="border-b border-[#D9D9D9] text-gray-700">{deal.description}</p>
+                      <p className="border-b border-[#D9D9D9]/30 text-gray-700">{deal.description}</p>
                     </div>
                   )}
 
@@ -1110,7 +1133,38 @@ export default function DealRoomDetail() {
                 />
               )}
               {active === "valuations" && (
+
+                
                 <div className="space-y-4 bg-white">
+                  <div className="p-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">Valuations</h3>
+                            <button
+                              onClick={() => refreshActivities({active})}
+                              disabled={loading}
+                              className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
+                            >
+                              <RefreshCcw className="w-4 h-4 mr-1" />
+                              {loading ? 'Loading...' : 'Refresh'}
+                            </button>
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-1">
+                              <input
+                                type="text"
+                                placeholder="Search valuations..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                         {valuations.length === 0 ? (
+                    <EmptyValuations onCreate={() => setValuationCreate(true)} />
+                  ) : ( 
+                    valuationCreate && 
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -1172,6 +1226,7 @@ export default function DealRoomDetail() {
                     />
                     <button className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-custom_yellow">Create</button>
                   </form>
+                  )}
                   <ul className="list-disc pl-5 text-gray-700">
                     {valuations.length === 0 && <li>No valuations found.</li>}
                     {valuations.map((v, i) => (
@@ -1192,8 +1247,8 @@ export default function DealRoomDetail() {
                     ))}
                   </ul>
                 </div>
-              )}
-            </>
+                  )}
+            </div>
           )}
         </div>
       </div>

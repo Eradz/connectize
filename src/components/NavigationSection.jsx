@@ -11,11 +11,6 @@ import {ButtonWithTooltipIcon} from './ButtonWithTooltipIcon'
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
 import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Brain, 
-  Truck, 
   BookOpen, 
   CreditCard, 
   Shield,

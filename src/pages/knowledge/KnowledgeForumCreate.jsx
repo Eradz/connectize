@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { knowledgeForumService, knowledgeCategoryService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft } from 'lucide-react';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const KnowledgeForumCreate = () => {
   const navigate = useNavigate();
@@ -92,24 +93,19 @@ const KnowledgeForumCreate = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white md:bg-gray-50">
-      {/* Mobile Header */}
-      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-4">
-        <button onClick={goBack} className="mb-4">
-          <ArrowLeft className="w-6 h-6 text-gray-700" />
-        </button>
-        <h1 className="text-xl font-bold text-gray-900">Create Forum</h1>
-        <p className="text-sm text-gray-500 mt-1">Create Forum For Discussion</p>
-      </div>
+    <div className="min-h-screen ">
 
-      <div className="md:max-w-3xl md:mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+      <div className="py-4">
         {/* Desktop Header */}
-        <div className="hidden md:block mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Create Forum</h1>
+        <div className="flex flex-col md:flex-row mb-4 px-4 md:px-0">
+          <BackArrowButton/>
+          <div>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Create Forum</h1>
           <p className="text-sm text-gray-500 mt-1">Create Forum For Discussion</p>
+          </div>
         </div>
         
-        <div className="md:bg-white md:p-6 md:rounded-lg md:shadow-sm space-y-6">
+        <div className="bg-white p-4 md:p-6 md:rounded-lg md:shadow-sm space-y-6">
           {error && (
             <div className="p-3 rounded bg-red-50 text-red-700 text-sm">{error}</div>
           )}

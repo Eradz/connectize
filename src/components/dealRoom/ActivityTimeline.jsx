@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from 'date-fns';
 import ListChecksIcon from '../../icon/ListChecksIcon';
+import { RefreshCcw } from 'lucide-react';
 
 const ActivityIcon = ({ type }) => {
   const iconMap = {
@@ -192,14 +193,15 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="bg-white p-4 rounded-lg border space-y-4">
+      <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
+            className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
           >
+            <RefreshCcw className="w-4 h-4 mr-1" />
             {loading ? 'Loading...' : 'Refresh'}
           </button>
         </div>

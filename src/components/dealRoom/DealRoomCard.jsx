@@ -23,7 +23,7 @@ import { DealIcon } from '../../icon/deal';
  
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
+      case 'active': return 'bg-green-100 text-[#00D707]';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'completed': return 'bg-blue-100 text-blue-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
@@ -48,7 +48,7 @@ import { DealIcon } from '../../icon/deal';
   };
 
   export const DealRoomCard = ({ deal }) => (
-    <div className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow mt-8">
+    <div className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow mt-4">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex flex-col">

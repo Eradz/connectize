@@ -121,15 +121,28 @@ export const hubNavItems = [
       { name: "My Created Events", to: webRoutes.workforceMyEvents }
     ]
   },
+  // {
+  //   name: "AI Services",
+  //   to: webRoutes.aiDashboard,
+  //   icon: "AISecondIcon",
+  //   description: "AI-powered insights",
+  //   subItems: [
+  //     { name: "AI Dashboard", to: webRoutes.aiDashboard },
+  //     { name: "Smart Matching", to: webRoutes.aiMatching },
+  //     { name: "Opportunities", to: webRoutes.aiOpportunities }
+  //   ]
+  // },
   {
-    name: "AI Services",
-    to: webRoutes.aiDashboard,
+    name: "Knowledge Hub",
+    to: webRoutes.knowledgeHub,
     icon: "AISecondIcon",
-    description: "AI-powered insights",
+    description: "Industry knowledge base",
     subItems: [
-      { name: "AI Dashboard", to: webRoutes.aiDashboard },
-      { name: "Smart Matching", to: webRoutes.aiMatching },
-      { name: "Opportunities", to: webRoutes.aiOpportunities }
+      { name: "Articles", to: webRoutes.knowledgeArticles },
+      { name: "Forums", to: webRoutes.knowledgeForums },
+      // { name: "Topics", to: webRoutes.knowledgeTopics },
+      { name: "Categories", to: webRoutes.knowledgeCategories },
+      { name: "Search", to: webRoutes.knowledgeSearch },
     ]
   },
   {
@@ -144,17 +157,6 @@ export const hubNavItems = [
       { name: "Shipments", to: webRoutes.logisticsShipments }
     ]
   },
-  // {
-  //   name: "Knowledge Hub",
-  //   to: webRoutes.knowledgeHub,
-  //   icon: "BookOpen",
-  //   description: "Industry knowledge base",
-  //   subItems: [
-  //     { name: "Articles", to: webRoutes.knowledgeArticles },
-  //     { name: "Forums", to: webRoutes.knowledgeForums },
-  //     { name: "Topics", to: webRoutes.knowledgeTopics }
-  //   ]
-  // },
   // {
   //   name: "Subscriptions",
   //   to: webRoutes.subscriptions,

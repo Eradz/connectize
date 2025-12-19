@@ -49,35 +49,14 @@ const DealRooms = () => {
 
   return (
     <div className="min-h-screen ">
-      {/* HEADER - Mobile Version (UNCHANGED) */}
-      <div className="lg:hidden bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Deal Room</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Secure Collaboration Space For <br className="sm:hidden" />
-                Oil And Gas Deals
-              </p>
-            </div>
-            <Link
-              to={webRoutes.dealRoomCreate}
-              className="w-12 h-12 bg-[#FFE8A3] rounded-xl flex items-center justify-center hover:bg-[#FFD700] transition"
-            >
-              <Plus className="w-6 h-6 text-gray-900" strokeWidth={2.5} />
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* HEADER - Desktop Version */}
-      <div className="hidden lg:block bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-start gap-4">
+      {/* HEADER*/}
+      
+        <div className="max-w-7xl mx-auto p-4">
+          <div className="flex items-end md:items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start gap-4">
               <button
                 onClick={() => navigate(-1)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors mt-1"
+                className="bg-white p-2 hover:bg-gray-100 rounded-lg transition-colors mt-1"
                 aria-label="Go back"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
@@ -94,14 +73,13 @@ const DealRooms = () => {
               className="inline-flex items-center gap-3 px-5 py-3 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl transition-colors font-medium text-gray-900 text-sm"
             >
               <Plus className="w-5 h-5" strokeWidth={2.5} />
-              New Deal Room
+                <span className="md:flex hidden text-gray-900">New Deal Room</span>
             </Link>
           </div>
         </div>
-      </div>
 
       {/* MAIN CONTENT */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 pb-6">
         <div className="space-y-6">
 
           {/* FILTERS & SEARCH - Mobile (UNCHANGED) */}
@@ -299,7 +277,7 @@ const DealRooms = () => {
               </Link>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="md:bg-white border-gray-200 md:px-4  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {dealRooms.map((deal) => (
                 <DealRoomCard key={deal.id} deal={deal} />
               ))}

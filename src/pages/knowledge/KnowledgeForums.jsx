@@ -11,6 +11,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { knowledgeForumService } from '../../api-services/oilgas';
+import { webRoutes } from '../../lib/webRoutes';
 
 // Custom SVG Icons
 const CreditCardIcon = () => (
@@ -125,7 +126,7 @@ const KnowledgeForums = () => {
               <h1 className="text-xl font-bold text-gray-900 mb-1">Discussion Forums</h1>
               <p className="text-sm text-gray-500">Join Conversations About Oil & Gas Industry Topics</p>
             </div>
-            <button className="text-gray-900 font-medium p-2.5 rounded-lg flex items-center justify-center ml-3 flex-shrink-0" style={{ backgroundColor: '#FFF1C6' }}>
+            <button className="text-gray-900 font-medium p-2.5 rounded-lg flex items-center justify-center ml-3 flex-shrink-0 bg-pale_yellow">
               <Plus className="h-5 w-5" />
             </button>
           </div>
@@ -143,10 +144,10 @@ const KnowledgeForums = () => {
               </div>
               <p className="text-gray-500">join conversations about oil & gas industry topics</p>
             </div>
-            <button className="hover:bg-yellow-300 text-gray-900 font-medium px-5 py-2.5 rounded-lg flex items-center space-x-2 transition-colors" style={{ backgroundColor: '#FFF1C6' }}>
+            <Link to={webRoutes.knowledgeForumCreate} className="hover:bg-pale_yellow text-gray-900 font-medium px-5 py-2.5 rounded-lg flex items-center space-x-2 transition-colors bg-pale_yellow">
               <Plus className="h-5 w-5" />
               <span>Create Forum</span>
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -154,7 +155,7 @@ const KnowledgeForums = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8 px-4 lg:px-4 lg:sm:px-6 lg:lg:px-8">
           <div className="bg-white p-4 lg:p-6 rounded-xl border border-gray-200">
             <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3" style={{ backgroundColor: '#FFF1C6' }}>
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3 bg-pale_yellow">
                 <div className="scale-75 lg:scale-100">
                   <CreditCardIcon />
                 </div>
@@ -166,7 +167,7 @@ const KnowledgeForums = () => {
 
           <div className="bg-white p-4 lg:p-6 rounded-xl border border-gray-200">
             <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3" style={{ backgroundColor: '#FFF1C6' }}>
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3 bg-pale_yellow">
                 <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 text-gray-700" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">{stats.active_forums}</p>
@@ -176,7 +177,7 @@ const KnowledgeForums = () => {
 
           <div className="bg-white p-4 lg:p-6 rounded-xl border border-gray-200">
             <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3" style={{ backgroundColor: '#FFF1C6' }}>
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3 bg-pale_yellow">
                 <Users className="h-5 w-5 lg:h-6 lg:w-6 text-gray-700" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">{stats.total_members}</p>
@@ -186,7 +187,7 @@ const KnowledgeForums = () => {
 
           <div className="bg-white p-4 lg:p-6 rounded-xl border border-gray-200">
             <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3" style={{ backgroundColor: '#FFF1C6' }}>
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-2 lg:mb-3 bg-pale_yellow">
                 <BookOpen className="h-5 w-5 lg:h-6 lg:w-6 text-gray-700" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">{stats.total_topics}</p>
