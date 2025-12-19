@@ -14,7 +14,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 
 const tabs = [
@@ -84,7 +84,7 @@ export default function DealRoomDetail() {
     return (
       <div className="min-h-screen border border-[#D9D9D9] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pale_yellow mx-auto"></div>
           <p className="mt-2 text-gray-600">Redirecting...</p>
         </div>
       </div>
@@ -432,9 +432,9 @@ export default function DealRoomDetail() {
     <div className="min-h-screen ">
       {/* Breadcrumbs */}
       <div className="">
-        <div className="max-w-7xl mx-auto  py-4">
-          <div className="flex items-center justify-between">
-            <Link to={webRoutes.dealRooms} className="flex items-center py-6">
+        <div className="max-w-7xl mx-auto py-4 md:px-0 px-4">
+          <div className="flex flex-col md:flex-row md:items-center">
+            <Link to={webRoutes.dealRooms} className="flex items-center md:py-6">
               <button
               onClick={() => navigate(webRoutes.dealRooms)}
               className=" bg-white mr-4 p-2 hover:bg-gray-100 rounded-lg"
@@ -442,52 +442,66 @@ export default function DealRoomDetail() {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
             </Link>
-            <div className="w-[70%]">
-              <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {deal?.title || `Deal Room #${id.slice(0, 8)}...`}
-              </h1>
+            <div className="flex justify-between items-end md:items-start w-full">
+              <div className="flex items-start gap-4">
+                <div>
+                    <h1 className="text-2xl font-medium md:font-bold text-gray-900">
+                      {deal?.title || `Deal Room #${id.slice(0, 8)}...`}
+                    </h1>
+                    <div className="flex items-center space-x-4 mt-2">
+                      <p className="text-gray-600">
+                        {deal?.description ? deal.description.slice(0, 100) + (deal.description.length > 100 ? '...' : '') : 'Manage documents, participants, milestones, and more.'}
+                      </p>
+                    </div>
+                </div>
               {deal?.status && (
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    deal.status === 'active' ? 'bg-green-100 text-green-800' :
-                    deal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    deal.status === 'closed' ? 'bg-gray-100 text-gray-800' :
-                    deal.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-500'
+                  <div className={`flex items-center mt-4 md:mt-2 md:px-2 md:py-1 justify-center text-xs font-semibold rounded-full w-6 h-5 md:w-fit md:h-fit  ${
+                    deal.status === 'active' ? ' border border-green-500 md:bg-green-100 md:text-green-800' :
+                    deal.status === 'pending' ? ' border border-yellow-500 md:bg-yellow-100 md:text-yellow-800' :
+                    deal.status === 'closed' ? ' border border-gray-500 md:bg-gray-100 md:text-gray-800' :
+                    deal.status === 'cancelled' ? ' border border-red-500 md:bg-red-100 md:text-red-800' :
+                    ' border border-gray-500 md:bg-gray-100 md:text-gray-500'
                   }`}>
+                    <div className={`md:hidden inline w-3 h-3 rounded-full
+                    ${
+                    deal.status === 'active' ? ' bg-green-500' :
+                    deal.status === 'pending' ? ' bg-yellow-500' :
+                    deal.status === 'closed' ? ' bg-gray-500' :
+                    deal.status === 'cancelled' ? ' bg-red-500' :
+                    ' bg-gray-500'
+                  }`
+                    }></div>
+                    <span className=" hidden md:flex">
                     {deal.status.charAt(0).toUpperCase() + deal.status.slice(1)}
-                  </span>
+                    </span>
+                  </div>
                 )}
               </div>
-              <div className="flex items-center space-x-4 mt-2">
-                <p className="text-gray-600">
-                  {deal?.description ? deal.description.slice(0, 100) + (deal.description.length > 100 ? '...' : '') : 'Manage documents, participants, milestones, and more.'}
-                </p>
-                
-              </div>
-            </div>
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mb-4">
               <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-pale_yellow">
               <PencilIcon className= "w-4 h-4"/>
-              Edit Deal Room
+              <span className="hidden md:flex">
+                Edit Deal Room
+              </span>
               </Link>
+            </div>
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 md:w-[74%] gap-2">
+            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Upload Document
               <Plus className="h-4 w-4 ml-2" />
             </button>
-            <button onClick={() => setShowParticipantModal(true)} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <button onClick={() => setShowParticipantModal(true)} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Invite Participant
               <UserPlus className="h-4 w-4 ml-2" />
             </button>
-            <Link to={linkFor("milestones")} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <Link to={linkFor("milestones")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Update Milestones
               <Settings className="h-4 w-4 ml-2" />
             </Link>
-            <Link to={linkFor("valuations")} className="inline-flex bg-white items-center px-3 py-2 rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <Link to={linkFor("valuations")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Run Valuation
               <BarChart3 className="h-4 w-4 ml-2" />
             </Link>
@@ -536,14 +550,14 @@ export default function DealRoomDetail() {
                       placeholder={`Search ${active}...`}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
                     />
                   </div>
                   {active === "participants" && (
                     <select
                       value={filterRole}
                       onChange={(e) => setFilterRole(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow"
                     >
                       <option value="all">All Roles</option>
                       {roleOptions.map(r => (
@@ -670,7 +684,7 @@ export default function DealRoomDetail() {
                       <div className="space-y-2">
                         {deal.recent_activities.slice(0, 3).map((activity, index) => (
                           <div key={activity.id || index} className="flex items-start space-x-3 text-sm">
-                            <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            <div className="flex-shrink-0 w-2 h-2 bg-custom_yellow rounded-full mt-2"></div>
                             <div className="flex-1 min-w-0">
                               <p className="text-gray-900">{activity.description}</p>
                               <p className="text-gray-500 text-xs">
@@ -683,7 +697,7 @@ export default function DealRoomDetail() {
                       {deal.recent_activities.length > 3 && (
                         <button 
                           onClick={() => navigate(linkFor("activities"))}
-                          className="text-blue-600 text-xs hover:text-blue-800 mt-2"
+                          className="text-pale_yellow text-xs hover:text-blue-800 mt-2"
                         >
                           View all activities ({activities.length > 0 ? activities.length : deal.recent_activities.length})
                         </button>
@@ -793,7 +807,7 @@ export default function DealRoomDetail() {
               className={`border-2 border-dashed rounded-lg text-center transition-colors mb-8
                 ${
                 dragActive 
-                  ? 'border-blue-500 bg-blue-50' 
+                  ? 'border-custom_yellow bg-blue-50' 
                   : 'border-blue-400 bg-white'
               }`
               }
@@ -832,14 +846,14 @@ export default function DealRoomDetail() {
                   <CloudUpload className="w-6 h-6 text-gray-400" />
                   <button
                     onClick={handleButtonClick}
-                    className="hover:text-blue-700 font-medium text-gray-400"
+                    className="hover:text-gold font-medium text-gray-400"
                   >
                     Choose or upload from local storage
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-3">
-                  <File className="w-8 h-8 text-blue-600" />
+                  <File className="w-8 h-8 text-pale_yellow" />
                   <span className="text-gray-700 font-medium">{newDocFile.name}</span>
                   <span className="text-gray-500 text-sm">
                     ({(newDocFile.size / 1024).toFixed(2)} KB)
@@ -983,7 +997,7 @@ export default function DealRoomDetail() {
                           <div key={p.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
                             <div className="flex items-center space-x-3">
                               <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-blue-600">
+                                <span className="text-sm font-medium text-pale_yellow">
                                   {(p.user_name || p.name || p.username || p.user_email || p.email || "U")[0].toUpperCase()}
                                 </span>
                               </div>
@@ -1065,7 +1079,7 @@ export default function DealRoomDetail() {
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                   <div 
-                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                    className="bg-pale_yellow h-2 rounded-full transition-all duration-300" 
                                     style={{ width: `${m.progress}%` }}
                                   ></div>
                                 </div>
@@ -1156,7 +1170,7 @@ export default function DealRoomDetail() {
                                 placeholder="Search valuations..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-custom_yellow"
                               />
                             </div>
                           </div>
@@ -1298,7 +1312,7 @@ export default function DealRoomDetail() {
               value={milestoneForm.notes}
               onChange={(e) => setMilestoneForm(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Add notes about completion..."
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
               rows={3}
             />
           </div>
@@ -1312,7 +1326,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-pale_yellow text-white rounded hover:bg-gold"
             >
               {Number(milestoneForm.progress) >= 100 ? 'Mark Complete' : 'Save Progress'}
             </button>
@@ -1427,7 +1441,7 @@ export default function DealRoomDetail() {
                   setUserSearch(v);
                 }}
                 placeholder="Type a name or email..."
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
                 autoComplete="off"
               />
               {userSearch && (userResults?.length > 0 || userSearching) && (
@@ -1465,7 +1479,7 @@ export default function DealRoomDetail() {
             <select
               value={participantForm.role}
               onChange={(e) => setParticipantForm(prev => ({ ...prev, role: e.target.value }))}
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 capitalize"
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow capitalize"
             >
               {roleOptions.map(r => (
                 <option key={r.value} value={r.value} className="capitalize">{r.label}</option>
@@ -1479,7 +1493,7 @@ export default function DealRoomDetail() {
             <select
               value={participantForm.permission_level}
               onChange={(e) => setParticipantForm(prev => ({ ...prev, permission_level: e.target.value }))}
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
             >
               {permissionOptions.map(p => (
                 <option key={p.value} value={p.value}>{p.label}</option>
@@ -1496,7 +1510,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-pale_yellow rounded hover:bg-gold"
             >
               Send Invitation
             </button>

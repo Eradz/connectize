@@ -1,4 +1,3 @@
-import React from "react";
 import { Search, Plus, FileText, Users2Icon, Target, BarChart3 } from "lucide-react";
 
 export function EmptyState({ 
