@@ -14,7 +14,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 
 const tabs = [
@@ -708,7 +708,6 @@ export default function DealRoomDetail() {
               )}
               {active === "documents" && (
                 <div className="space-y-4">
-                  
                   {documents.length === 0 ? (
                   <form
                     onSubmit={async (e) => {
@@ -882,6 +881,13 @@ export default function DealRoomDetail() {
                     // <EmptyDocuments onUpload={() => document.querySelector('input[type="file"]')?.click()} />
                   ) : (
                     <div className="space-y-2">
+                      <div className="flex items-center gap-4">
+                      <h1 className="text-3xl font-medium">All Documents</h1>
+                    <span className="bg-pale_yellow flex px-3 py-2 rounded-lg">
+                      <UploadCloud className="mr-2"/>
+                      <p>Upload New Document</p>
+                    </span>
+                      </div>
                       {documents
                         .filter(d => !searchTerm || (d.name || d.title || "").toLowerCase().includes(searchTerm.toLowerCase()))
                         .map((d, i) => {
