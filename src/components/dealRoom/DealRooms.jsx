@@ -30,11 +30,16 @@ const DealRooms = () => {
         search: searchTerm,
         status: filterStatus !== 'all' ? filterStatus : undefined,
         deal_type: filterType !== 'all' ? filterType : undefined,
-        ordering: sortBy.startsWith('-') ? sortBy : `-${sortBy}`
+        ordering: sortBy.startsWith('-') ? sortBy : `-${sortBy}`,
+        // Scope restricted to the authenticated user's own / participating deal rooms
+  // scope: 'mine'
       };
       const response = await dealRoomService.getAll(1, 50, params);
       const rooms = response?.results || response?.data || response || [];
+      console.log("Params:", params);
+      console.log("Rooms:", rooms);
       setDealRooms(Array.isArray(rooms) ? rooms : []);
+      console.log("Deal Rooms:", dealRooms);
     } catch (error) {
       console.error('Failed to load deal rooms:', error);
       setDealRooms([]);
@@ -103,7 +108,7 @@ const DealRooms = () => {
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
-                <option value="pending">Pending</option>
+                <option value="negotiating">Pending</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
@@ -264,7 +269,7 @@ const DealRooms = () => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#E5A800]" />
             </div>
           ) : dealRooms.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="flex flex-col items-center text-center py-16">
               <BigDealRoom />
               <h3 className="mt-6 text-xl font-semibold text-gray-900">No Deal room found</h3>
               <p className="mt-2 text-gray-500">Get started by creating your first deal room.</p>

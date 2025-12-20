@@ -13,7 +13,7 @@ export class CrudService {
     return makeApiRequest({
       url: this.basePath,
       method: "GET",
-      params: { page, limit, status },
+      params: { page, limit, ...status },
     });
   }
 

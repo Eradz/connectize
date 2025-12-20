@@ -489,10 +489,10 @@ export default function DealRoomDetail() {
           </div>
           {/* Enhanced Quick Actions and Stats */}
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 md:w-[74%] gap-2">
-            <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <Link to={linkFor("documents")} onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Upload Document
               <Plus className="h-4 w-4 ml-2" />
-            </button>
+            </Link>
             <button onClick={() => setShowParticipantModal(true)} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Invite Participant
               <UserPlus className="h-4 w-4 ml-2" />
