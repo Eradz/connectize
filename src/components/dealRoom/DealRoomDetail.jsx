@@ -911,23 +911,9 @@ export default function DealRoomDetail() {
                           return (
                             <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
                               <div className="flex items-center space-x-3">
-                                <FileText className="h-5 w-5 text-gray-400" />
                                 <div>
                                   <div className="font-medium text-gray-900" title={label}>{label}</div>
-                                  <div className="text-sm text-gray-500">
-                  {d.file_size && `${(d.file_size / 1024 / 1024).toFixed(2)}MB`} • 
-                                    {d.uploaded_at && new Date(d.uploaded_at).toLocaleDateString()}
-                                    {d._isTemporary && ' • Temporary (not saved to database)'}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={`px-2 py-1 text-xs rounded-full ${
-                                  d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                }`}>
-                                  {d.access_granted !== false ? 'Accessible' : 'Restricted'}
-                                </span>
-                {href ? (
+                                  {href ? (
                                   <button 
                                     onClick={handleDocumentOpen}
                                     className="inline-flex items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
@@ -975,6 +961,19 @@ export default function DealRoomDetail() {
                                     Request Access
                                   </button>
                                 )}
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-6 items-center space-x-2">
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {d.access_granted !== false ? 'Accessible' : 'Restricted'}
+                                </span>
+                                 <div className="text-sm text-gray-500">
+                  {/* {d.file_size && `${(d.file_size / 1024 / 1024).toFixed(2)}MB`} •  */}
+                                    {d.uploaded_at && new Date(d.uploaded_at).toLocaleDateString()}
+                                    {d._isTemporary && ' • Temporary (not saved to database)'}
+                                  </div>
                               </div>
                             </div>
                           );
