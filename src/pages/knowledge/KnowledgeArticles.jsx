@@ -240,7 +240,7 @@ const KnowledgeArticles = () => {
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-1" />
-                      <span>{article.author_name || 'Anonymous'}</span>
+                      <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
                     </div>
                     
                     <div className="flex items-center">
@@ -256,7 +256,7 @@ const KnowledgeArticles = () => {
                         className="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
                       >
                         <Heart className="h-4 w-4" />
-                        <span className="text-sm">{article.likes_count || 0}</span>
+                        <span className="text-sm">{article.likes || 0}</span>
                       </button>
                       
                       <button
@@ -264,12 +264,12 @@ const KnowledgeArticles = () => {
                         className="flex items-center space-x-1 text-gray-500 hover:text-blue-500 transition-colors"
                       >
                         <Share2 className="h-4 w-4" />
-                        <span className="text-sm">{article.shares_count || 0}</span>
+                        <span className="text-sm">{article.shares || 0}</span>
                       </button>
                       
                       <div className="flex items-center space-x-1 text-gray-500">
                         <Eye className="h-4 w-4" />
-                        <span className="text-sm">{article.views_count || 0}</span>
+                        <span className="text-sm">{article.views || 0}</span>
                       </div>
                     </div>
                     
@@ -308,9 +308,9 @@ const KnowledgeArticles = () => {
 
     
      {/* Mobile View */}
-      <div className="lg:hidden bg-white min-h-screen">
+      <div className="lg:hidden bg-background  min-h-screen">
         {/* Mobile Header */}
-        <div className="bg-white px-4 py-4">
+        <div className="px-4 py-4">
           <button onClick={() => window.history.back()} className="mb-3">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -450,7 +450,7 @@ const KnowledgeArticles = () => {
                 <div className="flex flex-col gap-2 mb-4">
                   <div className="flex items-center text-xs text-gray-500">
                     <User className="h-4 w-4 mr-1.5" />
-                    <span>{article.author_name || 'Anonymous'}</span>
+                    <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
                   </div>
                   <div className="flex items-center text-xs text-gray-500">
                     <Calendar className="h-4 w-4 mr-1.5" />
@@ -459,31 +459,32 @@ const KnowledgeArticles = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
                     <button
                       onClick={() => handleLike(article.slug)}
                       className="flex items-center gap-1"
                     >
                       <Heart className="h-4 w-4" />
-                      <span>{article.likes_count || 1}</span>
+                      <span>{article.likes || 0}</span>
                     </button>
-                    <div className="flex items-center gap-1">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                      </svg>
-                      <span>{article.shares_count || 3}</span>
+                    <div
+                      onClick={() => handleShare(article.slug)}
+                      className="flex items-center gap-1"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      <span>{article.shares || 0}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="h-4 w-4" />
-                      <span>{article.views_count || 0}</span>
+                      <span>{article.views || 0}</span>
                     </div>
-                    <button
+                    {/* <button
                       onClick={() => handleShare(article.slug)}
                       className="flex items-center gap-1"
                     >
                       <Share2 className="h-4 w-4" />
                       <span>0</span>
-                    </button>
+                    </button> */}
                   </div>
                   
                   <Link

@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceEventDetail = () => {
   const { id } = useParams();
@@ -400,9 +401,9 @@ const WorkforceEventDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto mb-4"></div>
           <p className="text-slate-600">Loading event details...</p>
         </div>
       </div>
@@ -437,9 +438,26 @@ const WorkforceEventDetail = () => {
 
   return (
     <div className="min-h-screen ">
-      <div className=" flex py-4 lg:py-8">
+      <div className="flex flex-col gap-4 py-4 lg:py-6">
+            <div className="flex justify-between ">
+                      <div className="flex items-start justify-between">
+                      <BackArrowButton />
+                        <div className="flex-1">
+                          <h1 className="text-3xl font-semibold text-gray-900">Industry Events</h1>
+                          <p className="text-lg text-gray-600 mt-1">Professional Development, Networking & training opportunity</p>
+                        </div>
+                      </div>
+                        <Link
+                          to="/bookmarks"
+                          className="bg-pale_yellow rounded-lg flex items-center justify-center flex-shrink-0 ml-3 py-2 px-3 h-[50%]"
+                        >
+                          <Bookmark className="w-5 h-5 text-gray-900 mr-1" />
+                          <span className='hidden md:block'>Saved Events</span>
+                        </Link>
+            </div>
           {/* Main Content */}
           <div className="bg-white space-y-8 px-4 py-6">
+
             {/* Hero Section */}
             <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 ">
               {/* Decorative background pattern */}
@@ -455,8 +473,6 @@ const WorkforceEventDetail = () => {
                         <StatusIcon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                         {eventStatus.label}
                       </span>
-                      
-                      
                       {event.is_free && (
                         <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-emerald-500 text-white">
                           Free Event
