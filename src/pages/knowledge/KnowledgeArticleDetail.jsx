@@ -10,7 +10,8 @@ import {
   Tag,
   Clock,
   Edit,
-  BookOpen
+  BookOpen,
+  User2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { knowledgeArticleService } from '../../api-services/oilgas';
@@ -21,6 +22,7 @@ const KnowledgeArticleDetail = () => {
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingAction, setLoadingAction] = useState(false);
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
@@ -47,13 +49,16 @@ const KnowledgeArticleDetail = () => {
 
   const handleLike = async () => {
     try {
+      setLoadingAction(true);
       await knowledgeArticleService.like(slug);
+      setLoadingAction(false);
       setLiked(!liked);
       // Update likes count
       setArticle(prev => ({
         ...prev,
         likes: liked ? prev.likes - 1 : prev.likes + 1
       }));
+      
       toast.success(liked ? 'Article unliked' : 'Article liked');
     } catch (error) {
       console.error('Error liking article:', error);
@@ -78,7 +83,7 @@ const KnowledgeArticleDetail = () => {
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'numeric',
       day: 'numeric'
     }).format(new Date(dateString));
   };
@@ -112,8 +117,8 @@ const KnowledgeArticleDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen ">
+      <div className="bg-white md:bg-transparent px-4 md:px-0 py-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center mb-4">
@@ -128,7 +133,7 @@ const KnowledgeArticleDetail = () => {
         </div>
 
         {/* Article Content */}
-        <article className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <article className="bg-white rounded-lg overflow-hidden">
           {/* Featured Image */}
           {article.featured_image && (
             <div className="aspect-w-16 aspect-h-9">
@@ -140,20 +145,20 @@ const KnowledgeArticleDetail = () => {
             </div>
           )}
 
-          <div className="p-8">
+          <div className="md:p-8">
             {/* Article Header */}
             <header className="mb-8">
               <div className="flex items-center space-x-2 mb-4">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                <span className="capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   {article.article_type}
                 </span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                <span className="capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                   {article.status}
                 </span>
                 {article.category && (
                   <Link
                     to={webRoutes.knowledgeCategoryDetail.replace(':slug', article.category.slug)}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="capitalize inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
                   >
                     {article.category.name}
                   </Link>
@@ -169,49 +174,52 @@ const KnowledgeArticleDetail = () => {
               </p>
 
               {/* Author and Meta */}
-              <div className="flex items-center justify-between border-b border-gray-200 pb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-700">
-                      {article.author ? `${article.author.first_name} ${article.author.last_name}` : 'Anonymous'}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-700">
+              <div className="flex md:flex-row flex-col gap-4 md:items-center justify-between border-b border-gray-200 pb-6">
+                <div className="flex items-center space-x-4 text-gray-400">
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="h-5 w-5" />
+                    <span className="text-sm">
                       {formatDate(article.published_at || article.created_at)}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-700">
+                  <div className="flex items-center space-x-1">
+                    <User2 className="h-5 w-5" />
+                    <span className="text-sm">
+                      {article.author ? `${article.author.first_name} ${article.author.last_name}` : 'Anonymous'}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Clock className="h-5 w-5" />
+                    <span className="text-sm">
                       {Math.ceil(article.content?.length / 1000) || 1} min read
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Eye className="h-4 w-4" />
-                    <span>{article.views || 0}</span>
-                  </div>
                   <button
                     onClick={handleLike}
-                    className={`flex items-center space-x-2 text-sm transition-colors ${
+                    className={`flex items-center space-x-1 text-sm transition-colors ${
                       liked ? 'text-red-600' : 'text-gray-600 hover:text-red-600'
                     }`}
                   >
                     <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
                     <span>{article.likes || 0}</span>
+                    <p>Likes</p>
                   </button>
                   <button
                     onClick={handleShare}
-                    className="flex items-center space-x-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                    className="flex items-center space-x-1 text-sm text-gray-600 hover:text-blue-600 transition-colors"
                   >
                     <Share2 className="h-4 w-4" />
                     <span>{article.shares || 0}</span>
+                    <p>Shares</p>
                   </button>
+                  <div className="flex items-center space-x-1 text-sm text-gray-600">
+                    <Eye className="h-4 w-4" />
+                    <span>{article.views || 0}</span>
+                    <p>Views</p>
+                  </div>
                 </div>
               </div>
             </header>
@@ -245,21 +253,23 @@ const KnowledgeArticleDetail = () => {
             {/* Actions */}
             <div className="mt-8 pt-8 border-t border-gray-200">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
                   <button
                     onClick={handleLike}
-                    className={`inline-flex items-center px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
+                    disabled={loadingAction}
+                    className={`inline-flex items-center px-2 md:px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
                       liked
                         ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100'
                         : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
                     <Heart className={`h-4 w-4 mr-2 ${liked ? 'fill-current' : ''}`} />
-                    {liked ? 'Unlike' : 'Like'} Article
+                    {loadingAction && "Liking..." || 
+                    <span>{liked ? 'Unlike' : 'Like'}</span>} 
                   </button>
                   <button
                     onClick={handleShare}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center px-2 md:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                   >
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
@@ -267,7 +277,7 @@ const KnowledgeArticleDetail = () => {
                 </div>
                 <Link
                   to={webRoutes.knowledgeArticles}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center px-2 md:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                 >
                   <BookOpen className="h-4 w-4 mr-2" />
                   More Articles
