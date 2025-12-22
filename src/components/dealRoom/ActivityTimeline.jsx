@@ -152,6 +152,14 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
     { value: 'status_changed', label: 'Status Changes' },
     { value: 'comment_added', label: 'Comments' }
   ];
+  const smallActivityTypes = [
+    { value: 'all', label: 'All' },
+    { value: 'milestone_reached', label: 'Milestones' },
+    { value: 'document_uploaded', label: 'Documents' },
+    { value: 'participant_added', label: 'Participants' },
+    { value: 'status_changed', label: 'Status Changes' },
+    { value: 'comment_added', label: 'Comments' }
+  ];
 
   const filteredActivities = activities.filter(activity => {
     const matchesFilter = filter === 'all' || activity.activity_type === filter;
@@ -193,7 +201,7 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="p-4 space-y-4">
+      <div className="py-4 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
           <button
@@ -208,8 +216,8 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
           </button>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
+        <div className="flex justify-between gap-4">
+          <div className="flex md:w-full">
             <input
               type="text"
               placeholder="Search activities..."
@@ -218,24 +226,32 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
               className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
+          
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="hidden md:block bg-white px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
             >
               {activityTypes.map(type => (
                 <option key={type.value} value={type.value}>{type.label}</option>
               ))}
             </select>
-          </div>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-[30%] md:hidden bg-white px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            >
+              {smallActivityTypes.map(type => (
+                <option key={type.value} value={type.value}>{type.label}</option>
+              ))}
+            </select>
         </div>
       </div>
 
       {/* Timeline */}
       <div className="space-y-6">
         {Object.keys(groupedActivities).length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-200 w-[50%] mx-auto rounded-lg">
+          <div className="flex flex-col items-center text-center py-12 border-2 border-dashed border-gray-200 w-full md:w-[50%] mx-auto rounded-lg">
             <div className="text-gray-400 text-6xl mb-4 px-[40%]">
             <ListChecksIcon/>
             </div>

@@ -16,6 +16,7 @@ import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
 import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
+import Scroll from "../Scroll";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -488,7 +489,7 @@ export default function DealRoomDetail() {
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 md:w-[74%] gap-2">
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 md:w-[80%] gap-2">
             <Link to={linkFor("documents")} onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Upload Document
               <Plus className="h-4 w-4 ml-2" />
@@ -506,7 +507,7 @@ export default function DealRoomDetail() {
               <BarChart3 className="h-4 w-4 ml-2" />
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="md:flex mt-6 hidden flex-wrap gap-2">
             {tabs.map((t) => (
               <Link
                 key={t.key}
@@ -519,10 +520,27 @@ export default function DealRoomDetail() {
               </Link>
             ))}
           </div>
+          <div className="md:hidden ">
+            <Scroll>
+              <div className="flex gap-4 pt-5 min-w-min">
+                {tabs.map((t) => (
+                <Link
+                  key={t.key}
+                  to={linkFor(t.key)}
+                  className={`px-3 py-2 rounded-[100px] text-sm ${
+                    active === t.key ? "bg-gold text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {t.label}
+                </Link>
+              ))}
+              </div>
+            </Scroll>
+          </div>
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto  py-8">
+              
+      <div className="max-w-7xl mx-auto px-4 md:px-0 md:py-8 ">
         <div className="">
           {loading ? (
             <div className="space-y-4">
@@ -881,11 +899,11 @@ export default function DealRoomDetail() {
                     // <EmptyDocuments onUpload={() => document.querySelector('input[type="file"]')?.click()} />
                   ) : (
                     <div className="space-y-2">
-                      <div className="flex items-center gap-4">
-                      <h1 className="text-3xl font-medium">All Documents</h1>
-                    <span className="bg-pale_yellow flex px-3 py-2 rounded-lg">
+                      <div className="flex justify-between md:justify-start items-center gap-4">
+                      <h1 className="text-xl md:text-3xl font-medium">All Documents</h1>
+                    <span onClick={handleButtonClick} className="bg-pale_yellow flex px-3 py-2 rounded-lg">
                       <UploadCloud className="mr-2"/>
-                      <p>Upload New Document</p>
+                      <p className="hidden md:flex">Upload New Document</p>
                     </span>
                       </div>
                       {documents
@@ -962,7 +980,7 @@ export default function DealRoomDetail() {
                                   </button>
                                 )}
                                 </div>
-                              </div>
+                              </div>  
                               <div className="flex flex-col gap-6 items-center space-x-2">
                                 <span className={`px-2 py-1 text-xs rounded-full ${
                                   d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'

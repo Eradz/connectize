@@ -277,3 +277,22 @@ a {
   color: #000 !important;
   text-transform: capitalize !important;
 }
+
+  /* Horizontal Scrolling Tabs */
+        .tabs-container {
+          position: sticky;
+          top: 66px;
+          z-index: 99;
+        }
+
+        .tabs-wrapper {
+          overflow-x: auto;
+          overflow-y: hidden;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          scroll-behavior: smooth;
+        }
+
+        .tabs-wrapper::-webkit-scrollbar {
+          display: none;
+        }
