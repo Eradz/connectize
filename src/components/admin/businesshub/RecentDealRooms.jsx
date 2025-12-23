@@ -57,10 +57,10 @@ export default function RecentDealRooms({dashboardData}) {
                     <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
                       <div
                         className="bg-yellow-500 h-2 rounded-full"
-                        style={{ width: `${deal.progress}%` }}
+                        style={{ width: `${deal.milestones_count}%` }}
                       ></div>
                     </div>
-                    <span className="text-xs text-gray-600">{deal.progress}%</span>
+                    <span className="text-xs text-gray-600">{deal.milestones_count}%</span>
                   </div>
                 </td>
               </tr>
