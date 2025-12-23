@@ -170,7 +170,9 @@ const WorkforceJobs = () => {
                 className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
+                 <span className="hidden md:flex">
                  New deal room
+                 </span>
               </Link>
           </div>
         </div>

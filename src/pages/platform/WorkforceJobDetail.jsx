@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { toast } from "sonner";
 import { workforceJobService } from "../../api-services/oilgas";
@@ -30,6 +30,7 @@ export default function WorkforceJobDetail() {
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [resume, setResume] = useState(null);
   const isApply = pathname.endsWith("/apply");
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -335,8 +336,8 @@ export default function WorkforceJobDetail() {
 
       {/* Application Modal */}
       <Modal
-        isOpen={showApplicationModal}
-        onClose={() => setShowApplicationModal(false)}
+        isOpen={showApplicationModal || isApply}
+        onClose={() => { setShowApplicationModal(false); navigate(pathname.replace("/apply", "")) }}
         title="Job Application form"
         className=""
         >

@@ -69,7 +69,7 @@ export default function BusinessHubHeader({dashboardData}) {
   const quickActions = [
     { label: "New Deal Room", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.dealRoomCreate }, 
     { label: "Post Opening Jobs", color: "bg-[#95EB99]", icon: "+", to: webRoutes.workforceJobCreate },
-    { label: "Create Profile", color: "bg-[#B1C7FC]", icon: "+", to: webRoutes.profile }, 
+    { label: "Create Profile", color: "bg-[#B1C7FC]", icon: "+", to: webRoutes.workforceProfileCreate }, 
     { label: "Get Verified", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.subscriptionDashboard }
   ];
 
