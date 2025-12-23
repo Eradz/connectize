@@ -205,7 +205,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
           return (
             <li key={index}>
               <Link
-                to={to}
+                to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                 onClick={() => toggleNav(false)}
                 className={clsx(
                   "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm flex-col text-xs xs:text-[.65rem]",
@@ -259,7 +259,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             return (
               <li key={index}>
                 <Link
-                  to={to}
+                  to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                   onClick={() => toggleNav(false)}
                   className={clsx(
                     "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded",
