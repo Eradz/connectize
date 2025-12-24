@@ -34,7 +34,8 @@ import {
   StarIcon,
   User2,
   CalendarDays,
-  ClockCheck
+  ClockCheck,
+  BookText
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI as workforceService } from '../../api-services/workforce';
@@ -42,6 +43,10 @@ import { formatSalary, getExperienceBadgeColor, getJobTypeIcon, getTimeAgo, togg
 import BackArrowButton from '../../components/BackArrowButton';
 import { StarFilledIcon } from '../../icon';
 import { MessageOutlined } from '@ant-design/icons';
+import Scroll from '../../components/Scroll';
+import { toast as notify } from "sonner";
+import { baseURL, getAuthorizationHeader } from '../../lib/helpers';
+import axios from 'axios';
 
 const WorkforceApplications = () => {
   const [savedJobs, setSavedJobs] = useState(new Set());
@@ -299,8 +304,34 @@ const WorkforceApplications = () => {
 
       <div className="">
         {/* Tabs */}
-        <div className="">
-          <div className="">
+        <div >
+          <div className="hidden md:flex" >
+          <nav className="flex gap-2" aria-label="Tabs">
+              {[
+                { key: 'all', label: 'All Applications' },
+                { key: 'active', label: 'Active' },
+                { key: 'interviews', label: 'Interviews' },
+                { key: 'completed', label: 'Completed' }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`${
+                    activeTab === tab.key
+                      ? 'border-transparent bg-[#FFDB76]'
+                      : 'border-[#D9D9D9] text-[#495057] hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap p-2 border-2 rounded-full font-medium text-sm flex items-center`}
+                >
+                  {tab.label}
+                  <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                    {getTabCount(tab.key)}
+                  </span>
+                </button>
+              ))}
+            </nav>
+          </div>
+          <div className="md:hidden">
+            <Scroll>
             <nav className="flex gap-2" aria-label="Tabs">
               {[
                 { key: 'all', label: 'All Applications' },
@@ -324,6 +355,7 @@ const WorkforceApplications = () => {
                 </button>
               ))}
             </nav>
+            </Scroll>
           </div>
 
         </div>
@@ -430,10 +462,10 @@ const WorkforceApplications = () => {
                 )}
               </div>
             {/* Applications List */}
-            <div className="flex justify-between">
-              {filteredApplications.map((job) => (
-                <div className="w-[49%] bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow h-[400px]">
-                        <div className="flex items-start justify-between mb-4  h-[35%]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredApplications.map((job, i) => (
+                <div className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow h-[400px]">
+                        <div className="flex items-start justify-between mb-2 md:mb-4 h-[50%] md:h-[35%] ">
                           <div className="flex-1">
                             <div className="flex justify-between items-center space-x-3 mb-2">
                                 <div className="flex gap-2">
@@ -443,17 +475,17 @@ const WorkforceApplications = () => {
                                         <h3 className="font-semibold text-gray-900 text-lg">{job.job_title}</h3>
                                 </div>
                            
-                            <div className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
-                                <Pencil className="w-5 h-5" />
-                                <p className="text-sm">Edit</p>
-                            </div>
+                            <Link to={`/jobs/${job?.job_posting}`} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
+                                <BookText className="w-5 h-5" />
+                                <p className="text-sm md:flex hidden">View Details</p>
+                            </Link>
                           </div>
                               <div className="flex items-center text-sm text-gray-600 pb-4">
                                   <Building className="w-4 h-4 mr-1" />
                                   <span className="font-medium">{job.job_company || 'Company'}</span>
                               </div>
-                              <div className='flex items-center justify-between'>
-                                <div className='flex items-center gap-2'>
+                              <div className='flex flex-col md:flex-row md:items-center justify-between'>
+                                <div className='flex flex-col md:flex-row md:items-center gap-2'>
                                   <div className="flex items-center text-sm text-gray-600">
                                     <CalendarDays className="w-4 h-4 mr-2 " />
                                     <span>Date Applied: {formatDate(job.submitted_at)}</span>
@@ -464,7 +496,7 @@ const WorkforceApplications = () => {
                                     <span>{`Reviewed At: ${formatDate(job.reviewed_at)}`}</span>
                                   </div>
                                 </div>
-                                <div className='flex text-xs items-center bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.5px] rounded-full'>
+                                <div className='flex mt-2 md:mt-0 w-fit text-xs items-center bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.5px] rounded-full'>
                                   <span className={`bg-white font-medium px-3 py-2 capitalize rounded-full `}>
                                     <div className={`${getStatusColor(job.status)} bg-clip-text`}>
                                       {job.status}
@@ -474,7 +506,7 @@ const WorkforceApplications = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="h-[30%] border-b-gray-500">
+                          <div className="h-[28%] md:h-[30%] border-b-gray-500 ">
                             <div className="flex items-center text-sm text-gray-600">
                               <DollarSign className="w-4 h-4 mr-2 " />
                               <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
@@ -507,7 +539,7 @@ const WorkforceApplications = () => {
                           </div>
                         </div>
 
-                        <div className='flex items-center text-sm h-[15%] text-[#6C757D] border border-y-gray-400 border-x-transparent py-2'>
+                        <div className=' flex items-center text-sm h-[10%] md:h-[15%] text-[#6C757D] border border-y-gray-400 border-x-transparent py-2'>
                           <User2 className='w-4 h-4 mr-2'/>
                           <div className='flex items-center gap-2'>
                             <p>Person contact:</p>
@@ -515,16 +547,38 @@ const WorkforceApplications = () => {
                           </div>
                         </div>
                 
-                        <div className="flex items-center justify-between my-2 h-[10%]">
+                        <div className=" flex items-center justify-between my-2 h-[10%]">
                           <div className="flex items-center gap-2 text-[12px]">
-                            <div className="flex items-center px-4 py-2 bg-pale_yellow rounded-lg cursor-pointer">
-                              <Download className="w-4 h-4 mr-1" />
-                              Download
-                            </div>
+                             <button
+                                onClick={async () => {
+                                try {
+                                const auth = await getAuthorizationHeader();
+                                const res = await axios.get(`${baseURL}/api/v1/deals/documents/${job.job_posting}/download/`, {
+                                headers: auth || {},
+                                responseType: "blob",
+                                });
+                                const blob = new Blob([res.data]);
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                const label = job.name || job.title || `Document ${i + 1}`;
+                                a.href = url;
+                                a.download = label.replace(/\s+/g, "_");
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                notify.success("Download started");
+                                } catch (e) {
+                                notify.error("Download failed: " + (e.response?.status === 401 ? "Authentication required" : "Unknown error"));
+                                }
+                                }}
+                                className="flex items-center px-4 py-2 bg-pale_yellow rounded-lg cursor-pointer"
+                                >
+                                <Download className="h-4 w-4 mr-1" />
+                                Download
+                            </button>
                             <div className="flex items-center bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.5px] rounded-lg cursor-pointer">
                               <div className='flex items-center px-4 py-2 bg-white rounded-lg'>
-                              <MessageOutlined className="w-4 h-4 mr-1 text-[#FFC000]" />
-                              <span className='text-[#FF8400]'>
+                              <MessageOutlined className="w-4 h-4 md:mr-1 text-[#FFC000]" />
+                              <span className='text-[#FF8400] hidden md:flex'>
                                 Message
                               </span>
                               </div>
@@ -536,15 +590,15 @@ const WorkforceApplications = () => {
                               to={webRoutes.workforceJobApply.replace(':id', job.id)}
                               className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-red-300 transition-colors font-medium"
                             >
-                              <Trash2 className="w-4 h-4 mr-1 text-[#FF0000]" />
-                              <p className="text-[#FF0000]">Delete</p>
+                              <Trash2 className="w-4 h-4 md:mr-1 text-[#FF0000]" />
+                              <p className="text-[#FF0000] hidden md:flex">Delete</p>
                             </Link>
                             <Link
                               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
                               className="flex font-medium bg-gray-100 hover:bg-gray-300 p-2 rounded-lg"
                             >
-                                <Edit className="w-4 h-4 mr-1 " />
-                                <p className="">Edit</p>
+                                <Edit className="w-4 h-4 md:mr-1 " />
+                                <p className="hidden md:flex">Edit</p>
                             </Link>
                           </div>
                           

@@ -177,15 +177,15 @@ return(
               to={webRoutes.workforceJobApply.replace(':id', job.id)}
               className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-gold transition-colors font-medium"
             >
-              <Trash2 className="w-4 h-4 mr-1 text-[#FF0000]" />
-              <p className="text-[#FF0000]">Delete</p>
+              <Trash2 className="w-4 h-4 md:mr-1 text-[#FF0000]" />
+              <p className="text-[#FF0000] hidden md:flex">Delete</p>
             </Link>
             <Link
               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
               className="flex font-medium bg-pale_yellow p-2 rounded-lg"
             >
-                <Eye className="w-4 h-4 mr-1 " />
-                <p className="">View Details</p>
+                <Eye className="w-4 h-4 md:mr-1 " />
+                <p className="hidden md:flex">View Details</p>
             </Link>
           </div>
             :
