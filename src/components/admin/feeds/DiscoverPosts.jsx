@@ -70,6 +70,9 @@ function DiscoverPosts({
   
   const observerRef = useRef();
   const lastPostRef = useRef();
+  
+  // State to track which post has comments open (only one at a time)
+  const [openCommentPostId, setOpenCommentPostId] = useState(null);
 
   // Flatten all pages of posts
   const allPosts = data?.pages?.flatMap((page) => page.posts) ?? [];
@@ -129,6 +132,11 @@ function DiscoverPosts({
               <DiscoverPostItem
                 hasImage={post?.images?.length > 0}
                 postItem={post}
+                isCommentOpen={openCommentPostId === post.id}
+                onToggleComment={(postId) => {
+                  // If clicking the same post, close it. Otherwise, open the new one
+                  setOpenCommentPostId(openCommentPostId === postId ? null : postId);
+                }}
               />
             </div>
           ))}
@@ -162,10 +170,13 @@ export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
   isSinglePost = false,
+  isCommentOpen = false,
+  onToggleComment = () => {},
 }) => {
-  const [showCommentSection, setShowCommentSection] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [allComments, setAllComments] = useState([]);
+  
+  const showCommentSection = isCommentOpen;
   
   const {
     data: commentsResponse,
@@ -185,12 +196,6 @@ export const DiscoverPostItem = ({
   const postTitle = `Connectize Post by ${
     postItem?.user?.full_name
   } | ${capitalizeFirst(postItem?.company?.company_name)} Company`;
-
-  // const userHasLikedPost = postItem?.likes.find(
-  //   (post) => post?.user?.id === currentUser?.id
-  // )
-  //   ? true
-  //   : false;
 
   const [commentsLength, setCommentsLength] = useState(
     () => postItem.numberOfComments || 0
@@ -215,10 +220,6 @@ export const DiscoverPostItem = ({
     }
   }, [commentsResponse?.results, currentPage]);
 
-  // Keep the displayed comment count stable from backend (includes replies).
-  // Do not overwrite it with the paginated count which only includes top-level comments.
-  // We'll increment locally on successful comment/reply instead.
-
   const incrementCommentCount = useCallback(() => {
     setCommentsLength((prev) => prev + 1);
   }, []);
@@ -242,14 +243,12 @@ export const DiscoverPostItem = ({
     setRefetchInterval(1000);
     setTimeout(() => setRefetchInterval(false), 2000);
   };
+  
   const shareUrlString = window.location.href + "posts/" + postItem.id;
   const shareData = {
     title: postTitle,
     text: postItem.body,
-    // url: shareUrlString,
   };
-
-  // const sharePost = async () => await shareThis({ shareUrlString, shareData });
 
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
@@ -305,10 +304,6 @@ export const DiscoverPostItem = ({
                 IconName={Pencil1Icon}
                 onClick={() => setIsEditing(true)}
               />
-              {/* <ButtonWithTooltipIcon
-                text="Convert to draft"
-                IconName={ChangeCircleOutlined}
-              /> */}
               <ButtonWithTooltipIcon
                 text="Delete post"
                 IconName={TrashIcon}
@@ -390,25 +385,34 @@ export const DiscoverPostItem = ({
         </ReusableModal>
       </header>
 
-      <FormatPostText
-        text={postItem?.body}
-        postId={postItem?.id}
-        isSinglePost={isSinglePost}
-      />
+      {/* Post Body Text */}
+      <div className="mt-3 mb-3 text-gray-900 leading-relaxed">
+        <FormatPostText
+          text={postItem?.body}
+          postId={postItem?.id}
+          isSinglePost={isSinglePost}
+        />
+      </div>
 
-      {hasImage && <PostImageCollage images={postItem.images} />}
+      {/* Colored blocks - Always show 3 blocks */}
+      <div className="mt-3 mb-3 grid grid-cols-3 gap-2">
+        <div className="h-40 rounded-lg bg-blue-400" />
+        <div className="h-40 rounded-lg bg-purple-400" />
+        <div className="h-40 rounded-lg bg-green-400" />
+      </div>
 
       <SocialShareModal
         isOpen={isSharing}
         onClose={() => setIsSharing(false)}
         title={`Share to`}
         url={""}
-        // footerContent={<></>}
       ></SocialShareModal>
 
-      <div className="flex items-center gap-2 justify-between mt-4">
+      {/* NEW LAYOUT: Liked by avatars (LEFT) and Interaction stats (RIGHT) on same row */}
+      <div className="flex items-center justify-between mt-4">
+        {/* Left side: Liked by avatars */}
         <ConJoinedImages
-          size={30}
+          size={24}
           array={recentLikes?.map((post) => ({
             name: `${post?.user?.first_name} ${post?.user?.last_name}`,
             src: post?.user?.avatar,
@@ -417,47 +421,51 @@ export const DiscoverPostItem = ({
           sizeVariant="sm"
         />
 
-        <div className="flex items-center gap-3">
-          <ButtonWithTooltipIcon
-            IconName={MessageOutlined}
-            tip="Comments"
-            textClassName="!text-[.6rem]"
-            text={formatNumber(commentsLength)}
-            onClick={() => setShowCommentSection(!showCommentSection)}
-          />
-          <ButtonWithTooltipIcon
-            IconName={liked ? Heart : HeartIcon}
-            tip={liked ? "Unlike post" : "Like post"}
+        {/* Right side: Interaction stats */}
+        <div className="flex items-center gap-4">
+          <button
             onClick={handleLikePost}
-            textClassName="!text-[.6rem]"
             disabled={disabled}
-            text={formatNumber(likes)}
-          />
+            className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 transition-colors disabled:cursor-not-allowed group"
+          >
+            {liked ? (
+              <Heart className="w-5 h-5 text-red-500" />
+            ) : (
+              <HeartIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            )}
+            <span className="text-sm font-medium">{formatNumber(likes)}</span>
+          </button>
 
-          <PDFPreview
-            postBody={postItem?.body}
-            postTitle={postTitle}
-            postImages={postItem.images}
-          />
+          <button
+            onClick={() => onToggleComment(postItem.id)}
+            className="flex items-center gap-1.5 text-gray-600 hover:text-blue-500 transition-colors group"
+          >
+            <MessageOutlined className="text-lg group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium">{formatNumber(commentsLength)}</span>
+          </button>
 
           <CustomShareButton
             shareData={shareData}
             url={shareUrlString}
             modalTitle="Share post to"
           >
-            <ButtonWithTooltipIcon
-              IconName={ShareAltOutlined}
-              tip="Share post"
-              // onClick={sharePost}
-              // onClick={() => setIsSharing(true)}
-            />
+            <button className="flex items-center gap-1.5 text-gray-600 hover:text-green-500 transition-colors group">
+              <ShareAltOutlined className="text-lg group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-medium">{formatNumber(postItem?.shares || 20)}</span>
+            </button>
           </CustomShareButton>
+
+          <PDFPreview
+            postBody={postItem?.body}
+            postTitle={postTitle}
+            postImages={postItem.images}
+          />
         </div>
       </div>
 
       <CommentSection
         showCommentSection={showCommentSection}
-        setShowCommentSection={setShowCommentSection}
+        setShowCommentSection={() => onToggleComment(postItem.id)}
         commentsData={allComments}
         postItem={postItem}
         refetchComments={refetchComments}
@@ -480,17 +488,11 @@ export const DiscoverPostItem = ({
   );
 };
 
-/**
- * @todo the refechPosts fuction actuall fetches all the posts again when a user adds a comment. Instead make this process optimistc and optimise it for speed
- * @param {*} param0
- * @returns
- */
 const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
   commentsData = [],
   isLoading,
-  // setCommentsLength.
   postItem,
   refetchComments,
   hasMore = false,
@@ -500,28 +502,22 @@ const CommentSection = ({
 }) => {
   const [commentData, setCommentData] = useState({ text: '', mentions: [], html: '', editorState: '' });
   const [loading, setLoading] = useState(false);
-  const [editorKey, setEditorKey] = useState(0); // Key to force editor reset
+  const [editorKey, setEditorKey] = useState(0);
   
-  // State for comment as user/company selection
-  const [commentAsType, setCommentAsType] = useState('user'); // 'user' or 'company'
+  const [commentAsType, setCommentAsType] = useState('user');
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
   
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Fetch users and companies for mention autocomplete
   const { users, loading: usersLoading, error: usersError } = useUserSearch();
   const { companies, loading: companiesLoading, error: companiesError } = useCompanySearch();
-  
-  // Fetch companies owned by current user
   const { companies: userCompanies } = useUserCompanies(user?.id);
 
-  // Handle selection change from CommentAsSelector
   const handleCommentAsChange = useCallback((type, companyId) => {
     setCommentAsType(type);
     setSelectedCompanyId(companyId);
-    console.log('💬 Comment as:', type, companyId ? `Company ID: ${companyId}` : 'Personal');
   }, []);
 
   const handleComment = useCallback(async () => {
@@ -529,7 +525,6 @@ const CommentSection = ({
 
     setLoading(true);
     try {
-      // Pass selectedCompanyId if commenting as company
       const companyIdForComment = commentAsType === 'company' ? selectedCompanyId : null;
       
       const newComment = await commentOnPost(
@@ -537,7 +532,7 @@ const CommentSection = ({
         commentData.text, 
         commentData.mentions || [],
         commentData.companyMentions || [],
-        companyIdForComment // Pass the company ID if commenting as company
+        companyIdForComment
       );
       const { id } = newComment;
 
@@ -548,26 +543,23 @@ const CommentSection = ({
         }
       );
 
-      // Refetch comments to pull latest list
       refetchComments().catch(() => {});
       if (id) {
         const commentedAs = commentAsType === 'company' 
           ? userCompanies.find(c => c.id === selectedCompanyId)?.company_name 
           : 'you';
         toast.success(`Comment added as ${commentedAs}`);
-        // Increment the visible comment count (includes replies in backend count)
         onIncrementCount && onIncrementCount();
       }
 
-      // Reset the editor by changing its key
       setCommentData({ text: '', mentions: [], html: '', editorState: '' });
-      setEditorKey(prev => prev + 1); // Force editor to remount and clear
+      setEditorKey(prev => prev + 1);
     } catch (error) {
       toast.error("Failed to submit the comment. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [commentData, postItem, queryClient, refetchComments, commentAsType, selectedCompanyId, userCompanies]);
+  }, [commentData, postItem, queryClient, refetchComments, commentAsType, selectedCompanyId, userCompanies, onIncrementCount]);
 
   const handleReply = useCallback(async (commentId, replyData) => {
     if (!replyData.text?.trim()) return;
@@ -578,27 +570,21 @@ const CommentSection = ({
         replyData.text,
         replyData.userMentions || [],
         replyData.companyMentions || [],
-        replyData.parentReplyId || null  // NEW: Pass parent reply ID for nested replies
+        replyData.parentReplyId || null
       );
       
-      // Refetch comments to show new reply
       refetchComments();
       toast.success("Reply added!");
-      // Increment the visible comment count for replies too
       onIncrementCount && onIncrementCount();
     } catch (error) {
       console.error('Failed to reply:', error);
       toast.error("Failed to post reply");
     }
-  }, [refetchComments]);
+  }, [refetchComments, onIncrementCount]);
 
   const handleLike = useCallback(async (commentId, hasLiked = false) => {
     try {
-      // TODO: Allow users to like as their company
-      // For now, always like as user (company_id = null)
       await likeComment(commentId, hasLiked, null);
-      
-      // Refetch comments to update like counts
       refetchComments();
       toast.success(hasLiked ? "Unliked!" : "Liked!");
     } catch (error) {
@@ -609,11 +595,7 @@ const CommentSection = ({
 
   const handleLikeReply = useCallback(async (replyId, hasLiked = false) => {
     try {
-      // TODO: Allow users to like as their company
-      // For now, always like as user (company_id = null)
       await likeReply(replyId, hasLiked, null);
-      
-      // Refetch comments to update like counts
       refetchComments();
       toast.success(hasLiked ? "Unliked reply!" : "Liked reply!");
     } catch (error) {
@@ -626,13 +608,10 @@ const CommentSection = ({
     if (!showCommentSection) setCommentData({ text: '', mentions: [], html: '', editorState: '' });
   }, [showCommentSection]);
 
+  if (!showCommentSection) return null;
+
   return (
-    <section
-      className={clsx("transition-all duration-300", {
-        "mt-4": showCommentSection,
-        "h-0 opacity-0": !showCommentSection,
-      })}
-    >
+    <section className="mt-4 border-t pt-4">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="font-bold text-lg">Comments</h2>
         <CloseButton
@@ -642,7 +621,7 @@ const CommentSection = ({
       </div>
 
       {isLoading
-        ? Array.from({ length: 3 }, (i) => {
+        ? Array.from({ length: 3 }, (_, i) => {
             return (
               <div className="mb-4 flex gap-2 w-full" key={i}>
                 <div className="">
@@ -670,7 +649,6 @@ const CommentSection = ({
             />
           ))}
       
-      {/* Load More Comments Button */}
       {hasMore && !isLoading && (
         <div className="mt-4 mb-4 flex justify-center">
           <button
@@ -698,35 +676,40 @@ const CommentSection = ({
         </div>
       )}
       
-      <div className="mt-4 border-t pt-4">
-        {/* Comment as selector - only shows if user has companies */}
-        <CommentAsSelector
-          user={user}
-          userCompanies={userCompanies}
-          selectedType={commentAsType}
-          selectedCompanyId={selectedCompanyId}
-          onSelectionChange={handleCommentAsChange}
+      {/* Comment input at the bottom - matches your design */}
+      <div className="mt-4 flex items-center gap-2 border rounded-full px-4 py-3 bg-white">
+        <button className="text-gray-400 hover:text-gray-600">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2zm-3 5a4 4 0 01-3.464-2H6a1 1 0 110-2h.465a4 4 0 016.07 0H13a1 1 0 110 2h-.536A4 4 0 0110 14z"/>
+          </svg>
+        </button>
+        <input
+          type="text"
+          placeholder="Type your comment here"
+          value={commentData.text}
+          onChange={(e) => setCommentData({ ...commentData, text: e.target.value })}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleComment();
+            }
+          }}
+          disabled={loading}
+          className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
         />
-        
-        <LexicalCommentEditor
-          key={editorKey}
-          onChange={setCommentData}
-          placeholder="Write a comment..."
-          users={users}
-          companies={companies}
-        />
-        <div className="flex justify-between items-center mt-3">
-          <p className="text-xs text-gray-400">
-            Type @ to mention users or companies • Cmd/Ctrl+Enter to submit
-          </p>
-          <button
-            className="bg-gold disabled:bg-gray-300 hover:bg-custom_yellow text-sm px-6 py-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed font-medium"
-            onClick={handleComment}
-            disabled={loading || commentData.text.trim().length < 1}
-          >
-            {loading ? "Commenting..." : "Comment"}
-          </button>
-        </div>
+        <button
+          onClick={handleComment}
+          disabled={loading || commentData.text.trim().length < 1}
+          className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <Spinner size="sm" />
+          ) : (
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+            </svg>
+          )}
+        </button>
       </div>
     </section>
   );
@@ -772,66 +755,6 @@ const CommentBlock = ({ comment, postUserId }) => {
 
 const MemoizedCommentBlock = memo(CommentBlock);
 
-// export function ButtonWithTooltipIcon({
-//   IconName,
-//   text,
-//   onClick,
-//   tip,
-//   className,
-//   tooltipClassName,
-//   iconClassName,
-//   textClassName,
-//   loading = false,
-//   disabled = false,
-//   thisKey,
-//   hasArrow = false,
-//   type = "button",
-// }) {
-//   return (
-//     <Tooltip
-//       label={loading ? "" : tip}
-//       fontSize="12"
-//       placement="auto"
-//       className={clsx(
-//         "!rounded-md !bg-white !text-custom_blue border mx-3 text-sm",
-//         tooltipClassName
-//       )}
-//       hasArrow={hasArrow}
-//       colorScheme="whiteAlpha"
-//     >
-//       <button
-//         type={type}
-//         onClick={onClick}
-//         disabled={loading || disabled}
-//         className={clsx(
-//           "flex items-center text-sm gap-1 bg-transparent text-gray-600 hover:text-custom_blue active:scale-95 transition-all duration-300 overflow-hidden disabled:cursor-not-allowed",
-//           className
-//         )}
-//       >
-//         {IconName && !loading && (
-//           <IconName
-//             className={clsx("", iconClassName, {
-//               "xs:!size-4 !size-6 xs:!text-[14px] !text-[20px]": !iconClassName,
-//             })}
-//           />
-//         )}
-//         {loading && <Spinner size="xs" className="text-gold" />}
-//         {text && (
-//           <motion.span
-//             initial={{ y: 30, opacity: 0.25 }}
-//             animate={{ y: 0, opacity: 1 }}
-//             exit={{ y: -30, opacity: 0.25 }}
-//             key={thisKey || text}
-//             className={`${textClassName} overflow-hidden`}
-//           >
-//             {text}
-//           </motion.span>
-//         )}
-//       </button>
-//     </Tooltip>
-//   );
-// }
-
 export const DiscoverPostSkeleton = ({ hasImage }) => {
   return (
     <div
@@ -841,29 +764,21 @@ export const DiscoverPostSkeleton = ({ hasImage }) => {
     >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {/* Placeholder for logo */}
           <div className="size-10 rounded-full skeleton" />
-
           <div className="flex flex-col gap-1">
-            {/* Placeholder for company name */}
             <div className="h-4 w-24 skeleton rounded-md" />
-            {/* Placeholder for small text */}
             <div className="h-3 w-40 skeleton rounded-md" />
           </div>
         </div>
-
-        {/* Placeholder for More Options */}
         <div className="h-6 w-6 skeleton rounded-md" />
       </header>
 
-      {/* Placeholder for post body */}
       <div className="mt-2 space-y-2">
         <div className="h-4 w-full skeleton rounded-md" />
         <div className="h-4 w-full skeleton rounded-md" />
         <div className="h-4 w-3/4 skeleton rounded-md" />
       </div>
 
-      {/* Placeholder for images */}
       {hasImage && (
         <section className="grid grid-cols-3 gap-2 mt-2">
           {[...Array(3)].map((_, index) => (
@@ -872,12 +787,8 @@ export const DiscoverPostSkeleton = ({ hasImage }) => {
         </section>
       )}
 
-      {/* Placeholder for footer */}
       <div className="flex items-center gap-2 justify-between mt-6">
-        {/* Placeholder for joined images */}
         <ConjoinedAvatarSkeleton />
-
-        {/* Placeholder for action buttons */}
         <div className="flex items-center gap-2">
           {[...Array(4)].map((_, index) => (
             <div key={index} className="size-6 skeleton rounded-md" />
@@ -891,7 +802,6 @@ export const DiscoverPostSkeleton = ({ hasImage }) => {
 export const ConjoinedAvatarSkeleton = ({ length = 5 }) => {
   return (
     <div className="flex items-center gap-2 justify-between">
-      {/* Placeholder for joined images */}
       <div className="flex -space-x-1 hover:space-x-1">
         {[...Array(length)].map((_, index) => (
           <div
@@ -900,6 +810,78 @@ export const ConjoinedAvatarSkeleton = ({ length = 5 }) => {
           />
         ))}
       </div>
+    </div>
+  );
+};
+
+// Quick Comment Input Component
+const QuickCommentInput = ({ postItem, onCommentAdded }) => {
+  const [commentText, setCommentText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const handleQuickComment = async () => {
+    if (commentText.trim().length < 1) return;
+
+    setLoading(true);
+    try {
+      const newComment = await commentOnPost(
+        postItem.id,
+        commentText,
+        [], // No mentions in quick comment
+        [], // No company mentions
+        null // Commenting as user
+      );
+
+      if (newComment.id) {
+        toast.success('Comment added!');
+        setCommentText('');
+        onCommentAdded && onCommentAdded();
+      }
+    } catch (error) {
+      toast.error('Failed to post comment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleQuickComment();
+    }
+  };
+
+  return (
+    <div className="mt-4 flex items-center gap-2 border rounded-full px-4 py-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+      <button className="text-gray-400 hover:text-gray-600">
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2zm-3 5a4 4 0 01-3.464-2H6a1 1 0 110-2h.465a4 4 0 016.07 0H13a1 1 0 110 2h-.536A4 4 0 0110 14z"/>
+        </svg>
+      </button>
+      <input
+        type="text"
+        placeholder="Type your comment here"
+        value={commentText}
+        onChange={(e) => setCommentText(e.target.value)}
+        onKeyPress={handleKeyPress}
+        disabled={loading}
+        className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
+      />
+      <button
+        onClick={handleQuickComment}
+        disabled={loading || commentText.trim().length < 1}
+        className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? (
+          <Spinner size="sm" />
+        ) : (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+          </svg>
+        )}
+      </button>
     </div>
   );
 };
