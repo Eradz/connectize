@@ -195,7 +195,7 @@ function App() {
           <Route path="services" element={<Services />} />
           <Route path="services/add" element={<ServiceAdmin />} />
           <Route path="services/:id" element={<ServiceOverView />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="co/settings" element={<SettingsPage />} />
           <Route path="user/:userId" element={<UserProfile />} />
           
           {/* Company-specific routes with "co" prefix */}
