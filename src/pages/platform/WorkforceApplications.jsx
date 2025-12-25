@@ -199,6 +199,19 @@ const WorkforceApplications = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+  const getStatusBackgroundColor = (status) => {
+    switch (status) {
+      case 'submitted': return 'bg-green-300';
+      case 'under_review': return 'bg-blue-100';
+      case 'shortlisted': return 'bg-cyan-100';
+      case 'interview_scheduled': return 'bg-purple-100';
+      case 'offer_made': return 'bg-green-100';
+      case 'hired': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent';
+      case 'rejected': return 'bg-red-100';
+      case 'withdrawn': return 'bg-gray-100';
+      default: return 'bg-gray-100';
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -496,7 +509,7 @@ const WorkforceApplications = () => {
                                     <span>{`Reviewed At: ${formatDate(job.reviewed_at)}`}</span>
                                   </div>
                                 </div>
-                                <div className='flex mt-2 md:mt-0 w-fit text-xs items-center bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.5px] rounded-full'>
+                                <div className={`flex mt-2 md:mt-0 w-fit text-xs items-center ${getStatusBackgroundColor(job.status)} p-[0.5px] rounded-full`}>
                                   <span className={`bg-white font-medium px-3 py-2 capitalize rounded-full `}>
                                     <div className={`${getStatusColor(job.status)} bg-clip-text`}>
                                       {job.status}

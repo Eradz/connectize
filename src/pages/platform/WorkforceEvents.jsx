@@ -3,23 +3,8 @@ import { Link } from 'react-router-dom';
 import { 
   Calendar,
   MapPin,
-  Users,
-  Clock,
-  Search,
-  Filter,
   Plus,
-  ExternalLink,
-  User,
-  Building,
   Globe,
-  Star,
-  CheckCircle,
-  AlertCircle,
-  Bookmark,
-  Share2,
-  Download,
-  Eye,
-  UserPlus
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
