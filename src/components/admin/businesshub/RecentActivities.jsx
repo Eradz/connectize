@@ -14,7 +14,7 @@ export default function RecentActivities({dashboardData}) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden h-[510px]">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activities</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4 hidden md:flex">Recent Activities</h2>
       
       <div className="space-y-4">
         {dashboardData.activities.data.slice(0, 5).map((activity, index) => (

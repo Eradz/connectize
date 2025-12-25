@@ -11,9 +11,17 @@ export default function RecentDealRooms({dashboardData}) {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  function formatNumberCompact(number) {
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1 // Adjust decimal places as needed
+  }).format(number);
+}
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Deal Rooms</h2>
+    <div>
+    <div className="hidden md:block bg-white rounded-lg border border-gray-200 p-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4 hidden md:flex">Recent Deal Rooms</h2>
       
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -39,7 +47,7 @@ export default function RecentDealRooms({dashboardData}) {
                   <p className="text-sm text-gray-500">{deal.description}</p>
                 </td>
                 <td className="py-4 px-4">
-                  <span className="text-sm text-gray-700">{deal.deal_type?.replace('_', ' ')}</span>
+                  <span className="capitalize text-sm text-gray-700">{deal.deal_type?.replace('_', ' ')}</span>
                 </td>
                 <td className="py-4 px-4">
                   <span className="text-sm font-medium text-gray-900"> {formatCurrency(deal.estimated_value)}</span>
@@ -50,7 +58,7 @@ export default function RecentDealRooms({dashboardData}) {
                           deal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                           'bg-gray-100 text-gray-800'}`}>
                         {deal.status}
-                      </span>
+                </span>
                 </td>
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-2">
@@ -66,15 +74,64 @@ export default function RecentDealRooms({dashboardData}) {
               </tr>
             ))}
              {dashboardData.dealRooms.data.length === 0 && (
-                              <tr>
-                                <td colSpan={5} className="py-8 text-center text-gray-500">
-                                  No deal rooms found. <Link to={webRoutes.dealRoomCreate} className="text-pale_yellow hover:text-gold">Create your first deal room</Link>
-                                </td>
-                              </tr>
-                            )}
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                    No deal rooms found. <Link to={webRoutes.dealRoomCreate} className="text-pale_yellow hover:text-gold">Create your first deal room</Link>
+                  </td>
+                </tr>
+              )}
           </tbody>
         </table>
       </div>
+    </div>
+            {/* Mobile View */}
+    <div className="md:hidden">
+      {dashboardData.dealRooms.data.map((deal, index) => (
+        <div key={index} className="bg-white border-b border-gray-200 py-4 space-y-8 p-6">
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">Deal Title</h1>
+            <Link
+              to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
+              className="font-medium text-pale_yellow hover:text-gold"
+            >
+              {deal.title}
+            </Link>
+            <p className="text-sm text-gray-500">{deal.description}</p>
+          </div>
+          <div className="text-center flex justify-between">
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">Value</h1>
+              <span className="text-sm font-medium text-gray-900"> {formatNumberCompact(deal.estimated_value)}</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">Status</h1>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                        ${deal.status === 'active' ? 'bg-green-100 text-green-800' : 
+                          deal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-gray-100 text-gray-800'}`}>
+                        {deal.status}
+                </span>
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">Type</h1>
+              <span className="capitalize text-sm text-gray-700">{deal.deal_type?.replace('_', ' ')}</span>
+            </div>
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-gray-900">Progress</h1>
+            <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2 ">
+                      <div
+                        className="bg-yellow-500 h-2 rounded-full"
+                        style={{ width: `${deal.milestones_count}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-gray-600">{deal.milestones_count}%</span>
+                  </div>
+          </div>
+        </div>
+      ))}
+    </div>
     </div>
   );
 }

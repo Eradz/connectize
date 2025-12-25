@@ -61,7 +61,7 @@ export default function PlatformModules({dashboardData}) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Platform Modules</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4 hidden md:flex">Platform Modules</h2>
       
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((module, index) => (

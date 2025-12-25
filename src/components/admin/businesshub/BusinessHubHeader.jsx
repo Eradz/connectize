@@ -75,7 +75,7 @@ export default function BusinessHubHeader({dashboardData}) {
 
   return (
     <div className="bg-gray-50 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto py-6">
 
         {/* Header */}
         <div className="mb-6">
@@ -109,9 +109,9 @@ export default function BusinessHubHeader({dashboardData}) {
               <Link
                 to={action.to}
                 key={index}
-                className={`${action.color} flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:opacity-90`}
+                className={`${action.color} flex items-center justify-center md:gap-2 px-4 py-2 md:py-3 rounded-lg text-sm md:font-medium transition-colors hover:opacity-90`}
               >
-               <Plus className="p-1" />
+               <Plus className="" />
                <p>{action.label}</p> 
               </Link>
             ))}

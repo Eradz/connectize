@@ -105,7 +105,7 @@ const PlatformDashboard = () => {
   }
 
   return (
-    <div >
+    <div className='px-6 md:px-0'>
       {/* Header */}
       <BusinessHubHeader dashboardData={dashboardData} />
       
@@ -114,14 +114,17 @@ const PlatformDashboard = () => {
 
         {/* Platform Modules */}
         <div className="flex flex-col md:flex-row gap-6 h-fit md:h-[510px]">
+          <h2 className="text-lg font-semibold text-gray-900 md:hidden">Platform Modules</h2>
           <PlatformModules dashboardData={dashboardData} />
           <div className="w-full md:w-[30%]">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 md:hidden">Recent Activities</h2>
             <RecentActivities dashboardData={dashboardData} />
           </div>
         </div>
 
         {/* Recent Deal Rooms */}
         <div className="py-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 md:hidden">Recent Deal Rooms</h2>
           <RecentDealRooms dashboardData={dashboardData} />
         </div>
       </div>
