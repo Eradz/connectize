@@ -183,7 +183,7 @@ const StepContent = ({
   if (currentStep === 2) {
     return (
       <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Financials & Timeline</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Financials Details</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -212,7 +212,7 @@ const StepContent = ({
               {currencies.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-          
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Target Close Date</label>
             <div className="relative">
@@ -227,50 +227,8 @@ const StepContent = ({
               />
             </div>
           </div>
-
-          <div className="md:col-span-2 space-y-3 pt-4">
-            <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={formData.is_confidential}
-                onChange={(e) => handleInputChange('is_confidential', e.target.checked)}
-                className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-500 border-gray-300"
-              />
-              <span className="ml-3 flex-1">
-                <span className="block text-sm font-medium text-gray-900">Mark as Confidential</span>
-                <span className="block text-xs text-gray-500">Only invited participants can see deal details</span>
-              </span>
-              <Lock className="w-4 h-4 text-gray-400" />
-            </label>
-
-             <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={formData.requires_nda}
-                onChange={(e) => handleInputChange('requires_nda', e.target.checked)}
-                className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-500 border-gray-300"
-              />
-              <span className="ml-3 flex-1">
-                <span className="block text-sm font-medium text-gray-900">Require NDA</span>
-                <span className="block text-xs text-gray-500">Participants must sign NDA to view documents</span>
-              </span>
-              <FileText className="w-4 h-4 text-gray-400" />
-            </label>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- Step 3: Participants & Tags (Unchanged) ---
-  if (currentStep === 3) {
-    return (
-      <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Participants & Tags</h2>
-
-        {/* Tags Section */}
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Deal Tags</label>
+          <div className='md:col-span-2'>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -286,9 +244,9 @@ const StepContent = ({
             />
             <button 
               onClick={() => addTag()}
-              className="px-4 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+              className="px-4 bg-gold text-white rounded-lg hover:bg-pale_yellow"
             >
-              Add
+              <Plus/>
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -302,6 +260,49 @@ const StepContent = ({
               </span>
             ))}
             {formData.tags.length === 0 && <p className="text-xs text-gray-500 italic">No tags added yet.</p>}
+          </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Step 3: Participants & Tags (Unchanged) ---
+  if (currentStep === 3) {
+    return (
+      <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Security & Access</h2>
+
+        {/* Tags Section */}
+        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <div className="md:col-span-2 space-y-3 pt-4">
+            <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={formData.is_confidential}
+                onChange={(e) => handleInputChange('is_confidential', e.target.checked)}
+                className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-500 border-gray-300"
+              />
+              <span className="ml-3 flex-1">
+                <span className="block text-sm font-medium text-gray-900">Confidential</span>
+                <span className="block text-xs text-gray-500">Mark as Confidential to restrict access and require And special permission</span>
+              </span>
+              <Lock className="w-4 h-4 text-gray-400" />
+            </label>
+
+             <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={formData.requires_nda}
+                onChange={(e) => handleInputChange('requires_nda', e.target.checked)}
+                className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-500 border-gray-300"
+              />
+              <span className="ml-3 flex-1">
+                <span className="block text-sm font-medium text-gray-900">Require NDA</span>
+                <span className="block text-xs text-gray-500">Require participants to sign an NDA Accessing documents</span>
+              </span>
+              <FileText className="w-4 h-4 text-gray-400" />
+            </label>
           </div>
         </div>
 

@@ -74,7 +74,7 @@ export default function BusinessHubHeader({dashboardData}) {
   ];
 
   return (
-    <div className="bg-gray-50 border-b border-gray-200">
+    <div className="">
       <div className="max-w-7xl mx-auto py-6">
 
         {/* Header */}

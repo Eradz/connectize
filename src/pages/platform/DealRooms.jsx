@@ -343,7 +343,9 @@ const DealRooms = () => {
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
-                <option value="pending">Pending</option>
+                <option value="negotiating">Pending</option>
+                <option value="due_diligence">Due Diligence</option>
+                <option value="closing">Closing</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>

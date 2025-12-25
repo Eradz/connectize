@@ -109,6 +109,8 @@ const DealRooms = () => {
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
                 <option value="negotiating">Pending</option>
+                <option value="due_diligence">Due Diligence</option>
+                <option value="closing">Closing</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
@@ -177,11 +179,13 @@ const DealRooms = () => {
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="h-[48px] px-5 pr-10 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 font-normal focus:outline-none focus:border-gray-300 appearance-none cursor-pointer hover:border-gray-300 transition-colors"
                 >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="negotiating">Pending</option>
+                <option value="due_diligence">Due Diligence</option>
+                <option value="closing">Closing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
                 </select>
                 <svg 
                   className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" 
