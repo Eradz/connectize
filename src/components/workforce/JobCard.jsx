@@ -5,7 +5,7 @@ import { useState } from "react";
 import { workforceJobService } from "../../api-services/oilgas";
 
 
-export const JobCard = ({ job, myPostedJob }) => {
+export const JobCard = ({ job, myPostedJob,  setShowDeleteModal, setJobToDelete }) => {
 const [savedJobs, setSavedJobs] = useState(new Set());
   const getExperienceBadgeColor = (level) => {
     switch (level) {
@@ -173,13 +173,13 @@ return(
           {
             myPostedJob ? 
             <div className="flex items-center space-x-2 text-[12px]">
-            <Link
-              to={webRoutes.workforceJobApply.replace(':id', job.id)}
+            <div
+              onClick={()=>{setShowDeleteModal(true); setJobToDelete(job)}}
               className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-gold transition-colors font-medium"
             >
               <Trash2 className="w-4 h-4 md:mr-1 text-[#FF0000]" />
               <p className="text-[#FF0000] hidden md:flex">Delete</p>
-            </Link>
+            </div>
             <Link
               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
               className="flex font-medium bg-pale_yellow p-2 rounded-lg"

@@ -269,7 +269,7 @@ const WorkforceMyPostedJobs = () => {
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
               {filteredJobs.map((job) => (
-                <JobCard key={job.id} job={job} myPostedJob={true}/>
+                <JobCard key={job.id} job={job} myPostedJob={true} setShowDeleteModal={setShowDeleteModal} setJobToDelete={setJobToDelete} />
               ))}
         </div>
             </div>
