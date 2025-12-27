@@ -6,12 +6,11 @@ import { useState, useCallback, useEffect } from "react";
 import { Avatar, Spinner } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import TimeAgo from "../../components/TimeAgo";
-import clsx from "clsx";
 import { toast } from "sonner";
 import { 
   commentOnPost, 
   likeComment, 
-  replyToComment 
+  replyToComment
 } from "../../api-services/posts";
 import { useAuth } from "../../context/userContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -82,6 +81,32 @@ function SinglePostPage() {
       refetchComments();
     } catch (error) {
       toast.error("Failed to like comment");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Delete this comment?')) return;
+    
+    try {
+      // TODO: Add your API call here when deleteComment function is ready
+      // await deleteComment(commentId);
+      console.log('Delete comment:', commentId);
+      toast.info('Delete function not connected yet');
+      // refetchComments();
+    } catch (error) {
+      toast.error("Failed to delete comment");
+    }
+  };
+
+  const handleEditComment = async (commentId, newContent) => {
+    try {
+      // TODO: Add your API call here when editComment function is ready
+      // await editComment(commentId, newContent);
+      console.log('Edit comment:', commentId, newContent);
+      toast.info('Edit function not connected yet');
+      // refetchComments();
+    } catch (error) {
+      toast.error("Failed to edit comment");
     }
   };
 
@@ -156,8 +181,10 @@ function SinglePostPage() {
                 <CommentItem
                   key={comment.id}
                   comment={comment}
-                  postUserId={postItem?.user?.id}
+                  currentUserId={user?.id}
                   onLike={handleLikeComment}
+                  onDelete={handleDeleteComment}
+                  onEdit={handleEditComment}
                 />
               ))}
 
@@ -225,10 +252,22 @@ function SinglePostPage() {
 }
 
 // Simple Comment Component
-function CommentItem({ comment, postUserId, onLike }) {
+function CommentItem({ comment, currentUserId, onLike, onDelete, onEdit }) {
   const [showReplies, setShowReplies] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(comment.content);
   
   if (!comment?.user) return null;
+
+  const isOwner = currentUserId === comment.user.id;
+
+  const handleSaveEdit = () => {
+    if (editText.trim()) {
+      onEdit(comment.id, editText);
+      setIsEditing(false);
+    }
+  };
 
   return (
     <div className="mb-6">
@@ -256,54 +295,127 @@ function CommentItem({ comment, postUserId, onLike }) {
             </span>
           </div>
 
-          {/* Comment Text */}
-          <p className="text-gray-700 text-sm leading-relaxed mb-3 break-words">
-            {comment.content}
-          </p>
+          {/* Comment Text or Edit Input */}
+          {isEditing ? (
+            <div className="mb-3">
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+              />
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditText(comment.content);
+                  }}
+                  className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-700 text-sm leading-relaxed mb-3 break-words">
+              {comment.content}
+            </p>
+          )}
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => onLike(comment.id, comment.isLikedByUser)}
-              className="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors"
-            >
-              {comment.numberOfLikes || 0} Likes
-            </button>
-            <button 
-              onClick={() => setShowReplies(!showReplies)}
-              className="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors flex items-center gap-1"
-            >
-              <svg width="16" height="16" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.9689 17.7073L25.2928 11.3887L18.9741 5.06482" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M5.05922 25.287L5.06286 16.4373C5.06341 15.0961 5.59673 13.8101 6.54549 12.8621C7.49425 11.9141 8.78074 11.3818 10.1219 11.3824L25.2929 11.3886" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Reply
-            </button>
-          </div>
+          {!isEditing && (
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => onLike(comment.id, comment.isLikedByUser)}
+                className="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors"
+              >
+                {comment.numberOfLikes || 0} Likes
+              </button>
+              <button 
+                onClick={() => setShowReplies(!showReplies)}
+                className="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors flex items-center gap-1"
+              >
+                <svg width="16" height="16" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18.9689 17.7073L25.2928 11.3887L18.9741 5.06482" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5.05922 25.287L5.06286 16.4373C5.06341 15.0961 5.59673 13.8101 6.54549 12.8621C7.49425 11.9141 8.78074 11.3818 10.1219 11.3824L25.2929 11.3886" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Reply
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Like Icon */}
-        <button 
-          onClick={() => onLike(comment.id, comment.isLikedByUser)}
-          className="transition-colors hover:opacity-80 flex-shrink-0"
-        >
-          <svg 
-            width="24" 
-            height="24" 
-            viewBox="0 0 31 31" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
+        {/* Three Dot Menu & Like */}
+        <div className="flex items-start gap-2">
+          <button 
+            onClick={() => onLike(comment.id, comment.isLikedByUser)}
+            className="transition-colors hover:opacity-80 flex-shrink-0"
           >
-            <path 
-              d="M8.85089 27.8171L5.05814 27.8156C4.38754 27.8153 3.74452 27.5486 3.27053 27.0742C2.79654 26.5999 2.53041 25.9566 2.53068 25.286L2.53432 16.4363C2.5346 15.7657 2.80126 15.1227 3.27564 14.6487C3.75002 14.1747 4.39326 13.9085 5.06386 13.9088L8.8566 13.9104M17.7074 11.3855L17.7095 6.32852C17.7099 5.32263 17.3107 4.35776 16.5997 3.64619C15.8887 2.93462 14.9242 2.53463 13.9183 2.53422L8.8566 13.9104L8.85089 27.8171L23.1116 27.823C23.7214 27.8301 24.3132 27.6166 24.778 27.2219C25.2428 26.8271 25.5493 26.2777 25.641 25.6748L27.3903 14.2973C27.4455 13.9349 27.4212 13.5649 27.3191 13.2128C27.2171 12.8608 27.0397 12.5351 26.7993 12.2584C26.5589 11.9818 26.2612 11.7606 25.9269 11.6104C25.5926 11.4602 25.2295 11.3845 24.863 11.3885L17.7074 11.3855Z" 
-              stroke={comment.isLikedByUser ? "#3B82F6" : "#8991A0"}
-              strokeWidth="2.5285" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              fill={comment.isLikedByUser ? "#3B82F6" : "none"}
-            />
-          </svg>
-        </button>
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 31 31" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                d="M8.85089 27.8171L5.05814 27.8156C4.38754 27.8153 3.74452 27.5486 3.27053 27.0742C2.79654 26.5999 2.53041 25.9566 2.53068 25.286L2.53432 16.4363C2.5346 15.7657 2.80126 15.1227 3.27564 14.6487C3.75002 14.1747 4.39326 13.9085 5.06386 13.9088L8.8566 13.9104M17.7074 11.3855L17.7095 6.32852C17.7099 5.32263 17.3107 4.35776 16.5997 3.64619C15.8887 2.93462 14.9242 2.53463 13.9183 2.53422L8.8566 13.9104L8.85089 27.8171L23.1116 27.823C23.7214 27.8301 24.3132 27.6166 24.778 27.2219C25.2428 26.8271 25.5493 26.2777 25.641 25.6748L27.3903 14.2973C27.4455 13.9349 27.4212 13.5649 27.3191 13.2128C27.2171 12.8608 27.0397 12.5351 26.7993 12.2584C26.5589 11.9818 26.2612 11.7606 25.9269 11.6104C25.5926 11.4602 25.2295 11.3845 24.863 11.3885L17.7074 11.3855Z" 
+                stroke={comment.isLikedByUser ? "#3B82F6" : "#8991A0"}
+                strokeWidth="2.5285" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                fill={comment.isLikedByUser ? "#3B82F6" : "none"}
+              />
+            </svg>
+          </button>
+
+          {isOwner && (
+            <div className="relative">
+              <button 
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="5" r="1.5" fill="#6B7280"/>
+                  <circle cx="12" cy="12" r="1.5" fill="#6B7280"/>
+                  <circle cx="12" cy="19" r="1.5" fill="#6B7280"/>
+                </svg>
+              </button>
+
+              {showMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                  <div className="absolute right-0 top-8 z-20 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px]">
+                    <button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        onDelete(comment.id);
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Replies (if any) */}
@@ -329,7 +441,14 @@ function CommentItem({ comment, postUserId, onLike }) {
             />
           </svg>
           {comment.replies.map((reply) => (
-            <ReplyItem key={reply.id} reply={reply} onLike={onLike} />
+            <ReplyItem 
+              key={reply.id} 
+              reply={reply} 
+              currentUserId={currentUserId}
+              onLike={onLike}
+              onDelete={onDelete}
+              onEdit={onEdit}
+            />
           ))}
         </div>
       )}
@@ -338,8 +457,21 @@ function CommentItem({ comment, postUserId, onLike }) {
 }
 
 // Reply Component
-function ReplyItem({ reply, onLike }) {
+function ReplyItem({ reply, currentUserId, onLike, onDelete, onEdit }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(reply.content);
+  
   if (!reply?.user) return null;
+
+  const isOwner = currentUserId === reply.user.id;
+
+  const handleSaveEdit = () => {
+    if (editText.trim()) {
+      onEdit(reply.id, editText);
+      setIsEditing(false);
+    }
+  };
 
   return (
     <div className="mb-4 flex gap-3">
@@ -364,48 +496,121 @@ function ReplyItem({ reply, onLike }) {
           </span>
         </div>
 
-        <p className="text-gray-700 text-sm leading-relaxed mb-2 break-words">
-          {reply.content}
-        </p>
+        {isEditing ? (
+          <div className="mb-2">
+            <input
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={handleSaveEdit}
+                className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditText(reply.content);
+                }}
+                className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-gray-700 text-sm leading-relaxed mb-2 break-words">
+              {reply.content}
+            </p>
 
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => onLike(reply.id, reply.isLikedByUser)}
-            className="text-gray-500 hover:text-blue-600 text-xs font-medium transition-colors"
-          >
-            {reply.numberOfLikes || 0} Likes
-          </button>
-          <button className="text-gray-500 hover:text-blue-600 text-xs font-medium transition-colors flex items-center gap-1">
-            <svg width="14" height="14" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18.9689 17.7073L25.2928 11.3887L18.9741 5.06482" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M5.05922 25.287L5.06286 16.4373C5.06341 15.0961 5.59673 13.8101 6.54549 12.8621C7.49425 11.9141 8.78074 11.3818 10.1219 11.3824L25.2929 11.3886" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Reply
-          </button>
-        </div>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => onLike(reply.id, reply.isLikedByUser)}
+                className="text-gray-500 hover:text-blue-600 text-xs font-medium transition-colors"
+              >
+                {reply.numberOfLikes || 0} Likes
+              </button>
+              <button className="text-gray-500 hover:text-blue-600 text-xs font-medium transition-colors flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18.9689 17.7073L25.2928 11.3887L18.9741 5.06482" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5.05922 25.287L5.06286 16.4373C5.06341 15.0961 5.59673 13.8101 6.54549 12.8621C7.49425 11.9141 8.78074 11.3818 10.1219 11.3824L25.2929 11.3886" stroke="currentColor" strokeWidth="2.5285" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Reply
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
-      <button 
-        onClick={() => onLike(reply.id, reply.isLikedByUser)}
-        className="transition-colors hover:opacity-80 flex-shrink-0"
-      >
-        <svg 
-          width="20" 
-          height="20" 
-          viewBox="0 0 31 31" 
-          fill="none" 
-          xmlns="http://www.w3.org/2000/svg"
+      <div className="flex items-start gap-2">
+        <button 
+          onClick={() => onLike(reply.id, reply.isLikedByUser)}
+          className="transition-colors hover:opacity-80 flex-shrink-0"
         >
-          <path 
-            d="M8.85089 27.8171L5.05814 27.8156C4.38754 27.8153 3.74452 27.5486 3.27053 27.0742C2.79654 26.5999 2.53041 25.9566 2.53068 25.286L2.53432 16.4363C2.5346 15.7657 2.80126 15.1227 3.27564 14.6487C3.75002 14.1747 4.39326 13.9085 5.06386 13.9088L8.8566 13.9104M17.7074 11.3855L17.7095 6.32852C17.7099 5.32263 17.3107 4.35776 16.5997 3.64619C15.8887 2.93462 14.9242 2.53463 13.9183 2.53422L8.8566 13.9104L8.85089 27.8171L23.1116 27.823C23.7214 27.8301 24.3132 27.6166 24.778 27.2219C25.2428 26.8271 25.5493 26.2777 25.641 25.6748L27.3903 14.2973C27.4455 13.9349 27.4212 13.5649 27.3191 13.2128C27.2171 12.8608 27.0397 12.5351 26.7993 12.2584C26.5589 11.9818 26.2612 11.7606 25.9269 11.6104C25.5926 11.4602 25.2295 11.3845 24.863 11.3885L17.7074 11.3855Z" 
-            stroke={reply.isLikedByUser ? "#3B82F6" : "#8991A0"}
-            strokeWidth="2.5285" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            fill={reply.isLikedByUser ? "#3B82F6" : "none"}
-          />
-        </svg>
-      </button>
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 31 31" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path 
+              d="M8.85089 27.8171L5.05814 27.8156C4.38754 27.8153 3.74452 27.5486 3.27053 27.0742C2.79654 26.5999 2.53041 25.9566 2.53068 25.286L2.53432 16.4363C2.5346 15.7657 2.80126 15.1227 3.27564 14.6487C3.75002 14.1747 4.39326 13.9085 5.06386 13.9088L8.8566 13.9104M17.7074 11.3855L17.7095 6.32852C17.7099 5.32263 17.3107 4.35776 16.5997 3.64619C15.8887 2.93462 14.9242 2.53463 13.9183 2.53422L8.8566 13.9104L8.85089 27.8171L23.1116 27.823C23.7214 27.8301 24.3132 27.6166 24.778 27.2219C25.2428 26.8271 25.5493 26.2777 25.641 25.6748L27.3903 14.2973C27.4455 13.9349 27.4212 13.5649 27.3191 13.2128C27.2171 12.8608 27.0397 12.5351 26.7993 12.2584C26.5589 11.9818 26.2612 11.7606 25.9269 11.6104C25.5926 11.4602 25.2295 11.3845 24.863 11.3885L17.7074 11.3855Z" 
+              stroke={reply.isLikedByUser ? "#3B82F6" : "#8991A0"}
+              strokeWidth="2.5285" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              fill={reply.isLikedByUser ? "#3B82F6" : "none"}
+            />
+          </svg>
+        </button>
+
+        {isOwner && (
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-1 hover:bg-gray-100 rounded transition-colors"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="5" r="1.5" fill="#6B7280"/>
+                <circle cx="12" cy="12" r="1.5" fill="#6B7280"/>
+                <circle cx="12" cy="19" r="1.5" fill="#6B7280"/>
+              </svg>
+            </button>
+
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-8 z-20 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px]">
+                  <button
+                    onClick={() => {
+                      setIsEditing(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDelete(reply.id);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
