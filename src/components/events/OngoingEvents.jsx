@@ -12,7 +12,6 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
   return (
             <div className="p-2 py-4 mb-8">
               <div className="flex justify-between lg:items-center flex-col-reverse lg:flex-row gap-4 pb-4">
-                <h3 className='text-2xl font-medium md:w-[50%] '>Ongoing Events</h3>
                 <div className='flex gap-4 lg:w-[50%]'>
                   <div className="flex-1">
                     <div className="relative">
@@ -122,7 +121,7 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
               <Scroll>
                 <div className='flex gap-2 md:gap-6 min-w-min'>
               {filteredEvents.map((currentEvent, index) => (
-                 <div className="w-[340px] md:w-[820px] h-full rounded-lg bg-gradient-to-br from-[#FFC000] to-[#FF1A00] p-4 lg:p-8 flex flex-col justify-between">
+                 <div key={index} className="w-[340px] md:w-[820px] h-full rounded-lg bg-gradient-to-br from-[#FFC000] to-[#FF1A00] p-4 lg:p-8 flex flex-col justify-between">
                   {/* Header Section */}
                   <div className="flex-1 flex flex-col justify-start">
                     <h2 className="text-xl md:text-4xl font-bold text-white mb-4">{currentEvent.title}</h2>

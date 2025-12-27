@@ -28,16 +28,26 @@ const WorkforceEvents = () => {
 
   const getTabCount = (tab) => {
     switch (tab) {
-      case 'all':
-        return applications.length;
-      case 'active':
-        return applications.filter(app => ['submitted', 'under_review', 'shortlisted', 'interview_scheduled'].includes(app.status)).length;
-      case 'completed':
-        return applications.filter(app => ['offer_made', 'hired', 'rejected', 'withdrawn'].includes(app.status)).length;
-      case 'interviews':
-        return applications.filter(app => app.status === 'interview_scheduled').length;
+      case 'ongoing':
+        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) > Date.now()).length;
+      case 'upcoming':
+        return events.filter(event => new Date(event.start_date) > Date.now()).length;
+      case 'recent':
+        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) < Date.now()).length;
       default:
         return 0;
+    }
+  };
+  const getEventSchedule = (tab) => {
+    switch (tab) {
+      case 'ongoing':
+        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) > Date.now());
+      case 'upcoming':
+        return events.filter(event => new Date(event.start_date) > Date.now());
+      case 'recent':
+        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) < Date.now());
+      default:
+        return [];
     }
   };
   const handleFilterChange = useCallback((field, value) => {
@@ -189,6 +199,12 @@ const WorkforceEvents = () => {
     return cap ? Math.max(cap - reg, 0) : 0;
   };
 
+  const scrollToId = (id) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+};
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -238,13 +254,13 @@ const WorkforceEvents = () => {
           </div>
           <nav className="flex gap-2" aria-label="Tabs">
               {[
-                { key: 'all', label: 'Ongoing Events' },
-                { key: 'active', label: 'Upcoming Events' },
-                { key: 'interviews', label: 'Recent Events' },
+                { key: 'ongoing', label: 'Ongoing Events' },
+                { key: 'upcoming', label: 'Upcoming Events' },
+                { key: 'recent', label: 'Recent Events' },
               ].map((tab) => ( 
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => { setActiveTab(tab.key); scrollToId(tab.key); }}
                   className={`${
                     activeTab === tab.key
                       ? 'border-transparent bg-[#FFDB76]'
@@ -252,9 +268,9 @@ const WorkforceEvents = () => {
                   } whitespace-nowrap p-2 border-2 rounded-full font-medium text-sm flex items-center`}
                 >
                   {tab.label}
-                  {/* <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                  <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
                     {getTabCount(tab.key)}
-                  </span> */}
+                  </span>
                 </button>
               ))}
             </nav>
@@ -262,19 +278,41 @@ const WorkforceEvents = () => {
       </div>
 
       <div className="lg:bg-white">
-        {/* Search and Filters */}
-        <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={filteredEvents} />
-
-        {/* Events Grid */}
-        <div className='px-2'>
-              <h4 className='font-medium text-3xl mb-4'>Upcoming Events</h4>
-        <UpcomingEvents filteredEvents={filteredEvents} />
+        {/* Ongoing Events */}
+        <div className='px-2' id='ongoing'>
+          <span className="flex h-fit gap-2 ">
+            <h3 className='text-2xl font-medium  '>Ongoing Events</h3>
+            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+              {getTabCount('ongoing')}
+            </span>
+          </span>
+        {getEventSchedule('ongoing').length === 0 ? <p className='mb-8'>No ongoing events</p> :
+        <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={getEventSchedule('ongoing')} />
+        }
         </div>
 
         {/* Events Grid */}
-        <div className='px-2 py-6'>
-              <h4 className='font-medium text-3xl mb-4'>Recent Events</h4>
-        <UpcomingEvents filteredEvents={filteredEvents} />
+        <div className='px-2' id='upcoming'>
+          <span className="flex h-fit gap-2">
+              <h4 className='font-medium text-3xl mb-4'>Upcoming Events</h4>
+              <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                    {getTabCount('upcoming')}
+              </span>
+          </span>
+              {getEventSchedule('upcoming').length === 0 ? <p className='mb-8'>No upcoming events</p> :
+        <UpcomingEvents filteredEvents={getEventSchedule('upcoming')} />}
+        </div>
+
+        {/* Events Grid */}
+        <div className='px-2 py-6' id='recent'>
+          <span className="flex ">
+            <h4 className='font-medium text-3xl mb-4'>Recent Events</h4>
+            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+              {getTabCount('recent')}
+            </span>
+          </span>
+              {getEventSchedule('recent').length === 0 ? <p className='mb-8'>No recent events</p> :
+        <UpcomingEvents filteredEvents={getEventSchedule('recent')} />}
         </div>
 
         {/* Empty State */}

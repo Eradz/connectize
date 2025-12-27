@@ -19,7 +19,7 @@ const UpcomingEvents = ({filteredEvents}) => {
         if (start && end && now >= start && now <= end) return 'open';
         return 'past';
       };
-    
+    console.log(filteredEvents);
       const getStatusColor = (status) => {
         switch (status) {
           case 'upcoming': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400]  text-white';
