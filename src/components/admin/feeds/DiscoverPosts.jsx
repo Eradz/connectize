@@ -1,4 +1,4 @@
-import { MessageOutlined, ShareAltOutlined } from "@ant-design/icons";
+import {  } from "@ant-design/icons";
 import {
   Avatar,
   Button,
@@ -35,7 +35,7 @@ import FormatPostText from "../../FormatPostText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import MoreOptions from "../../MoreOptions";
 import LightParagraph from "../../ParagraphText";
-import PDFPreview from "../../PDFPreview";
+// import PDFPreview from "../../PDFPreview";
 import PostImageCollage from "../../PostImageCollage";
 import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
 import SEO from "../../SEO";
@@ -424,42 +424,76 @@ export const DiscoverPostItem = ({
         {/* Right side: Interaction stats */}
         <div className="flex items-center gap-4">
           <button
-            onClick={handleLikePost}
-            disabled={disabled}
-            className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 transition-colors disabled:cursor-not-allowed group"
-          >
-            {liked ? (
-              <Heart className="w-5 h-5 text-red-500" />
-            ) : (
-              <HeartIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            )}
-            <span className="text-sm font-medium">{formatNumber(likes)}</span>
-          </button>
+  onClick={handleLikePost}
+  disabled={disabled}
+  className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 transition-colors disabled:cursor-not-allowed group"
+>
+  <svg 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill={liked ? "currentColor" : "none"}
+    xmlns="http://www.w3.org/2000/svg"
+    className={`w-5 h-5 group-hover:scale-110 transition-transform ${liked ? 'text-red-500' : ''}`}
+  >
+    <path 
+      d="M4.31802 6.31802C2.56066 8.07538 2.56066 10.9246 4.31802 12.682L12.0001 20.364L19.682 12.682C21.4393 10.9246 21.4393 8.07538 19.682 6.31802C17.9246 4.56066 15.0754 4.56066 13.318 6.31802L12.0001 7.63609L10.682 6.31802C8.92462 4.56066 6.07538 4.56066 4.31802 6.31802Z" 
+      stroke={liked ? "none" : "currentColor"}
+      fill={liked ? "currentColor" : "none"}
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+  </svg>
+  <span className="text-sm font-medium">{formatNumber(likes)}</span>
+</button>
 
-          <button
-            onClick={() => onToggleComment(postItem.id)}
-            className="flex items-center gap-1.5 text-gray-600 hover:text-blue-500 transition-colors group"
-          >
-            <MessageOutlined className="text-lg group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium">{formatNumber(commentsLength)}</span>
-          </button>
+          <Link to={`/feed/posts/${postItem.id}`}>
+  <button className="flex items-center gap-1.5 text-gray-600 hover:text-blue-500 transition-colors group">
+    <svg 
+      width="18" 
+      height="17" 
+      viewBox="0 0 18 17" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      className="group-hover:scale-110 transition-transform"
+    >
+      <path 
+        d="M8.18848 0.5C12.7416 0.5 16.2975 4.43494 15.8379 8.96484L15.6299 11.0127L15.2568 13.2207L15.209 13.5068L15.4326 13.6904L16.8291 14.8379L11.1963 15.7627L8.72754 15.9258C4.27508 16.2183 0.5 12.6689 0.5 8.2041C0.500072 3.95667 3.94353 0.500028 8.18848 0.5Z" 
+        stroke="currentColor"
+      />
+    </svg>
+    <span className="text-sm font-medium">{formatNumber(commentsLength)}</span>
+  </button>
+</Link>
 
           <CustomShareButton
-            shareData={shareData}
-            url={shareUrlString}
-            modalTitle="Share post to"
-          >
-            <button className="flex items-center gap-1.5 text-gray-600 hover:text-green-500 transition-colors group">
-              <ShareAltOutlined className="text-lg group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium">{formatNumber(postItem?.shares || 20)}</span>
-            </button>
-          </CustomShareButton>
+  shareData={shareData}
+  url={shareUrlString}
+  modalTitle="Share post to"
+>
+  <button className="flex items-center gap-1.5 text-gray-600 hover:text-green-500 transition-colors group">
+    <svg 
+      width="20" 
+      height="20" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      className="group-hover:scale-110 transition-transform"
+    >
+      <path 
+        d="M15.2118 5.74645L3.29142 9.7199C2.8217 9.87743 2.412 10.176 2.11816 10.5749C1.82433 10.9738 1.66067 11.4536 1.6495 11.9489C1.63833 12.4442 1.78019 12.9309 2.05573 13.3426C2.33128 13.7544 2.72711 14.0711 3.18924 14.2496L7.59978 15.9355C7.70438 15.9783 7.79942 16.0415 7.87934 16.1214C7.95926 16.2013 8.02245 16.2964 8.06524 16.401L9.75112 20.8115C9.89496 21.1862 10.1302 21.5189 10.4353 21.7796C10.7405 22.0402 11.1059 22.2204 11.4985 22.3039C11.891 22.3874 12.2982 22.3714 12.683 22.2575C13.0678 22.1436 13.418 21.9353 13.7019 21.6516C13.965 21.3832 14.1648 21.0593 14.2865 20.7037L18.26 8.7833C18.4001 8.35961 18.4197 7.90533 18.3166 7.47115C18.2136 7.03697 17.9919 6.63995 17.6763 6.32441C17.3608 6.00886 16.9638 5.7872 16.5296 5.68414C16.0954 5.58109 15.6411 5.60069 15.2175 5.74077L15.2118 5.74645ZM16.733 8.27811L14.7463 14.2383L12.7596 20.1985C12.7053 20.3529 12.6052 20.4871 12.4725 20.583C12.3398 20.6789 12.181 20.732 12.0173 20.7351C11.8536 20.7382 11.6929 20.6911 11.5567 20.6003C11.4206 20.5095 11.3154 20.3791 11.2554 20.2268L9.5638 15.822C9.54065 15.7637 9.51412 15.7069 9.48433 15.6517L13.3953 11.7407C13.5459 11.5901 13.6305 11.386 13.6305 11.1731C13.6305 10.9601 13.5459 10.756 13.3953 10.6054C13.2448 10.4549 13.0406 10.3703 12.8277 10.3703C12.6148 10.3703 12.4106 10.4549 12.2601 10.6054L8.34906 14.5164C8.29389 14.4866 8.23703 14.4601 8.17876 14.437L3.77391 12.7454C3.62161 12.6854 3.4913 12.5802 3.40046 12.444C3.30962 12.3078 3.26259 12.1471 3.26568 11.9834C3.26877 11.8197 3.32183 11.6609 3.41774 11.5283C3.51365 11.3956 3.64783 11.2954 3.80229 11.2412L15.7226 7.26771C15.8633 7.22237 16.0137 7.21671 16.1573 7.25136C16.3009 7.28601 16.4322 7.35962 16.5367 7.46409C16.6411 7.56857 16.7147 7.69984 16.7494 7.84347C16.784 7.98709 16.7784 8.13749 16.733 8.27811Z" 
+        fill="currentColor"
+      />
+    </svg>
+    <span className="text-sm font-medium">{formatNumber(postItem?.shares || 20)}</span>
+  </button>
+</CustomShareButton>
 
-          <PDFPreview
+          {/* <PDFPreview
             postBody={postItem?.body}
             postTitle={postTitle}
             postImages={postItem.images}
-          />
+          /> */}
         </div>
       </div>
 
