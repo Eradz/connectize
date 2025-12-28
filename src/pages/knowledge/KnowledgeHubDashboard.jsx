@@ -171,9 +171,9 @@ const KnowledgeHubDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen ">
       {/* Header - Desktop */}
-      <div className="hidden md:block border-b border-gray-200">
+      <div className="hidden md:block ">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Knowledge Hub</h1>
           <p className="text-sm text-gray-500">
@@ -193,7 +193,7 @@ const KnowledgeHubDashboard = () => {
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-0">
         {/* Featured Articles - Desktop */}
         <div className="hidden md:block mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Article</h2>
@@ -367,20 +367,20 @@ const KnowledgeHubDashboard = () => {
           <h2 className="text-lg font-semibold text-[#1E1E1E]">Quick Action</h2>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button className="h-12 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
+            <Link to={webRoutes.knowledgeArticleCreate} className="h-9 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
               <WriteArticleIcon className="w-5 h-5" />
               Write Article
-            </button>
+            </Link>
 
-            <button className="h-12 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
+            <Link to={webRoutes.knowledgeForumCreate} className="h-9 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
               <StartDiscussionIcon className="w-5 h-5" />
               Start Discussion
-            </button>
+            </Link>
 
-            <button className="h-12 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
+            <Link to={webRoutes.knowledgeSearch} className="h-9 px-5 flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-sm text-[#1E1E1E] hover:bg-gray-50 transition">
               <Search className="w-5 h-5" />
               Advance Search
-            </button>
+            </Link>
           </div>
         </div>
 
