@@ -231,7 +231,7 @@ const KnowledgeForumDetail = () => {
           <p className="text-gray-600 mb-4">The forum you're looking for doesn't exist.</p>
           <Link 
             to={webRoutes.knowledgeForums}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center text-gold hover:text-blue-700"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Forums
@@ -249,9 +249,9 @@ const KnowledgeForumDetail = () => {
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-            <Link to={webRoutes.knowledgeHub} className="hover:text-blue-600">Knowledge Hub</Link>
+            <Link to={webRoutes.knowledgeHub} className="hover:text-gold">Knowledge Hub</Link>
             <ChevronRight className="w-4 h-4" />
-            <Link to={webRoutes.knowledgeForums} className="hover:text-blue-600">Forums</Link>
+            <Link to={webRoutes.knowledgeForums} className="hover:text-gold">Forums</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-gray-900">{forum.name}</span>
           </div>
@@ -299,7 +299,7 @@ const KnowledgeForumDetail = () => {
               {(forum.is_public || forum.is_member) && (
                 <Link
                   to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                  className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>New Topic</span>
@@ -339,7 +339,7 @@ const KnowledgeForumDetail = () => {
               </select>
               <button
                 onClick={handleSearch}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
               >
                 <Search className="w-4 h-4" />
                 <span>Search</span>
@@ -358,7 +358,7 @@ const KnowledgeForumDetail = () => {
               <form onSubmit={onInvite} className="p-6 space-y-3">
                 <input value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="Email address" className="w-full border rounded px-3 py-2" />
                 <textarea value={inviteMessage} onChange={e=>setInviteMessage(e.target.value)} placeholder="Optional message" className="w-full border rounded px-3 py-2" />
-                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Send Invite</button>
+                <button type="submit" className="bg-gold text-white px-4 py-2 rounded">Send Invite</button>
               </form>
               <div className="p-6 border-t">
                 <h4 className="font-medium mb-2">Pending Invites</h4>
@@ -437,7 +437,7 @@ const KnowledgeForumDetail = () => {
             </div>
           ) : topicsLoading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold mx-auto"></div>
               <p className="mt-2 text-gray-600">Loading topics...</p>
             </div>
           ) : topics.length === 0 ? (
@@ -448,7 +448,7 @@ const KnowledgeForumDetail = () => {
               {(forum.is_public || forum.is_member) && (
                 <Link
                   to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                  className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Start First Topic
@@ -462,7 +462,7 @@ const KnowledgeForumDetail = () => {
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-blue-600" />
+                        <User className="w-5 h-5 text-gold" />
                       </div>
                     </div>
                     
@@ -476,7 +476,7 @@ const KnowledgeForumDetail = () => {
                         )}
                         <Link
                           to={webRoutes.knowledgeForumTopicDetail?.replace(':slug', topic.slug) || '#'}
-                          className="text-lg font-semibold text-gray-900 hover:text-blue-600 line-clamp-2"
+                          className="text-lg font-semibold text-gray-900 hover:text-gold line-clamp-2"
                         >
                           {topic.title}
                         </Link>
@@ -542,7 +542,7 @@ const KnowledgeForumDetail = () => {
                           onClick={() => setCurrentPage(pageNum)}
                           className={`px-3 py-1 text-sm rounded ${
                             pageNum === currentPage
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-gold text-white'
                               : 'border border-gray-300 hover:bg-gray-100'
                           }`}
                         >

@@ -398,20 +398,20 @@ const KnowledgeHubDashboard = () => {
 
           {quickActionOpen && (
             <div className="absolute right-0 top-12 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-              <button className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <Link to={webRoutes.knowledgeArticleCreate} className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                 <WriteArticleIcon className="w-5 h-5" />
                 Write Article
-              </button>
+              </Link>
 
-              <button className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <Link to={webRoutes.knowledgeForumCreate} className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                 <StartDiscussionIcon className="w-5 h-5" />
                 Start Discussion
-              </button>
+              </Link>
 
-              <button className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+              <Link to={webRoutes.knowledgeSearch} className="w-full px-4 py-3 flex items-center gap-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                 <Search className="w-5 h-5" />
                 Advance Search
-              </button>
+              </Link>
             </div>
           )}
         </div>
