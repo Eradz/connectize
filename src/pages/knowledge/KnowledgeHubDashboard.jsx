@@ -16,6 +16,16 @@ import {
   X
 } from 'lucide-react';
 
+import { webRoutes } from '../../lib/webRoutes';
+import {
+  knowledgeArticleService,
+  knowledgeForumService,
+  knowledgeCategoryService,
+  knowledgeTagService
+} from '../../api-services/oilgas';
+import { toast } from 'sonner';
+import Scroll from '../../components/Scroll';
+
 // Custom SVG Icons
 const WriteArticleIcon = (props) => (
   <svg
@@ -67,15 +77,6 @@ const StartDiscussionIcon = (props) => (
     />
   </svg>
 );
-import { webRoutes } from '../../lib/webRoutes';
-import {
-  knowledgeArticleService,
-  knowledgeForumService,
-  knowledgeCategoryService,
-  knowledgeTagService
-} from '../../api-services/oilgas';
-import { toast } from 'sonner';
-
 const KnowledgeHubDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -193,16 +194,17 @@ const KnowledgeHubDashboard = () => {
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-0">
+      <div className="max-w-7xl bg-red-500 mx-auto px-4 md:px-6 py-4 md:py-0">
         {/* Featured Articles - Desktop */}
         <div className="hidden md:block mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Article</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {featuredArticles.slice(0, 2).map((article, index) => (
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Articles</h2>
+            <Scroll>
+              <div className='flex gap-2 min-w-min'>
+            {recentArticles.slice(0, 2).map((article, index) => (
               <Link
                 key={article.id || index}
                 to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                className="relative rounded-2xl overflow-hidden h-52 group"
+                className="relative rounded-2xl overflow-hidden h-52 group w-[500px]"
               >
                 <div
                   className="absolute inset-0 bg-cover bg-center"
@@ -277,7 +279,8 @@ const KnowledgeHubDashboard = () => {
                 </div>
               </Link>
             ))}
-          </div>
+              </div>
+            </Scroll>
         </div>
 
         {/* Featured Article - Mobile */}
