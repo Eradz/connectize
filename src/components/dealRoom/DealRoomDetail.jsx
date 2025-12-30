@@ -17,6 +17,7 @@ import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, Em
 import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
+import { DocumentIcon } from "../ui/ModernIcon";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -490,19 +491,19 @@ export default function DealRoomDetail() {
           </div>
           {/* Enhanced Quick Actions and Stats */}
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 md:w-[80%] gap-2">
-            <Link to={linkFor("documents")} onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <Link to={linkFor("documents")} onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Upload Document
-              <Plus className="h-4 w-4 ml-2" />
+              <DocumentIcon className="h-4 w-4 ml-2" />
             </Link>
-            <button onClick={() => setShowParticipantModal(true)} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <button onClick={() => setShowParticipantModal(true)} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Invite Participant
               <UserPlus className="h-4 w-4 ml-2" />
             </button>
-            <Link to={linkFor("milestones")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <Link to={linkFor("milestones")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Update Milestones
               <Settings className="h-4 w-4 ml-2" />
             </Link>
-            <Link to={linkFor("valuations")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
+            <Link to={linkFor("valuations")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Run Valuation
               <BarChart3 className="h-4 w-4 ml-2" />
             </Link>
@@ -513,7 +514,7 @@ export default function DealRoomDetail() {
                 key={t.key}
                 to={linkFor(t.key)}
                 className={`px-3 py-2 rounded-[100px] text-sm ${
-                  active === t.key ? "bg-gold text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  active === t.key ? "bg-gold text-white" : "border border-gray-200 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {t.label}
@@ -587,7 +588,7 @@ export default function DealRoomDetail() {
               )}
 
               {active === "overview" && (
-                <div className="space-y-6 bg-white p-4">
+                <div className="space-y-6 bg-white px-4 pt-4 pb-12">
                   <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
                   {/* Enhanced Deal Overview */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -667,18 +668,18 @@ export default function DealRoomDetail() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex gap-4 md:gap-0 md:flex-row flex-col justify-between">
 
                   {/* Deal Description */}
                   {deal?.description && (
-                    <div className="border border-[#D9D9D9] rounded-lg p-4 w-[48%]">
+                    <div className="border border-[#D9D9D9] rounded-lg p-4 md:w-[48%]">
                       <h4 className="text-sm font-medium text-gray-600 mb-2">Description</h4>
                       <p className="border-b border-[#D9D9D9]/30 text-gray-700">{deal.description}</p>
                     </div>
                   )}
 
                   {/* Security & Confidentiality */}
-                  <div className="border border-[#D9D9D9] rounded-lg p-4 w-[48%]">
+                  <div className="border border-[#D9D9D9] rounded-lg p-4 md:w-[48%]">
                     <h4 className="text-sm font-medium text-gray-600 mb-2">Security & Access</h4>
                     <div className="flex flex-wrap gap-2">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
