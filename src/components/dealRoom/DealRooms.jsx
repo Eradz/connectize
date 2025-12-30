@@ -36,10 +36,10 @@ const DealRooms = () => {
       };
       const response = await dealRoomService.getAll(1, 50, params);
       const rooms = response?.results || response?.data || response || [];
-      console.log("Params:", params);
-      console.log("Rooms:", rooms);
+      // console.log("Params:", params);
+      // console.log("Rooms:", rooms);
       setDealRooms(Array.isArray(rooms) ? rooms : []);
-      console.log("Deal Rooms:", dealRooms);
+      // console.log("Deal Rooms:", dealRooms);
     } catch (error) {
       console.error('Failed to load deal rooms:', error);
       setDealRooms([]);
@@ -88,58 +88,9 @@ const DealRooms = () => {
         <div className="space-y-6">
 
           {/* FILTERS & SEARCH - Mobile (UNCHANGED) */}
-          <div className="block lg:hidden space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search Deal Rooms"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={handleSearch}
-                  className="w-[209px] h-11 pl-12 pr-4 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#E5A800]"
-                />
-              </div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-[114px] h-11 px-4 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E5A800] appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:16px]"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="negotiating">Pending</option>
-                <option value="due_diligence">Due Diligence</option>
-                <option value="closing">Closing</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="w-[146px] h-11 px-4 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E5A800] appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:16px]"
-              >
-                <option value="all">All Types</option>
-                <option value="acquisition">Acquisition</option>
-                <option value="joint_venture">Joint Venture</option>
-                <option value="service_contract">Service Contract</option>
-                <option value="equipment_lease">Equipment Lease</option>
-                <option value="exploration_rights">Exploration Rights</option>
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-[175px] h-11 px-4 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E5A800] appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:16px]"
-              >
-                <option value="created_at">Newest First</option>
-                <option value="estimated_value">Highest Value</option>
-                <option value="target_close_date">Closing Soon</option>
-                <option value="title">Alphabetical</option>
-              </select>
-            </div>
-            <div className="flex justify-between bg-white border border-gray-300 rounded-xl overflow-hidden">
+          <div className="block lg:hidden space-y-2">
+            <div className="flex flex-wrap  items-center gap-3">
+              <div className="flex w-[52%] justify-between bg-white border border-gray-300 rounded-xl overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-6 py-3 flex items-center gap-2 font-medium text-sm ${viewMode === 'grid' ? 'text-[#E5A800]' : 'text-gray-600'}`}
@@ -156,6 +107,55 @@ const DealRooms = () => {
                 List
               </button>
             </div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-[44%] h-11 px-4 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E5A800] appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:16px]"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="negotiating">Pending</option>
+                <option value="due_diligence">Due Diligence</option>
+                <option value="closing">Closing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="w-[44%] h-11 px-4 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E5A800] appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:16px]"
+              >
+                <option value="all">All Types</option>
+                <option value="acquisition">Acquisition</option>
+                <option value="joint_venture">Joint Venture</option>
+                <option value="service_contract">Service Contract</option>
+                <option value="equipment_lease">Equipment Lease</option>
+                <option value="exploration_rights">Exploration Rights</option>
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-[52%] h-11 px-4 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E5A800] appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:16px]"
+              >
+                <option value="created_at">Newest First</option>
+                <option value="estimated_value">Highest Value</option>
+                <option value="target_close_date">Closing Soon</option>
+                <option value="title">Alphabetical</option>
+              </select>
+            </div>
+            <div className="relative w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search Deal Rooms"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleSearch}
+                  className="w-full h-11 pl-12 pr-4 bg-white border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#E5A800]"
+                />
+              </div>
           </div>
 
           {/* FILTERS & SEARCH - Desktop (UPDATED WITH MINIMALIST DROPDOWNS) */}
