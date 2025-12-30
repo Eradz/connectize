@@ -98,6 +98,7 @@ const StepContent = ({
   formData, 
   handleInputChange, 
   dealTypes, 
+  securityTypes,
   currencies,
   currentTag,
   addTag,
@@ -183,21 +184,21 @@ const StepContent = ({
   if (currentStep === 2) {
     return (
       <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Financials Details</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Financials Details</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Value</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <DollarSign className="h-5 w-5 text-gray-400" />
-              </div>
+              </div> */}
               <input
                 type="number"
                 value={formData.estimated_value}
                 onChange={(e) => handleInputChange('estimated_value', e.target.value)}
                 placeholder="0.00"
-                className="w-full pl-10 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none"
+                className="w-full  p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none"
               />
             </div>
           </div>
@@ -274,40 +275,29 @@ const StepContent = ({
         <h2 className="text-xl font-bold text-gray-900 mb-4">Security & Access</h2>
 
         {/* Tags Section */}
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-          <div className="md:col-span-2 space-y-3 pt-4">
-            <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={formData.is_confidential}
-                onChange={(e) => handleInputChange('is_confidential', e.target.checked)}
-                className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-500 border-gray-300"
-              />
-              <span className="ml-3 flex-1">
-                <span className="block text-sm font-medium text-gray-900">Confidential</span>
-                <span className="block text-xs text-gray-500">Mark as Confidential to restrict access and require And special permission</span>
-              </span>
-              <Lock className="w-4 h-4 text-gray-400" />
-            </label>
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {securityTypes.map((type) => (
+              <button
+                key={type.value}
+                onClick={() => handleInputChange(`${type.id}`, !formData[type.id])}
+                className={`relative
+                  text-left p-4 rounded-xl border transition-all duration-200 hover:shadow-sm h-full flex flex-col justify-between
+                  ${formData[type.id] 
+                    ? 'border-yellow-400 bg-yellow-50 ring-1 ring-yellow-400' 
+                    : 'border-gray-200 bg-white hover:border-gray-300'}
+                `}
+              >
+                <div className="font-semibold text-gray-900 mb-2">{type.label}</div>
+                <div className="text-xs text-gray-500 leading-relaxed">{type.description}</div>
 
-             <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-              <input
-                type="checkbox"
-                checked={formData.requires_nda}
-                onChange={(e) => handleInputChange('requires_nda', e.target.checked)}
-                className="w-4 h-4 text-yellow-500 rounded focus:ring-yellow-500 border-gray-300"
-              />
-              <span className="ml-3 flex-1">
-                <span className="block text-sm font-medium text-gray-900">Require NDA</span>
-                <span className="block text-xs text-gray-500">Require participants to sign an NDA Accessing documents</span>
-              </span>
-              <FileText className="w-4 h-4 text-gray-400" />
-            </label>
+                <div className='absolute top-4 right-4 border border-yellow-400 rounded-full p-[1px]'>
+                    <div className={`w-1 h-1 rounded-full ${formData[type.id] ? 'bg-yellow-400' : ''}`}/>
+                </div>
+              </button>
+            ))}
           </div>
-        </div>
-
         {/* Participants Section */}
-        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+        <div className="">
           <label className="block text-sm font-medium text-gray-700 mb-2">Invite Participants</label>
           <div className="flex flex-col md:flex-row gap-2 mb-3">
             <input
@@ -315,21 +305,23 @@ const StepContent = ({
               value={currentParticipant.email}
               onChange={(e) => setCurrentParticipant(prev => ({...prev, email: e.target.value}))}
               placeholder="colleague@example.com"
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none"
+              className="md:w-[80%] flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none"
             />
-            <select
-              value={currentParticipant.role}
-              onChange={(e) => setCurrentParticipant(prev => ({...prev, role: e.target.value}))}
-              className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none bg-white"
-            >
-              {participantRoles.map(role => <option key={role.value} value={role.value}>{role.label}</option>)}
-            </select>
-            <button 
-              onClick={addParticipant}
-              className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 whitespace-nowrap"
-            >
-              Invite
-            </button>
+            <div className='flex justify-between md:gap-2 w-full md:w-[30%]'>
+              <select
+                value={currentParticipant.role}
+                onChange={(e) => setCurrentParticipant(prev => ({...prev, role: e.target.value}))}
+                className="w-[80%] p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none bg-white"
+              >
+                {participantRoles.map(role => <option key={role.value} value={role.value}>{role.label}</option>)}
+              </select>
+              <div className='w-fit px-4 py-2 bg-gold hover:bg-gold/90'>
+                <Plus 
+                  onClick={addParticipant}
+                  className="w-6 h-6 "
+                />
+              </div>
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -456,7 +448,10 @@ const DealRoomCreate = () => {
     { value: 'exploration_rights', label: 'Exploration Rights', description: 'Purchase of rights for drilling' },
     { value: 'production_sharing', label: 'Production Sharing', description: 'Agreement to share production output' }
   ];
-
+  const securityTypes = [
+    { id: "is_confidential", value: 'confidential', label: 'Confidential', description: 'Mark as Confidential to restrict access and require special permission' },
+    { id: "requires_nda", value: 'nda', label: 'Require NDA', description: 'Require participants to sign an NDA before accessing documents' }
+  ];
   const participantRoles = [
     { value: 'admin', label: 'Administrator' },
     { value: 'editor', label: 'Editor' },
@@ -583,107 +578,181 @@ const DealRoomCreate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen">
       
       {/* Container */}
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-10">
+      <div className="px-4 md:px-8 py-4">
         
         {/* Header Section with Titles */}
-        <div className="mb-10">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center mb-1">
-                <ArrowLeft className="w-6 h-6 mr-3 text-gray-400 cursor-pointer hover:text-gray-700" onClick={() => navigate(webRoutes.dealRooms)} />
+        <div className="md:mb-10 mb-6">
+            <h1 className="flex flex-col md:flex-row text-3xl font-bold text-gray-900  md:items-center mb-1 gap-4 md:gap-0">
+                <ArrowLeft className="bg-white border border-gray-200 rounded-lg w-12 h-10 md:w-6 md:h-6 mr-3 text-gray-400 cursor-pointer hover:text-gray-700" onClick={() => navigate(webRoutes.dealRooms)} />
                 Create Deal Room
             </h1>
             <p className="text-gray-500">Set up a secure collaboration space for your deal</p>
         </div>
-        
-        <StepIndicator currentStep={currentStep} />
-        
-        <div className="min-h-[500px]">
-          <StepContent 
-              currentStep={currentStep} 
-              formData={formData} 
-              handleInputChange={handleInputChange} 
-              dealTypes={dealTypes} 
-              currencies={currencies} 
-              currentTag={currentTag} 
-              addTag={handleAddTagWrapper}
-              removeTag={removeTag}
-              currentParticipant={currentParticipant} 
-              setCurrentParticipant={setCurrentParticipant} 
-              participantRoles={participantRoles} 
-              addParticipant={addParticipant} 
-              removeParticipant={removeParticipant} 
-          />
-        </div>
-
-        {/* Navigation Footer - Mobile and Desktop Logic */}
-        <div className="flex justify-between items-center pt-12 mt-6">
-          
-          {/* LEFT SIDE: Previous (Desktop) / Cancel (Mobile) */}
-          <div className="flex items-center">
-            
-            {/* Previous Button (Visible only on Large screens and if not on step 1) */}
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className="hidden lg:flex items-center px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ 
-                backgroundColor: '#FFEF9A', 
-                color: '#000000'
-              }}
-            >
-              <ChevronLeft className="w-4 h-4 mr-2" /> Previous
-            </button>
-
-            {/* Cancel Button (Visible on Mobile) */}
-            <button
-              onClick={() => navigate(webRoutes.dealRooms)}
-              className="flex lg:hidden items-center px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
-            >
-              <X className="w-4 h-4 mr-2" /> Cancel
-            </button>
-
+        <div className='md:hidden'>
+          <StepIndicator currentStep={currentStep} />
+          </div>
+        <div className="bg-white py-12 px-8">
+          <div className='hidden md:block'>
+          <StepIndicator currentStep={currentStep} />
           </div>
           
-          
-
-          {/* RIGHT SIDE: Next / Create Button Group */}
-          <div className="flex items-center gap-4">
-
-            {/* Cancel Button (Visible only on Large screens) */}
-            <button
-              onClick={() => navigate(webRoutes.dealRooms)}
-              className="hidden lg:flex items-center px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
-            >
-              <X className="w-4 h-4 mr-2" /> Cancel
-            </button>
-            
-            {currentStep < 4 ? (
-              <button
-                onClick={nextStep}
-                className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all"
-              >
-                Next <ChevronRight className="w-4 h-4 ml-2" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all disabled:opacity-70"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
-                    Creating...
-                  </>
-                ) : (
-                  'Create Deal Room'
-                )}
-              </button>
-            )}
+          <div className="min-h-[500px] ">
+            <StepContent 
+                currentStep={currentStep} 
+                formData={formData} 
+                securityTypes={securityTypes}
+                handleInputChange={handleInputChange} 
+                dealTypes={dealTypes} 
+                currencies={currencies} 
+                currentTag={currentTag} 
+                addTag={handleAddTagWrapper}
+                removeTag={removeTag}
+                currentParticipant={currentParticipant} 
+                setCurrentParticipant={setCurrentParticipant} 
+                participantRoles={participantRoles} 
+                addParticipant={addParticipant} 
+                removeParticipant={removeParticipant} 
+            />
           </div>
+
+          {/* Navigation Footer - Mobile and Desktop Logic */}
+          <div className="hidden md:flex justify-between items-center pt-12 mt-6">
+            
+            {/* LEFT SIDE: Previous (Desktop) / Cancel (Mobile) */}
+            <div className="flex items-center">
+              
+              {/* Previous Button (Visible only on Large screens and if not on step 1) */}
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className="hidden lg:flex items-center px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: '#FFEF9A', 
+                  color: '#000000'
+                }}
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" /> Previous
+              </button>
+
+              {/* Cancel Button (Visible on Mobile) */}
+              <button
+                onClick={() => navigate(webRoutes.dealRooms)}
+                className="flex lg:hidden items-center px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+              >
+                <X className="w-4 h-4 mr-2" /> Cancel
+              </button>
+
+            </div>
+            
+            
+
+            {/* RIGHT SIDE: Next / Create Button Group */}
+            <div className="flex items-center gap-4">
+
+              {/* Cancel Button (Visible only on Large screens) */}
+              <button
+                onClick={() => navigate(webRoutes.dealRooms)}
+                className="hidden lg:flex items-center px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+              >
+                <X className="w-4 h-4 mr-2" /> Cancel
+              </button>
+              
+              {currentStep < 4 ? (
+                <button
+                  onClick={nextStep}
+                  className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all"
+                >
+                  Next <ChevronRight className="w-4 h-4 ml-2" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Deal Room'
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+
         </div>
+         <div className="md:hidden flex justify-between items-center mt-6">
+            
+            {/* LEFT SIDE: Previous (Desktop) / Cancel (Mobile) */}
+            <div className="flex items-center">
+              
+              {/* Previous Button (Visible only on Large screens and if not on step 1) */}
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className="hidden lg:flex items-center px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: '#FFEF9A', 
+                  color: '#000000'
+                }}
+              >
+                <ChevronLeft className="w-4 h-4 mr-2" /> Previous
+              </button>
+
+              {/* Cancel Button (Visible on Mobile) */}
+              <button
+                onClick={() => navigate(webRoutes.dealRooms)}
+                className="flex lg:hidden items-center px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+              >
+                <X className="w-4 h-4 mr-2" /> Cancel
+              </button>
+
+            </div>
+            
+            
+
+            {/* RIGHT SIDE: Next / Create Button Group */}
+            <div className="flex items-center gap-4">
+
+              {/* Cancel Button (Visible only on Large screens) */}
+              <button
+                onClick={() => navigate(webRoutes.dealRooms)}
+                className="hidden lg:flex items-center px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+              >
+                <X className="w-4 h-4 mr-2" /> Cancel
+              </button>
+              
+              {currentStep < 4 ? (
+                <button
+                  onClick={nextStep}
+                  className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all"
+                >
+                  Next <ChevronRight className="w-4 h-4 ml-2" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Deal Room'
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
       </div>
     </div>
   );
