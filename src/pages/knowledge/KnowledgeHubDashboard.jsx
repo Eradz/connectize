@@ -194,17 +194,17 @@ const KnowledgeHubDashboard = () => {
         </p>
       </div>
 
-      <div className="max-w-7xl bg-red-500 mx-auto px-4 md:px-6 py-4 md:py-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-0">
         {/* Featured Articles - Desktop */}
         <div className="hidden md:block mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Articles</h2>
             <Scroll>
               <div className='flex gap-2 min-w-min'>
-            {recentArticles.slice(0, 2).map((article, index) => (
+            {recentArticles.map((article, index) => (
               <Link
                 key={article.id || index}
                 to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                className="relative rounded-2xl overflow-hidden h-52 group w-[500px]"
+                className="relative rounded-2xl overflow-hidden h-52 group w-[950px]"
               >
                 <div
                   className="absolute inset-0 bg-cover bg-center"
@@ -285,11 +285,13 @@ const KnowledgeHubDashboard = () => {
 
         {/* Featured Article - Mobile */}
         <div className="md:hidden mb-6">
-          {featuredArticles.slice(0, 1).map((article, index) => (
+          <Scroll>
+           <div className='flex gap-2 min-w-min'>
+          {recentArticles.map((article, index) => (
             <Link
               key={article.id || index}
               to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-              className="relative rounded-2xl overflow-hidden block"
+              className="relative rounded-2xl overflow-hidden block w-[340px]"
               style={{ height: '280px' }}
             >
               <div
@@ -314,7 +316,7 @@ const KnowledgeHubDashboard = () => {
                   </span>
                 </div>
 
-                <div>
+                <div className='bg-red-500'>
                   <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
                     {article.title}
                   </h3>
@@ -363,6 +365,8 @@ const KnowledgeHubDashboard = () => {
               </div>
             </Link>
           ))}
+            </div> 
+          </Scroll>
         </div>
 
         {/* Quick Action - Desktop */}

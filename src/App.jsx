@@ -292,6 +292,7 @@ function App() {
           {/* Direct plan detail (plural form) route to match webRoutes.subscriptionPlanDetail */}
           <Route path="subscriptions/plans/:planId" element={<SubscriptionPlanDetail />} />
           
+          <Route path='ads' element={<FeaturedAdsPage />} />
           {/* Direct company routes (for URLs like /Connectize) - Must be last to avoid conflicts */}
           <Route path=":company" element={<CompanyProfile />} />
         </Route>
