@@ -352,40 +352,53 @@ const StepContent = ({
   if (currentStep === 4) {
     return (
       <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
-        <div className="text-center py-4">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+        <div className="md:py-4">
+          {/* <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
             <CheckCircle className="w-8 h-8" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900">Ready to Launch</h2>
-          <p className="text-gray-500">Review your deal room details before creating</p>
+          </div> */}
+          <h2 className="text-2xl font-bold text-gray-900">Review and confirm</h2>
+          <p className="text-gray-500">Please Kindly confirm this information</p>
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 space-y-4 text-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <span className="text-gray-500 block mb-1">Title</span>
+            <h2 className='text-gray-900'>Deal Information</h2>
+        <div className="">
+          <div className="grid grid-cols-1 gap-4 rounded-xl p-6 border border-gray-200 space-y-2 text-sm" >
+            <div className="flex flex-col gap-2 md:flex-row justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Title:</span>
               <span className="font-medium text-gray-900">{formData.title}</span>
             </div>
-            <div>
-              <span className="text-gray-500 block mb-1">Type</span>
+            <div className="flex flex-col gap-2 md:flex-row justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Type:</span>
               <span className="font-medium text-gray-900 capitalize">{formData.deal_type?.replace('_', ' ')}</span>
             </div>
-            <div>
-              <span className="text-gray-500 block mb-1">Est. Value</span>
+            <div className="flex flex-col gap-2 md:flex-row justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Estimated Value:</span>
               <span className="font-medium text-gray-900">{formData.currency} {formData.estimated_value}</span>
             </div>
-             <div>
-              <span className="text-gray-500 block mb-1">Target Date</span>
+             <div className="flex flex-col gap-2 md:flex-row justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Target Closed Date:</span>
               <span className="font-medium text-gray-900">{formData.target_close_date}</span>
+            </div>
+             <div className="flex flex-col gap-2 md:flex-row justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Security:</span>
+              <span className="font-medium text-gray-900">{formData.is_confidential ? 'Confidential' : 'Not Confidential'}</span>
+            </div>
+             <div className="flex flex-col gap-2 md:flex-row justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Location:</span>
+              <span className="font-medium text-gray-900">{formData.location}</span>
+            </div>
+             <div className="flex flex-col gap-2 md:flex-row md:hidden justify-between border-b border-gray-200">
+              <span className="text-gray-500 block mb-1">Description:</span>
+              <span className="font-medium text-gray-900">{formData.description}</span>
             </div>
           </div>
           
-          <div className="pt-4 border-t border-gray-200">
-             <span className="text-gray-500 block mb-2">Description</span>
+          <div className="hidden md:flex flex-col gap-2 pt-4">
+             <span className="text-gray-500 block mb-2">Description:</span>
              <p className="text-gray-800 leading-relaxed">{formData.description}</p>
           </div>
 
-          <div className="pt-4 border-t border-gray-200 flex gap-4">
+          {/* <div className="pt-4 border-t border-gray-200 flex gap-4">
             {formData.is_confidential && (
               <span className="flex items-center text-yellow-700 bg-yellow-100 px-2 py-1 rounded text-xs font-medium">
                 <Lock className="w-3 h-3 mr-1" /> Confidential
@@ -396,16 +409,16 @@ const StepContent = ({
                 <FileText className="w-3 h-3 mr-1" /> NDA Required
               </span>
             )}
-          </div>
+          </div> */}
           
-          <div className="pt-4 border-t border-gray-200">
+          {/* <div className="pt-4 border-t border-gray-200">
              <span className="text-gray-500 block mb-2">Participants ({formData.participants.length})</span>
              <div className="flex flex-wrap gap-2">
                 {formData.participants.map(p => (
                   <span key={p.email} className="bg-white px-3 py-1 rounded-full text-xs border border-gray-200">{p.email} ({p.role})</span>
                 ))}
               </div>
-          </div>
+          </div> */}
         </div>
       </div>
     );
@@ -594,7 +607,7 @@ const DealRoomCreate = () => {
         <div className='md:hidden'>
           <StepIndicator currentStep={currentStep} />
           </div>
-        <div className="bg-white py-12 px-8">
+        <div className="md:bg-white py-12 md:px-8">
           <div className='hidden md:block'>
           <StepIndicator currentStep={currentStep} />
           </div>
@@ -619,7 +632,7 @@ const DealRoomCreate = () => {
           </div>
 
           {/* Navigation Footer - Mobile and Desktop Logic */}
-          <div className="hidden md:flex justify-between items-center pt-12 mt-6">
+          <div className="hidden md:flex justify-between items-center pt-4 ">
             
             {/* LEFT SIDE: Previous (Desktop) / Cancel (Mobile) */}
             <div className="flex items-center">
