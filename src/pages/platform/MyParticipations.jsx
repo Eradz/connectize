@@ -5,6 +5,7 @@ import { dealRoomService } from '../../api-services/oilgas';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { EmptySearch } from '../../components/ui/EmptyStates';
 import { Search, Eye, Users, FileText, TrendingUp, Calendar, PlusIcon, UsersIcon, Users2Icon } from 'lucide-react';
+import BackArrowButton from '../../components/BackArrowButton';
 
 export default function MyParticipations() {
   const [loading, setLoading] = useState(true);
@@ -66,9 +67,10 @@ export default function MyParticipations() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="md:bg-white space-y-6 py-6 px-4">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row">
+        <BackArrowButton/>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Participants</h1>
           <p className="text-gray-600 mt-1">
@@ -132,43 +134,42 @@ export default function MyParticipations() {
           {filteredParticipations.map((deal) => (
             <div key={deal.id} className="bg-white hover:bg-gold/20 rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                <div className="flex-1 md:w-[65%] lg:w-[80%]">
+                  <div className="flex flex-col gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">
                       {deal.title || `Deal Room #${deal.id?.slice(0, 8)}`}
                     </h3>
-                  </div>
-                  
                   {deal.description && (
                     <p className="text-gray-600 mb-3 line-clamp-2">
                       {deal.description}
                     </p>
                   )}
+                  </div>
+                  
 
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
-                      <span>Created: {formatDate(deal.created_at)}</span>
+                      <span className='lg:flex hidden'>Created: </span>
+                      <span>{formatDate(deal.created_at)}</span>
                     </div>
-                    {deal.participants_count && (
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
-                        <span>{deal.participants_count} participants</span>
+                        <span className='lg:flex hidden'>Participants: </span>
+                        <span>{deal.participants_count ? deal.participants_count : 0}</span>
                       </div>
-                    )}
-                    {deal.documents_count && (
                       <div className="flex items-center gap-1">
                         <FileText className="h-4 w-4" />
-                        <span>{deal.documents_count} documents</span>
+                        <span className='lg:flex hidden'>Documents: </span>
+                        <span>{deal.documents_count ? deal.documents_count : 0}</span>
                       </div>
-                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 ml-4">
                   <Link
                     to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gold"
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gold/90 bg-gold"
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     View
