@@ -295,7 +295,7 @@ const WorkforceEvents = () => {
         <div className='px-2' id='upcoming'>
           <span className="flex h-fit gap-2">
               <h4 className='font-medium text-3xl mb-4'>Upcoming Events</h4>
-              <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+              <span className={`ml-1 h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
                     {getTabCount('upcoming')}
               </span>
           </span>
@@ -307,7 +307,7 @@ const WorkforceEvents = () => {
         <div className='px-2 py-6' id='recent'>
           <span className="flex ">
             <h4 className='font-medium text-3xl mb-4'>Recent Events</h4>
-            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+            <span className={`ml-1 h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
               {getTabCount('recent')}
             </span>
           </span>
