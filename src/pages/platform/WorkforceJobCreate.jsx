@@ -10,7 +10,7 @@ import { StepContent, StepIndicator } from '../../components/workforce/Workforce
 const WorkforceJobCreate = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams();
+  const { id : updateId } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
@@ -38,10 +38,6 @@ const WorkforceJobCreate = () => {
   const [currentSkill, setCurrentSkill] = useState('');
   const [currentQualification, setCurrentQualification] = useState('');
   const [currentBenefit, setCurrentBenefit] = useState('');
-console.log("current Skill:", currentSkill);
-  console.log("current Qualification:", currentQualification);
-  console.log("current Benefit:", currentBenefit);
-  console.log("skills required:", formData.required_skills_list);
   const employmentTypes = [
     { value: 'full_time', label: 'Full-time' },
     { value: 'part_time', label: 'Part-time' },
@@ -205,7 +201,7 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
         status: 'active'
       };
 
-      const response = currentPath.includes("update") ? await workforceAPI.updateJob(id, jobData) : await workforceAPI.createJob(jobData);
+      const response = currentPath.includes("update") ? await workforceAPI.updateJob(updateId, jobData) : await workforceAPI.createJob(jobData);
       const jobId = response?.data?.id || response?.id;
 
       toast.success('Job posted successfully!');
@@ -218,14 +214,13 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
     }
   };
 
-if(currentPath.includes("update") ? 'Update Job' : 'Publish Job') {
+if(currentPath.includes("update")) {
   // If we're in update mode, fetch the job details
-  const {id} = useParams();
   useEffect(() => {
     const fetchJobDetails = async () => {
       setLoading(true);
       try {
-        const response = await workforceAPI.getJob(id);
+        const response = await workforceAPI.getJob(updateId);
         setFormData(response.data);
       } catch (err) {
         const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to fetch job details';
@@ -235,7 +230,7 @@ if(currentPath.includes("update") ? 'Update Job' : 'Publish Job') {
       }
     };
     fetchJobDetails();
-  }, [id]);
+  }, [updateId]);
 }
 
   return (

@@ -118,7 +118,7 @@ const WorkforceMyPostedJobs = () => {
       <div className="">
         {/* Header */}
         <div className="my-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex md:flex-col sm:flex-row sm:items-center sm:justify-between">
             <div className='flex'>
               <BackArrowButton />
               <div>
@@ -133,8 +133,8 @@ const WorkforceMyPostedJobs = () => {
                 to={webRoutes.workforceJobCreate}
                 className="inline-flex items-center px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-gold transition-colors"
               >
-                <Plus className="w-5 h-5 mr-2" />
-                Post New Job
+                <Plus className="w-5 h-5 md:mr-2" />
+               <span className="hidden md:infline-flex text-sm">Post New Job</span>
               </Link>
             </div>
           </div>
