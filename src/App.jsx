@@ -241,6 +241,7 @@ function App() {
           {/* Workforce */}
           <Route path="jobs" element={<WorkforceJobs />} />
           <Route path="jobs/create" element={<WorkforceJobCreate />} />
+          <Route path="jobs/update/:id" element={<WorkforceJobCreate />} />
           <Route path="jobs/:id" element={<WorkforceJobDetail />} />
           <Route path="jobs/:id/apply" element={<WorkforceJobDetail />} />
           <Route path="jobs/my-posted" element={<WorkforceMyPostedJobs />} />

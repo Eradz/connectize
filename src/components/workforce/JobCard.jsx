@@ -88,10 +88,10 @@ return(
                 </div>
                 {
             myPostedJob ? 
-            <div className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
+            <Link to={`/jobs/update/${job.id}`} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
                 <Pencil className="w-5 h-5" />
                 <p className="text-sm">Edit</p>
-            </div>
+            </Link>
             :
           <button
             onClick={() => toggleSaveJob(job.id)}

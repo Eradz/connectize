@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react'; // X imported here
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
@@ -9,11 +9,13 @@ import { StepContent, StepIndicator } from '../../components/workforce/Workforce
 
 const WorkforceJobCreate = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [userCompanies, setUserCompanies] = useState([]);
-
+  const currentPath = location.pathname;
   const [formData, setFormData] = useState({
     title: '',
     company_id: '',
@@ -21,10 +23,10 @@ const WorkforceJobCreate = () => {
     employment_type: 'full_time',
     experience_level: 'mid',
     location: '',
-    qualifications: [],
+    education_requirements_list: [],
     responsibilities: '',
-    skills_required: [],
-    benefits: [],
+    required_skills_list: [],
+    benefits_list: [],
     salary_min: '',
     salary_max: '',
     currency: 'USD',
@@ -36,7 +38,10 @@ const WorkforceJobCreate = () => {
   const [currentSkill, setCurrentSkill] = useState('');
   const [currentQualification, setCurrentQualification] = useState('');
   const [currentBenefit, setCurrentBenefit] = useState('');
-
+console.log("current Skill:", currentSkill);
+  console.log("current Qualification:", currentQualification);
+  console.log("current Benefit:", currentBenefit);
+  console.log("skills required:", formData.required_skills_list);
   const employmentTypes = [
     { value: 'full_time', label: 'Full-time' },
     { value: 'part_time', label: 'Part-time' },
@@ -94,45 +99,62 @@ const WorkforceJobCreate = () => {
     setFormData(prev => ({ ...prev, [name]: checked }));
   }, []);
 
-  const addSkill = () => {
-    if (currentSkill.trim() && !formData.skills_required.includes(currentSkill.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        skills_required: [...prev.skills_required, currentSkill.trim()]
-      }));
-      setCurrentSkill('');
-    }
-  };
+ const addSkill = () => {
+  const trimmedSkill = currentSkill.trim();
+  if (!trimmedSkill) return;
+
+  setFormData(prev => {
+    // Ensure required_skills_list is always an array
+    const currentSkills = Array.isArray(prev.required_skills_list) ? prev.required_skills_list : [];
+
+    // Avoid duplicates
+    if (currentSkills.includes(trimmedSkill)) {
+      return prev; // no change needed
+    }
+
+    return {
+      ...prev,
+      required_skills_list: [...currentSkills, trimmedSkill]
+    };
+  });
+
+  setCurrentSkill('');
+};
 
   const removeSkill = (skill) => {
     setFormData(prev => ({
       ...prev,
-      skills_required: prev.skills_required.filter(s => s !== skill)
+      required_skills_list: prev.required_skills_list.filter(s => s !== skill)
     }));
   };
 
   const addQualification = () => {
-    if (currentQualification.trim() && !formData.qualifications.includes(currentQualification.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        qualifications: [...prev.qualifications, currentQualification.trim()]
-      }));
-      setCurrentQualification('');
-    }
-  };
+const qualification = currentQualification.trim();
+
+const qualificationArray = Array.isArray(formData.education_requirements_list) ? formData.education_requirements_list : [];
+
+if (qualification && !qualificationArray.includes(qualification)) {
+  setFormData(prev => ({
+    ...prev,
+    education_requirements_list: [...qualificationArray, qualification]
+  }));
+  setCurrentQualification('');
+}
+return toast.info('Qualification already added!');
+};
 
   const removeQualification = (q) => {
     setFormData(prev => ({
       ...prev,
-      qualifications: prev.qualifications.filter(item => item !== q)
+      education_requirements_list: prev.education_requirements_list.filter(item => item !== q)
     }));
   };
 
   const addBenefit = () => {
-    if (currentBenefit.trim() && !formData.benefits.includes(currentBenefit.trim())) {
+    if (currentBenefit.trim() && !formData.benefits_list.includes(currentBenefit.trim())) {
       setFormData(prev => ({
         ...prev,
-        benefits: [...prev.benefits, currentBenefit.trim()]
+        benefits_list: [...prev.benefits_list, currentBenefit.trim()]
       }));
       setCurrentBenefit('');
     }
@@ -141,7 +163,7 @@ const WorkforceJobCreate = () => {
   const removeBenefit = (b) => {
     setFormData(prev => ({
       ...prev,
-      benefits: prev.benefits.filter(item => item !== b)
+      benefits_list: prev.benefits_list.filter(item => item !== b)
     }));
   };
 
@@ -152,7 +174,8 @@ const WorkforceJobCreate = () => {
       if (!formData.company_id) return toast.error('Please select a company'), false;
       if (!formData.location.trim()) return toast.error('Location is required'), false;
     }
-    if (step === 2 && formData.skills_required.length === 0)
+const skills = Array.isArray(formData.required_skills_list) ? formData.required_skills_list : [];
+    if (step === 2 && skills.length === 0)
       return toast.error('Add at least one required skill'), false;
     return true;
   };
@@ -176,13 +199,13 @@ const WorkforceJobCreate = () => {
         salary_min: formData.salary_min ? parseFloat(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseFloat(formData.salary_max) : null,
         currency: formData.currency,
-        benefits_list: formData.benefits,
-        education_requirements_list: formData.qualifications,
+        benefits_list: formData.benefits_list,
+        education_requirements_list: formData.education_requirements_list,
         application_deadline: formData.application_deadline || null,
         status: 'active'
       };
 
-      const response = await workforceAPI.createJob(jobData);
+      const response = currentPath.includes("update") ? await workforceAPI.updateJob(id, jobData) : await workforceAPI.createJob(jobData);
       const jobId = response?.data?.id || response?.id;
 
       toast.success('Job posted successfully!');
@@ -194,6 +217,26 @@ const WorkforceJobCreate = () => {
       setLoading(false);
     }
   };
+
+if(currentPath.includes("update") ? 'Update Job' : 'Publish Job') {
+  // If we're in update mode, fetch the job details
+  const {id} = useParams();
+  useEffect(() => {
+    const fetchJobDetails = async () => {
+      setLoading(true);
+      try {
+        const response = await workforceAPI.getJob(id);
+        setFormData(response.data);
+      } catch (err) {
+        const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to fetch job details';
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobDetails();
+  }, [id]);
+}
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -208,7 +251,7 @@ const WorkforceJobCreate = () => {
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Post a Job</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{`${ currentPath.includes("update") ? 'Update Job' : 'Publish a Job'} a Job`}</h1>
               <p className="text-gray-600 mt-1">Find the best oil & gas professionals</p>
             </div>
           </div>
@@ -292,10 +335,10 @@ const WorkforceJobCreate = () => {
                                 {loading ? (
                                     <>
                                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Publishing... {/* Corrected text */}
+                                        {currentPath.includes("update") ? 'Updating...' : 'Publishing...'}
                                     </>
                                 ) : (
-                                    'Publish Job' // Corrected text
+                                     currentPath.includes("update") ? 'Update Job' : 'Publish Job'
                                 )}
                             </button>
                         )}
@@ -350,10 +393,10 @@ const WorkforceJobCreate = () => {
                                     {loading ? (
                                         <>
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                            Publishing... {/* Corrected text */}
+                                            {!currentPath.includes("update")  ? 'Updating...' : 'Publishing...'}
                                         </>
                                     ) : (
-                                        'Publish Job' // Corrected text
+                                         currentPath.includes("update") ? 'Update Job' : 'Publish Job'
                                     )}
                                 </button>
                             )}

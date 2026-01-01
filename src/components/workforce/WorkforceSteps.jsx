@@ -1,3 +1,5 @@
+import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
+
  export const StepIndicator = ({currentStep}) => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center">
@@ -192,7 +194,7 @@
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {formData.skills_required.map((skill) => (
+                      {formData.required_skills_list?.map((skill) => (
                         <span
                           key={skill}
                           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
@@ -232,7 +234,7 @@
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {formData.qualifications.map((qual) => (
+                      {formData.education_requirements_list?.map((qual) => (
                         <span
                           key={qual}
                           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -302,7 +304,7 @@
           return (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Compensation & Benefits</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Compensation & benefits_list</h3>
                 
                 <div className="space-y-4">
                   <div>
@@ -349,7 +351,7 @@
   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Benefits
+                      benefits_list
                     </label>
                     <div className="flex space-x-2 mb-2">
                       <input
@@ -369,7 +371,7 @@
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {formData.benefits.map((benefit) => (
+                      {formData.benefits_list?.map((benefit) => (
                         <span
                           key={benefit}
                           className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
@@ -490,11 +492,11 @@
                     </div>
                   )}
   
-                  {formData.skills_required.length > 0 && (
+                  {formData.required_skills_list.length > 0 && (
                     <div>
                       <span className="text-sm font-medium text-gray-600">Required Skills:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {formData.skills_required.map((skill) => (
+                        {formData.required_skills_list.map((skill) => (
                           <span
                             key={skill}
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
@@ -506,11 +508,11 @@
                     </div>
                   )}
   
-                  {formData.qualifications.length > 0 && (
+                  {formData.education_requirements_list.length > 0 && (
                     <div>
                       <span className="text-sm font-medium text-gray-600">Qualifications:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {formData.qualifications.map((qual) => (
+                        {formData.education_requirements_list.map((qual) => (
                           <span
                             key={qual}
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -522,11 +524,11 @@
                     </div>
                   )}
   
-                  {formData.benefits.length > 0 && (
+                  {formData.benefits_list.length > 0 && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Benefits:</span>
+                      <span className="text-sm font-medium text-gray-600">benefits_list:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {formData.benefits.map((benefit) => (
+                        {formData.benefits_list.map((benefit) => (
                           <span
                             key={benefit}
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"

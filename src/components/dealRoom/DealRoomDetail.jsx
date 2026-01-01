@@ -14,10 +14,11 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud, CalendarDays, LockOpen } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
+import RefreshButton from "../RefreshButton";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -70,6 +71,7 @@ export default function DealRoomDetail() {
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
+    setUploadSomeDocument(true);
   };
 
   const handleRemoveFile = () => {
@@ -102,6 +104,7 @@ export default function DealRoomDetail() {
   const [valuations, setValuations] = useState([]);
   const [participants, setParticipants] = useState([]);
   const [valuationCreate, setValuationCreate] = useState(false);
+  const [uploadSomeDocument, setUploadSomeDocument] = useState(false);
   
   // Track locally added items to preserve them during reloads
   const [locallyAddedParticipants, setLocallyAddedParticipants] = useState([]);
@@ -165,10 +168,10 @@ export default function DealRoomDetail() {
       });
       const list = res?.results || res?.data || res || [];
       setValuations(Array.isArray(list) ? list : []);
-      notify.success('Valuations refreshed');
+      notify.success(`${active} refreshed`);
     } catch (error) {
-      console.error('Error refreshing Valuations:', error);
-      notify.error('Failed to refresh Valuations');
+      console.error(`Error refreshing ${active}:`, error);
+      notify.error(`Failed to refresh ${active}`);
     } finally {
       setLoading(false);
     }
@@ -457,14 +460,14 @@ export default function DealRoomDetail() {
                     </div>
                 </div>
               {deal?.status && (
-                  <div className={`flex items-center mt-4 md:mt-2 md:px-2 md:py-1 justify-center text-xs font-semibold rounded-full w-6 h-5 md:w-fit md:h-fit  ${
+                  <div className={`flex items-center mt-4 md:mt-2 md:px-2 md:py-1 justify-center text-xs font-semibold rounded-full  md:w-fit md:h-fit  ${
                     deal.status === 'active' ? ' border border-green-500 md:bg-green-100 md:text-green-800' :
                     deal.status === 'pending' ? ' border border-yellow-500 md:bg-yellow-100 md:text-yellow-800' :
                     deal.status === 'closed' ? ' border border-gray-500 md:bg-gray-100 md:text-gray-800' :
                     deal.status === 'cancelled' ? ' border border-red-500 md:bg-red-100 md:text-red-800' :
                     ' border border-gray-500 md:bg-gray-100 md:text-gray-500'
                   }`}>
-                    <div className={`md:hidden inline w-3 h-3 rounded-full
+                    <div className={`md:hidden block m-[2px] w-3 h-3 rounded-full
                     ${
                     deal.status === 'active' ? ' bg-green-500' :
                     deal.status === 'pending' ? ' bg-yellow-500' :
@@ -558,7 +561,12 @@ export default function DealRoomDetail() {
             <div className="text-red-600">{error}</div>
           ) : (
             <div className="">
-              {(active !== "overview" && active !== "activities" && active !== "valuations") && <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>}
+              {(active !== "overview" && active !== "activities" && active !== "valuations") && 
+              <div className="flex justify-between">
+                <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
+                <RefreshButton refreshActivities={refreshActivities} active={active} loading={loading}/>
+              </div>
+              }
               {/* Search and Filter Bar */}
               {(active === "documents" || active === "participants"  || active === "milestones") && (
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -899,10 +907,189 @@ export default function DealRoomDetail() {
                   </form>
                     // <EmptyDocuments onUpload={() => document.querySelector('input[type="file"]')?.click()} />
                   ) : (
+                    
+                      uploadSomeDocument ?
+                    <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!newDocFile) {
+                        notify.error("Please select a file to upload");
+                        return;
+                      }
+                      try {
+                        setDocUploading(true);
+                        
+                        // First, ALWAYS try the real API call to save to database
+                        let apiSuccess = false;
+                        let apiDocument = null;
+                        
+                        const fd = new FormData();
+                        fd.append("title", newDocName || newDocFile.name);
+                        fd.append("document_type", newDocType);
+                        fd.append("file", newDocFile);
+                        fd.append("deal_room", id);
+                        
+                        try {
+                          console.log('Attempting to upload document to database...');
+                          const uploadResult = await dealDocumentService.uploadDocument(fd);
+                          apiDocument = uploadResult?.data || uploadResult;
+                          apiSuccess = true;
+                          console.log('✅ Successfully uploaded document to database:', apiDocument);
+                          notify.success("Document uploaded and saved to database");
+                          
+                          // Refresh document list from database
+                          try {
+                            const docs = await makeApiRequest({
+                              url: "api/v1/deals/documents/",
+                              method: "GET",
+                              params: { deal_room: id },
+                            });
+                            setDocuments(docs?.results || docs?.data || docs || []);
+                          } catch (refreshError) {
+                            console.warn('Failed to refresh document list:', refreshError);
+                          }
+                        } catch (apiError) {
+                          console.log('❌ Database upload failed:', apiError);
+                          notify.error((apiError?.status === 401 ? 'Authentication required. Please log in.' : 'Upload failed') + (apiError?.message ? `: ${apiError.message}` : ''));
+                          return; // Do not create temporary documents anymore
+                        }
+                        
+                        // Reset form regardless of success/failure
+                        setNewDocFile(null);
+                        setNewDocName("");
+                        setNewDocType("other");
+                        
+                      } catch (error) {
+                        console.error('Upload error:', error);
+                        notify.error("Upload failed: " + (error.message || "Unknown error"));
+                      } finally {
+                        setDocUploading(false);
+                      }
+                    }}
+                    className="flex flex-col gap-2 p-4 border rounded-lg bg-white"
+                  >
+                    <div className="text-[32px] font-medium text-gray-800">Upload Document</div>
+                    <div className="flex w-full justify-between">
+                      <div className="flex flex-col w-[75%]">
+                    <label htmlFor="document-title" className="font-medium">Document Title</label>
+                    <input
+                      id="document-title"
+                      type="text"
+                      value={newDocName}
+                      onChange={(e) => setNewDocName(e.target.value)}
+                      placeholder="Please enter the name of your document"
+                      className="border px-3 py-2 w-full rounded-lg"
+                    />
+                      </div>
+                      <div className="flex flex-col w-[22%]">
+                      <label htmlFor="document-type" className="font-medium">Type</label>
+                    <select
+                      id="document-type"
+                      value={newDocType}
+                      onChange={(e) => setNewDocType(e.target.value)}
+                      className="border px-3 py-2 w-full rounded-lg"
+                      title="Document type"
+                    >
+                      <option value="financial">Financial Statement</option>
+                      <option value="legal">Legal Document</option>
+                      <option value="technical">Technical Report</option>
+                      <option value="due_diligence">Due Diligence</option>
+                      <option value="contract">Contract</option>
+                      <option value="presentation">Presentation</option>
+                      <option value="other">Other</option>
+                    </select>
+                    </div>
+                    </div>
+                    <div>
+                    <label htmlFor="" className="font-medium">Upload Document</label>
+                      <div
+              className={`border-2 border-dashed rounded-lg text-center transition-colors mb-8
+                ${
+                dragActive 
+                  ? 'border-custom_yellow bg-blue-50' 
+                  : 'border-blue-400 bg-white'
+              }`
+              }
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Check file size (max 10MB)
+                            if (file.size > 10 * 1024 * 1024) {
+                              notify.error("File size must be less than 10MB");
+                              e.target.value = '';
+                              return;
+                            }
+                            setNewDocFile(file);
+                            // Auto-set document name if not provided
+                            if (!newDocName) {
+                              setNewDocName(file.name.replace(/\.[^/.]+$/, ""));
+                            }
+                          } else {
+                            setNewDocFile(null);
+                          }
+                        }}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+              />
+
+              {!newDocFile ? (
+                <div className="flex items-center justify-center p-3 gap-2">
+                  <CloudUpload className="w-6 h-6 text-gray-400" />
+                  <button
+                    onClick={handleButtonClick}
+                    className="hover:text-gold font-medium text-gray-400"
+                  >
+                    Choose or upload from local storage
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-3">
+                  <File className="w-8 h-8 text-pale_yellow" />
+                  <span className="text-gray-700 font-medium">{newDocFile.name}</span>
+                  <span className="text-gray-500 text-sm">
+                    ({(newDocFile.size / 1024).toFixed(2)} KB)
+                  </span>
+                  <button
+                    onClick={handleRemoveFile}
+                    className="ml-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
+              )}
+                      </div>
+                    </div>
+                    {newDocFile && (
+                      <div className="text-sm text-gray-600 flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        <span>{newDocFile.name}</span>
+                        <span>({(newDocFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+
+                    <button disabled={docUploading} className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-gold/80 disabled:opacity-60">
+                      {docUploading ? "Uploading..." : "Upload"}
+                    </button>
+                    <button disabled={docUploading} onClick={()=> setUploadSomeDocument(false)} className="self-start bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500 disabled:opacity-60">
+                      Cancel
+                    </button>
+                    </div>
+                  </form>
+                  :
+
                     <div className="space-y-2">
                       <div className="flex justify-between md:justify-start items-center gap-4">
                       <h1 className="text-xl md:text-3xl font-medium">All Documents</h1>
-                    <span onClick={handleButtonClick} className="bg-pale_yellow flex px-3 py-2 rounded-lg">
+                    <span onClick={handleButtonClick} className="bg-pale_yellow flex px-3 py-2 rounded-lg cursor-pointer hover:animate-bounce">
                       <UploadCloud className="mr-2"/>
                       <p className="hidden md:flex">Upload New Document</p>
                     </span>
@@ -929,60 +1116,77 @@ export default function DealRoomDetail() {
                           
                           return (
                             <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
-                              <div className="flex items-center space-x-3">
-                                <div>
+                              <div className="flex w-full items-center space-x-3">
+                                <div className="flex flex-col  w-full">
                                   <div className="font-medium text-gray-900" title={label}>{label}</div>
-                                  {href ? (
-                                  <button 
-                                    onClick={handleDocumentOpen}
-                                    className="inline-flex items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    Open
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={async () => {
-                                      try {
-                                        const auth = await getAuthorizationHeader();
-                                        const res = await axios.get(`${baseURL}/api/v1/deals/documents/${d.id}/download/`, {
-                                          headers: auth || {},
-                                          responseType: "blob",
-                                        });
-                                        const blob = new Blob([res.data]);
-                                        const url = window.URL.createObjectURL(blob);
-                                        const a = document.createElement("a");
-                                        a.href = url;
-                                        a.download = label.replace(/\s+/g, "_");
-                                        a.click();
-                                        window.URL.revokeObjectURL(url);
-                                        notify.success("Download started");
-                                      } catch (e) {
-                                        notify.error("Download failed: " + (e.response?.status === 401 ? "Authentication required" : "Unknown error"));
-                                      }
-                                    }}
-                                    className="inline-flex items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
-                                  >
-                                    <Download className="h-4 w-4 mr-1" />
-                                    Download
-                                  </button>
-                                )}
-                                {!d.access_granted && (
-                                  <button
-                                    onClick={async () => {
-                                      const justification = window.prompt("Justification for access request", "Due diligence");
-                                      if (justification == null) return;
-                                      await dealDocumentService.requestAccess(d.id, justification);
-                                      notify.success("Access requested");
-                                    }}
-                                    className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
-                                  >
-                                    Request Access
-                                  </button>
-                                )}
+                                      <div className="flex flex-row-reverse mb-3 justify-between md:hidden  gap-6 items-center space-x-2">
+                                          <span className={`px-2 py-1 text-xs rounded-full ${
+                                            d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                          }`}>
+                                            {d.access_granted !== false ? 'Accessible' : 'Restricted'}
+                                          </span>
+                                          <div className="text-sm text-gray-500">
+                                              {d.uploaded_at &&<span className="flex items-center">
+                                                <CalendarDays className="h-4 w-4"/>
+                                                <span className="ml-1">{new Date(d.uploaded_at).toLocaleDateString()}</span>
+                                              </span> }
+                                              {d._isTemporary && ' • Temporary (not saved to database)'}
+                                            </div>
+                                      </div>
+                                      <div className="flex w-full md:w-[50%] mt-1">
+                                          {href ? (
+                                          <button 
+                                            onClick={handleDocumentOpen}
+                                            className="w-[50%] md:w-[40%] inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
+                                          >
+                                            <Eye className="h-4 w-4 mr-1" />
+                                            Open
+                                          </button>
+                                        ) : (
+                                          <button
+                                            onClick={async () => {
+                                              try {
+                                                const auth = await getAuthorizationHeader();
+                                                const res = await axios.get(`${baseURL}/api/v1/deals/documents/${d.id}/download/`, {
+                                                  headers: auth || {},
+                                                  responseType: "blob",
+                                                });
+                                                const blob = new Blob([res.data]);
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement("a");
+                                                a.href = url;
+                                                a.download = label.replace(/\s+/g, "_");
+                                                a.click();
+                                                window.URL.revokeObjectURL(url);
+                                                notify.success("Download started");
+                                              } catch (e) {
+                                                notify.error("Download failed: " + (e.response?.status === 401 ? "Authentication required" : "Unknown error"));
+                                              }
+                                            }}
+                                            className="inline-flex w-[50%] md:w-[40%] items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
+                                          >
+                                            <Download className="h-4 w-4 mr-1" />
+                                            Download
+                                          </button>
+                                        )}
+                                        {!d.access_granted && (
+                                          <button
+                                            onClick={async () => {
+                                              const justification = window.prompt("Justification for access request", "Due diligence");
+                                              if (justification == null) return;
+                                              await dealDocumentService.requestAccess(d.id, justification);
+                                              notify.success("Access requested");
+                                            }}
+                                            className="inline-flex w-[50%] md:w-[60%] px-3 py-1.5 rounded border text-sm bg-pale_yellow hover:bg-custom_yellow"
+                                          >
+                                            <LockOpen className="h-4 w-4 mr-1" />
+                                            Request Access
+                                          </button>
+                                        )}
+                                      </div>
                                 </div>
                               </div>  
-                              <div className="flex flex-col gap-6 items-center space-x-2">
+                              <div className="hidden md:flex flex-col gap-6 items-center space-x-2">
                                 <span className={`px-2 py-1 text-xs rounded-full ${
                                   d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                 }`}>
@@ -990,7 +1194,10 @@ export default function DealRoomDetail() {
                                 </span>
                                  <div className="text-sm text-gray-500">
                   {/* {d.file_size && `${(d.file_size / 1024 / 1024).toFixed(2)}MB`} •  */}
-                                    {d.uploaded_at && new Date(d.uploaded_at).toLocaleDateString()}
+                                    {d.uploaded_at &&<span className="flex items-center">
+                                      <CalendarDays className="h-4 w-4"/>
+                                      <span className="ml-1">{new Date(d.uploaded_at).toLocaleDateString()}</span>
+                                    </span> }
                                     {d._isTemporary && ' • Temporary (not saved to database)'}
                                   </div>
                               </div>
@@ -1001,6 +1208,7 @@ export default function DealRoomDetail() {
                         <EmptySearch searchTerm={searchTerm} />
                       )}
                     </div>
+                    
                   )}
                 </div>
               )}

@@ -316,7 +316,7 @@ const KnowledgeHubDashboard = () => {
                   </span>
                 </div>
 
-                <div className='bg-red-500'>
+                <div className=''>
                   <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
                     {article.title}
                   </h3>

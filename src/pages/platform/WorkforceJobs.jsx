@@ -3,20 +3,10 @@ import { Link } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
-  DollarSign,
-  Clock,
-  Users,
-  Building,
   Star,
-  Bookmark,
-  BookmarkCheck,
-  Eye,
-  ExternalLink,
   Briefcase,
   TrendingUp,
   LucideChartNoAxesCombined,
-  ClockFading, 
-  MapPin
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { BriefCaseIcon } from '../../icon';
