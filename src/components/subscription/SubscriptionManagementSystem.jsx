@@ -35,13 +35,9 @@ import {
   Download
 } from 'lucide-react';
 import { subscriptionsAPI } from '../../api-services/subscriptions';
-import Scroll from '../Scroll';
+import Scroll from '../Scroll';  
 
-
-
-  
   // State management
-
 const SubscriptionManagementSystem = () => {
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [availablePlans, setAvailablePlans] = useState([]);
@@ -106,8 +102,8 @@ const SubscriptionManagementSystem = () => {
       ]);
 
       const safeExtract = (result, defaultValue = null) => {
-        if (result.status === 'fulfilled' && result.value?.data) {
-          return result.value.data;
+        if (result.status === 'fulfilled' && (result.value?.data || result.value)) {
+          return result.value.data || result.value;
           
         }
         return defaultValue;
@@ -127,7 +123,6 @@ const SubscriptionManagementSystem = () => {
       setUsage(usageData?.usage || usageData);
       setAnalytics(analyticsData);
       setBillingHistory(billingData?.results || billingData || []);
-
       // Handle subscription data structure from /api/v1/subscriptions/current/
 
       const subscription = subscriptionData?.subscription || subscriptionData;
@@ -266,7 +261,7 @@ const SubscriptionManagementSystem = () => {
               backgroundColor: 'transparent'
             }}
           >
-            {currentSubscription?.plan?.name || 'Professional Plan'}
+            {currentSubscription?.plan?.name || 'No Plan'}
           </button>
         </div>
 
@@ -279,7 +274,7 @@ const SubscriptionManagementSystem = () => {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className="flex items-center gap-2 pb-4 relative transition-colors"
                   style={{
                     color: activeTab === tab.id ? '#000000' : '#6B7280'
@@ -310,7 +305,7 @@ const SubscriptionManagementSystem = () => {
                   <TrendingUp className="w-6 h-6 text-gray-700" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  ${currentSubscription?.plan?.price || '99.99'}
+                  ${currentSubscription?.plan?.price || '0.00'}
                 </div>
                 <div className="text-sm text-gray-600">
                   Monthly Cost
@@ -366,7 +361,7 @@ const SubscriptionManagementSystem = () => {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Plan Name</p>
                     <p className="text-lg font-semibold text-gray-900">
-                      {currentSubscription?.plan?.name || 'Professional'}
+                      {currentSubscription?.plan?.name || 'None'}
                     </p>
                   </div>
                   <div>
@@ -387,7 +382,7 @@ const SubscriptionManagementSystem = () => {
                     <p className="text-lg font-semibold text-gray-900">
                       {currentSubscription?.current_period_end 
                         ? new Date(currentSubscription.current_period_end).toLocaleDateString('en-GB')
-                        : '23/09/2025'}
+                        : '23/09/2026'}
                     </p>
                   </div>
                 </div>
@@ -400,100 +395,100 @@ const SubscriptionManagementSystem = () => {
                   {/* API Calls */}
                   <div>
                     <p className="text-sm font-medium text-gray-900 mb-1">API Calls</p>
-                    <p className="text-xs text-gray-400 mb-2">1,250 / 25,000</p>
+                    <p className="text-xs text-gray-400 mb-2">{`${usage.api_calls_used || 0} / ${usage.api_calls_limit || 0}`}</p>
                     <div className="relative flex items-center gap-4">
                       <div className="flex-1 relative h-5 bg-gray-200 overflow-hidden">
                         <div 
                           className="absolute left-0 top-0 h-full transition-all duration-500 ease-out"
                           style={{ 
-                            width: '80%',
+                            width: `${(usage.api_calls_used / usage.api_calls_limit) * 100}%`,
                             backgroundColor: '#FCD34D'
                           }}
                         />
                         <div 
                           className="absolute top-0 bottom-0 w-0.5 transition-all duration-500"
                           style={{ 
-                            left: '80%',
+                            left: `${(usage.api_calls_used / usage.api_calls_limit) * 100}%`,
                             backgroundColor: '#000000'
                           }}
                         />
                       </div>
-                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">80%</span>
+                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">{`${Math.round((usage.api_calls_used / usage.api_calls_limit) * 100) || 0}%`}</span>
                     </div>
                   </div>
 
                   {/* Posts */}
                   <div>
                     <p className="text-sm font-medium text-gray-900 mb-1">Posts</p>
-                    <p className="text-xs text-gray-400 mb-2">15 / 200</p>
+                    <p className="text-xs text-gray-400 mb-2">{`${usage.posts_used || 0} / ${usage.posts_limit || 0}`}</p>
                     <div className="relative flex items-center gap-4">
                       <div className="flex-1 relative h-5 bg-gray-200 overflow-hidden">
                         <div 
                           className="absolute left-0 top-0 h-full transition-all duration-500 ease-out"
                           style={{ 
-                            width: '40%',
+                            width: `${(usage.posts_used / usage.posts_limit) * 100}%`,
                             backgroundColor: '#FCD34D'
                           }}
                         />
                         <div 
                           className="absolute top-0 bottom-0 w-0.5 transition-all duration-500"
                           style={{ 
-                            left: '40%',
+                            left: `${(usage.posts_used / usage.posts_limit) * 100}%`,
                             backgroundColor: '#000000'
                           }}
                         />
                       </div>
-                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">40%</span>
+                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">{`${Math.round((usage.posts_used / usage.posts_limit) * 100) || 0}%`}</span>
                     </div>
                   </div>
 
                   {/* Ad Spend */}
                   <div>
                     <p className="text-sm font-medium text-gray-900 mb-1">Ad Spend</p>
-                    <p className="text-xs text-gray-400 mb-2">230 / 1,000</p>
+                    <p className="text-xs text-gray-400 mb-2">{`${usage.ad_spend_used || 0} / ${usage.ad_spend_limit || 0}`}</p>
                     <div className="relative flex items-center gap-4">
                       <div className="flex-1 relative h-5 bg-gray-200 overflow-hidden">
                         <div 
                           className="absolute left-0 top-0 h-full transition-all duration-500 ease-out"
                           style={{ 
-                            width: '75%',
+                            width: `${(usage.ad_spend_used / usage.ad_spend_limit) * 100}%`,
                             backgroundColor: '#FCD34D'
                           }}
                         />
                         <div 
                           className="absolute top-0 bottom-0 w-0.5 transition-all duration-500"
                           style={{ 
-                            left: '75%',
+                            left: `${(usage.ad_spend_used / usage.ad_spend_limit) * 100}%`,
                             backgroundColor: '#000000'
                           }}
                         />
                       </div>
-                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">75%</span>
+                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">{`${Math.round((usage.ad_spend_used / usage.ad_spend_limit) * 100) || 0}%`}</span>
                     </div>
                   </div>
 
                   {/* Storage */}
                   <div>
                     <p className="text-sm font-medium text-gray-900 mb-1">Storage</p>
-                    <p className="text-xs text-gray-400 mb-2">75mb / 100GB</p>
+                    <p className="text-xs text-gray-400 mb-2">{`${usage.storage_used || 0}GB / ${usage.storage_limit || 0}GB`}</p>
                     <div className="relative flex items-center gap-4">
                       <div className="flex-1 relative h-5 bg-gray-200 overflow-hidden">
                         <div 
                           className="absolute left-0 top-0 h-full transition-all duration-500 ease-out"
                           style={{ 
-                            width: '60%',
+                            width: `${(usage.storage_used / usage.storage_limit) * 100}%`,
                             backgroundColor: '#FCD34D'
                           }}
                         />
                         <div 
                           className="absolute top-0 bottom-0 w-0.5 transition-all duration-500"
                           style={{ 
-                            left: '60%',
+                            left: `${(usage.storage_used / usage.storage_limit) * 100}%`,
                             backgroundColor: '#000000'
                           }}
                         />
                       </div>
-                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">60%</span>
+                      <span className="text-sm font-medium text-gray-600 min-w-[45px] text-right">{`${Math.round((usage.storage_used / usage.storage_limit) * 100) || 0}%`}</span>
                     </div>
                   </div>
                 </div>
@@ -512,7 +507,7 @@ const SubscriptionManagementSystem = () => {
                     <TrendingUp className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    8.8%
+                    {Math.round(analytics?.cost_optimization?.current_plan_utilization || 0)}%
                   </div>
                   <div className="text-sm text-gray-600">
                     Total Usage
@@ -530,7 +525,7 @@ const SubscriptionManagementSystem = () => {
                     <TrendingUp className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    Optimal
+                    {`Optimal`}
                   </div>
                   <div className="text-sm text-gray-600">
                     Usage Trend
