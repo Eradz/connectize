@@ -204,7 +204,7 @@ const KnowledgeHubDashboard = () => {
               <Link
                 key={article.id || index}
                 to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                className="relative rounded-2xl overflow-hidden h-52 group w-[950px]"
+                className="relative rounded-2xl overflow-hidden h-52 group md:w-[600px]"
               >
                 <div
                   className="absolute inset-0 bg-cover bg-center"
@@ -675,7 +675,7 @@ const KnowledgeHubDashboard = () => {
                     <Link
                       key={tag.id}
                       to={webRoutes.knowledgeTagDetail.replace(':slug', tag.slug)}
-                      className="inline-flex items-center px-3 py-1.5 rounded-full text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="capitalize inline-flex items-center px-3 py-1.5 rounded-full text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       <Tag className="w-3 h-3 mr-1" />
                       {tag.name}

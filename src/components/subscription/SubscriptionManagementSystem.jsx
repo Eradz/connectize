@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button';
 import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import Alert, { AlertDescription } from '@/components/ui/Alert';
 import Progress from '@/components/ui/Progress';
-import subscriptionsApi from '@/api-services/subscriptions';
+// import subscriptionsAPI from '@/api-services/subscriptions';
 import { getAuthorizationHeader } from '@/lib/helpers';
 import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
 import BillingManagement from './BillingManagement';
@@ -34,6 +34,8 @@ import {
   Eye,
   Download
 } from 'lucide-react';
+import { subscriptionsAPI } from '../../api-services/subscriptions';
+import Scroll from '../Scroll';
 
 
 
@@ -95,12 +97,12 @@ const SubscriptionManagementSystem = () => {
         analyticsResult,
         billingResult
       ] = await Promise.allSettled([
-        subscriptionsApi.getCurrentSubscription(),
-        subscriptionsApi.getPlans(),
-        subscriptionsApi.getAvailableFeatures(),
-        subscriptionsApi.getUsage(),
-        subscriptionsApi.getSubscriptionAnalytics(),
-        subscriptionsApi.getBillingHistory()
+        subscriptionsAPI.getCurrentSubscription(),
+        subscriptionsAPI.getPlans(),
+        subscriptionsAPI.getAvailableFeatures(),
+        subscriptionsAPI.getUsage(),
+        subscriptionsAPI.getSubscriptionAnalytics(),
+        subscriptionsAPI.getBillingHistory()
       ]);
 
       const safeExtract = (result, defaultValue = null) => {
@@ -186,7 +188,7 @@ const SubscriptionManagementSystem = () => {
         return;
       }
 
-      const response = await subscriptionsApi.upgradeSubscription(currentSubscription.id, {
+      const response = await subscriptionsAPI.upgradeSubscription(currentSubscription.id, {
         target_plan_id: planId
       });
 
@@ -264,13 +266,14 @@ const SubscriptionManagementSystem = () => {
               backgroundColor: 'transparent'
             }}
           >
-            {currentSubscription?.plan?.name || 'Professional'} Plan
+            {currentSubscription?.plan?.name || 'Professional Plan'}
           </button>
         </div>
 
         {/* Tabs */}
         <div className="mb-8">
-          <div className="flex gap-8 border-b-2 border-gray-200">
+            <Scroll>
+          <div className="flex gap-8 border-b-2 border-gray-200 min-w-min">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -294,6 +297,7 @@ const SubscriptionManagementSystem = () => {
               );
             })}
           </div>
+            </Scroll>
         </div>
 {/* Stats Cards - Only show on Dashboard */}
         {activeTab === 'dashboard' && (
