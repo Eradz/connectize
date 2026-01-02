@@ -1593,6 +1593,7 @@ export default function DealRoomDetail() {
                 if (apiParticipant && (apiParticipant.id || apiParticipant.user || apiParticipant.user_email)) {
                   apiSuccess = true;
                   console.log('✅ Successfully saved participant to database:', apiParticipant);
+                  
                   notify.success("Participant invited and saved to database");
                 } else {
                   throw new Error('Unexpected response when adding participant');

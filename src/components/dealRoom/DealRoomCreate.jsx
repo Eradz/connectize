@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft,  
   FileText, 
@@ -14,29 +15,9 @@ import {
   Users,
   Tag
 } from 'lucide-react';
-
-// Mock external dependencies for the standalone demo
-const toast = {
-  error: (msg) => alert(`Error: ${msg}`),
-  success: (msg) => alert(`Success: ${msg}`),
-  info: (msg) => alert(`Info: ${msg}`)
-};
-
-const webRoutes = {
-  dealRooms: '#',
-  dealRoomDetail: '/deals/:id'
-};
-
-// Mock API
-const dealRoomAPI = {
-  createDealRoom: async (payload) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ data: { id: '123' } });
-      }, 1000);
-    });
-  }
-};
+import dealRoomAPI from '../../api-services/dealRoom';
+import { toast } from 'sonner';
+import { webRoutes } from '../../lib/webRoutes';
 
 // --- Child Component: Step Indicator (FIXED VERSION) ---
 const StepIndicator = ({ currentStep }) => {
@@ -430,7 +411,7 @@ const StepContent = ({
 
 // --- Main Component ---
 const DealRoomCreate = () => {
-  const navigate = (path) => console.log(`Navigating to ${path}`); 
+  const navigate = useNavigate();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -581,10 +562,10 @@ const DealRoomCreate = () => {
 
       const response = await dealRoomAPI.createDealRoom(payload);
       toast.success('Deal room created successfully');
+      console.log('Deal room created:', response.data);
       navigate(webRoutes.dealRoomDetail.replace(':id', response.data.id));
     } catch (error) {
-      console.error('Error creating deal room:', error);
-      toast.error('Failed to create deal room.');
+      toast.error(error.message || 'Failed to create deal room.');
     } finally {
       setLoading(false);
     }
