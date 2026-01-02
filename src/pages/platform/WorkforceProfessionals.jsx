@@ -726,14 +726,15 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <button 
-                    onClick={() => handleConnectWithProfessional(professional.id)}
+                  <Link 
+                    to={`/messages/?room_name=room_${user?.id}_${professional.id}`}
+                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="w-[50%] flex items-center justify-center bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
                     title="Send connection request"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
