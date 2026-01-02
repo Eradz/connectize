@@ -1,4 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import Alert, { AlertDescription } from '@/components/ui/Alert';
+import Progress from '@/components/ui/Progress';
+import subscriptionsApi from '@/api-services/subscriptions';
+import { getAuthorizationHeader } from '@/lib/helpers';
+import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
+import BillingManagement from './BillingManagement';
+import UsageAnalytics from './UsageAnalytics';
+import PlanSelector from './PlanSelector';
+import PaymentMethodManager from './PaymentMethodManager';
 import {
   Crown,
   TrendingUp,
@@ -20,20 +34,6 @@ import {
   Eye,
   Download
 } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import Alert, { AlertDescription } from '@/components/ui/Alert';
-import Progress from '@/components/ui/Progress';
-import subscriptionsApi from '@/api-services/subscriptions';
-import { getAuthorizationHeader } from '@/lib/helpers';
-import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
-import BillingManagement from './BillingManagement';
-import UsageAnalytics from './UsageAnalytics';
-import PlanSelector from './PlanSelector';
-import PaymentMethodManager from './PaymentMethodManager';
 
 
 
