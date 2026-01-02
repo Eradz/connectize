@@ -1199,10 +1199,19 @@ const SubscriptionManagementSystem = () => {
             {/* Card 1 */}
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10">
-                  <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="10" cy="12" r="10" fill="#EB001B"/>
-                    <circle cx="22" cy="12" r="10" fill="#F79E1B"/>
+                <div className="flex items-center justify-center">
+                  <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clipPath="url(#clip0_1335_8445)">
+                      <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                      <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                      <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                      <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_1335_8445">
+                        <rect width="65" height="40" fill="white"/>
+                      </clipPath>
+                    </defs>
                   </svg>
                 </div>
                 <div>
@@ -1221,10 +1230,19 @@ const SubscriptionManagementSystem = () => {
             {/* Card 2 */}
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10">
-                  <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="10" cy="12" r="10" fill="#EB001B"/>
-                    <circle cx="22" cy="12" r="10" fill="#F79E1B"/>
+                <div className="flex items-center justify-center">
+                  <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clipPath="url(#clip0_card2)">
+                      <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                      <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                      <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                      <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_card2">
+                        <rect width="65" height="40" fill="white"/>
+                      </clipPath>
+                    </defs>
                   </svg>
                 </div>
                 <div>
@@ -1243,10 +1261,19 @@ const SubscriptionManagementSystem = () => {
             {/* Card 3 */}
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10">
-                  <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="10" cy="12" r="10" fill="#EB001B"/>
-                    <circle cx="22" cy="12" r="10" fill="#F79E1B"/>
+                <div className="flex items-center justify-center">
+                  <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clipPath="url(#clip0_card3)">
+                      <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                      <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                      <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                      <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_card3">
+                        <rect width="65" height="40" fill="white"/>
+                      </clipPath>
+                    </defs>
                   </svg>
                 </div>
                 <div>
@@ -1284,7 +1311,7 @@ const SubscriptionManagementSystem = () => {
                   </label>
                   <input
                     type="text"
-                    value=""
+                    value="Barry White"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -1294,7 +1321,7 @@ const SubscriptionManagementSystem = () => {
                   </label>
                   <input
                     type="text"
-                    value=""
+                    value="02 / 2026"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -1309,13 +1336,22 @@ const SubscriptionManagementSystem = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      value=""
+                      value="9226 9885 8877 2233"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <svg width="24" height="18" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="10" cy="12" r="10" fill="#EB001B"/>
-                        <circle cx="22" cy="12" r="10" fill="#F79E1B"/>
+                      <svg width="32" height="20" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clipPath="url(#clip0_input)">
+                          <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                          <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                          <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                          <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_input">
+                            <rect width="65" height="40" fill="white"/>
+                          </clipPath>
+                        </defs>
                       </svg>
                     </div>
                   </div>
@@ -1326,7 +1362,7 @@ const SubscriptionManagementSystem = () => {
                   </label>
                   <input
                     type="text"
-                    value=""
+                    value="***"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
