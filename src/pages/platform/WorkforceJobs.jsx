@@ -161,7 +161,7 @@ const WorkforceJobs = () => {
               >
                 <Plus className="w-4 h-4 mr-2" />
                  <span className="hidden md:flex">
-                 New deal room
+                 Create job
                  </span>
               </Link>
           </div>
