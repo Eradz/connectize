@@ -282,7 +282,6 @@ a {
         .tabs-container {
           position: sticky;
           top: 66px;
-          z-index: 99;
         }
 
         .tabs-wrapper {
