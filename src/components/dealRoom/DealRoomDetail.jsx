@@ -1580,7 +1580,7 @@ export default function DealRoomDetail() {
             }
             
             try {
-              const payload = { user: participantForm.userId, role: participantForm.role, permission_level: participantForm.permission_level };
+              const payload = { user: participantForm.userId, role: participantForm.role, permission_level: participantForm.permission_level,  deal_room: id };
               
               // First, ALWAYS try the real API call to save to database
               let apiSuccess = false;
