@@ -610,13 +610,14 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <button 
-                    onClick={() => handleConnectWithProfessional(professional.id)}
+                  <Link 
+                   to={`/messages/?room_name=room_${user?.id}_${professional.id}`}
+                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -714,9 +715,6 @@ const WorkforceProfessionals = () => {
                 </div>
 
                     </div>
-
-
-
                 {/* Actions */}
                 <div className="flex space-x-2 pt-3 border-t-2 border-[#00000033]/20 h-[15%]">
                   <Link
