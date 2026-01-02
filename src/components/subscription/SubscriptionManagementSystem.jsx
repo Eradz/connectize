@@ -1,4 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import Alert, { AlertDescription } from '@/components/ui/Alert';
+import Progress from '@/components/ui/Progress';
+import subscriptionsApi from '@/api-services/subscriptions';
+import { getAuthorizationHeader } from '@/lib/helpers';
+import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
+import BillingManagement from './BillingManagement';
+import UsageAnalytics from './UsageAnalytics';
+import PlanSelector from './PlanSelector';
+import PaymentMethodManager from './PaymentMethodManager';
 import {
   Crown,
   TrendingUp,
@@ -21,37 +35,7 @@ import {
   Download
 } from 'lucide-react';
 
-// Mock API - replace with your actual API
-const subscriptionsApi = {
-  getPlans: async () => ({ data: { results: [] } }),
-  getCurrentSubscription: async () => ({ 
-    data: { 
-      subscription: {
-        plan: { name: 'Professional', price: 99.99 },
-        status: 'active',
-        is_active: true
-      }
-    } 
-  }),
-  getUsage: async () => ({ data: null }),
-  getAvailableFeatures: async () => ({ 
-    data: { 
-      features_by_category: {
-        'Social Media': [{}, {}, {}, {}, {}],
-        'Analytics': [{}, {}, {}],
-        'AI Services': [{}, {}, {}, {}],
-        'Enterprise Tools': [{}, {}, {}],
-        'Team Management': [{}, {}, {}, {}, {}],
-        'Admin & Support': [{}, {}, {}, {}]
-      }
-    }
-  }),
-  getSubscriptionAnalytics: async () => ({ data: null }),
-  getBillingHistory: async () => ({ data: { results: [] } })
-};
 
-const loginForTesting = async () => {};
-const isTestAuthActive = () => true;
 
 const SubscriptionManagementSystem = () => {
   const [currentSubscription, setCurrentSubscription] = useState(null);
