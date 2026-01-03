@@ -6,6 +6,7 @@ import {
   dealMilestoneService,
   dealActivityService
 } from "../../api-services/oilgas";
+
 import { baseURL, getAuthorizationHeader, makeApiRequest } from "../../lib/helpers";
 import { dealDocumentService, dealValuationService } from "../../api-services/oilgas";
 import axios from "axios";
@@ -19,6 +20,8 @@ import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
+import dealRoomAPI from "../../api-services/dealRoom";
+import { useAuth } from "../../context/userContext";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -45,11 +48,9 @@ export default function DealRoomDetail() {
   const active = useMemo(() => currentSection(pathname), [pathname]);
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
+  const {user} = useAuth();
 
-
-  
-
-    const handleDrag = (e) => {
+  const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -105,7 +106,7 @@ export default function DealRoomDetail() {
   const [participants, setParticipants] = useState([]);
   const [valuationCreate, setValuationCreate] = useState(false);
   const [uploadSomeDocument, setUploadSomeDocument] = useState(false);
-  
+  // console.log("valuation Create:", valuationCreate);
   // Track locally added items to preserve them during reloads
   const [locallyAddedParticipants, setLocallyAddedParticipants] = useState([]);
   const [locallyAddedDocuments, setLocallyAddedDocuments] = useState([]);
@@ -120,20 +121,34 @@ export default function DealRoomDetail() {
   const [valuationBase, setValuationBase] = useState(0);
   const [valuationAdjusted, setValuationAdjusted] = useState(0);
   const [valuationCurrency, setValuationCurrency] = useState("USD");
+  const [valuationPreparedBy, setValuationPreparedBy] = useState("");
   const [actPage, setActPage] = useState(1);
   const pageSize = 10;
   
   // Modal states
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+  const [showCreateMilestoneModal, setShowCreateMilestoneModal] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState(null);
   // Milestone modal state: progress and optional notes
   const [milestoneForm, setMilestoneForm] = useState({ progress: 0, notes: "" });
+  const [createMilestoneForm, setCreateMilestoneForm] = useState({ 
+    deal_room: null,
+    title:"" ,
+    description: "" ,
+    status: null,
+    priority: null,
+    progress: null,
+    assigned_to: null,
+    created_by: null,
+    due_date: null
+  });
   // Participant form aligned with backend: role and permission_level choices
   const [participantForm, setParticipantForm] = useState({ userId: "", userDisplay: "", role: "observer", permission_level: "view" });
   const [userSearch, setUserSearch] = useState("");
   const [userResults, setUserResults] = useState([]);
   const [userSearching, setUserSearching] = useState(false);
+
   
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -326,7 +341,7 @@ export default function DealRoomDetail() {
         } else if (active === "activities") {
           try {
             const res = await makeApiRequest({
-              url: "api/v1/deals/activities/",
+              url: "api/activities/",
               method: "GET",
               params: { deal_room: id, page_size: 200 },
             });
@@ -936,7 +951,7 @@ export default function DealRoomDetail() {
                           apiSuccess = true;
                           console.log('✅ Successfully uploaded document to database:', apiDocument);
                           notify.success("Document uploaded and saved to database");
-                          
+                          await dealRoomAPI.createActivities(id, { activity_type: 'document_uploaded', description: `Document uploaded`, actor: user.id });
                           // Refresh document list from database
                           try {
                             const docs = await makeApiRequest({
@@ -1266,6 +1281,7 @@ export default function DealRoomDetail() {
                                     if (window.confirm('Remove this participant?')) {
                                       await dealRoomService.removeParticipant(id, p.id);
                                       setParticipants((prev) => prev.filter((x) => (x.id || x) !== p.id));
+                                      await dealRoomAPI.createActivities(id, { activity_type: 'participant_removed', description: `Participant removed`, actor: user.id, target_user: p.id });
                                       notify.success("Participant removed");
                                     }
                                   }}
@@ -1295,7 +1311,7 @@ export default function DealRoomDetail() {
               {active === "milestones" && (
                 <div className="space-y-3">
                   {milestones.length === 0 ? (
-                    <EmptyMilestones onCreate={() => notify.info("Milestone creation coming soon")} />
+                    <EmptyMilestones onCreate={() => setShowCreateMilestoneModal(true)} />
                   ) : (
                     milestones.map((m, i) => (
                       <div key={m.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
@@ -1404,11 +1420,11 @@ export default function DealRoomDetail() {
                               />
                             </div>
                           </div>
-                        </div>
-                         {valuations.length === 0 ? (
-                    <EmptyValuations onCreate={() => setValuationCreate(true)} />
-                  ) : ( 
-                    valuationCreate && 
+                  </div>
+                         {valuations.length === 0 && (
+                         <div>
+                   {!valuationCreate && <EmptyValuations onCreate={() => setValuationCreate(true)} />}
+                    {valuationCreate && 
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -1420,6 +1436,7 @@ export default function DealRoomDetail() {
                         currency: valuationCurrency,
                         assumptions: {},
                         notes: valuationNotes,
+                        prepared_by: participantForm.userId
                       };
                       await dealValuationService.createValuation(payload);
                       const res = await makeApiRequest({
@@ -1468,11 +1485,61 @@ export default function DealRoomDetail() {
                       placeholder="Notes/assumptions"
                       className="border rounded px-3 py-2 w-full"
                     />
-                    <button className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-custom_yellow">Create</button>
-                  </form>
+                    <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Prepared by
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={valuationPreparedBy || userSearch}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setValuationPreparedBy(v);
+                  setUserSearch(v);
+                }}
+                placeholder="Type a name or email..."
+                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                autoComplete="off"
+              />
+              {userSearch && (userResults?.length > 0 || userSearching) && (
+                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-auto">
+                  {userSearching && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
                   )}
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {valuations.length === 0 && <li>No valuations found.</li>}
+                  {userResults.map((u) => (
+                    <button
+                      type="button"
+                      key={u.id}
+                      onClick={() => {
+                        const label = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
+                        setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
+                        setUserSearch(label);
+                        setUserResults([]);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
+                    >
+                      <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
+                      <div className="text-xs text-gray-500">{u.email}</div>
+                    </button>
+                  ))}
+                  {!userSearching && userResults.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+                    <div className="flex justify-between w-full">
+                      <button type="submit" className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-custom_yellow">Create</button>
+                      <button type="button" onClick={() => setValuationCreate(false)} className="self-start border border-gray-300 px-4 py-2 rounded hover:bg-red-600">Cancel</button>
+                    </div>
+                  </form>}
+                </div>
+              )} 
+              {valuations.length > 0 && (
+                <ul className="list-disc pl-5 text-gray-700">
+                    {/* {valuations.length === 0 && <li>No valuations found.</li>} */}
                     {valuations.map((v, i) => (
                       <li key={v.id || i} className="flex items-center gap-2">
                         <span className="capitalize">{v.valuation_method || v.method || v.title || `Valuation ${i + 1}`}</span>
@@ -1490,6 +1557,7 @@ export default function DealRoomDetail() {
                       </li>
                     ))}
                   </ul>
+              )}
                 </div>
                   )}
             </div>
@@ -1563,6 +1631,169 @@ export default function DealRoomDetail() {
           </div>
         </form>
       </Modal>
+      {/* Milestone Create Modal */}
+      <Modal
+        isOpen={showCreateMilestoneModal}
+        onClose={() => setShowCreateMilestoneModal(false)}
+        title="Create Milestone"
+        size="2xl"
+      >
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const newMilestone = await dealMilestoneService.create({ ...milestoneForm, dealRoomId: id });
+              setMilestones(prev => [...prev, newMilestone]);
+              setShowCreateMilestoneModal(false);
+              notify.success("Milestone created successfully");
+            } catch (err) {
+              notify.error(err?.message || 'Failed to create milestone');
+            }
+          }}
+          className="space-y-1"
+        >
+          <div className="grid grid-cols-4 gap-4">
+              {/* Title */}
+              <div className="col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title:</label>
+                <input
+                  type="text"
+                  value={createMilestoneForm.title}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                />
+              </div>
+              {/* Status */}
+              <div className="col-span-1 w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
+                <select value={createMilestoneForm.status} onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, status: e.target.value }))}>
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <input
+                  type="text"
+                  value={createMilestoneForm.status}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full"
+                />
+              </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description:</label>
+                <textarea
+                  value={createMilestoneForm.description}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                  rows={3}
+                />
+              </div>  
+              {/* Completion Note */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Completion Notes (optional)</label>
+                <textarea
+                  value={milestoneForm.notes}
+                  onChange={(e) => setMilestoneForm(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Add notes about completion..."
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                  rows={3}
+                />
+              </div>
+          </div>
+           <div className="grid grid-cols-2 gap-4">
+                {/* Progress */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Progress: </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={createMilestoneForm.progress}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, progress: Number(e.target.value) }))}
+                  className="w-full"
+                />
+              </div>
+              {/* Priority */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Priority:</label>
+                <input
+                  type="text"
+                  value={createMilestoneForm.priority}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, priority: e.target.value }))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+         
+          {/* Assigned to */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Assigned to
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={participantForm.userDisplay || userSearch}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setParticipantForm(prev => ({ ...prev, userDisplay: v, userId: prev.userId && v === prev.userDisplay ? prev.userId : "" }));
+                  setUserSearch(v);
+                }}
+                placeholder="Type a name or email..."
+                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                autoComplete="off"
+              />
+              {userSearch && (userResults?.length > 0 || userSearching) && (
+                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-auto">
+                  {userSearching && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
+                  )}
+                  {userResults.map((u) => (
+                    <button
+                      type="button"
+                      key={u.id}
+                      onClick={() => {
+                        const label = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
+                        setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
+                        setUserSearch(label);
+                        setUserResults([]);
+                        setCreateMilestoneForm(prev => ({ ...prev, assigned_to: u.id }));
+                      }}
+                      className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
+                    >
+                      <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
+                      <div className="text-xs text-gray-500">{u.email}</div>
+                    </button>
+                  ))}
+                  {!userSearching && userResults.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={() => setShowCreateMilestoneModal(false)}
+              className="px-4 py-2 border rounded text-gray-700 hover:border border-[#D9D9D9]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-pale_yellow text-gray-900 rounded hover:bg-gold"
+            >
+              Create Milestone
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Participant Invite Modal */}
       <Modal
@@ -1593,7 +1824,7 @@ export default function DealRoomDetail() {
                 if (apiParticipant && (apiParticipant.id || apiParticipant.user || apiParticipant.user_email)) {
                   apiSuccess = true;
                   console.log('✅ Successfully saved participant to database:', apiParticipant);
-                  
+                  await dealRoomAPI.createActivities(id, { activity_type: 'participant_added', description: `New participant added to the deal`, actor: user.id, target_user: participantForm.userId });
                   notify.success("Participant invited and saved to database");
                 } else {
                   throw new Error('Unexpected response when adding participant');
@@ -1748,6 +1979,7 @@ export default function DealRoomDetail() {
           </div>
         </form>
       </Modal>
+
     </div>
   );
 }

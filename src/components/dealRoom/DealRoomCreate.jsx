@@ -562,7 +562,6 @@ const DealRoomCreate = () => {
 
       const response = await dealRoomAPI.createDealRoom(payload);
       toast.success('Deal room created successfully');
-      console.log('Deal room created:', response.data);
       navigate(webRoutes.dealRoomDetail.replace(':id', response.data.id));
     } catch (error) {
       toast.error(error.message || 'Failed to create deal room.');

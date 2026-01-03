@@ -1,7 +1,7 @@
 const webRoutes = {
   acceptRepresentation: "/co/representatives/accept",
   address: "/address",
-  aiDashboard: "/ai-services",
+  aiDashboard: "/ai",
   analysis: "/analysis",
   assignRepresentative: "/co/representatives/manage",
   bio: "/bio",

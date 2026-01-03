@@ -71,7 +71,7 @@ const ActivityCard = ({ activity, isExpanded, onToggle }) => {
       deal_closed: "border-yellow-200 bg-yellow-50",
       default: "border-gray-200 bg-gray-50"
     };
-    return priorityMap[activity.activity_type] || priorityMap.default;
+    return priorityMap[type.activity_type] || priorityMap.default;
   };
 
   return (
