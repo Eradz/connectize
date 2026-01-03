@@ -69,8 +69,23 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
+        // Forward all headers including Authorization
+        headers: {
+          Connection: 'keep-alive'
+        },
         // Forward CSP headers from Django to the frontend
         configure: (proxy, options) => {
+          // Log proxy requests for debugging
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Ensure Authorization header is forwarded
+            if (req.headers.authorization) {
+              proxyReq.setHeader('Authorization', req.headers.authorization);
+              console.log('[Vite Proxy] Forwarding Authorization header for:', req.url);
+            } else {
+              console.log('[Vite Proxy] No Authorization header for:', req.url);
+            }
+          });
+          
           proxy.on('proxyRes', (proxyRes, req, res) => {
             // Forward CSP headers from Django
             if (proxyRes.headers['content-security-policy']) {

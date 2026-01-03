@@ -1,23 +1,37 @@
 import { useState, useEffect, useCallback } from 'react';
 import { makeApiRequest } from '../lib/helpers';
+import { useAuth } from '../context/userContext';
 
 /**
  * Custom hook for searching users for @ mentions
  * Fetches and caches user list for autocomplete
+ * Only fetches when user is authenticated
  */
 export const useUserSearch = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user, loading: authLoading } = useAuth();
 
   const fetchUsers = useCallback(async () => {
+    // Debug logging
+    console.log('[useUserSearch] fetchUsers called, user:', user ? 'authenticated' : 'null', 'authLoading:', authLoading);
+    
+    // Don't fetch if auth is still loading or user is not authenticated
+    if (authLoading || !user) {
+      console.log('[useUserSearch] Skipping fetch - authLoading:', authLoading, 'user:', user ? 'exists' : 'null');
+      setUsers([]);
+      return;
+    }
+
+    console.log('[useUserSearch] User authenticated, fetching users...');
     setIsLoading(true);
     setError(null);
     
     try {
-      // Fetch paginated users
+      // Fetch paginated users - use relative URL without leading slash to go through baseURL
       const response = await makeApiRequest({
-        url: '/api/users/?page_size=100',
+        url: 'api/users/?page_size=100',
         method: 'GET',
       });
 
@@ -52,7 +66,7 @@ export const useUserSearch = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user, authLoading]);
 
   useEffect(() => {
     fetchUsers();

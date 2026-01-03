@@ -77,7 +77,12 @@ function Login() {
     },
   });
 
-  if (user) navigate(navigateTo);
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate(navigateTo);
+    }
+  }, [user, navigate, navigateTo]);
 
   useEffect(() => {
     formik.setValues(formValues);
