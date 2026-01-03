@@ -5,8 +5,11 @@ import { useState } from "react";
 import { workforceJobService } from "../../api-services/oilgas";
 
 
-export const JobCard = ({ job, myPostedJob,  setShowDeleteModal, setJobToDelete }) => {
-const [savedJobs, setSavedJobs] = useState(new Set());
+export const JobCard = ({ job, myPostedJob, setShowDeleteModal, setJobToDelete, savedJobs: propSavedJobs, onToggleSave }) => {
+  // Use prop savedJobs if provided, otherwise use local state for backwards compatibility
+  const [localSavedJobs, setLocalSavedJobs] = useState(new Set());
+  const savedJobs = propSavedJobs || localSavedJobs;
+  
   const getExperienceBadgeColor = (level) => {
     switch (level) {
       case 'entry': return 'bg-green-100 text-green-800';
@@ -43,14 +46,22 @@ const [savedJobs, setSavedJobs] = useState(new Set());
     try {
       if (savedJobs.has(jobId)) {
         await workforceJobService.unsaveJob(jobId);
-        setSavedJobs(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(jobId);
-          return newSet;
-        });
+        if (onToggleSave) {
+          onToggleSave(jobId, false);
+        } else {
+          setLocalSavedJobs(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(jobId);
+            return newSet;
+          });
+        }
       } else {
         await workforceJobService.saveJob(jobId);
-        setSavedJobs(prev => new Set(prev).add(jobId));
+        if (onToggleSave) {
+          onToggleSave(jobId, true);
+        } else {
+          setLocalSavedJobs(prev => new Set(prev).add(jobId));
+        }
       }
     } catch (error) {
       console.error('Failed to toggle job save:', error);

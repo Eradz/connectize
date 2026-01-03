@@ -409,6 +409,13 @@ export class WorkforceJobService extends CrudService {
     });
   }
 
+  async getSavedJobs() {
+    return makeApiRequest({
+      url: `${this.basePath}saved/`,
+      method: "GET",
+    });
+  }
+
   async getRecommendedJobs(profileId) {
     return makeApiRequest({
       url: `${this.basePath}recommended/`,

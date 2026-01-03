@@ -57,15 +57,11 @@ const DownloadButton = ({newDocFile, setNewDocFile}) => {
                               if (file) {
                                 // Check file size (max 10MB)
                                 if (file.size > 10 * 1024 * 1024) {
-                                  notify.error("File size must be less than 10MB");
+                                  alert("File size must be less than 10MB");
                                   e.target.value = '';
                                   return;
                                 }
                                 setNewDocFile(file);
-                                // Auto-set document name if not provided
-                                if (!newDocName) {
-                                  setNewDocName(file.name.replace(/\.[^/.]+$/, ""));
-                                }
                               } else {
                                 setNewDocFile(null);
                               }
@@ -78,6 +74,7 @@ const DownloadButton = ({newDocFile, setNewDocFile}) => {
                     <div className="flex items-center justify-center p-3 gap-2">
                       <CloudUpload className="w-6 h-6 text-gray-400" />
                       <button
+                        type="button"
                         onClick={handleButtonClick}
                         className="hover:text-blue-700 font-medium text-gray-400"
                       >
@@ -92,6 +89,7 @@ const DownloadButton = ({newDocFile, setNewDocFile}) => {
                         ({(newDocFile.size / 1024).toFixed(2)} KB)
                       </span>
                       <button
+                        type="button"
                         onClick={handleRemoveFile}
                         className="ml-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
                       >

@@ -39,7 +39,12 @@ export default function WorkforceJobDetail() {
       setError(null);
       try {
         const res = await workforceJobService.getById(id);
-        if (isMounted) setJob(res?.data || res);
+        const jobData = res?.data || res;
+        if (isMounted) {
+          setJob(jobData);
+          // Initialize saved state from API response
+          setSaved(jobData?.user_saved || false);
+        }
       } catch (e) {
         if (isMounted) setError(e?.response?.data?.detail || e?.message || "Failed to load job");
       } finally {
@@ -156,13 +161,15 @@ export default function WorkforceJobDetail() {
                           setSaved(true);
                           toast.success("Job saved");
                         }
-                      } catch (e) {}
+                      } catch (e) {
+                        toast.error("Failed to update saved status");
+                      }
                     }}
-                    className={`inline-flex absolute  top-4 right-4 items-center px-3 py-2 rounded-lg border text-sm transition-colors ${
-                      saved ? 'border-blue-300 bg-blue-50 text-blue-700' : 'hover:bg-gray-50'
+                    className={`inline-flex absolute top-4 right-4 items-center px-3 py-2 rounded-lg border text-sm transition-colors ${
+                      saved ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    {saved ? <Bookmark className="h-4 w-4 mr-2" /> : <BookmarkPlus className="h-4 w-4 mr-2" />}
+                    {saved ? <Bookmark className="h-4 w-4 mr-2 fill-current" /> : <BookmarkPlus className="h-4 w-4 mr-2" />}
                     {saved ? "Saved" : "Save Job"}
                   </button>
                 </div>

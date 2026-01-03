@@ -63,6 +63,7 @@ import EnterpriseApp from "./components/enterprise/EnterpriseApp";
 import WorkforceJobs from "./pages/platform/WorkforceJobs";
 import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
 import WorkforceMyPostedJobs from "./pages/platform/WorkforceMyPostedJobs";
+import WorkforceSavedJobs from "./pages/platform/WorkforceSavedJobs";
 import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
 import WorkforceProfessionals from "./pages/platform/WorkforceProfessionals";
 import WorkforceProfileCreate from "./pages/platform/WorkforceProfileCreate";
@@ -242,6 +243,7 @@ function App() {
           <Route path="jobs" element={<WorkforceJobs />} />
           <Route path="jobs/create" element={<WorkforceJobCreate />} />
           <Route path="jobs/update/:id" element={<WorkforceJobCreate />} />
+          <Route path="jobs/saved" element={<WorkforceSavedJobs />} />
           <Route path="jobs/:id" element={<WorkforceJobDetail />} />
           <Route path="jobs/:id/apply" element={<WorkforceJobDetail />} />
           <Route path="jobs/my-posted" element={<WorkforceMyPostedJobs />} />
@@ -316,6 +318,7 @@ function App() {
           <Route path={toRelativePath(webRoutes.workforceJobs)} element={<WorkforceJobs />} />
           <Route path={toRelativePath(webRoutes.workforceJobCreate)} element={<WorkforceJobCreate />} />
           <Route path={toRelativePath(webRoutes.workforceMyPostedJobs)} element={<WorkforceMyPostedJobs />} />
+          <Route path={toRelativePath(webRoutes.workforceSavedJobs)} element={<WorkforceSavedJobs />} />
           <Route path={toRelativePath(webRoutes.workforceJobDetail)} element={<WorkforceJobDetail />} />
           <Route path={toRelativePath(webRoutes.workforceJobApply)} element={<WorkforceJobDetail />} />
           <Route path={toRelativePath(webRoutes.workforceProfiles)} element={<WorkforceProfessionals />} />
