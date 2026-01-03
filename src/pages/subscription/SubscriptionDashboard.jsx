@@ -2,17 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown } from 'lucide-react';
 
-// Mock API for demo purposes
-const subscriptionsApi = {
-  getPlans: async () => ({ data: { results: [] } }),
-  getCurrentSubscription: async () => ({ data: null }),
-  getUsage: async () => ({ data: null })
-};
+// CHANGED: Real API imports instead of mock
+import subscriptionsApi from '../../api-services/subscriptions';
+import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
+import { webRoutes } from '../../lib/webRoutes';
 
-const loginForTesting = async () => {};
-const isTestAuthActive = () => true;
-
-// Card components
+// Card components (UNCHANGED)
 const Card = ({ children, className = "", ...props }) => (
   <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`} {...props}>
     {children}
@@ -32,6 +27,7 @@ const CardContent = ({ children, className = "", ...props }) => (
 );
 
 const SubscriptionDashboard = () => {
+  const navigate = useNavigate(); // ADDED: for navigation
   const [activeTab, setActiveTab] = useState('manage');
   const [billingCycle, setBillingCycle] = useState('Weekly');
   const [dashboardData, setDashboardData] = useState({
@@ -54,27 +50,42 @@ const SubscriptionDashboard = () => {
         await loginForTesting();
       }
 
-      const [plansResult, currentSubscriptionResult, usageResult] = await Promise.all([
+      // CHANGED: Added features and analytics, removed getUsage (doesn't exist)
+      const [plansResult, featuresResult, analyticsResult, currentSubscriptionResult] = await Promise.all([
         subscriptionsApi.getPlans().catch(err => {
           console.error('❌ Failed to load plans:', err);
           return { data: { results: [] } };
         }),
+        subscriptionsApi.getAvailableFeatures().catch(err => {
+          console.error('❌ Failed to load features:', err);
+          return { data: { features_by_category: {} } };
+        }),
+        subscriptionsApi.getSubscriptionAnalytics().catch(err => {
+          console.error('❌ Failed to load analytics:', err);
+          return { data: null };
+        }),
         subscriptionsApi.getCurrentSubscription().catch(err => {
           console.error('❌ Failed to load current subscription:', err);
           return { data: null };
-        }),
-        subscriptionsApi.getUsage().catch(err => {
-          console.error('❌ Failed to load usage:', err);
-          return { data: null };
         })
       ]);
+
+      // ADDED: Extract features
+      const featuresData = featuresResult?.data?.features_by_category || {};
+      const allFeatures = Object.values(featuresData).flat().map(f => ({
+        ...f,
+        minimum_plan: f.minimum_plan || f.required_plan || 'trial'
+      }));
 
       const extractedSubscription = currentSubscriptionResult?.data?.subscription || currentSubscriptionResult?.data || null;
       
       setDashboardData({
         plans: plansResult?.data?.results || [],
+        features: allFeatures || [], // ADDED
+        featuresCategories: featuresData, // ADDED
+        analytics: analyticsResult?.data, // ADDED
         currentSubscription: extractedSubscription,
-        usage: usageResult?.data
+        usage: extractedSubscription?.usage_summary || null // CHANGED: from usageResult to subscription's usage_summary
       });
 
     } catch (error) {
@@ -89,7 +100,7 @@ const SubscriptionDashboard = () => {
     loadDashboardData();
   }, []);
 
-  // Get usage data with fallbacks
+  // Get usage data with fallbacks (UNCHANGED - exact same logic)
   const getUsageData = () => {
     const usage = dashboardData.usage || {};
     return [
@@ -150,7 +161,7 @@ const SubscriptionDashboard = () => {
     ];
   };
 
-  // Format plan data
+  // Format plan data (UNCHANGED)
   const getFormattedPlans = () => {
     if (dashboardData.plans.length === 0) {
       return [
@@ -247,9 +258,21 @@ const SubscriptionDashboard = () => {
     });
   };
 
+  // CHANGED: Navigation instead of alert
   const handleChoosePackage = (plan) => {
     console.log('Choosing package:', plan);
-    alert(`You selected: ${plan.name}`);
+    
+    if (!plan || !plan.id) {
+      console.error('❌ No plan ID available');
+      if (plan?.plan_type) {
+        const fallbackRoute = webRoutes.subscriptionPlanDetail.replace(':planId', plan.plan_type);
+        navigate(fallbackRoute);
+      }
+      return;
+    }
+    
+    const targetRoute = webRoutes.subscriptionPlanDetail.replace(':planId', plan.id);
+    navigate(targetRoute);
   };
 
   const usageData = getUsageData();
