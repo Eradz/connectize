@@ -1468,7 +1468,6 @@ export default function DealRoomDetail() {
         onClose={() => setShowCreateMilestoneModal(false)}
         title="Create Milestone"
         size="lg"
-        className="max-h-[90vh] overflow-y-auto"
       >
         <form
           onSubmit={async (e) => {
@@ -1484,7 +1483,7 @@ export default function DealRoomDetail() {
               notify.error(`${Object.keys(err)[0]}: ${Object.values(err)[0]}` || 'Failed to create milestone');
             }
           }}
-          className=""
+          className="space-y-4"
         >
           <div className="grid grid-cols-3 gap-4">
               {/* Title */}
@@ -1613,7 +1612,7 @@ export default function DealRoomDetail() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
                 <input
-                  type="text"
+                  type="number"
                   value={createMilestoneForm.priority}
                   onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, priority: e.target.value }))}
                   className="w-full"
