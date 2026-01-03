@@ -19,6 +19,7 @@ import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
+import ValuationsPanel from "./ValuationsPanel";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -1379,119 +1380,8 @@ export default function DealRoomDetail() {
                 />
               )}
               {active === "valuations" && (
-                <div className="space-y-4 bg-white">
-                  <div className="p-4 space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900">Valuations</h3>
-                            <button
-                              onClick={() => refreshActivities({active})}
-                              disabled={loading}
-                              className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
-                            >
-                              <RefreshCcw className="w-4 h-4 mr-1" />
-                              {loading ? 'Loading...' : 'Refresh'}
-                            </button>
-                          </div>
-                          
-                          <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex-1">
-                              <input
-                                type="text"
-                                placeholder="Search valuations..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-custom_yellow"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                         {valuations.length === 0 ? (
-                    <EmptyValuations onCreate={() => setValuationCreate(true)} />
-                  ) : ( 
-                    valuationCreate && 
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const payload = {
-                        deal_room: id,
-                        valuation_method: valuationMethod,
-                        base_value: parseFloat(valuationBase) || 0,
-                        adjusted_value: parseFloat(valuationAdjusted) || 0,
-                        currency: valuationCurrency,
-                        assumptions: {},
-                        notes: valuationNotes,
-                      };
-                      await dealValuationService.createValuation(payload);
-                      const res = await makeApiRequest({
-                        url: "api/v1/deals/valuations/",
-                        method: "GET",
-                        params: { deal_room: id },
-                      });
-                      setValuations(res?.results || res?.data || res || []);
-                      setValuationNotes("");
-                      setValuationBase(0);
-                      setValuationAdjusted(0);
-                      notify.success("Valuation created");
-                    }}
-                    className="flex flex-col gap-2 p-4 border rounded-lg"
-                  >
-                    <div className="text-sm font-medium text-gray-800">Create Valuation</div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Method</label>
-                        <select value={valuationMethod} onChange={(e) => setValuationMethod(e.target.value)} className="border rounded px-3 py-2 w-full">
-                          <option value="dcf">Discounted Cash Flow</option>
-                          <option value="comparable">Comparable Analysis</option>
-                          <option value="asset_based">Asset Based</option>
-                          <option value="market_multiple">Market Multiple</option>
-                          <option value="risk_adjusted">Risk Adjusted NPV</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Base Value</label>
-                        <input type="number" value={valuationBase} onChange={(e) => setValuationBase(e.target.value)} className="border rounded px-3 py-2 w-full" min="0" step="1000" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Adjusted Value</label>
-                        <input type="number" value={valuationAdjusted} onChange={(e) => setValuationAdjusted(e.target.value)} className="border rounded px-3 py-2 w-full" min="0" step="1000" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Currency</label>
-                        <select value={valuationCurrency} onChange={(e) => setValuationCurrency(e.target.value)} className="border rounded px-3 py-2 w-full">
-                          {['USD','EUR','GBP','NGN','ZAR','CAD','AUD'].map(c => (<option key={c} value={c}>{c}</option>))}
-                        </select>
-                      </div>
-                    </div>
-                    <textarea
-                      value={valuationNotes}
-                      onChange={(e) => setValuationNotes(e.target.value)}
-                      placeholder="Notes/assumptions"
-                      className="border rounded px-3 py-2 w-full"
-                    />
-                    <button className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-custom_yellow">Create</button>
-                  </form>
-                  )}
-                  <ul className="list-disc pl-5 text-gray-700">
-                    {valuations.length === 0 && <li>No valuations found.</li>}
-                    {valuations.map((v, i) => (
-                      <li key={v.id || i} className="flex items-center gap-2">
-                        <span className="capitalize">{v.valuation_method || v.method || v.title || `Valuation ${i + 1}`}</span>
-        {v.id && (
-                          <button
-                            onClick={async () => {
-          await dealValuationService.runAnalysis(v.id, "standard");
-          notify.success("Analysis started");
-                            }}
-                            className="px-2 py-1 text-xs rounded border"
-                          >
-                            Run Analysis
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                  )}
+                <ValuationsPanel dealRoomId={id} />
+              )}
             </div>
           )}
         </div>
