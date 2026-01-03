@@ -1067,6 +1067,7 @@ export default function DealRoomDetail() {
                       <p className="hidden md:flex">Upload New Document</p>
                     </span>
                       </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {documents
                         .filter(d => !searchTerm || (d.name || d.title || "").toLowerCase().includes(searchTerm.toLowerCase()))
                         .map((d, i) => {
@@ -1092,7 +1093,7 @@ export default function DealRoomDetail() {
                               <div className="flex w-full items-center space-x-3">
                                 <div className="flex flex-col  w-full">
                                   <div className="font-medium text-gray-900" title={label}>{label}</div>
-                                      <div className="flex flex-row-reverse mb-3 justify-between md:hidden  gap-6 items-center space-x-2">
+                                      <div className="flex flex-row-reverse md:mb-3 justify-between md:hidden  gap-6 items-center space-x-2">
                                           <span className={`px-2 py-1 text-xs rounded-full ${
                                             d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                           }`}>
@@ -1106,11 +1107,11 @@ export default function DealRoomDetail() {
                                               {d._isTemporary && ' • Temporary (not saved to database)'}
                                             </div>
                                       </div>
-                                      <div className="flex w-full md:w-[50%] mt-1">
+                                      <div className="flex w-full mt-1">
                                           {href ? (
                                           <button 
                                             onClick={handleDocumentOpen}
-                                            className="w-[50%] md:w-[40%] inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
+                                            className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
                                           >
                                             <Eye className="h-4 w-4 mr-1" />
                                             Open
@@ -1136,7 +1137,7 @@ export default function DealRoomDetail() {
                                                 notify.error("Download failed: " + (e.response?.status === 401 ? "Authentication required" : "Unknown error"));
                                               }
                                             }}
-                                            className="inline-flex w-[50%] md:w-[40%] items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
+                                            className="inline-flex w-fit items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
                                           >
                                             <Download className="h-4 w-4 mr-1" />
                                             Download
@@ -1150,7 +1151,7 @@ export default function DealRoomDetail() {
                                               await dealDocumentService.requestAccess(d.id, justification);
                                               notify.success("Access requested");
                                             }}
-                                            className="inline-flex w-[50%] md:w-[60%] px-3 py-1.5 rounded border text-sm bg-pale_yellow hover:bg-custom_yellow"
+                                            className="inline-flex w-fitpx-3 py-1.5 px-3 rounded border text-sm bg-pale_yellow hover:bg-custom_yellow"
                                           >
                                             <LockOpen className="h-4 w-4 mr-1" />
                                             Request Access
@@ -1180,6 +1181,7 @@ export default function DealRoomDetail() {
                       {searchTerm && documents.filter(d => (d.name || d.title || "").toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
                         <EmptySearch searchTerm={searchTerm} />
                       )}
+                      </div>
                     </div>
                     
                   )}
