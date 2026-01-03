@@ -95,7 +95,7 @@ return(
             :
           <button
             onClick={() => toggleSaveJob(job.id)}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`hidden p-2 rounded-lg transition-colors ${
               savedJobs.has(job.id) 
                 ? 'bg-blue-100 text-blue-600' 
                 : 'hover:bg-gray-100 text-gray-400'
@@ -173,13 +173,13 @@ return(
           {
             myPostedJob ? 
             <div className="flex items-center space-x-2 text-[12px]">
-            <div
+            <button
               onClick={()=>{setShowDeleteModal(true); setJobToDelete(job)}}
               className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-gold transition-colors font-medium"
             >
               <Trash2 className="w-4 h-4 md:mr-1 text-[#FF0000]" />
               <p className="text-[#FF0000] hidden md:flex">Delete</p>
-            </div>
+            </button>
             <Link
               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
               className="flex font-medium bg-pale_yellow p-2 rounded-lg"

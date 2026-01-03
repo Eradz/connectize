@@ -819,6 +819,7 @@ export default function DealRoomDetail() {
               <input
                 ref={fileInputRef}
                 type="file"
+                accept=".pdf"
                 onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -838,7 +839,6 @@ export default function DealRoomDetail() {
                           }
                         }}
                 className="hidden"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
               />
 
               {!newDocFile ? (
@@ -1011,7 +1011,7 @@ export default function DealRoomDetail() {
                           }
                         }}
                 className="hidden"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+                accept=".pdf"
               />
 
               {!newDocFile ? (
