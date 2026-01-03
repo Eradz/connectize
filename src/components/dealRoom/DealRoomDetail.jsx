@@ -136,9 +136,9 @@ export default function DealRoomDetail() {
     deal_room: null,
     title:"" ,
     description: "" ,
-    status: null,
-    priority: null,
-    progress: null,
+    status: "pending",
+    priority: 1,
+    progress: 0,
     assigned_to: null,
     created_by: null,
     due_date: null
@@ -294,49 +294,7 @@ export default function DealRoomDetail() {
             if (isMounted) setMilestones(apiMilestones);
           } catch (err) {
             console.warn('Milestones API failed:', err);
-            // Fall back to mock data only for the specific demo deal
-            if (id === '28f11f78-f41c-4ded-b98c-d2aa5029bd30') {
-              const mockMilestones = [
-                {
-                  id: 1,
-                  title: 'Initial Assessment',
-                  description: 'Preliminary evaluation and feasibility study',
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 2,
-                  title: 'Due Diligence', 
-                  description: 'Comprehensive technical and financial review',
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 3,
-                  title: 'Legal Documentation',
-                  description: 'Contract preparation and legal review', 
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 4,
-                  title: 'Financial Approval',
-                  description: 'Final financial approval and sign-off',
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 5,
-                  title: 'Deal Completion',
-                  description: 'Final closing and deal completion',
-                  progress: 80,
-                  status: 'in_progress'
-                }
-              ];
-              if (isMounted) setMilestones(mockMilestones);
-            } else {
-              if (isMounted) setMilestones([]);
-            }
+            if (isMounted) setMilestones([]);
           }
         } else if (active === "activities") {
           try {
@@ -576,14 +534,14 @@ export default function DealRoomDetail() {
             <div className="text-red-600">{error}</div>
           ) : (
             <div className="">
-              {(active !== "overview" && active !== "activities" && active !== "valuations") && 
+              {(active !== "overview" && active !== "activities" && active !== "valuations" && active !== "milestones") && 
               <div className="flex justify-between">
                 <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
                 <RefreshButton refreshActivities={refreshActivities} active={active} loading={loading}/>
               </div>
               }
               {/* Search and Filter Bar */}
-              {(active === "documents" || active === "participants"  || active === "milestones") && (
+              {(active === "documents" || active === "participants"  ) && (
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -1310,20 +1268,53 @@ export default function DealRoomDetail() {
               )}
               {active === "milestones" && (
                 <div className="space-y-3">
+                  <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">Milestones</h3>
+                            <div className="flex gap-4">
+                            <button
+                              onClick={() => refreshActivities({active})}
+                              disabled={loading}
+                              className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
+                            >
+                              <RefreshCcw className="w-4 h-4 mr-1" />
+                              {loading ? 'Loading...' : 'Refresh'}
+                            </button>
+                            <button
+                              onClick={() => setShowCreateMilestoneModal(true)}
+                              className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              <span className="hidden md:block">{'Add Milestone'}</span>
+                            </button>
+
+                            </div>
+                          </div>
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={`Search ${active}...`}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                    />
+                  </div>
+                  </div>
                   {milestones.length === 0 ? (
                     <EmptyMilestones onCreate={() => setShowCreateMilestoneModal(true)} />
                   ) : (
                     milestones.map((m, i) => (
-                      <div key={m.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
+                      <div key={m?.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <div className="font-medium text-gray-800">{m.title || m.name || `Milestone ${i + 1}`}</div>
-                            {m.description && <div className="text-sm text-gray-600 mt-1">{m.description}</div>}
-                            {typeof m.progress !== 'undefined' && (
+                            <div className="font-medium text-gray-800">{m?.title || m?.name || `Milestone ${i + 1}`}</div>
+                            {m?.description && <div className="text-sm text-gray-600 mt-1">{m.description}</div>}
+                            {typeof m?.progress !== 'undefined' && (
                               <div className="mt-2">
                                 <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
                                   <span>Progress</span>
-                                  <span>{m.progress}%</span>
+                                  <span>{m?.progress}%</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                   <div 
@@ -1636,25 +1627,28 @@ export default function DealRoomDetail() {
         isOpen={showCreateMilestoneModal}
         onClose={() => setShowCreateMilestoneModal(false)}
         title="Create Milestone"
-        size="2xl"
+        size="lg"
+        className="max-h-[90vh] overflow-y-auto"
       >
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             try {
-              const newMilestone = await dealMilestoneService.create({ ...milestoneForm, dealRoomId: id });
-              setMilestones(prev => [...prev, newMilestone]);
-              setShowCreateMilestoneModal(false);
-              notify.success("Milestone created successfully");
+              const newMilestone = await dealMilestoneService.create({ ...createMilestoneForm, created_by: user.id, deal_room: id });
+              if (newMilestone) {
+                setMilestones(prev => [...prev, newMilestone]);
+                setShowCreateMilestoneModal(false);
+                notify.success("Milestone created successfully");
+              }
             } catch (err) {
-              notify.error(err?.message || 'Failed to create milestone');
+              notify.error(`${Object.keys(err)[0]}: ${Object.values(err)[0]}` || 'Failed to create milestone');
             }
           }}
-          className="space-y-1"
+          className=""
         >
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-4">
               {/* Title */}
-              <div className="col-span-3">
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Title:</label>
                 <input
                   type="text"
@@ -1666,19 +1660,15 @@ export default function DealRoomDetail() {
               {/* Status */}
               <div className="col-span-1 w-full">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
-                <select value={createMilestoneForm.status} onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, status: e.target.value }))}>
+                <select value={createMilestoneForm.status} onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                  >
                   <option value="pending">Pending</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
                   <option value="overdue">Overdue</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                <input
-                  type="text"
-                  value={createMilestoneForm.status}
-                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, status: e.target.value }))}
-                  className="w-full"
-                />
               </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -1704,32 +1694,7 @@ export default function DealRoomDetail() {
                 />
               </div>
           </div>
-           <div className="grid grid-cols-2 gap-4">
-                {/* Progress */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Progress: </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={createMilestoneForm.progress}
-                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, progress: Number(e.target.value) }))}
-                  className="w-full"
-                />
-              </div>
-              {/* Priority */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Priority:</label>
-                <input
-                  type="text"
-                  value={createMilestoneForm.priority}
-                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, priority: e.target.value }))}
-                  className="w-full"
-                />
-              </div>
-            </div>
-         
+          <div className="grid grid-cols-2 gap-4">
           {/* Assigned to */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1777,6 +1742,44 @@ export default function DealRoomDetail() {
               )}
             </div>
           </div>
+              {/* Due date */}
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={createMilestoneForm.due_date}
+                    onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, due_date: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+          </div>
+           <div className="grid grid-cols-2 gap-4">
+                {/* Progress */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Progress: {createMilestoneForm.progress}%</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={createMilestoneForm.progress}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, progress: Number(e.target.value) }))}
+                  className="w-full"
+                />
+              </div>
+              {/* Priority */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                <input
+                  type="text"
+                  value={createMilestoneForm.priority}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, priority: e.target.value }))}
+                  className="w-full"
+                />
+              </div>
+            </div>
           <div className="flex justify-end space-x-3">
             <button
               type="button"
