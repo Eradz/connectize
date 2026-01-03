@@ -1,23 +1,37 @@
 import { useState, useEffect, useCallback } from 'react';
 import { makeApiRequest } from '../lib/helpers';
+import { useAuth } from '../context/userContext';
 
 /**
  * Custom hook for searching companies for @ mentions
  * Fetches and caches company list for autocomplete
+ * Only fetches when user is authenticated
  */
 export const useCompanySearch = () => {
   const [companies, setCompanies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user, loading: authLoading } = useAuth();
 
   const fetchCompanies = useCallback(async () => {
+    // Debug logging
+    console.log('[useCompanySearch] fetchCompanies called, user:', user ? 'authenticated' : 'null', 'authLoading:', authLoading);
+    
+    // Don't fetch if auth is still loading or user is not authenticated
+    if (authLoading || !user) {
+      console.log('[useCompanySearch] Skipping fetch - authLoading:', authLoading, 'user:', user ? 'exists' : 'null');
+      setCompanies([]);
+      return;
+    }
+
+    console.log('[useCompanySearch] User authenticated, fetching companies...');
     setIsLoading(true);
     setError(null);
     
     try {
-      // Fetch paginated companies
+      // Fetch paginated companies - use relative URL without leading slash to go through baseURL
       const response = await makeApiRequest({
-        url: '/api/companies/?page_size=100',
+        url: 'api/companies/?page_size=100',
         method: 'GET',
       });
 
@@ -39,7 +53,7 @@ export const useCompanySearch = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user, authLoading]);
 
   useEffect(() => {
     fetchCompanies();

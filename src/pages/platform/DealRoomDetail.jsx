@@ -14,7 +14,7 @@ import ActivityTimeline from '../../components/deals/ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3 } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, Trash2 } from "lucide-react";
 import ValuationsPanel from "../../components/dealRoom/ValuationsPanel";
 
 const tabs = [
@@ -691,17 +691,15 @@ export default function DealRoomDetail() {
                           console.log('✅ Successfully uploaded document to database:', apiDocument);
                           notify.success("Document uploaded and saved to database");
                           
-                          // Refresh document list from database
-                          try {
-                            const docs = await makeApiRequest({
-                              url: "api/v1/deals/documents/",
-                              method: "GET",
-                              params: { deal_room: id },
-                            });
-                            setDocuments(docs?.results || docs?.data || docs || []);
-                          } catch (refreshError) {
-                            console.warn('Failed to refresh document list:', refreshError);
-                          }
+                          // Refresh document list from database immediately
+                          const docs = await makeApiRequest({
+                            url: "api/v1/deals/documents/",
+                            method: "GET",
+                            params: { deal_room: id, page_size: 200 },
+                          });
+                          const updatedDocs = docs?.results || docs?.data || docs || [];
+                          console.log('✅ Refreshed documents list, count:', updatedDocs.length);
+                          setDocuments(Array.isArray(updatedDocs) ? updatedDocs : []);
                         } catch (apiError) {
                           console.log('❌ Database upload failed:', apiError);
                           notify.error((apiError?.status === 401 ? 'Authentication required. Please log in.' : 'Upload failed') + (apiError?.message ? `: ${apiError.message}` : ''));
@@ -869,6 +867,31 @@ export default function DealRoomDetail() {
                                     className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
                                   >
                                     Request Access
+                                  </button>
+                                )}
+                                {/* Delete button - only show for non-temporary documents */}
+                                {!d._isTemporary && d.id && (
+                                  <button
+                                    onClick={async () => {
+                                      if (!window.confirm(`Are you sure you want to delete "${label}"? This action cannot be undone.`)) return;
+                                      try {
+                                        await dealDocumentService.delete(d.id);
+                                        // Refresh document list
+                                        const docs = await makeApiRequest({
+                                          url: "api/v1/deals/documents/",
+                                          method: "GET",
+                                          params: { deal_room: id },
+                                        });
+                                        setDocuments(docs?.results || docs?.data || docs || []);
+                                        notify.success("Document deleted");
+                                      } catch (e) {
+                                        notify.error("Failed to delete document: " + (e.message || "Unknown error"));
+                                      }
+                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 rounded border text-sm text-red-600 hover:bg-red-50 hover:border-red-200"
+                                    title="Delete document"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
                                   </button>
                                 )}
                               </div>

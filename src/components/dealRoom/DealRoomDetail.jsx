@@ -15,7 +15,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud, CalendarDays, LockOpen } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud, CalendarDays, LockOpen, Trash2 } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
@@ -23,6 +23,7 @@ import RefreshButton from "../RefreshButton";
 import dealRoomAPI from "../../api-services/dealRoom";
 import { useAuth } from "../../context/userContext";
 import ValuationsPanel from "./ValuationsPanel";
+import { useAuth } from "../../context/userContext";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -46,6 +47,7 @@ export default function DealRoomDetail() {
   const { id } = useParams();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const active = useMemo(() => currentSection(pathname), [pathname]);
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
@@ -173,6 +175,71 @@ export default function DealRoomDetail() {
     { value: "edit", label: "View, Comment & Edit" },
     { value: "admin", label: "Admin (Full Access)" },
   ];
+
+  // User permissions state - fetched from API
+  const [userPermissions, setUserPermissions] = useState({
+    permission_level: null,
+    roles: [],
+    can_view: false,
+    can_comment: false,
+    can_edit: false,
+    can_admin: false,
+    is_initiator: false,
+  });
+
+  // Fetch user permissions when deal room ID changes
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      if (!id || !user) return;
+      try {
+        const res = await makeApiRequest({
+          url: `api/v1/deals/deal-rooms/${id}/my_permissions/`,
+          method: "GET",
+        });
+        if (res) {
+          setUserPermissions(res);
+        }
+      } catch (error) {
+        console.warn('Could not fetch permissions:', error);
+        // Fallback to local calculation if API fails
+      }
+    };
+    fetchPermissions();
+  }, [id, user]);
+
+  // Check if current user has edit privileges (initiator, admin, or edit permission)
+  // Uses API permissions if available, falls back to local calculation
+  const canEdit = useMemo(() => {
+    // Prefer API-provided permissions
+    if (userPermissions.can_edit || userPermissions.can_admin) return true;
+    
+    // Fallback to local calculation
+    if (!user) return false;
+    // Check if user is the deal initiator
+    if (deal?.initiator === user.id || deal?.initiator_id === user.id) return true;
+    // Check if user has admin or edit permission level in participants
+    const userParticipant = participants.find(
+      p => p.user === user.id || p.user_id === user.id || p.user_email === user.email
+    );
+    if (userParticipant) {
+      return ['admin', 'edit'].includes(userParticipant.permission_level);
+    }
+    return false;
+  }, [user, deal, participants, userPermissions]);
+
+  // Check if user can delete (admin only)
+  const canDelete = useMemo(() => {
+    if (userPermissions.can_admin) return true;
+    if (!user) return false;
+    if (deal?.initiator === user.id || deal?.initiator_id === user.id) return true;
+    const userParticipant = participants.find(
+      p => p.user === user.id || p.user_id === user.id || p.user_email === user.email
+    );
+    return userParticipant?.permission_level === 'admin';
+  }, [user, deal, participants, userPermissions]);
+
+  // Check if user can manage participants (admin only)
+  const canManageParticipants = canDelete;
 
   const refreshActivities = async ({active}) => {
     setLoading(true);
@@ -738,6 +805,16 @@ export default function DealRoomDetail() {
                           console.log('✅ Successfully uploaded document to database:', apiDocument);
                           notify.success("Document uploaded and saved to database");
                           
+                          // IMMEDIATE UI UPDATE - show document right away
+                          if (apiDocument && apiDocument.id) {
+                            console.log('📄 Adding document to UI immediately (first form):', apiDocument);
+                            setDocuments(prev => {
+                              const list = Array.isArray(prev) ? prev : [];
+                              if (list.some(d => d?.id === apiDocument.id)) return list;
+                              return [apiDocument, ...list];
+                            });
+                          }
+
                           // Refresh document list from database
                           try {
                             const docs = await makeApiRequest({
@@ -910,7 +987,16 @@ export default function DealRoomDetail() {
                           apiSuccess = true;
                           console.log('✅ Successfully uploaded document to database:', apiDocument);
                           notify.success("Document uploaded and saved to database");
-                          await dealRoomAPI.createActivities(id, { activity_type: 'document_uploaded', description: `Document uploaded`, actor: user.id });
+                          // IMMEDIATE UI UPDATE - show document right away
+                          if (apiDocument && apiDocument.id) {
+                            console.log('📄 Adding document to UI immediately (second form):', apiDocument);
+                            setDocuments(prev => {
+                              const list = Array.isArray(prev) ? prev : [];
+                              if (list.some(d => d?.id === apiDocument.id)) return list;
+                              return [apiDocument, ...list];
+                            });
+                          }
+
                           // Refresh document list from database
                           try {
                             const docs = await makeApiRequest({
@@ -928,10 +1014,11 @@ export default function DealRoomDetail() {
                           return; // Do not create temporary documents anymore
                         }
                         
-                        // Reset form regardless of success/failure
+                        // Reset form and close upload panel after successful upload
                         setNewDocFile(null);
                         setNewDocName("");
                         setNewDocType("other");
+                        setUploadSomeDocument(false); // Close the upload form to show document list
                         
                       } catch (error) {
                         console.error('Upload error:', error);
@@ -1175,6 +1262,32 @@ export default function DealRoomDetail() {
                                     </span> }
                                     {d._isTemporary && ' • Temporary (not saved to database)'}
                                   </div>
+                                {/* Delete button - only visible for users with edit privileges */}
+                                {canEdit && !d._isTemporary && d.id && (
+                                  <button
+                                    onClick={async () => {
+                                      if (!window.confirm(`Are you sure you want to delete "${label}"? This action cannot be undone.`)) return;
+                                      try {
+                                        await dealDocumentService.delete(d.id);
+                                        // Refresh document list
+                                        const docs = await makeApiRequest({
+                                          url: "api/v1/deals/documents/",
+                                          method: "GET",
+                                          params: { deal_room: id },
+                                        });
+                                        setDocuments(docs?.results || docs?.data || docs || []);
+                                        notify.success("Document deleted");
+                                      } catch (e) {
+                                        notify.error("Failed to delete document: " + (e.message || "Unknown error"));
+                                      }
+                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 rounded border text-sm text-red-600 border-red-200 hover:bg-red-50"
+                                    title="Delete document"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Delete
+                                  </button>
+                                )}
                               </div>
                             </div>
                           );

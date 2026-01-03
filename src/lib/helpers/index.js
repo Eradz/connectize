@@ -48,9 +48,8 @@ export function goToLogin() {
 export const baseURL = (
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV
-    ? "https://about.connectize.co"
-    : // ? "http://localhost:8000"
-      "https://about.connectize.co")
+    ? "http://localhost:8000"
+    : "https://about.connectize.co")
 ).replace(/\/$/, "");
 
 axios.defaults.withCredentials = true;
@@ -149,17 +148,22 @@ export async function refreshToken() {
 let hasNotifiedOffline = false;
 
 export async function getAuthorizationHeader() {
+  console.log('[getAuthorizationHeader] Called, cached accessToken:', accessToken ? 'exists' : 'null');
+  
   // Use cached token (no expiration check - tokens are long-lived)
   if (accessToken) {
+    console.log('[getAuthorizationHeader] Using cached token');
     return { Authorization: "Bearer " + accessToken };
   }
 
   // Try to use access token from session first (avoids unnecessary refresh right after login)
   try {
     const session = getSession();
+    console.log('[getAuthorizationHeader] Session:', session ? 'exists' : 'null', 'tokens:', session?.tokens ? 'exists' : 'null');
 
     const tokenFromSession = session?.tokens?.access;
     if (tokenFromSession) {
+      console.log('[getAuthorizationHeader] Using token from session, length:', tokenFromSession.length);
       // Fresh token from session, update cache
       accessToken = tokenFromSession;
       // No expiration - tokens are managed by the backend
@@ -169,6 +173,7 @@ export async function getAuthorizationHeader() {
     
     // Try refresh if we have a refresh token
     if (session?.tokens?.refresh) {
+      console.log('[getAuthorizationHeader] Attempting token refresh');
       const refreshedToken = await refreshToken();
       if (refreshedToken?.Authorization) {
         return refreshedToken;
@@ -180,6 +185,7 @@ export async function getAuthorizationHeader() {
   }
 
   // No valid auth header available - this is normal for unauthenticated users
+  console.log('[getAuthorizationHeader] No valid token available');
   return null;
 }
 
@@ -206,8 +212,11 @@ export async function makeApiRequest({
       ? url
       : buildUrl(baseURL, url);
 
+  console.log('[makeApiRequest] Starting request:', { url, method, type, requestUrl });
+
   try {
     const authorization = await getAuthorizationHeader();
+    console.log('[makeApiRequest] Authorization header:', authorization ? 'Bearer token (length: ' + authorization?.Authorization?.length + ')' : 'null');
 
     if (
       (!authorization || !authorization.Authorization) &&
@@ -232,6 +241,8 @@ export async function makeApiRequest({
     if (!isFormData && contentType) {
       headers["Content-Type"] = contentType;
     }
+    
+    console.log('[makeApiRequest] Final headers:', { hasAuth: !!headers.Authorization, contentType: headers['Content-Type'] });
 
     const response = await axios({
       url: requestUrl,

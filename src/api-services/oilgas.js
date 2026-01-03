@@ -287,14 +287,16 @@ export class DealDocumentService extends CrudService {
       // Re-throw with more context
       if (error.status === 401) {
         throw new Error('Authentication required. Please log in to upload documents.');
+      } else if (error.status === 403) {
+        throw new Error(error.response?.data?.error || 'You do not have permission to upload documents to this deal room.');
       } else if (error.status === 413) {
         throw new Error('File too large. Please select a smaller file.');
       } else if (error.status === 400) {
-        throw new Error('Invalid file format or missing required fields.');
+        throw new Error(error.response?.data?.error || 'Invalid file format or missing required fields.');
       } else if (error.message) {
         throw new Error(error.message);
       } else {
-        throw new Error(error.message || 'Upload failed. Please try again.');
+        throw new Error('Upload failed. Please try again.');
       }
     }
   }

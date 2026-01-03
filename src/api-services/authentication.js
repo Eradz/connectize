@@ -25,6 +25,8 @@ export const authenticationService = async ({
       const tokens = payload?.tokens;
       console.log('🔑 Setting session with tokens:', { hasAccess: !!(tokens?.access), hasRefresh: !!(tokens?.refresh) });
       if (tokens?.access && tokens?.refresh) {
+        // Clear any stale cached tokens before setting new session
+        clearTokenCache();
         setSession(payload);
       } else {
         console.warn("Login succeeded response but no tokens present; skipping session set");

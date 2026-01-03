@@ -73,6 +73,8 @@ export const getSession = () => {
 
     const decryptedSession = decryptData(encryptedSession);
     const session = JSON.parse(decryptedSession);
+    
+    console.log('[getSession] Retrieved from:', source, 'hasTokens:', !!session?.tokens, 'hasAccess:', !!session?.tokens?.access);
 
     // Re-sync storage for cross-platform compatibility
     if (source === 'localStorage' && session) {
