@@ -427,10 +427,10 @@ const WorkforceApplications = () => {
                           onChange={(e) => handleFilterChange('jobType', e.target.value)}
                         >
                           <option value="">All Types</option>
-                          <option value="Full-time">Full-time</option>
+                          <option value="full_time">Full-time</option>
                           <option value="Contract">Contract</option>
-                          <option value="Part-time">Part-time</option>
-                          <option value="Temporary">Temporary</option>
+                          <option value="part_time">Part-time</option>
+                          <option value="temporary">Temporary</option>
                         </select>
                       </div>
                       <div>
