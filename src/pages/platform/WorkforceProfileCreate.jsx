@@ -90,7 +90,7 @@ const WorkforceProfileCreate = () => {
         return;
       }
 
-      const response = await workforceAPI.createProfile(formData);
+      const response = await workforceAPI.createWorkforceProfile(formData);
       toast.success('Professional profile created successfully!');
       
       // Navigate to the created profile or profiles list
@@ -405,7 +405,7 @@ const WorkforceProfileCreate = () => {
           </div>
 
           {/* Skills Information */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <div className="flex items-start space-x-3">
               <Star className="w-5 h-5 text-blue-600 mt-1" />
               <div>
@@ -421,7 +421,7 @@ const WorkforceProfileCreate = () => {
                 </ul>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Submit Buttons */}
           <div className="flex justify-end space-x-4">
@@ -435,7 +435,7 @@ const WorkforceProfileCreate = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+              className="px-6 py-3 bg-gold/80 text-white rounded-lg hover:bg-gold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
             >
               {loading ? (
                 <>

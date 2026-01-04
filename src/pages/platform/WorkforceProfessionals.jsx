@@ -634,14 +634,14 @@ const WorkforceProfessionals = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4 h-[20%]">
                   <div className="flex items-start space-x-3">
-                    {/* <img
+                    <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
                       alt={professional.user_name || professional.user_email || 'Professional'}
                       className="w-10 h-10 rounded-full object-cover"
-                    /> */}
-                    <div className='rounded-full border-2 border-black'>
+                    />
+                    {/* <div className='rounded-full border-2 border-black'>
                       <User fill='#6D8FAF' className="w-10 h-10 text-[#6D8FAF]" />
-                    </div>
+                    </div> */}
                     <div>
                       <h3 className="font-semibold text-gray-900">{professional.user_name || professional.user_email || 'Professional'}</h3>
                       <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
@@ -725,7 +725,7 @@ const WorkforceProfessionals = () => {
                     View Profile
                   </Link>
                   <Link 
-                    to={`/messages/?room_name=room_${user?.id}_${professional.id}`}
+                    to={`/messages/?room_name=room_${user?.id}_${professional?.user}`}
                     // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="w-[50%] flex items-center justify-center bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
                     title="Send connection request"
