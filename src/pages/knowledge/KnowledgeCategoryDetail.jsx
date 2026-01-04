@@ -287,9 +287,15 @@ const KnowledgeCategoryDetail = () => {
 
                 {/* Category Filter Dropdown */}
                 <select 
-                onChange={(e)=> navigate(`/knowledge/categories/${e.target.value}`)}
+                onChange={(e)=> {
+                  if (e.target.value === 'all') {
+                    navigate(webRoutes.knowledgeArticles);
+                  } else {
+                    navigate(`/knowledge/categories/${e.target.value}`);
+                  }
+                }}
                 className="w-[30%] px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option>All Categories</option>
+                  <option value="all">All Categories</option>
                   {categories?.map((cat) => (
                     <option key={cat.id} value={cat.slug}>
                       {cat.name}
@@ -330,42 +336,74 @@ const KnowledgeCategoryDetail = () => {
           </div>
 
           {/* Content Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredContent.map((item) => (
-              <Link
-                key={`${item.type}-${item.id}`}
-                to={getContentLink(item)}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6 flex flex-col"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {item.title || item.name}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {category?.name || category?.title || 'Knowledge Category'}
+          {articles.length === 0 && forums.length === 0 && topics.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-gray-50 rounded-lg p-12 max-w-md mx-auto">
+                <BookOpen className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Content Yet</h3>
+                <p className="text-gray-600 mb-6">
+                  This category doesn't have any articles, forums, or discussion topics yet. Be the first to contribute!
                 </p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                    {item.type === 'article' ? 'Article' : item.type === 'forum' ? 'Forum' : item.type === 'topic' ? 'Topic' : item.type}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatDate(item.created_at)}
-                  </span>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Link
+                    to={webRoutes.knowledgeArticleCreate}
+                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Write Article
+                  </Link>
+                  <Link
+                    to={webRoutes.knowledgeForumCreate}
+                    className="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Forum
+                  </Link>
                 </div>
-              </Link>
-            ))}
-          </div>
-
-          {filteredContent.length === 0 && (
-            <div className="text-center py-12">
-              <Hash className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No content found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {searchTerm 
-                  ? 'Try adjusting your search term.'
-                  : 'This category doesn\'t have any content yet.'
-                }
-              </p>
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredContent.filter((item) => 
+                  item.category_name === category?.name
+                ).map((item) => (
+                  <Link
+                    key={`${item.type}-${item.id}`}
+                    to={getContentLink(item)}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6 flex flex-col"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {item.title || item.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {category?.name || category?.title || 'Knowledge Category'}
+                    </p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                        {item.type === 'article' ? 'Article' : item.type === 'forum' ? 'Forum' : item.type === 'topic' ? 'Topic' : item.type}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatDate(item.created_at)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {filteredContent.filter((item) => item.category_name === category?.name).length === 0 && (
+                <div className="text-center py-12">
+                  <Hash className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No content found</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {searchTerm 
+                      ? 'Try adjusting your search term.'
+                      : 'No results match your current filters.'
+                    }
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
         <div>

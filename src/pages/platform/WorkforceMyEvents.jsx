@@ -147,7 +147,7 @@ const WorkforceMyEvents = () => {
           </div>
           <Link
             to={webRoutes.workforceEventCreate}
-            className="mt-4 sm:mt-0 inline-flex items-center bg-slate-600 text-white p-3 sm:px-6 sm:py-3 rounded-lg hover:bg-slate-700 transition-colors"
+            className="mt-4 sm:mt-0 inline-flex items-center bg-gold text-white p-3 sm:px-6 sm:py-3 rounded-lg hover:bg-slate-700 transition-colors"
           >
             <Plus className="w-5 h-5 sm:mr-2" />
             <span className="hidden sm:inline">Create Event</span>
@@ -211,7 +211,7 @@ const WorkforceMyEvents = () => {
             </p>
             <Link
               to={webRoutes.workforceEventCreate}
-              className="inline-flex items-center bg-slate-600 text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center bg-gold text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" />
               Create Your First Event
@@ -219,7 +219,7 @@ const WorkforceMyEvents = () => {
           </div>
         ) : (
           /* Events List */
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => {
               const eventStatus = getEventStatus(event);
               const StatusIcon = eventStatus.status === 'completed' ? CheckCircle : 
@@ -227,115 +227,122 @@ const WorkforceMyEvents = () => {
                                 eventStatus.status === 'cancelled' ? XCircle : Clock;
 
               return (
-                <div key={event.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="p-6">
-                    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-                      {/* Event Info */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                                ${eventStatus.color === 'green' ? 'bg-emerald-100 text-emerald-800' :
-                                  eventStatus.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                                  eventStatus.color === 'red' ? 'bg-red-100 text-red-800' :
-                                  'bg-slate-100 text-slate-800'}`}>
-                                <StatusIcon className="w-4 h-4 mr-1" />
-                                {eventStatus.label}
-                              </span>
-                              <span className="text-sm text-slate-500 capitalize">{event.event_type}</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                              {event.title}
-                            </h3>
-                            <p className="text-slate-600 text-sm mb-3">{event.description}</p>
-                          </div>
-                        </div>
+                <div key={event.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
+                  {/* Status Badge */}
+                  <div className="px-6 pt-4">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                      ${eventStatus.color === 'green' ? 'bg-emerald-100 text-emerald-700' :
+                        eventStatus.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                        eventStatus.color === 'red' ? 'bg-red-100 text-red-700' :
+                        'bg-amber-100 text-amber-700'}`}>
+                      {eventStatus.label}
+                    </span>
+                  </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-slate-600 mb-4">
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2 text-slate-500" />
-                            <span>{formatDate(event.start_date)}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="w-4 h-4 mr-2 text-slate-500" />
-                            <span>{formatTime(event.start_date)}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <MapPin className="w-4 h-4 mr-2 text-slate-500" />
-                            <span>
-                              {event.is_virtual ? 
-                                `Virtual${event.virtual_platform ? ` - ${event.virtual_platform}` : ''}` : 
-                                event.venue_name
-                              }
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <Users className="w-4 h-4 mr-2 text-slate-500" />
-                            <span>
-                              {event.attendees_count || 0}
-                              {event.max_attendees && ` / ${event.max_attendees}`} registered
-                            </span>
-                          </div>
-                        </div>
+                  {/* Card Content */}
+                  <div className="px-6 py-3 flex-1 flex flex-col">
+                    {/* Title */}
+                    <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2">
+                      {event.title}
+                    </h3>
 
-                        {/* Revenue and Pricing */}
-                        <div className="flex flex-wrap items-center gap-4 text-sm">
-                          {event.is_free ? (
-                            <span className="text-emerald-600 font-medium">Free Event</span>
-                          ) : (
-                            <span className="text-slate-700">
-                              Fee: ${event.ticket_price} {event.currency} 
-                              {event.attendees_count > 0 && (
-                                <span className="ml-2 text-emerald-600">
-                                  (Revenue: ${(event.ticket_price * event.attendees_count).toFixed(2)})
-                                </span>
-                              )}
-                            </span>
-                          )}
-                          <span className="text-slate-500">
-                            Created: {formatDate(event.created_at)}
-                          </span>
-                        </div>
+                    {/* Organization/Description */}
+                    <p className="text-sm text-slate-600 mb-3 line-clamp-1">
+                      {event.description || event.organizer_name || 'Event Details'}
+                    </p>
+
+                    {/* Location */}
+                    <div className="flex items-start gap-2 mb-2">
+                      <MapPin className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-600 line-clamp-1">
+                        {event.is_virtual ? 
+                          `Virtual${event.virtual_platform ? ` - ${event.virtual_platform}` : ''}` : 
+                          event.venue_name || 'Location TBA'
+                        }
+                      </span>
+                    </div>
+
+                    {/* Date and Time */}
+                    <div className="flex items-center gap-4 text-sm text-slate-600 mb-3">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4 text-slate-500" />
+                        <span>{formatDate(event.start_date)}</span>
                       </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Link
-                          to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
-                          className="flex items-center justify-center px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Link>
-                        
-                        <button 
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowRegistrations(true);
-                          }}
-                          className="flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                        >
-                          <UserCheck className="w-4 h-4 mr-2" />
-                          Registrations ({event.attendees_count || 0})
-                        </button>
-
-                        <Link
-                          to={`/events/${event.id}/edit`}
-                          className="flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Link>
-
-                        <button 
-                          onClick={() => handleDeleteEvent(event.id)}
-                          className="flex items-center justify-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </button>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-slate-500" />
+                        <span>{formatTime(event.start_date)}</span>
                       </div>
+                    </div>
+
+                    {/* Theme Tags */}
+                    <div className="flex flex-wrap gap-2 mb-3 pt-2">
+                      {event.event_type && (
+                        <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-700 rounded-md capitalize">
+                          {event.event_type}
+                        </span>
+                      )}
+                      {event.is_free ? (
+                        <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-700 rounded-md">
+                          Free
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-700 rounded-md">
+                          ${event.ticket_price}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-slate-200 my-3"></div>
+
+                    {/* Registration Info */}
+                    <div className="text-xs text-slate-600 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span>Registered: {event.attendees_count || 0}/{event.max_attendees || '∞'}</span>
+                        <span>{formatDate(event.created_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="px-6 pb-4 pt-2 flex flex-col gap-2">
+                    <Link
+                      to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
+                      className="w-full flex items-center justify-center px-4 py-2 bg-amber-400 text-slate-900 font-semibold rounded-lg hover:bg-amber-500 transition-colors text-sm"
+                    >
+                      View Event Details
+                    </Link>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      <button 
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowRegistrations(true);
+                        }}
+                        className="flex items-center justify-center px-2 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                        title={`${event.attendees_count || 0} registrations`}
+                      >
+                        <UserCheck className="w-4 h-4" />
+                        <span className="hidden sm:inline sm:ml-1 text-xs font-medium">Registrations</span>
+                      </button>
+
+                      <Link
+                        to={`/events/${event.id}/edit`}
+                        className="flex items-center justify-center px-2 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                        title="Edit event"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span className="hidden sm:inline sm:ml-1 text-xs font-medium">Edit</span>
+                      </Link>
+
+                      <button 
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="flex items-center justify-center px-2 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
+                        title="Delete event"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="hidden sm:inline sm:ml-1 text-xs font-medium">Delete</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -387,7 +394,7 @@ const WorkforceMyEvents = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => downloadRegistrations(selectedEvent)}
-                  className="flex items-center px-3 py-2 text-sm bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                  className="flex items-center px-3 py-2 text-sm bg-gold text-white rounded-lg hover:bg-slate-700 transition-colors"
                 >
                   <Download className="w-4 h-4 mr-1" />
                   Export CSV
