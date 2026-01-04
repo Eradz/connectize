@@ -5,6 +5,8 @@ import {
   MapPin,
   Plus,
   Globe,
+  Clock,
+  Zap,
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -93,7 +95,7 @@ const WorkforceEvents = () => {
       filtered = filtered.filter(event => 
         (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (event.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (event.organizer || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -280,15 +282,22 @@ const WorkforceEvents = () => {
       <div className="lg:bg-white">
         {/* Ongoing Events */}
         <div className='px-2' id='ongoing'>
-          <span className="flex h-fit gap-2 ">
-            <h3 className='text-2xl font-medium  '>Ongoing Events</h3>
-            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
-              {getTabCount('ongoing')}
-            </span>
-          </span>
-        {getEventSchedule('ongoing').length === 0 ? <p className='mb-8'>No ongoing events</p> :
-        <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={getEventSchedule('ongoing')} />
-        }
+          {getEventSchedule('ongoing').length === 0 ? (
+            <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
+              <Zap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Ongoing Events</h3>
+              <p className="text-gray-600 mb-6">There are no events happening right now. Check back soon or browse upcoming events!</p>
+              <button
+                onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                View Upcoming Events
+              </button>
+            </div>
+          ) : (
+            <OngoingEvents events={events} searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={getEventSchedule('ongoing')} />
+          )}
         </div>
 
         {/* Events Grid */}
@@ -299,8 +308,22 @@ const WorkforceEvents = () => {
                     {getTabCount('upcoming')}
               </span>
           </span>
-              {getEventSchedule('upcoming').length === 0 ? <p className='mb-8'>No upcoming events</p> :
-        <UpcomingEvents filteredEvents={getEventSchedule('upcoming')} />}
+          {getEventSchedule('upcoming').length === 0 ? (
+            <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
+              <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Upcoming Events</h3>
+              <p className="text-gray-600 mb-6">There are no scheduled events in the future. Check back later or create your own event!</p>
+              <Link
+                to={webRoutes.workforceEventCreate}
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create an Event
+              </Link>
+            </div>
+          ) : (
+            <UpcomingEvents filteredEvents={getEventSchedule('upcoming')} />
+          )}
         </div>
 
         {/* Events Grid */}
@@ -311,8 +334,22 @@ const WorkforceEvents = () => {
               {getTabCount('recent')}
             </span>
           </span>
-              {getEventSchedule('recent').length === 0 ? <p className='mb-8'>No recent events</p> :
-        <UpcomingEvents filteredEvents={getEventSchedule('recent')} />}
+          {getEventSchedule('recent').length === 0 ? (
+            <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
+              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Recent Events</h3>
+              <p className="text-gray-600 mb-6">You haven't attended any events recently. Explore upcoming events to get started!</p>
+              <button
+                onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Browse Events
+              </button>
+            </div>
+          ) : (
+            <UpcomingEvents filteredEvents={getEventSchedule('recent')} />
+          )}
         </div>
 
         {/* Empty State */}
@@ -326,7 +363,7 @@ const WorkforceEvents = () => {
             <div className="mt-6">
               <button
                 onClick={clearFilters}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700"
               >
                 Clear all filters
               </button>

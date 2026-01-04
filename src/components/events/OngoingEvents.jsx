@@ -2,16 +2,37 @@ import { Bookmark, Building, Calendar, ClockCheck, Globe, MapPin, SearchIcon, Se
 import OngoingEventsCarousel from './OngoingEventsCarousel'
 import OngoingEventContent from './OngoingEventContent'
 import Scroll from '../Scroll'
+import { Link } from 'react-router-dom'
+import { webRoutes } from '../../lib/webRoutes'
 
   const getTopicsDisplay = (topics) => {
         if (!Array.isArray(topics) || topics.length === 0) return []
         return topics.slice(0, 3).sort((a, b) => b.length - a.length)
       }
 
-const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilters, handleFilterChange, filters, clearFilters, filteredEvents}) => {
+const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilters, handleFilterChange, filters, clearFilters, filteredEvents, events}) => {
+
+  const getTabCount = (tab) => {
+    switch (tab) {
+      case 'ongoing':
+        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) > Date.now()).length;
+      case 'upcoming':
+        return events.filter(event => new Date(event.start_date) > Date.now()).length;
+      case 'recent':
+        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) < Date.now()).length;
+      default:
+        return 0;
+    }
+  };
   return (
             <div className="p-2 py-4 mb-8">
               <div className="flex justify-between lg:items-center flex-col-reverse lg:flex-row gap-4 pb-4">
+                <span className="flex h-fit gap-2 ">
+                            <h3 className='text-2xl font-medium  '>Ongoing Events</h3>
+                            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                              {getTabCount('ongoing')}
+                            </span>
+                          </span>
                 <div className='flex gap-4 lg:w-[50%]'>
                   <div className="flex-1">
                     <div className="relative">
@@ -176,9 +197,9 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
                     {/* Action Buttons */}
                     <div className="flex flex-col-reverse md:flex-row justify-between gap-3 lg:gap-0">
                         <div className="flex gap-3 md:w-[50%]">
-                            <button className="flex-1 bg-white font-semibold py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg">
+                            <Link to={webRoutes.workforceEventDetail.replace(":id", `${currentEvent.id}`)} className="flex-1 bg-white text-center font-semibold py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg">
                                 Join This Event
-                            </button>
+                            </Link>
                             <button className="p-3 bg-pale_yellow hover:bg-white/30 border border-white/30 rounded-lg transition-colors duration-200 flex items-center justify-center">
                                 <Bookmark className="w-5 h-5" />
                             </button>
