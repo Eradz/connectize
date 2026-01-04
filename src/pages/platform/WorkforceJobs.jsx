@@ -7,6 +7,7 @@ import {
   Briefcase,
   TrendingUp,
   LucideChartNoAxesCombined,
+  Bookmark,
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { BriefCaseIcon } from '../../icon';
@@ -28,7 +29,30 @@ const WorkforceJobs = () => {
 
   useEffect(() => {
     loadJobs();
+    loadSavedJobs();
   }, []);
+
+  const loadSavedJobs = async () => {
+    try {
+      const response = await workforceJobService.getSavedJobs();
+      const savedJobIds = (response || []).map(saved => saved.job_posting?.id || saved.job_posting);
+      setSavedJobs(new Set(savedJobIds.filter(id => id)));
+    } catch (error) {
+      console.error('Failed to load saved jobs:', error);
+    }
+  };
+
+  const handleToggleSave = (jobId, isSaved) => {
+    setSavedJobs(prev => {
+      const newSet = new Set(prev);
+      if (isSaved) {
+        newSet.add(jobId);
+      } else {
+        newSet.delete(jobId);
+      }
+      return newSet;
+    });
+  };
 
   // derive filtered + sorted jobs without triggering extra state updates
   const filteredJobs = useMemo(() => {
@@ -155,15 +179,26 @@ const WorkforceJobs = () => {
               <h1 className="text-3xl font-bold text-gray-900">Oil & Gas Jobs</h1>
               <p className="text-gray-600 mt-1">Find your next opportunity in the energy sector</p>
             </div>
-            <Link
+            <div className="flex items-center gap-3">
+              <Link
+                to={webRoutes.workforceSavedJobs}
+                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center"
+              >
+                <Bookmark className="w-4 h-4 mr-2" />
+                <span className="hidden md:flex">
+                  Saved Jobs ({savedJobs.size})
+                </span>
+              </Link>
+              <Link
                 to={webRoutes.workforceJobCreate}
                 className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                 <span className="hidden md:flex">
-                 Create job
-                 </span>
+                <span className="hidden md:flex">
+                  Post a Job
+                </span>
               </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -338,7 +373,12 @@ const WorkforceJobs = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-[95%] mx-auto">
             {filteredJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard 
+                key={job.id} 
+                job={job} 
+                savedJobs={savedJobs}
+                onToggleSave={handleToggleSave}
+              />
             ))}
           </div>
         )}

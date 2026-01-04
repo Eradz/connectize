@@ -43,6 +43,7 @@ const WorkforceEventCreate = () => {
   const [myCompanies, setMyCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [companiesError, setCompaniesError] = useState(null);
+  const [topicsInput, setTopicsInput] = useState(''); // Separate state for topics input
 
   // Form state
   const [formData, setFormData] = useState({
@@ -109,9 +110,17 @@ const WorkforceEventCreate = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Handle topics input - store raw string, only convert to array on submit
   const handleTopicsChange = (topicsString) => {
-    const topics = topicsString.split(',').map(topic => topic.trim()).filter(topic => topic);
-    setFormData(prev => ({ ...prev, topics }));
+    setTopicsInput(topicsString);
+  };
+
+  // Parse topics from input string to array
+  const parseTopics = (topicsString) => {
+    return topicsString
+      .split(',')
+      .map(topic => topic.trim())
+      .filter(topic => topic.length > 0);
   };
 
   const addAgendaItem = () => {
@@ -166,9 +175,13 @@ const WorkforceEventCreate = () => {
     setError(null);
 
     try {
+      // Parse topics from input string
+      const parsedTopics = parseTopics(topicsInput);
+
       // Prepare submission data
       const submissionData = {
         ...formData,
+        topics: parsedTopics, // Use parsed topics from input
         start_date: `${formData.start_date}T${formData.start_time}:00Z`,
         end_date: `${formData.end_date}T${formData.end_time}:00Z`,
         registration_deadline: formData.registration_deadline ? `${formData.registration_deadline}T23:59:59Z` : null,
@@ -332,7 +345,7 @@ const WorkforceEventCreate = () => {
                     <label className="block text-sm font-semibold text-slate-700">Event Topics</label>
                     <input
                       type="text"
-                      value={formData.topics.join(', ')}
+                      value={topicsInput}
                       onChange={(e) => handleTopicsChange(e.target.value)}
                       className="w-full px-4 py-4 bg-white/80 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all duration-200 placeholder:text-slate-400"
                       placeholder="e.g., AI in Energy, Sustainable Technologies, Digital Transformation"

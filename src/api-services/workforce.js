@@ -82,6 +82,12 @@ const workforce = {
     return response;
   },
 
+  // My Companies (for event creation, job posting, etc.)
+  getMyCompanies: async () => {
+    const response = await api.get('/api/v1/workforce/companies/my_companies/');
+    return response;
+  },
+
   // Other job methods
   getJobs: async (params = {}) => {
     const response = await api.get('/api/v1/workforce/jobs/', { params });

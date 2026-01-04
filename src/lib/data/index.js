@@ -113,6 +113,7 @@ export const hubNavItems = [
     description: "Job marketplace and events",
     subItems: [
       { name: "Job Marketplace", to: webRoutes.workforceJobs },
+      { name: "Saved Jobs", to: webRoutes.workforceSavedJobs },
       { name: "My Posted Jobs", to: webRoutes.workforceMyPostedJobs },
       { name: "My Applications", to: webRoutes.workforceApplications },
       { name: "Professionals", to: webRoutes.workforceProfiles },
