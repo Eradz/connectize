@@ -7,7 +7,7 @@ import subscriptionsApi from '../../api-services/subscriptions';
 import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
 
-// Card components (UNCHANGED)
+// Card components
 const Card = ({ children, className = "", ...props }) => (
   <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`} {...props}>
     {children}
@@ -27,7 +27,7 @@ const CardContent = ({ children, className = "", ...props }) => (
 );
 
 const SubscriptionDashboard = () => {
-  const navigate = useNavigate(); // ADDED: for navigation
+  const navigate = useNavigate(); // ADDED
   const [activeTab, setActiveTab] = useState('manage');
   const [billingCycle, setBillingCycle] = useState('Weekly');
   const [dashboardData, setDashboardData] = useState({
@@ -40,7 +40,7 @@ const SubscriptionDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load dashboard data
+  // Load dashboard data - CHANGED API calls
   const loadDashboardData = async () => {
     try {
       setLoading(true);
@@ -50,7 +50,6 @@ const SubscriptionDashboard = () => {
         await loginForTesting();
       }
 
-      // CHANGED: Added features and analytics, removed getUsage (doesn't exist)
       const [plansResult, featuresResult, analyticsResult, currentSubscriptionResult] = await Promise.all([
         subscriptionsApi.getPlans().catch(err => {
           console.error('❌ Failed to load plans:', err);
@@ -70,7 +69,6 @@ const SubscriptionDashboard = () => {
         })
       ]);
 
-      // ADDED: Extract features
       const featuresData = featuresResult?.data?.features_by_category || {};
       const allFeatures = Object.values(featuresData).flat().map(f => ({
         ...f,
@@ -81,11 +79,11 @@ const SubscriptionDashboard = () => {
       
       setDashboardData({
         plans: plansResult?.data?.results || [],
-        features: allFeatures || [], // ADDED
-        featuresCategories: featuresData, // ADDED
-        analytics: analyticsResult?.data, // ADDED
+        features: allFeatures || [],
+        featuresCategories: featuresData,
+        analytics: analyticsResult?.data,
         currentSubscription: extractedSubscription,
-        usage: extractedSubscription?.usage_summary || null // CHANGED: from usageResult to subscription's usage_summary
+        usage: extractedSubscription?.usage_summary || null
       });
 
     } catch (error) {
@@ -100,7 +98,7 @@ const SubscriptionDashboard = () => {
     loadDashboardData();
   }, []);
 
-  // Get usage data with fallbacks (UNCHANGED - exact same logic)
+  // Get usage data with fallbacks - EXACT SAME
   const getUsageData = () => {
     const usage = dashboardData.usage || {};
     return [
@@ -161,7 +159,7 @@ const SubscriptionDashboard = () => {
     ];
   };
 
-  // Format plan data (UNCHANGED)
+  // Format plan data - EXACT SAME
   const getFormattedPlans = () => {
     if (dashboardData.plans.length === 0) {
       return [
@@ -389,7 +387,7 @@ const SubscriptionDashboard = () => {
               </div>
             </div>
 
-            {/* Usage Bars */}
+            {/* Usage Bars - YOUR EXACT CODE */}
             <div className="space-y-6">
               {usageData.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">

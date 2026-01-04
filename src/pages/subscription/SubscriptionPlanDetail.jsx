@@ -13,24 +13,23 @@ import {
   CreditCard,
   TrendingUp,
   AlertCircle,
-  Info
+  Info,
+  Check
 } from 'lucide-react';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
+// RESTORED: Real API imports
 import subscriptionsApi from '../../api-services/subscriptions';
 import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
-import { getSession } from '../../lib/session';
 import { makeApiRequest } from '../../lib/helpers';
 
-// Card components
+// Card components (kept your new design)
 const Card = ({ children, className = "", ...props }) => (
-  <div className={`bg-white rounded-lg shadow-md border border-gray-200 ${className}`} {...props}>
+  <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`} {...props}>
     {children}
   </div>
 );
 const CardHeader = ({ children, className = "", ...props }) => (
-  <div className={`px-6 py-4 border-b border-gray-100 ${className}`} {...props}>
+  <div className={`px-6 py-4 ${className}`} {...props}>
     {children}
   </div>
 );
@@ -39,6 +38,36 @@ const CardContent = ({ children, className = "", ...props }) => (
     {children}
   </div>
 );
+
+const Badge = ({ children, className = "", variant = "default" }) => {
+  const variants = {
+    default: "bg-gray-100 text-gray-800",
+    secondary: "bg-blue-100 text-blue-800",
+    outline: "border border-gray-300 bg-white text-gray-700"
+  };
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+      {children}
+    </span>
+  );
+};
+
+const Button = ({ children, className = "", variant = "default", disabled = false, onClick, ...props }) => {
+  const variants = {
+    default: "bg-blue-600 text-white hover:bg-blue-700",
+    outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+  };
+  return (
+    <button
+      className={`inline-flex items-center justify-center px-4 py-2 rounded-md font-medium transition-colors ${variants[variant]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      disabled={disabled}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
 const SubscriptionPlanDetail = () => {
   const { planId } = useParams();
@@ -52,13 +81,13 @@ const SubscriptionPlanDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load plan details
+  // RESTORED: Load plan details with real API calls
   const loadPlanDetails = async () => {
     try {
       setLoading(true);
       setError(null);
 
-            // Check if test auth is active
+      // Check if test auth is active
       if (!isTestAuthActive()) {
         loginForTesting();
       }
@@ -104,7 +133,7 @@ const SubscriptionPlanDetail = () => {
       let featuresData = {};
       let allPlanFeatures = [];
 
-      // Extract features directly from the plan data
+      // RESTORED: Extract features directly from the plan data
       let planFeaturesResult = { features_by_category: {} };
       if (planResult?.data?.features || planResult?.data?.plan?.features) {
         const planFeatures = planResult.data.features || planResult.data.plan.features;
@@ -403,24 +432,12 @@ const SubscriptionPlanDetail = () => {
         // Clean up empty categories
         Object.keys(featuresData).forEach(category => {
           if (featuresData[category].length === 0) {
-            console.log(`❌ Removing empty category: ${category}`);
             delete featuresData[category];
-          } else {
           }
         });
         
         planFeaturesResult = { features_by_category: featuresData };
-      } else {
-        console.log('❌ No features found in plan data - checking structure:');
-        console.log('planResult.data:', planResult?.data);
       }
-
-      console.log('📊 Plan detail API responses:', {
-        planResponse: planResult,
-        featuresResponse: planFeaturesResult,
-        currentSubscriptionResponse: currentSubscriptionResult
-      });
-
 
       // Extract features data - prioritize plan-specific features from enhanced plans API
       // Reset the variables for processing
@@ -431,25 +448,12 @@ const SubscriptionPlanDetail = () => {
       if (actualFeaturesResult?.features) {
         featuresData = actualFeaturesResult.features;
         allPlanFeatures = Object.values(featuresData).flat();
-        console.log('🔍 Plan-specific features found:', {
-          totalFeatures: allPlanFeatures.length,
-          categories: Object.keys(featuresData).length,
-          planId: planId
-        });
       }
       // Fallback to manual features from plan data if API features not available
       else if (planFeaturesResult?.features_by_category) {
         featuresData = planFeaturesResult.features_by_category;
         allPlanFeatures = Object.values(featuresData).flat();
       }
-
-      console.log('� Final features processing:', {
-        featuresDataKeys: Object.keys(featuresData),
-        totalFeatures: allPlanFeatures.length,
-        featuresByCategory: Object.entries(featuresData).map(([cat, features]) => 
-          ({ category: cat, count: features.length })
-        )
-      });
 
       // Create final plan data structure
       const finalPlanData = {
@@ -465,15 +469,6 @@ const SubscriptionPlanDetail = () => {
         featuresCategories: featuresData,
         currentSubscription: currentSubscriptionResult?.subscription_plan || planResult?.data?.current_subscription
       };
-      
-      console.log('🔍 Final plan data summary:', {
-        plan: finalPlanData.plan,
-        featuresCount: finalPlanData.features.length,
-        categoriesCount: Object.keys(finalPlanData.featuresCategories).length,
-        hasName: !!finalPlanData.plan?.name,
-        planName: finalPlanData.plan?.name,
-        planType: finalPlanData.plan?.plan_type
-      });
 
       setPlanData(finalPlanData);
 
@@ -491,56 +486,6 @@ const SubscriptionPlanDetail = () => {
     }
   }, [planId]);
 
-  // Get plan icon
-  const getPlanIcon = (planType) => {
-    const icons = {
-      'trial': Star,
-      'starter': Zap,
-      'professional': Crown,
-      'enterprise': Shield,
-      'custom': Settings
-    };
-    const IconComponent = icons[planType?.toLowerCase()] || Star;
-    return IconComponent;
-  };
-
-  // Get plan color
-  const getPlanColor = (planType) => {
-    const colors = {
-      'trial': 'bg-gray-100 text-gray-800 border-gray-200',
-      'starter': 'bg-blue-100 text-blue-800 border-blue-200',
-      'professional': 'bg-purple-100 text-purple-800 border-purple-200',
-      'enterprise': 'bg-amber-100 text-amber-800 border-amber-200',
-      'custom': 'bg-emerald-100 text-emerald-800 border-emerald-200'
-    };
-    return colors[planType?.toLowerCase()] || colors.trial;
-  };
-
-  // Get plan features for this specific plan (all features from API)
-  const getPlanFeatures = (planType) => {
-    // Use all features returned by the API - they are already filtered for this plan
-    return planData.features || [];
-  };
-
-  // Categorize features by their category (use API-provided categories first)
-  const categorizeFeatures = (features) => {
-    // If we have API-provided categories, use them directly
-    if (planData.featuresCategories && Object.keys(planData.featuresCategories).length > 0) {
-      return planData.featuresCategories;
-    }
-    
-    // Fallback: categorize the filtered features passed as parameter
-    const categories = {};
-    features.forEach(feature => {
-      const category = feature.feature_category || feature.category || 'General Features';
-      if (!categories[category]) {
-        categories[category] = [];
-      }
-      categories[category].push(feature);
-    });
-    return categories;
-  };
-
   // Check if this plan is the current subscription
   const isCurrentPlan = () => {
     if (!planData.currentSubscription || !planData.plan) return false;
@@ -554,9 +499,9 @@ const SubscriptionPlanDetail = () => {
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <div className="h-64 bg-gray-200 rounded-lg mb-6"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="h-32 bg-gray-200 rounded-lg"></div>
                 <div className="h-96 bg-gray-200 rounded-lg"></div>
               </div>
               <div className="h-64 bg-gray-200 rounded-lg"></div>
@@ -582,17 +527,6 @@ const SubscriptionPlanDetail = () => {
               <p className="text-red-600 mt-2">
                 {error || `Plan with ID ${planId} could not be found.`}
               </p>
-              <div className="mt-4">
-                <p className="text-sm text-gray-600">Debug info:</p>
-                <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-auto">
-                  {JSON.stringify({
-                    planId,
-                    planData,
-                    error,
-                    loading
-                  }, null, 2)}
-                </pre>
-              </div>
               <div className="flex space-x-4 mt-4">
                 <Button 
                   onClick={() => navigate(webRoutes.subscriptions)} 
@@ -613,154 +547,94 @@ const SubscriptionPlanDetail = () => {
   }
 
   const { plan } = planData;
-  const PlanIcon = getPlanIcon(plan.plan_type);
-  const planFeatures = getPlanFeatures(plan.plan_type);
-  const categorizedFeatures = categorizeFeatures(planFeatures);
+  const categorizedFeatures = planData.featuresCategories || {};
+  const totalFeatures = planData.features.length;
+  const totalCategories = Object.keys(categorizedFeatures).length;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
+        {/* Header - KEPT YOUR NEW DESIGN */}
+        <div className="mb-6">
+          <div className="flex items-center space-x-4 mb-4">
+            <button 
               onClick={() => navigate(webRoutes.subscriptions)}
+              className="flex items-center justify-center h-12 w-12 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Plans
-            </Button>
+              <ArrowLeft className="h-5 w-5 text-gray-700" />
+            </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-4xl font-bold text-gray-900">
                 {plan?.name || 'Subscription Plan'}
               </h1>
-              <p className="text-gray-600 mt-1">
-                {plan?.description || `${plan?.plan_type || 'Professional'} subscription plan`}
-              </p>
             </div>
           </div>
-          
-          {isCurrentPlan() && (
-            <Badge className="bg-green-100 text-green-800 px-3 py-1">
-              Current Plan
-            </Badge>
-          )}
+          <p className="text-gray-500 text-lg ml-16">
+            {plan?.description || `${plan?.plan_type || 'Professional'} subscription plan`}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Plan Overview */}
-            <Card className={`${getPlanColor(plan.plan_type)} border-2`}>
-              <CardHeader>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - KEPT YOUR NEW DESIGN */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Price Card - KEPT YOUR NEW DESIGN */}
+            <Card>
+              <CardContent className="py-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center h-12 w-12 bg-white rounded-full">
-                      <PlanIcon className="h-6 w-6" />
+                  <div>
+                    <div className="text-sm text-gray-700 mb-2 font-medium">
+                      {plan?.plan_type?.charAt(0).toUpperCase() + plan?.plan_type?.slice(1) || 'Professional'}
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold">{plan?.name || 'Subscription Plan'}</h2>
-                      <p className="text-sm opacity-80">{plan?.plan_type || 'Professional'} Plan</p>
-                    </div>
-                  </div>
-                  
-                  {plan?.price && (
-                    <div className="text-right">
-                      <div className="text-3xl font-bold">
-                        ${plan.price}
-                      </div>
-                      {plan?.billing_cycle && (
-                        <div className="text-sm opacity-80">
-                          per {plan.billing_cycle}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                {plan.description && (
-                  <p className="text-lg mb-6">{plan.description}</p>
-                )}
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white bg-opacity-50 rounded-lg p-4">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-5 w-5" />
-                      <span className="font-medium">Features Included</span>
-                    </div>
-                    <div className="text-2xl font-bold mt-1">
-                      {planFeatures.length}
+                    <div className="flex items-baseline">
+                      <span className="text-4xl font-bold text-gray-900 border-b-4 border-red-500 pb-1">
+                        ${plan?.price || '99.99'}
+                      </span>
+                      <span className="text-gray-600 ml-2 text-lg">/ {plan?.billing_cycle || 'month'}</span>
                     </div>
                   </div>
-                  
-                  <div className="bg-white bg-opacity-50 rounded-lg p-4">
+                  <div className="flex flex-col space-y-2 text-sm">
                     <div className="flex items-center space-x-2">
-                      <Users className="h-5 w-5" />
-                      <span className="font-medium">Categories</span>
+                      <Check className="h-4 w-4 text-gray-600" />
+                      <span className="text-gray-700">Features Included: {totalFeatures}</span>
                     </div>
-                    <div className="text-2xl font-bold mt-1">
-                      {Object.keys(categorizedFeatures).length}
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4 text-gray-600" />
+                      <span className="text-gray-700">Categories: {totalCategories}</span>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Features by Category */}
+            {/* Features & Capabilities - KEPT YOUR NEW DESIGN */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Features & Capabilities
               </h2>
               
-              <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(categorizedFeatures).map(([category, features]) => (
-                  <Card key={category} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold capitalize">
-                          {category.replace('_', ' ')}
+                  <Card key={category} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3 pb-3 border-b border-gray-200">
+                        <h3 className="font-semibold text-gray-900 text-base">
+                          {category}
                         </h3>
-                        <Badge variant="secondary">
-                          {features.length} feature{features.length !== 1 ? 's' : ''}
-                        </Badge>
+                        <span className="text-xs text-gray-500">
+                          {features.length} Feature{features.length !== 1 ? 's' : ''}
+                        </span>
                       </div>
-                    </CardHeader>
-                    
-                    <CardContent className="pt-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      
+                      <ul className="space-y-2.5">
                         {features.map((feature, index) => (
-                          <div key={feature.id || index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-shrink-0 mt-0.5">
-                              {/* Show green tick for features included in this plan */}
-                              <CheckCircle className="h-4 w-4 text-green-600" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-medium text-sm">{feature.feature_name}</h4>
-                              {feature.description && (
-                                <p className="text-xs text-gray-600 mt-1">{feature.description}</p>
-                              )}
-                              <div className="flex items-center space-x-2 mt-1">
-                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                  ✓ Included
-                                </Badge>
-                                {feature.value && (
-                                  <Badge className="text-xs bg-blue-100 text-blue-800">
-                                    {typeof feature.value === 'number' ? feature.value.toLocaleString() : feature.value}
-                                  </Badge>
-                                )}
-                                {feature.enabled === true && (
-                                  <Badge className="text-xs bg-green-100 text-green-800">
-                                    Active
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
+                          <li key={feature.id || index} className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700">
+                              • {feature.feature_name}
+                            </span>
+                            <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </CardContent>
                   </Card>
                 ))}
@@ -768,112 +642,87 @@ const SubscriptionPlanDetail = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Right Sidebar - KEPT YOUR NEW DESIGN */}
           <div className="space-y-6">
-            {/* Pricing Card */}
-            <Card className="sticky top-6">
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Subscription Details</h3>
+            {/* Subscription Details - KEPT YOUR NEW DESIGN */}
+            <Card>
+              <CardHeader className="pb-3">
+                <h3 className="font-semibold text-gray-900 text-base">Subscription Details</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {plan?.description || 'Perfect for businesses getting started'}
+                </p>
               </CardHeader>
               
-              <CardContent className="space-y-4">
-                {plan.price && (
-                  <div className="text-center py-4 bg-gray-50 rounded-lg">
-                    <div className="text-3xl font-bold text-gray-900">
-                      ${plan.price}
-                    </div>
-                    {plan.billing_cycle && (
-                      <div className="text-sm text-gray-600">
-                        per {plan.billing_cycle}
-                      </div>
-                    )}
-                  </div>
+              <CardContent className="space-y-3 pt-0">
+                {isCurrentPlan() ? (
+                  <button className="w-full bg-green-600 text-white py-3 rounded-lg font-medium flex items-center justify-center text-sm" disabled>
+                    <Check className="h-5 w-5 mr-2" />
+                    Current Plan
+                  </button>
+                ) : (
+                  <button 
+                    className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm"
+                    style={{ background: 'linear-gradient(to right, #FFC000, #FF8400)' }}
+                  >
+                    <TrendingUp className="h-5 w-5 mr-2" />
+                    Upgrade to This Plan
+                  </button>
                 )}
                 
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Plan Type</span>
-                    <Badge variant="outline">{plan.plan_type}</Badge>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Features</span>
-                    <span className="font-medium">{planFeatures.length}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Categories</span>
-                    <span className="font-medium">{Object.keys(categorizedFeatures).length}</span>
-                  </div>
-                </div>
-                
-                <div className="pt-4 space-y-2">
-                  {isCurrentPlan() ? (
-                    <div className="space-y-2">
-                      <Button className="w-full" disabled>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Current Plan
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => navigate(webRoutes.subscriptionManagement)}
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Manage Subscription
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Button className="w-full">
-                        <TrendingUp className="h-4 w-4 mr-2" />
-                        Upgrade to This Plan
-                      </Button>
-                      <Button variant="outline" className="w-full">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Compare Plans
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                <button 
+                  onClick={() => navigate(webRoutes.subscriptions)}
+                  className="w-full border-2 border-orange-200 bg-orange-50 text-orange-600 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-orange-100 transition-colors text-sm"
+                >
+                  <Users className="h-5 w-5 mr-2" />
+                  Compare Plans
+                </button>
               </CardContent>
             </Card>
 
-            {/* Plan Benefits */}
+            {/* Why Choose This Plan - KEPT YOUR NEW DESIGN */}
             <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Why Choose This Plan?</h3>
+              <CardHeader className="pb-3">
+                <h3 className="font-semibold text-gray-900 text-base">Why Choose This Plan?</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {plan?.description || 'Perfect for businesses getting started'}
+                </p>
               </CardHeader>
               
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Access to {planFeatures.length} powerful features</span>
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Coverage across {Object.keys(categorizedFeatures).length} feature categories</span>
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>24/7 customer support</span>
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Regular feature updates</span>
-                  </div>
-                  
-                  {plan.plan_type !== 'trial' && (
-                    <div className="flex items-start space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                      <span>Priority technical assistance</span>
-                    </div>
+              <CardContent className="pt-0">
+                <ul className="space-y-3">
+                  <li className="flex items-start justify-between">
+                    <span className="text-sm text-gray-700">
+                      • Access to {totalFeatures} powerful features
+                    </span>
+                    <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                  </li>
+                  <li className="flex items-start justify-between">
+                    <span className="text-sm text-gray-700">
+                      • Coverage across {totalCategories} feature categories
+                    </span>
+                    <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                  </li>
+                  <li className="flex items-start justify-between">
+                    <span className="text-sm text-gray-700">
+                      • 24/7 customer support
+                    </span>
+                    <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                  </li>
+                  <li className="flex items-start justify-between">
+                    <span className="text-sm text-gray-700">
+                      • Regular feature updates
+                    </span>
+                    <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                  </li>
+                  {plan?.plan_type !== 'trial' && (
+                    <li className="flex items-start justify-between">
+                      <span className="text-sm text-gray-700">
+                        • Priority technical assistance
+                      </span>
+                      <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                    </li>
                   )}
-                </div>
+                </ul>
               </CardContent>
             </Card>
           </div>
