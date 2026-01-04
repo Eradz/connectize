@@ -25,11 +25,13 @@ import {
   knowledgeForumTopicService
 } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const KnowledgeCategoryDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [category, setCategory] = useState(null);
+  const [categories, setCategories] = useState(null);
   const [articles, setArticles] = useState([]);
   const [forums, setForums] = useState([]);
   const [topics, setTopics] = useState([]);
@@ -41,8 +43,20 @@ const KnowledgeCategoryDetail = () => {
   useEffect(() => {
     if (slug) {
       loadCategoryData();
+      loadCategories();
     }
   }, [slug]);
+    const loadCategories = async () => {
+      try {
+        setLoading(true);
+    const response = await knowledgeCategoryService.getAll();
+    setCategories(response?.results || response?.data || response || []);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const loadCategoryData = async () => {
     try {
@@ -173,55 +187,35 @@ const KnowledgeCategoryDetail = () => {
   const filteredContent = getFilteredContent();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Link
-              to={webRoutes.knowledgeCategories}
-              className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
-            >
-              <ArrowLeft className="w-5 h-5 mr-1" />
-              Categories
-            </Link>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div 
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-white text-2xl font-bold"
-                style={{ backgroundColor: category.color || '#3B82F6' }}
+        <div className=" flex items-center gap-3">
+          {/* Back Button */}
+          <BackArrowButton />
+          <div >
+            {/* Breadcrumb */}
+            <div className="flex items-center text-sm text-gray-600 mb-4">
+              <Link
+                to={webRoutes.knowledgeCategories}
+                className="hover:text-gray-900 transition-colors"
               >
-                {category.icon || category.name?.charAt(0)?.toUpperCase()}
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{category.name}</h1>
-                <p className="mt-2 text-gray-600">{category.description}</p>
-              </div>
+                Categories
+              </Link>
+              <span className="mx-2">›</span>
+              <span className="text-gray-900">{category.name}</span>
             </div>
             
-            <div className="flex items-center space-x-3">
-              <Link
-                to={webRoutes.knowledgeArticleCreate}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                New Article
-              </Link>
-              <Link
-                to={webRoutes.knowledgeForumCreate}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                New Forum
-              </Link>
+            {/* Title and Subtitle */}
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-3">{category.name}</h1>
+              <p className="text-gray-600">{category.description}</p>
             </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -269,169 +263,150 @@ const KnowledgeCategoryDetail = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {/* Content Type Filter */}
-              <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+          
+        </div>
+
+        <div className='bg-white p-4'>
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              {/* Search and Filter */}
+              <div className="flex w-full flex-col sm:flex-row items-start sm:items-center gap-3 ">
+                <div className="relative flex w-[70%]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <input
+                    type="text"
+                    placeholder="Search Deal Rooms"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Category Filter Dropdown */}
+                <select 
+                onChange={(e)=> {
+                  if (e.target.value === 'all') {
+                    navigate(webRoutes.knowledgeArticles);
+                  } else {
+                    navigate(`/knowledge/categories/${e.target.value}`);
+                  }
+                }}
+                className="w-[30%] px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="all">All Categories</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id} value={cat.slug}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Search Button */}
+                <button className="px-6 py-2 bg-yellow-400 text-gray-900 font-medium rounded-lg hover:bg-yellow-500 transition-colors">
+                  Search
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="">
+              <div className="grid grid-cols-4 gap-2">
                 {[
                   { key: 'all', label: 'All Content' },
-                  { key: 'articles', label: 'Articles' },
-                  { key: 'forums', label: 'Forums' },
+                  { key: 'articles', label: 'Article' },
+                  { key: 'forums', label: 'Forum' },
                   { key: 'topics', label: 'Topics' }
-                ].map((type) => (
+                ].map((tab) => (
                   <button
-                    key={type.key}
-                    onClick={() => setContentType(type.key)}
-                    className={`px-4 py-2 text-sm font-medium ${
-                      contentType === type.key
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    key={tab.key}
+                    onClick={() => setContentType(tab.key)}
+                    className={`py-2 px-1  font-medium text-sm transition-colors ${
+                      contentType === tab.key
+                        ? 'border-b-[2px] border-gray-900 text-gray-900 bg-gray-100'
+                        : 'border-b-[1px] border-gray-300 text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    {type.label}
+                    {tab.label}
                   </button>
                 ))}
               </div>
-
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  placeholder="Search content..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-64 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            {/* View Mode */}
-            <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 ${
-                  viewMode === 'grid'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <Grid className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 ${
-                  viewMode === 'list'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <List className="h-5 w-5" />
-              </button>
             </div>
           </div>
-        </div>
 
-        {/* Content */}
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredContent.map((item) => (
-              <Link
-                key={`${item.type}-${item.id}`}
-                to={getContentLink(item)}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    {getContentIcon(item.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+          {/* Content Cards Grid */}
+          {articles.length === 0 && forums.length === 0 && topics.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-gray-50 rounded-lg p-12 max-w-md mx-auto">
+                <BookOpen className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Content Yet</h3>
+                <p className="text-gray-600 mb-6">
+                  This category doesn't have any articles, forums, or discussion topics yet. Be the first to contribute!
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Link
+                    to={webRoutes.knowledgeArticleCreate}
+                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Write Article
+                  </Link>
+                  <Link
+                    to={webRoutes.knowledgeForumCreate}
+                    className="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Forum
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredContent.filter((item) => 
+                  item.category_name === category?.name
+                ).map((item) => (
+                  <Link
+                    key={`${item.type}-${item.id}`}
+                    to={getContentLink(item)}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6 flex flex-col"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {item.title || item.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      {item.description || item.excerpt || item.content?.substring(0, 100) + '...'}
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {category?.name || category?.title || 'Knowledge Category'}
                     </p>
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                        {item.type}
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                        {item.type === 'article' ? 'Article' : item.type === 'forum' ? 'Forum' : item.type === 'topic' ? 'Topic' : item.type}
                       </span>
                       <span className="text-xs text-gray-500">
                         {formatDate(item.created_at)}
                       </span>
                     </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="divide-y divide-gray-200">
-              {filteredContent.map((item) => (
-                <Link
-                  key={`${item.type}-${item.id}`}
-                  to={getContentLink(item)}
-                  className="block p-6 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 mt-1">
-                      {getContentIcon(item.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {item.title || item.name}
-                        </h3>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                          {item.type}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {item.description || item.excerpt || item.content?.substring(0, 200) + '...'}
-                      </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          <span>{formatDate(item.created_at)}</span>
-                        </div>
-                        {item.views && (
-                          <div className="flex items-center">
-                            <Eye className="h-4 w-4 mr-1" />
-                            <span>{item.views}</span>
-                          </div>
-                        )}
-                        {item.likes && (
-                          <div className="flex items-center">
-                            <ThumbsUp className="h-4 w-4 mr-1" />
-                            <span>{item.likes}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+                  </Link>
+                ))}
+              </div>
 
-        {filteredContent.length === 0 && (
-          <div className="text-center py-12">
-            <Hash className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No content found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm 
-                ? 'Try adjusting your search term.'
-                : 'This category doesn\'t have any content yet.'
-              }
-            </p>
-          </div>
-        )}
+              {filteredContent.filter((item) => item.category_name === category?.name).length === 0 && (
+                <div className="text-center py-12">
+                  <Hash className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No content found</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {searchTerm 
+                      ? 'Try adjusting your search term.'
+                      : 'No results match your current filters.'
+                    }
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div>
       </div>
     </div>
   );

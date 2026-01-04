@@ -2,15 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown } from 'lucide-react';
 
-// Mock API for demo purposes
-const subscriptionsApi = {
-  getPlans: async () => ({ data: { results: [] } }),
-  getCurrentSubscription: async () => ({ data: null }),
-  getUsage: async () => ({ data: null })
-};
-
-const loginForTesting = async () => {};
-const isTestAuthActive = () => true;
+// CHANGED: Real API imports instead of mock
+import subscriptionsApi from '../../api-services/subscriptions';
+import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
+import { webRoutes } from '../../lib/webRoutes';
 
 // Card components
 const Card = ({ children, className = "", ...props }) => (
@@ -32,6 +27,7 @@ const CardContent = ({ children, className = "", ...props }) => (
 );
 
 const SubscriptionDashboard = () => {
+  const navigate = useNavigate(); // ADDED
   const [activeTab, setActiveTab] = useState('manage');
   const [billingCycle, setBillingCycle] = useState('Weekly');
   const [dashboardData, setDashboardData] = useState({
@@ -44,7 +40,7 @@ const SubscriptionDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load dashboard data
+  // Load dashboard data - CHANGED API calls
   const loadDashboardData = async () => {
     try {
       setLoading(true);
@@ -54,27 +50,40 @@ const SubscriptionDashboard = () => {
         await loginForTesting();
       }
 
-      const [plansResult, currentSubscriptionResult, usageResult] = await Promise.all([
+      const [plansResult, featuresResult, analyticsResult, currentSubscriptionResult] = await Promise.all([
         subscriptionsApi.getPlans().catch(err => {
           console.error('❌ Failed to load plans:', err);
           return { data: { results: [] } };
         }),
+        subscriptionsApi.getAvailableFeatures().catch(err => {
+          console.error('❌ Failed to load features:', err);
+          return { data: { features_by_category: {} } };
+        }),
+        subscriptionsApi.getSubscriptionAnalytics().catch(err => {
+          console.error('❌ Failed to load analytics:', err);
+          return { data: null };
+        }),
         subscriptionsApi.getCurrentSubscription().catch(err => {
           console.error('❌ Failed to load current subscription:', err);
           return { data: null };
-        }),
-        subscriptionsApi.getUsage().catch(err => {
-          console.error('❌ Failed to load usage:', err);
-          return { data: null };
         })
       ]);
+
+      const featuresData = featuresResult?.data?.features_by_category || {};
+      const allFeatures = Object.values(featuresData).flat().map(f => ({
+        ...f,
+        minimum_plan: f.minimum_plan || f.required_plan || 'trial'
+      }));
 
       const extractedSubscription = currentSubscriptionResult?.data?.subscription || currentSubscriptionResult?.data || null;
       
       setDashboardData({
         plans: plansResult?.data?.results || [],
+        features: allFeatures || [],
+        featuresCategories: featuresData,
+        analytics: analyticsResult?.data,
         currentSubscription: extractedSubscription,
-        usage: usageResult?.data
+        usage: extractedSubscription?.usage_summary || null
       });
 
     } catch (error) {
@@ -89,7 +98,7 @@ const SubscriptionDashboard = () => {
     loadDashboardData();
   }, []);
 
-  // Get usage data with fallbacks
+  // Get usage data with fallbacks - EXACT SAME
   const getUsageData = () => {
     const usage = dashboardData.usage || {};
     return [
@@ -150,7 +159,7 @@ const SubscriptionDashboard = () => {
     ];
   };
 
-  // Format plan data
+  // Format plan data - EXACT SAME
   const getFormattedPlans = () => {
     if (dashboardData.plans.length === 0) {
       return [
@@ -247,9 +256,21 @@ const SubscriptionDashboard = () => {
     });
   };
 
+  // CHANGED: Navigation instead of alert
   const handleChoosePackage = (plan) => {
     console.log('Choosing package:', plan);
-    alert(`You selected: ${plan.name}`);
+    
+    if (!plan || !plan.id) {
+      console.error('❌ No plan ID available');
+      if (plan?.plan_type) {
+        const fallbackRoute = webRoutes.subscriptionPlanDetail.replace(':planId', plan.plan_type);
+        navigate(fallbackRoute);
+      }
+      return;
+    }
+    
+    const targetRoute = webRoutes.subscriptionPlanDetail.replace(':planId', plan.id);
+    navigate(targetRoute);
   };
 
   const usageData = getUsageData();
@@ -366,7 +387,7 @@ const SubscriptionDashboard = () => {
               </div>
             </div>
 
-            {/* Usage Bars */}
+            {/* Usage Bars - YOUR EXACT CODE */}
             <div className="space-y-6">
               {usageData.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">

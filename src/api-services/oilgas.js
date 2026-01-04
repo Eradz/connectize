@@ -173,6 +173,32 @@ export class DealRoomService extends CrudService {
       }
     }
   }
+  async addDealRoom(dealRoomId, dealRoomData) {
+    try {
+      const res = await makeApiRequest({
+  url: `${this.basePath}${dealRoomId}api/v1/deals/deal-rooms/`,
+        method: "POST",
+        data: dealRoomData,
+      });
+      // If request was redirected to login or blocked, makeApiRequest returns undefined.
+      if (!res) {
+        const err = new Error('Authentication required. Please log in to add activities.');
+        err.status = 401;
+        throw err;
+      }
+      // Expect a participant-like object back
+      if (!res.id && !res.user && !res.user_email) {
+        const err = new Error('Failed to add activity. Unexpected server response.');
+        err.status = 500;
+        throw err;
+      }
+      return res;
+    } catch (error) {
+      // Re-throw with better error context
+      console.error('Add activity API error:', error);
+      throw error;
+    }
+  }
 
   async addParticipant(dealRoomId, participantData) {
     try {
@@ -318,6 +344,33 @@ export class DealActivityService extends CrudService {
       method: "GET",
       params: { limit },
     });
+  }
+
+   async addActivities(dealRoomId, activityData) {
+    try {
+      const res = await makeApiRequest({
+  url: `${this.basePath}${dealRoomId}/add_activity/`,
+        method: "POST",
+        data: activityData,
+      });
+      // If request was redirected to login or blocked, makeApiRequest returns undefined.
+      if (!res) {
+        const err = new Error('Authentication required. Please log in to add activities.');
+        err.status = 401;
+        throw err;
+      }
+      // Expect a participant-like object back
+      if (!res.id && !res.user && !res.user_email) {
+        const err = new Error('Failed to add activity. Unexpected server response.');
+        err.status = 500;
+        throw err;
+      }
+      return res;
+    } catch (error) {
+      // Re-throw with better error context
+      console.error('Add activity API error:', error);
+      throw error;
+    }
   }
 }
 

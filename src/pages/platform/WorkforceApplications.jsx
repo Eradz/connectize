@@ -47,11 +47,14 @@ import Scroll from '../../components/Scroll';
 import { toast as notify } from "sonner";
 import { baseURL, getAuthorizationHeader } from '../../lib/helpers';
 import axios from 'axios';
+import ApplicationActionModal from '../../components/workforce/ApplicationActionModal';
 
 const WorkforceApplications = () => {
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Derived list; avoid setState on each keypress to prevent focus loss
   // We'll compute filtered applications via useMemo
   const [searchTerm, setSearchTerm] = useState('');
@@ -172,6 +175,24 @@ const WorkforceApplications = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOpenApplicationModal = (application) => {
+    setSelectedApplication(application);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplication(null);
+  };
+
+  const handleApplicationUpdate = () => {
+    loadApplications();
+  };
+
+  const handleApplicationDelete = () => {
+    loadApplications();
   };
 
   // Removed filterApplications state updater; using useMemo instead
@@ -427,10 +448,10 @@ const WorkforceApplications = () => {
                           onChange={(e) => handleFilterChange('jobType', e.target.value)}
                         >
                           <option value="">All Types</option>
-                          <option value="Full-time">Full-time</option>
+                          <option value="full_time">Full-time</option>
                           <option value="Contract">Contract</option>
-                          <option value="Part-time">Part-time</option>
-                          <option value="Temporary">Temporary</option>
+                          <option value="part_time">Part-time</option>
+                          <option value="temporary">Temporary</option>
                         </select>
                       </div>
                       <div>
@@ -560,8 +581,8 @@ const WorkforceApplications = () => {
                           </div>
                         </div>
                 
-                        <div className=" flex items-center justify-between my-2 h-[10%]">
-                          <div className="flex items-center gap-2 text-[12px]">
+                        <div className="flex items-center my-2  h-[10%]">
+                          {/* <div className="flex items-center gap-2 text-[12px]">
                              <button
                                 onClick={async () => {
                                 try {
@@ -596,23 +617,23 @@ const WorkforceApplications = () => {
                               </span>
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                           
-                          <div className="flex items-center space-x-2 text-[12px]">
-                            <Link
-                              to={webRoutes.workforceJobApply.replace(':id', job.id)}
+                          <div className="flex flex-row-reverse w-full justify-between  items-center space-x-2 text-[12px]">
+                            <button
+                              onClick={() => handleOpenApplicationModal(job)}
                               className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-red-300 transition-colors font-medium"
                             >
                               <Trash2 className="w-4 h-4 md:mr-1 text-[#FF0000]" />
                               <p className="text-[#FF0000] hidden md:flex">Delete</p>
-                            </Link>
-                            <Link
-                              to={webRoutes.workforceJobDetail.replace(':id', job.id)}
+                            </button>
+                            <button
+                              onClick={() => handleOpenApplicationModal(job)}
                               className="flex font-medium bg-gray-100 hover:bg-gray-300 p-2 rounded-lg"
                             >
                                 <Edit className="w-4 h-4 md:mr-1 " />
                                 <p className="hidden md:flex">Edit</p>
-                            </Link>
+                            </button>
                           </div>
                           
                         </div>
@@ -649,6 +670,15 @@ const WorkforceApplications = () => {
           </div>
         )}
       </div>
+
+      {/* Application Action Modal */}
+      <ApplicationActionModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        application={selectedApplication}
+        onUpdate={handleApplicationUpdate}
+        onDelete={handleApplicationDelete}
+      />
     </div>
   );
 };

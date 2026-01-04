@@ -118,8 +118,8 @@ const WorkforceMyPostedJobs = () => {
       <div className="">
         {/* Header */}
         <div className="my-6">
-          <div className="flex md:flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className='flex'>
+          <div className="flex flex-row items-end md:items-center justify-between">
+            <div className='flex flex-col md:flex-row'>
               <BackArrowButton />
               <div>
               <h1 className="text-3xl font-bold text-gray-900">My Posted Jobs</h1>
@@ -134,7 +134,7 @@ const WorkforceMyPostedJobs = () => {
                 className="inline-flex items-center px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-gold transition-colors"
               >
                 <Plus className="w-5 h-5 md:mr-2" />
-               <span className="hidden md:infline-flex text-sm">Post New Job</span>
+               <span className="hidden md:flex text-sm">Post New Job</span>
               </Link>
             </div>
           </div>

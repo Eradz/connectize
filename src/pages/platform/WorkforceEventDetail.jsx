@@ -41,10 +41,6 @@ const WorkforceEventDetail = () => {
   const [isEventCreator, setIsEventCreator] = useState(false);
   const [myRegistration, setMyRegistration] = useState(null);
 
-  // Debug user state
-  console.log('Component render - User state:', user);
-  console.log('Current myRegistration state:', myRegistration);
-
   useEffect(() => {
     if (id) {
       loadEventDetail();
@@ -87,9 +83,9 @@ const WorkforceEventDetail = () => {
         try {
           console.log('Checking registration for event:', event.id);
           const response = await workforceAPI.getMyEventRegistrations();
-          console.log('My registrations API response:', response);
+          // console.log('My registrations API response:', response);
 
-          if (response.success && response.data?.results) {
+          if (response.data?.results) {
             console.log('Found registrations:', response.data.results.length);
             response.data.results.forEach((reg, index) => {
               console.log(`Registration ${index + 1}:`, {
@@ -99,21 +95,22 @@ const WorkforceEventDetail = () => {
                 matches: reg.event?.id === event.id
               });
             });
-
+            // console.log("Event ID:", event.id);
             const myReg = response.data.results.find(reg => {
               const regEventId = reg.event?.id;
               const currentEventId = event.id;
+              // console.log('Checking registration:', { regEventId, currentEventId });
               // Ensure both are strings for comparison
               return String(regEventId) === String(currentEventId);
             });
-            console.log('Found matching registration:', myReg);
+            // console.log('Found matching registration:', myReg);
             setMyRegistration(myReg || null);
           } else {
-            console.log('No registrations found or API error:', response);
+            // console.log('No registrations found or API error:', response);
             setMyRegistration(null);
           }
         } catch (error) {
-          console.error('Error checking my registration:', error);
+          // console.error('Error checking my registration:', error);
           setMyRegistration(null);
         }
       };
@@ -457,7 +454,7 @@ const WorkforceEventDetail = () => {
                        to={webRoutes.workforceEventCreate}
                        className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
                        >
-                        <Bookmark className="w-5 h-5 md:mr-2 " />
+                        <Plus className="w-5 h-5 md:mr-2 " />
                         <p className='hidden md:flex'>
                         Create Event
                         </p>
@@ -499,10 +496,10 @@ const WorkforceEventDetail = () => {
                     <p className="text-base lg:text-xl text-white leading-relaxed mb-6 lg:mb-8">{event.description}</p>
                     <button 
                       onClick={handleRegister}
-                      disabled={isRegistering}
+                      disabled={isRegistering || myRegistration}
                       className='hidden md:flex border disabled:opacity-50 disabled:cursor-not-allowed border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700 hover:text-white'
                     >
-                      Register Now
+                      {myRegistration ? 'Registered' : 'Register Now'}
                     </button>
                   </div>
 
@@ -553,9 +550,9 @@ const WorkforceEventDetail = () => {
                         </div>
                       </div>
                       <button onClick={handleRegister}
-                      disabled={isRegistering}
-                      className='flex w-full md:hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:text-white border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700'>
-                        Register Now
+                      disabled={isRegistering || myRegistration}
+                      className='flex text-center w-full md:hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:text-white border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700'>
+                        {myRegistration ? 'Registered' : 'Register Now'}
                     </button>
                     </div>
                   </div>
@@ -998,11 +995,8 @@ const WorkforceEventDetail = () => {
                 </div>
 
                 {eventStatus.status === 'upcoming' && (
-                  <div className="space-y-1 border border-gray-200 md:border-transparent  py-4 px-2 md:px-0 md:py-0">
-                    <div className="md:hidden flex flex-col gap-4 mb-4">
-                      <span className='font-semibold'>Apply for this job</span>
-                      <span className='text-gray-500'>Please Note : application typically take about 2-3 minutes</span>
-                    </div>
+                  <div className="space-y-1 ">
+                    
                     {myRegistration ? (
                       // User is already registered
                       <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl lg:rounded-2xl border border-emerald-200 shadow-lg">

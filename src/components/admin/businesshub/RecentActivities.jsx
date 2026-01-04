@@ -16,8 +16,8 @@ export default function RecentActivities({dashboardData}) {
     <div className="bg-white rounded-lg border border-gray-200 p-6 overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden h-[510px]">
       <h2 className="text-lg font-semibold text-gray-900 mb-4 hidden md:flex">Recent Activities</h2>
       
-      <div className="space-y-4">
-        {dashboardData.activities.data.slice(0, 5).map((activity, index) => (
+      <div className="space-y-4 overflow-y-scroll scrollbar-hidden">
+        {dashboardData.activities.data.map((activity, index) => (
           <div key={index} className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
               <User2Icon/>

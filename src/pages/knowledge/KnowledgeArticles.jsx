@@ -16,7 +16,7 @@ import {
   Calendar,
   ChevronDown
 } from 'lucide-react';
-import { knowledgeArticleService } from '../../api-services/oilgas';
+import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 
 const KnowledgeArticles = () => {
   const [articles, setArticles] = useState([]);
@@ -24,7 +24,7 @@ const KnowledgeArticles = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-
+  const [categories, setCategories] = useState([]);
   useEffect(() => {
     loadArticles();
   }, []);
@@ -32,8 +32,9 @@ const KnowledgeArticles = () => {
   const loadArticles = async () => {
     try {
       setLoading(true);
-  const response = await knowledgeArticleService.getAll();
+  const [response, categoriesRes] = await Promise.all([knowledgeArticleService.getAll(), knowledgeCategoryService.getAll(),]);
   setArticles(response?.results || response?.data || response || []);
+  setCategories(categoriesRes?.results || categoriesRes?.data || categoriesRes || []);
     } catch (error) {
       console.error('Error loading articles:', error);
     } finally {
@@ -64,7 +65,7 @@ const KnowledgeArticles = () => {
   const filteredArticles = articles.filter(article => {
     const matchesSearch = article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          article.content?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === '' || article.category === filterCategory;
+    const matchesCategory = article.category_name === filterCategory || filterCategory === '' ;
     const matchesStatus = filterStatus === '' || article.status === filterStatus;
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -187,12 +188,17 @@ const KnowledgeArticles = () => {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-[196px]"
               >
                 <option value="">All Categories</option>
-                <option value="market_analysis">Market Analysis</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+                {/*<option value="market_analysis">Market Analysis</option>
                 <option value="technology">Technology</option>
                 <option value="regulations">Regulations</option>
                 <option value="sustainability">Sustainability</option>
                 <option value="exploration">Exploration</option>
-                <option value="production">Production</option>
+                <option value="production">Production</option> */}
               </select>
 
               <select
@@ -408,12 +414,17 @@ const KnowledgeArticles = () => {
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm appearance-none pr-10"
               >
                 <option value="">All Categories</option>
-                <option value="market_analysis">Market Analysis</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+                {/*<option value="market_analysis">Market Analysis</option>
                 <option value="technology">Technology</option>
                 <option value="regulations">Regulations</option>
                 <option value="sustainability">Sustainability</option>
                 <option value="exploration">Exploration</option>
-                <option value="production">Production</option>
+                <option value="production">Production</option> */}
               </select>
               <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>

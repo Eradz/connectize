@@ -47,16 +47,16 @@ const WorkforceMyRegistrations = () => {
     }
   };
 
-  const getEventStatus = (event) => {
+   const getEventStatus = (event) => {
     if (!event || !event.start_date) return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
-    
-    const eventDate = new Date(event.start_date);
+
     const now = new Date();
-    const eventEndDate = event.end_date ? new Date(event.end_date) : eventDate;
-    
-    if (now < eventDate) {
+    const start = new Date(event.start_date);
+    const end = event.end_date ? new Date(event.end_date) : null;
+
+    if (start > now) {
       return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
-    } else if (now >= eventDate && now <= eventEndDate) {
+    } else if (end && now <= end) {
       return { status: 'ongoing', label: 'Ongoing', color: 'green' };
     } else {
       return { status: 'completed', label: 'Completed', color: 'gray' };
@@ -329,10 +329,12 @@ const WorkforceMyRegistrations = () => {
                     {/* Organizer */}
                     <div className='flex justify-between text-[12px] mb-3'>
                       <div className='flex gap-3 '>
-                        <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1'>Upcoming</span>
+                        <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1 capitalize'>{eventStatus?.status}</span>
                         <span className='flex items-center gap-2 bg-[#FFEFBD80]/50 rounded-full text-[#FFC000] px-2 py-1'>
-                        <ClockFading className='text-[#FF8400] w-4 h-4'/>
-                        Pending Approval
+                              {/* <span className={`text-${regStatus?.color}`}> */}
+                                {/* {StatusIcon} */}
+                                {/* </span> */}
+                              {regStatus?.label}
                         </span>
                       </div>
                       <span className='bg-gradient-to-br from-[#258B00] to-[#53FF09] rounded-full text-white px-2 py-1'>Free Event</span>
@@ -411,7 +413,7 @@ const WorkforceMyRegistrations = () => {
                     {/* Actions */}
                   <div className="rounded-b-xl flex justify-end space-x-2 py-3 px-2 border-t border-gray-300">
                       <Link
-                        to={`${webRoutes.workforceEventDetail.replace(':id', registration.id)}`}
+                        to={`${webRoutes.workforceEventDetail.replace(':id', registration?.event?.id)}`}
                         className="bg-pale_yellow text-white text-center py-2 rounded-lg px-2 hover:bg-gold transition-colors flex items-center justify-center"
                       >
                         <Eye className="w-4 h-4 mr-1" />

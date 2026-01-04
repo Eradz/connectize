@@ -658,6 +658,7 @@ export default function ValuationsPanel({ dealRoomId }) {
         }}
         title={showCreateModal ? "Create Valuation" : "Edit Valuation"}
         size="lg"
+        className="max-h-[90vh] overflow-y-scroll scrollbar-hidden"
       >
         <form onSubmit={showCreateModal ? handleCreate : handleUpdate} className="space-y-5">
           {/* Method Selection */}

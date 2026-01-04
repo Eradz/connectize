@@ -59,6 +59,7 @@ export const dealRoomAPI = {
   deleteDocument: (id) => api.delete(`${DEAL_ROOM_BASE_URL}/documents/${id}/`),
   
   // Deal Activities
+  createActivities: (id, data) => api.post(`${DEAL_ROOM_BASE_URL}/activities/`, data),
   getActivities: (params = {}) => {
     // If dealRoomId is passed as first parameter (legacy), convert to params
     if (typeof params === 'string') {
@@ -66,6 +67,7 @@ export const dealRoomAPI = {
     }
     return api.get(`${DEAL_ROOM_BASE_URL}/activities/`, { params });
   },
+  
   
   // Deal Milestones - Fixed to handle both filtered and unfiltered calls
   getMilestones: (params = {}) => {

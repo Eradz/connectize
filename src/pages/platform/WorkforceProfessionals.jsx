@@ -610,13 +610,14 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <button 
-                    onClick={() => handleConnectWithProfessional(professional.id)}
+                  <Link 
+                   to={`/messages/?room_name=room_${user?.id}_${professional.id}`}
+                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -633,14 +634,14 @@ const WorkforceProfessionals = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4 h-[20%]">
                   <div className="flex items-start space-x-3">
-                    {/* <img
+                    <img
                       src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
                       alt={professional.user_name || professional.user_email || 'Professional'}
                       className="w-10 h-10 rounded-full object-cover"
-                    /> */}
-                    <div className='rounded-full border-2 border-black'>
+                    />
+                    {/* <div className='rounded-full border-2 border-black'>
                       <User fill='#6D8FAF' className="w-10 h-10 text-[#6D8FAF]" />
-                    </div>
+                    </div> */}
                     <div>
                       <h3 className="font-semibold text-gray-900">{professional.user_name || professional.user_email || 'Professional'}</h3>
                       <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
@@ -714,9 +715,6 @@ const WorkforceProfessionals = () => {
                 </div>
 
                     </div>
-
-
-
                 {/* Actions */}
                 <div className="flex space-x-2 pt-3 border-t-2 border-[#00000033]/20 h-[15%]">
                   <Link
@@ -726,14 +724,15 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <button 
-                    onClick={() => handleConnectWithProfessional(professional.id)}
+                  <Link 
+                    to={`/messages/?room_name=room_${user?.id}_${professional?.user}`}
+                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="w-[50%] flex items-center justify-center bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
                     title="Send connection request"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

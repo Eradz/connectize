@@ -64,7 +64,7 @@ const Modal = ({
       {/* Modal */}
       <div 
         className={clsx(
-          "relative w-full rounded-2xl transition-all duration-300 transform animate-fadeIn",
+          "relative w-full rounded-2xl transition-all duration-300 transform animate-fadeIn max-h-[90vh] overflow-y-scroll scrollbar-hidden",
           sizes[size],
           variants[variant],
           className

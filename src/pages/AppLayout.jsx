@@ -43,7 +43,7 @@ const AppLayout = () => {
           )}
         >
           {/* Wrap Outlet to enforce full-width clamp */}
-          <div className="w-full h-full max-w-full overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="w-full h-full max-w-7xl mx-auto overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Outlet />
           </div>
         </section>

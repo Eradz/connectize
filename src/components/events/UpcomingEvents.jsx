@@ -58,7 +58,7 @@ const UpcomingEvents = ({filteredEvents}) => {
 
   return (
     <div className="">
-      <div className='hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
+      <div className={`hidden lg:grid grid-cols-1 md:grid-cols-2 ${filteredEvents.length > 2 ? 'lg:grid-cols-3' : ''} gap-2`}>
               {filteredEvents.map((event) => (
                 <div key={event.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl h-[490px]">
                 <div className="bg-white rounded-xl border h-full">

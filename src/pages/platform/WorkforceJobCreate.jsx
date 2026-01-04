@@ -48,9 +48,9 @@ const WorkforceJobCreate = () => {
   ];
 
   const experienceLevels = [
-    { value: 'entry_level', label: 'Entry Level (0-2 years)' },
-    { value: 'mid_level', label: 'Mid Level (3-5 years)' },
-    { value: 'senior_level', label: 'Senior Level (6-10 years)' },
+    { value: 'entry', label: 'Entry Level (0-2 years)' },
+    { value: 'mid', label: 'Mid Level (3-5 years)' },
+    { value: 'senior', label: 'Senior Level (6-10 years)' },
     { value: 'executive', label: 'Executive (10+ years)' }
   ];
 

@@ -6,6 +6,7 @@ import {
   dealMilestoneService,
   dealActivityService
 } from "../../api-services/oilgas";
+
 import { baseURL, getAuthorizationHeader, makeApiRequest } from "../../lib/helpers";
 import { dealDocumentService, dealValuationService } from "../../api-services/oilgas";
 import axios from "axios";
@@ -19,6 +20,7 @@ import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
+import dealRoomAPI from "../../api-services/dealRoom";
 import ValuationsPanel from "./ValuationsPanel";
 import { useAuth } from "../../context/userContext";
 
@@ -44,15 +46,12 @@ export default function DealRoomDetail() {
   const { id } = useParams();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const active = useMemo(() => currentSection(pathname), [pathname]);
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
+  const {user} = useAuth();
 
-
-  
-
-    const handleDrag = (e) => {
+  const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -108,7 +107,7 @@ export default function DealRoomDetail() {
   const [participants, setParticipants] = useState([]);
   const [valuationCreate, setValuationCreate] = useState(false);
   const [uploadSomeDocument, setUploadSomeDocument] = useState(false);
-  
+  // console.log("valuation Create:", valuationCreate);
   // Track locally added items to preserve them during reloads
   const [locallyAddedParticipants, setLocallyAddedParticipants] = useState([]);
   const [locallyAddedDocuments, setLocallyAddedDocuments] = useState([]);
@@ -123,20 +122,34 @@ export default function DealRoomDetail() {
   const [valuationBase, setValuationBase] = useState(0);
   const [valuationAdjusted, setValuationAdjusted] = useState(0);
   const [valuationCurrency, setValuationCurrency] = useState("USD");
+  const [valuationPreparedBy, setValuationPreparedBy] = useState("");
   const [actPage, setActPage] = useState(1);
   const pageSize = 10;
   
   // Modal states
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+  const [showCreateMilestoneModal, setShowCreateMilestoneModal] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState(null);
   // Milestone modal state: progress and optional notes
   const [milestoneForm, setMilestoneForm] = useState({ progress: 0, notes: "" });
+  const [createMilestoneForm, setCreateMilestoneForm] = useState({ 
+    deal_room: null,
+    title:"" ,
+    description: "" ,
+    status: "pending",
+    priority: 1,
+    progress: 0,
+    assigned_to: null,
+    created_by: null,
+    due_date: null
+  });
   // Participant form aligned with backend: role and permission_level choices
   const [participantForm, setParticipantForm] = useState({ userId: "", userDisplay: "", role: "observer", permission_level: "view" });
   const [userSearch, setUserSearch] = useState("");
   const [userResults, setUserResults] = useState([]);
   const [userSearching, setUserSearching] = useState(false);
+
   
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -347,54 +360,12 @@ export default function DealRoomDetail() {
             if (isMounted) setMilestones(apiMilestones);
           } catch (err) {
             console.warn('Milestones API failed:', err);
-            // Fall back to mock data only for the specific demo deal
-            if (id === '28f11f78-f41c-4ded-b98c-d2aa5029bd30') {
-              const mockMilestones = [
-                {
-                  id: 1,
-                  title: 'Initial Assessment',
-                  description: 'Preliminary evaluation and feasibility study',
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 2,
-                  title: 'Due Diligence', 
-                  description: 'Comprehensive technical and financial review',
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 3,
-                  title: 'Legal Documentation',
-                  description: 'Contract preparation and legal review', 
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 4,
-                  title: 'Financial Approval',
-                  description: 'Final financial approval and sign-off',
-                  progress: 100,
-                  status: 'completed'
-                },
-                {
-                  id: 5,
-                  title: 'Deal Completion',
-                  description: 'Final closing and deal completion',
-                  progress: 80,
-                  status: 'in_progress'
-                }
-              ];
-              if (isMounted) setMilestones(mockMilestones);
-            } else {
-              if (isMounted) setMilestones([]);
-            }
+            if (isMounted) setMilestones([]);
           }
         } else if (active === "activities") {
           try {
             const res = await makeApiRequest({
-              url: "api/v1/deals/activities/",
+              url: "api/activities/",
               method: "GET",
               params: { deal_room: id, page_size: 200 },
             });
@@ -629,14 +600,14 @@ export default function DealRoomDetail() {
             <div className="text-red-600">{error}</div>
           ) : (
             <div className="">
-              {(active !== "overview" && active !== "activities" && active !== "valuations") && 
+              {(active !== "overview" && active !== "activities" && active !== "valuations" && active !== "milestones") && 
               <div className="flex justify-between">
                 <h2 className="text-lg font-semibold mb-4">{active[0].toUpperCase() + active.slice(1)}</h2>
                 <RefreshButton refreshActivities={refreshActivities} active={active} loading={loading}/>
               </div>
               }
               {/* Search and Filter Bar */}
-              {(active === "documents" || active === "participants"  || active === "milestones") && (
+              {(active === "documents" || active === "participants"  ) && (
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -923,6 +894,7 @@ export default function DealRoomDetail() {
               <input
                 ref={fileInputRef}
                 type="file"
+                accept=".pdf"
                 onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
@@ -942,7 +914,6 @@ export default function DealRoomDetail() {
                           }
                         }}
                 className="hidden"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
               />
 
               {!newDocFile ? (
@@ -1125,7 +1096,7 @@ export default function DealRoomDetail() {
                           }
                         }}
                 className="hidden"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+                accept=".pdf"
               />
 
               {!newDocFile ? (
@@ -1182,6 +1153,7 @@ export default function DealRoomDetail() {
                       <p className="hidden md:flex">Upload New Document</p>
                     </span>
                       </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {documents
                         .filter(d => !searchTerm || (d.name || d.title || "").toLowerCase().includes(searchTerm.toLowerCase()))
                         .map((d, i) => {
@@ -1207,7 +1179,7 @@ export default function DealRoomDetail() {
                               <div className="flex w-full items-center space-x-3">
                                 <div className="flex flex-col  w-full">
                                   <div className="font-medium text-gray-900" title={label}>{label}</div>
-                                      <div className="flex flex-row-reverse mb-3 justify-between md:hidden  gap-6 items-center space-x-2">
+                                      <div className="flex flex-row-reverse md:mb-3 justify-between md:hidden  gap-6 items-center space-x-2">
                                           <span className={`px-2 py-1 text-xs rounded-full ${
                                             d.access_granted !== false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                                           }`}>
@@ -1221,11 +1193,11 @@ export default function DealRoomDetail() {
                                               {d._isTemporary && ' • Temporary (not saved to database)'}
                                             </div>
                                       </div>
-                                      <div className="flex w-full md:w-[50%] mt-1">
+                                      <div className="flex w-full mt-1">
                                           {href ? (
                                           <button 
                                             onClick={handleDocumentOpen}
-                                            className="w-[50%] md:w-[40%] inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
+                                            className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
                                           >
                                             <Eye className="h-4 w-4 mr-1" />
                                             Open
@@ -1251,7 +1223,7 @@ export default function DealRoomDetail() {
                                                 notify.error("Download failed: " + (e.response?.status === 401 ? "Authentication required" : "Unknown error"));
                                               }
                                             }}
-                                            className="inline-flex w-[50%] md:w-[40%] items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
+                                            className="inline-flex w-fit items-center px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
                                           >
                                             <Download className="h-4 w-4 mr-1" />
                                             Download
@@ -1265,7 +1237,7 @@ export default function DealRoomDetail() {
                                               await dealDocumentService.requestAccess(d.id, justification);
                                               notify.success("Access requested");
                                             }}
-                                            className="inline-flex w-[50%] md:w-[60%] px-3 py-1.5 rounded border text-sm bg-pale_yellow hover:bg-custom_yellow"
+                                            className="inline-flex w-fitpx-3 py-1.5 px-3 rounded border text-sm bg-pale_yellow hover:bg-custom_yellow"
                                           >
                                             <LockOpen className="h-4 w-4 mr-1" />
                                             Request Access
@@ -1321,6 +1293,7 @@ export default function DealRoomDetail() {
                       {searchTerm && documents.filter(d => (d.name || d.title || "").toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
                         <EmptySearch searchTerm={searchTerm} />
                       )}
+                      </div>
                     </div>
                     
                   )}
@@ -1380,6 +1353,7 @@ export default function DealRoomDetail() {
                                     if (window.confirm('Remove this participant?')) {
                                       await dealRoomService.removeParticipant(id, p.id);
                                       setParticipants((prev) => prev.filter((x) => (x.id || x) !== p.id));
+                                      await dealRoomAPI.createActivities(id, { activity_type: 'participant_removed', description: `Participant removed`, actor: user.id, target_user: p.id });
                                       notify.success("Participant removed");
                                     }
                                   }}
@@ -1408,20 +1382,53 @@ export default function DealRoomDetail() {
               )}
               {active === "milestones" && (
                 <div className="space-y-3">
+                  <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">Milestones</h3>
+                            <div className="flex gap-4">
+                            <button
+                              onClick={() => refreshActivities({active})}
+                              disabled={loading}
+                              className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
+                            >
+                              <RefreshCcw className="w-4 h-4 mr-1" />
+                              {loading ? 'Loading...' : 'Refresh'}
+                            </button>
+                            <button
+                              onClick={() => setShowCreateMilestoneModal(true)}
+                              className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              <span className="hidden md:block">{'Add Milestone'}</span>
+                            </button>
+
+                            </div>
+                          </div>
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={`Search ${active}...`}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                    />
+                  </div>
+                  </div>
                   {milestones.length === 0 ? (
-                    <EmptyMilestones onCreate={() => notify.info("Milestone creation coming soon")} />
+                    <EmptyMilestones onCreate={() => setShowCreateMilestoneModal(true)} />
                   ) : (
                     milestones.map((m, i) => (
-                      <div key={m.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
+                      <div key={m?.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <div className="font-medium text-gray-800">{m.title || m.name || `Milestone ${i + 1}`}</div>
-                            {m.description && <div className="text-sm text-gray-600 mt-1">{m.description}</div>}
-                            {typeof m.progress !== 'undefined' && (
+                            <div className="font-medium text-gray-800">{m?.title || m?.name || `Milestone ${i + 1}`}</div>
+                            {m?.description && <div className="text-sm text-gray-600 mt-1">{m.description}</div>}
+                            {typeof m?.progress !== 'undefined' && (
                               <div className="mt-2">
                                 <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
                                   <span>Progress</span>
-                                  <span>{m.progress}%</span>
+                                  <span>{m?.progress}%</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                   <div 
@@ -1566,6 +1573,180 @@ export default function DealRoomDetail() {
           </div>
         </form>
       </Modal>
+      {/* Milestone Create Modal */}
+      <Modal
+        isOpen={showCreateMilestoneModal}
+        onClose={() => setShowCreateMilestoneModal(false)}
+        title="Create Milestone"
+        size="lg"
+      >
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const newMilestone = await dealMilestoneService.create({ ...createMilestoneForm, created_by: user.id, deal_room: id });
+              if (newMilestone) {
+                setMilestones(prev => [...prev, newMilestone]);
+                setShowCreateMilestoneModal(false);
+                notify.success("Milestone created successfully");
+              }
+            } catch (err) {
+              notify.error(`${Object.keys(err)[0]}: ${Object.values(err)[0]}` || 'Failed to create milestone');
+            }
+          }}
+          className="space-y-4"
+        >
+          <div className="grid grid-cols-3 gap-4">
+              {/* Title */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title:</label>
+                <input
+                  type="text"
+                  value={createMilestoneForm.title}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                />
+              </div>
+              {/* Status */}
+              <div className="col-span-1 w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Status:</label>
+                <select value={createMilestoneForm.status} onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                  >
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description:</label>
+                <textarea
+                  value={createMilestoneForm.description}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                  rows={3}
+                />
+              </div>  
+              {/* Completion Note */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Completion Notes (optional)</label>
+                <textarea
+                  value={milestoneForm.notes}
+                  onChange={(e) => setMilestoneForm(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Add notes about completion..."
+                  className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                  rows={3}
+                />
+              </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+          {/* Assigned to */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Assigned to
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={participantForm.userDisplay || userSearch}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setParticipantForm(prev => ({ ...prev, userDisplay: v, userId: prev.userId && v === prev.userDisplay ? prev.userId : "" }));
+                  setUserSearch(v);
+                }}
+                placeholder="Type a name or email..."
+                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
+                autoComplete="off"
+              />
+              {userSearch && (userResults?.length > 0 || userSearching) && (
+                <div className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-auto">
+                  {userSearching && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
+                  )}
+                  {userResults.map((u) => (
+                    <button
+                      type="button"
+                      key={u.id}
+                      onClick={() => {
+                        const label = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
+                        setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
+                        setUserSearch(label);
+                        setUserResults([]);
+                        setCreateMilestoneForm(prev => ({ ...prev, assigned_to: u.id }));
+                      }}
+                      className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
+                    >
+                      <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
+                      <div className="text-xs text-gray-500">{u.email}</div>
+                    </button>
+                  ))}
+                  {!userSearching && userResults.length === 0 && (
+                    <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+              {/* Due date */}
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={createMilestoneForm.due_date}
+                    onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, due_date: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+          </div>
+           <div className="grid grid-cols-2 gap-4">
+                {/* Progress */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Progress: {createMilestoneForm.progress}%</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={createMilestoneForm.progress}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, progress: Number(e.target.value) }))}
+                  className="w-full"
+                />
+              </div>
+              {/* Priority */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                <input
+                  type="number"
+                  value={createMilestoneForm.priority}
+                  onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, priority: e.target.value }))}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={() => setShowCreateMilestoneModal(false)}
+              className="px-4 py-2 border rounded text-gray-700 hover:border border-[#D9D9D9]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-pale_yellow text-gray-900 rounded hover:bg-gold"
+            >
+              Create Milestone
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Participant Invite Modal */}
       <Modal
@@ -1583,7 +1764,7 @@ export default function DealRoomDetail() {
             }
             
             try {
-              const payload = { user: participantForm.userId, role: participantForm.role, permission_level: participantForm.permission_level };
+              const payload = { user: participantForm.userId, role: participantForm.role, permission_level: participantForm.permission_level,  deal_room: id };
               
               // First, ALWAYS try the real API call to save to database
               let apiSuccess = false;
@@ -1596,6 +1777,7 @@ export default function DealRoomDetail() {
                 if (apiParticipant && (apiParticipant.id || apiParticipant.user || apiParticipant.user_email)) {
                   apiSuccess = true;
                   console.log('✅ Successfully saved participant to database:', apiParticipant);
+                  await dealRoomAPI.createActivities(id, { activity_type: 'participant_added', description: `New participant added to the deal`, actor: user.id, target_user: participantForm.userId });
                   notify.success("Participant invited and saved to database");
                 } else {
                   throw new Error('Unexpected response when adding participant');
@@ -1750,6 +1932,7 @@ export default function DealRoomDetail() {
           </div>
         </form>
       </Modal>
+
     </div>
   );
 }

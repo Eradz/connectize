@@ -130,9 +130,9 @@ export default function MyParticipations() {
           </div>
         )
       ) : (
-        <div className="grid grid-col-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-col-1 md:grid-cols-2 gap-4">
           {filteredParticipations.map((deal) => (
-            <div key={deal.id} className="bg-white hover:bg-gold/20 rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={deal.id} className="bg-white hover:bg-gold/20 rounded-lg shadow-sm border border-gray-200 py-6 px-3 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <div className="flex-1 md:w-[65%] lg:w-[80%]">
                   <div className="flex flex-col gap-3 mb-2">
@@ -166,7 +166,7 @@ export default function MyParticipations() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-2">
                   <Link
                     to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
                     className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gold/90 bg-gold"
