@@ -13,7 +13,8 @@ import {
   Menu,
   ArrowLeft,
   Plus,
-  X
+  X,
+  BookOpen
 } from 'lucide-react';
 
 import { webRoutes } from '../../lib/webRoutes';
@@ -507,73 +508,94 @@ const KnowledgeHubDashboard = () => {
               </div>
 
               <div className="divide-y divide-gray-200">
-                {(activeTab === 'trending' ? trendingArticles : recentArticles)
-                  .slice(0, 5)
-                  .map((article) => (
-                    <div key={article.id} className="p-6 bg-white hover:bg-gray-50 transition-colors">
-                      <div className="mb-3">
-                        <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-50 text-green-600 border border-green-200">
-                          Published
-                        </span>
-                      </div>
-
-                      <Link
-                        to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
-                        className="block mb-3"
-                      >
-                        <h3 className="text-lg font-bold text-gray-900 hover:text-blue-600 line-clamp-2 mb-2">
-                          {article.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {article.excerpt || 'Latest Developments In The Global Oil And Gas'}
-                        </p>
-                      </Link>
-
-                      <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 mb-4">
-                        <div className="flex flex-col md:flex-row md:items-center items-start gap-1.5 md:gap-4">
-                          <div className="flex items-center gap-1.5">
-                            <Users className="w-4 h-4" />
-                            <span>
-                              {article.author?.first_name || article.author?.last_name
-                                ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
-                                : 'Anonymous'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4" />
-                            <span>{formatDate(article.published_at)}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1.5">
-                            <Heart className="w-4 h-4" />
-                            <span>{article.likes || 1}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Share2 className="w-4 h-4" />
-                            <span>{article.shares || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Eye className="w-4 h-4" />
-                            <span>{article.views || 0}</span>
-                          </div>
+                {(activeTab === 'trending' ? trendingArticles : recentArticles).length > 0 ? (
+                  (activeTab === 'trending' ? trendingArticles : recentArticles)
+                    .slice(0, 5)
+                    .map((article) => (
+                      <div key={article.id} className="p-6 bg-white hover:bg-gray-50 transition-colors">
+                        <div className="mb-3">
+                          <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-50 text-green-600 border border-green-200">
+                            Published
+                          </span>
                         </div>
 
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(webRoutes.knowledgeArticleDetail.replace(':slug', article.slug));
-                          }}
-                          className="bg-[#F2C94C] text-gray-900 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors"
+                        <Link
+                          to={webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}
+                          className="block mb-3"
                         >
-                          Read More
-                        </button>
+                          <h3 className="text-lg font-bold text-gray-900 hover:text-blue-600 line-clamp-2 mb-2">
+                            {article.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm line-clamp-2">
+                            {article.excerpt || 'Latest Developments In The Global Oil And Gas'}
+                          </p>
+                        </Link>
+
+                        <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 mb-4">
+                          <div className="flex flex-col md:flex-row md:items-center items-start gap-1.5 md:gap-4">
+                            <div className="flex items-center gap-1.5">
+                              <Users className="w-4 h-4" />
+                              <span>
+                                {article.author?.first_name || article.author?.last_name
+                                  ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
+                                  : 'Anonymous'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-4 h-4" />
+                              <span>{formatDate(article.published_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-1.5">
+                              <Heart className="w-4 h-4" />
+                              <span>{article.likes || 1}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Share2 className="w-4 h-4" />
+                              <span>{article.shares || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Eye className="w-4 h-4" />
+                              <span>{article.views || 0}</span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              navigate(webRoutes.knowledgeArticleDetail.replace(':slug', article.slug));
+                            }}
+                            className="bg-[#F2C94C] text-gray-900 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors"
+                          >
+                            Read More
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                ) : (
+                  <div className="p-12 text-center">
+                    <BookOpen className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No {activeTab === 'trending' ? 'Trending' : 'Recent'} Articles
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                      {activeTab === 'trending' 
+                        ? "No trending articles at the moment. Check back soon for popular content!"
+                        : "No recent articles yet. Be the first to write one!"}
+                    </p>
+                    <Link
+                      to={webRoutes.knowledgeArticleCreate}
+                      className="inline-flex items-center gap-2 bg-[#F2C94C] text-gray-900 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Write Article
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
 
