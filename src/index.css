@@ -296,3 +296,426 @@ a {
         .tabs-wrapper::-webkit-scrollbar {
           display: none;
         }
+/* ===================================
+   React Quill Editor Custom Styles
+   =================================== */
+
+/* Enhanced Quill editor container */
+.custom-quill-editor .ql-container {
+  min-height: 400px;
+  font-size: 16px;
+  font-family: inherit;
+  border: none !important;
+}
+
+.custom-quill-editor .ql-editor {
+  min-height: 400px;
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Placeholder styling */
+.custom-quill-editor .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+  font-size: 15px;
+}
+
+/* Toolbar styling */
+.custom-quill-editor .ql-toolbar {
+  background-color: #f9fafb;
+  border: none !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 12px 8px;
+  border-radius: 0;
+}
+
+.custom-quill-editor .ql-toolbar .ql-stroke {
+  stroke: #4b5563;
+}
+
+.custom-quill-editor .ql-toolbar .ql-fill {
+  fill: #4b5563;
+}
+
+.custom-quill-editor .ql-toolbar .ql-picker-label {
+  color: #4b5563;
+}
+
+/* Active/hover states */
+.custom-quill-editor .ql-toolbar button:hover,
+.custom-quill-editor .ql-toolbar button:focus {
+  background-color: #e5e7eb;
+  border-radius: 4px;
+}
+
+.custom-quill-editor .ql-toolbar button.ql-active {
+  background-color: #eab308;
+  color: white;
+  border-radius: 4px;
+}
+
+.custom-quill-editor .ql-toolbar button.ql-active .ql-stroke {
+  stroke: white;
+}
+
+.custom-quill-editor .ql-toolbar button.ql-active .ql-fill {
+  fill: white;
+}
+
+/* Focus state */
+.custom-quill-editor .ql-editor:focus {
+  outline: none;
+}
+
+/* Content formatting */
+.custom-quill-editor .ql-editor h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+.custom-quill-editor .ql-editor h2 {
+  font-size: 1.75em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+.custom-quill-editor .ql-editor h3 {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+.custom-quill-editor .ql-editor h4 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+.custom-quill-editor .ql-editor blockquote {
+  border-left: 4px solid #eab308;
+  padding-left: 16px;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.custom-quill-editor .ql-editor code {
+  background-color: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.custom-quill-editor .ql-editor pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.custom-quill-editor .ql-editor a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.custom-quill-editor .ql-editor a:hover {
+  color: #1d4ed8;
+}
+
+.custom-quill-editor .ql-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.custom-quill-editor .ql-editor ul,
+.custom-quill-editor .ql-editor ol {
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.custom-quill-editor .ql-editor li {
+  margin-bottom: 0.5em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .custom-quill-editor .ql-container {
+    min-height: 300px;
+  }
+  
+  .custom-quill-editor .ql-editor {
+    min-height: 300px;
+    padding: 16px;
+    font-size: 15px;
+  }
+  
+  .custom-quill-editor .ql-toolbar {
+    padding: 8px 4px;
+  }
+}
+
+/* Tooltip styling */
+.ql-tooltip {
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.ql-tooltip input[type="text"] {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.ql-tooltip .ql-action,
+.ql-tooltip .ql-remove {
+  color: #2563eb;
+}
+
+.ql-tooltip .ql-action:hover,
+.ql-tooltip .ql-remove:hover {
+  color: #1d4ed8;
+}
+
+/* ===================================
+   Article Content Display Styles
+   (For viewing articles with rich HTML content)
+   =================================== */
+
+.prose {
+  color: #1f2937;
+  max-width: 65ch;
+}
+
+.prose h1 {
+  font-size: 2.25em;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-top: 0;
+  margin-bottom: 0.8888889em;
+  color: #111827;
+}
+
+.prose h2 {
+  font-size: 1.875em;
+  font-weight: 700;
+  line-height: 1.3333333;
+  margin-top: 1.5em;
+  margin-bottom: 0.8333333em;
+  color: #111827;
+}
+
+.prose h3 {
+  font-size: 1.5em;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.6em;
+  margin-bottom: 0.6666667em;
+  color: #111827;
+}
+
+.prose h4 {
+  font-size: 1.25em;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #111827;
+}
+
+.prose p {
+  font-size: 1.125em;
+  line-height: 1.7777778;
+  margin-top: 1.3333333em;
+  margin-bottom: 1.3333333em;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+}
+
+.prose strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose u {
+  text-decoration: underline;
+}
+
+.prose code {
+  color: #111827;
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.prose pre {
+  color: #e5e7eb;
+  background-color: #1f2937;
+  overflow-x: auto;
+  padding: 1.5em;
+  border-radius: 0.5rem;
+  margin-top: 1.7142857em;
+  margin-bottom: 1.7142857em;
+  font-size: 0.875em;
+  line-height: 1.7142857;
+}
+
+.prose pre code {
+  background-color: transparent;
+  border-width: 0;
+  border-radius: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+.prose blockquote {
+  font-weight: 500;
+  font-style: italic;
+  color: #4b5563;
+  border-left-width: 0.25rem;
+  border-left-color: #eab308;
+  quotes: "\201C""\201D""\2018""\2019";
+  margin-top: 1.6em;
+  margin-bottom: 1.6em;
+  padding-left: 1em;
+}
+
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.625em;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.625em;
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+/* Prose size variants */
+.prose-lg {
+  font-size: 1.125rem;
+  line-height: 1.7777778;
+}
+
+.prose-lg p {
+  margin-top: 1.3333333em;
+  margin-bottom: 1.3333333em;
+}
+
+.prose-lg h1 {
+  font-size: 2.6666667em;
+  margin-top: 0;
+  margin-bottom: 0.8333333em;
+  line-height: 1;
+}
+
+.prose-lg h2 {
+  font-size: 2em;
+  margin-top: 1.5555556em;
+  margin-bottom: 0.8888889em;
+  line-height: 1.1111111;
+}
+
+.prose-lg h3 {
+  font-size: 1.6666667em;
+  margin-top: 1.6666667em;
+  margin-bottom: 0.6666667em;
+  line-height: 1.3333333;
+}
+
+.prose-lg h4 {
+  font-size: 1.3333333em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.5;
+}
+
+/* Max-width utility */
+.max-w-none {
+  max-width: none;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  .prose {
+    font-size: 1rem;
+  }
+  
+  .prose p {
+    font-size: 1rem;
+  }
+  
+  .prose h1 {
+    font-size: 1.875em;
+  }
+  
+  .prose h2 {
+    font-size: 1.5em;
+  }
+  
+  .prose h3 {
+    font-size: 1.25em;
+  }
+  
+  .prose img,
+  .prose video {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+}
