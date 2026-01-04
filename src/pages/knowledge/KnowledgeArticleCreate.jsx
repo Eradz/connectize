@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { knowledgeArticleService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
@@ -10,9 +12,44 @@ const KnowledgeArticleCreate = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  // Quill editor configuration with comprehensive toolbar
+  const modules = useMemo(() => ({
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'font': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'align': [] }],
+      ['blockquote', 'code-block'],
+      ['link', 'image', 'video'],
+      ['clean']
+    ],
+    clipboard: {
+      matchVisual: false
+    }
+  }), []);
+
+  const formats = [
+    'header', 'font', 'size',
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'script',
+    'list', 'bullet', 'indent',
+    'align',
+    'blockquote', 'code-block',
+    'link', 'image', 'video'
+  ];
+
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onContentChange = (value) => {
+    setForm((prev) => ({ ...prev, content: value }));
   };
 
   const onSubmit = async (e) => {
@@ -91,15 +128,24 @@ const KnowledgeArticleCreate = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">Content</label>
-              <textarea
-                name="content"
-                value={form.content}
-                onChange={onChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
-                rows={12}
-                placeholder="write your article content here..."
-                required
-              />
+              <div className="border border-gray-300 rounded-md overflow-hidden bg-white">
+                <ReactQuill
+                  theme="snow"
+                  value={form.content}
+                  onChange={onContentChange}
+                  modules={modules}
+                  formats={formats}
+                  placeholder="Write your article content here... Use the toolbar above to format your text, add links, images, and more."
+                  className="custom-quill-editor"
+                  style={{ 
+                    minHeight: '400px',
+                    backgroundColor: 'white'
+                  }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Rich text editor supports formatting, links, images, code blocks, and more.
+              </p>
             </div>
           </div>
 

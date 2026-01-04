@@ -16,6 +16,7 @@ import {
   Calendar,
   ChevronDown
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 
 const KnowledgeArticles = () => {
@@ -33,7 +34,14 @@ const KnowledgeArticles = () => {
     try {
       setLoading(true);
   const [response, categoriesRes] = await Promise.all([knowledgeArticleService.getAll(), knowledgeCategoryService.getAll(),]);
-  setArticles(response?.results || response?.data || response || []);
+      
+      // Map is_liked_by_user to is_liked for consistency
+      const articlesData = (response?.results || response?.data || response || []).map(article => ({
+        ...article,
+        is_liked: article.is_liked_by_user || false
+      }));
+      
+  setArticles(articlesData);
   setCategories(categoriesRes?.results || categoriesRes?.data || categoriesRes || []);
     } catch (error) {
       console.error('Error loading articles:', error);
@@ -42,23 +50,108 @@ const KnowledgeArticles = () => {
     }
   };
 
-  const handleLike = async (articleSlug) => {
+  const handleLike = async (articleSlug, currentLikes, isLiked) => {
+    // Optimistic UI update - instant feedback
+    setArticles(prevArticles => 
+      prevArticles.map(article => 
+        article.slug === articleSlug 
+          ? { 
+              ...article, 
+              likes: isLiked ? currentLikes - 1 : currentLikes + 1,
+              is_liked: !isLiked,
+              is_liked_by_user: !isLiked  // Update backend field too
+            }
+          : article
+      )
+    );
+
     try {
-  await knowledgeArticleService.like(articleSlug);
-      // Reload articles to update like count
-      loadArticles();
+      const response = await knowledgeArticleService.like(articleSlug);
+      
+      // Sync with actual server state if response contains updated data
+      if (response?.data) {
+        setArticles(prevArticles => 
+          prevArticles.map(article => 
+            article.slug === articleSlug 
+              ? { 
+                  ...article, 
+                  likes: response.data.likes || article.likes,
+                  is_liked: response.data.is_liked_by_user || !isLiked,
+                  is_liked_by_user: response.data.is_liked_by_user || !isLiked
+                }
+              : article
+          )
+        );
+      }
+      
+      toast.success(isLiked ? 'Article unliked' : 'Article liked');
     } catch (error) {
+      // Revert on error
+      setArticles(prevArticles => 
+        prevArticles.map(article => 
+          article.slug === articleSlug 
+            ? { 
+                ...article, 
+                likes: currentLikes,
+                is_liked: isLiked,
+                is_liked_by_user: isLiked
+              }
+            : article
+        )
+      );
       console.error('Error liking article:', error);
+      toast.error('Failed to update like. Please try again.');
     }
   };
 
-  const handleShare = async (articleSlug) => {
+  const handleShare = async (article) => {
+    const articleUrl = `${window.location.origin}/knowledge/articles/${article.slug}`;
+    
     try {
-  await knowledgeArticleService.share(articleSlug);
-      // You might want to show a share dialog or copy link to clipboard
-      console.log('Article shared successfully');
+      // Try native share API first (works on mobile and modern browsers)
+      if (navigator.share) {
+        await navigator.share({
+          title: article.title,
+          text: article.excerpt || 'Check out this article',
+          url: articleUrl,
+        });
+        
+        // Call backend to increment share count
+        await knowledgeArticleService.share(article.slug);
+        
+        // Update share count optimistically
+        setArticles(prevArticles => 
+          prevArticles.map(a => 
+            a.slug === article.slug 
+              ? { ...a, shares: (a.shares || 0) + 1 }
+              : a
+          )
+        );
+        
+        toast.success('Article shared successfully!');
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(articleUrl);
+        
+        // Call backend to increment share count
+        await knowledgeArticleService.share(article.slug);
+        
+        // Update share count optimistically
+        setArticles(prevArticles => 
+          prevArticles.map(a => 
+            a.slug === article.slug 
+              ? { ...a, shares: (a.shares || 0) + 1 }
+              : a
+          )
+        );
+        
+        toast.success('Article link copied to clipboard!');
+      }
     } catch (error) {
-      console.error('Error sharing article:', error);
+      if (error.name !== 'AbortError') {
+        console.error('Error sharing article:', error);
+        toast.error('Failed to share article');
+      }
     }
   };
 
@@ -161,7 +254,7 @@ const KnowledgeArticles = () => {
                   <Heart className="h-6 w-6 text-gray-700" />
                 </div>
                 <p className="text-3xl font-bold text-gray-900 mb-1">
-                  {articles.reduce((sum, article) => sum + (article.likes_count || 0), 0)}
+                  {articles.reduce((sum, article) => sum + (article.likes || 0), 0)}
                 </p>
                 <p className="text-sm font-medium text-gray-600">Total Likes</p>
               </div>
@@ -258,15 +351,19 @@ const KnowledgeArticles = () => {
                   <div className="flex items-center justify-between pt-3 border-t border-gray-200">
                     <div className="flex items-center space-x-4">
                       <button
-                        onClick={() => handleLike(article.slug)}
-                        className="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
+                        onClick={() => handleLike(article.slug, article.likes || 0, article.is_liked)}
+                        className={`flex items-center space-x-1 transition-colors ${
+                          article.is_liked 
+                            ? 'text-red-500' 
+                            : 'text-gray-500 hover:text-red-500'
+                        }`}
                       >
-                        <Heart className="h-4 w-4" />
+                        <Heart className={`h-4 w-4 ${article.is_liked ? 'fill-current' : ''}`} />
                         <span className="text-sm">{article.likes || 0}</span>
                       </button>
                       
                       <button
-                        onClick={() => handleShare(article.slug)}
+                        onClick={() => handleShare(article)}
                         className="flex items-center space-x-1 text-gray-500 hover:text-blue-500 transition-colors"
                       >
                         <Share2 className="h-4 w-4" />
@@ -369,7 +466,7 @@ const KnowledgeArticles = () => {
                 <Heart className="w-6 h-6 text-gray-900" />
               </div>
               <p className="text-2xl font-bold text-gray-900 text-center">
-                {articles.reduce((sum, article) => sum + (article.likes_count || 0), 0)}
+                {articles.reduce((sum, article) => sum + (article.likes || 0), 0)}
               </p>
               <p className="text-xs text-gray-600 mt-1 text-center">Total Likes</p>
             </div>
@@ -472,30 +569,27 @@ const KnowledgeArticles = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <button
-                      onClick={() => handleLike(article.slug)}
-                      className="flex items-center gap-1"
+                      onClick={() => handleLike(article.slug, article.likes || 0, article.is_liked)}
+                      className={`flex items-center gap-1 transition-colors ${
+                        article.is_liked 
+                          ? 'text-red-500' 
+                          : 'text-gray-500'
+                      }`}
                     >
-                      <Heart className="h-4 w-4" />
+                      <Heart className={`h-4 w-4 ${article.is_liked ? 'fill-current' : ''}`} />
                       <span>{article.likes || 0}</span>
                     </button>
-                    <div
-                      onClick={() => handleShare(article.slug)}
+                    <button
+                      onClick={() => handleShare(article)}
                       className="flex items-center gap-1"
                     >
                       <Share2 className="h-4 w-4" />
                       <span>{article.shares || 0}</span>
-                    </div>
+                    </button>
                     <div className="flex items-center gap-1">
                       <Eye className="h-4 w-4" />
                       <span>{article.views || 0}</span>
                     </div>
-                    {/* <button
-                      onClick={() => handleShare(article.slug)}
-                      className="flex items-center gap-1"
-                    >
-                      <Share2 className="h-4 w-4" />
-                      <span>0</span>
-                    </button> */}
                   </div>
                   
                   <Link
