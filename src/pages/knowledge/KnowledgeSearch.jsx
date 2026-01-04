@@ -15,12 +15,13 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { knowledgeSearchService } from '../../api-services/oilgas';
+import knowledgeHubAPI from '../../api-services/knowledgeHub';
 
 const KnowledgeSearch = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('all');
+  const [searchType, setSearchType] = useState("");
   const [sortBy, setSortBy] = useState('relevance');
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
@@ -31,12 +32,12 @@ const KnowledgeSearch = () => {
     try {
       setLoading(true);
       setSearchPerformed(true);
-      const response = await knowledgeSearchService.search({
-        q: term,
+      const response = await knowledgeHubAPI.search( term, {
         type: searchType,
         sort: sortBy
       });
-      setSearchResults(response.results || []);
+      setSearchResults(response.data.results || []);
+      console.log("Search results:", response.data.results);
     } catch (error) {
       console.error('Error performing search:', error);
       setSearchResults([]);
@@ -46,6 +47,7 @@ const KnowledgeSearch = () => {
   };
 
   const handleSearch = (e) => {
+    console.log("Y")
     e.preventDefault();
     performSearch();
   };
@@ -124,7 +126,7 @@ const KnowledgeSearch = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -243,7 +245,7 @@ const KnowledgeSearch = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg flex items-center justify-between bg-white text-left"
               >
                 <span className="text-gray-700">
-                  {searchType === 'all' ? 'All Categories' : 
+                  {searchType === "" ? 'All Categories' : 
                    searchType === 'articles' ? 'Articles Only' :
                    searchType === 'forums' ? 'Forums Only' : 'Topics Only'}
                 </span>
@@ -255,7 +257,7 @@ const KnowledgeSearch = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setSearchType('all');
+                      setSearchType("");
                       setCategoryDropdownOpen(false);
                     }}
                     className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-200"

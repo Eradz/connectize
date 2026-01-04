@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { knowledgeForumService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
+import { toast } from 'sonner';
 
 // Custom SVG Icons
 const CreditCardIcon = () => (
@@ -75,27 +76,16 @@ const KnowledgeForums = () => {
       const response = await knowledgeForumService.getAll();
       const list = response?.results || response?.data || response || [];
       setForums(list);
-
-      // Try aggregated stats endpoint
-      const remoteStats = await knowledgeForumService.getStats();
-      if (remoteStats && typeof remoteStats === 'object') {
-        setStats({
-          total_forums: remoteStats.total_forums ?? list.length,
-          active_forums: remoteStats.active_forums ?? list.filter(f => (f.topic_count || 0) > 0).length,
-          total_members: remoteStats.total_members ?? list.reduce((s, f) => s + (f.members_count || 0), 0),
-          total_topics: remoteStats.total_topics ?? list.reduce((s, f) => s + (f.topic_count || 0), 0)
-        });
-      } else {
-        // Derive locally
-        setStats({
+       setStats({
           total_forums: list.length,
           active_forums: list.filter(f => (f.topic_count || 0) > 0).length,
           total_members: list.reduce((s, f) => s + (f.members_count || 0), 0),
           total_topics: list.reduce((s, f) => s + (f.topic_count || 0), 0)
         });
-      }
+
     } catch (error) {
       console.error('Error loading forums:', error);
+      toast.error('Failed to load forums. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -104,7 +94,7 @@ const KnowledgeForums = () => {
   const filteredForums = forums.filter(forum => {
     const matchesSearch = forum.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          forum.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === '' || forum.category === filterCategory;
+    const matchesCategory = filterCategory === '' || forum.category_name === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -117,8 +107,8 @@ const KnowledgeForums = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white lg:bg-gray-50">
-      <div className="max-w-7xl mx-auto lg:px-4 lg:py-8">
+    <div className="min-h-screen bg-white md:bg-background">
+      <div className="max-w-7xl mx-auto ">
         {/* Mobile Header */}
         <div className="lg:hidden px-4 pt-4 pb-6">
           <div className="flex justify-between items-start mb-2">
@@ -126,9 +116,9 @@ const KnowledgeForums = () => {
               <h1 className="text-xl font-bold text-gray-900 mb-1">Discussion Forums</h1>
               <p className="text-sm text-gray-500">Join Conversations About Oil & Gas Industry Topics</p>
             </div>
-            <button className="text-gray-900 font-medium p-2.5 rounded-lg flex items-center justify-center ml-3 flex-shrink-0 bg-pale_yellow">
+            <Link to={webRoutes.knowledgeForumCreate} className="text-gray-900 font-medium p-2.5 rounded-lg flex items-center justify-center ml-3 flex-shrink-0 bg-pale_yellow">
               <Plus className="h-5 w-5" />
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -203,7 +193,7 @@ const KnowledgeForums = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Search Deal Rooms"
+                placeholder="Search Forums"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
@@ -216,12 +206,12 @@ const KnowledgeForums = () => {
               className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white"
             >
               <option value="">All Categories</option>
-              <option value="general">General Discussion</option>
-              <option value="technical">Technical</option>
-              <option value="market">Market Analysis</option>
-              <option value="sustainability">Sustainability</option>
-              <option value="regulations">Regulations</option>
-              <option value="careers">Careers</option>
+              <option value="General">General Discussion</option>
+              <option value="Technical">Technical</option>
+              <option value="Market">Market Analysis</option>
+              <option value="Sustainability">Sustainability</option>
+              <option value="Regulations">Regulations</option>
+              <option value="Careers">Careers</option>
             </select>
 
             <button className="text-gray-900 font-medium px-6 py-2.5 rounded-lg transition-colors" style={{ backgroundColor: '#F1C644' }}>
@@ -252,12 +242,12 @@ const KnowledgeForums = () => {
               className="pl-4 pr-10 py-3 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white appearance-none text-sm"
             >
               <option value="">All Categories</option>
-              <option value="general">General Discussion</option>
-              <option value="technical">Technical</option>
-              <option value="market">Market Analysis</option>
-              <option value="sustainability">Sustainability</option>
-              <option value="regulations">Regulations</option>
-              <option value="careers">Careers</option>
+              <option value="General">General Discussion</option>
+              <option value="Technical">Technical</option>
+              <option value="Market">Market Analysis</option>
+              <option value="Sustainability">Sustainability</option>
+              <option value="Regulations">Regulations</option>
+              <option value="Careers">Careers</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
           </div>
@@ -337,10 +327,10 @@ const KnowledgeForums = () => {
             <p className="text-gray-500 mb-6">
               Create the first forum to start discussions in the community.
             </p>
-            <button className="inline-flex items-center px-6 py-3 text-gray-900 font-medium rounded-lg transition-colors" style={{ backgroundColor: '#F1C644' }}>
+            <Link to={webRoutes.knowledgeForumCreate} className="inline-flex items-center px-6 py-3 text-gray-900 font-medium rounded-lg transition-colors" style={{ backgroundColor: '#F1C644' }}>
               <Plus className="h-5 w-5 mr-2" />
               Create Forum
-            </button>
+            </Link>
           </div>
         )}
       </div>

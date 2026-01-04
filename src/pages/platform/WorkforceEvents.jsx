@@ -5,6 +5,10 @@ import {
   MapPin,
   Plus,
   Globe,
+  Clock,
+  Zap,
+  SearchIcon,
+  Settings2,
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -93,7 +97,7 @@ const WorkforceEvents = () => {
       filtered = filtered.filter(event => 
         (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (event.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (event.organizer || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -277,18 +281,138 @@ const WorkforceEvents = () => {
         </div>
       </div>
 
-      <div className="lg:bg-white">
+      <div className="lg:bg-white py-4">
         {/* Ongoing Events */}
         <div className='px-2' id='ongoing'>
-          <span className="flex h-fit gap-2 ">
-            <h3 className='text-2xl font-medium  '>Ongoing Events</h3>
-            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
-              {getTabCount('ongoing')}
-            </span>
-          </span>
-        {getEventSchedule('ongoing').length === 0 ? <p className='mb-8'>No ongoing events</p> :
-        <OngoingEvents searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={getEventSchedule('ongoing')} />
-        }
+          <div className="flex justify-between lg:items-center flex-col-reverse lg:flex-row gap-4 pb-4">
+                <span className="flex h-fit gap-2 ">
+                            <h3 className='text-2xl font-medium  '>Ongoing Events</h3>
+                            <span className={`ml-1 md:h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                              {getTabCount('ongoing')}
+                            </span>
+                          </span>
+                <div className='flex gap-4 lg:w-[50%]'>
+                  <div className="flex-1">
+                    <div className="relative">
+                      <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <input
+                        type="text"
+                        placeholder="Search events by title, organizer, or topic..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 flex items-center"
+                  >
+                    Filter
+                    <Settings2 className="w-4 h-4 ml-2" />
+                  </button>
+                </div>
+              </div>
+    
+              {showFilters && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={filters.category}
+                        onChange={(e) => handleFilterChange('category', e.target.value)}
+                      >
+                        <option value="">All Categories</option>
+                        <option value="Conference">Conference</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Training">Training</option>
+                        <option value="Networking">Networking</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Trade Show">Trade Show</option>
+                        <option value="Certification">Certification</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                      <input
+                        type="text"
+                        placeholder="City, Country"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={filters.location}
+                        onChange={(e) => handleFilterChange('location', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={filters.date}
+                        onChange={(e) => handleFilterChange('date', e.target.value)}
+                      >
+                        <option value="">Any Time</option>
+                        <option value="today">Today</option>
+                        <option value="this_week">This Week</option>
+                        <option value="this_month">This Month</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={filters.type}
+                        onChange={(e) => handleFilterChange('type', e.target.value)}
+                      >
+                        <option value="">All Types</option>
+                        <option value="In-Person">In-Person</option>
+                        <option value="Virtual">Virtual</option>
+                        <option value="Hybrid">Hybrid</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={filters.status}
+                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                      >
+                        <option value="">All Status</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="open">Registration Open</option>
+                        <option value="sold_out">Sold Out</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex space-x-3">
+                    <button
+                      onClick={clearFilters}
+                      className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200"
+                    >
+                      Clear Filters
+                    </button>
+                    <span className="text-sm text-gray-500 py-2">
+                      {filteredEvents.length} events found
+                    </span>
+                  </div>
+                </div>
+              )}
+          {getEventSchedule('ongoing').length === 0 ? (
+            <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
+              <Zap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Ongoing Events</h3>
+              <p className="text-gray-600 mb-6">There are no events happening right now. Check back soon or browse upcoming events!</p>
+              <button
+                onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                View Upcoming Events
+              </button>
+            </div>
+          ) : (
+            <OngoingEvents events={events} searchTerm={searchTerm} handleSearchChange={handleSearchChange} setShowFilters={setShowFilters} showFilters={showFilters} handleFilterChange={handleFilterChange} filters={filters} clearFilters={clearFilters} filteredEvents={getEventSchedule('ongoing')} />
+          )}
         </div>
 
         {/* Events Grid */}
@@ -299,8 +423,22 @@ const WorkforceEvents = () => {
                     {getTabCount('upcoming')}
               </span>
           </span>
-              {getEventSchedule('upcoming').length === 0 ? <p className='mb-8'>No upcoming events</p> :
-        <UpcomingEvents filteredEvents={getEventSchedule('upcoming')} />}
+          {getEventSchedule('upcoming').length === 0 ? (
+            <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
+              <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Upcoming Events</h3>
+              <p className="text-gray-600 mb-6">There are no scheduled events in the future. Check back later or create your own event!</p>
+              <Link
+                to={webRoutes.workforceEventCreate}
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create an Event
+              </Link>
+            </div>
+          ) : (
+            <UpcomingEvents filteredEvents={getEventSchedule('upcoming')} />
+          )}
         </div>
 
         {/* Events Grid */}
@@ -311,8 +449,22 @@ const WorkforceEvents = () => {
               {getTabCount('recent')}
             </span>
           </span>
-              {getEventSchedule('recent').length === 0 ? <p className='mb-8'>No recent events</p> :
-        <UpcomingEvents filteredEvents={getEventSchedule('recent')} />}
+          {getEventSchedule('recent').length === 0 ? (
+            <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
+              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Recent Events</h3>
+              <p className="text-gray-600 mb-6">You haven't attended any events recently. Explore upcoming events to get started!</p>
+              <button
+                onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Browse Events
+              </button>
+            </div>
+          ) : (
+            <UpcomingEvents filteredEvents={getEventSchedule('recent')} />
+          )}
         </div>
 
         {/* Empty State */}
@@ -326,7 +478,7 @@ const WorkforceEvents = () => {
             <div className="mt-6">
               <button
                 onClick={clearFilters}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700"
               >
                 Clear all filters
               </button>
