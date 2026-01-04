@@ -411,7 +411,7 @@ const WorkforceMyRegistrations = () => {
                     {/* Actions */}
                   <div className="rounded-b-xl flex justify-end space-x-2 py-3 px-2 border-t border-gray-300">
                       <Link
-                        to={`${webRoutes.workforceEventDetail.replace(':id', registration.id)}`}
+                        to={`${webRoutes.workforceEventDetail.replace(':id', registration?.event?.id)}`}
                         className="bg-pale_yellow text-white text-center py-2 rounded-lg px-2 hover:bg-gold transition-colors flex items-center justify-center"
                       >
                         <Eye className="w-4 h-4 mr-1" />
