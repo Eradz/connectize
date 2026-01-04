@@ -21,7 +21,6 @@ import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
 import dealRoomAPI from "../../api-services/dealRoom";
-import { useAuth } from "../../context/userContext";
 import ValuationsPanel from "./ValuationsPanel";
 import { useAuth } from "../../context/userContext";
 
@@ -47,7 +46,6 @@ export default function DealRoomDetail() {
   const { id } = useParams();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const active = useMemo(() => currentSection(pathname), [pathname]);
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
