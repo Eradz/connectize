@@ -791,7 +791,7 @@ const WorkforceEventCreate = () => {
           {/* Right Sidebar */}
           <div className="space-y-6">
             {/* Event Settings */}
-            <div className="sticky top-32 group relative overflow-hidden rounded-3xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-black/10 transition-all duration-500">
+            <div className="sticky top-32 group  overflow-hidden rounded-3xl bg-white/70 backdrop-blur-sm border border-white/50 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-black/10 transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative p-6">
                 <div className="flex items-center space-x-3 mb-6">
