@@ -26,7 +26,7 @@ const LogisticsInventoryForm = () => {
     reorder_point: 0,
     maximum_stock: 0,
     minimum_stock: 0,
-    unit: 'pieces',
+    unit: 'pcs',
     unit_cost: 0,
     status: 'available',
     condition: 'new',

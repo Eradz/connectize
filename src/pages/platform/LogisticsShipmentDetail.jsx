@@ -421,6 +421,141 @@ const LogisticsShipmentDetail = () => {
     return out;
   };
 
+  const handleDownload = async () => {
+    if (!shipment?.id) {
+      toast.error('Cannot download shipment: No shipment data available');
+      return;
+    }
+
+    try {
+      toast.loading('Generating shipment document...');
+      
+      // Call download API
+      const blob = await logisticsAPI.downloadShipment(shipment.id);
+      
+      // Validate blob
+      if (!blob || !(blob instanceof Blob)) {
+        console.error('Invalid blob response:', blob);
+        toast.dismiss();
+        toast.error('Failed to download: Invalid response from server');
+        return;
+      }
+
+      // Check if blob is actually an error response (HTML)
+      if (blob.type === 'text/html') {
+        console.error('Received HTML instead of CSV');
+        toast.dismiss();
+        toast.error('Server error: Please restart the backend server');
+        return;
+      }
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Generate filename with tracking number or ID
+      const filename = shipment.tracking_number 
+        ? `shipment_${shipment.tracking_number}.csv`
+        : `shipment_${shipment.id}.csv`;
+      link.download = filename;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.dismiss();
+      toast.success('Shipment document downloaded successfully');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.dismiss();
+      
+      if (error.response?.status === 500) {
+        toast.error('Server error: Please restart the backend server');
+      } else if (error.response?.status === 404) {
+        toast.error('Download endpoint not found. Please restart the backend server.');
+      } else {
+        toast.error('Failed to download shipment document');
+      }
+    }
+  };
+
+  const handleShare = async () => {
+    if (!shipment?.id) {
+      toast.error('Cannot share shipment: No shipment data available');
+      return;
+    }
+
+    const shareUrl = window.location.href;
+    const shareText = `Shipment ${shipment.tracking_number || shipment.id} - ${shipment.status}`;
+
+    // Try Web Share API first (mobile-friendly)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareText,
+          text: `Track shipment: ${shipment.tracking_number || shipment.id}`,
+          url: shareUrl,
+        });
+        toast.success('Shared successfully');
+      } catch (error) {
+        // User cancelled or error occurred
+        if (error.name !== 'AbortError') {
+          console.error('Share error:', error);
+          // Fall back to clipboard
+          copyToClipboard(shareUrl);
+        }
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          toast.success('Link copied to clipboard!');
+        })
+        .catch((error) => {
+          console.error('Clipboard error:', error);
+          fallbackCopyToClipboard(text);
+        });
+    } else {
+      fallbackCopyToClipboard(text);
+    }
+  };
+
+  const fallbackCopyToClipboard = (text) => {
+    // Create a temporary textarea
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        toast.success('Link copied to clipboard!');
+      } else {
+        toast.error('Failed to copy link');
+      }
+    } catch (error) {
+      console.error('Fallback copy error:', error);
+      toast.error('Failed to copy link');
+    }
+
+    document.body.removeChild(textArea);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -490,11 +625,19 @@ const LogisticsShipmentDetail = () => {
                 {getStatusIcon(shipment.status)}
                 <span className="ml-2">{shipment.status.replace('_', ' ')}</span>
               </span>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center">
+              <button 
+                onClick={handleShare}
+                disabled={!shipment?.id}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center">
+              <button 
+                onClick={handleDownload}
+                disabled={!shipment?.id}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </button>

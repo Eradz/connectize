@@ -73,20 +73,34 @@ const LogisticsInventoryDetailView = () => {
       // Load item details and movement history in parallel
       const [itemData, movementsData] = await Promise.allSettled([
         logisticsAPI.getInventoryItem(id),
-        logisticsAPI.getInventoryMovements ? logisticsAPI.getInventoryMovements(id) : Promise.resolve([])
+        logisticsAPI.getInventoryMovements({ item: id })
       ]);
 
       if (itemData.status === 'fulfilled') {
-        setItem(itemData.value.data || itemData.value);
+        setItem(itemData.value);
       } else {
-        // Fallback to mock data for demo
-        setItem(generateMockItemData());
+        // Only use mock data in development mode
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Using mock data for development');
+          setItem(generateMockItemData());
+        } else {
+          toast.error('Failed to load inventory item');
+          navigate(webRoutes.logisticsInventory);
+          return;
+        }
       }
 
       if (movementsData.status === 'fulfilled') {
-        setMovements(movementsData.value.data || movementsData.value || []);
+        const movements = movementsData.value.results || movementsData.value.data || movementsData.value || [];
+        setMovements(movements);
       } else {
-        setMovements(generateMockMovements());
+        // Only use mock data in development mode
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Using mock movements for development');
+          setMovements(generateMockMovements());
+        } else {
+          setMovements([]);
+        }
       }
 
     } catch (error) {

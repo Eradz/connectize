@@ -105,14 +105,14 @@ const LogisticsShipments = () => {
       // Test direct API call first to verify authentication
       console.log('🧪 Testing direct API authentication...');
       try {
-        const testUrl = new URL('/api/v1/logistics/shipments/', window.location.origin);
-        Object.keys(scopeParams).forEach(key => {
-          if (scopeParams[key] !== undefined) {
-            testUrl.searchParams.append(key, scopeParams[key]);
-          }
-        });
+        // Use a relative URL so this works in dev (Vite proxy) and avoids URL parsing edge-cases
+        const testUrl = `/api/v1/logistics/shipments/?${new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(scopeParams).filter(([, v]) => v !== undefined && v !== null)
+          )
+        ).toString()}`;
         
-        const testResponse = await fetch(testUrl.toString(), {
+        const testResponse = await fetch(testUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${currentSession.tokens.access}`,
@@ -123,7 +123,13 @@ const LogisticsShipments = () => {
         console.log('🧪 Direct API test response:', testResponse.status, testResponse.statusText);
         
         if (!testResponse.ok) {
-          const errorData = await testResponse.json();
+          const errorText = await testResponse.text();
+          let errorData = errorText;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            // Not JSON (could be HTML 404/500 page) — keep as text
+          }
           console.error('🧪 Direct API test failed:', errorData);
           
           if (testResponse.status === 401) {
@@ -132,7 +138,13 @@ const LogisticsShipments = () => {
             return;
           }
         } else {
-          const testData = await testResponse.json();
+          const testText = await testResponse.text();
+          let testData = testText;
+          try {
+            testData = JSON.parse(testText);
+          } catch {
+            // If backend returns non-JSON for some reason, still log it
+          }
           console.log('🧪 Direct API test success:', testData);
         }
       } catch (directError) {
@@ -286,6 +298,68 @@ const LogisticsShipments = () => {
     return `In ${diffDays} days`;
   };
 
+  const handleExport = async () => {
+    try {
+      toast.loading('Generating shipments export...');
+      
+      // Build filters object from current state
+      const filters = {
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        search: searchTerm || undefined,
+      };
+      
+      // Call export API
+      const blob = await logisticsAPI.exportShipments('csv', filters);
+      
+      // Validate blob
+      if (!blob || !(blob instanceof Blob)) {
+        console.error('Invalid blob response:', blob);
+        toast.dismiss();
+        toast.error('Failed to export: Invalid response from server');
+        return;
+      }
+
+      // Check if blob is actually an error response (HTML)
+      if (blob.type === 'text/html') {
+        console.error('Received HTML instead of CSV');
+        toast.dismiss();
+        toast.error('Server error: Please restart the backend server');
+        return;
+      }
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      link.download = `shipments_export_${timestamp}.csv`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.dismiss();
+      toast.success('Shipments exported successfully');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.dismiss();
+      
+      if (error.response?.status === 500) {
+        toast.error('Server error: Please restart the backend server');
+      } else if (error.response?.status === 404) {
+        toast.error('Export endpoint not found. Please restart the backend server.');
+      } else {
+        toast.error('Failed to export shipments');
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -323,7 +397,11 @@ const LogisticsShipments = () => {
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center">
+              <button 
+                onClick={handleExport}
+                disabled={loading || shipments.length === 0}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </button>

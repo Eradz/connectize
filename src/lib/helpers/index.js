@@ -205,6 +205,7 @@ export async function makeApiRequest({
   contentType = "application/json",
   params,
   onUploadProgress,
+  responseType, // Support for blob, arraybuffer, etc.
 }) {
   // For URLs starting with /api, use them directly for Vite proxy in development
   const requestUrl =
@@ -212,7 +213,7 @@ export async function makeApiRequest({
       ? url
       : buildUrl(baseURL, url);
 
-  console.log('[makeApiRequest] Starting request:', { url, method, type, requestUrl });
+  console.log('[makeApiRequest] Starting request:', { url, method, type, requestUrl, responseType });
 
   try {
     const authorization = await getAuthorizationHeader();
@@ -244,7 +245,7 @@ export async function makeApiRequest({
     
     console.log('[makeApiRequest] Final headers:', { hasAuth: !!headers.Authorization, contentType: headers['Content-Type'] });
 
-    const response = await axios({
+    const axiosConfig = {
       url: requestUrl,
       method,
       data,
@@ -252,12 +253,26 @@ export async function makeApiRequest({
       params,
       onUploadProgress,
       timeout: 15000, // 15 second timeout to prevent hanging requests
-    });
+    };
+    
+    // Add responseType if specified (for blob downloads, etc.)
+    if (responseType) {
+      axiosConfig.responseType = responseType;
+    }
+
+    const response = await axios(axiosConfig);
 
     hasNotifiedOffline = false;
 
     if (response.status >= 200 && response.status <= 204) {
       resetForm?.();
+      
+      // For blob responses, return the entire response object
+      if (responseType === 'blob') {
+        console.log('[makeApiRequest] Blob response received, size:', response.data?.size);
+        return response;
+      }
+      
       const responseMessage = response.data.message;
 
       if (
@@ -346,6 +361,11 @@ export async function makeApiRequest({
 
     if (errorMsg && method?.toLowerCase() !== "get") {
       toast.error(errorMsg);
+    }
+
+    // For blob requests, throw the error so caller can handle it
+    if (responseType === 'blob') {
+      throw error;
     }
 
     // Return null for failed requests to prevent infinite loading

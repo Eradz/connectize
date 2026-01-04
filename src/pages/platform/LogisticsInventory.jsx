@@ -40,6 +40,13 @@ const LogisticsInventoryEnhanced = () => {
   const [summary, setSummary] = useState(null);
   const [categories, setCategories] = useState([]);
   const [lowStockAlerts, setLowStockAlerts] = useState([]);
+  const [fieldChoices, setFieldChoices] = useState({
+    categories: [],
+    statuses: [],
+    conditions: [],
+    units: []
+  });
+  const [loadingChoices, setLoadingChoices] = useState(true);
 
   // Calculate enhanced inventory statistics with robust error handling
   // (Placed early to avoid temporal dead zone when referenced in effects below)
@@ -91,42 +98,124 @@ const LogisticsInventoryEnhanced = () => {
     }
   }, [inventory, summary]);
 
-  // Oil & gas industry categories
-  const industryCategories = [
-    { value: 'drilling_equipment', label: 'Drilling Equipment', icon: Wrench },
-    { value: 'pipe_tubing', label: 'Pipes & Tubing', icon: Building },
-    { value: 'wellhead_equipment', label: 'Wellhead Equipment', icon: Settings },
-    { value: 'production_equipment', label: 'Production Equipment', icon: TrendingUp },
-    { value: 'safety_equipment', label: 'Safety Equipment', icon: AlertTriangle },
-    { value: 'maintenance_tools', label: 'Maintenance Tools', icon: Wrench },
-    { value: 'chemicals', label: 'Chemicals & Fluids', icon: Package },
-    { value: 'valves_fittings', label: 'Valves & Fittings', icon: Settings },
-    { value: 'electrical_equipment', label: 'Electrical Equipment', icon: TrendingUp },
-    { value: 'instrumentation', label: 'Instrumentation', icon: Settings },
-    { value: 'ppe', label: 'Personal Protective Equipment', icon: AlertTriangle },
-    { value: 'consumables', label: 'Consumables', icon: Package },
-    { value: 'spare_parts', label: 'Spare Parts', icon: Settings },
-    { value: 'other', label: 'Other', icon: Package }
+  // Icon mapping for categories (icons stay in frontend for UI)
+  const categoryIcons = {
+    drilling_equipment: Wrench,
+    pipe_tubing: Building,
+    wellhead_equipment: Settings,
+    production_equipment: TrendingUp,
+    safety_equipment: AlertTriangle,
+    maintenance_tools: Wrench,
+    chemicals: Package,
+    valves_fittings: Settings,
+    electrical_equipment: TrendingUp,
+    instrumentation: Settings,
+    ppe: AlertTriangle,
+    consumables: Package,
+    spare_parts: Settings,
+    other: Package
+  };
+
+  // Color mapping for statuses and conditions (colors stay in frontend for UI)
+  const statusColors = {
+    available: 'text-green-600 bg-green-100',
+    reserved: 'text-blue-600 bg-blue-100',
+    in_use: 'text-purple-600 bg-purple-100',
+    maintenance: 'text-orange-600 bg-orange-100',
+    damaged: 'text-red-600 bg-red-100',
+    obsolete: 'text-gray-600 bg-gray-100',
+    disposed: 'text-red-800 bg-red-200'
+  };
+
+  const conditionColors = {
+    new: 'text-green-600 bg-green-100',
+    excellent: 'text-blue-600 bg-blue-100',
+    good: 'text-green-500 bg-green-50',
+    fair: 'text-yellow-600 bg-yellow-100',
+    poor: 'text-orange-600 bg-orange-100',
+    damaged: 'text-red-600 bg-red-100'
+  };
+
+  // Fallback hard-coded data (only used if API fails)
+  const FALLBACK_CATEGORIES = [
+    { value: 'drilling_equipment', label: 'Drilling Equipment' },
+    { value: 'pipe_tubing', label: 'Pipes & Tubing' },
+    { value: 'wellhead_equipment', label: 'Wellhead Equipment' },
+    { value: 'production_equipment', label: 'Production Equipment' },
+    { value: 'safety_equipment', label: 'Safety Equipment' },
+    { value: 'maintenance_tools', label: 'Maintenance Tools' },
+    { value: 'chemicals', label: 'Chemicals & Fluids' },
+    { value: 'valves_fittings', label: 'Valves & Fittings' },
+    { value: 'electrical_equipment', label: 'Electrical Equipment' },
+    { value: 'instrumentation', label: 'Instrumentation' },
+    { value: 'ppe', label: 'Personal Protective Equipment' },
+    { value: 'consumables', label: 'Consumables' },
+    { value: 'spare_parts', label: 'Spare Parts' },
+    { value: 'other', label: 'Other' }
   ];
 
-  const statusOptions = [
-    { value: 'available', label: 'Available', color: 'text-green-600 bg-green-100' },
-    { value: 'reserved', label: 'Reserved', color: 'text-blue-600 bg-blue-100' },
-    { value: 'in_use', label: 'In Use', color: 'text-purple-600 bg-purple-100' },
-    { value: 'maintenance', label: 'Under Maintenance', color: 'text-orange-600 bg-orange-100' },
-    { value: 'damaged', label: 'Damaged', color: 'text-red-600 bg-red-100' },
-    { value: 'obsolete', label: 'Obsolete', color: 'text-gray-600 bg-gray-100' },
-    { value: 'disposed', label: 'Disposed', color: 'text-red-800 bg-red-200' }
+  const FALLBACK_STATUSES = [
+    { value: 'available', label: 'Available' },
+    { value: 'reserved', label: 'Reserved' },
+    { value: 'in_use', label: 'In Use' },
+    { value: 'maintenance', label: 'Under Maintenance' },
+    { value: 'damaged', label: 'Damaged' },
+    { value: 'obsolete', label: 'Obsolete' },
+    { value: 'disposed', label: 'Disposed' }
   ];
 
-  const conditionOptions = [
-    { value: 'new', label: 'New', color: 'text-green-600 bg-green-100' },
-    { value: 'excellent', label: 'Excellent', color: 'text-blue-600 bg-blue-100' },
-    { value: 'good', label: 'Good', color: 'text-green-500 bg-green-50' },
-    { value: 'fair', label: 'Fair', color: 'text-yellow-600 bg-yellow-100' },
-    { value: 'poor', label: 'Poor', color: 'text-orange-600 bg-orange-100' },
-    { value: 'damaged', label: 'Damaged', color: 'text-red-600 bg-red-100' }
+  const FALLBACK_CONDITIONS = [
+    { value: 'new', label: 'New' },
+    { value: 'excellent', label: 'Excellent' },
+    { value: 'good', label: 'Good' },
+    { value: 'fair', label: 'Fair' },
+    { value: 'poor', label: 'Poor' },
+    { value: 'damaged', label: 'Damaged' }
   ];
+
+  // Get options with icons and colors
+  const industryCategories = fieldChoices.categories.map(cat => ({
+    ...cat,
+    icon: categoryIcons[cat.value] || Package
+  }));
+
+  const statusOptions = fieldChoices.statuses.map(status => ({
+    ...status,
+    color: statusColors[status.value] || 'text-gray-600 bg-gray-100'
+  }));
+
+  const conditionOptions = fieldChoices.conditions.map(condition => ({
+    ...condition,
+    color: conditionColors[condition.value] || 'text-gray-600 bg-gray-100'
+  }));
+
+  // Load field choices from API
+  const loadFieldChoices = async () => {
+    try {
+      setLoadingChoices(true);
+      console.log('📋 Loading field choices from API...');
+      const choices = await logisticsAPI.getInventoryFieldChoices();
+      console.log('📋 Field choices loaded:', choices);
+      
+      setFieldChoices({
+        categories: choices.categories || FALLBACK_CATEGORIES,
+        statuses: choices.statuses || FALLBACK_STATUSES,
+        conditions: choices.conditions || FALLBACK_CONDITIONS,
+        units: choices.units || []
+      });
+    } catch (error) {
+      console.error('❌ Failed to load field choices, using fallback:', error);
+      setFieldChoices({
+        categories: FALLBACK_CATEGORIES,
+        statuses: FALLBACK_STATUSES,
+        conditions: FALLBACK_CONDITIONS,
+        units: []
+      });
+      toast.error('Some dropdown options may be limited');
+    } finally {
+      setLoadingChoices(false);
+    }
+  };
 
   const loadInventoryData = async () => {
     try {
@@ -379,6 +468,8 @@ const LogisticsInventoryEnhanced = () => {
       return;
     }
     
+    // Load field choices and inventory data
+    loadFieldChoices();
     loadInventoryData();
   }, []);
 
@@ -497,6 +588,41 @@ const LogisticsInventoryEnhanced = () => {
       style: 'currency',
       currency: 'USD'
     }).format(amount || 0);
+  };
+
+  const handleExport = async () => {
+    try {
+      console.log('📥 Starting export...');
+      toast.info('Preparing export...');
+
+      // Build filter parameters matching current view
+      const filters = {};
+      if (selectedCategory !== 'all') filters.category = selectedCategory;
+      if (selectedStatus !== 'all') filters.status = selectedStatus;
+      if (selectedCondition !== 'all') filters.condition = selectedCondition;
+      if (selectedWarehouse !== 'all') filters.warehouse = selectedWarehouse;
+      if (searchTerm) filters.search = searchTerm;
+      if (showLowStockOnly) filters.low_stock = 'true';
+
+      // Call API to get CSV blob
+      const blob = await logisticsAPI.exportInventoryItems(filters);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `inventory_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success(`Exported ${filteredInventory.length} items successfully`);
+      console.log('✅ Export completed');
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      toast.error('Failed to export inventory. Please try again.');
+    }
   };
 
   return (
@@ -719,7 +845,12 @@ const LogisticsInventoryEnhanced = () => {
               <h3 className="text-lg font-semibold text-gray-900">
                 Inventory Items ({filteredInventory.length})
               </h3>
-              <button className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button 
+                onClick={handleExport}
+                disabled={loading || filteredInventory.length === 0}
+                className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </button>

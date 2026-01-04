@@ -149,6 +149,18 @@ const logistics = {
     }
   },
 
+  getInventoryItem: async (id) => {
+    try {
+      console.log('📦 Fetching single inventory item:', id);
+      const response = await api.get(`/api/v1/logistics/inventory-items/${id}/`);
+      console.log('📦 Item data received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching inventory item:', error);
+      throw error;
+    }
+  },
+
   createInventoryItem: async (data) => {
     const response = await api.post('/api/v1/logistics/inventory-items/', data);
     return response.data;
@@ -168,6 +180,19 @@ const logistics = {
   getInventoryCategories: async (params = {}) => {
     const response = await api.get('/api/v1/logistics/inventory-categories/', { params });
     return response.data;
+  },
+
+  // Inventory Field Choices (for dropdowns)
+  getInventoryFieldChoices: async () => {
+    try {
+      console.log('📋 Fetching inventory field choices...');
+      const response = await api.get('/api/v1/logistics/inventory-items/field_choices/');
+      console.log('📋 Field choices received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error fetching field choices:', error);
+      throw error;
+    }
   },
 
   // Inventory Movements
@@ -212,11 +237,71 @@ const logistics = {
 
   // Export data
   exportShipments: async (format = 'csv', filters = {}) => {
-    const response = await api.get('/api/v1/logistics/shipments/export/', {
-      params: { format, ...filters },
-      responseType: 'blob'
-    });
-    return response.data;
+    try {
+      console.log('📥 Exporting shipments with filters:', filters);
+      const response = await api.get('/api/v1/logistics/shipments/export/', {
+        // NOTE: DRF treats `format=` as content-negotiation in some setups and can return 404.
+        // Use a different param name and let the backend treat it as a hint.
+        params: { export_format: format, ...filters },
+        responseType: 'blob'
+      });
+      console.log('📥 Export response:', response);
+      console.log('📥 Export completed, blob size:', response?.data?.size, 'type:', response?.data?.type);
+      
+      // Check if response or response.data is null/undefined
+      if (!response || !response.data) {
+        console.error('❌ Response is null/undefined:', response);
+        throw new Error('Server returned empty response');
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('❌ Export shipments error:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error data type:', typeof error.response?.data);
+      
+      // If error response data is a blob (HTML error page), try to read it
+      if (error.response?.data instanceof Blob) {
+        try {
+          const text = await error.response.data.text();
+          console.error('❌ Error response body (first 200 chars):', text.substring(0, 200));
+        } catch (e) {
+          console.error('❌ Could not read error blob');
+        }
+      }
+      
+      throw error;
+    }
+  },
+
+  downloadShipment: async (id) => {
+    try {
+      console.log('📥 Downloading shipment:', id);
+      const response = await api.get(`/api/v1/logistics/shipments/${id}/download/`, {
+        responseType: 'blob'
+      });
+      console.log('📥 Shipment download completed, blob size:', response.data?.size);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Shipment download error:', error);
+      throw error;
+    }
+  },
+
+  exportInventoryItems: async (filters = {}) => {
+    try {
+      console.log('📥 Exporting inventory items with filters:', filters);
+      const response = await api.get('/api/v1/logistics/inventory-items/export/', {
+        params: filters,
+        responseType: 'blob'
+      });
+      console.log('📥 Export completed successfully');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Export error:', error);
+      throw error;
+    }
   },
 
   // Statistics

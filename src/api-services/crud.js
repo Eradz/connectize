@@ -73,7 +73,15 @@ const api = {
       url: normalizeUrl(url),
       method: 'GET',
       params: config.params,
-    }).then((data) => ({ data })),
+      responseType: config.responseType, // Support blob downloads
+    }).then((response) => {
+      // For blob responses, makeApiRequest returns the full response object
+      // For normal responses, it returns just response.data
+      if (config.responseType === 'blob') {
+        return response; // Already has { data: blob, status, headers, etc }
+      }
+      return { data: response };
+    }),
 
   // Public GET request that doesn't require authentication
   getPublic: (url, config = {}) =>
