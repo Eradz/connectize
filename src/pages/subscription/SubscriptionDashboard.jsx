@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check, ChevronDown, Link } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, ChevronDown} from 'lucide-react';
 
 // CHANGED: Real API imports instead of mock
 import subscriptionsApi from '../../api-services/subscriptions';
@@ -331,7 +331,8 @@ const SubscriptionDashboard = () => {
           >
             Manage Subscription
           </button>
-          <button
+          <Link
+            to={webRoutes.subscriptionManagement + '?tab=billing'}
             onClick={() => setActiveTab('billing')}
             className="px-6 py-2 rounded-full font-medium transition-colors"
             style={{ 
@@ -346,8 +347,9 @@ const SubscriptionDashboard = () => {
             }}
           >
             View Billing
-          </button>
-          <button
+          </Link>
+          <Link
+            to={webRoutes.subscriptionManagement + '?tab=dashboard'}
             onClick={() => setActiveTab('analytics')}
             className="px-6 py-2 rounded-full font-medium transition-colors"
             style={{ 
@@ -362,7 +364,7 @@ const SubscriptionDashboard = () => {
             }}
           >
             Usage Analytics
-          </button>
+          </Link>
         </div>
 
         {/* Main Content */}
@@ -482,7 +484,7 @@ const SubscriptionDashboard = () => {
             {plans.map((plan, index) => (
               <div
                 key={plan.id || index}
-                className="rounded-2xl p-6 shadow-md"
+                className="rounded-2xl p-6 shadow-md flex flex-col justify-between"
                 style={{ backgroundColor: plan.color }}
               >
                 <div className="mb-6">
@@ -497,16 +499,16 @@ const SubscriptionDashboard = () => {
                       backgroundColor: plan.plan_type === 'starter' ? '#EF4444' : '#343A40'
                     }}
                   />
+                  <ul className="space-y-2.5 mt-6">
+                    {plan.feature_highlights.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start gap-2">
+                        <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
+                        <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                <ul className="space-y-2.5 mb-8 h-[60%]">
-                  {plan.feature_highlights.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-2">
-                      <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
-                      <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
 
                 <button
                   onClick={() => handleChoosePackage(plan)}
