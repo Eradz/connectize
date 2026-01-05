@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Link } from 'lucide-react';
 
 // CHANGED: Real API imports instead of mock
 import subscriptionsApi from '../../api-services/subscriptions';
@@ -104,30 +104,30 @@ const SubscriptionDashboard = () => {
     return [
       { 
         label: 'API Calls', 
-        current: usage.api_calls?.current || 1250, 
-        limit: usage.api_calls?.limit || 5000, 
-        percentage: usage.api_calls?.percentage || 80, 
+        current: usage.api_calls?.current || 0, 
+        limit: usage.api_calls?.limit || 0, 
+        percentage: usage.api_calls?.percentage || 0, 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Posts', 
-        current: usage.posts?.current || 19, 
-        limit: usage.posts?.limit || 200, 
-        percentage: usage.posts?.percentage || 40, 
+        current: usage.posts?.current || 0, 
+        limit: usage.posts?.limit || 0, 
+        percentage: usage.posts?.percentage || 0, 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Storage', 
         current: usage.storage?.current ? `${usage.storage.current}%` : '75%', 
         limit: usage.storage?.limit ? `${usage.storage.limit}%` : '100%', 
-        percentage: usage.storage?.percentage || 75, 
+        percentage: usage.storage?.percentage || 0, 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Ad Spend', 
-        current: usage.ad_spend?.current ? `$${usage.ad_spend.current}` : '$83', 
-        limit: usage.ad_spend?.limit || '1,000', 
-        percentage: usage.ad_spend?.percentage || 60, 
+        current: usage.ad_spend?.current ? `$${usage.ad_spend.current}` : '$0', 
+        limit: usage.ad_spend?.limit || 0, 
+        percentage: usage.ad_spend?.percentage || 0, 
         color: 'bg-yellow-400' 
       }
     ];
@@ -304,12 +304,13 @@ const SubscriptionDashboard = () => {
             <h1 className="text-2xl font-bold text-gray-900">Subscription Dashboard</h1>
             <p className="text-gray-500 text-sm mt-1">Manage your subscription plans and features</p>
           </div>
-          <button 
+          <Link
+            to={webRoutes.subscriptionManagement}
             className="px-6 py-2 rounded-full font-medium transition-colors text-gray-800 hover:opacity-90"
             style={{ backgroundColor: '#FFE7A4' }}
           >
             Manage Subscription
-          </button>
+          </Link>
         </div>
 
         {/* Tabs */}
@@ -373,10 +374,10 @@ const SubscriptionDashboard = () => {
             <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {currentPlan ? `${currentPlan.name} ${currentPlan.price}` : 'Professional Plan $99.99'} / Month
+                  <h3 className="capitalize text-lg font-semibold text-gray-900">
+                    {currentPlan ? `${currentPlan.name} ${currentPlan.price}` : 'Not subscribed'} / {currentPlan ? currentPlan.billing_cycle : 'Month' }
                   </h3>
-                  <p className="text-sm text-gray-500 mt-1">advanced feature for scaling companies</p>
+                  <p className="text-sm text-gray-500 mt-1">{currentPlan ? currentPlan.description : 'No description available'}</p>
                 </div>
                 <div className="relative">
                   <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
@@ -387,7 +388,7 @@ const SubscriptionDashboard = () => {
               </div>
             </div>
 
-            {/* Usage Bars - YOUR EXACT CODE */}
+            {/* Usage Bars */}
             <div className="space-y-6">
               {usageData.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
@@ -405,7 +406,7 @@ const SubscriptionDashboard = () => {
                         }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-gray-500 w-12 text-right">{item.percentage}%</span>
+                    <span className="text-sm font-medium text-gray-500 w-12 text-right">{Math.round(item.percentage)}%</span>
                   </div>
                 </div>
               ))}
@@ -438,17 +439,18 @@ const SubscriptionDashboard = () => {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-700 mb-6">Billing Information</h3>
               <div className="space-y-4">
-                <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Next Amount:</span>
+                  <span className="text-sm font-medium text-gray-900">${dashboardData.currentSubscription?.billing_info?.next_billing_amount || '$0'}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Autorenew:</span>
-                  <span className="text-sm font-medium text-gray-900">Renewed</span>
+                  <span className="text-sm font-medium text-gray-900">{dashboardData.currentSubscription?.billing_info?.auto_renew ? 'Enabled' : 'Disabled'}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Plan Type</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    {currentPlan?.plan_type || 'Professional'}
+                  <span className="capitalize text-sm font-medium text-gray-900">
+                    {currentPlan?.plan_type || 'None'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -456,7 +458,7 @@ const SubscriptionDashboard = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {dashboardData.currentSubscription?.current_period_start 
                       ? new Date(dashboardData.currentSubscription.current_period_start).toLocaleDateString('en-GB')
-                      : '24/08/2025'}
+                      : 'No specified date'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -464,7 +466,7 @@ const SubscriptionDashboard = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {dashboardData.currentSubscription?.current_period_end 
                       ? new Date(dashboardData.currentSubscription.current_period_end).toLocaleDateString('en-GB')
-                      : '24/09/2025'}
+                      : 'No specified date'}
                   </span>
                 </div>
               </div>
@@ -497,8 +499,8 @@ const SubscriptionDashboard = () => {
                   />
                 </div>
 
-                <ul className="space-y-2.5 mb-8">
-                  {plan.features.map((feature, featureIndex) => (
+                <ul className="space-y-2.5 mb-8 h-[60%]">
+                  {plan.feature_highlights.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-2">
                       <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
                       <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
