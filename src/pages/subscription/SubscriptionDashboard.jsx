@@ -381,12 +381,6 @@ const SubscriptionDashboard = () => {
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">{currentPlan ? currentPlan.description : 'No description available'}</p>
                 </div>
-                <div className="relative">
-                  <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-                    <ChevronDown className="w-4 h-4" />
-                    {billingCycle}
-                  </button>
-                </div>
               </div>
             </div>
 
