@@ -40,6 +40,67 @@ import Scroll from '../Scroll';
 import { webRoutes } from '../../lib/webRoutes';
 import { makeApiRequest } from '../../lib/helpers';
 
+// Utility function to get currency symbol
+const getCurrencySymbol = (currencyCode) => {
+  const currencyMap = {
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+    'CNY': '¥',
+    'INR': '₹',
+    'AUD': 'A$',
+    'CAD': 'C$',
+    'CHF': 'CHF',
+    'SEK': 'kr',
+    'NZD': 'NZ$'
+  };
+  return currencyMap[currencyCode?.toUpperCase()] || currencyCode || '$';
+};
+
+// Utility function to export billing history to CSV
+const exportBillingHistoryToCSV = (billingHistory, currentSubscription) => {
+  if (!billingHistory || billingHistory.length === 0) {
+    alert('No billing history to export');
+    return;
+  }
+
+  // Prepare CSV headers
+  const headers = ['Transaction ID', 'Type', 'Amount', 'Currency', 'Status', 'Plan', 'Date', 'Description'];
+  
+  // Prepare CSV rows
+  const rows = billingHistory.map(transaction => [
+    transaction?.id || 'N/A',
+    transaction?.transaction_type === 'subscription' ? 'Subscription' : 'Payment',
+    transaction?.amount || '0.00',
+    transaction?.currency || 'USD',
+    transaction?.display_info?.is_failed ? 'Failed' : 
+    transaction?.display_info?.is_pending ? 'Pending' : 'Completed',
+    transaction?.plan_info?.name || 'N/A',
+    new Date(transaction?.display_info?.transaction_date || transaction?.processed_at).toLocaleDateString('en-GB'),
+    transaction?.description || transaction?.plan_info?.name || 'N/A'
+  ]);
+
+  // Create CSV content
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+  ].join('\n');
+
+  // Create blob and download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', `billing-history-${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
   // State management
 const SubscriptionManagementSystem = () => {
   const [currentSubscription, setCurrentSubscription] = useState(null);
@@ -701,6 +762,54 @@ const SubscriptionManagementSystem = () => {
 
             {/* Top Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+              {/* Current Plan Cost */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <div className="flex flex-col items-center text-center">
+                  <div 
+                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
+                    style={{ backgroundColor: '#FFF1C6' }}
+                  >
+                    <DollarSign className="w-6 h-6 text-gray-700" />
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                    {(() => {
+                      const currency = currentSubscription?.plan?.currency || 'USD';
+                      const symbol = getCurrencySymbol(currency);
+                      const price = currentSubscription?.plan?.price || '0.00';
+                      return `${symbol}${price}`;
+                    })()}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Current Plan Cost
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Billing Date */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                <div className="flex flex-col items-center text-center">
+                  <div 
+                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
+                    style={{ backgroundColor: '#FFF1C6' }}
+                  >
+                    <Calendar className="w-6 h-6 text-gray-700" />
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                    {currentSubscription?.current_period_end
+                      ? new Date(currentSubscription.current_period_end).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: '2-digit'
+                        })
+                      : 'N/A'}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Next Billing Date
+                  </div>
+                </div>
+              </div>
+
+              {/* Billing Cycle */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center text-center">
                   <div 
@@ -710,62 +819,7 @@ const SubscriptionManagementSystem = () => {
                     <TrendingUp className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    $99.99
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Current Plan Cost
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-                <div className="flex flex-col items-center text-center">
-                  <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                    style={{ backgroundColor: '#FFF1C6' }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clipPath="url(#clip0_1335_7827)">
-                        <path d="M19 2H18V1C18 0.734784 17.8946 0.48043 17.7071 0.292893C17.5196 0.105357 17.2652 0 17 0C16.7348 0 16.4804 0.105357 16.2929 0.292893C16.1054 0.48043 16 0.734784 16 1V2H8V1C8 0.734784 7.89464 0.48043 7.70711 0.292893C7.51957 0.105357 7.26522 0 7 0C6.73478 0 6.48043 0.105357 6.29289 0.292893C6.10536 0.48043 6 0.734784 6 1V2H5C3.67441 2.00159 2.40356 2.52888 1.46622 3.46622C0.528882 4.40356 0.00158786 5.67441 0 7L0 19C0.00158786 20.3256 0.528882 21.5964 1.46622 22.5338C2.40356 23.4711 3.67441 23.9984 5 24H19C20.3256 23.9984 21.5964 23.4711 22.5338 22.5338C23.4711 21.5964 23.9984 20.3256 24 19V7C23.9984 5.67441 23.4711 4.40356 22.5338 3.46622C21.5964 2.52888 20.3256 2.00159 19 2ZM2 7C2 6.20435 2.31607 5.44129 2.87868 4.87868C3.44129 4.31607 4.20435 4 5 4H19C19.7956 4 20.5587 4.31607 21.1213 4.87868C21.6839 5.44129 22 6.20435 22 7V8H2V7ZM19 22H5C4.20435 22 3.44129 21.6839 2.87868 21.1213C2.31607 20.5587 2 19.7956 2 19V10H22V19C22 19.7956 21.6839 20.5587 21.1213 21.1213C20.5587 21.6839 19.7956 22 19 22Z" fill="#374957"/>
-                        <path d="M12 16.5C12.8284 16.5 13.5 15.8284 13.5 15C13.5 14.1716 12.8284 13.5 12 13.5C11.1716 13.5 10.5 14.1716 10.5 15C10.5 15.8284 11.1716 16.5 12 16.5Z" fill="#374957"/>
-                        <path d="M7 16.5C7.82843 16.5 8.5 15.8284 8.5 15C8.5 14.1716 7.82843 13.5 7 13.5C6.17157 13.5 5.5 14.1716 5.5 15C5.5 15.8284 6.17157 16.5 7 16.5Z" fill="#374957"/>
-                        <path d="M17 16.5C17.8284 16.5 18.5 15.8284 18.5 15C18.5 14.1716 17.8284 13.5 17 13.5C16.1716 13.5 15.5 14.1716 15.5 15C15.5 15.8284 16.1716 16.5 17 16.5Z" fill="#374957"/>
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_1335_7827">
-                          <rect width="24" height="24" fill="white"/>
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
-                    Sep 23, 2025
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Next Billing Date
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-                <div className="flex flex-col items-center text-center">
-                  <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                    style={{ backgroundColor: '#FFF1C6' }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clipPath="url(#clip0_1335_7833)">
-                        <path d="M21.9621 12.875C21.7692 15.1548 20.8028 17.3002 19.223 18.9552C17.6432 20.6102 15.545 21.6754 13.2766 21.9739C11.0082 22.2725 8.70594 21.7866 6.7517 20.5967C4.79746 19.4069 3.30875 17.5846 2.53257 15.4324C1.75638 13.2801 1.73937 10.9271 2.48435 8.76383C3.22933 6.60055 4.69153 4.75699 6.62836 3.53901C8.56519 2.32103 10.8602 1.80184 13.1327 2.06758C15.4052 2.33332 17.5185 3.36801 19.1221 5H16.0001C15.7349 5 15.4805 5.10536 15.293 5.29289C15.1054 5.48043 15.0001 5.73478 15.0001 6C15.0001 6.26522 15.1054 6.51957 15.293 6.70711C15.4805 6.89464 15.7349 7 16.0001 7H20.1431C20.6355 6.99974 21.1077 6.804 21.4559 6.45581C21.8041 6.10761 21.9998 5.63543 22.0001 5.143V1C22.0001 0.734784 21.8947 0.48043 21.7072 0.292893C21.5196 0.105357 21.2653 0 21.0001 0V0C20.7349 0 20.4805 0.105357 20.293 0.292893C20.1054 0.48043 20.0001 0.734784 20.0001 1V3.078C17.9887 1.28073 15.43 0.214484 12.7375 0.0517113C10.0451 -0.111061 7.37652 0.639157 5.16332 2.18103C2.95013 3.72291 1.32176 5.96628 0.541583 8.54832C-0.238597 11.1304 -0.124969 13.9001 0.86409 16.4095C1.85315 18.919 3.6598 21.0214 5.99186 22.3768C8.32392 23.7322 11.045 24.2614 13.715 23.8786C16.3851 23.4958 18.8479 22.2236 20.7053 20.2676C22.5626 18.3116 23.7059 15.7863 23.9501 13.1C23.963 12.9607 23.9468 12.8203 23.9024 12.6877C23.8581 12.555 23.7866 12.4331 23.6925 12.3296C23.5984 12.2261 23.4838 12.1434 23.356 12.0866C23.2282 12.0299 23.0899 12.0004 22.9501 12C22.7061 11.9971 22.4698 12.085 22.2872 12.2468C22.1045 12.4085 21.9886 12.6325 21.9621 12.875Z" fill="#374957"/>
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_1335_7833">
-                          <rect width="24" height="24" fill="white"/>
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
-                    Monthly
+                    {currentSubscription?.billing_cycle || 'Monthly'}
                   </div>
                   <div className="text-sm text-gray-600">
                     Billing Cycle
@@ -773,6 +827,7 @@ const SubscriptionManagementSystem = () => {
                 </div>
               </div>
 
+              {/* Auto Renewal Status */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center text-center">
                   <div 
@@ -782,7 +837,7 @@ const SubscriptionManagementSystem = () => {
                     <CheckCircle className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    Enabled
+                    {currentSubscription?.auto_renew !== false ? 'Enabled' : 'Disabled'}
                   </div>
                   <div className="text-sm text-gray-600">
                     Auto Renewal
@@ -802,15 +857,42 @@ const SubscriptionManagementSystem = () => {
                   <div className="grid grid-cols-3 gap-6">
                     <div>
                       <p className="text-sm text-gray-600 mb-2">Period Start</p>
-                      <p className="text-lg font-semibold text-gray-900">Aug 24, 2025</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {currentSubscription?.current_period_start 
+                          ? new Date(currentSubscription.current_period_start).toLocaleDateString('en-GB', { 
+                              day: '2-digit', 
+                              month: 'short', 
+                              year: 'numeric' 
+                            })
+                          : 'N/A'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600 mb-2">Period End</p>
-                      <p className="text-lg font-semibold text-gray-900">Sep 23, 2025</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {currentSubscription?.current_period_end 
+                          ? new Date(currentSubscription.current_period_end).toLocaleDateString('en-GB', { 
+                              day: '2-digit', 
+                              month: 'short', 
+                              year: 'numeric' 
+                            })
+                          : 'N/A'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600 mb-2">Days Remaining</p>
-                      <p className="text-lg font-semibold text-gray-900">0 Days</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {(() => {
+                          if (currentSubscription?.current_period_end) {
+                            const endDate = new Date(currentSubscription.current_period_end);
+                            const now = new Date();
+                            const diffTime = endDate - now;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            return diffDays > 0 ? `${diffDays} Day${diffDays !== 1 ? 's' : ''}` : '0 Days';
+                          }
+                          return 'N/A';
+                        })()}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -829,11 +911,30 @@ const SubscriptionManagementSystem = () => {
                   
                   <div className="grid grid-cols-2 gap-8 mt-8">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-gray-900 mb-2">$0.00</p>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">
+                        {(() => {
+                          // Calculate total spent from billing history
+                          const total = billingHistory?.reduce((sum, transaction) => {
+                            if (transaction?.display_info?.is_processed && transaction?.amount) {
+                              return sum + parseFloat(transaction.amount);
+                            }
+                            return sum;
+                          }, 0) || 0;
+                          const currency = billingHistory?.[0]?.currency || 'USD';
+                          const symbol = getCurrencySymbol(currency);
+                          return `${symbol}${total.toFixed(2)}`;
+                        })()}
+                      </p>
                       <p className="text-sm text-gray-600">Total Spent</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-gray-900 mb-2">2</p>
+                      <p className="text-3xl font-bold text-gray-900 mb-2">
+                        {(() => {
+                          // Count successful payments
+                          const successCount = billingHistory?.filter(t => t?.display_info?.is_processed).length || 0;
+                          return successCount;
+                        })()}
+                      </p>
                       <p className="text-sm text-gray-600">Successful Payments</p>
                     </div>
                   </div>
@@ -844,123 +945,82 @@ const SubscriptionManagementSystem = () => {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-gray-900">Billing History</h3>
-                  <button className="text-sm text-gray-600 hover:text-gray-900 font-medium">
+                  <button 
+                    onClick={() => exportBillingHistoryToCSV(billingHistory, currentSubscription)}
+                    className="text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
                     Export CSV
                   </button>
                 </div>
 
                 <div className="space-y-4">
-                  {/* Payment Entry 1 */}
-                  <div className="flex items-start justify-between py-4 border-b border-gray-100">
-                    <div className="flex items-start gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: '#FFF9E6' }}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#495057" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Payment</p>
-                        <p className="text-sm font-semibold text-gray-900 mb-1">Monthly Subscription Payment</p>
-                        <p className="text-xs text-gray-500">23/09/2025</p>
-                      </div>
+                  {billingHistory && billingHistory.length > 0 ? (
+                    billingHistory.map((transaction, index) => {
+                      // Determine status colors
+                      const statusColors = {
+                        'completed': { bg: '#D1FAE5', text: '#059669' },
+                        'pending': { bg: '#FEF3C7', text: '#D97706' },
+                        'failed': { bg: '#FEE2E2', text: '#DC2626' }
+                      };
+                      
+                      const status = transaction?.display_info?.is_failed ? 'failed' : 
+                                   transaction?.display_info?.is_pending ? 'pending' : 'completed';
+                      const colors = statusColors[status] || statusColors.completed;
+                      
+                      // Format transaction type label
+                      const typeLabel = transaction?.transaction_type === 'subscription' ? 'Subscription' : 'Payment';
+                      
+                      // Get formatted date
+                      const transactionDate = transaction?.display_info?.transaction_date || transaction?.processed_at;
+                      const formattedDate = transactionDate ? 
+                        new Date(transactionDate).toLocaleDateString('en-GB', { 
+                          day: '2-digit', 
+                          month: '2-digit', 
+                          year: 'numeric' 
+                        }) : 'N/A';
+                      
+                      // Get amount display
+                      const amountDisplay = transaction?.display_info?.formatted_amount || 
+                                          `${transaction?.currency || 'USD'} ${transaction?.amount || '0.00'}`;
+                      
+                      // Get description
+                      const description = transaction?.plan_info?.name || transaction?.description || `${typeLabel} Payment`;
+                      
+                      return (
+                        <div key={transaction?.id || index} className={`flex items-start justify-between py-4 ${index !== billingHistory.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                              style={{ backgroundColor: '#FFF9E6' }}
+                            >
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#495057" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">{typeLabel}</p>
+                              <p className="text-sm font-semibold text-gray-900 mb-1">{description}</p>
+                              <p className="text-xs text-gray-500">{formattedDate}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-gray-900 mb-1">{amountDisplay}</p>
+                            <span 
+                              className="inline-block px-2 py-1 rounded text-xs font-medium capitalize"
+                              style={{ backgroundColor: colors.bg, color: colors.text }}
+                            >
+                              {status}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <p className="text-gray-500 text-sm">No billing history available</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900 mb-1">$99.99</p>
-                      <span 
-                        className="inline-block px-2 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: '#D1FAE5', color: '#009A05' }}
-                      >
-                        Completed
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Payment Entry 2 */}
-                  <div className="flex items-start justify-between py-4 border-b border-gray-100">
-                    <div className="flex items-start gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: '#FFF9E6' }}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#495057" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Payment</p>
-                        <p className="text-sm font-semibold text-gray-900 mb-1">Monthly Subscription Payment</p>
-                        <p className="text-xs text-gray-500">23/09/2025</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900 mb-1">$99.99</p>
-                      <span 
-                        className="inline-block px-2 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: '#D1FAE5', color: '#059669' }}
-                      >
-                        Completed
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Payment Entry 3 */}
-                  <div className="flex items-start justify-between py-4 border-b border-gray-100">
-                    <div className="flex items-start gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: '#FFF9E6' }}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#495057" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Payment</p>
-                        <p className="text-sm font-semibold text-gray-900 mb-1">Monthly Subscription Payment</p>
-                        <p className="text-xs text-gray-500">23/09/2025</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900 mb-1">$99.99</p>
-                      <span 
-                        className="inline-block px-2 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: '#D1FAE5', color: '#059669' }}
-                      >
-                        Completed
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Payment Entry 4 */}
-                  <div className="flex items-start justify-between py-4">
-                    <div className="flex items-start gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: '#FFF9E6' }}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#495057" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Payment</p>
-                        <p className="text-sm font-semibold text-gray-900 mb-1">Monthly Subscription Payment</p>
-                        <p className="text-xs text-gray-500">23/09/2025</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900 mb-1">$99.99</p>
-                      <span 
-                        className="inline-block px-2 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: '#D1FAE5', color: '#059669' }}
-                      >
-                        Completed
-                      </span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
