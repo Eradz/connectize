@@ -205,7 +205,7 @@ const SubscriptionManagementSystem = () => {
 
   // Calculate categories count
   const categoriesCount = Object.keys(features).length;
-
+  console.log('Current Subscription :', currentSubscription);
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -240,11 +240,17 @@ const SubscriptionManagementSystem = () => {
     { id: 'payments', label: 'Payments', icon: DollarSign }
   ];
 
+  const statsCards =[
+    {icon: TrendingUp, title: 'Monthly Cost', value: `$${currentSubscription?.plan?.price || '0.00'}`},
+    {icon: Star, title: 'Features ', value: totalFeatures || 0},
+    {icon: BarChart3, title: 'Categories', value: categoriesCount || 0},
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col-reverse md:flex-row justify-between items-start mb-8 gap-2">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Subscription Management
@@ -254,7 +260,7 @@ const SubscriptionManagementSystem = () => {
             </p>
           </div>
           <button 
-            className="w-full md:w-auto px-6 py-2 rounded-lg font-medium border-2 transition-colors hover:bg-orange-50"
+            className="w-fit md:w-auto px-6 py-1 md:py-2 rounded-lg font-medium border-2 transition-colors hover:bg-orange-50"
             style={{ 
               borderColor: '#F59E0B',
               color: '#F59E0B',
@@ -296,56 +302,26 @@ const SubscriptionManagementSystem = () => {
         </div>
 {/* Stats Cards - Only show on Dashboard */}
         {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <div className="flex flex-col items-center text-center">
-                <div 
-                  className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                  style={{ backgroundColor: '#FFF9E6' }}
-                >
-                  <TrendingUp className="w-6 h-6 text-gray-700" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">            
+            {statsCards.map((card, index) => (
+              <div key={index} className={`${index === 2 ? "col-span-2 md:col-span-1" : ""} bg-white rounded-lg p-6 shadow-sm border border-gray-100`}>
+                <div className="flex flex-col items-center text-center">
+                  <div 
+                    className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
+                    style={{ backgroundColor: '#FFF9E6' }}
+                  >
+                    {/* {card.icon}  */}
+                  <card.icon className="w-6 h-6 text-gray-700" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  ${currentSubscription?.plan?.price || '0.00'}
+                  {card.value}
                 </div>
                 <div className="text-sm text-gray-600">
-                  Monthly Cost
+                  {card.title}
                 </div>
               </div>
             </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-              <div className="flex flex-col items-center text-center">
-                <div 
-                  className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                  style={{ backgroundColor: '#FFF9E6' }}
-                >
-                  <Star className="w-6 h-6 text-gray-700" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {totalFeatures}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Features
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100 col-span-2 md:col-span-1">
-              <div className="flex flex-col items-center text-center">
-                <div 
-                  className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                  style={{ backgroundColor: '#FFF9E6' }}
-                >
-                  <BarChart3 className="w-6 h-6 text-gray-700" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {categoriesCount}
-                </div>
-                <div className="text-sm text-gray-600">
-                  Categories
-                </div>
-              </div>
-            </div>
+          ))}
           </div>
         )}
 
@@ -357,11 +333,11 @@ const SubscriptionManagementSystem = () => {
               {/* Plan Overview */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">Plan Overview</h2>
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Plan Name</p>
                     <p className="text-lg font-semibold text-gray-900">
-                      {currentSubscription?.plan?.name || 'None'}
+                      {currentSubscription?.plan?.name.replace("Plan", '') || 'None'}
                     </p>
                   </div>
                   <div>
@@ -496,9 +472,9 @@ const SubscriptionManagementSystem = () => {
             </div>
 
             {/* Right Column - Stats Grid */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-2 h-max">
               {/* Total Usage */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <div className="max-h-max bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center text-center">
                   <div 
                     className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
@@ -516,7 +492,7 @@ const SubscriptionManagementSystem = () => {
               </div>
 
               {/* Usage Trend */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <div className="max-h-max bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center text-center">
                   <div 
                     className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
@@ -534,7 +510,7 @@ const SubscriptionManagementSystem = () => {
               </div>
 
               {/* Efficiency Score */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <div className="max-h-max bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center text-center">
                   <div 
                     className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
@@ -543,7 +519,13 @@ const SubscriptionManagementSystem = () => {
                     <BarChart3 className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    11/100
+                   {(() => {
+                      const usageValues = Object.values(currentSubscription?.usage_percentage);
+                      const avgUsage = usageValues.reduce((sum, val) => sum + val, 0) / usageValues.length;
+                      // Simple efficiency: higher usage = higher efficiency (up to 80%)
+                      const efficiency = Math.min(avgUsage * 1.2, 100);
+                      return `${Math.round(efficiency)}/100`;
+                   })()}
                   </div>
                   <div className="text-sm text-gray-600">
                     Efficiency Score
@@ -552,7 +534,7 @@ const SubscriptionManagementSystem = () => {
               </div>
 
               {/* Days Remaining */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <div className="max-h-max bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                 <div className="flex flex-col items-center text-center">
                   <div 
                     className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
@@ -561,7 +543,26 @@ const SubscriptionManagementSystem = () => {
                     <BarChart3 className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    0
+                   {(() => {
+                    // Calculate days remaining from current_period_end
+                    if (currentSubscription?.current_period_end) {
+                      const endDate = new Date(currentSubscription.current_period_end);
+                      const now = new Date();
+                      const diffTime = endDate - now;
+                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                      return diffDays > 0 ? diffDays.toString() : '0';
+                    }
+                    if (currentSubscription?.days_remaining !== undefined) {
+                      return currentSubscription.days_remaining.toString();
+                    }
+                    if (analytics?.billing_period?.days_remaining !== undefined) {
+                      return analytics.billing_period.days_remaining.toString();
+                    }
+                    if (usage?.days_remaining !== undefined) {
+                      return usage.days_remaining.toString();
+                    }
+                    return 'N/A';
+                  })()}
                   </div>
                   <div className="text-sm text-gray-600">
                     Days Remaining
