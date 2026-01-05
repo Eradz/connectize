@@ -314,7 +314,7 @@ const SubscriptionDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-3 mb-6">
+        {/* <div className="flex gap-3 mb-6">
           <button
             onClick={() => setActiveTab('manage')}
             className="px-6 py-2 rounded-full font-medium transition-colors text-gray-800"
@@ -365,7 +365,7 @@ const SubscriptionDashboard = () => {
           >
             Usage Analytics
           </Link>
-        </div>
+        </div> */}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

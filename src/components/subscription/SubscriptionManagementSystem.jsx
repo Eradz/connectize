@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -32,10 +32,13 @@ import {
   Sparkles,
   PlusCircle,
   Eye,
-  Download
+  Download,
+  Check
 } from 'lucide-react';
 import { subscriptionsAPI } from '../../api-services/subscriptions';
 import Scroll from '../Scroll';  
+import { webRoutes } from '../../lib/webRoutes';
+import { makeApiRequest } from '../../lib/helpers';
 
   // State management
 const SubscriptionManagementSystem = () => {
@@ -49,8 +52,9 @@ const SubscriptionManagementSystem = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [error, setError] = useState(null);
+  const [enhancedFeatures, setEnhancedFeatures] = useState(null);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
 
     // Get active tab from URL or default to dashboard
@@ -98,7 +102,7 @@ const SubscriptionManagementSystem = () => {
         subscriptionsAPI.getAvailableFeatures(),
         subscriptionsAPI.getUsage(),
         subscriptionsAPI.getSubscriptionAnalytics(),
-        subscriptionsAPI.getBillingHistory()
+        subscriptionsAPI.getBillingHistory(),      
       ]);
 
       const safeExtract = (result, defaultValue = null) => {
@@ -123,8 +127,22 @@ const SubscriptionManagementSystem = () => {
       setUsage(usageData?.usage || usageData);
       setAnalytics(analyticsData);
       setBillingHistory(billingData?.results || billingData || []);
+      // setEnhancedFeatures(enhancedResult?.data || enhancedResult || {});
       // Handle subscription data structure from /api/v1/subscriptions/current/
-
+      console.log("Fetching enhanced features for plan:", subscriptionResult.value.data.plan_features.id);
+      const result = await makeApiRequest({
+              url: `api/permissions/api/v2/enhanced-plans/${subscriptionResult?.value?.data?.plan_features.id}/`,
+              method: 'GET'
+            });
+      
+            // Validate that we have features
+            if (!result?.features || Object.keys(result.features).length === 0) {
+              throw new Error('No features found for this plan');
+            }
+      
+            console.log("API Result:", result);
+            // setPlanData(result);
+            setEnhancedFeatures(result);
       const subscription = subscriptionData?.subscription || subscriptionData;
       const subscriptionUsage = subscriptionData?.usage || usageData;
       
@@ -583,127 +601,53 @@ const SubscriptionManagementSystem = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Starter Plan */}
-              <div className="rounded-2xl p-6 shadow-md" style={{ backgroundColor: '#212529' }}>
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3 text-white">Starter</h3>
-                  <div className="mb-2">
-                    <span className="text-3xl font-bold text-white">$29.99</span>
-                    <span className="text-sm text-gray-300"> / month</span>
-                  </div>
-                  <div className="w-20 h-0.5 bg-red-500" />
-                </div>
-
-                <ul className="space-y-2.5 mb-8">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-white" strokeWidth={2.5} />
-                    <span className="text-sm text-white">All sessions access</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-white" strokeWidth={2.5} />
-                    <span className="text-sm text-white">Summit materials</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-white" strokeWidth={2.5} />
-                    <span className="text-sm text-white">Tea & lunch breaks</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-white" strokeWidth={2.5} />
-                    <span className="text-sm text-white">Gala dinner</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-white" strokeWidth={2.5} />
-                    <span className="text-sm text-white">Visa assistance</span>
-                  </li>
-                </ul>
-
-                <button className="w-full py-3 rounded-lg font-semibold transition-all border-2 bg-transparent text-white border-white hover:bg-white hover:text-gray-900">
-                  Choose package
-                </button>
-              </div>
-
-              {/* Professional Plan */}
-              <div className="rounded-2xl p-6 shadow-md" style={{ backgroundColor: '#FFDB76' }}>
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3 text-gray-900">Professional</h3>
-                  <div className="mb-2">
-                    <span className="text-3xl font-bold text-gray-900">$99.99</span>
-                    <span className="text-sm text-gray-700"> / month</span>
-                  </div>
-                  <div className="w-20 h-0.5" style={{ backgroundColor: '#343A40' }} />
-                </div>
-
-                <ul className="space-y-2.5 mb-8">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Economy flight</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">5 nights in standard room</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">All-access summit entry</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Meals + Gala</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Shuttle transport</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Visa assistance</span>
-                  </li>
-                </ul>
-
-                <button className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-gray-900 border-gray-900" style={{ backgroundColor: '#FFDB76' }}>
-                  Choose package
-                </button>
-              </div>
-
-              {/* Enterprise Plan */}
-              <div className="rounded-2xl p-6 shadow-md" style={{ backgroundColor: '#FFDB76' }}>
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold mb-3 text-gray-900">Enterprise</h3>
-                  <div className="mb-2">
-                    <span className="text-3xl font-bold text-gray-900">$299.99</span>
-                    <span className="text-sm text-gray-700"> / month</span>
-                  </div>
-                  <div className="w-20 h-0.5" style={{ backgroundColor: '#343A40' }} />
-                </div>
-
-                <p className="text-sm text-gray-700 mb-4">Full-Scale Solution For Large Enterprises</p>
-
-                <ul className="space-y-2.5 mb-8">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Admin functions: 2 features</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">al services: 2 features</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">analytic: 1 feature</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Transport (airport + daily)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-900" strokeWidth={2.5} />
-                    <span className="text-sm text-gray-900">Visa assistance</span>
-                  </li>
-                </ul>
-
-                <button className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-gray-900 border-gray-900" style={{ backgroundColor: '#FFDB76' }}>
-                  Choose package
-                </button>
-              </div>
+              {availablePlans.map((plan, index) => (
+                            <div
+                              key={plan.id || index}
+                              className="rounded-2xl p-6 shadow-md flex flex-col justify-between"
+                              style={{
+                                  backgroundColor: plan.plan_type === 'starter' ? 'black' : '#FFDB76',
+                                  color: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40',
+                                  borderColor: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40'
+                                }}
+                            >
+                              <div className="mb-6">
+                                <h3 className={`text-lg font-bold mb-3 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
+                                <div className="mb-2">
+                                  <span className={`text-3xl font-bold ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
+                                  <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
+                                </div>
+                                <div 
+                                  className="w-20 h-0.5"
+                                  style={{ 
+                                    backgroundColor: plan.plan_type === 'starter' ? '#EF4444' : '#343A40'
+                                  }}
+                                />
+                                <ul className="space-y-2.5 mt-6">
+                                  {plan.feature_highlights.map((feature, featureIndex) => (
+                                    <li key={featureIndex} className="flex items-start gap-2">
+                                      <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
+                                      <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+              
+              
+                              <Link
+                                to={webRoutes.subscriptionPlanDetail.replace(":planId", `${plan.id}`)}
+                                // onClick={() => handleChoosePackage(plan)}
+                                className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-center"
+                                style={{
+                                  backgroundColor: plan.plan_type === 'starter' ? 'transparent' : '#FFDB76',
+                                  color: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40',
+                                  borderColor: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40'
+                                }}
+                              >
+                                Choose package
+                              </Link>
+                            </div>
+                          ))}
             </div>
           </div>
         )}
@@ -721,210 +665,28 @@ const SubscriptionManagementSystem = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Current Usage */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Usage</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• user management</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• admin dashboard</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* AI Services */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">AI Services</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• ai insights</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• ai matchmaking</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Analytics */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Analytics</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• advance analytics</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Communication */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Communication</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• basic messaging</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• unlimited messaging</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Deal Management */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Deal Management</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• create deal room</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• deal analytics</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• unlimited deal rooms</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Enterprise Tool */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Enterprise Tool</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• custom branding</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• priority support</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• white label solution</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* API */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">API</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• basic API access</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• enterprise API access</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Marketplace */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Marketplace</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• create products</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• create services</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Workforce */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Workforce</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• post jobs</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• unlimited job posts</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Logistics */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Logistics</h3>
-                <div className="h-px bg-gray-200 mb-4"></div>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• advanced logistics</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">• basic logistics</span>
-                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 7L5 11L15 1" stroke="#343A40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </li>
-                </ul>
-              </div>
+             {Object.entries(enhancedFeatures.features || {}).map(([categoryName, features], index) => (
+                               <Card key={index} className="border border-gray-200">
+                                 <CardContent className="p-4">
+                                   <div className="flex items-start justify-between mb-3 pb-3 border-b border-gray-200">
+                                     <h3 className="capitalize font-semibold text-gray-900 text-base">
+                                       {categoryName}
+                                     </h3>
+                                   </div>
+                                   
+                                   <ul className="space-y-2.5">
+                                     {features.map((feature, featureIndex) => (
+                                       <li key={feature.id || featureIndex} className="flex items-center justify-between">
+                                         <span className="text-sm text-gray-700">
+                                           • {feature.feature_name}
+                                         </span>
+                                         <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                                       </li>
+                                     ))}
+                                   </ul>
+                                 </CardContent>
+                               </Card>
+                             ))}
             </div>
           </div>
         )}
