@@ -37,7 +37,7 @@ const KnowledgeArticleDetail = () => {
       const response = await knowledgeArticleService.getById(slug);
       const articleData = response?.data || response;
       setArticle(articleData);
-      setLiked(articleData.is_liked || false);
+      setLiked(!!articleData.is_liked_by_user);
     } catch (error) {
       console.error('Error loading article:', error);
       toast.error('Article not found');
@@ -68,15 +68,37 @@ const KnowledgeArticleDetail = () => {
 
   const handleShare = async () => {
     try {
-      await navigator.share({
-        title: article.title,
-        text: article.excerpt,
-        url: window.location.href,
-      });
+      // Call backend to track share
+      const response = await knowledgeArticleService.share(slug);
+      const shareData = response?.data || response;
+      
+      // Update local share count
+      setArticle(prev => ({
+        ...prev,
+        shares: shareData.shares || (prev.shares || 0) + 1
+      }));
+
+      // Try native share API
+      if (navigator.share) {
+        await navigator.share({
+          title: article.title,
+          text: article.excerpt,
+          url: window.location.href,
+        });
+      } else {
+        // Fallback to copying URL to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Article URL copied to clipboard');
+      }
     } catch (error) {
-      // Fallback to copying URL to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Article URL copied to clipboard');
+      console.error('Error sharing article:', error);
+      // If backend call failed, still try to copy URL
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Article URL copied to clipboard');
+      } catch (clipboardError) {
+        toast.error('Failed to share article');
+      }
     }
   };
 
@@ -203,7 +225,10 @@ const KnowledgeArticleDetail = () => {
                       liked ? 'text-red-600' : 'text-gray-600 hover:text-red-600'
                     }`}
                   >
-                    <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+                    <Heart
+                      className={`h-4 w-4 ${liked ? 'fill-current' : ''}`}
+                      fill={liked ? 'currentColor' : 'none'}
+                    />
                     <span>{article.likes || 0}</span>
                     <p>Likes</p>
                   </button>
@@ -263,7 +288,10 @@ const KnowledgeArticleDetail = () => {
                         : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    <Heart className={`h-4 w-4 mr-2 ${liked ? 'fill-current' : ''}`} />
+                    <Heart
+                      className={`h-4 w-4 mr-2 ${liked ? 'fill-current' : ''}`}
+                      fill={liked ? 'currentColor' : 'none'}
+                    />
                     {loadingAction && "Liking..." || 
                     <span>{liked ? 'Unlike' : 'Like'}</span>} 
                   </button>

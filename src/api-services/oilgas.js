@@ -901,6 +901,13 @@ export class KnowledgeTagService extends CrudService {
     super("api/v1/knowledge/tags/");
   }
 
+  async getBySlug(slug) {
+    return makeApiRequest({
+      url: `${this.basePath}${slug}/`,
+      method: "GET",
+    });
+  }
+
   async getPopular() {
     return makeApiRequest({
       url: `${this.basePath}popular/`,

@@ -9,6 +9,9 @@ import {
   Zap,
   SearchIcon,
   Settings2,
+  Bookmark,
+  UserCircle,
+  CalendarCheck,
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -18,6 +21,9 @@ import UpcomingEvents from '../../components/events/UpcomingEvents';
 const WorkforceEvents = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [ongoingEvents, setOngoingEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -30,26 +36,82 @@ const WorkforceEvents = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
 
+  // Helper function to apply filters to a specific event list
+  const applyFiltersToEvents = useCallback((eventList) => {
+    let filtered = eventList;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(event => 
+        (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (event.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (filters.category) {
+      filtered = filtered.filter(event => event.category === filters.category);
+    }
+
+    // Location filter
+    if (filters.location) {
+      filtered = filtered.filter(event => 
+        (event.location || '').toLowerCase().includes(filters.location.toLowerCase())
+      );
+    }
+
+    // Type filter
+    if (filters.type) {
+      filtered = filtered.filter(event => event.event_type === filters.type);
+    }
+
+    // Status filter
+    if (filters.status) {
+      filtered = filtered.filter(event => event.status === filters.status);
+    }
+
+    return filtered;
+  }, [searchTerm, filters]);
+
   const getTabCount = (tab) => {
+    // Return filtered count if any filters are active
+    const hasActiveFilters = searchTerm || filters.category || filters.location || filters.type || filters.status;
+    
+    if (hasActiveFilters) {
+      switch (tab) {
+        case 'ongoing':
+          return applyFiltersToEvents(ongoingEvents).length;
+        case 'upcoming':
+          return applyFiltersToEvents(upcomingEvents).length;
+        case 'recent':
+          return applyFiltersToEvents(pastEvents).length;
+        default:
+          return 0;
+      }
+    }
+    
+    // Return unfiltered count when no filters are active
     switch (tab) {
       case 'ongoing':
-        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) > Date.now()).length;
+        return ongoingEvents.length;
       case 'upcoming':
-        return events.filter(event => new Date(event.start_date) > Date.now()).length;
+        return upcomingEvents.length;
       case 'recent':
-        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) < Date.now()).length;
+        return pastEvents.length;
       default:
         return 0;
     }
   };
+  
   const getEventSchedule = (tab) => {
     switch (tab) {
       case 'ongoing':
-        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) > Date.now());
+        return applyFiltersToEvents(ongoingEvents);
       case 'upcoming':
-        return events.filter(event => new Date(event.start_date) > Date.now());
+        return applyFiltersToEvents(upcomingEvents);
       case 'recent':
-        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) < Date.now());
+        return applyFiltersToEvents(pastEvents);
       default:
         return [];
     }
@@ -76,12 +138,31 @@ const WorkforceEvents = () => {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const response = await workforceAPI.getEvents();
-      const data = response.data?.results || response.data || [];
-      setEvents(data);
-      setFilteredEvents(data);
+      
+      // Fetch all event types in parallel
+      const [upcomingResponse, ongoingResponse, pastResponse] = await Promise.all([
+        workforceAPI.getUpcomingEvents(),
+        workforceAPI.getOngoingEvents(),
+        workforceAPI.getPastEvents()
+      ]);
+      
+      const upcomingData = upcomingResponse.data?.results || upcomingResponse.data || [];
+      const ongoingData = ongoingResponse.data?.results || ongoingResponse.data || [];
+      const pastData = pastResponse.data?.results || pastResponse.data || [];
+      
+      setUpcomingEvents(upcomingData);
+      setOngoingEvents(ongoingData);
+      setPastEvents(pastData);
+      
+      // Combine all events for filtering/search purposes
+      const allEvents = [...upcomingData, ...ongoingData, ...pastData];
+      setEvents(allEvents);
+      setFilteredEvents(allEvents);
     } catch (error) {
       console.error('Failed to load events:', error);
+      setUpcomingEvents([]);
+      setOngoingEvents([]);
+      setPastEvents([]);
       setEvents([]);
       setFilteredEvents([]);
     } finally {
@@ -246,6 +327,20 @@ const WorkforceEvents = () => {
             </div>
             <div className="flex space-x-3">
               <Link
+                to={webRoutes.workforceMyBookmarks}
+                className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Bookmark className="w-4 h-4 mr-2" />
+                My Bookmarks
+              </Link>
+              <Link
+                to={webRoutes.workforceMyEvents}
+                className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <CalendarCheck className="w-4 h-4 mr-2" />
+                My Events
+              </Link>
+              <Link
                 to={webRoutes.workforceEventCreate}
                 className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
               >
@@ -256,11 +351,37 @@ const WorkforceEvents = () => {
               </Link>
             </div>
           </div>
+          
+          {/* Mobile Quick Access Menu */}
+          <div className="md:hidden mb-4 flex gap-2 overflow-x-auto pb-2">
+            <Link
+              to={webRoutes.workforceMyBookmarks}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              <Bookmark className="w-4 h-4 mr-1" />
+              Bookmarks
+            </Link>
+            <Link
+              to={webRoutes.workforceMyEvents}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              <CalendarCheck className="w-4 h-4 mr-1" />
+              My Events
+            </Link>
+            <Link
+              to={webRoutes.workforceMyRegistrations}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              <UserCircle className="w-4 h-4 mr-1" />
+              Registrations
+            </Link>
+          </div>
+
           <nav className="flex gap-2" aria-label="Tabs">
               {[
                 { key: 'ongoing', label: 'Ongoing Events' },
                 { key: 'upcoming', label: 'Upcoming Events' },
-                { key: 'recent', label: 'Recent Events' },
+                { key: 'recent', label: 'Past Events' },
               ].map((tab) => ( 
                 <button
                   key={tab.key}
@@ -444,7 +565,7 @@ const WorkforceEvents = () => {
         {/* Events Grid */}
         <div className='px-2 py-6' id='recent'>
           <span className="flex ">
-            <h4 className='font-medium text-3xl mb-4'>Recent Events</h4>
+            <h4 className='font-medium text-3xl mb-4'>Past Events</h4>
             <span className={`ml-1 h-[50%] mt-2 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
               {getTabCount('recent')}
             </span>
@@ -452,7 +573,7 @@ const WorkforceEvents = () => {
           {getEventSchedule('recent').length === 0 ? (
             <div className="bg-white rounded-lg p-12 text-center mb-8 border border-gray-200">
               <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Recent Events</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Past Events</h3>
               <p className="text-gray-600 mb-6">You haven't attended any events recently. Explore upcoming events to get started!</p>
               <button
                 onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}

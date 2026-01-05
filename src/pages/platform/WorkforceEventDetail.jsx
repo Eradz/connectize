@@ -53,6 +53,8 @@ const WorkforceEventDetail = () => {
       setError(null);
       const response = await workforceAPI.getEvent(id);
       setEvent(response.data);
+      // Set bookmark state from event data
+      setIsBookmarked(response.data?.is_bookmarked || false);
     } catch (err) {
       console.error('Error loading event:', err);
       setError('Failed to load event details');
@@ -301,9 +303,20 @@ const WorkforceEventDetail = () => {
     // You could add a toast notification here
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    // You could save this to localStorage or send to API
+  const handleBookmark = async () => {
+    try {
+      const response = await workforceAPI.bookmarkEvent(id);
+      const newBookmarkState = response?.data?.bookmarked ?? !isBookmarked;
+      setIsBookmarked(newBookmarkState);
+      
+      // Update event object as well
+      if (event) {
+        setEvent(prev => ({ ...prev, is_bookmarked: newBookmarkState }));
+      }
+    } catch (error) {
+      console.error('Failed to bookmark event:', error);
+      // Optionally show error toast
+    }
   };
 
   const getOrganizerInfo = (event) => {

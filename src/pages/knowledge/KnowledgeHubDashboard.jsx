@@ -128,7 +128,9 @@ const KnowledgeHubDashboard = () => {
       setRecentArticles(normalizeArray(recentRes));
       setForums(normalizeArray(forumsRes));
       setCategories(normalizeArray(categoriesRes));
-      setPopularTags(normalizeArray(tagsRes));
+      // Filter out tags with 0 usage_count
+      const tagsWithArticles = normalizeArray(tagsRes).filter(tag => tag.usage_count > 0);
+      setPopularTags(tagsWithArticles);
     } catch (error) {
       console.error('Error loading knowledge hub data:', error);
       toast.error('Failed to load knowledge hub data');
@@ -141,6 +143,87 @@ const KnowledgeHubDashboard = () => {
     if (searchTerm.trim()) {
       navigate(`${webRoutes.knowledgeSearch}?q=${encodeURIComponent(searchTerm)}`);
     }
+  };
+
+  const handleLike = async (articleSlug, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await knowledgeArticleService.like(articleSlug);
+      
+      // Update local state - toggle like status and update count
+      const updateArticles = (articles) => 
+        articles.map(article => {
+          if (article.slug === articleSlug) {
+            const isLiked = article.is_liked_by_user;
+            return {
+              ...article,
+              is_liked_by_user: !isLiked,
+              likes: isLiked ? Math.max((article.likes || 0) - 1, 0) : (article.likes || 0) + 1
+            };
+          }
+          return article;
+        });
+      
+      setFeaturedArticles(updateArticles);
+      setTrendingArticles(updateArticles);
+      setRecentArticles(updateArticles);
+      
+      toast.success('Article liked!');
+    } catch (error) {
+      console.error('Failed to like article:', error);
+      toast.error('Failed to like article');
+    }
+  };
+
+  const handleShare = async (article, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}${webRoutes.knowledgeArticleDetail.replace(':slug', article.slug)}`;
+    
+    try {
+      // Call backend to track share
+      const response = await knowledgeArticleService.share(article.slug);
+      const shareData = response?.data || response;
+      
+      // Update share count in all article lists
+      const updateArticles = (articles) => 
+        articles.map(a => 
+          a.id === article.id 
+            ? { ...a, shares: shareData.shares || (a.shares || 0) + 1 }
+            : a
+        );
+      setFeaturedArticles(updateArticles);
+      setTrendingArticles(updateArticles);
+      setRecentArticles(updateArticles);
+
+      // Try native share API
+      if (navigator.share) {
+        await navigator.share({
+          title: article.title,
+          text: article.excerpt,
+          url: shareUrl,
+        });
+        toast.success('Article shared successfully!');
+      } else {
+        copyToClipboard(shareUrl);
+      }
+    } catch (error) {
+      console.error('Error sharing article:', error);
+      // Fallback to copying URL even if backend fails
+      if (error.name !== 'AbortError') {
+        copyToClipboard(shareUrl);
+      }
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success('Link copied to clipboard!');
+    }).catch((error) => {
+      console.error('Failed to copy:', error);
+      toast.error('Failed to copy link');
+    });
   };
 
   const formatDate = (dateString) => {
@@ -233,14 +316,25 @@ const KnowledgeHubDashboard = () => {
                       Published
                     </span>
                     <div className="flex items-center space-x-3 text-white text-xs">
-                      <div className="flex items-center space-x-1">
-                        <Heart className="w-3.5 h-3.5" />
+                      <button
+                        onClick={(e) => handleLike(article.slug, e)}
+                        className={`flex items-center space-x-1 hover:scale-110 transition-transform ${
+                          article.is_liked_by_user ? 'text-red-500' : 'text-white'
+                        }`}
+                      >
+                        <Heart 
+                          className="w-3.5 h-3.5" 
+                          fill={article.is_liked_by_user ? "currentColor" : "none"}
+                        />
                         <span>{article.likes || 0}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
+                      </button>
+                      <button
+                        onClick={(e) => handleShare(article, e)}
+                        className="flex items-center space-x-1 hover:scale-110 transition-transform"
+                      >
                         <Share2 className="w-3.5 h-3.5" />
                         <span>{article.shares || 0}</span>
-                      </div>
+                      </button>
                       <div className="flex items-center space-x-1">
                         <Eye className="w-3.5 h-3.5" />
                         <span>{article.views || 0}</span>
@@ -550,14 +644,27 @@ const KnowledgeHubDashboard = () => {
 
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <div className="flex items-center gap-1.5">
-                              <Heart className="w-4 h-4" />
+                            <button
+                              onClick={(e) => handleLike(article.slug, e)}
+                              className={`flex items-center gap-1.5 transition-colors ${
+                                article.is_liked_by_user 
+                                  ? 'text-red-500' 
+                                  : 'hover:text-red-500'
+                              }`}
+                            >
+                              <Heart 
+                                className="w-4 h-4" 
+                                fill={article.is_liked_by_user ? "currentColor" : "none"}
+                              />
                               <span>{article.likes || 1}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
+                            </button>
+                            <button
+                              onClick={(e) => handleShare(article, e)}
+                              className="flex items-center gap-1.5 hover:text-blue-500 transition-colors"
+                            >
                               <Share2 className="w-4 h-4" />
                               <span>{article.shares || 0}</span>
-                            </div>
+                            </button>
                             <div className="flex items-center gap-1.5">
                               <Eye className="w-4 h-4" />
                               <span>{article.views || 0}</span>

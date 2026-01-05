@@ -75,6 +75,7 @@ import WorkforceEventDetail from "./pages/platform/WorkforceEventDetail";
 import WorkforceEventCreate from "./pages/platform/WorkforceEventCreate";
 import WorkforceMyEvents from "./pages/platform/WorkforceMyEvents";
 import WorkforceMyRegistrations from "./pages/platform/WorkforceMyRegistrations";
+import WorkforceMyBookmarks from "./pages/platform/WorkforceMyBookmarks";
 import AIDashboard from "./pages/platform/AIDashboard";
 import DealRoomDetail from "./components/dealRoom/DealRoomDetail";
 import MyParticipations from "./pages/platform/MyParticipations";
@@ -120,6 +121,7 @@ import KnowledgeForums from "./pages/knowledge/KnowledgeForums";
 import KnowledgeTopics from "./pages/knowledge/KnowledgeTopics";
 import KnowledgeCategories from "./pages/knowledge/KnowledgeCategories";
 import KnowledgeCategoryDetail from "./pages/knowledge/KnowledgeCategoryDetail";
+import KnowledgeTagDetail from "./pages/knowledge/KnowledgeTagDetail";
 import KnowledgeSearch from "./pages/knowledge/KnowledgeSearch";
 import KnowledgeArticleCreate from "./pages/knowledge/KnowledgeArticleCreate";
 import KnowledgeForumCreate from "./pages/knowledge/KnowledgeForumCreate";
@@ -219,6 +221,7 @@ function App() {
           <Route path="knowledge/forums/:forumSlug/topics/create" element={<KnowledgeTopicCreate />} />
           <Route path="knowledge/categories" element={<KnowledgeCategories />} />
           <Route path="knowledge/categories/:slug" element={<KnowledgeCategoryDetail />} />
+          <Route path="knowledge/tags/:slug" element={<KnowledgeTagDetail />} />
           <Route path="knowledge/search" element={<KnowledgeSearch />} />
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           
@@ -256,6 +259,7 @@ function App() {
           <Route path="events/:id" element={<WorkforceEventDetail />} />
           <Route path="events/my-events" element={<WorkforceMyEvents />} />
           <Route path="events/my-registrations" element={<WorkforceMyRegistrations />} />
+          <Route path="events/my-bookmarks" element={<WorkforceMyBookmarks />} />
           <Route path="applications" element={<WorkforceApplications />} />
           
           {/* AI Services */}
@@ -331,6 +335,7 @@ function App() {
           <Route path={toRelativePath(webRoutes.workforceEventDetail)} element={<WorkforceEventDetail />} />
           <Route path={toRelativePath(webRoutes.workforceMyEvents)} element={<WorkforceMyEvents />} />
           <Route path={toRelativePath(webRoutes.workforceMyRegistrations)} element={<WorkforceMyRegistrations />} />
+          <Route path={toRelativePath(webRoutes.workforceMyBookmarks)} element={<WorkforceMyBookmarks />} />
           <Route path={toRelativePath(webRoutes.aiDashboard)} element={<AIDashboard />} />
           <Route path={toRelativePath(webRoutes.aiMatching)} element={<AISubpage />} />
           <Route path={toRelativePath(webRoutes.aiOpportunities)} element={<AISubpage />} />
@@ -391,6 +396,7 @@ function App() {
           <Route path={toRelativePath(webRoutes.knowledgeTopics)} element={<KnowledgeTopics />} />
           <Route path={toRelativePath(webRoutes.knowledgeCategories)} element={<KnowledgeCategories />} />
           <Route path={toRelativePath(webRoutes.knowledgeCategoryDetail)} element={<KnowledgeCategoryDetail />} />
+          <Route path={toRelativePath(webRoutes.knowledgeTagDetail)} element={<KnowledgeTagDetail />} />
           <Route path={toRelativePath(webRoutes.knowledgeSearch)} element={<KnowledgeSearch />} />
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           

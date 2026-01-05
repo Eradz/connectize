@@ -360,6 +360,38 @@ const workforce = {
     return response;
   },
 
+  bookmarkEvent: async (id) => {
+    const response = await api.post(`/api/v1/workforce/events/${id}/bookmark/`);
+    return response;
+  },
+
+  getMyBookmarkedEvents: async () => {
+    const response = await api.get('/api/v1/workforce/events/my_bookmarks/');
+    return response;
+  },
+
+  // Event Schedule Methods
+  getUpcomingEvents: async (params = {}) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
+    console.log('🔗 Making upcoming events API call to:', '/api/v1/workforce/events/upcoming/', 'with params:', cleanParams);
+    const response = await api.getPublic('/api/v1/workforce/events/upcoming/', { params: cleanParams });
+    return response;
+  },
+
+  getOngoingEvents: async (params = {}) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
+    console.log('🔗 Making ongoing events API call to:', '/api/v1/workforce/events/ongoing/', 'with params:', cleanParams);
+    const response = await api.getPublic('/api/v1/workforce/events/ongoing/', { params: cleanParams });
+    return response;
+  },
+
+  getPastEvents: async (params = {}) => {
+    const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
+    console.log('🔗 Making past events API call to:', '/api/v1/workforce/events/past/', 'with params:', cleanParams);
+    const response = await api.getPublic('/api/v1/workforce/events/past/', { params: cleanParams });
+    return response;
+  },
+
     // Convenience methods for backward compatibility
   getProfiles: function(params) { return this.getWorkforceProfiles(params); },
   getProfile: function(id) { return this.getWorkforceProfile(id); },

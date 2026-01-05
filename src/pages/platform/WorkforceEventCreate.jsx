@@ -44,6 +44,8 @@ const WorkforceEventCreate = () => {
   const [loadingCompanies, setLoadingCompanies] = useState(false);
   const [companiesError, setCompaniesError] = useState(null);
   const [topicsInput, setTopicsInput] = useState(''); // Separate state for topics input
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -169,6 +171,23 @@ const WorkforceEventCreate = () => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setError('Image file size must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -195,9 +214,28 @@ const WorkforceEventCreate = () => {
       delete submissionData.start_time;
       delete submissionData.end_time;
 
-      console.log('Submitting event data:', submissionData);
+      // Create FormData if there's an image
+      let requestData;
+      if (imageFile) {
+        requestData = new FormData();
+        Object.keys(submissionData).forEach(key => {
+          const value = submissionData[key];
+          if (value !== null && value !== undefined) {
+            if (Array.isArray(value) || typeof value === 'object') {
+              requestData.append(key, JSON.stringify(value));
+            } else {
+              requestData.append(key, value);
+            }
+          }
+        });
+        requestData.append('image', imageFile);
+      } else {
+        requestData = submissionData;
+      }
 
-      const response = await workforceAPI.createEvent(submissionData);
+      console.log('Submitting event data:', imageFile ? 'FormData with image' : submissionData);
+
+      const response = await workforceAPI.createEvent(requestData);
       
       if (response.data) {
         console.log('Event created successfully:', response.data);
@@ -316,6 +354,45 @@ const WorkforceEventCreate = () => {
                       className="w-full px-4 py-4 bg-white/80 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all duration-200 placeholder:text-slate-400 resize-none"
                       placeholder="Describe your event in detail. What makes it special and valuable for attendees?"
                     />
+                  </div>
+
+                  {/* Event Image Upload */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-slate-700">Event Banner Image</label>
+                    <div className="space-y-3">
+                      {imagePreview ? (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Event preview"
+                            className="w-full h-48 object-cover rounded-2xl border-2 border-slate-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors shadow-lg"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Camera className="w-12 h-12 text-slate-400 mb-3" />
+                            <p className="mb-2 text-sm text-slate-600 font-medium">
+                              <span className="text-indigo-600">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-slate-500">PNG, JPG or WEBP (MAX. 5MB)</p>
+                          </div>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                          />
+                        </label>
+                      )}
+                    </div>
                   </div>
 
                   {/* Event Type */}

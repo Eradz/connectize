@@ -5,8 +5,68 @@ import { Link } from 'react-router-dom';
 import OngoingEventsCarousel from './OngoingEventsCarousel';
 import UpcomingEventContent from './UpcomingEventContent';
 import Scroll from '../Scroll';
+import { workforceAPI } from '../../api-services/workforce';
+import { toast } from 'sonner';
 
 const UpcomingEvents = ({filteredEvents}) => {
+    const [events, setEvents] = React.useState(filteredEvents);
+
+    React.useEffect(() => {
+      setEvents(filteredEvents);
+    }, [filteredEvents]);
+
+    const handleBookmark = async (eventId, e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        const response = await workforceAPI.bookmarkEvent(eventId);
+        const isBookmarked = response?.data?.bookmarked ?? false;
+        
+        // Update local state
+        setEvents(prev => prev.map(ev => 
+          ev.id === eventId ? { ...ev, is_bookmarked: isBookmarked } : ev
+        ));
+        
+        toast.success(isBookmarked ? 'Event bookmarked!' : 'Bookmark removed');
+      } catch (error) {
+        console.error('Failed to bookmark event:', error);
+        toast.error('Failed to update bookmark');
+      }
+    };
+
+    const handleShare = async (event, e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const shareUrl = `${window.location.origin}${webRoutes.workforceEventDetail.replace(':id', event.id)}`;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: event.title,
+            text: event.description,
+            url: shareUrl,
+          });
+          toast.success('Event shared successfully!');
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('Error sharing:', error);
+            copyToClipboard(shareUrl);
+          }
+        }
+      } else {
+        copyToClipboard(shareUrl);
+      }
+    };
+
+    const copyToClipboard = (text) => {
+      navigator.clipboard.writeText(text).then(() => {
+        toast.success('Link copied to clipboard!');
+      }).catch((error) => {
+        console.error('Failed to copy:', error);
+        toast.error('Failed to copy link');
+      });
+    };
+
     const getEventStatus = (event) => {
         if (!event) return 'unknown';
         if (event.is_cancelled) return 'cancelled';
@@ -59,7 +119,7 @@ const UpcomingEvents = ({filteredEvents}) => {
   return (
     <div className="">
       <div className={`hidden lg:grid grid-cols-1 md:grid-cols-3 gap-2`}>
-              {filteredEvents.map((event) => (
+              {events.map((event) => (
                 <div key={event.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl h-[490px]">
                 <div className="bg-white rounded-xl border h-full">
                   {/* Event Image */}
@@ -81,8 +141,15 @@ const UpcomingEvents = ({filteredEvents}) => {
                     </div>
                     <div className="absolute top-4 right-4">
                     
-                       <button className="bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gold transition-colors">
-                        <Bookmark className="w-4 h-4" />
+                       <button 
+                         onClick={(e) => handleBookmark(event.id, e)}
+                         className={`p-2 rounded-lg transition-colors ${
+                           event.is_bookmarked 
+                             ? 'bg-gold text-white' 
+                             : 'bg-pale_yellow text-gray-700 hover:bg-gold'
+                         }`}
+                       >
+                        <Bookmark className={`w-4 h-4 ${event.is_bookmarked ? 'fill-current' : ''}`} />
                       </button>
                     </div>
                   </div>
@@ -156,7 +223,10 @@ const UpcomingEvents = ({filteredEvents}) => {
                         View Details
                       </Link>
                      
-                      <button className="flex items-center bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors ">
+                      <button 
+                        onClick={(e) => handleShare(event, e)}
+                        className="flex items-center bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors "
+                      >
                         <Share2 className="w-4 h-4 mr-1" />
                         {"Share"}
                       </button>
@@ -170,7 +240,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                 <Scroll>
                   <div className='flex gap-2 min-w-min'>
                   {
-                    filteredEvents.map((event, index) => (
+                    events.map((event, index) => (
                       <div key={event.id} className="w-[340px] bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl h-[490px]">
                         <div className="bg-white rounded-xl border h-full">
                           {/* Event Image */}
@@ -192,8 +262,15 @@ const UpcomingEvents = ({filteredEvents}) => {
                                       </div>
                                       <div className="absolute top-4 right-4">
                                       
-                                         <button className="bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gold transition-colors">
-                                          <Bookmark className="w-4 h-4" />
+                                         <button 
+                                           onClick={(e) => handleBookmark(event.id, e)}
+                                           className={`p-2 rounded-lg transition-colors ${
+                                             event.is_bookmarked 
+                                               ? 'bg-gold text-white' 
+                                               : 'bg-pale_yellow text-gray-700 hover:bg-gold'
+                                           }`}
+                                         >
+                                          <Bookmark className={`w-4 h-4 ${event.is_bookmarked ? 'fill-current' : ''}`} />
                                         </button>
                                       </div>
                                     </div>
@@ -266,7 +343,10 @@ const UpcomingEvents = ({filteredEvents}) => {
                                           View Details
                                         </Link>
                                        
-                                        <button className="flex items-center bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors ">
+                                        <button 
+                                          onClick={(e) => handleShare(event, e)}
+                                          className="flex items-center bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors "
+                                        >
                                           <Share2 className="w-4 h-4 mr-1" />
                                           {"Share"}
                                         </button>
