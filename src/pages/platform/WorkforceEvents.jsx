@@ -27,11 +27,11 @@ const WorkforceEvents = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
-    category: '',
-    location: '',
-    date: '',
-    type: '',
-    status: ''
+    type: '',        // event_type: conference, workshop, training, seminar, etc.
+    location: '',    // venue_name or venue_address
+    format: '',      // virtual or in_person
+    date: '',        // today, this_week, this_month
+    price: ''        // free or paid
   });
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
@@ -45,30 +45,66 @@ const WorkforceEvents = () => {
       filtered = filtered.filter(event => 
         (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (event.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (event.topics || []).some(topic => topic.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
-    // Category filter
-    if (filters.category) {
-      filtered = filtered.filter(event => event.category === filters.category);
-    }
-
-    // Location filter
-    if (filters.location) {
-      filtered = filtered.filter(event => 
-        (event.location || '').toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-
-    // Type filter
+    // Event Type filter (conference, workshop, training, seminar, etc.)
     if (filters.type) {
       filtered = filtered.filter(event => event.event_type === filters.type);
     }
 
-    // Status filter
-    if (filters.status) {
-      filtered = filtered.filter(event => event.status === filters.status);
+    // Location filter - check venue_name and venue_address (virtual events may not have these)
+    if (filters.location) {
+      const locationTerm = filters.location.toLowerCase();
+      filtered = filtered.filter(event => 
+        (event.venue_name || '').toLowerCase().includes(locationTerm) ||
+        (event.venue_address || '').toLowerCase().includes(locationTerm) ||
+        (event.is_virtual && 'virtual'.includes(locationTerm)) ||
+        (event.virtual_platform || '').toLowerCase().includes(locationTerm)
+      );
+    }
+
+    // Virtual/In-Person filter
+    if (filters.format) {
+      if (filters.format === 'virtual') {
+        filtered = filtered.filter(event => event.is_virtual === true);
+      } else if (filters.format === 'in_person') {
+        filtered = filtered.filter(event => event.is_virtual === false);
+      }
+    }
+
+    // Date filter
+    if (filters.date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      filtered = filtered.filter(event => {
+        const eventDate = new Date(event.start_date);
+        eventDate.setHours(0, 0, 0, 0);
+        
+        if (filters.date === 'today') {
+          return eventDate.getTime() === today.getTime();
+        }
+        if (filters.date === 'this_week') {
+          const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+          return eventDate >= today && eventDate <= weekFromNow;
+        }
+        if (filters.date === 'this_month') {
+          return eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear();
+        }
+        return true;
+      });
+    }
+
+    // Price filter
+    if (filters.price) {
+      if (filters.price === 'free') {
+        filtered = filtered.filter(event => event.is_free === true);
+      } else if (filters.price === 'paid') {
+        filtered = filtered.filter(event => event.is_free === false);
+      }
     }
 
     return filtered;
@@ -76,7 +112,7 @@ const WorkforceEvents = () => {
 
   const getTabCount = (tab) => {
     // Return filtered count if any filters are active
-    const hasActiveFilters = searchTerm || filters.category || filters.location || filters.type || filters.status;
+    const hasActiveFilters = searchTerm || filters.type || filters.location || filters.format || filters.date || filters.price;
     
     if (hasActiveFilters) {
       switch (tab) {
@@ -178,29 +214,47 @@ const WorkforceEvents = () => {
       filtered = filtered.filter(event => 
         (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (event.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (event.organizer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (event.topics || []).some(topic => topic.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
-    // Category filter
-    if (filters.category) {
-      filtered = filtered.filter(event => event.category === filters.category);
+    // Event Type filter (conference, workshop, training, seminar, etc.)
+    if (filters.type) {
+      filtered = filtered.filter(event => event.event_type === filters.type);
     }
 
-    // Location filter
+    // Location filter - check venue_name and venue_address (virtual events may not have these)
     if (filters.location) {
+      const locationTerm = filters.location.toLowerCase();
       filtered = filtered.filter(event => 
-        (event.location || '').toLowerCase().includes(filters.location.toLowerCase())
+        (event.venue_name || '').toLowerCase().includes(locationTerm) ||
+        (event.venue_address || '').toLowerCase().includes(locationTerm) ||
+        (event.is_virtual && 'virtual'.includes(locationTerm)) ||
+        (event.virtual_platform || '').toLowerCase().includes(locationTerm)
       );
+    }
+
+    // Virtual/In-Person filter
+    if (filters.format) {
+      if (filters.format === 'virtual') {
+        filtered = filtered.filter(event => event.is_virtual === true);
+      } else if (filters.format === 'in_person') {
+        filtered = filtered.filter(event => event.is_virtual === false);
+      }
     }
 
     // Date filter
     if (filters.date) {
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       filtered = filtered.filter(event => {
-        const eventDate = new Date(event.start_date || event.date);
+        const eventDate = new Date(event.start_date);
+        eventDate.setHours(0, 0, 0, 0);
+        
         if (filters.date === 'today') {
-          return eventDate.toDateString() === today.toDateString();
+          return eventDate.getTime() === today.getTime();
         }
         if (filters.date === 'this_week') {
           const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -213,14 +267,13 @@ const WorkforceEvents = () => {
       });
     }
 
-    // Type filter
-    if (filters.type) {
-      filtered = filtered.filter(event => event.type === filters.type);
-    }
-
-    // Status filter
-    if (filters.status) {
-      filtered = filtered.filter(event => event.status === filters.status);
+    // Price filter
+    if (filters.price) {
+      if (filters.price === 'free') {
+        filtered = filtered.filter(event => event.is_free === true);
+      } else if (filters.price === 'paid') {
+        filtered = filtered.filter(event => event.is_free === false);
+      }
     }
 
     setFilteredEvents(filtered);
@@ -228,11 +281,11 @@ const WorkforceEvents = () => {
 
   const clearFilters = () => {
     setFilters({
-      category: '',
-      location: '',
-      date: '',
       type: '',
-      status: ''
+      location: '',
+      format: '',
+      date: '',
+      price: ''
     });
     setSearchTerm('');
   };
@@ -439,31 +492,44 @@ const WorkforceEvents = () => {
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
                       <select
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={filters.category}
-                        onChange={(e) => handleFilterChange('category', e.target.value)}
+                        value={filters.type}
+                        onChange={(e) => handleFilterChange('type', e.target.value)}
                       >
-                        <option value="">All Categories</option>
-                        <option value="Conference">Conference</option>
-                        <option value="Workshop">Workshop</option>
-                        <option value="Training">Training</option>
-                        <option value="Networking">Networking</option>
-                        <option value="Seminar">Seminar</option>
-                        <option value="Trade Show">Trade Show</option>
-                        <option value="Certification">Certification</option>
+                        <option value="">All Types</option>
+                        <option value="conference">Conference</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="training">Training</option>
+                        <option value="seminar">Seminar</option>
+                        <option value="networking">Networking</option>
+                        <option value="webinar">Webinar</option>
+                        <option value="exhibition">Exhibition</option>
+                        <option value="job_fair">Job Fair</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
                       <input
                         type="text"
-                        placeholder="City, Country"
+                        placeholder="City, venue name..."
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         value={filters.location}
                         onChange={(e) => handleFilterChange('location', e.target.value)}
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={filters.format}
+                        onChange={(e) => handleFilterChange('format', e.target.value)}
+                      >
+                        <option value="">All Formats</option>
+                        <option value="virtual">Virtual</option>
+                        <option value="in_person">In-Person</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
@@ -479,29 +545,15 @@ const WorkforceEvents = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                       <select
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={filters.type}
-                        onChange={(e) => handleFilterChange('type', e.target.value)}
+                        value={filters.price}
+                        onChange={(e) => handleFilterChange('price', e.target.value)}
                       >
-                        <option value="">All Types</option>
-                        <option value="In-Person">In-Person</option>
-                        <option value="Virtual">Virtual</option>
-                        <option value="Hybrid">Hybrid</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={filters.status}
-                        onChange={(e) => handleFilterChange('status', e.target.value)}
-                      >
-                        <option value="">All Status</option>
-                        <option value="upcoming">Upcoming</option>
-                        <option value="open">Registration Open</option>
-                        <option value="sold_out">Sold Out</option>
+                        <option value="">All Prices</option>
+                        <option value="free">Free</option>
+                        <option value="paid">Paid</option>
                       </select>
                     </div>
                   </div>
@@ -512,9 +564,6 @@ const WorkforceEvents = () => {
                     >
                       Clear Filters
                     </button>
-                    <span className="text-sm text-gray-500 py-2">
-                      {filteredEvents.length} events found
-                    </span>
                   </div>
                 </div>
               )}

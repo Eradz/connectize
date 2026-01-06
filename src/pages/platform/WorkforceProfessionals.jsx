@@ -635,7 +635,7 @@ const WorkforceProfessionals = () => {
                 <div className="flex items-start justify-between mb-4 h-[20%]">
                   <div className="flex items-start space-x-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=F1C644&color=white`}
                       alt={professional.user_name || professional.user_email || 'Professional'}
                       className="w-10 h-10 rounded-full object-cover"
                     />
@@ -750,7 +750,7 @@ const WorkforceProfessionals = () => {
             <div className="mt-6">
               <button
                 onClick={clearFilters}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
+                className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 Clear all filters
               </button>
