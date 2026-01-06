@@ -1,17 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { workforceAPI } from '../../api-services/workforce';
 
-const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDelete }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDelete, isEditing, setIsEditing }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    cover_letter: application?.cover_letter || '',
-    portfolio_link: application?.portfolio_link || '',
-    additional_info: application?.additional_info || '',
+    cover_letter: '',
+    portfolio_link: '',
+    additional_info: '',
   });
+
+  // Reset form data when application changes or modal opens
+  useEffect(() => {
+    if (isOpen && application) {
+      setFormData({
+        cover_letter: application?.cover_letter || '',
+        portfolio_link: application?.portfolio_link || '',
+        additional_info: application?.additional_info || '',
+      });
+      setShowDeleteConfirm(false);
+    }
+  }, [isOpen, application]);
 
   if (!isOpen || !application) return null;
 
@@ -25,14 +36,17 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
   const handleSaveChanges = async () => {
     try {
       setLoading(true);
-      await workforceAPI.updateJobApplication(application.id, formData);
+      const response = await workforceAPI.updateJobApplication(application.id, formData);
       toast.success('Application updated successfully');
       setIsEditing(false);
       onUpdate?.();
-      onClose();
+      // Close modal after successful update
+      setTimeout(() => {
+        onClose();
+      }, 500);
     } catch (error) {
       console.error('Failed to update application:', error);
-      toast.error('Failed to update application');
+      toast.error(error?.response?.data?.detail || 'Failed to update application');
     } finally {
       setLoading(false);
     }
@@ -43,11 +57,15 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
       setLoading(true);
       await workforceAPI.deleteJobApplication(application.id);
       toast.success('Application deleted successfully');
+      setShowDeleteConfirm(false);
       onDelete?.();
-      onClose();
+      // Close modal after successful delete
+      setTimeout(() => {
+        onClose();
+      }, 500);
     } catch (error) {
       console.error('Failed to delete application:', error);
-      toast.error('Failed to delete application');
+      toast.error(error?.response?.data?.detail || 'Failed to delete application');
     } finally {
       setLoading(false);
     }
@@ -206,75 +224,89 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
         </div>
 
         {/* Footer - Actions */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-          <button
-            onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
-            disabled={loading}
-            className={`${isEditing ? "hidden" : "flex"}  items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              showDeleteConfirm
-                ? 'border border-gray-400 hover:bg-pale_yellow disabled:opacity-50'
-                : 'bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50'
-            }`}
-          >
-            {showDeleteConfirm ? <X className='w-4 h-4'/> :<Trash2 className="w-4 h-4" /> }
-            {showDeleteConfirm ? 'Cancel' : 'Delete Application'}
-          </button>
+        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 gap-3">
+          {/* Delete Button - Left Side */}
+          {!showDeleteConfirm && !isEditing && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg font-medium transition-colors disabled:opacity-50"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Application
+            </button>
+          )}
 
-          <div className="flex justify-between w-full items-center gap-3">
-            {/* {isEditing && (
+          {/* Delete Confirmation Buttons */}
+          {showDeleteConfirm && (
+            <div className="flex gap-3 w-full">
               <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setFormData({
-                    cover_letter: application?.cover_letter || '',
-                    portfolio_link: application?.portfolio_link || '',
-                    additional_info: application?.additional_info || '',
-                  });
-                }}
+                onClick={() => setShowDeleteConfirm(false)}
                 disabled={loading}
-                className="px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-400 bg-white text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors disabled:opacity-50"
               >
+                <X className="w-4 h-4" />
                 Cancel
               </button>
-            )} */}
-
-            {!showDeleteConfirm && (
-              <>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  disabled={loading}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    isEditing
-                      ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  } disabled:opacity-50`}
-                >
-                  {isEditing ? 'Cancel Edit' : 'Edit Application'}
-                </button>
-
-                {isEditing && (
-                  <button
-                    onClick={handleSaveChanges}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-custom_yellow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Save className="w-4 h-4" />
-                    {loading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                )}
-              </>
-            )}
-
-            {showDeleteConfirm && (
               <button
                 onClick={handleDeleteApplication}
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Deleting...' : 'Delete'}
               </button>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Right Side Action Buttons */}
+          {!showDeleteConfirm && (
+            <div className="flex gap-3 ml-auto">
+              <button
+                onClick={() => {
+                  if (isEditing) {
+                    setIsEditing(false);
+                    // Reset form data to original values
+                    setFormData({
+                      cover_letter: application?.cover_letter || '',
+                      portfolio_link: application?.portfolio_link || '',
+                      additional_info: application?.additional_info || '',
+                    });
+                  } else {
+                    onClose();
+                  }
+                }}
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isEditing
+                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 border border-gray-300'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                } disabled:opacity-50`}
+              >
+                {isEditing ? 'Cancel Edit' : 'Close'}
+              </button>
+
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg font-medium transition-colors disabled:opacity-50"
+                >
+                  Edit Application
+                </button>
+              )}
+
+              {isEditing && (
+                <button
+                  onClick={handleSaveChanges}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

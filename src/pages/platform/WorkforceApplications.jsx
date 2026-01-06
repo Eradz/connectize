@@ -55,6 +55,7 @@ const WorkforceApplications = () => {
   const [applications, setApplications] = useState([]);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);  
   // Derived list; avoid setState on each keypress to prevent focus loss
   // We'll compute filtered applications via useMemo
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,6 +181,7 @@ const WorkforceApplications = () => {
   const handleOpenApplicationModal = (application) => {
     setSelectedApplication(application);
     setIsModalOpen(true);
+    setIsEditing(false);
   };
 
   const handleCloseModal = () => {
@@ -674,6 +676,8 @@ const WorkforceApplications = () => {
       {/* Application Action Modal */}
       <ApplicationActionModal
         isOpen={isModalOpen}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
         onClose={handleCloseModal}
         application={selectedApplication}
         onUpdate={handleApplicationUpdate}
