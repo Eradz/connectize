@@ -98,36 +98,39 @@ const SubscriptionDashboard = () => {
     loadDashboardData();
   }, []);
 
+  console.log("usage:", dashboardData.usage);
   // Get usage data with fallbacks - EXACT SAME
   const getUsageData = () => {
     const usage = dashboardData.usage || {};
+    const hasSubscription = !!dashboardData.currentSubscription;
+    
     return [
       { 
         label: 'API Calls', 
-        current: usage.api_calls?.current || 0, 
-        limit: usage.api_calls?.limit || 0, 
-        percentage: usage.api_calls?.percentage || 0, 
+        current: hasSubscription ? (usage.api_calls?.used || 0) : 0, 
+        limit: hasSubscription ? (usage.api_calls?.limit || 0) : 0, 
+        percentage: hasSubscription ? (usage.api_calls?.percentage || 0) : 0, 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Posts', 
-        current: usage.posts?.current || 0, 
-        limit: usage.posts?.limit || 0, 
-        percentage: usage.posts?.percentage || 0, 
+        current: hasSubscription ? (usage.posts?.used || 0) : 0, 
+        limit: hasSubscription ? (usage.posts?.limit || 0) : 0, 
+        percentage: hasSubscription ? (usage.posts?.percentage || 0) : 0, 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Storage', 
-        current: usage.storage?.current ? `${usage.storage.current}%` : '75%', 
-        limit: usage.storage?.limit ? `${usage.storage.limit}%` : '100%', 
-        percentage: usage.storage?.percentage || 0, 
+        current: hasSubscription ? (usage.storage?.used_gb ? `${usage.storage.used_gb}GB` : '0') : '0', 
+        limit: hasSubscription ? (usage.storage?.limit_gb ? `${usage.storage.limit_gb}GB` : '100GB') : '0GB', 
+        percentage: hasSubscription ? (usage.storage?.percentage || 0) : 0, 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Ad Spend', 
-        current: usage.ad_spend?.current ? `$${usage.ad_spend.current}` : '$0', 
-        limit: usage.ad_spend?.limit || 0, 
-        percentage: usage.ad_spend?.percentage || 0, 
+        current: hasSubscription ? (usage.ad_spend?.current ? `${usage.ad_spend.current}` : '0') : '0', 
+        limit: hasSubscription ? (usage.ad_spend?.limit || 0) : 0, 
+        percentage: hasSubscription ? (usage.ad_spend?.percentage || 0) : 0, 
         color: 'bg-yellow-400' 
       }
     ];
@@ -135,25 +138,27 @@ const SubscriptionDashboard = () => {
 
   const getSummaryItems = () => {
     const usage = dashboardData.usage || {};
+    const hasSubscription = !!dashboardData.currentSubscription;
+    
     return [
       { 
         label: 'API Calls', 
-        value: `${usage.api_calls?.current || 1250} / ${usage.api_calls?.limit || 28000}`, 
+        value: hasSubscription ? `${usage.api_calls?.current || 0} / ${usage.api_calls?.limit || 0}` : '0 / 0', 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Posts', 
-        value: `${usage.posts?.current || 19} / ${usage.posts?.limit || 200}`, 
+        value: hasSubscription ? `${usage.posts?.current || 0} / ${usage.posts?.limit || 0}` : '0 / 0', 
         color: 'bg-purple-400' 
       },
       { 
         label: 'Storage', 
-        value: `${usage.storage?.current || 2}GB / ${usage.storage?.limit || 100}GB`, 
+        value: hasSubscription ? `${usage.storage?.current || 0}GB / ${usage.storage?.limit || 0}GB` : '0GB / 0GB', 
         color: 'bg-pink-400' 
       },
       { 
         label: 'Ad Spend', 
-        value: `${usage.ad_spend?.current || 3} / ${usage.ad_spend?.limit || 1000}`, 
+        value: hasSubscription ? `${usage.ad_spend?.current || 0} / ${usage.ad_spend?.limit || 0}` : '0 / 0', 
         color: 'bg-blue-400' 
       }
     ];
@@ -306,7 +311,7 @@ const SubscriptionDashboard = () => {
           </div>
           <Link
             to={webRoutes.subscriptionManagement}
-            className="px-6 py-2 rounded-full font-medium transition-colors text-gray-800 hover:opacity-90"
+            className="px-6 py-2 text-center rounded-full font-medium transition-colors text-gray-800 hover:opacity-90"
             style={{ backgroundColor: '#FFE7A4' }}
           >
             Manage Subscription
@@ -437,16 +442,20 @@ const SubscriptionDashboard = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Next Amount:</span>
-                  <span className="text-sm font-medium text-gray-900">${dashboardData.currentSubscription?.billing_info?.next_billing_amount || '$0'}</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {dashboardData.currentSubscription?.billing_info?.next_billing_amount ? `$${dashboardData.currentSubscription.billing_info.next_billing_amount}` : '--'}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Autorenew:</span>
-                  <span className="text-sm font-medium text-gray-900">{dashboardData.currentSubscription?.billing_info?.auto_renew ? 'Enabled' : 'Disabled'}</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {dashboardData.currentSubscription?.billing_info?.auto_renew !== undefined ? (dashboardData.currentSubscription.billing_info.auto_renew ? 'Enabled' : 'Disabled') : '--'}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Plan Type</span>
                   <span className="capitalize text-sm font-medium text-gray-900">
-                    {currentPlan?.plan_type || 'None'}
+                    {currentPlan?.plan_type ? currentPlan.plan_type : '--'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -454,7 +463,7 @@ const SubscriptionDashboard = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {dashboardData.currentSubscription?.current_period_start 
                       ? new Date(dashboardData.currentSubscription.current_period_start).toLocaleDateString('en-GB')
-                      : 'No specified date'}
+                      : '--'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -462,7 +471,7 @@ const SubscriptionDashboard = () => {
                   <span className="text-sm font-medium text-gray-900">
                     {dashboardData.currentSubscription?.current_period_end 
                       ? new Date(dashboardData.currentSubscription.current_period_end).toLocaleDateString('en-GB')
-                      : 'No specified date'}
+                      : '--'}
                   </span>
                 </div>
               </div>

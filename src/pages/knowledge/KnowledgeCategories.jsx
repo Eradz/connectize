@@ -73,7 +73,7 @@ const KnowledgeCategories = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12 text-center">
           {/* Total Categories */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
             <div className="flex flex-col items-center">

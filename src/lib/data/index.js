@@ -122,21 +122,21 @@ export const hubNavItems = [
       { name: "My Created Events", to: webRoutes.workforceMyEvents }
     ]
   },
-  // {
-  //   name: "AI Services",
-  //   to: webRoutes.aiDashboard,
-  //   icon: "AISecondIcon",
-  //   description: "AI-powered insights",
-  //   subItems: [
-  //     { name: "AI Dashboard", to: webRoutes.aiDashboard },
-  //     { name: "Smart Matching", to: webRoutes.aiMatching },
-  //     { name: "Opportunities", to: webRoutes.aiOpportunities }
-  //   ]
-  // },
+  {
+    name: "AI Services",
+    to: webRoutes.aiDashboard,
+    icon: "AISecondIcon",
+    description: "AI-powered insights",
+    subItems: [
+      { name: "AI Dashboard", to: webRoutes.aiDashboard },
+      { name: "Smart Matching", to: webRoutes.aiMatching },
+      { name: "Opportunities", to: webRoutes.aiOpportunities }
+    ]
+  },
   {
     name: "Knowledge Hub",
     to: webRoutes.knowledgeHub,
-    icon: "AISecondIcon",
+    icon: "OpenBookIcon",
     description: "Industry knowledge base",
     subItems: [
       { name: "Articles", to: webRoutes.knowledgeArticles },
@@ -158,12 +158,12 @@ export const hubNavItems = [
       { name: "Shipments", to: webRoutes.logisticsShipments }
     ]
   },
-  // {
-  //   name: "Subscriptions",
-  //   to: webRoutes.subscriptions,
-  //   icon: "CreditCard",
-  //   description: "Manage your subscription"
-  // }
+  {
+    name: "Subscriptions",
+    to: webRoutes.subscriptions,
+    icon: "CreditCardIcon",
+    description: "Manage your subscription"
+  }
 ];
 
 // Admin Navigation Items

@@ -24,6 +24,8 @@ import { DealIcon } from "../icon/deal";
 import BriefCaseIcon from "../icon/briefCaseIcon";
 import {BusinessHub} from "../icon/BusinessHub"
 import LogisticIcon from "../icon/LogisticIcon";
+import CreditCardIcon from "../icon/CreditCardIcon";
+import OpenBookIcon from "../icon/OpenBookIcon";
 
 // Icon mapping for dynamic icons
 const iconMap = {
@@ -32,6 +34,8 @@ const iconMap = {
   BriefCaseIcon,
   AISecondIcon,
   LogisticIcon,
+  CreditCardIcon,
+  OpenBookIcon,
   BookOpen,
   CreditCard,
   Shield,
