@@ -5,17 +5,20 @@ import { queryClient } from "../lib/utils";
 import { NavProvider } from "./navContext";
 import { QueryProvider } from "./queryContext";
 import { UserProvider } from "./userContext";
+import { SubscriptionProvider } from "./SubscriptionContext";
 
 const MyProvider = ({ children }) => {
   return (
     <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <UserProvider>
-        <NavProvider>
-          <ChakraProvider>
-            <QueryProvider>{children}</QueryProvider>
-          </ChakraProvider>
-        </NavProvider>
+        <SubscriptionProvider>
+          <NavProvider>
+            <ChakraProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </ChakraProvider>
+          </NavProvider>
+        </SubscriptionProvider>
       </UserProvider>
     </QueryClientProvider>
     </HelmetProvider>

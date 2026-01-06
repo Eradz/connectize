@@ -1,3 +1,4 @@
+import axios from "axios";
 import { makeApiRequest } from "../lib/helpers/index";
 
 // Updated CrudService with fixed options handling
@@ -68,8 +69,26 @@ function normalizeUrl(url) {
 }
 
 const api = {
-  get: (url, config = {}) =>
-    makeApiRequest({
+  get: (url, config = {}) => {
+    // If custom headers are provided (like for Stripe auth), use axios directly
+    if (config.headers) {
+      return axios({
+        url: config.baseURL ? config.headers.url || url : (url.startsWith('http') ? url : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/${normalizeUrl(url)}`),
+        method: 'GET',
+        params: config.params,
+        headers: config.headers,
+        responseType: config.responseType,
+      }).then((response) => {
+        if (config.responseType === 'blob') {
+          return response;
+        }
+        return { data: response.data };
+      }).catch((error) => {
+        throw error.response?.data || error;
+      });
+    }
+    
+    return makeApiRequest({
       url: normalizeUrl(url),
       method: 'GET',
       params: config.params,
@@ -81,7 +100,8 @@ const api = {
         return response; // Already has { data: blob, status, headers, etc }
       }
       return { data: response };
-    }),
+    });
+  },
 
   // Public GET request that doesn't require authentication
   getPublic: (url, config = {}) =>

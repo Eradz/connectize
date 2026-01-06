@@ -173,21 +173,54 @@ const subscriptions = {
     // Payment Methods
   getPaymentMethods: async (params = {}) => {
     try {
-      const response = await api.get('/api/v1/payment-methods/', { params });
+      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      
+      if (!stripeKey) {
+        console.warn('Stripe publishable key not configured');
+        return { payment_methods: [], source: 'stripe_key_missing' };
+      }
+
+      // Use Stripe token authentication instead of Bearer token
+      const response = await api.get('/api/v1/payment-methods/', { 
+        params,
+        headers: {
+          'Authorization': `Bearer ${stripeKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       if (response.data?.payment_methods) {
         return response.data;
       }
       return { payment_methods: [], source: 'empty_response' };
     } catch (e) {
-      // Additional fallback for any remaining errors
-      console.warn('Payment methods fallback triggered:', e?.message);
-      return { payment_methods: [], source: 'fallback_error' };
+      console.warn('Payment methods API error:', e?.message);
+      return { payment_methods: [], source: 'api_error', error: e?.message };
     }
   },
 
   getPaymentMethod: async (id) => {
-    const response = await api.get(`/api/v1/payment-methods/${id}/`);
-    return response.data;
+    try {
+      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+      
+      if (!stripeKey) {
+        console.warn('Stripe publishable key not configured');
+        return { source: 'stripe_key_missing' };
+      }
+
+      // Use Stripe token authentication instead of Bearer token
+      const response = await api.get(`/api/v1/payment-methods/${id}/`, {
+        headers: {
+          'Authorization': `Bearer ${stripeKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      return response.data;
+    } catch (e) {
+      console.warn('Get payment method API error:', e?.message);
+      throw e;
+    }
   },
 
   createPaymentMethod: async (data) => {

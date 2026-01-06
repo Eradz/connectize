@@ -7,9 +7,9 @@ import {
   AlertCircle,
   Check
 } from 'lucide-react';
-import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
 import { makeApiRequest } from '../../lib/helpers';
+import { useSubscription } from '../../context/SubscriptionContext';
 
 // Card components
 const Card = ({ children, className = "", ...props }) => (
@@ -50,6 +50,7 @@ const Button = ({ children, className = "", variant = "default", disabled = fals
 const SubscriptionPlanDetail = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
+  const { isCurrentUserPlan, currentSubscription } = useSubscription();
   const [planData, setPlanData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,11 +59,6 @@ const SubscriptionPlanDetail = () => {
     try {
       setLoading(true);
       setError(null);
-
-      // // Check if test auth is active
-      // if (!isTestAuthActive()) {
-      //   loginForTesting();
-      // }
 
       // Get plan-specific features using the enhanced plans API
       const result = await makeApiRequest({
@@ -92,11 +88,10 @@ const SubscriptionPlanDetail = () => {
     }
   }, [planId]);
 
-  // Check if this plan is the current subscription
+  // Check if this plan is the current subscription using context method
   const isCurrentPlan = () => {
-    if (!planData?.current_subscription || !planData) return false;
-    return planData.current_subscription?.id === planData.id ||
-           planData.current_subscription?.plan_type === planData.plan_type;
+    if (!planData) return false;
+    return isCurrentUserPlan(planData);
   };
 
   // Loading state
@@ -171,10 +166,17 @@ const SubscriptionPlanDetail = () => {
             >
               <ArrowLeft className="h-5 w-5 text-gray-700" />
             </button>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">
-                {planData.name || 'Subscription Plan'}
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-4xl font-bold text-gray-900">
+                  {planData.name || 'Subscription Plan'}
+                </h1>
+                {isCurrentPlan() && (
+                  <span className="inline-block px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                    Current Plan
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <p className="text-gray-500 text-lg ml-16">
@@ -255,9 +257,16 @@ const SubscriptionPlanDetail = () => {
           {/* Right Sidebar */}
           <div className="space-y-6">
             {/* Subscription Details */}
-            <Card>
-              <CardHeader className="pb-3">
-                <h3 className="font-semibold text-gray-900 text-base">Subscription Details</h3>
+            <Card className={isCurrentPlan() ? 'border-2 border-green-500' : ''}>
+              <CardHeader className="pb-3 relative">
+                {isCurrentPlan() && (
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-block px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                      Current Plan
+                    </span>
+                  </div>
+                )}
+                <h3 className="font-semibold text-gray-900 text-base pr-24">Subscription Details</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   {planData.tagline || planData.description || 'Perfect for businesses getting started'}
                 </p>
@@ -266,7 +275,7 @@ const SubscriptionPlanDetail = () => {
               <CardContent className="space-y-3 pt-0">
                 {isCurrentPlan() ? (
                   <button 
-                    className="w-full bg-green-600 text-white py-3 rounded-lg font-medium flex items-center justify-center text-sm" 
+                    className="w-full bg-green-600 text-white py-3 rounded-lg font-medium flex items-center justify-center text-sm opacity-75 cursor-not-allowed" 
                     disabled
                   >
                     <Check className="h-5 w-5 mr-2" />
@@ -274,7 +283,7 @@ const SubscriptionPlanDetail = () => {
                   </button>
                 ) : (
                   <button 
-                    className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm"
+                    className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm hover:opacity-90"
                     style={{ background: 'linear-gradient(to right, #FFC000, #FF8400)' }}
                   >
                     <TrendingUp className="h-5 w-5 mr-2" />

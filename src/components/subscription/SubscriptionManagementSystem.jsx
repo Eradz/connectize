@@ -6,7 +6,6 @@ import Button from '@/components/ui/Button';
 import Tabs, { TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import Alert, { AlertDescription } from '@/components/ui/Alert';
 import Progress from '@/components/ui/Progress';
-// import subscriptionsAPI from '@/api-services/subscriptions';
 import { getAuthorizationHeader } from '@/lib/helpers';
 import { loginForTesting, isTestAuthActive } from '@/lib/testAuth';
 import BillingManagement from './BillingManagement';
@@ -38,82 +37,29 @@ import {
 import { subscriptionsAPI } from '../../api-services/subscriptions';
 import Scroll from '../Scroll';  
 import { webRoutes } from '../../lib/webRoutes';
-import { makeApiRequest } from '../../lib/helpers';
-
-// Utility function to get currency symbol
-const getCurrencySymbol = (currencyCode) => {
-  const currencyMap = {
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'JPY': '¥',
-    'CNY': '¥',
-    'INR': '₹',
-    'AUD': 'A$',
-    'CAD': 'C$',
-    'CHF': 'CHF',
-    'SEK': 'kr',
-    'NZD': 'NZ$'
-  };
-  return currencyMap[currencyCode?.toUpperCase()] || currencyCode || '$';
-};
-
-// Utility function to export billing history to CSV
-const exportBillingHistoryToCSV = (billingHistory, currentSubscription) => {
-  if (!billingHistory || billingHistory.length === 0) {
-    alert('No billing history to export');
-    return;
-  }
-
-  // Prepare CSV headers
-  const headers = ['Transaction ID', 'Type', 'Amount', 'Currency', 'Status', 'Plan', 'Date', 'Description'];
-  
-  // Prepare CSV rows
-  const rows = billingHistory.map(transaction => [
-    transaction?.id || 'N/A',
-    transaction?.transaction_type === 'subscription' ? 'Subscription' : 'Payment',
-    transaction?.amount || '0.00',
-    transaction?.currency || 'USD',
-    transaction?.display_info?.is_failed ? 'Failed' : 
-    transaction?.display_info?.is_pending ? 'Pending' : 'Completed',
-    transaction?.plan_info?.name || 'N/A',
-    new Date(transaction?.display_info?.transaction_date || transaction?.processed_at).toLocaleDateString('en-GB'),
-    transaction?.description || transaction?.plan_info?.name || 'N/A'
-  ]);
-
-  // Create CSV content
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-  ].join('\n');
-
-  // Create blob and download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  
-  link.setAttribute('href', url);
-  link.setAttribute('download', `billing-history-${new Date().toISOString().split('T')[0]}.csv`);
-  link.style.visibility = 'hidden';
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+import { useSubscription } from '../../context/SubscriptionContext';
 
   // State management
 const SubscriptionManagementSystem = () => {
-  const [currentSubscription, setCurrentSubscription] = useState(null);
-  const [availablePlans, setAvailablePlans] = useState([]);
-  const [features, setFeatures] = useState({});
-  const [usage, setUsage] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
-  const [billingHistory, setBillingHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Get subscription data from context
+  const {
+    currentSubscription,
+    availablePlans,
+    features,
+    usage,
+    analytics,
+    billingHistory,
+    enhancedFeatures,
+    paymentMethods,
+    loading,
+    error,
+    isCurrentUserPlan,
+    getCurrencySymbol,
+    exportBillingHistoryToCSV
+  } = useSubscription();
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [error, setError] = useState(null);
-  const [enhancedFeatures, setEnhancedFeatures] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,97 +75,6 @@ const SubscriptionManagementSystem = () => {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     navigate(`?tab=${tab}`, { replace: true });
-  };
-  // Fetch all subscription data
-  useEffect(() => {
-    const initializeAuth = async () => {
-      if (!isTestAuthActive()) {
-        try {
-          await loginForTesting();
-        } catch (error) {
-          console.warn('❌ Failed to enable test authentication:', error);
-        }
-      }
-      fetchAllData();
-    };
-    initializeAuth();
-  }, []);
-
-  const fetchAllData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const [
-        subscriptionResult,
-        plansResult,
-        featuresResult,
-        usageResult,
-        analyticsResult,
-        billingResult
-      ] = await Promise.allSettled([
-        subscriptionsAPI.getCurrentSubscription(),
-        subscriptionsAPI.getPlans(),
-        subscriptionsAPI.getAvailableFeatures(),
-        subscriptionsAPI.getUsage(),
-        subscriptionsAPI.getSubscriptionAnalytics(),
-        subscriptionsAPI.getBillingHistory(),      
-      ]);
-
-      const safeExtract = (result, defaultValue = null) => {
-        if (result.status === 'fulfilled' && (result.value?.data || result.value)) {
-          return result.value.data || result.value;
-          
-        }
-        return defaultValue;
-      };
-
-      const subscriptionData = safeExtract(subscriptionResult, {});
-      const plansData = safeExtract(plansResult, { results: [] });
-      const featuresData = safeExtract(featuresResult, { features_by_category: {} });
-      const usageData = safeExtract(usageResult, {});
-      const analyticsData = safeExtract(analyticsResult, {});
-      const billingData = safeExtract(billingResult, { results: [] });
-
-      // Update state with extracted data - handle the actual API response structure
-      setCurrentSubscription(subscriptionData?.subscription || subscriptionData);
-      setAvailablePlans(plansData?.results || plansData || []);
-      setFeatures(featuresData?.features_by_category || featuresData || {});
-      setUsage(usageData?.usage || usageData);
-      setAnalytics(analyticsData);
-      setBillingHistory(billingData?.results || billingData || []);
-      // setEnhancedFeatures(enhancedResult?.data || enhancedResult || {});
-      // Handle subscription data structure from /api/v1/subscriptions/current/
-      console.log("Fetching enhanced features for plan:", subscriptionResult.value.data.plan_features.id);
-      const result = await makeApiRequest({
-              url: `api/permissions/api/v2/enhanced-plans/${subscriptionResult?.value?.data?.plan_features.id}/`,
-              method: 'GET'
-            });
-      
-            // Validate that we have features
-            if (!result?.features || Object.keys(result.features).length === 0) {
-              throw new Error('No features found for this plan');
-            }
-      
-            console.log("API Result:", result);
-            // setPlanData(result);
-            setEnhancedFeatures(result);
-      const subscription = subscriptionData?.subscription || subscriptionData;
-      const subscriptionUsage = subscriptionData?.usage || usageData;
-      
-      setCurrentSubscription(subscription);
-      setAvailablePlans(plansData?.results || plansData || []);
-      setFeatures(featuresData?.features_by_category || {});
-      setUsage(subscriptionUsage);
-      setAnalytics(analyticsData);
-      setBillingHistory(billingData?.results || billingData || []);
-
-    } catch (error) {
-      console.error('❌ Error fetching subscription data:', error);
-      setError(`Failed to load subscription data: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
   };
 
     // Get plan color based on type
@@ -662,53 +517,65 @@ const SubscriptionManagementSystem = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Starter Plan */}
-              {availablePlans.map((plan, index) => (
-                            <div
-                              key={plan.id || index}
-                              className="rounded-2xl p-6 shadow-md flex flex-col justify-between"
-                              style={{
-                                  backgroundColor: plan.plan_type === 'starter' ? 'black' : '#FFDB76',
-                                  color: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40',
-                                  borderColor: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40'
-                                }}
-                            >
-                              <div className="mb-6">
-                                <h3 className={`text-lg font-bold mb-3 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                                <div className="mb-2">
-                                  <span className={`text-3xl font-bold ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
-                                  <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
-                                </div>
-                                <div 
-                                  className="w-20 h-0.5"
-                                  style={{ 
-                                    backgroundColor: plan.plan_type === 'starter' ? '#EF4444' : '#343A40'
-                                  }}
-                                />
-                                <ul className="space-y-2.5 mt-6">
-                                  {plan.feature_highlights.map((feature, featureIndex) => (
-                                    <li key={featureIndex} className="flex items-start gap-2">
-                                      <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
-                                      <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-              
-              
-                              <Link
-                                to={webRoutes.subscriptionPlanDetail.replace(":planId", `${plan.id}`)}
-                                // onClick={() => handleChoosePackage(plan)}
-                                className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-center"
-                                style={{
-                                  backgroundColor: plan.plan_type === 'starter' ? 'transparent' : '#FFDB76',
-                                  color: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40',
-                                  borderColor: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40'
-                                }}
-                              >
-                                Choose package
-                              </Link>
-                            </div>
-                          ))}
+              {availablePlans.map((plan, index) => {
+                const isCurrentPlan = isCurrentUserPlan(plan);
+                
+                return (
+                  <div
+                    key={plan.id || index}
+                    className={`rounded-2xl p-6 shadow-md flex flex-col justify-between relative ${isCurrentPlan ? 'border-2 border-green-500' : ''}`}
+                    style={{
+                        backgroundColor: isCurrentPlan ? 'black' : '#FFDB76',
+                        color: isCurrentPlan ? '#FFFFFF' : '#343A40',
+                        borderColor: isCurrentPlan ? '#FFFFFF' : '#343A40'
+                      }}
+                  >
+                    {/* Current Plan Badge */}
+                    {isCurrentPlan && (
+                      <div className="absolute top-4 right-4">
+                        <Badge 
+                          className="bg-green-500 text-white text-xs font-semibold"
+                        >
+                          Current Plan
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <div className="mb-6">
+                      <h3 className={`text-lg font-bold mb-3 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
+                      <div className="mb-2">
+                        <span className={`text-3xl font-bold ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{getCurrencySymbol(plan.currency || 'USD')}{plan.price}</span>
+                        <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
+                      </div>
+                      <div 
+                        className="w-20 h-0.5"
+                        style={{ 
+                          backgroundColor: isCurrentPlan ? '#EF4444' : '#343A40'
+                        }}
+                      />
+                      <ul className="space-y-2.5 mt-6">
+                        {plan.feature_highlights && plan.feature_highlights.map((feature, featureIndex) => (
+                          <li key={featureIndex} className="flex items-start gap-2">
+                            <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
+                            <span className={`text-sm ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                      <Link
+                        to={webRoutes.subscriptionPlanDetail.replace(":planId", `${plan.id}`)}
+                        className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-center hover:opacity-80"
+                        style={{
+                          backgroundColor: isCurrentPlan ? 'transparent' : '#FFDB76',
+                          color: isCurrentPlan ? '#FFFFFF' : '#343A40',
+                          borderColor: isCurrentPlan ? '#FFFFFF' : '#343A40'
+                        }}
+                      >
+                        {isCurrentPlan ? 'Manage Plan' : 'Choose package'}
+                      </Link>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -901,12 +768,13 @@ const SubscriptionManagementSystem = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold text-gray-900">Billing Insights</h3>
-                    <button 
+                    <Link 
+                      to={webRoutes.subscriptionManagement + '?tab=plans'}
                       className="px-4 py-2 rounded-lg text-sm font-medium"
                       style={{ backgroundColor: '#F1C644', color: '#000000' }}
                     >
                       Upgrade Plan
-                    </button>
+                    </Link>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-8 mt-8">
@@ -1028,252 +896,252 @@ const SubscriptionManagementSystem = () => {
         )}
         
         {/* Payments Tab */}
-{activeTab === 'payments' && (
-  <div className="mt-8">
-    <div className="mb-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Payments Methods</h2>
-      <p className="text-gray-600">Manage Payment Methods And Billing Preferences</p>
-    </div>
-
-    {!showPaymentForm ? (
-      /* Empty State */
-      <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-semibold text-gray-900">Current Billing Period</h3>
-          <button 
-            onClick={() => setShowPaymentForm(true)}
-            className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            Add Payment Method
-          </button>
-        </div>
-
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="w-16 h-16 mb-6 flex items-center justify-center">
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="8" y="16" width="48" height="32" rx="4" stroke="#D1D5DB" strokeWidth="2" fill="none"/>
-              <rect x="8" y="24" width="48" height="8" fill="#E5E7EB"/>
-              <rect x="12" y="36" width="16" height="4" rx="2" fill="#D1D5DB"/>
-            </svg>
-          </div>
-          <h4 className="text-lg font-semibold text-gray-900 mb-2">
-            No Payment Method Found
-          </h4>
-          <p className="text-sm text-gray-600 mb-6">
-            Add payment to ensure uninterrupted service
-          </p>
-          <button 
-            onClick={() => setShowPaymentForm(true)}
-            className="px-6 py-3 rounded-lg font-medium text-black"
-            style={{ backgroundColor: '#F59E0B' }}
-          >
-            Add Payment Method
-          </button>
-        </div>
-      </div>
-    ) : (
-      /* Payment Form */
-      <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-semibold text-gray-900">Current Billing Period</h3>
-          <button 
-            className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
-          >
-            + Add Payment Method
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Saved Cards */}
-          <div className="space-y-4">
-            {/* Card 1 */}
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center">
-                  <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g clipPath="url(#clip0_1335_8445)">
-                      <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
-                      <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
-                      <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
-                      <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_1335_8445">
-                        <rect width="65" height="40" fill="white"/>
-                      </clipPath>
-                    </defs>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Masters card</p>
-                  <p className="text-xs text-gray-500">2234************234</p>
-                </div>
-              </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+        {activeTab === 'payments' && (
+          <div className="mt-8">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Payments Methods</h2>
+              <p className="text-gray-600">Manage Payment Methods And Billing Preferences</p>
             </div>
 
-            {/* Card 2 */}
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center">
-                  <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g clipPath="url(#clip0_card2)">
-                      <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
-                      <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
-                      <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
-                      <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_card2">
-                        <rect width="65" height="40" fill="white"/>
-                      </clipPath>
-                    </defs>
-                  </svg>
+            {!showPaymentForm ? (
+              /* Empty State */
+              <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-semibold text-gray-900">Current Billing Period</h3>
+                  <button 
+                    onClick={() => setShowPaymentForm(true)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    Add Payment Method
+                  </button>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Masters card</p>
-                  <p className="text-xs text-gray-500">2234************234</p>
+
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 mb-6 flex items-center justify-center">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="8" y="16" width="48" height="32" rx="4" stroke="#D1D5DB" strokeWidth="2" fill="none"/>
+                      <rect x="8" y="24" width="48" height="8" fill="#E5E7EB"/>
+                      <rect x="12" y="36" width="16" height="4" rx="2" fill="#D1D5DB"/>
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    No Payment Method Found
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Add payment to ensure uninterrupted service
+                  </p>
+                  <button 
+                    onClick={() => setShowPaymentForm(true)}
+                    className="px-6 py-3 rounded-lg font-medium text-black"
+                    style={{ backgroundColor: '#F59E0B' }}
+                  >
+                    Add Payment Method
+                  </button>
                 </div>
               </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Card 3 */}
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center">
-                  <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g clipPath="url(#clip0_card3)">
-                      <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
-                      <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
-                      <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
-                      <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_card3">
-                        <rect width="65" height="40" fill="white"/>
-                      </clipPath>
-                    </defs>
-                  </svg>
+            ) : (
+              /* Payment Form */
+              <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-semibold text-gray-900">Current Billing Period</h3>
+                  <button 
+                    className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    + Add Payment Method
+                  </button>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Masters card</p>
-                  <p className="text-xs text-gray-500">2234************234</p>
-                </div>
-              </div>
-              <button className="text-gray-400 hover:text-gray-600">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
 
-          {/* Right Column - Card Details Form */}
-          <div>
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-lg font-semibold text-gray-900">Card Details</h4>
-                <button className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                  + Add card
-                </button>
-              </div>
-              <p className="text-sm text-gray-600">Set default payment methods</p>
-            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Left Column - Saved Cards */}
+                  <div className="space-y-4">
+                    {/* Card 1 */}
+                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center">
+                          <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clipPath="url(#clip0_1335_8445)">
+                              <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                              <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                              <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                              <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_1335_8445">
+                                <rect width="65" height="40" fill="white"/>
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Masters card</p>
+                          <p className="text-xs text-gray-500">2234************234</p>
+                        </div>
+                      </div>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
 
-            <div className="space-y-4">
-              {/* Name on Card and Expiry */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Name on your Card
-                  </label>
-                  <input
-                    type="text"
-                    value="Barry White"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry
-                  </label>
-                  <input
-                    type="text"
-                    value="02 / 2026"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
+                    {/* Card 2 */}
+                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center">
+                          <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clipPath="url(#clip0_card2)">
+                              <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                              <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                              <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                              <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_card2">
+                                <rect width="65" height="40" fill="white"/>
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Masters card</p>
+                          <p className="text-xs text-gray-500">2234************234</p>
+                        </div>
+                      </div>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
 
-              {/* Card Number and CVV */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Card Number
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value="9226 9885 8877 2233"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <svg width="32" height="20" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g clipPath="url(#clip0_input)">
-                          <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
-                          <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
-                          <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
-                          <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
-                        </g>
-                        <defs>
-                          <clipPath id="clip0_input">
-                            <rect width="65" height="40" fill="white"/>
-                          </clipPath>
-                        </defs>
-                      </svg>
+                    {/* Card 3 */}
+                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center">
+                          <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clipPath="url(#clip0_card3)">
+                              <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                              <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                              <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                              <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                            </g>
+                            <defs>
+                              <clipPath id="clip0_card3">
+                                <rect width="65" height="40" fill="white"/>
+                              </clipPath>
+                            </defs>
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Masters card</p>
+                          <p className="text-xs text-gray-500">2234************234</p>
+                        </div>
+                      </div>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Column - Card Details Form */}
+                  <div>
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900">Card Details</h4>
+                        <button className="text-sm font-medium text-gray-700 hover:text-gray-900">
+                          + Add card
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-600">Set default payment methods</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Name on Card and Expiry */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Name on your Card
+                          </label>
+                          <input
+                            type="text"
+                            value="Barry White"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Expiry
+                          </label>
+                          <input
+                            type="text"
+                            value="02 / 2026"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Card Number and CVV */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Card Number
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value="9226 9885 8877 2233"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <svg width="32" height="20" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g clipPath="url(#clip0_input)">
+                                  <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
+                                  <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
+                                  <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
+                                  <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
+                                </g>
+                                <defs>
+                                  <clipPath id="clip0_input">
+                                    <rect width="65" height="40" fill="white"/>
+                                  </clipPath>
+                                </defs>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            CVV
+                          </label>
+                          <input
+                            type="text"
+                            value="***"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CVV
-                  </label>
-                  <input
-                    type="text"
-                    value="***"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+
+                {/* Security Notice */}
+                <div className="mt-8 flex items-start gap-2 p-4 bg-gray-50 rounded-lg">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 mt-0.5">
+                    <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM11 15H9V9H11V15ZM11 7H9V5H11V7Z" fill="#6B7280"/>
+                  </svg>
+                  <p className="text-xs text-gray-600">
+                    <strong>Secure Processing:</strong> All Payment Information Is Encrypted And Processed Securely. We Will Never Store Your Complete Card Details On Our Servers.
+                  </p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        </div>
-
-        {/* Security Notice */}
-        <div className="mt-8 flex items-start gap-2 p-4 bg-gray-50 rounded-lg">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 mt-0.5">
-            <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM11 15H9V9H11V15ZM11 7H9V5H11V7Z" fill="#6B7280"/>
-          </svg>
-          <p className="text-xs text-gray-600">
-            <strong>Secure Processing:</strong> All Payment Information Is Encrypted And Processed Securely. We Will Never Store Your Complete Card Details On Our Servers.
-          </p>
-        </div>
-      </div>
-    )}
-  </div>
-)}
+        )}
 
         
 
