@@ -122,17 +122,17 @@ export const hubNavItems = [
       { name: "My Created Events", to: webRoutes.workforceMyEvents }
     ]
   },
-  {
-    name: "AI Services",
-    to: webRoutes.aiDashboard,
-    icon: "AISecondIcon",
-    description: "AI-powered insights",
-    subItems: [
-      { name: "AI Dashboard", to: webRoutes.aiDashboard },
-      { name: "Smart Matching", to: webRoutes.aiMatching },
-      { name: "Opportunities", to: webRoutes.aiOpportunities }
-    ]
-  },
+  // {
+  //   name: "AI Services",
+  //   to: webRoutes.aiDashboard,
+  //   icon: "AISecondIcon",
+  //   description: "AI-powered insights",
+  //   subItems: [
+  //     { name: "AI Dashboard", to: webRoutes.aiDashboard },
+  //     { name: "Smart Matching", to: webRoutes.aiMatching },
+  //     { name: "Opportunities", to: webRoutes.aiOpportunities }
+  //   ]
+  // },
   {
     name: "Knowledge Hub",
     to: webRoutes.knowledgeHub,

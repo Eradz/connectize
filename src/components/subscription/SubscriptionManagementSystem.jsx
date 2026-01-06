@@ -175,9 +175,9 @@ const SubscriptionManagementSystem = () => {
   ];
 
   const statsCards =[
-    {icon: TrendingUp, title: 'Monthly Cost', value: `$${currentSubscription?.plan?.price || '0.00'}`},
-    {icon: Star, title: 'Features ', value: totalFeatures || 0},
-    {icon: BarChart3, title: 'Categories', value: categoriesCount || 0},
+    {icon: TrendingUp, title: 'Monthly Cost', value: currentSubscription?.plan?.price ? `$${currentSubscription.plan.price}` : '--'},
+    {icon: Star, title: 'Features ', value: currentSubscription ? (totalFeatures || 0) : 0},
+    {icon: BarChart3, title: 'Categories', value: currentSubscription ? (categoriesCount || 0) : 0},
   ]
 
   return (
@@ -201,7 +201,7 @@ const SubscriptionManagementSystem = () => {
               backgroundColor: 'transparent'
             }}
           >
-            {currentSubscription?.plan?.name || 'No Plan'}
+            {currentSubscription?.plan?.name || '--'}
           </button>
         </div>
 
@@ -271,7 +271,7 @@ const SubscriptionManagementSystem = () => {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Plan Name</p>
                     <p className="text-lg font-semibold text-gray-900">
-                      {currentSubscription?.plan?.name.replace("Plan", '') || 'None'}
+                      {currentSubscription?.plan?.name ? currentSubscription.plan.name.replace("Plan", '') : '--'}
                     </p>
                   </div>
                   <div>
@@ -284,7 +284,7 @@ const SubscriptionManagementSystem = () => {
                         backgroundColor: '#FFFBEB'
                       }}
                     >
-                      {currentSubscription?.is_active || currentSubscription?.status === 'active' ? 'Active' : 'Inactive'}
+                      {currentSubscription && (currentSubscription.is_active || currentSubscription.status === 'active') ? 'Active' : '--'}
                     </span>
                   </div>
                   <div>
@@ -292,7 +292,7 @@ const SubscriptionManagementSystem = () => {
                     <p className="text-lg font-semibold text-gray-900">
                       {currentSubscription?.current_period_end 
                         ? new Date(currentSubscription.current_period_end).toLocaleDateString('en-GB')
-                        : '23/09/2026'}
+                        : '--'}
                     </p>
                   </div>
                 </div>
@@ -454,7 +454,9 @@ const SubscriptionManagementSystem = () => {
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
                    {(() => {
-                      const usageValues = Object.values(currentSubscription?.usage_percentage);
+                      if (!currentSubscription?.usage_percentage) return '0/100';
+                      const usageValues = Object.values(currentSubscription.usage_percentage);
+                      if (usageValues.length === 0) return '0/100';
                       const avgUsage = usageValues.reduce((sum, val) => sum + val, 0) / usageValues.length;
                       // Simple efficiency: higher usage = higher efficiency (up to 80%)
                       const efficiency = Math.min(avgUsage * 1.2, 100);
@@ -495,7 +497,7 @@ const SubscriptionManagementSystem = () => {
                     if (usage?.days_remaining !== undefined) {
                       return usage.days_remaining.toString();
                     }
-                    return 'N/A';
+                    return '--';
                   })()}
                   </div>
                   <div className="text-sm text-gray-600">
@@ -640,9 +642,10 @@ const SubscriptionManagementSystem = () => {
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
                     {(() => {
-                      const currency = currentSubscription?.plan?.currency || 'USD';
+                      if (!currentSubscription?.plan?.price) return '--';
+                      const currency = currentSubscription.plan.currency || 'USD';
                       const symbol = getCurrencySymbol(currency);
-                      const price = currentSubscription?.plan?.price || '0.00';
+                      const price = currentSubscription.plan.price;
                       return `${symbol}${price}`;
                     })()}
                   </div>
@@ -668,7 +671,7 @@ const SubscriptionManagementSystem = () => {
                           month: 'short',
                           year: '2-digit'
                         })
-                      : 'N/A'}
+                      : '--'}
                   </div>
                   <div className="text-sm text-gray-600">
                     Next Billing Date
@@ -686,7 +689,7 @@ const SubscriptionManagementSystem = () => {
                     <TrendingUp className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {currentSubscription?.billing_cycle || 'Monthly'}
+                    {currentSubscription?.billing_cycle || '--'}
                   </div>
                   <div className="text-sm text-gray-600">
                     Billing Cycle
@@ -704,7 +707,7 @@ const SubscriptionManagementSystem = () => {
                     <CheckCircle className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {currentSubscription?.auto_renew !== false ? 'Enabled' : 'Disabled'}
+                    {!currentSubscription ? '--' : (currentSubscription?.auto_renew !== false ? 'Enabled' : 'Disabled')}
                   </div>
                   <div className="text-sm text-gray-600">
                     Auto Renewal
@@ -731,7 +734,7 @@ const SubscriptionManagementSystem = () => {
                               month: 'short', 
                               year: 'numeric' 
                             })
-                          : 'N/A'}
+                          : '--'}
                       </p>
                     </div>
                     <div>
@@ -743,7 +746,7 @@ const SubscriptionManagementSystem = () => {
                               month: 'short', 
                               year: 'numeric' 
                             })
-                          : 'N/A'}
+                          : '--'}
                       </p>
                     </div>
                     <div>
@@ -757,7 +760,7 @@ const SubscriptionManagementSystem = () => {
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                             return diffDays > 0 ? `${diffDays} Day${diffDays !== 1 ? 's' : ''}` : '0 Days';
                           }
-                          return 'N/A';
+                          return '--';
                         })()}
                       </p>
                     </div>
