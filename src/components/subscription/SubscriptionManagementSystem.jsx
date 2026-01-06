@@ -595,28 +595,42 @@ const SubscriptionManagementSystem = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Current Usage */}
-             {Object.entries(enhancedFeatures.features || {}).map(([categoryName, features], index) => (
-                               <Card key={index} className="border border-gray-200">
-                                 <CardContent className="p-4">
-                                   <div className="flex items-start justify-between mb-3 pb-3 border-b border-gray-200">
-                                     <h3 className="capitalize font-semibold text-gray-900 text-base">
-                                       {categoryName}
-                                     </h3>
-                                   </div>
-                                   
-                                   <ul className="space-y-2.5">
-                                     {features.map((feature, featureIndex) => (
-                                       <li key={feature.id || featureIndex} className="flex items-center justify-between">
-                                         <span className="text-sm text-gray-700">
-                                           • {feature.feature_name}
-                                         </span>
-                                         <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
-                                       </li>
-                                     ))}
-                                   </ul>
-                                 </CardContent>
-                               </Card>
-                             ))}
+              {Object.entries(enhancedFeatures?.features || {}).length > 0 ? (
+                Object.entries(enhancedFeatures?.features || {}).map(([categoryName, features], index) => (
+                  <Card key={index} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3 pb-3 border-b border-gray-200">
+                        <h3 className="capitalize font-semibold text-gray-900 text-base">
+                          {categoryName}
+                        </h3>
+                      </div>
+                      
+                      <ul className="space-y-2.5">
+                        {features.map((feature, featureIndex) => (
+                          <li key={feature.id || featureIndex} className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700">
+                              • {feature.feature_name}
+                            </span>
+                            <Check className="h-4 w-4 text-gray-900 flex-shrink-0 ml-2" />
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-12 px-4">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM15.5 11H12.5V8C12.5 7.72 12.28 7.5 12 7.5C11.72 7.5 11.5 7.72 11.5 8V11H8.5C8.22 11 8 11.22 8 11.5C8 11.78 8.22 12 8.5 12H11.5V15C11.5 15.28 11.72 15.5 12 15.5C12.28 15.5 12.5 15.28 12.5 15V12H15.5C15.78 12 16 11.78 16 11.5C16 11.22 15.78 11 15.5 11Z" fill="#9CA3AF"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Features Available</h3>
+                  <p className="text-gray-600 text-center max-w-sm">
+                    Your current plan doesn't include any enhanced features. Upgrade your plan to unlock more capabilities.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

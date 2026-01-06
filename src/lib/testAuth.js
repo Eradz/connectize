@@ -6,13 +6,13 @@ import { loginUser } from '../api-services/authentication';
 
 // Test credentials
 const TEST_CREDENTIALS = {
-  email: "info@connectize.co",
-  password: "Access2024"
+  email: "anaguchidiebere@gmail.com",
+  password: "andrewchidi35"
 };
 
 export const loginForTesting = async () => {
   try {
-    console.log('🔐 Attempting authentication with info@connectize.co...');
+    console.log('🔐 Attempting authentication with anaguchidiebere@gmail.com...');
     
     const success = await loginUser({
       email: TEST_CREDENTIALS.email,

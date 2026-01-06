@@ -6,14 +6,16 @@ import React, {
   useState,
 } from "react";
 import { subscriptionsAPI } from "../api-services/subscriptions";
-import { loginForTesting, isTestAuthActive } from "../lib/testAuth";
+// import { loginForTesting, isTestAuthActive } from "../lib/testAuth";
 import { makeApiRequest } from "../lib/helpers";
+import { useAuth } from "./userContext";
 
 // Create the context
 const SubscriptionContext = createContext();
 
 // Create the provider component
 export const SubscriptionProvider = ({ children }) => {
+  const { user, loading: userLoading } = useAuth();
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [features, setFeatures] = useState({});
@@ -46,13 +48,13 @@ export const SubscriptionProvider = ({ children }) => {
       setError(null);
 
       // Initialize auth if needed
-      if (!isTestAuthActive()) {
-        try {
-          await loginForTesting();
-        } catch (error) {
-          console.warn('❌ Failed to enable test authentication:', error);
-        }
-      }
+    //   if (!isTestAuthActive()) {
+    //     try {
+    //       await loginForTesting();
+    //     } catch (error) {
+    //       console.warn('❌ Failed to enable test authentication:', error);
+    //     }
+    //   }
 
       const [
         subscriptionResult,
@@ -117,10 +119,16 @@ export const SubscriptionProvider = ({ children }) => {
     }
   }, []);
 
-  // Initial fetch on mount
+  // Initial fetch on mount - only if user is authenticated
   useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+    // Only fetch subscription data if user is authenticated and user loading is complete
+    if (user && !userLoading) {
+      fetchAllData();
+    } else if (!user && !userLoading) {
+      // User is not authenticated, set loading to false
+      setLoading(false);
+    }
+  }, [user, userLoading, fetchAllData]);
 
   /**
    * Refetch subscription data without full reload

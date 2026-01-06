@@ -4,7 +4,7 @@ import { Check, ChevronDown} from 'lucide-react';
 
 // CHANGED: Real API imports instead of mock
 import subscriptionsApi from '../../api-services/subscriptions';
-import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
+// import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
 
 // Card components
@@ -46,9 +46,9 @@ const SubscriptionDashboard = () => {
       setLoading(true);
       setError(null);
 
-      if (!isTestAuthActive()) {
-        await loginForTesting();
-      }
+      // if (!isTestAuthActive()) {
+      //   await loginForTesting();
+      // }
 
       const [plansResult, featuresResult, analyticsResult, currentSubscriptionResult] = await Promise.all([
         subscriptionsApi.getPlans().catch(err => {
