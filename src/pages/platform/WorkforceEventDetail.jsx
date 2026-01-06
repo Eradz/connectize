@@ -1169,7 +1169,7 @@ const WorkforceEventDetail = () => {
                 />
                 <button
                   onClick={copyEventLink}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-custom_yellow transition-colors"
                 >
                   <Copy className="w-4 h-4" />
                 </button>

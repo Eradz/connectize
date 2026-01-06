@@ -316,7 +316,7 @@ const LogisticsInventoryDetailView = () => {
               </button>
               <button
                 onClick={() => setShowAdjustStock(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center"
+                className="px-4 py-2 bg-blue-600 hover:bg-custom_yellow text-white rounded-lg flex items-center"
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Adjust Stock
@@ -716,7 +716,7 @@ const LogisticsInventoryDetailView = () => {
                 <button
                   onClick={handleStockAdjustment}
                   disabled={adjusting || !adjustmentData.quantity || !adjustmentData.reason}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  className="px-4 py-2 bg-blue-600 hover:bg-custom_yellow text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   {adjusting ? (
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />

@@ -214,7 +214,7 @@ const DealRooms = () => {
           </div>
           <Link
             to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
           >
             View Details
           </Link>
@@ -287,7 +287,7 @@ const DealRooms = () => {
             </button>
             <Link
               to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
             >
               View Details
             </Link>
@@ -309,7 +309,7 @@ const DealRooms = () => {
             </div>
             <Link
               to={webRoutes.dealRoomCreate}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Deal Room
@@ -407,7 +407,7 @@ const DealRooms = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.dealRoomCreate}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Deal Room

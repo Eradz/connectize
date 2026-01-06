@@ -750,7 +750,7 @@ const WorkforceProfessionals = () => {
             <div className="mt-6">
               <button
                 onClick={clearFilters}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 Clear all filters
               </button>

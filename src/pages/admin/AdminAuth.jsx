@@ -79,7 +79,7 @@ const AdminAuth = () => {
               <div className="mt-4 space-x-2">
                 <button
                   onClick={handleCheckSession}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-custom_yellow"
                 >
                   Refresh Session
                 </button>

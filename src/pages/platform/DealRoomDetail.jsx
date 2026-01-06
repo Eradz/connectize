@@ -418,7 +418,7 @@ export default function DealRoomDetail() {
             </div>
             <div className="flex space-x-2">
               <Link to={webRoutes.dealRooms} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">Back to Deals</Link>
-              <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700">Edit Deal Room</Link>
+              <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-custom_yellow">Edit Deal Room</Link>
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}
@@ -773,7 +773,7 @@ export default function DealRoomDetail() {
                         <span>({(newDocFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                       </div>
                     )}
-                    <button disabled={docUploading} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-60">
+                    <button disabled={docUploading} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-custom_yellow disabled:opacity-60">
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                   </form>
@@ -1138,7 +1138,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-custom_yellow"
             >
               {Number(milestoneForm.progress) >= 100 ? 'Mark Complete' : 'Save Progress'}
             </button>
@@ -1322,7 +1322,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-custom_yellow"
             >
               Send Invitation
             </button>

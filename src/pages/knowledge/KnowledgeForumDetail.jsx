@@ -299,7 +299,7 @@ const KnowledgeForumDetail = () => {
               {(forum.is_public || forum.is_member) && (
                 <Link
                   to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                  className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                  className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>New Topic</span>
@@ -339,7 +339,7 @@ const KnowledgeForumDetail = () => {
               </select>
               <button
                 onClick={handleSearch}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
               >
                 <Search className="w-4 h-4" />
                 <span>Search</span>
@@ -448,7 +448,7 @@ const KnowledgeForumDetail = () => {
               {(forum.is_public || forum.is_member) && (
                 <Link
                   to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                  className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Start First Topic

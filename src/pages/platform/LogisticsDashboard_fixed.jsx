@@ -176,7 +176,7 @@ const LogisticsDashboard = () => {
             <div className="flex space-x-3">
               <Link
                 to={webRoutes.logisticsShipmentCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Shipment
@@ -505,7 +505,7 @@ const LogisticsDashboard = () => {
                       <p className="text-gray-500 mb-4">You haven't created any shipments yet</p>
                       <Link
                         to={webRoutes.logisticsShipmentCreate}
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Create First Shipment
@@ -576,7 +576,7 @@ const LogisticsDashboard = () => {
                         <div className="mt-3 flex space-x-2">
                           <Link
                             to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                            className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                            className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-custom_yellow"
                           >
                             View Details
                           </Link>
@@ -602,7 +602,7 @@ const LogisticsDashboard = () => {
                   Real-time shipment tracking will be displayed here
                 </p>
                 <div className="mt-6">
-                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow">
                     <MapPin className="w-4 h-4 mr-2" />
                     View Map
                   </button>

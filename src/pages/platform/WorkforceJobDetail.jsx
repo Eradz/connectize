@@ -166,7 +166,7 @@ export default function WorkforceJobDetail() {
                       }
                     }}
                     className={`inline-flex absolute top-4 right-4 items-center px-3 py-2 rounded-lg border text-sm transition-colors ${
-                      saved ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-gray-300 hover:bg-gray-50'
+                      saved ? 'border-pale_yellow bg-pale_yellow/20 text-gold' : 'border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     {saved ? <Bookmark className="h-4 w-4 mr-2 fill-current" /> : <BookmarkPlus className="h-4 w-4 mr-2" />}
@@ -307,7 +307,7 @@ export default function WorkforceJobDetail() {
                   </div>
                   <button
                     onClick={() => setShowApplicationModal(true)}
-                    className=" bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                    className=" bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors flex items-center justify-center"
                   >
                     <Send className="h-4 w-4 mr-1" />
                     Apply Now
@@ -329,10 +329,23 @@ export default function WorkforceJobDetail() {
                   </div>
                 ) : similarJobs.length > 0 ? (
                   <div className="grid grid-col-1 md:grid-cols-2 gap-4">
-                    {similarJobs.map(job => <JobCard key={job.id} job={job} myPostedJob={true} />)}
+                    {similarJobs.map(job => <JobCard key={job.id} job={job}  />)}
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">No similar jobs found.</div>
+                  <div className="flex flex-col items-center justify-center py-12 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12C10.6569 12 12 10.6569 12 9C12 7.34315 10.6569 6 9 6C7.34315 6 6 7.34315 6 9C6 10.6569 7.34315 12 9 12Z" fill="#9CA3AF"/>
+                        <path d="M16 14C17.1046 14 18 13.1046 18 12C18 10.8954 17.1046 10 16 10C14.8954 10 14 10.8954 14 12C14 13.1046 14.8954 14 16 14Z" fill="#9CA3AF"/>
+                        <path d="M21 20C21 21.1046 20.1046 22 19 22C17.8954 22 17 21.1046 17 20V18C17 16.8954 17.8954 16 19 16C20.1046 16 21 16.8954 21 18V20Z" fill="#9CA3AF"/>
+                        <path d="M3 20C3 21.1046 3.89543 22 5 22C6.10457 22 7 21.1046 7 20V18C7 16.8954 6.10457 16 5 16C3.89543 16 3 16.8954 3 18V20Z" fill="#9CA3AF"/>
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Similar Jobs</h3>
+                    <p className="text-gray-600 text-center max-w-sm text-sm">
+                      We couldn't find any similar jobs at the moment. Try exploring other opportunities or refine your search criteria.
+                    </p>
+                  </div>
                 )}
               </div>
                 </div>

@@ -78,59 +78,59 @@ const SubscriptionManagementSystem = () => {
   };
 
     // Get plan color based on type
-  const getPlanColor = (planType) => {
-    const colorMap = {
-      'trial': 'bg-gray-100 text-gray-800 border-gray-300',
-      'starter': 'bg-blue-100 text-blue-800 border-blue-300',
-      'professional': 'bg-purple-100 text-purple-800 border-purple-300',
-      'enterprise': 'bg-orange-100 text-orange-800 border-orange-300',
-      'custom': 'bg-red-100 text-red-800 border-red-300'
-    };
-    return colorMap[planType?.toLowerCase()] || 'bg-gray-100 text-gray-800 border-gray-300';
-  };
+  // const getPlanColor = (planType) => {
+  //   const colorMap = {
+  //     'trial': 'bg-gray-100 text-gray-800 border-gray-300',
+  //     'starter': 'bg-blue-100 text-blue-800 border-blue-300',
+  //     'professional': 'bg-purple-100 text-purple-800 border-purple-300',
+  //     'enterprise': 'bg-orange-100 text-orange-800 border-orange-300',
+  //     'custom': 'bg-red-100 text-red-800 border-red-300'
+  //   };
+  //   return colorMap[planType?.toLowerCase()] || 'bg-gray-100 text-gray-800 border-gray-300';
+  // };
 
   // Format usage percentage color
-  const getUsageColor = (percentage) => {
-    if (percentage >= 90) return 'text-red-600';
-    if (percentage >= 75) return 'text-yellow-600';
-    return 'text-green-600';
-  };
+  // const getUsageColor = (percentage) => {
+  //   if (percentage >= 90) return 'text-red-600';
+  //   if (percentage >= 75) return 'text-yellow-600';
+  //   return 'text-green-600';
+  // };
 
   // Get category icon
-  const getCategoryIcon = (category) => {
-    const iconMap = {
-      'Social Media': TrendingUp,
-      'Analytics': BarChart3,
-      'AI Services': Sparkles,
-      'Enterprise Tools': Shield,
-      'Team Management': Users,
-      'Admin & Support': Settings
-    };
-    return iconMap[category] || CheckCircle;
-  };
+  // const getCategoryIcon = (category) => {
+  //   const iconMap = {
+  //     'Social Media': TrendingUp,
+  //     'Analytics': BarChart3,
+  //     'AI Services': Sparkles,
+  //     'Enterprise Tools': Shield,
+  //     'Team Management': Users,
+  //     'Admin & Support': Settings
+  //   };
+  //   return iconMap[category] || CheckCircle;
+  // };
 
   // Handle plan upgrade
-  const handlePlanUpgrade = async (planId) => {
-    try {
-      if (!currentSubscription?.id) {
-        console.error('No current subscription found');
-        return;
-      }
+  // const handlePlanUpgrade = async (planId) => {
+  //   try {
+  //     if (!currentSubscription?.id) {
+  //       console.error('No current subscription found');
+  //       return;
+  //     }
 
-      const response = await subscriptionsAPI.upgradeSubscription(currentSubscription.id, {
-        target_plan_id: planId
-      });
+  //     const response = await subscriptionsAPI.upgradeSubscription(currentSubscription.id, {
+  //       target_plan_id: planId
+  //     });
 
-      if (response.data) {
-        // Refresh data after upgrade
-        await fetchAllData();
-        alert('Plan upgraded successfully!');
-      }
-    } catch (error) {
-      console.error('Error upgrading plan:', error);
-      alert('Failed to upgrade plan. Please try again.');
-    }
-  };
+  //     if (response.data) {
+  //       // Refresh data after upgrade
+  //       await fetchAllData();
+  //       alert('Plan upgraded successfully!');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error upgrading plan:', error);
+  //     alert('Failed to upgrade plan. Please try again.');
+  //   }
+  // };
 
   // Calculate total features count
   const totalFeatures = Object.values(features).reduce((total, categoryFeatures) => 
@@ -158,7 +158,7 @@ const SubscriptionManagementSystem = () => {
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Data</h3>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button onClick={fetchAllData} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button onClick={fetchAllData} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow">
             Try Again
           </button>
         </div>
@@ -534,7 +534,7 @@ const SubscriptionManagementSystem = () => {
                   >
                     {/* Current Plan Badge */}
                     {isCurrentPlan && (
-                      <div className="absolute top-4 right-4">
+                      <div className="absolute top-0 right-4">
                         <Badge 
                           className="bg-green-500 text-white text-xs font-semibold"
                         >
@@ -702,8 +702,8 @@ const SubscriptionManagementSystem = () => {
                   >
                     <TrendingUp className="w-6 h-6 text-gray-700" />
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {currentSubscription?.billing_cycle || '--'}
+                  <div className="text-2xl font-bold text-gray-900 mb-1 capitalize">
+                    {currentSubscription?.billing_info.billing_cycle || '--'}
                   </div>
                   <div className="text-sm text-gray-600">
                     Billing Cycle

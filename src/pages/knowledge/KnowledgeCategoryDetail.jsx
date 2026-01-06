@@ -347,7 +347,7 @@ const KnowledgeCategoryDetail = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Link
                     to={webRoutes.knowledgeArticleCreate}
-                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Write Article

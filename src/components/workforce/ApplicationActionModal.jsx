@@ -256,7 +256,7 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
                   <button
                     onClick={handleSaveChanges}
                     disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-custom_yellow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-4 h-4" />
                     {loading ? 'Saving...' : 'Save Changes'}

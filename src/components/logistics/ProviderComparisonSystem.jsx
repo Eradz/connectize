@@ -221,7 +221,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
             <button
               type="button"
               onClick={() => onProviderSelected && onProviderSelected({ provider_name: 'self', action: 'open-quote-form' })}
-              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
             >
               Submit Quote
             </button>
@@ -243,7 +243,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
           <button
             onClick={loadProvidersAndRates}
             disabled={calculatingRates || !isAuthenticated}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${calculatingRates ? 'animate-spin' : ''}`} />
             <span>Refresh Rates</span>
@@ -758,7 +758,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
         <button
           onClick={handleProviderSelection}
           disabled={loading || !selectedProvider || (requiresService && !selectedService) || calculatingRates || !isAuthenticated}
-          className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-medium transition-colors"
+          className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-lg font-medium transition-colors"
         >
           {loading ? (
             <>

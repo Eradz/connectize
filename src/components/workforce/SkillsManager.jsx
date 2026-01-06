@@ -143,7 +143,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
         <h3 className="text-lg font-semibold text-gray-900">Skills & Expertise</h3>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
           disabled={loading}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -272,7 +272,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
             </button>
             <button
               onClick={handleAddSkill}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow flex items-center"
               disabled={loading}
             >
               {loading ? 'Adding...' : (

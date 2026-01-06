@@ -186,7 +186,7 @@ const LogisticsRequestList = () => {
             </div>
             <button
               onClick={() => navigate(webRoutes.logisticsRequestCreate)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>New Request</span>
@@ -258,7 +258,7 @@ const LogisticsRequestList = () => {
               </p>
               <button
                 onClick={() => navigate(webRoutes.logisticsRequestCreate)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 inline-flex items-center space-x-2"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow inline-flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>Create Request</span>

@@ -167,7 +167,7 @@ export default function LogisticsInventoryDetail() {
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </button>
-              <button onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', id))} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+              <button onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', id))} className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center">
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </button>
@@ -488,7 +488,7 @@ export default function LogisticsInventoryDetail() {
                     <button
                       onClick={adjustStock}
                       disabled={adjusting || !adjustQty}
-                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium"
+                      className="w-full bg-blue-600 hover:bg-custom_yellow disabled:opacity-50 text-white px-4 py-2 rounded-lg font-medium"
                     >
                       {adjusting ? 'Adjusting...' : `${movementType === 'issue' ? 'Decrease' : 'Increase'} Stock`}
                     </button>

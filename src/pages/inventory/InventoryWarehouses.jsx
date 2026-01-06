@@ -60,7 +60,7 @@ const InventoryWarehouses = () => {
             </div>
             <Link
               to="/inventory/warehouses/create"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <Plus className="h-5 w-5" />
               <span>Add Warehouse</span>
@@ -231,7 +231,7 @@ const InventoryWarehouses = () => {
             <div className="mt-6">
               <Link
                 to="/inventory/warehouses/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Warehouse

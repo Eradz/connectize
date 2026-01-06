@@ -17,7 +17,7 @@ const TestAuthBanner = () => {
           </div>
           <button
             onClick={logout}
-            className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-custom_yellow"
           >
             <LogOut className="w-3 h-3" />
             Logout

@@ -282,7 +282,7 @@ const LogisticsInventoryEnhanced = () => {
               </button>
               <button
                 onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+                className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Item

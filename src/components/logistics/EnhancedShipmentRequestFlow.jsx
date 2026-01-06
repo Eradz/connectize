@@ -390,7 +390,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Item</span>
@@ -870,7 +870,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
           <button
             onClick={nextStep}
             disabled={!validateStep(currentStep)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             <span>Next</span>
             <ArrowRight className="w-4 h-4" />

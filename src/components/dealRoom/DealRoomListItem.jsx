@@ -11,6 +11,7 @@
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';
+import { shareThis } from '../../lib/utils';
   
  const formatCompactNumber = (num) => {
     if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
@@ -81,7 +82,18 @@ export const DealRoomListItem = ({ deal }) => (
           </div>
           
           <div className="flex items-center space-x-2">
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
+            <button
+               onClick={async () => {
+                          const shareUrlString =
+                          window.location.href + "/" + deal?.id;
+                          const shareData = {
+                          title: deal?.title,
+                          text: deal?.sub_title,
+                          url: shareUrlString,
+                          };
+                          await shareThis({ shareUrlString, shareData });
+                       }}
+            className="p-2 hover:bg-gray-100 rounded-lg">
               <Share2 className="w-4 h-4 text-gray-400" />
             </button>
             <button className="p-2 hover:bg-gray-100 rounded-lg">
@@ -89,7 +101,7 @@ export const DealRoomListItem = ({ deal }) => (
             </button>
             <Link
               to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-              className="bg-pale_yellow  text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="bg-pale_yellow  text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
             >
               View Details
             </Link>

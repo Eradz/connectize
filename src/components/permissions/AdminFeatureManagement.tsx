@@ -202,7 +202,7 @@ export const AdminFeatureManagement: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900">Feature Management</h2>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-custom_yellow"
             >
               Create Feature
             </button>
@@ -593,7 +593,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-custom_yellow disabled:opacity-50"
             >
               {isSubmitting ? 'Saving...' : 'Save Feature'}
             </button>

@@ -261,7 +261,7 @@ const LogisticsRequestDetail = () => {
           <p className="text-gray-600 mb-4">The shipment request you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate(webRoutes.logisticsRequests)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
           >
             Back to Requests
           </button>
@@ -337,7 +337,7 @@ const LogisticsRequestDetail = () => {
               {false && (request.status === 'posted' || request.status === 'quoted') && (
                 <button
                   onClick={() => setShowProviderModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
                 >
                   <Send className="w-4 h-4" />
                   <span>Assign Provider</span>
@@ -694,7 +694,7 @@ const LogisticsRequestDetail = () => {
               <button
                 onClick={handleAwardToProvider}
                 disabled={!selectedProvider || awarding}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {awarding ? 'Assigning...' : 'Assign Provider'}
               </button>

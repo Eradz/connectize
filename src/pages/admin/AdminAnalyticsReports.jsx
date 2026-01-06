@@ -442,7 +442,7 @@ const AdminAnalyticsReports = () => {
           
           <button
             onClick={() => loadAnalytics()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors flex items-center"
           >
             <ArrowPathIcon className="w-4 h-4 mr-2" aria-hidden="true" />
             Refresh

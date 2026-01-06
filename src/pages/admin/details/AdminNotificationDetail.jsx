@@ -111,7 +111,7 @@ const AdminNotificationDetail = () => {
         <div className="space-x-2">
           <Link to="/admin/notifications" className="px-4 py-2 border rounded-lg">Back to list</Link>
           {!isRead && hasPermission('notifications.change') && (
-            <button onClick={handleMarkRead} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Mark as read</button>
+            <button onClick={handleMarkRead} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow">Mark as read</button>
           )}
           {hasPermission('notifications.change') && (
             <button onClick={handleSoftDelete} className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">Delete</button>

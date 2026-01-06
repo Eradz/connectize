@@ -90,7 +90,7 @@ const InventoryItems = () => {
             </div>
             <Link
               to="/inventory/items/create"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <Plus className="h-5 w-5" />
               <span>Add Item</span>

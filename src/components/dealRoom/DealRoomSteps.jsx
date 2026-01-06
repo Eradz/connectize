@@ -211,7 +211,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                   <button
                     type="button"
                     onClick={addTag}
-                    className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-blue-700"
+                    className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-custom_yellow"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -311,7 +311,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                     <button
                       type="button"
                       onClick={addParticipant}
-                      className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-blue-700"
+                      className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-custom_yellow"
                     >
                       <Plus className="w-4 h-4" />
                     </button>

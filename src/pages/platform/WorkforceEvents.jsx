@@ -525,7 +525,7 @@ const WorkforceEvents = () => {
               <p className="text-gray-600 mb-6">There are no events happening right now. Check back soon or browse upcoming events!</p>
               <button
                 onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
-                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 View Upcoming Events
@@ -551,7 +551,7 @@ const WorkforceEvents = () => {
               <p className="text-gray-600 mb-6">There are no scheduled events in the future. Check back later or create your own event!</p>
               <Link
                 to={webRoutes.workforceEventCreate}
-                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create an Event
@@ -577,7 +577,7 @@ const WorkforceEvents = () => {
               <p className="text-gray-600 mb-6">You haven't attended any events recently. Explore upcoming events to get started!</p>
               <button
                 onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
-                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 Browse Events
@@ -599,7 +599,7 @@ const WorkforceEvents = () => {
             <div className="mt-6">
               <button
                 onClick={clearFilters}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 Clear all filters
               </button>

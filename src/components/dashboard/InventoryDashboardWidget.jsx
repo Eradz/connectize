@@ -370,7 +370,7 @@ const InventoryDashboardWidget = ({ className = "" }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button
               onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-              className="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-custom_yellow text-white rounded-lg text-sm font-medium transition-colors"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Item

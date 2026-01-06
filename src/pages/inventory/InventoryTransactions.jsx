@@ -109,7 +109,7 @@ const InventoryTransactions = () => {
               <h1 className="text-3xl font-bold text-gray-900">Inventory Transactions</h1>
               <p className="mt-2 text-gray-600">Track all inventory movements and changes</p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <button className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
               <Download className="h-5 w-5" />
               <span>Export</span>
             </button>

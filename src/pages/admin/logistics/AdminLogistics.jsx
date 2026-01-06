@@ -2300,7 +2300,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="flex items-center">

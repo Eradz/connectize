@@ -85,7 +85,7 @@ export default function LogisticsInventoryEdit() {
               </button>
               <h1 className="text-2xl font-bold text-gray-900">Edit Inventory Item</h1>
             </div>
-            <button disabled={saving} form="inventory-edit-form" type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center disabled:opacity-50">
+            <button disabled={saving} form="inventory-edit-form" type="submit" className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center disabled:opacity-50">
               <Save className="w-4 h-4 mr-2" /> Save
             </button>
           </div>

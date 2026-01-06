@@ -32,7 +32,7 @@ const CardContent = ({ children, className = "", ...props }) => (
 
 const Button = ({ children, className = "", variant = "default", disabled = false, onClick, ...props }) => {
   const variants = {
-    default: "bg-blue-600 text-white hover:bg-blue-700",
+    default: "bg-blue-600 text-white hover:bg-custom_yellow",
     outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
   };
   return (
@@ -292,7 +292,7 @@ const SubscriptionPlanDetail = () => {
                 )}
                 
                 <button 
-                  onClick={() => navigate(webRoutes.subscriptions)}
+                  onClick={() => navigate(webRoutes.subscriptionManagement + `?tab=plans`)}
                   className="w-full border-2 border-orange-200 bg-orange-50 text-orange-600 py-3 rounded-lg font-medium flex items-center justify-center hover:bg-orange-100 transition-colors text-sm"
                 >
                   <Users className="h-5 w-5 mr-2" />

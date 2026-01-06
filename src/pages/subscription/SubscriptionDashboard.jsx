@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, ChevronDown} from 'lucide-react';
+import { Check, ChevronDown, CheckCircle2} from 'lucide-react';
 
 // CHANGED: Real API imports instead of mock
 import subscriptionsApi from '../../api-services/subscriptions';
+import { useSubscription } from '../../context/SubscriptionContext';
 // import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
 
@@ -28,6 +29,7 @@ const CardContent = ({ children, className = "", ...props }) => (
 
 const SubscriptionDashboard = () => {
   const navigate = useNavigate(); // ADDED
+  const { currentSubscription, isCurrentUserPlan } = useSubscription();
   const [activeTab, setActiveTab] = useState('manage');
   const [billingCycle, setBillingCycle] = useState('Weekly');
   const [dashboardData, setDashboardData] = useState({
@@ -143,17 +145,17 @@ const SubscriptionDashboard = () => {
     return [
       { 
         label: 'API Calls', 
-        value: hasSubscription ? `${usage.api_calls?.current || 0} / ${usage.api_calls?.limit || 0}` : '0 / 0', 
+        value: hasSubscription ? `${usage.api_calls?.used || 0} / ${usage.api_calls?.limit || 0}` : '0 / 0', 
         color: 'bg-yellow-400' 
       },
       { 
         label: 'Posts', 
-        value: hasSubscription ? `${usage.posts?.current || 0} / ${usage.posts?.limit || 0}` : '0 / 0', 
+        value: hasSubscription ? `${usage.posts?.used || 0} / ${usage.posts?.limit || 0}` : '0 / 0', 
         color: 'bg-purple-400' 
       },
       { 
         label: 'Storage', 
-        value: hasSubscription ? `${usage.storage?.current || 0}GB / ${usage.storage?.limit || 0}GB` : '0GB / 0GB', 
+        value: hasSubscription ? `${usage.storage?.used_gb || 0}GB / ${usage.storage?.limit || 0}GB` : '0GB / 0GB', 
         color: 'bg-pink-400' 
       },
       { 
@@ -484,48 +486,60 @@ const SubscriptionDashboard = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Available Plan</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan, index) => (
-              <div
-                key={plan.id || index}
-                className="rounded-2xl p-6 shadow-md flex flex-col justify-between"
-                style={{ backgroundColor: plan.color }}
-              >
-                <div className="mb-6">
-                  <h3 className={`text-lg font-bold mb-3 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                  <div className="mb-2">
-                    <span className={`text-3xl font-bold ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
-                    <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
-                  </div>
-                  <div 
-                    className="w-20 h-0.5"
-                    style={{ 
-                      backgroundColor: plan.plan_type === 'starter' ? '#EF4444' : '#343A40'
-                    }}
-                  />
-                  <ul className="space-y-2.5 mt-6">
-                    {plan.feature_highlights.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start gap-2">
-                        <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
-                        <span className={`text-sm ${plan.plan_type === 'starter' ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-
-                <button
-                  onClick={() => handleChoosePackage(plan)}
-                  className="w-full py-3 rounded-lg font-semibold transition-all border-2"
-                  style={{
-                    backgroundColor: plan.plan_type === 'starter' ? 'transparent' : '#FFDB76',
-                    color: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40',
-                    borderColor: plan.plan_type === 'starter' ? '#FFFFFF' : '#343A40'
-                  }}
+            {plans.map((plan, index) => {
+              const isCurrentPlan = isCurrentUserPlan(plan);
+              return (
+                <div
+                  key={plan.id || index}
+                  className={`rounded-2xl p-6 shadow-md flex flex-col justify-between border-2 ${isCurrentPlan ? 'border-green-500' : 'border-transparent'}`}
+                  style={{ backgroundColor: isCurrentPlan ? '#212529' : '#FFDB76' }}
                 >
-                  Choose package
-                </button>
-              </div>
-            ))}
+                  {isCurrentPlan && (
+                    <div className="mb-4 flex items-center gap-2 px-3 py-1.5 bg-green-100 w-fit rounded-full">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      <span className="text-xs font-semibold text-green-700">Current Plan</span>
+                    </div>
+                  )}
+                  
+                  <div className="mb-6">
+                    <h3 className={`text-lg font-bold mb-3 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
+                    <div className="mb-2">
+                      <span className={`text-3xl font-bold ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
+                      <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
+                    </div>
+                    <div 
+                      className="w-20 h-0.5"
+                      style={{ 
+                        backgroundColor: isCurrentPlan ? '#EF4444' : '#343A40'
+                      }}
+                    />
+                    <ul className="space-y-2.5 mt-6">
+                      {plan.feature_highlights.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start gap-2">
+                          <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
+                          <span className={`text-sm ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <button
+                    onClick={() => handleChoosePackage(plan)}
+                    disabled={isCurrentPlan}
+                    className={`w-full py-3 rounded-lg font-semibold transition-all border-2 ${isCurrentPlan ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    style={{
+                      backgroundColor: isCurrentPlan 
+                        ? isCurrentPlan ? 'rgba(255,255,255,0.3)' : '#d4d4d4'
+                        : isCurrentPlan ? 'transparent' : '#FFDB76',
+                      color: isCurrentPlan ? '#FFFFFF' : '#343A40',
+                      borderColor: isCurrentPlan ? '#10b981' : (isCurrentPlan ? '#FFFFFF' : '#343A40')
+                    }}
+                  >
+                    {isCurrentPlan ? 'Current Plan' : 'Choose package'}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

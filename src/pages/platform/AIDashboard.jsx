@@ -281,7 +281,7 @@ const AIDashboard = () => {
             <div className="mt-6 pt-4 border-t border-gray-100">
               <Link
                 to={webRoutes.aiMatching}
-                className="w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium block"
+                className="w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium block"
               >
                 Configure Matching
               </Link>

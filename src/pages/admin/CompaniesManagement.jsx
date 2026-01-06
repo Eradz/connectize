@@ -66,7 +66,7 @@ const CompaniesManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Companies Management</h1>
           <p className="text-gray-600">Manage and monitor all registered companies</p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors">
           <BuildingOfficeIcon className="h-5 w-5 mr-2" />
           Add New Company
         </button>

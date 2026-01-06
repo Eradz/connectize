@@ -326,7 +326,7 @@ const WorkforceApplications = () => {
               </button>
               <Link
                 to={webRoutes.workforceJobs}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Find Jobs
@@ -430,12 +430,12 @@ const WorkforceApplications = () => {
                           onChange={(e) => handleFilterChange('status', e.target.value)}
                         >
                           <option value="">All Status</option>
-                          <option value="pending">Pending</option>
+                          <option value="submitted">Submitted</option>
                           <option value="under_review">Under Review</option>
+                          <option value="shortlisted">Shortlisted</option>
                           <option value="interview_scheduled">Interview Scheduled</option>
-                          <option value="interviewed">Interviewed</option>
                           <option value="offered">Offered</option>
-                          <option value="accepted">Accepted</option>
+                          <option value="hired">Hired</option>
                           <option value="rejected">Rejected</option>
                           <option value="withdrawn">Withdrawn</option>
                         </select>
@@ -653,7 +653,7 @@ const WorkforceApplications = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.workforceJobs}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 Browse Jobs
               </Link>

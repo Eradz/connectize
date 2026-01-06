@@ -396,7 +396,7 @@ const EnhancedPlanComparison = () => {
                 </div>
               )}
 
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button className="w-full bg-blue-600 hover:bg-custom_yellow">
                 Choose {plan.name}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>

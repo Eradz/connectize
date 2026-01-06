@@ -312,7 +312,7 @@ const LogisticsTracking = () => {
               </button>
               <button
                 onClick={() => navigate(webRoutes.logisticsShipmentCreate)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+                className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Shipment
@@ -481,7 +481,7 @@ const LogisticsTracking = () => {
                       </div>
                       <button
                         onClick={() => navigate(`${webRoutes.logisticsShipments}/${item.shipment_id}`)}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         View Details

@@ -365,7 +365,7 @@ const PlanCard = ({ plan, currentPlan, onSelectPlan, isPopular = false }) => {
           ) : (
             <Button 
               onClick={() => onSelectPlan(plan)}
-              className={`w-full ${isUpgrade ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+              className={`w-full ${isUpgrade ? 'bg-blue-600 hover:bg-custom_yellow' : ''}`}
               variant={isDowngrade ? 'outline' : 'default'}
             >
               {isUpgrade && <ArrowRight className="h-4 w-4 mr-2" />}

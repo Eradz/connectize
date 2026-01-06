@@ -387,7 +387,7 @@ const AdminNotifications = () => {
               <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
                 {hasPermission('notifications.change') && (
-                  <button onClick={handleMarkAllRead} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Mark all as read</button>
+                  <button onClick={handleMarkAllRead} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow">Mark all as read</button>
                 )}
               </div>
             </div>

@@ -66,7 +66,7 @@ const AdminDeals = () => {
         <div className="flex space-x-3">
           <button
             onClick={() => window.location.href = '/admin/deals/analytics'}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
           >
             <BriefcaseIcon className="w-4 h-4 mr-2" />
             Analytics

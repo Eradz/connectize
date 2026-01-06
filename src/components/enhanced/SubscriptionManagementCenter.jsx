@@ -440,7 +440,7 @@ const SubscriptionManagementCenter = () => {
                         </p>
                       </div>
                       <Button 
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-blue-600 hover:bg-custom_yellow"
                         onClick={() => setActiveTab('plans')}
                       >
                         View Plans

@@ -198,7 +198,7 @@ export default function DealRoomEdit() {
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-60"
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-custom_yellow disabled:opacity-60"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -366,7 +366,7 @@ export default function DealRoomEdit() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-60"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
