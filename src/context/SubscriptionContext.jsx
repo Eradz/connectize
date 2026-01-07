@@ -92,7 +92,8 @@ export const SubscriptionProvider = ({ children }) => {
       setUsage(subscriptionUsage);
       setAnalytics(analyticsData);
       setBillingHistory(billingData?.results || billingData || []);
-      setPaymentMethods(paymentMethodsData?.results || paymentMethodsData || []);
+      // Handle payment methods - API returns { payment_methods: [...] }
+      setPaymentMethods(paymentMethodsData?.payment_methods || paymentMethodsData?.results || paymentMethodsData || []);
 
       // Handle enhanced features for the current plan
       if (subscriptionResult.status === 'fulfilled' && subscriptionResult.value?.data?.plan_features?.id) {

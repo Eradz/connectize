@@ -20,7 +20,9 @@ import {
   Receipt,
   ExternalLink,
   Settings,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 
 const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) => {
@@ -32,6 +34,9 @@ const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) =
   const [error, setError] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [renewalLoading, setRenewalLoading] = useState(false);
+  const [renewalError, setRenewalError] = useState(null);
+  const [renewalSuccess, setRenewalSuccess] = useState(null);
 
   useEffect(() => {
     fetchBillingData();
@@ -196,6 +201,85 @@ const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) =
     console.log('Viewing all invoices');
   };
 
+  // Handle subscription renewal
+  const handleRenewSubscription = async () => {
+    if (!subscription?.id) return;
+    
+    try {
+      setRenewalLoading(true);
+      setRenewalError(null);
+      
+      // Check if user has a payment method
+      if (paymentMethods.length === 0) {
+        setRenewalError('Please add a payment method before renewing your subscription.');
+        return;
+      }
+      
+      // Call the renewal API
+      const response = await subscriptionsApi.processRenewal(subscription.id);
+      
+      if (response?.data || response) {
+        setRenewalSuccess('Your subscription has been renewed successfully!');
+        // Refresh billing data to reflect the changes
+        await fetchBillingData();
+        setTimeout(() => setRenewalSuccess(null), 5000);
+      }
+    } catch (err) {
+      console.error('Error renewing subscription:', err);
+      setRenewalError(
+        err?.response?.data?.error || 
+        err?.response?.data?.message || 
+        'Failed to renew subscription. Please try again or contact support.'
+      );
+    } finally {
+      setRenewalLoading(false);
+    }
+  };
+
+  // Navigate to plans to resubscribe
+  const handleResubscribe = () => {
+    if (setActiveTab) {
+      setActiveTab('plans');
+    } else {
+      window.location.href = '/subscription?tab=plans';
+    }
+  };
+
+  // Check if subscription period has expired (regardless of status)
+  const isPeriodExpired = () => {
+    if (!subscription?.current_period_end) return false;
+    const endDate = new Date(subscription.current_period_end);
+    const now = new Date();
+    return endDate < now;
+  };
+
+  // Check if subscription needs renewal
+  const needsRenewal = () => {
+    if (!subscription) return false;
+    const status = subscription.status?.toLowerCase();
+    
+    // Check explicit status
+    if (['expired', 'cancelled', 'canceled', 'past_due', 'unpaid'].includes(status)) {
+      return true;
+    }
+    
+    // Also check if the period has expired (even if status hasn't updated)
+    if (isPeriodExpired()) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  // Check if subscription is about to expire (within 7 days)
+  const isExpiringSoon = () => {
+    if (!subscription?.current_period_end) return false;
+    const endDate = new Date(subscription.current_period_end);
+    const now = new Date();
+    const daysRemaining = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+    return daysRemaining <= 7 && daysRemaining > 0;
+  };
+
   const getStatusColor = (status) => {
     const statusMap = {
       'completed': 'bg-green-100 text-green-800',
@@ -308,6 +392,130 @@ const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) =
           Refresh
         </Button>
       </div>
+
+      {/* Renewal Success Message */}
+      {renewalSuccess && (
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">{renewalSuccess}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Renewal Error Message */}
+      {renewalError && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800 flex items-center justify-between">
+            <span>{renewalError}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setRenewalError(null)}
+              className="text-red-600 hover:text-red-700"
+            >
+              Dismiss
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Subscription Renewal Alert - Shows when subscription is expired/cancelled */}
+      {needsRenewal() && (
+        <Card className="border-2 border-red-300 bg-gradient-to-r from-red-50 to-orange-50">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-full bg-red-100 flex-shrink-0">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-red-800">
+                    {subscription?.status === 'cancelled' || subscription?.status === 'canceled' 
+                      ? 'Subscription Cancelled' 
+                      : subscription?.status === 'past_due'
+                        ? 'Payment Overdue'
+                        : 'Subscription Period Expired'}
+                  </h3>
+                  <p className="text-sm text-red-700 mt-1">
+                    {subscription?.status === 'past_due' 
+                      ? 'Your payment is overdue. Please update your payment method or make a payment to continue service.'
+                      : isPeriodExpired()
+                        ? 'Your subscription billing period has ended. Renew now to continue enjoying premium features without interruption.'
+                        : 'Your subscription has ended. Renew now to continue enjoying premium features.'}
+                  </p>
+                  {subscription?.current_period_end && (
+                    <p className="text-xs text-red-600 mt-2">
+                      Period ended: {formatDate(subscription.current_period_end)}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                {paymentMethods.length > 0 ? (
+                  <Button 
+                    onClick={handleRenewSubscription}
+                    disabled={renewalLoading}
+                    className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000] text-white w-full sm:w-auto"
+                  >
+                    {renewalLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Renewing...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Renew Subscription
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={handleAddPaymentMethod}
+                    className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000] text-white w-full sm:w-auto"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Add Payment Method
+                  </Button>
+                )}
+                <Button 
+                  variant="outline"
+                  onClick={handleResubscribe}
+                  className="w-full sm:w-auto"
+                >
+                  View Plans
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Expiring Soon Alert */}
+      {isExpiringSoon() && !needsRenewal() && (
+        <Alert className="border-yellow-300 bg-yellow-50">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <span>
+                Your subscription expires on <strong>{formatDate(subscription?.current_period_end)}</strong>. 
+                {subscription?.auto_renew 
+                  ? ' It will automatically renew.'
+                  : ' Enable auto-renewal or renew manually to avoid service interruption.'}
+              </span>
+              {!subscription?.auto_renew && (
+                <Button 
+                  size="sm" 
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                  onClick={handleResubscribe}
+                >
+                  Manage
+                </Button>
+              )}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Billing Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
@@ -575,12 +783,40 @@ const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) =
             <div className="text-center py-8 sm:py-12">
               <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No Billing History</h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-4 px-4">Your billing history will appear here once you have transactions</p>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 px-4">
+                Your billing history will appear here once payments are processed.
+              </p>
               
-              {subscription?.status === 'trialing' && (
-                <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full mx-4">
-                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span>Trial period - No charges yet</span>
+              {/* Context-aware messages */}
+              {subscription?.status === 'trialing' ? (
+                <div className="space-y-3 max-w-md mx-auto">
+                  <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>Trial period - No charges yet</span>
+                  </div>
+                  <p className="text-xs text-gray-500 px-4">
+                    Your first charge will appear after your trial ends on {formatDate(subscription?.current_period_end)}.
+                  </p>
+                </div>
+              ) : subscription?.plan?.price === 0 || subscription?.plan?.price === '0' || subscription?.plan?.price === '0.00' ? (
+                <div className="space-y-3 max-w-md mx-auto">
+                  <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-green-600 bg-green-50 px-4 py-2 rounded-full">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>Free plan - No charges apply</span>
+                  </div>
+                  <p className="text-xs text-gray-500 px-4">
+                    Upgrade to a paid plan to access premium features.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-w-md mx-auto">
+                  <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-full">
+                    <FileText className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>Transactions will appear here</span>
+                  </div>
+                  <p className="text-xs text-gray-500 px-4">
+                    When you make a payment or your subscription renews, you'll see the transaction details here.
+                  </p>
                 </div>
               )}
             </div>

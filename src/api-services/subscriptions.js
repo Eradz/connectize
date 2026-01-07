@@ -203,7 +203,12 @@ const subscriptions = {
   },
 
   updatePaymentMethod: async (id, data) => {
-    const response = await api.put(`/api/v1/payment-methods/${id}/`, data);
+    // Use set_default action if setting default, otherwise use PATCH
+    if (data.is_default) {
+      const response = await api.post(`/api/v1/payment-methods/${id}/set_default/`);
+      return response.data;
+    }
+    const response = await api.patch(`/api/v1/payment-methods/${id}/`, data);
     return response.data;
   },
 
@@ -356,15 +361,26 @@ const subscriptions = {
 
   // Subscription Management Actions
   upgradeSubscription: async (subscriptionId, newPlanId) => {
-    const response = await api.post(`/api/v1/subscriptions/user-subscriptions/${subscriptionId}/upgrade/`, {
-      new_plan_id: newPlanId
+    // Use the payment-enabled upgrade endpoint
+    const response = await api.post(`/api/v1/subscription-payments/upgrade_subscription_payment/`, {
+      plan_id: newPlanId
+    });
+    return response.data;
+  },
+
+  // Simple upgrade (no payment processing - for free plan changes)
+  upgradeSubscriptionSimple: async (newPlanId) => {
+    const response = await api.post(`/api/v1/subscriptions/upgrade/`, {
+      plan_id: newPlanId,
+      upgrade_immediately: true
     });
     return response.data;
   },
 
   downgradeSubscription: async (subscriptionId, newPlanId) => {
-    const response = await api.post(`/api/v1/subscriptions/user-subscriptions/${subscriptionId}/downgrade/`, {
-      new_plan_id: newPlanId
+    // The backend uses a detail=False action, so no subscription ID in URL
+    const response = await api.post(`/api/v1/subscriptions/downgrade/`, {
+      plan_id: newPlanId
     });
     return response.data;
   },
@@ -388,7 +404,7 @@ const subscriptions = {
   },
 
   processRenewal: async (subscriptionId) => {
-    const response = await api.post(`/api/v1/subscriptions/user-subscriptions/${subscriptionId}/renew/`);
+    const response = await api.post(`/api/v1/subscriptions/${subscriptionId}/renew/`);
     return response.data;
   },
 
@@ -537,8 +553,10 @@ const subscriptions = {
   addPaymentMethod: function(data) {
     return this.createPaymentMethod(data).then(d => ({ data: d }));
   },
-  setDefaultPaymentMethod: function(id) {
-    return this.updatePaymentMethod(id, { is_default: true }).then(d => ({ data: d }));
+  setDefaultPaymentMethod: async function(id) {
+    // Use the dedicated set_default endpoint
+    const response = await api.post(`/api/v1/payment-methods/${id}/set_default/`);
+    return { data: response.data };
   },
   removePaymentMethod: function(id) {
     return this.deletePaymentMethod(id).then(d => ({ data: d }));
