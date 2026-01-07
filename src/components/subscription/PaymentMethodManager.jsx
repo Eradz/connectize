@@ -123,7 +123,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name on Card and Expiry Date */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Name on your Card
@@ -163,7 +163,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
       </div>
 
       {/* Card Number and CVV */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Card Number

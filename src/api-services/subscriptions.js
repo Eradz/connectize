@@ -558,7 +558,7 @@ const subscriptions = {
   createSetupIntent: async function() {
     const response = await api.post('/api/v1/payment-methods/create_setup_intent/', {}, {
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}`,
+        'Authorization': `Bearer ${import.meta.env.VITE_STRIPE_SECRET_KEY}`,
         'Content-Type': 'application/json'
       }
     });
