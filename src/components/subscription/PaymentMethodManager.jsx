@@ -122,6 +122,26 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className=" hidden md:flex">
+        <div>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">Card Details</h4>
+                <p className="text-xs sm:text-sm text-gray-600">Set default payment methods</p>
+      </div>
+        <Button 
+          type="submit"
+          disabled={!stripe || loading || !cardholderName.trim()}
+          className="w-fit ml-auto bg-gray-300 hover:bg-gold hover: to-[#FFC000]  hover:from-[#FF8400] text-white"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Adding...
+            </>
+          ) : (
+            '+  Add Card'
+          )}
+        </Button>
+        </div>
       {/* Name on Card and Expiry Date */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -350,7 +370,7 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
         </Alert>
       )}
 
-      {/* MOBILE VIEW */}
+      {/* Mobile view */}
       <div className="lg:hidden">
         {showAddCard ? (
           <div className="space-y-4">
@@ -444,7 +464,7 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
         )}
       </div>
 
-      {/* DESKTOP VIEW */}
+      {/* Desktop view */}
       <div className="hidden lg:block space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -525,10 +545,7 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
           {/* Right Column: Card Details Form */}
           {(paymentMethods.length > 0 || showAddCard) && (
             <div className="lg:col-span-2 space-y-4">
-              <div>
-                <h4 className="text-base sm:text-lg font-semibold text-gray-900">Card Details</h4>
-                <p className="text-xs sm:text-sm text-gray-600">Set default payment methods</p>
-              </div>
+              
 
               <Elements stripe={stripePromise} options={elementsOptions}>
                 <CardForm

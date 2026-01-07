@@ -173,21 +173,8 @@ const subscriptions = {
     // Payment Methods
   getPaymentMethods: async (params = {}) => {
     try {
-      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-      
-      if (!stripeKey) {
-        console.warn('Stripe publishable key not configured');
-        return { payment_methods: [], source: 'stripe_key_missing' };
-      }
-
-      // Use Stripe token authentication instead of Bearer token
-      const response = await api.get('/api/v1/payment-methods/', { 
-        params,
-        headers: {
-          'Authorization': `Bearer ${stripeKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Use standard JWT authentication - makeApiRequest handles auth automatically
+      const response = await api.get('/api/v1/payment-methods/', { params });
       
       if (response.data?.payment_methods) {
         return response.data;
@@ -201,21 +188,8 @@ const subscriptions = {
 
   getPaymentMethod: async (id) => {
     try {
-      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-      
-      if (!stripeKey) {
-        console.warn('Stripe publishable key not configured');
-        return { source: 'stripe_key_missing' };
-      }
-
-      // Use Stripe token authentication instead of Bearer token
-      const response = await api.get(`/api/v1/payment-methods/${id}/`, {
-        headers: {
-          'Authorization': `Bearer ${stripeKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
+      // Use standard JWT authentication - makeApiRequest handles auth automatically
+      const response = await api.get(`/api/v1/payment-methods/${id}/`);
       return response.data;
     } catch (e) {
       console.warn('Get payment method API error:', e?.message);
@@ -556,12 +530,8 @@ const subscriptions = {
     return this.getUserSubscriptions({ company: 'current' }).then(d => ({ data: d }));
   },
   createSetupIntent: async function() {
-    const response = await api.post('/api/v1/payment-methods/create_setup_intent/', {}, {
-      headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_STRIPE_SECRET_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    // Don't pass custom headers - let makeApiRequest handle JWT auth automatically
+    const response = await api.post('/api/v1/payment-methods/create_setup_intent/', {});
     return { data: response.data };
   },
   addPaymentMethod: function(data) {
