@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Alert, { AlertDescription } from '@/components/ui/Alert';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
-import Input from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
+import Button from '../..//components/ui/Button';
+import Badge from '../../components/ui/Badge';
+import Alert, { AlertDescription } from '../../components/ui/Alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/Dialog';
+import Input from '../../components/ui/Input';
+import { Label } from '../../components/ui/Label';
 import {
   CreditCard,
   Plus,
@@ -17,8 +17,8 @@ import {
   DollarSign,
   Loader2
 } from 'lucide-react';
-import { stripePromise } from '@/lib/stripeUtils';
-import subscriptionsApi from '@/api-services/subscriptions';
+import { stripePromise } from '../../lib/stripeUtils';
+import subscriptionsApi from '../../api-services/subscriptions';
 
 // Stripe Elements configuration for development
 const elementsOptions = {
@@ -33,7 +33,7 @@ const elementsOptions = {
 };
 
 // Stripe Card Form Component
-const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
+export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [cardholderName, setCardholderName] = useState('');
@@ -58,9 +58,9 @@ const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
         throw new Error('Setup intent did not return a client_secret');
       }
       
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        console.error('Stripe CardElement not mounted (CSP or mounting issue)');
+      const cardNumberElement = elements.getElement(CardNumberElement);
+      if (!cardNumberElement) {
+        console.error('Stripe CardNumberElement not mounted (CSP or mounting issue)');
         onError('Payment field failed to load. If content blockers are enabled, disable them and refresh.');
         setLoading(false);
         return;
@@ -72,7 +72,7 @@ const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
         setupIntentData.client_secret,
         {
           payment_method: {
-            card: cardElement,
+            card: cardNumberElement,
             billing_details: {
               name: cardholderName,
             },
@@ -121,50 +121,101 @@ const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="cardholderName">Cardholder Name</Label>
-        <Input
-          id="cardholderName"
-          placeholder="John Doe"
-          value={cardholderName}
-          onChange={(e) => setCardholderName(e.target.value)}
-          required
-        />
-      </div>
-      
-      <div>
-        <Label>Card Information</Label>
-        <div className="p-3 border border-gray-300 rounded-md bg-white">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-                invalid: {
-                  color: '#9e2146',
-                },
-              },
-            }}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* First Row: Name on Card and Expiry Date */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Name on your Card
+          </label>
+          <input
+            type="text"
+            placeholder="Barry White"
+            value={cardholderName}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            onChange={(e) => setCardholderName(e.target.value)}
+            required
           />
         </div>
-        {import.meta.env.DEV && (
-          <p className="text-xs text-gray-500 mt-1">
-            Test cards: 4242424242424242 (succeeds), 4000002500003155 (requires auth), 4000000000009995 (declined)
-          </p>
-        )}
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Expiry Date
+          </label>
+          <div className="border border-gray-300 rounded-lg px-4 py-3 bg-white focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+            <CardExpiryElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: '#1f2937',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    '::placeholder': { color: '#9ca3af' },
+                  },
+                  invalid: {
+                    color: '#ef4444',
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Second Row: Card Number and CVV */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Card Number
+          </label>
+          <div className="border border-gray-300 rounded-lg px-4 py-3 bg-white focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+            <CardNumberElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: '#1f2937',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    '::placeholder': { color: '#9ca3af' },
+                  },
+                  invalid: {
+                    color: '#ef4444',
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            CVV
+          </label>
+          <div className="border border-gray-300 rounded-lg px-4 py-3 bg-white focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+            <CardCvcElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: '#1f2937',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    '::placeholder': { color: '#9ca3af' },
+                  },
+                  invalid: {
+                    color: '#ef4444',
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
       </div>
       
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-6 border-t border-gray-200">
         <Button 
           type="submit"
           disabled={!stripe || loading || !cardholderName.trim()}
-          className="flex-1"
+          className="ml-auto bg-gold/90 hover:bg-gold text-white"
         >
           {loading ? (
             <>
@@ -294,116 +345,203 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
       
       {success && (
         <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4" />
+          <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">{success}</AlertDescription>
         </Alert>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Payment Methods</h3>
-          <p className="text-sm text-gray-600">Manage your payment methods and billing preferences</p>
-        </div>
-        
-        {/* Only show Add button in header if there are existing payment methods */}
-        {paymentMethods.length > 0 && (
-          <Button 
-            onClick={() => setShowAddCard(true)}
-            className="flex items-center gap-2 w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4" />
-            Add Payment Method
-          </Button>
+      {/* MOBILE VIEW */}
+      <div className="lg:hidden">
+        {showAddCard ? (
+          <div className="space-y-4">
+            {/* Back Button */}
+            <button 
+              onClick={() => setShowAddCard(false)}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+            >
+              ← Back
+            </button>
+
+            {/* Form Title */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Add or modify payment method</h3>
+              <p className="text-sm text-gray-600">Set default payment methods</p>
+            </div>
+
+            {/* Form */}
+            <Elements stripe={stripePromise} options={elementsOptions}>
+              <CardForm
+                onSuccess={handleAddSuccess}
+                onError={handleAddError}
+                loading={loading}
+                setLoading={setLoading}
+              />
+            </Elements>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Payment Methods</h3>
+                <p className="text-sm text-gray-600">Manage your payment methods</p>
+              </div>
+              <button 
+                onClick={() => setShowAddCard(true)}
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-bold text-lg"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Current Billing Period Title */}
+            <h4 className="text-base font-semibold text-gray-900">Current Billing Period</h4>
+
+            {/* Payment Methods List or Empty State */}
+            {paymentMethods.length > 0 ? (
+              <div className="space-y-3">
+                {paymentMethods.map((method) => (
+                  <div key={method.id} className={`p-4 rounded-lg border-2 transition-all ${method.is_default ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex gap-1 flex-shrink-0">
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-b from-red-500 to-red-600"></div>
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-b from-orange-400 to-red-500"></div>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900">{method.brand}</p>
+                          <p className="text-xs text-gray-600 truncate">•••• •••• •••• {method.last4}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeletePaymentMethod(method.id)}
+                        disabled={loading}
+                        className="p-2 text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <CreditCard className="h-7 w-7 text-gray-400" />
+                </div>
+                <h4 className="text-base font-semibold text-gray-900 mb-2">No Payment Methods</h4>
+                <p className="text-sm text-gray-600 mb-6">Add a payment method to get started</p>
+                <Button 
+                  onClick={() => setShowAddCard(true)}
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Payment Method
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Payment Methods List */}
-      {paymentMethods.length > 0 ? (
-        <div className="space-y-4">
-          {paymentMethods.map((method) => (
-            <Card key={method.id} className={method.is_default ? 'ring-2 ring-blue-200' : ''}>
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-                    {getBrandIcon(method.brand)}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                        <p className="text-sm sm:text-base font-medium truncate">•••• •••• •••• {method.last4}</p>
-                        {method.is_default && (
-                          <Badge className="bg-blue-100 text-blue-800 w-fit text-xs">Default</Badge>
-                        )}
+      {/* DESKTOP VIEW */}
+      <div className="hidden lg:block space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">Payment Methods</h3>
+            <p className="text-sm text-gray-600">Manage your payment methods and billing preferences</p>
+          </div>
+          {paymentMethods.length > 0 && (
+            <Button 
+              onClick={() => setShowAddCard(!showAddCard)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Payment Method
+            </Button>
+          )}
+        </div>
+
+        {/* Two Column Layout */}
+        <div className={`grid grid-cols-1 ${showAddCard ? "lg:grid-cols-3" : "lg:grid-cols-1"} gap-6`}>
+          {/* Left Column: Payment Methods List */}
+          <div className="lg:col-span-1">
+            {paymentMethods.length > 0 ? (
+              <div className="space-y-4">
+                <h4 className="text-base font-semibold text-gray-900">Current Billing Period</h4>
+                <div className="space-y-3">
+                  {paymentMethods.map((method) => (
+                    <div key={method.id} className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${method.is_default ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex gap-1">
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-b from-red-500 to-red-600"></div>
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-b from-orange-400 to-red-500"></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900">{method.brand}</span>
                       </div>
-                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                        Expires {method.exp_month.toString().padStart(2, '0')}/{method.exp_year}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          {method.brand.toUpperCase()}
-                        </Badge>
-                        <Badge className="bg-green-100 text-green-800 text-xs">
-                          Active
-                        </Badge>
-                        {method.funding && (
-                          <Badge variant="outline" className="text-xs">
-                            {method.funding}
-                          </Badge>
+                      <p className="text-xs sm:text-sm text-gray-600">•••• •••• •••• {method.last4}</p>
+                      <div className="mt-3 flex gap-2">
+                        {!method.is_default && (
+                          <button
+                            onClick={() => handleSetDefault(method.id)}
+                            disabled={loading}
+                            className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                          >
+                            Set Default
+                          </button>
                         )}
+                        <button
+                          onClick={() => handleDeletePaymentMethod(method.id)}
+                          disabled={loading}
+                          className="text-xs text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                        >
+                          <Trash2 className="h-3 w-3 inline mr-1" />
+                          Remove
+                        </button>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                    {!method.is_default && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSetDefault(method.id)}
-                        disabled={loading}
-                        className="text-xs sm:text-sm"
-                      >
-                        {loading ? (
-                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                        ) : (
-                          'Set Default'
-                        )}
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeletePaymentMethod(method.id)}
-                      className="text-red-600 hover:text-red-700 text-xs sm:text-sm"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                          <span className="sm:hidden">Remove</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                  <CreditCard className="h-7 w-7 text-gray-400" />
+                </div>
+                <h4 className="text-base font-semibold text-gray-900 mb-2">No Payment Method Found</h4>
+                <p className="text-sm text-gray-600 mb-6">Add payment to ensure uninterrupted service</p>
+                <Button 
+                  onClick={() => setShowAddCard(true)}
+                  className="w-fit px-4  bg-gold/90 hover:bg-gold text-white text-sm"
+                >
+                  {/* <Plus className="h-4 w-4 mr-2" /> */}
+                  Add Payment Method
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Card Details Form */}
+          {(paymentMethods.length > 0 || showAddCard) && (
+            <div className="lg:col-span-2 space-y-4">
+              <div>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">Add or modify payment method</h4>
+                <p className="text-xs sm:text-sm text-gray-600">Set default payment methods</p>
+              </div>
+
+              <Elements stripe={stripePromise} options={elementsOptions}>
+                <CardForm
+                  onSuccess={handleAddSuccess}
+                  onError={handleAddError}
+                  loading={loading}
+                  setLoading={setLoading}
+                />
+              </Elements>
+            </div>
+          )}
         </div>
-      ) : (
-        <Card className="border-dashed">
-          <CardContent className="p-6 sm:p-8 text-center">
-            <CreditCard className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No Payment Methods</h3>
-            <p className="text-sm sm:text-base text-gray-600 mb-4 px-4">Add a payment method to ensure uninterrupted service</p>
-            <Button onClick={() => setShowAddCard(true)} className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Payment Method
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      </div>
 
       {/* Security Notice */}
       <Alert className="border-blue-200 bg-blue-50">
@@ -415,7 +553,7 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
       </Alert>
 
       {/* Billing Information */}
-      {subscription && (
+      {/* {subscription && (
         <Card>
           <CardHeader className="pb-3 sm:pb-4">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -487,25 +625,15 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
-      {/* Single Add Payment Method Dialog */}
-      <Elements stripe={stripePromise} options={elementsOptions}>
-        <Dialog open={showAddCard} onOpenChange={setShowAddCard}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Payment Method</DialogTitle>
-            </DialogHeader>
-            
-            <CardForm
+
+      {/* <CardForm
               onSuccess={handleAddSuccess}
               onError={handleAddError}
               loading={loading}
               setLoading={setLoading}
-            />
-          </DialogContent>
-        </Dialog>
-      </Elements>
+      /> */}
     </div>
   );
 };

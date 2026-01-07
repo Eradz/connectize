@@ -61,9 +61,19 @@ const SubscriptionManagementSystem = () => {
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [cardDetails, setCardDetails] = useState({
+    name: '',
+    number: '',
+    expiry: '',
+    cvc: ''
+  });
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const fetchAllData = async () => {
+   console.log("fetching")
+  };
 
     // Get active tab from URL or default to dashboard
   useEffect(() => {
@@ -916,11 +926,6 @@ const SubscriptionManagementSystem = () => {
         {/* Payments Tab */}
         {activeTab === 'payments' && (
           <div className="mt-8">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Payments Methods</h2>
-              <p className="text-gray-600">Manage Payment Methods And Billing Preferences</p>
-            </div>
-
             {!showPaymentForm ? (
               /* Empty State */
               <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
@@ -961,19 +966,19 @@ const SubscriptionManagementSystem = () => {
             ) : (
               /* Payment Form */
               <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-semibold text-gray-900">Current Billing Period</h3>
-                  <button 
-                    className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    + Add Payment Method
-                  </button>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Left Column - Saved Cards */}
-                  <div className="space-y-4">
-                    {/* Card 1 */}
+                
+                  <PaymentMethodManager 
+                    subscription={currentSubscription}
+                    onUpdate={() => {
+                    // Refresh data after payment method changes
+                    fetchAllData();
+                    }}
+                  />
+                
+
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+                  {/* <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center">
@@ -1003,93 +1008,23 @@ const SubscriptionManagementSystem = () => {
                         </svg>
                       </button>
                     </div>
-
-                    {/* Card 2 */}
-                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center">
-                          <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g clipPath="url(#clip0_card2)">
-                              <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
-                              <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
-                              <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
-                              <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_card2">
-                                <rect width="65" height="40" fill="white"/>
-                              </clipPath>
-                            </defs>
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">Masters card</p>
-                          <p className="text-xs text-gray-500">2234************234</p>
-                        </div>
-                      </div>
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Card 3 */}
-                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center">
-                          <svg width="40" height="24" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g clipPath="url(#clip0_card3)">
-                              <path d="M41.288 4.27734H23.7129V35.7218H41.288V4.27734Z" fill="#FF5F00"/>
-                              <path d="M24.8291 19.9997C24.8291 13.8886 27.6746 8.0553 32.4728 4.27752C23.769 -2.55581 11.1595 -1.05581 4.29688 7.66641C-2.56579 16.3331 -1.05935 28.8886 7.70031 35.722C15.0093 41.4442 25.2196 41.4442 32.5286 35.722C27.6746 31.9442 24.8291 26.1109 24.8291 19.9997Z" fill="#EB001B"/>
-                              <path d="M65.0014 19.9997C65.0014 31.0553 56.0186 39.9997 44.9156 39.9997C40.3962 39.9997 36.0443 38.4997 32.5293 35.722C41.2332 28.8886 42.7396 16.3331 35.8769 7.61085C34.8726 6.38863 33.7568 5.22196 32.5293 4.27752C41.2332 -2.55581 53.8984 -1.05581 60.7053 7.66641C63.495 11.1664 65.0014 15.4997 65.0014 19.9997Z" fill="#F79E1B"/>
-                              <path d="M63.1034 32.3891V31.7224H63.3824V31.6113H62.7129V31.7224H62.9919V32.3891H63.1034ZM64.3867 32.3891V31.6113H64.1635L63.9404 32.1669L63.7172 31.6113H63.494V32.3891H63.6614V31.778L63.8846 32.278H64.0519L64.2751 31.778V32.3891H64.3867Z" fill="#F79E1B"/>
-                            </g>
-                            <defs>
-                              <clipPath id="clip0_card3">
-                                <rect width="65" height="40" fill="white"/>
-                              </clipPath>
-                            </defs>
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">Masters card</p>
-                          <p className="text-xs text-gray-500">2234************234</p>
-                        </div>
-                      </div>
-                      <button className="text-gray-400 hover:text-gray-600">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M2.5 5H4.16667H17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M6.66699 5.00033V3.33366C6.66699 2.89163 6.84259 2.46771 7.15515 2.15515C7.46771 1.84259 7.89163 1.66699 8.33366 1.66699H11.667C12.109 1.66699 12.5329 1.84259 12.8455 2.15515C13.1581 2.46771 13.3337 2.89163 13.3337 3.33366V5.00033M15.8337 5.00033V16.667C15.8337 17.109 15.6581 17.5329 15.3455 17.8455C15.0329 18.1581 14.609 18.3337 14.167 18.3337H5.83366C5.39163 18.3337 4.96771 18.1581 4.65515 17.8455C4.34259 17.5329 4.16699 17.109 4.16699 16.667V5.00033H15.8337Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
+                  </div> */}
 
                   {/* Right Column - Card Details Form */}
                   <div>
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900">Card Details</h4>
-                        <button className="text-sm font-medium text-gray-700 hover:text-gray-900">
-                          + Add card
-                        </button>
-                      </div>
-                      <p className="text-sm text-gray-600">Set default payment methods</p>
-                    </div>
 
                     <div className="space-y-4">
                       {/* Name on Card and Expiry */}
-                      <div className="grid grid-cols-2 gap-4">
+                      {/* <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Name on your Card
                           </label>
                           <input
                             type="text"
-                            value="Barry White"
+                            value={cardDetails.name}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onChange={(e)=> setCardDetails((prev)=> ({...prev, name: e.target.value}))}
                           />
                         </div>
                         <div>
@@ -1098,14 +1033,15 @@ const SubscriptionManagementSystem = () => {
                           </label>
                           <input
                             type="text"
-                            value="02 / 2026"
+                            value={cardDetails.expiry}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onChange={(e)=> setCardDetails((prev)=> ({...prev, expiry: e.target.value}))}
                           />
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Card Number and CVV */}
-                      <div className="grid grid-cols-2 gap-4">
+                      {/* <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Card Number
@@ -1113,8 +1049,9 @@ const SubscriptionManagementSystem = () => {
                           <div className="relative">
                             <input
                               type="text"
-                              value="9226 9885 8877 2233"
+                              value={cardDetails.number}
                               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                              onChange={(e)=> setCardDetails((prev)=> ({...prev, number: e.target.value}))}
                             />
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
                               <svg width="32" height="20" viewBox="0 0 65 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1139,23 +1076,16 @@ const SubscriptionManagementSystem = () => {
                           </label>
                           <input
                             type="text"
-                            value="***"
+                            value={cardDetails.cvc}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onChange={(e)=> setCardDetails((prev)=> ({...prev, cvc: e.target.value}))}
                           />
                         </div>
-                      </div>
+                      </div> */}
+
+              
                     </div>
                   </div>
-                </div>
-
-                {/* Security Notice */}
-                <div className="mt-8 flex items-start gap-2 p-4 bg-gray-50 rounded-lg">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0 mt-0.5">
-                    <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM11 15H9V9H11V15ZM11 7H9V5H11V7Z" fill="#6B7280"/>
-                  </svg>
-                  <p className="text-xs text-gray-600">
-                    <strong>Secure Processing:</strong> All Payment Information Is Encrypted And Processed Securely. We Will Never Store Your Complete Card Details On Our Servers.
-                  </p>
                 </div>
               </div>
             )}

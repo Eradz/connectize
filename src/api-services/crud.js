@@ -112,13 +112,29 @@ const api = {
       type: 'public', // This bypasses auth check
     }).then((data) => ({ data })),
 
-  post: (url, data, config = {}) =>
-    makeApiRequest({
+  post: (url, data, config = {}) => {
+    // If custom headers are provided (like for Bearer token auth), use axios directly
+    if (config.headers) {
+      return axios({
+        url: url.startsWith('http') ? url : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/${normalizeUrl(url)}`,
+        method: 'POST',
+        data,
+        headers: config.headers,
+        responseType: config.responseType,
+      }).then((response) => {
+        return { data: response.data };
+      }).catch((error) => {
+        throw error.response?.data || error;
+      });
+    }
+    
+    return makeApiRequest({
       url: normalizeUrl(url),
       method: 'POST',
       data,
       contentType: config.headers?.['Content-Type'] || 'application/json',
-    }).then((data) => ({ data })),
+    }).then((data) => ({ data }));
+  },
 
   put: (url, data, config = {}) =>
     makeApiRequest({

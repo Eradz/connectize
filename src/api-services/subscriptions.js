@@ -556,7 +556,12 @@ const subscriptions = {
     return this.getUserSubscriptions({ company: 'current' }).then(d => ({ data: d }));
   },
   createSetupIntent: async function() {
-    const response = await api.post('/api/v1/payment-methods/create_setup_intent/');
+    const response = await api.post('/api/v1/payment-methods/create_setup_intent/', {}, {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
     return { data: response.data };
   },
   addPaymentMethod: function(data) {
