@@ -32,7 +32,8 @@ import {
   PlusCircle,
   Eye,
   Download,
-  Check
+  Check,
+  Plus
 } from 'lucide-react';
 import { subscriptionsAPI } from '../../api-services/subscriptions';
 import Scroll from '../Scroll';  
@@ -929,7 +930,8 @@ const SubscriptionManagementSystem = () => {
                     onClick={() => setShowPaymentForm(true)}
                     className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
-                    Add Payment Method
+                     <Plus className='w-4 h-4 md:hidden'/>
+                    <span className='hidden md:flex'>Add Payment Method</span>
                   </button>
                 </div>
 
@@ -952,7 +954,7 @@ const SubscriptionManagementSystem = () => {
                     className="px-6 py-3 rounded-lg font-medium text-black"
                     style={{ backgroundColor: '#F59E0B' }}
                   >
-                    Add Payment Method
+                    <span className=''>Add Payment Method</span>
                   </button>
                 </div>
               </div>
