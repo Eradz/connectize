@@ -703,7 +703,7 @@ const SubscriptionManagementSystem = () => {
                     <TrendingUp className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1 capitalize">
-                    {currentSubscription?.billing_info.billing_cycle || '--'}
+                    {currentSubscription?.billing_info?.billing_cycle || '--'}
                   </div>
                   <div className="text-sm text-gray-600">
                     Billing Cycle
@@ -721,7 +721,7 @@ const SubscriptionManagementSystem = () => {
                     <CheckCircle className="w-6 h-6 text-gray-700" />
                   </div>
                   <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {!currentSubscription ? '--' : (currentSubscription?.auto_renew !== false ? 'Enabled' : 'Disabled')}
+                    {!currentSubscription ? '--' : (currentSubscription.auto_renew === false ? 'Disabled' : 'Enabled')}
                   </div>
                   <div className="text-sm text-gray-600">
                     Auto Renewal
