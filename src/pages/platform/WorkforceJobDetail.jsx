@@ -443,7 +443,7 @@ export default function WorkforceJobDetail() {
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              onClick={() => {setShowApplicationModal(false); navigate(pathname.replace("/apply", ""))}}
+              onClick={() => {setShowApplicationModal(false); pathname.includes("/apply") && navigate(pathname.replace("/apply", ""))}}
               className="w-[30%] px-6 py-2 bg-pale_yellow border rounded text-gray-700 hover:bg-gray-50"
             >
               Cancel
