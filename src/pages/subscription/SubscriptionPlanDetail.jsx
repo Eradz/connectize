@@ -5,11 +5,13 @@ import {
   Users, 
   TrendingUp,
   AlertCircle,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { makeApiRequest } from '../../lib/helpers';
 import { useSubscription } from '../../context/SubscriptionContext';
+import subscriptionsApi from '../../api-services/subscriptions';
 
 // Card components
 const Card = ({ children, className = "", ...props }) => (
@@ -50,10 +52,98 @@ const Button = ({ children, className = "", variant = "default", disabled = fals
 const SubscriptionPlanDetail = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
-  const { isCurrentUserPlan, currentSubscription } = useSubscription();
+  const { isCurrentUserPlan, currentSubscription, refreshSubscription } = useSubscription();
   const [planData, setPlanData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [upgrading, setUpgrading] = useState(false);
+  const [upgradeError, setUpgradeError] = useState(null);
+  const [upgradeSuccess, setUpgradeSuccess] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Plan hierarchy for determining upgrade vs downgrade
+  const planHierarchy = {
+    'trial': 0, 'free': 0, 'starter': 1, 'basic': 1, 
+    'professional': 2, 'pro': 2, 'business': 3, 
+    'enterprise': 4, 'custom': 5
+  };
+
+  // Determine if this is an upgrade or downgrade
+  const isUpgrade = () => {
+    if (!currentSubscription?.plan?.plan_type || !planData?.plan_type) return true; // Default to upgrade
+    const currentTier = planHierarchy[currentSubscription.plan.plan_type.toLowerCase()] ?? 0;
+    const newTier = planHierarchy[planData.plan_type.toLowerCase()] ?? 0;
+    return newTier > currentTier;
+  };
+
+  const isDowngrade = () => {
+    if (!currentSubscription?.plan?.plan_type || !planData?.plan_type) return false;
+    const currentTier = planHierarchy[currentSubscription.plan.plan_type.toLowerCase()] ?? 0;
+    const newTier = planHierarchy[planData.plan_type.toLowerCase()] ?? 0;
+    return newTier < currentTier;
+  };
+
+  // Calculate price difference for upgrade
+  const getPriceDifference = () => {
+    if (!currentSubscription?.plan?.price || !planData?.price) return null;
+    const currentPrice = parseFloat(currentSubscription.plan.price) || 0;
+    const newPrice = parseFloat(planData.price) || 0;
+    return (newPrice - currentPrice).toFixed(2);
+  };
+
+  const handlePlanChangeClick = () => {
+    if (!planData) return;
+    
+    if (!currentSubscription) {
+      // No subscription - redirect to start subscription flow
+      navigate(webRoutes.subscriptions);
+      return;
+    }
+    
+    // Show confirmation modal
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmPlanChange = async () => {
+    setShowConfirmModal(false);
+
+    try {
+      setUpgrading(true);
+      setUpgradeError(null);
+
+      // Use different API based on upgrade vs downgrade
+      let result;
+      if (isUpgrade()) {
+        result = await subscriptionsApi.upgradeSubscription(currentSubscription.id, planData.id);
+      } else {
+        result = await subscriptionsApi.downgradeSubscription(currentSubscription.id, planData.id);
+      }
+      
+      setUpgradeSuccess(true);
+      
+      // Refresh subscription context
+      if (refreshSubscription) {
+        await refreshSubscription();
+      }
+
+      // Show success briefly then redirect
+      setTimeout(() => {
+        navigate(webRoutes.subscriptionManagement);
+      }, 2000);
+
+    } catch (err) {
+      console.error('Plan change error:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to change subscription';
+      setUpgradeError(errorMessage);
+      
+      // If it's a payment method issue, suggest adding one
+      if (errorMessage.toLowerCase().includes('payment') || errorMessage.toLowerCase().includes('card')) {
+        setUpgradeError(`${errorMessage}. Please add a payment method first.`);
+      }
+    } finally {
+      setUpgrading(false);
+    }
+  };
 
   const loadPlanDetails = async () => {
     try {
@@ -273,6 +363,30 @@ const SubscriptionPlanDetail = () => {
               </CardHeader>
               
               <CardContent className="space-y-3 pt-0">
+                {upgradeSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm flex items-center">
+                    <Check className="h-4 w-4 mr-2" />
+                    Successfully upgraded! Redirecting...
+                  </div>
+                )}
+                
+                {upgradeError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    <div className="flex items-start">
+                      <AlertCircle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>{upgradeError}</span>
+                    </div>
+                    {upgradeError.toLowerCase().includes('payment') && (
+                      <button
+                        onClick={() => navigate(webRoutes.subscriptionManagement + '?tab=payment')}
+                        className="mt-2 text-xs text-red-700 underline hover:text-red-800"
+                      >
+                        Add Payment Method →
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 {isCurrentPlan() ? (
                   <button 
                     className="w-full bg-green-600 text-white py-3 rounded-lg font-medium flex items-center justify-center text-sm opacity-75 cursor-not-allowed" 
@@ -281,14 +395,53 @@ const SubscriptionPlanDetail = () => {
                     <Check className="h-5 w-5 mr-2" />
                     Current Plan
                   </button>
-                ) : (
+                ) : isUpgrade() ? (
                   <button 
-                    className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm hover:opacity-90"
+                    onClick={handlePlanChangeClick}
+                    disabled={upgrading || upgradeSuccess}
+                    className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{ background: 'linear-gradient(to right, #FFC000, #FF8400)' }}
                   >
-                    <TrendingUp className="h-5 w-5 mr-2" />
-                    Upgrade to This Plan
+                    {upgrading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <TrendingUp className="h-5 w-5 mr-2" />
+                        Upgrade to This Plan
+                      </>
+                    )}
                   </button>
+                ) : (
+                  <button 
+                    onClick={handlePlanChangeClick}
+                    disabled={upgrading || upgradeSuccess}
+                    className="w-full bg-gray-600 text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {upgrading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowLeft className="h-5 w-5 mr-2" />
+                        Switch to This Plan
+                      </>
+                    )}
+                  </button>
+                )}
+                
+                {/* Show price info */}
+                {!isCurrentPlan() && currentSubscription && getPriceDifference() && (
+                  <p className="text-xs text-center text-gray-500">
+                    {parseFloat(getPriceDifference()) > 0 
+                      ? `+$${getPriceDifference()}/${planData.billing_cycle || 'month'} from your current plan`
+                      : `Save $${Math.abs(parseFloat(getPriceDifference()))}/${planData.billing_cycle || 'month'}`
+                    }
+                  </p>
                 )}
                 
                 <button 
@@ -350,6 +503,102 @@ const SubscriptionPlanDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Plan Change Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <div className="text-center">
+              <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${isUpgrade() ? 'bg-orange-100' : 'bg-gray-100'}`}>
+                {isUpgrade() ? (
+                  <TrendingUp className="h-8 w-8 text-orange-600" />
+                ) : (
+                  <ArrowLeft className="h-8 w-8 text-gray-600" />
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">
+                {isUpgrade() ? 'Confirm Upgrade' : 'Confirm Plan Change'}
+              </h3>
+              <p className="text-gray-600 mt-2">
+                You're {isUpgrade() ? 'upgrading' : 'switching'} to <span className="font-semibold">{planData.name}</span>
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Current Plan:</span>
+                <span className="font-medium">{currentSubscription?.plan?.name || 'None'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">New Plan:</span>
+                <span className="font-medium">{planData.name}</span>
+              </div>
+              <div className="border-t border-gray-200 my-2"></div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Current Price:</span>
+                <span className="font-medium">${currentSubscription?.plan?.price || '0'}/{currentSubscription?.plan?.billing_cycle || 'month'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">New Price:</span>
+                <span className={`font-semibold ${isUpgrade() ? 'text-orange-600' : 'text-green-600'}`}>${planData.price}/{planData.billing_cycle || 'month'}</span>
+              </div>
+              {isUpgrade() && getPriceDifference() && parseFloat(getPriceDifference()) > 0 && (
+                <>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Amount to charge now:</span>
+                    <span className="font-bold text-green-600">${getPriceDifference()}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Prorated amount for the remainder of your billing period
+                  </p>
+                </>
+              )}
+              {isDowngrade() && getPriceDifference() && (
+                <>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">You'll save:</span>
+                    <span className="font-bold text-green-600">${Math.abs(parseFloat(getPriceDifference()))}/{planData.billing_cycle || 'month'}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className={`border rounded-lg p-3 ${isUpgrade() ? 'bg-blue-50 border-blue-200' : 'bg-yellow-50 border-yellow-200'}`}>
+              <p className={`text-xs ${isUpgrade() ? 'text-blue-700' : 'text-yellow-700'}`}>
+                {isUpgrade() ? (
+                  <>
+                    <strong>Note:</strong> Your default payment method will be charged. 
+                    The upgrade takes effect immediately and you'll have access to all {planData.name} features right away.
+                  </>
+                ) : (
+                  <>
+                    <strong>Note:</strong> The plan change takes effect at the end of your current billing period. 
+                    You'll continue to have access to your current features until then.
+                  </>
+                )}
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmPlanChange}
+                className={`flex-1 px-4 py-3 text-white rounded-lg font-medium transition-colors ${isUpgrade() ? '' : 'bg-gray-600 hover:bg-gray-700'}`}
+                style={isUpgrade() ? { background: 'linear-gradient(to right, #FFC000, #FF8400)' } : {}}
+              >
+                {isUpgrade() ? 'Confirm & Pay' : 'Confirm Change'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

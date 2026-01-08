@@ -926,8 +926,9 @@ const SubscriptionManagementSystem = () => {
         {/* Payments Tab */}
         {activeTab === 'payments' && (
           <div className="mt-8">
-            {!showPaymentForm ? (
-              /* Empty State */
+            {/* Show PaymentMethodManager directly if user has payment methods, otherwise show empty state */}
+            {(!showPaymentForm && (!paymentMethods || paymentMethods.length === 0)) ? (
+              /* Empty State - Only show when no payment methods exist */
               <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-8">
                   <h3 className="text-xl font-semibold text-gray-900">Current Billing Period</h3>
@@ -964,7 +965,7 @@ const SubscriptionManagementSystem = () => {
                 </div>
               </div>
             ) : (
-              /* Payment Form */
+              /* Payment Form / Payment Methods List */
               <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
 
                 

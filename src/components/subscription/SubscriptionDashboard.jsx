@@ -86,14 +86,12 @@ const SubscriptionDashboard = () => {
   const upgradeSubscription = async (plan) => {
     setProcessingPlan(plan.id);
     try {
-      const response = await subscriptionsApi.upgradeSubscription(current.id, {
-        plan_id: plan.id,
-        upgrade_immediately: true
-      });
+      // upgradeSubscription expects (subscriptionId, planId) - planId should be a string/UUID
+      const response = await subscriptionsApi.upgradeSubscription(current.id, plan.id);
       
-      if (response.data) {
+      if (response.data || response.subscription) {
         // Handle API response structure
-        const subscription = response.data.subscription || response.data;
+        const subscription = response.subscription || response.data?.subscription || response.data;
         setCurrent(subscription);
         setError('');
         alert(`Successfully upgraded to ${plan.name}!`);

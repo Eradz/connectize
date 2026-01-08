@@ -21,11 +21,13 @@ import {
   AlertTriangle,
   Package,
   BookOpen,
-  CreditCard
+  CreditCard,
+  Lock
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import Logo from '../logo';
 import { useAuth } from '../../context/userContext';
+import { useFeatureAccess } from '../../hooks/useFeatureAccess';
 import { NotificationPopOver } from '../notifications';
 import FeedSearch from '../custom/FeedSearch';
 import { JoinedUserCompanyImages } from '../ResponsiveNav';
@@ -91,28 +93,41 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
             <li key={item.name}>
               <div className="group flex items-center justify-between">
                 <Link
-                  to={item.href}
+                  to={item.locked ? '/subscription' : item.href}
                   className={classNames(
                     'flex-1 flex items-center gap-2 transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded',
                     {
-                      'bg-mid_grey pointer-events-none !text-gold': item.current,
+                      'bg-mid_grey pointer-events-none !text-gold': item.current && !item.locked,
                       '!text-gray-500': !item.current,
+                      'opacity-60': item.locked,
                     }
                   )}
+                  title={item.locked ? `Upgrade your plan to access ${item.name}` : item.name}
                 >
                   <item.icon
                     className={classNames(
                       'hover:!text-gold text-xl !size-5 lg:!size-4',
                       {
-                        '!text-gold': item.current,
+                        '!text-gold': item.current && !item.locked,
                         '!text-gray-500': !item.current,
+                        '!text-gray-400': item.locked,
                       }
                     )}
                   />
                   <span className="max-md:sr-only lg:!text-sm">{item.name}</span>
+                  {/* Show lock icon for locked items */}
+                  {item.locked && (
+                    <Lock className="h-3 w-3 text-gray-400 ml-auto" />
+                  )}
+                  {/* Show premium badge for premium features */}
+                  {item.isPremium && !item.locked && (
+                    <span className="ml-auto text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full font-medium">
+                      PRO
+                    </span>
+                  )}
                 </Link>
                 
-                {item.children && (
+                {item.children && item.children.length > 0 && !item.locked && (
                   <button
                     onClick={() => toggleExpanded(item.name)}
                     className="p-1 text-gray-400 hover:text-gray-500"
@@ -128,15 +143,24 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
               </div>
               
               {/* Submenu */}
-              {item.children && expandedItems.has(item.name) && (
+              {item.children && item.children.length > 0 && expandedItems.has(item.name) && !item.locked && (
                 <div className="ml-8 mt-2 space-y-1">
                   {item.children.map((child) => (
                     <Link
                       key={child.name}
-                      to={child.href}
-                      className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                      to={child.locked ? '/subscription' : child.href}
+                      className={classNames(
+                        'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
+                        child.locked 
+                          ? 'text-gray-400 hover:bg-gray-50' 
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      )}
+                      title={child.locked ? `Upgrade to access ${child.name}` : child.name}
                     >
                       {child.name}
+                      {child.locked && (
+                        <Lock className="h-3 w-3 text-gray-400 ml-auto" />
+                      )}
                     </Link>
                   ))}
                 </div>
@@ -152,11 +176,20 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
           {secondaryNavigation.map((item) => (
             <li key={item.name}>
               <Link
-                to={item.href}
-                className="flex items-center gap-2 transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                to={item.locked ? '/subscription' : item.href}
+                className={classNames(
+                  'flex items-center gap-2 transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  { 'opacity-60': item.locked }
+                )}
               >
-                <item.icon className="hover:!text-gold text-xl !size-5 lg:!size-4 !text-gray-500" />
+                <item.icon className={classNames(
+                  'hover:!text-gold text-xl !size-5 lg:!size-4',
+                  item.locked ? '!text-gray-400' : '!text-gray-500'
+                )} />
                 <span className="max-md:sr-only lg:!text-sm">{item.name}</span>
+                {item.locked && (
+                  <Lock className="h-3 w-3 text-gray-400 ml-auto" />
+                )}
               </Link>
             </li>
           ))}
@@ -170,24 +203,48 @@ const PlatformNavigation = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const { user: currentUser } = useAuth();
+  const { hasFeature, hasMinPlan, loading: featureLoading } = useFeatureAccess();
 
-  const navigation = useMemo(() => ([
+  /**
+   * Check if user has access to a navigation item based on feature/plan requirements
+   */
+  const hasNavAccess = (item) => {
+    // If no requirements, everyone has access
+    if (!item.requiresFeature && !item.requiresPlan) return true;
+    
+    // Check feature requirement
+    if (item.requiresFeature && !hasFeature(item.requiresFeature)) {
+      return false;
+    }
+    
+    // Check plan requirement
+    if (item.requiresPlan && !hasMinPlan(item.requiresPlan)) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  const rawNavigation = useMemo(() => ([
     {
       name: 'Dashboard',
       href: webRoutes.platformDashboard,
       icon: LayoutDashboard,
       current: location.pathname === webRoutes.platformDashboard
+      // No feature requirement - accessible to all
     },
     {
       name: 'Deal Rooms',
       href: webRoutes.dealRooms,
       icon: FileText,
       current: location.pathname.startsWith('/deals'),
+      // requiresFeature: 'deal_rooms', // Uncomment to restrict
+      // requiresPlan: 'starter',       // Uncomment to require starter+
       children: [
         { name: 'All Deal Rooms', href: webRoutes.dealRooms },
         { name: 'Create Deal Room', href: webRoutes.dealRoomCreate },
         { name: 'My Participations', href: webRoutes.myParticipations },
-        { name: 'Deal Analytics', href: '/deals/analytics' }
+        { name: 'Deal Analytics', href: '/deals/analytics', requiresPlan: 'professional' }
       ]
     },
     {
@@ -214,11 +271,15 @@ const PlatformNavigation = ({ children }) => {
       href: webRoutes.aiDashboard,
       icon: Brain,
       current: location.pathname.startsWith('/ai'),
+      // AI Services typically require professional plan
+      // requiresFeature: 'ai_services',
+      // requiresPlan: 'professional',
+      isPremium: true, // Shows lock icon if no access
       children: [
         { name: 'AI Dashboard', href: webRoutes.aiDashboard },
-        { name: 'Smart Matching', href: webRoutes.aiMatching },
+        { name: 'Smart Matching', href: webRoutes.aiMatching, requiresFeature: 'ai_matching' },
         { name: 'Opportunities', href: webRoutes.aiOpportunities },
-        { name: 'Compliance Monitor', href: webRoutes.aiCompliance }
+        { name: 'Compliance Monitor', href: webRoutes.aiCompliance, requiresPlan: 'business' }
       ]
     },
     {
@@ -254,6 +315,7 @@ const PlatformNavigation = ({ children }) => {
       href: webRoutes.featuredAds,
       icon: Target,
       current: location.pathname.startsWith('/ads'),
+      // requiresPlan: 'starter', // Uncomment to require paid plan
       children: [
         { name: 'Manage Campaigns', href: webRoutes.featuredAds }
       ]
@@ -271,6 +333,30 @@ const PlatformNavigation = ({ children }) => {
       ]
     }
   ]), [location.pathname]);
+
+  // Filter navigation based on feature access (while loading, show all)
+  const navigation = useMemo(() => {
+    if (featureLoading) return rawNavigation;
+    
+    return rawNavigation.map(item => {
+      const hasAccess = hasNavAccess(item);
+      const filteredChildren = item.children?.filter(child => hasNavAccess(child));
+      
+      return {
+        ...item,
+        locked: !hasAccess,
+        children: filteredChildren,
+        // Mark as having restricted children
+        hasLockedChildren: item.children?.length !== filteredChildren?.length
+      };
+    }).filter(item => {
+      // Option 1: Hide items user doesn't have access to
+      // return hasNavAccess(item);
+      
+      // Option 2: Show all items but mark locked ones (better UX)
+      return true;
+    });
+  }, [rawNavigation, featureLoading, hasFeature, hasMinPlan]);
 
   const secondaryNavigation = useMemo(() => ([
     { name: 'Analytics', href: webRoutes.platformAnalytics, icon: BarChart3 },
