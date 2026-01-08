@@ -13,6 +13,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { BriefCaseIcon } from '../../icon';
 import { workforceJobService } from '../../api-services/oilgas';
 import { JobCard } from '../../components/workforce/JobCard';
+import { useSubscription } from '../../context/SubscriptionContext';
 
 const WorkforceJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -26,7 +27,7 @@ const WorkforceJobs = () => {
   const [filterSalaryRange, setFilterSalaryRange] = useState('all');
   const [sortBy, setSortBy] = useState('created_at');
   const [savedJobs, setSavedJobs] = useState(new Set());
-
+  
   useEffect(() => {
     loadJobs();
     loadSavedJobs();
@@ -167,8 +168,6 @@ const WorkforceJobs = () => {
     if (jobCount >= 10) return 'Small Company (10-49 employees)';
     return 'Startup (<10 employees)';
   };
-
-  console.log("Jobs:", jobs);
 
   return (
     <div className="min-h-screen">
