@@ -574,7 +574,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
         <Button 
           type="submit"
           disabled={!stripe || loading || !cardholderName.trim()}
-          className="w-full ml-auto bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:bg-gold hover: to-[#FFC000]  hover:from-[#FF8400] text-white"
+          className="w-full ml-auto bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:bg-gold hover:to-[#FFC000]  hover:from-[#FF8400] text-white"
         >
           {loading ? (
             <>
