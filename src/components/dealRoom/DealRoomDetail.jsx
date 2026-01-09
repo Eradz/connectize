@@ -239,6 +239,46 @@ export default function DealRoomDetail() {
   // Check if user can manage participants (admin only)
   const canManageParticipants = canDelete;
 
+  /* Validates milestone creation form */
+  const validateMilestoneForm = (formData) => {
+    const missingFields = [];
+
+    // Check title
+    if (!formData.title || formData.title.trim() === "") {
+      missingFields.push("Title");
+    }
+
+    // Check description
+    if (!formData.description || formData.description.trim() === "") {
+      missingFields.push("Description");
+    }
+
+    // Check status
+    if (!formData.status || formData.status.trim() === "") {
+      missingFields.push("Status");
+    }
+
+    // Check due date
+    if (!formData.due_date) {
+      missingFields.push("Due Date");
+    }
+
+    // Check assigned_to (person to assign milestone to)
+    if (!formData.assigned_to) {
+      missingFields.push("Assigned To");
+    }
+
+    // Check priority
+    if (formData.priority === null || formData.priority === undefined) {
+      missingFields.push("Priority");
+    }
+
+    return {
+      isValid: missingFields.length === 0,
+      missingFields
+    };
+  };
+
   const refreshActivities = async ({active}) => {
     setLoading(true);
     try {
@@ -1583,6 +1623,15 @@ export default function DealRoomDetail() {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            
+            // Validate form before submission
+            const validation = validateMilestoneForm(createMilestoneForm);
+            if (!validation.isValid) {
+              const missingFieldsList = validation.missingFields.join(", ");
+              notify.error(`Please fill in the following field(s): ${missingFieldsList}`);
+              return;
+            }
+
             try {
               const newMilestone = await dealMilestoneService.create({ ...createMilestoneForm, created_by: user.id, deal_room: id });
               if (newMilestone) {
