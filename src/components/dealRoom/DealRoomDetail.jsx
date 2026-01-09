@@ -1629,6 +1629,11 @@ export default function DealRoomDetail() {
             if (!validation.isValid) {
               const missingFieldsList = validation.missingFields.join(", ");
               notify.error(`Please fill in the following field(s): ${missingFieldsList}`);
+              if (validation.missingFields.includes("Assigned To")) {
+                // If assigned_to is missing, highlight the assigned_to field
+                document.getElementById("assigned-to").classList.add("border-red-500");
+                notify.error("Please select an assignee that is registered on Connectize");
+              }
               return;
             }
 
@@ -1702,6 +1707,7 @@ export default function DealRoomDetail() {
             <div className="relative">
               <input
                 type="text"
+                id="assigned-to"
                 value={participantForm.userDisplay || userSearch}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -1734,10 +1740,10 @@ export default function DealRoomDetail() {
                       <div className="text-xs text-gray-500">{u.email}</div>
                     </button>
                   ))}
-                  {!userSearching && userResults.length === 0 && (
-                    <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
-                  )}
                 </div>
+              )}
+              {!userSearching && userResults.length === 0 && (
+                <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
               )}
             </div>
           </div>
