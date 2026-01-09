@@ -25,14 +25,14 @@ export default function PlatformModules({dashboardData}) {
       bgColor: "bg-blue-50",
       to: webRoutes.workforceJobs
     },
-    {
-      icon: <AIIcon/>,
-      title: "AI Services",
-      description: "Intelligent matching and market insights",
-      link: `${dashboardData.opportunities.count} opportunity`,
-      bgColor: "bg-purple-50",
-      to: webRoutes.aiDashboard
-    },
+    // {
+    //   icon: <AIIcon/>,
+    //   title: "AI Services",
+    //   description: "Intelligent matching and market insights",
+    //   link: `${dashboardData.opportunities.count} opportunity`,
+    //   bgColor: "bg-purple-50",
+    //   to: webRoutes.aiDashboard
+    // },
     {
       icon: <LogisticIcon/>,
       title: "Logistics Hub",
