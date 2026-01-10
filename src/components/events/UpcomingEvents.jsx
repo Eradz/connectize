@@ -112,8 +112,17 @@ const UpcomingEvents = ({filteredEvents}) => {
   //   return cap ? Math.max(cap - reg, 0) : 0;
   // };
   const getLongestString = (themes) => {
-    const longestStringArr = themes.sort((a, b) => a.length - b.length).reverse();
-    return longestStringArr;
+    if (!themes || !Array.isArray(themes)) return [];
+    // Filter out empty strings, "[]", and invalid values
+    const filtered = themes.filter(t => t && typeof t === 'string' && t.trim() && t !== '[]');
+    if (filtered.length === 0) return [];
+    return filtered.sort((a, b) => a.length - b.length).reverse();
+  };
+  
+  // Helper to check if topics are valid
+  const hasValidTopics = (topics) => {
+    if (!topics || !Array.isArray(topics) || topics.length === 0) return false;
+    return topics.some(t => t && typeof t === 'string' && t.trim() && t !== '[]');
   };
 
   return (
@@ -199,17 +208,17 @@ const UpcomingEvents = ({filteredEvents}) => {
                             </div>
                         </div>
 
+                          {/* Topics (if any) */}
+                          {hasValidTopics(event.topics) && (
                           <div className='flex gap-4'>
                             <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
-                            {/* Topics (if any) */}
-                            {Array.isArray(event.topics) && event.topics.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
                                 {getLongestString(event.topics.slice(0, 3)).map((t, i) => (
                                 <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
-                            )}
                           </div>
+                          )}
                     </div>
     
                   </div>
@@ -319,17 +328,17 @@ const UpcomingEvents = ({filteredEvents}) => {
                                               </div>
                                           </div>
                   
+                                            {/* Topics (if any) */}
+                                            {hasValidTopics(event.topics) && (
                                             <div className='flex gap-4'>
                                               <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
-                                              {/* Topics (if any) */}
-                                              {Array.isArray(event.topics) && event.topics.length > 0 && (
                                               <div className="flex flex-wrap gap-1 mb-4">
                                                   {getLongestString(event.topics.slice(0, 3)).map((t, i) => (
                                                   <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
                                                   ))}
                                               </div>
-                                              )}
                                             </div>
+                                            )}
                                       </div>
                       
                                     </div>

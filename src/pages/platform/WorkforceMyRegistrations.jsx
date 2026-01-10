@@ -69,6 +69,8 @@ const WorkforceMyRegistrations = () => {
         return { icon: CheckCircle, label: 'Confirmed', color: 'green' };
       case 'pending':
         return { icon: AlertCircle, label: 'Pending Approval', color: 'yellow' };
+      case 'pending_payment':
+        return { icon: DollarSign, label: 'Pending Payment', color: 'orange' };
       case 'waitlisted':
         return { icon: Clock, label: 'Waitlisted', color: 'orange' };
       case 'cancelled':
@@ -319,8 +321,6 @@ const WorkforceMyRegistrations = () => {
               const EventStatusIcon = eventStatus.status === 'completed' ? CheckCircle : 
                                       eventStatus.status === 'ongoing' ? AlertCircle : Clock;
 
-              console.log('Registration Status:', registration);
-
               return (
                 <div key={registration.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl  w-full md:w-[49%]">
                 <div className="bg-white rounded-xl border h-full">
@@ -330,14 +330,23 @@ const WorkforceMyRegistrations = () => {
                     <div className='flex justify-between text-[12px] mb-3'>
                       <div className='flex gap-3 '>
                         <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1 capitalize'>{eventStatus?.status}</span>
-                        <span className='flex items-center gap-2 bg-[#FFEFBD80]/50 rounded-full text-[#FFC000] px-2 py-1'>
-                              {/* <span className={`text-${regStatus?.color}`}> */}
-                                {/* {StatusIcon} */}
-                                {/* </span> */}
+                        <span className={`flex items-center gap-2 rounded-full px-2 py-1 ${
+                          regStatus?.color === 'green' ? 'bg-green-100 text-green-700' :
+                          regStatus?.color === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
+                          regStatus?.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                          regStatus?.color === 'red' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
                               {regStatus?.label}
                         </span>
                       </div>
-                      <span className='bg-gradient-to-br from-[#258B00] to-[#53FF09] rounded-full text-white px-2 py-1'>Free Event</span>
+                      {registration.event.is_free || !registration.event.ticket_price ? (
+                        <span className='bg-gradient-to-br from-[#258B00] to-[#53FF09] rounded-full text-white px-2 py-1'>Free Event</span>
+                      ) : (
+                        <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1'>
+                          ${parseFloat(registration.event.ticket_price).toFixed(2)} {registration.event.currency || 'USD'}
+                        </span>
+                      )}
                     </div>
                      {/* Title */}
                     <h3 className="font-semibold text-gray-900 pb-4 line-clamp-2">
@@ -353,7 +362,7 @@ const WorkforceMyRegistrations = () => {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-5 h-5 mr-2" />
-                        {!registration.event.is_virtual ? 'Online' : (registration.event.venue_name || registration.event.venue_address || 'Venue TBA').slice(0, 20) + "..."}
+                        {registration.event.is_virtual ? 'Online' : (registration.event.venue_name || registration.event.venue_address || 'Venue TBA').slice(0, 20) + "..."}
                       </div>
                       <div className='flex justify-between items-center text-sm text-gray-600 gap-2'>
                         <span className='flex'>
@@ -386,12 +395,15 @@ const WorkforceMyRegistrations = () => {
                           <div className='flex gap-4'>
                             <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
                             {/* Topics (if any) */}
-                            {Array.isArray(registration.event.topics) && registration.event.topics.length > 0 && (
+                            {Array.isArray(registration.event.topics) && 
+                             registration.event.topics.filter(t => t && t !== '[]' && t.trim() !== '').length > 0 ? (
                             <div className="flex flex-wrap gap-1 mb-4">
-                                {getLongestString(registration.event.topics.slice(0, 3)).map((t, i) => (
+                                {getLongestString(registration.event.topics.filter(t => t && t !== '[]' && t.trim() !== '').slice(0, 3)).map((t, i) => (
                                 <span key={i} className="bg-gray-100 text-gray-700 text-[12px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
+                            ) : (
+                              <span className="text-gray-400 text-sm">—</span>
                             )}
                           </div>
                     </div>

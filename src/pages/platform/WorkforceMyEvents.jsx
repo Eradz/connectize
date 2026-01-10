@@ -17,6 +17,8 @@ const WorkforceMyEvents = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showRegistrations, setShowRegistrations] = useState(false);
+  const [registrations, setRegistrations] = useState([]);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(false);
 
   useEffect(() => {
     loadMyEvents();
@@ -35,6 +37,26 @@ const WorkforceMyEvents = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadRegistrations = async (eventId) => {
+    try {
+      setLoadingRegistrations(true);
+      const response = await workforceAPI.getEventRegistrations(eventId);
+      const registrationsData = response.data.results || response.data || [];
+      setRegistrations(registrationsData);
+    } catch (err) {
+      console.error('Error loading registrations:', err);
+      setRegistrations([]);
+    } finally {
+      setLoadingRegistrations(false);
+    }
+  };
+
+  const handleShowRegistrations = (event) => {
+    setSelectedEvent(event);
+    setShowRegistrations(true);
+    loadRegistrations(event.id);
   };
 
   const getEventStatus = (event) => {
@@ -99,12 +121,17 @@ const WorkforceMyEvents = () => {
   };
 
   const downloadRegistrations = (event) => {
+    if (!registrations || registrations.length === 0) {
+      alert('No registrations to export');
+      return;
+    }
+    
     // Create CSV data
-    const csvData = event.registrations.map(reg => ({
-      Name: reg.attendee_name,
-      Status: reg.status,
-      'Registration Date': formatDate(reg.registered_at),
-      Email: reg.attendee_email || 'Not provided'
+    const csvData = registrations.map(reg => ({
+      Name: reg.attendee_name || reg.user?.full_name || 'Unknown',
+      Email: reg.user?.email || reg.attendee_email || 'Not provided',
+      Status: reg.status || 'registered',
+      'Registration Date': formatDate(reg.registered_at || reg.created_at)
     }));
 
     // Convert to CSV string
@@ -315,10 +342,7 @@ const WorkforceMyEvents = () => {
                     
                     <div className="grid grid-cols-3 gap-2">
                       <button 
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowRegistrations(true);
-                        }}
+                        onClick={() => handleShowRegistrations(event)}
                         className="flex items-center justify-center px-2 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
                         title={`${event.attendees_count || 0} registrations`}
                       >
@@ -395,12 +419,16 @@ const WorkforceMyEvents = () => {
                 <button
                   onClick={() => downloadRegistrations(selectedEvent)}
                   className="flex items-center px-3 py-2 text-sm bg-gold text-white rounded-lg hover:bg-slate-700 transition-colors"
+                  disabled={registrations.length === 0}
                 >
                   <Download className="w-4 h-4 mr-1" />
                   Export CSV
                 </button>
                 <button
-                  onClick={() => setShowRegistrations(false)}
+                  onClick={() => {
+                    setShowRegistrations(false);
+                    setRegistrations([]);
+                  }}
                   className="text-slate-400 hover:text-slate-600"
                 >
                   <XCircle className="w-6 h-6" />
@@ -409,22 +437,29 @@ const WorkforceMyEvents = () => {
             </div>
             
             <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {selectedEvent.registrations && selectedEvent.registrations.length > 0 ? (
+              {loadingRegistrations ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto mb-3"></div>
+                  <p className="text-slate-600">Loading registrations...</p>
+                </div>
+              ) : registrations.length > 0 ? (
                 <div className="space-y-3">
-                  {selectedEvent.registrations.map((registration) => (
+                  {registrations.map((registration) => (
                     <div key={registration.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                       <div>
-                        <h4 className="font-medium text-slate-900">{registration.attendee_name}</h4>
+                        <h4 className="font-medium text-slate-900">{registration.attendee_name || registration.user?.full_name || 'Unknown'}</h4>
                         <p className="text-sm text-slate-600">
-                          Registered: {formatDate(registration.registered_at)}
+                          {registration.user?.email && <span className="mr-3">{registration.user.email}</span>}
+                          Registered: {formatDate(registration.registered_at || registration.created_at)}
                         </p>
                       </div>
                       <div className="flex items-center space-x-3">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium
                           ${registration.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
                             registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            registration.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                             'bg-slate-100 text-slate-800'}`}>
-                          {registration.status}
+                          {registration.status || 'registered'}
                         </span>
                       </div>
                     </div>

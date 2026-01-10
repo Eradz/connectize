@@ -76,6 +76,7 @@ import WorkforceEventCreate from "./pages/platform/WorkforceEventCreate";
 import WorkforceMyEvents from "./pages/platform/WorkforceMyEvents";
 import WorkforceMyRegistrations from "./pages/platform/WorkforceMyRegistrations";
 import WorkforceMyBookmarks from "./pages/platform/WorkforceMyBookmarks";
+import CompanyEarnings from "./pages/platform/CompanyEarnings";
 import AIDashboard from "./pages/platform/AIDashboard";
 import DealRoomDetail from "./components/dealRoom/DealRoomDetail";
 import MyParticipations from "./pages/platform/MyParticipations";
@@ -256,10 +257,12 @@ function App() {
           <Route path="professionals/:id/edit" element={<WorkforceProfileEdit />} />
           <Route path="events" element={<WorkforceEvents />} />
           <Route path="events/create" element={<WorkforceEventCreate />} />
-          <Route path="events/:id" element={<WorkforceEventDetail />} />
+          <Route path="events/earnings" element={<CompanyEarnings />} />
           <Route path="events/my-events" element={<WorkforceMyEvents />} />
           <Route path="events/my-registrations" element={<WorkforceMyRegistrations />} />
           <Route path="events/my-bookmarks" element={<WorkforceMyBookmarks />} />
+          <Route path="events/:id/edit" element={<WorkforceEventCreate />} />
+          <Route path="events/:id" element={<WorkforceEventDetail />} />
           <Route path="applications" element={<WorkforceApplications />} />
           
           {/* AI Services */}
@@ -336,6 +339,7 @@ function App() {
           <Route path={toRelativePath(webRoutes.workforceMyEvents)} element={<WorkforceMyEvents />} />
           <Route path={toRelativePath(webRoutes.workforceMyRegistrations)} element={<WorkforceMyRegistrations />} />
           <Route path={toRelativePath(webRoutes.workforceMyBookmarks)} element={<WorkforceMyBookmarks />} />
+          <Route path={toRelativePath(webRoutes.workforceCompanyEarnings)} element={<CompanyEarnings />} />
           <Route path={toRelativePath(webRoutes.aiDashboard)} element={<AIDashboard />} />
           <Route path={toRelativePath(webRoutes.aiMatching)} element={<AISubpage />} />
           <Route path={toRelativePath(webRoutes.aiOpportunities)} element={<AISubpage />} />

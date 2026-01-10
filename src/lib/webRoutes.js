@@ -70,6 +70,7 @@ const webRoutes = {
   workforceMyEvents: "/events/my-events",
   workforceMyRegistrations: "/events/my-registrations",
   workforceMyBookmarks: "/events/my-bookmarks",
+  workforceCompanyEarnings: "/events/earnings",
   workforceApplications: "/applications",
   workforceApplicationsManage: "/applications/manage",
   workforceDashboard: "/workforce/dashboard",

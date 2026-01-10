@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Calendar, Clock, MapPin, Users, DollarSign, ArrowLeft, 
   UserCheck, Share2, Bookmark, ExternalLink, Mail, Phone,
   CheckCircle, AlertCircle, XCircle, Globe, Building, Search,
   Filter, Download, Eye, User, Badge, ChevronDown, ChevronUp,
-  Star, Award, TrendingUp, MessageCircle, Heart, Copy,
+  Star, Award, TrendingUp, MessageCircle, Heart, Copy, Check,
   Shield, Wifi, Coffee, Car, Gift, Zap, Target,
   ClockCheck,
   Users2,
   User2,
-  Plus
+  Plus,
+  CreditCard,
+  Loader2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
-
 const WorkforceEventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,8 +28,11 @@ const WorkforceEventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Participants state
   const [participants, setParticipants] = useState([]);
@@ -40,6 +44,51 @@ const WorkforceEventDetail = () => {
   const [participantsPerPage] = useState(10);
   const [isEventCreator, setIsEventCreator] = useState(false);
   const [myRegistration, setMyRegistration] = useState(null);
+  
+  // Ref to track if registration has been checked for this event
+  const registrationCheckedRef = useRef(null);
+
+  // Handle payment return from Stripe Checkout
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    
+    if (paymentStatus === 'success' && id) {
+      // Payment was successful, verify with backend and update status
+      setError(null);
+      setPaymentError(null);
+      // Clear the URL parameter
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // Verify payment with Stripe and update registration
+      const verifyPayment = async () => {
+        try {
+          const response = await workforceAPI.verifyEventPayment(id);
+          const data = response.data || response;
+          
+          if (data.status === 'confirmed' && data.registration) {
+            // Update registration state immediately
+            setMyRegistration(data.registration);
+          }
+          
+          // Reset the registration check ref and reload
+          registrationCheckedRef.current = null;
+          await loadEventDetail();
+        } catch (err) {
+          console.error('Error verifying payment:', err);
+          // Still reload to check status
+          registrationCheckedRef.current = null;
+          await loadEventDetail();
+        }
+      };
+      
+      verifyPayment();
+    } else if (paymentStatus === 'cancelled') {
+      // Payment was cancelled
+      setPaymentError('Payment was cancelled. Your registration is still pending.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (id) {
@@ -65,71 +114,47 @@ const WorkforceEventDetail = () => {
 
   // Check if user is event creator and get their registration
   useEffect(() => {
-    console.log('useEffect triggered - event:', event?.id, 'user:', user?.id);
-
     if (event && user) {
+      // Skip if we've already checked for this event+user combination
+      const checkKey = `${event.id}-${user.id}`;
+      if (registrationCheckedRef.current === checkKey) {
+        return;
+      }
+      // Mark as checked for this combination
+      registrationCheckedRef.current = checkKey;
+      
       // Check if user is the creator (check organizer field - created_by doesn't exist)
       const isCreator = event.organizer === user.id;
       setIsEventCreator(isCreator);
-      console.log('Event creator check:', {
-        userId: user.id,
-        userIdType: typeof user.id,
-        eventOrganizer: event.organizer,
-        eventOrganizerType: typeof event.organizer,
-        isCreator,
-        comparison: `${event.organizer} === ${user.id}`
-      });
 
       // Get user's registration for this event
       const checkMyRegistration = async () => {
         try {
-          console.log('Checking registration for event:', event.id);
           const response = await workforceAPI.getMyEventRegistrations();
-          // console.log('My registrations API response:', response);
 
           if (response.data?.results) {
-            console.log('Found registrations:', response.data.results.length);
-            response.data.results.forEach((reg, index) => {
-              console.log(`Registration ${index + 1}:`, {
-                regId: reg.id,
-                eventId: reg.event?.id,
-                currentEventId: event.id,
-                matches: reg.event?.id === event.id
-              });
-            });
-            // console.log("Event ID:", event.id);
             const myReg = response.data.results.find(reg => {
               const regEventId = reg.event?.id;
               const currentEventId = event.id;
-              // console.log('Checking registration:', { regEventId, currentEventId });
-              // Ensure both are strings for comparison
               return String(regEventId) === String(currentEventId);
             });
-            // console.log('Found matching registration:', myReg);
             setMyRegistration(myReg || null);
           } else {
-            // console.log('No registrations found or API error:', response);
             setMyRegistration(null);
           }
         } catch (error) {
-          // console.error('Error checking my registration:', error);
+          console.error('Error checking my registration:', error);
           setMyRegistration(null);
         }
       };
 
       checkMyRegistration();
     }
-  }, [event, user]);
-
-  // Debug: Log myRegistration state changes
-  useEffect(() => {
-    console.log('myRegistration state changed:', myRegistration);
-  }, [myRegistration]);
+  }, [event?.id, user?.id]);
 
   // When creator determination changes, attempt loading participants if panel already toggled or not yet loaded
   useEffect(() => {
     if (event && isEventCreator && participants.length === 0 && !participantsLoading) {
-      console.log('Creator confirmed, attempting participants fetch');
       loadParticipants();
     }
   }, [isEventCreator]);
@@ -141,25 +166,20 @@ const WorkforceEventDetail = () => {
       if (isEventCreator) {
         // If user is event creator, load all participants
         const apiWrapper = await workforceAPI.getEventRegistrations(event.id);
-        console.log('Participants API raw wrapper:', apiWrapper);
         const payload = apiWrapper?.data; // unwrap from axios-like wrapper
         // Possible shapes: paginated { results: [...], count, next, previous } OR direct array
         const resultArray = payload?.results || (Array.isArray(payload) ? payload : null);
         if (resultArray) {
           setParticipants(resultArray);
-          console.log('Loaded participants count:', resultArray.length);
         } else {
-          console.warn('Participants payload missing expected data structure', { payload });
           setParticipants([]);
         }
       } else {
         // If user is not creator, only show their own registration
         if (myRegistration) {
           setParticipants([myRegistration]);
-          console.log('Loaded own registration');
         } else {
           setParticipants([]);
-          console.log('No registration found for current user');
         }
       }
     } catch (error) {
@@ -178,15 +198,97 @@ const WorkforceEventDetail = () => {
   const handleRegister = async () => {
     try {
       setIsRegistering(true);
-      await workforceAPI.registerForEvent(id);
-      // Reload event to get updated registration count
+      const response = await workforceAPI.registerForEvent(id);
+      const data = response.data || response;
+      
+      // Check if this is a paid event with external payment
+      if (data.external_payment_url || data.requires_external_payment) {
+        // Set the registration from response so UI updates immediately
+        if (data.registration) {
+          setMyRegistration(data.registration);
+        }
+        // Open the external payment URL in a new tab
+        window.open(data.external_payment_url, '_blank');
+        // Reload event to get updated attendee count
+        await loadEventDetail();
+        return;
+      }
+      
+      // For internal payment, set registration from response
+      if (data.requires_payment && data.registration) {
+        setMyRegistration(data.registration);
+        await loadEventDetail();
+        return;
+      }
+      
+      // For free events, set registration from response
+      if (data.id || data.registration) {
+        setMyRegistration(data.registration || data);
+      }
+      
+      // Reload event to get updated attendee count
       await loadEventDetail();
     } catch (err) {
       console.error('Error registering for event:', err);
-      setError('Failed to register for event');
+      
+      // Check if this is a pending payment error with payment URL
+      const errorData = err.response?.data;
+      if (errorData?.requires_payment && event?.external_payment_url) {
+        // User has pending payment, redirect to payment URL
+        window.open(event.external_payment_url, '_blank');
+        return;
+      }
+      
+      setError(errorData?.error || 'Failed to register for event');
     } finally {
       setIsRegistering(false);
     }
+  };
+
+  // Handle internal payment via Stripe Checkout
+  const handleInternalPayment = async () => {
+    try {
+      setIsProcessingPayment(true);
+      setPaymentError(null);
+      
+      // Create a Stripe Checkout Session and redirect to it
+      const response = await workforceAPI.createEventCheckoutSession(id);
+      const data = response.data || response;
+      
+      if (data.checkout_url) {
+        // Redirect to Stripe Checkout page
+        window.location.href = data.checkout_url;
+      } else {
+        setPaymentError('Failed to create payment session. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error creating checkout session:', err);
+      const errorData = err.response?.data;
+      setPaymentError(errorData?.error || 'Payment failed. Please try again.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Helper to get registration button text based on event and registration status
+  const getRegisterButtonText = () => {
+    if (myRegistration) {
+      if (myRegistration.status === 'pending_payment') {
+        return 'Complete Payment';
+      }
+      return 'Registered';
+    }
+    if (!event?.is_free && event?.ticket_price) {
+      return `Register - $${event.ticket_price}`;
+    }
+    return 'Register Now';
+  };
+
+  // Check if user can still register (not already confirmed)
+  const canRegister = () => {
+    if (!myRegistration) return true;
+    if (myRegistration.status === 'pending_payment') return true; // Can click to complete payment
+    return false; // Already confirmed
   };
 
   const getEventStatus = (event) => {
@@ -197,9 +299,9 @@ const WorkforceEventDetail = () => {
     const end = event.end_date ? new Date(event.end_date) : null;
 
     if (start > now) {
-      return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
+      return { status: 'upcoming', label: 'Upcoming', color: 'gold' };
     } else if (end && now <= end) {
-      return { status: 'ongoing', label: 'Ongoing', color: 'green' };
+      return { status: 'ongoing', label: 'Ongoing', color: 'gold' };
     } else {
       return { status: 'completed', label: 'Completed', color: 'gray' };
     }
@@ -241,7 +343,7 @@ const WorkforceEventDetail = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'confirmed':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
+        return <CheckCircle className="w-4 h-4 text-gold" />;
       case 'pending':
         return <AlertCircle className="w-4 h-4 text-yellow-600" />;
       case 'cancelled':
@@ -254,13 +356,13 @@ const WorkforceEventDetail = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+        return 'bg-pale_yellow text-yellow-800 border border-gold/30';
       case 'pending':
-        return 'bg-indigo-100  border border-indigo-200';
+        return 'bg-pale_yellow text-yellow-800 border border-gold/30';
       case 'cancelled':
         return 'bg-red-100 text-red-800 border border-red-200';
       default:
-        return 'bg-indigo-100  border border-indigo-200';
+        return 'bg-pale_yellow text-yellow-800 border border-gold/30';
     }
   };
 
@@ -300,22 +402,25 @@ const WorkforceEventDetail = () => {
 
   const copyEventLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    // You could add a toast notification here
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   const handleBookmark = async () => {
+    // Optimistically update UI first
+    const newBookmarkState = !isBookmarked;
+    setIsBookmarked(newBookmarkState);
+    
     try {
       const response = await workforceAPI.bookmarkEvent(id);
-      const newBookmarkState = response?.data?.bookmarked ?? !isBookmarked;
-      setIsBookmarked(newBookmarkState);
-      
-      // Update event object as well
-      if (event) {
-        setEvent(prev => ({ ...prev, is_bookmarked: newBookmarkState }));
+      // Verify with server response if available
+      if (response?.data?.bookmarked !== undefined) {
+        setIsBookmarked(response.data.bookmarked);
       }
     } catch (error) {
+      // Revert on error
+      setIsBookmarked(!newBookmarkState);
       console.error('Failed to bookmark event:', error);
-      // Optionally show error toast
     }
   };
 
@@ -383,29 +488,29 @@ const WorkforceEventDetail = () => {
     const features = [];
 
     if (event.is_virtual) {
-      features.push({ icon: Wifi, label: 'Virtual Event', color: 'blue' });
+      features.push({ icon: Wifi, label: 'Virtual Event', color: 'gold' });
     } else {
-      features.push({ icon: MapPin, label: 'In-Person', color: 'green' });
+      features.push({ icon: MapPin, label: 'In-Person', color: 'gold' });
     }
 
     if (event.is_free) {
-      features.push({ icon: Gift, label: 'Free Event', color: 'emerald' });
+      features.push({ icon: Gift, label: 'Free Event', color: 'gold' });
     }
 
     if (event.provides_certification) {
-      features.push({ icon: Award, label: 'Certificate', color: 'purple' });
+      features.push({ icon: Award, label: 'Certificate', color: 'gold' });
     }
 
     if (event.networking_opportunities) {
-      features.push({ icon: Users, label: 'Networking', color: 'orange' });
+      features.push({ icon: Users, label: 'Networking', color: 'gold' });
     }
 
     if (event.refreshments_provided) {
-      features.push({ icon: Coffee, label: 'Refreshments', color: 'amber' });
+      features.push({ icon: Coffee, label: 'Refreshments', color: 'gold' });
     }
 
     if (event.parking_available) {
-      features.push({ icon: Car, label: 'Parking', color: 'indigo' });
+      features.push({ icon: Car, label: 'Parking', color: 'gold' });
     }
 
     return features;
@@ -413,10 +518,10 @@ const WorkforceEventDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading event details...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading event details...</p>
         </div>
       </div>
     );
@@ -424,14 +529,15 @@ const WorkforceEventDetail = () => {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Event Not Found</h2>
-          <p className="text-slate-600 mb-6">{error || 'The event you are looking for could not be found.'}</p>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Event Not Found</h2>
+          <p className="text-gray-600 mb-6">{error || 'The event you are looking for could not be found.'}</p>
           <button
+            type="button"
             onClick={() => navigate(webRoutes.workforceEvents)}
-            className="flex items-center text-slate-600 hover:text-slate-800 transition-colors"
+            className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back to Events
@@ -449,15 +555,15 @@ const WorkforceEventDetail = () => {
   const eventFeatures = getEventFeatures(event);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <div className=" flex flex-col py-4">
         {/* Header */}
         <div className='flex justify-between items-end md:items-start px-4 pb-4'>
                     <div className='flex flex-col md:flex-row md:w-[70%]'>
                         <BackArrowButton  />
                       <div className='flex flex-col'>
-                        <h1 className="text-xl md:text-2xl font-bold text-slate-900">Industry Events</h1>
-                        <p className="mt-2 text-lg text-slate-600">
+                        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Industry Events</h1>
+                        <p className="mt-2 text-lg text-gray-600">
                           Professional Development, Networking & training opportunity
                         </p>
                       </div>
@@ -477,7 +583,7 @@ const WorkforceEventDetail = () => {
           {/* Main Content */}
           <div className="md:bg-white space-y-8 px-4 py-6">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 ">
+            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-gold via-yellow-500 to-yellow-600">
               
 
 
@@ -494,12 +600,18 @@ const WorkforceEventDetail = () => {
 
 
                       {event.is_free && (
-                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-emerald-500 text-white">
+                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white text-yellow-800">
                           Free Event
                         </span>
                       )}
+                      {!event.is_free && event.ticket_price && (
+                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white text-yellow-800">
+                          <DollarSign className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
+                          ${event.ticket_price} {event.currency !== 'USD' && event.currency}
+                        </span>
+                      )}
                       {daysUntil && (
-                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-amber-500 text-white">
+                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
                           <Clock className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
                           {daysUntil}
                         </span>
@@ -508,11 +620,12 @@ const WorkforceEventDetail = () => {
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 lg:mb-6 leading-tight">{event.title}</h1>
                     <p className="text-base lg:text-xl text-white leading-relaxed mb-6 lg:mb-8">{event.description}</p>
                     <button 
+                      type="button"
                       onClick={handleRegister}
-                      disabled={isRegistering || myRegistration}
-                      className='hidden md:flex border disabled:opacity-50 disabled:cursor-not-allowed border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700 hover:text-white'
+                      disabled={isRegistering || !canRegister()}
+                      className='hidden md:flex border disabled:opacity-50 disabled:cursor-not-allowed border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-yellow-600 hover:text-white'
                     >
-                      {myRegistration ? 'Registered' : 'Register Now'}
+                      {getRegisterButtonText()}
                     </button>
                   </div>
 
@@ -562,10 +675,12 @@ const WorkforceEventDetail = () => {
                           </p> */}
                         </div>
                       </div>
-                      <button onClick={handleRegister}
-                      disabled={isRegistering || myRegistration}
-                      className='flex text-center w-full md:hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:text-white border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-indigo-700'>
-                        {myRegistration ? 'Registered' : 'Register Now'}
+                      <button 
+                      type="button"
+                      onClick={handleRegister}
+                      disabled={isRegistering || !canRegister()}
+                      className='flex text-center w-full md:hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:text-white border border-white items-center px-20 py-2 rounded-lg bg-white text-black hover:bg-yellow-600'>
+                        {getRegisterButtonText()}
                     </button>
                     </div>
                   </div>
@@ -579,7 +694,7 @@ const WorkforceEventDetail = () => {
                   <div className="bg-white rounded-lg border p-4 md:p-6">
                     <h2 className="text-lg font-bold mb-4">Event Organizer</h2>
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gold to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
                         <span className="text-white font-bold text-lg">
                           {organizerInfo.name.charAt(0).toUpperCase()}
                         </span>
@@ -587,7 +702,7 @@ const WorkforceEventDetail = () => {
                       <div className="flex-1">
                         <div className="flex items-center space-x-3">
                           <h3 className="text-lg font-bold ">{organizerInfo.name}</h3>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-pale_yellow text-yellow-800">
                             {organizerInfo.type}
                           </span>
                         </div>
@@ -602,9 +717,9 @@ const WorkforceEventDetail = () => {
 
                   {/* About This Event */}
                   {event.long_description && (
-                    <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-indigo-100 p-8 shadow-lg">
+                    <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gold/20 p-8 shadow-lg">
                       <h2 className="text-2xl font-bold  mb-6 flex items-center">
-                        <div className="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center mr-3">
+                        <div className="w-8 h-8 bg-pale_yellow rounded-xl flex items-center justify-center mr-3">
                           <MessageCircle className="w-5 h-5 " />
                         </div>
                         About This Event
@@ -615,18 +730,26 @@ const WorkforceEventDetail = () => {
                     </div>
                   )}
 
-                  {/* Agenda */}
+                  {/* Schedule/Agenda */}
                   {event.agenda && event.agenda.length > 0 && (
-                    <div className="bg-white rounded border border-gray-200 p-4">
-                      <h2 className="text-sm font-medium text-gray-900 mb-2">Schedule</h2>
-                      <div className="space-y-1">
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 bg-pale_yellow rounded-lg flex items-center justify-center">
+                          <Clock className="w-4 h-4 text-gold" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-gray-900">Schedule</h2>
+                      </div>
+                      <div className="space-y-3">
                         {event.agenda.map((item, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <div className="w-8 h-6 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-                              <span className="text-xs font-medium text-gray-600">{item.time}</span>
+                          <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-pale_yellow/30 transition-colors">
+                            <div className="px-3 py-1.5 bg-gold/10 border border-gold/20 rounded-md flex-shrink-0">
+                              <span className="text-sm font-semibold text-yellow-800">{item.time}</span>
                             </div>
-                            <div className="flex-1">
-                              <h3 className="font-medium text-gray-900 text-xs">{item.session}</h3>
+                            <div className="flex-1 pt-0.5">
+                              <h3 className="font-medium text-gray-900 text-sm">{item.session}</h3>
+                              {item.description && (
+                                <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -636,26 +759,40 @@ const WorkforceEventDetail = () => {
 
                   {/* Speakers */}
                   {event.speakers && event.speakers.length > 0 && (
-                    <div className="bg-white rounded border border-gray-200 p-4">
-                      <h2 className="text-sm font-medium text-gray-900 mb-2">Speakers</h2>
-                      <div className="space-y-1">
+                    <div className="bg-white rounded-xl border border-gray-200 p-5">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 bg-pale_yellow rounded-lg flex items-center justify-center">
+                          <Users className="w-4 h-4 text-gold" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-gray-900">Speakers</h2>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {event.speakers.map((speaker, index) => {
                           // Handle both string and object formats
                           const speakerName = typeof speaker === 'string' ? speaker : speaker.name || 'Unknown Speaker';
                           const speakerTitle = typeof speaker === 'string' ? '' : speaker.title || '';
                           const speakerCompany = typeof speaker === 'string' ? '' : speaker.company || '';
+                          const speakerImage = typeof speaker === 'string' ? null : speaker.image || speaker.photo || null;
 
                           return (
-                            <div key={index} className="flex items-center space-x-2">
-                              <div className="w-6 h-6 bg-gray-600 rounded flex items-center justify-center flex-shrink-0">
-                                <span className="text-white font-medium text-xs">
-                                  {speakerName.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                                </span>
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-medium text-gray-900 text-xs">{speakerName}</h3>
-                                {speakerTitle && <p className="text-xs text-gray-600">{speakerTitle}</p>}
-                                {speakerCompany && <p className="text-xs text-gray-500">{speakerCompany}</p>}
+                            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-pale_yellow/30 transition-colors">
+                              {speakerImage ? (
+                                <img 
+                                  src={speakerImage} 
+                                  alt={speakerName}
+                                  className="w-12 h-12 rounded-full object-cover border-2 border-gold/20"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 bg-gradient-to-br from-gold to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <span className="text-white font-semibold text-sm">
+                                    {speakerName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-900 text-sm truncate">{speakerName}</h3>
+                                {speakerTitle && <p className="text-xs text-gray-600 truncate">{speakerTitle}</p>}
+                                {speakerCompany && <p className="text-xs text-gold truncate">{speakerCompany}</p>}
                               </div>
                             </div>
                           );
@@ -669,8 +806,8 @@ const WorkforceEventDetail = () => {
                   {/* Requirements */}
                   {event.requirements && (
                     <div className="bg-white rounded-lg shadow-sm p-6">
-                      <h2 className="text-xl font-semibold text-slate-900 mb-4">Requirements</h2>
-                      <div className="text-slate-600">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements</h2>
+                      <div className="text-gray-600">
                         <p>{event.requirements}</p>
                       </div>
                     </div>
@@ -685,6 +822,7 @@ const WorkforceEventDetail = () => {
                           <div className="flex justify-between">
                               <h2 className="text-xl font-medium ">Participants</h2>
                               <button
+                              type="button"
                               onClick={handleToggleParticipants}
                               className="flex items-center px-4 py-2 text-sm border rounded-lg"
                             >
@@ -703,7 +841,7 @@ const WorkforceEventDetail = () => {
                             </span>
                             {/* <button
                               onClick={exportParticipants}
-                              className="flex items-center px-4 py-2 text-sm  hover: hover:bg-indigo-50 rounded-xl transition-all duration-300"
+                              className="flex items-center px-4 py-2 text-sm  hover: hover:bg-pale_yellow/50 rounded-xl transition-all duration-300"
                             >
                               <Download className="w-4 h-4 mr-2" />
                               Export
@@ -727,7 +865,7 @@ const WorkforceEventDetail = () => {
                                   setParticipantSearch(e.target.value);
                                   setCurrentPage(1);
                                 }}
-                                className="w-full pl-10 pr-4 py-3 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white/70 backdrop-blur-sm transition-all duration-300"
+                                className="w-full pl-10 pr-4 py-3 border border-gold/30 rounded-xl focus:ring-2 focus:ring-gold focus:border-gold bg-white/70 backdrop-blur-sm transition-all duration-300"
                               />
                             </div>
                             <div className="relative">
@@ -737,7 +875,7 @@ const WorkforceEventDetail = () => {
                                   setParticipantFilter(e.target.value);
                                   setCurrentPage(1);
                                 }}
-                                className="appearance-none bg-white/70 backdrop-blur-sm border border-indigo-200 rounded-xl px-4 py-3 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300"
+                                className="appearance-none bg-white/70 backdrop-blur-sm border border-gold/30 rounded-xl px-4 py-3 pr-10 focus:ring-2 focus:ring-gold focus:border-gold transition-all duration-300"
                               >
                                 <option value="all">All Status</option>
                                 <option value="confirmed">Confirmed</option>
@@ -751,13 +889,13 @@ const WorkforceEventDetail = () => {
                           {participantsLoading ? (
                             <div className="flex items-center justify-center py-20">
                               <div className="text-center">
-                                <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto mb-4"></div>
+                                <div className="animate-spin rounded-full h-16 w-16 border-4 border-gold/30 border-t-gold mx-auto mb-4"></div>
                                 <span className="text-lg  font-medium">Loading participants...</span>
                               </div>
                             </div>
                           ) : paginatedParticipants.length === 0 ? (
                             <div className="text-center py-16">
-                              <div className="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                              <div className="w-20 h-20 bg-pale_yellow rounded-2xl flex items-center justify-center mx-auto mb-6">
                                 <Users className="w-10 h-10 " />
                               </div>
                               <h3 className="text-xl font-bold  mb-3">
@@ -776,8 +914,9 @@ const WorkforceEventDetail = () => {
                                 <div className="mt-6 space-y-3">
                                   <p className="text-sm ">You are the organizer and attendee count is {event.attendees_count}, but no list was returned. You can retry fetching:</p>
                                   <button
+                                    type="button"
                                     onClick={loadParticipants}
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm"
+                                    className="px-4 py-2 bg-gold hover:bg-yellow-600 text-white rounded-md text-sm"
                                   >Retry Load Participants</button>
                                 </div>
                               )}
@@ -788,19 +927,19 @@ const WorkforceEventDetail = () => {
                               <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full">
                                   <thead>
-                                    <tr className="border-b border-indigo-200">
+                                    <tr className="border-b border-gold/30">
                                       <th className="text-left py-4 px-6 font-bold ">Participant</th>
                                       <th className="text-left py-4 px-6 font-bold ">Contact</th>
                                       <th className="text-left py-4 px-6 font-bold ">Status</th>
                                       <th className="text-left py-4 px-6 font-bold ">Registered</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-indigo-100">
+                                  <tbody className="divide-y divide-gold/20">
                                     {paginatedParticipants.map((participant, index) => (
-                                      <tr key={participant.id || index} className="hover:bg-indigo-50/50 transition-all duration-300 group">
+                                      <tr key={participant.id || index} className="hover:bg-pale_yellow/50/50 transition-all duration-300 group">
                                         <td className="py-4 px-6">
                                           <div className="flex items-center space-x-4">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-gold to-yellow-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                                               <span className="text-white font-bold">
                                                 {(participant.attendee_name || 'U').charAt(0).toUpperCase()}
                                               </span>
@@ -854,9 +993,9 @@ const WorkforceEventDetail = () => {
                               {/* Mobile Card View */}
                               <div className="md:hidden space-y-4">
                                 {paginatedParticipants.map((participant, index) => (
-                                  <div key={participant.id || index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-indigo-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                                  <div key={participant.id || index} className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gold/20 shadow-lg hover:shadow-xl transition-all duration-300">
                                     <div className="flex items-center space-x-4">
-                                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                                      <div className="w-12 h-12 bg-gradient-to-br from-gold to-yellow-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                                         <span className="text-white font-bold">
                                           {(participant.attendee_name || 'U').charAt(0).toUpperCase()}
                                         </span>
@@ -901,15 +1040,16 @@ const WorkforceEventDetail = () => {
 
                               {/* Pagination */}
                               {totalPages > 1 && (
-                                <div className="mt-8 flex items-center justify-between border-t border-indigo-200 pt-6">
+                                <div className="mt-8 flex items-center justify-between border-t border-gold/30 pt-6">
                                   <div className=" font-medium">
                                     Showing {startIndex + 1} to {Math.min(startIndex + participantsPerPage, totalParticipants)} of {totalParticipants} participants
                                   </div>
                                   <div className="flex items-center space-x-3">
                                     <button
+                                      type="button"
                                       onClick={() => setCurrentPage(currentPage - 1)}
                                       disabled={currentPage === 1}
-                                      className="px-4 py-2 font-medium  hover: disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-indigo-50 transition-all duration-300"
+                                      className="px-4 py-2 font-medium  hover: disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-pale_yellow/50 transition-all duration-300"
                                     >
                                       Previous
                                     </button>
@@ -918,12 +1058,13 @@ const WorkforceEventDetail = () => {
                                         const pageNum = i + 1;
                                         return (
                                           <button
+                                            type="button"
                                             key={pageNum}
                                             onClick={() => setCurrentPage(pageNum)}
                                             className={`px-4 py-2 font-medium rounded-xl transition-all duration-300 ${
                                               currentPage === pageNum
-                                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
-                                                : 'text-indigo-700 hover:bg-indigo-100'
+                                                ? 'bg-gradient-to-r from-gold to-yellow-600 text-white shadow-lg'
+                                                : 'text-yellow-700 hover:bg-pale_yellow'
                                             }`}
                                           >
                                             {pageNum}
@@ -932,9 +1073,10 @@ const WorkforceEventDetail = () => {
                                       })}
                                     </div>
                                     <button
+                                      type="button"
                                       onClick={() => setCurrentPage(currentPage + 1)}
                                       disabled={currentPage === totalPages}
-                                      className="px-4 py-2 font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-indigo-50 transition-all duration-300"
+                                      className="px-4 py-2 font-medium text-gold hover:text-yellow-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl hover:bg-pale_yellow/50 transition-all duration-300"
                                     >
                                       Next
                                     </button>
@@ -1008,36 +1150,128 @@ const WorkforceEventDetail = () => {
                 </div>
 
                 {eventStatus.status === 'upcoming' && (
-                  <div className="space-y-1 ">
+                  <div className="space-y-3">
                     
-                    {myRegistration ? (
-                      // User is already registered
-                      <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl lg:rounded-2xl border border-emerald-200 shadow-lg">
-                        <div className="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-100 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
-                          <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-emerald-600" />
+                    {myRegistration && myRegistration.status === 'pending_payment' ? (
+                      // User has pending payment - show payment prompt
+                      <div className="p-4 lg:p-6 bg-gradient-to-br from-orange-100 to-yellow-50 rounded-xl lg:rounded-2xl border border-orange-300 shadow-lg">
+                        <div className="text-center">
+                          <div className="w-12 h-12 lg:w-16 lg:h-16 bg-orange-200/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
+                            <DollarSign className="w-6 h-6 lg:w-8 lg:h-8 text-orange-600" />
+                          </div>
+                          <h3 className="text-lg lg:text-xl font-bold text-orange-900 mb-2">Complete Your Payment</h3>
+                          <p className="text-orange-700 mb-3 text-sm">
+                            Your registration is reserved. Complete payment to confirm your spot.
+                          </p>
+                          <div className="bg-white/60 rounded-lg p-3 mb-4">
+                            <p className="text-2xl font-bold text-orange-800">
+                              ${event.ticket_price} <span className="text-sm font-normal">{event.currency}</span>
+                            </p>
+                          </div>
+                          
+                          {/* Show error if payment failed */}
+                          {paymentError && (
+                            <div className="bg-red-100 border border-red-300 text-red-700 text-sm rounded-lg p-3 mb-4">
+                              {paymentError}
+                            </div>
+                          )}
+                          
+                          {/* Internal payment (Stripe) */}
+                          {event.use_internal_payment ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={handleInternalPayment}
+                                disabled={isProcessingPayment}
+                                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {isProcessingPayment ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Processing...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CreditCard className="w-4 h-4" />
+                                    Pay Now
+                                  </>
+                                )}
+                              </button>
+                              <p className="text-orange-600 text-xs mt-3">
+                                Secure payment via Stripe
+                              </p>
+                            </>
+                          ) : (
+                            /* External payment URL */
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => window.open(event.external_payment_url, '_blank')}
+                                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                                Pay Now
+                              </button>
+                              <p className="text-orange-600 text-xs mt-3">
+                                You'll be redirected to complete payment
+                              </p>
+                            </>
+                          )}
                         </div>
-                        <h3 className="text-lg lg:text-xl font-bold text-emerald-900 mb-2">You're Registered!</h3>
-                        <p className="text-emerald-700 mb-2 lg:mb-3">
-                          Status: <span className="font-semibold capitalize">{myRegistration.status}</span>
-                        </p>
-                        <p className="text-emerald-600 text-sm">
-                          Registered on {new Date(myRegistration.registered_at || myRegistration.created_at).toLocaleDateString()}
-                        </p>
+                      </div>
+                    ) : myRegistration ? (
+                      // User is fully registered (confirmed)
+                      <div className="p-4 lg:p-6 bg-gradient-to-br from-pale_yellow to-yellow-50 rounded-xl lg:rounded-2xl border border-gold/30 shadow-lg">
+                        <div className="text-center">
+                          <div className="w-12 h-12 lg:w-16 lg:h-16 bg-white/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
+                            <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-gold" />
+                          </div>
+                          <h3 className="text-lg lg:text-xl font-bold text-yellow-900 mb-2">You're Registered!</h3>
+                          <p className="text-yellow-800 mb-2 lg:mb-3">
+                            Status: <span className="font-semibold capitalize">{myRegistration.status.replace('_', ' ')}</span>
+                          </p>
+                          <p className="text-yellow-700 text-sm mb-4">
+                            Registered on {new Date(myRegistration.registered_at || myRegistration.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {/* Share and Bookmark buttons */}
+                        <div className="flex gap-2 pt-3 border-t border-gold/20">
+                          <button
+                            type="button"
+                            onClick={handleShare}
+                            className="flex flex-1 items-center justify-center gap-2 bg-white/60 border border-gold/20 rounded-lg hover:bg-white transition-colors duration-200 font-medium text-sm py-2.5 text-yellow-800"
+                          >
+                            <Share2 className="w-4 h-4" />
+                            Share Event
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleBookmark}
+                            className={`flex items-center justify-center rounded-lg transition-colors duration-200 px-4 py-2.5 ${
+                              isBookmarked 
+                                ? 'bg-gold/30 border border-gold/40' 
+                                : 'bg-white/60 hover:bg-white border border-gold/20'
+                            }`}
+                          >
+                            <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-gold text-gold' : 'text-yellow-700'}`} />
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       // User is not registered
                         <div className='flex gap-2'>
 
                             <button
+                              type="button"
                               onClick={handleRegister}
                               disabled={isRegistering || (event.max_attendees && event.attendees_count >= event.max_attendees)}
-                              className="w-[50%] bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white  rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] 
-                                      disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 p-2 
-                                      flex items-center justify-center text-sm shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105"
+                              className="w-[50%] bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] 
+                                      disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 p-2 
+                                      flex items-center justify-center text-sm shadow-md"
                             >
                               {isRegistering ? (
                                 <>
-                                  <div className="animate-spin rounded-full h-5 w-5 lg:h-6 lg:w-6 border-3 border-white border-t-transparent mr-2 lg:mr-3"></div>
+                                  <div className="animate-spin rounded-full h-5 w-5 lg:h-6 lg:w-6 border-2 border-white border-t-transparent mr-2 lg:mr-3"></div>
                                   Registering...
                                 </>
                               ) : (
@@ -1049,21 +1283,23 @@ const WorkforceEventDetail = () => {
                             </button>
                             <div className="flex w-[50%] gap-2">
                               <button
+                                type="button"
                                 onClick={handleShare}
-                                className="flex w-[60%] items-center justify-center bg-gray-100 border border-gray-200 rounded-lg  hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-300 font-semibold text-sm"
+                                className="flex w-[60%] items-center justify-center bg-gray-100 border border-gray-200 rounded-lg hover:bg-pale_yellow/50 hover:border-gold/40 transition-colors duration-200 font-semibold text-sm py-2"
                               >
                                 <Share2 className="w-4 h-4 mr-2" />
                                 Share
                               </button>
                               <button
+                                type="button"
                                 onClick={handleBookmark}
-                                className={`flex w-[40%] items-center justify-center rounded-lg transition-all duration-300 font-semibold text-sm lg:text-base ${
+                                className={`flex w-[40%] items-center justify-center rounded-lg transition-colors duration-200 font-semibold text-sm lg:text-base py-2 ${
                                   isBookmarked 
-                                    ? 'bg-pale_yellow text-red-700 hover:bg-red-100' 
-                                    : ' bg-pale_yellow hover:bg-indigo-50 hover:border-indigo-300'
+                                    ? 'bg-gold/20 text-gold border border-gold/30' 
+                                    : 'bg-pale_yellow hover:bg-gold/20 border border-gold/20'
                                 }`}
                               >
-                                <Bookmark className={`w-4 h-4 lg:w-5 lg:h-5 mx-auto ${isBookmarked ? 'fill-current' : ''}`} />
+                                <Bookmark className={`w-4 h-4 lg:w-5 lg:h-5 ${isBookmarked ? 'fill-gold text-gold' : 'text-gray-600'}`} />
                               </button>
                             </div>
                         </div>
@@ -1077,28 +1313,149 @@ const WorkforceEventDetail = () => {
                     )}
                   </div>
                 )}
-
                 {eventStatus.status === 'ongoing' && (
-                  <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
-                    <p className="text-green-800 font-medium">Event is Live!</p>
-                    {event.is_virtual && event.meeting_link && (
-                      <a 
-                        href={event.meeting_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center mt-3 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Join Now
-                      </a>
+                  <div className="space-y-3">
+                    {/* Check if registration is still open */}
+                    {(!event.registration_deadline || new Date(event.registration_deadline) > new Date()) ? (
+                      <>
+                        {myRegistration && myRegistration.status === 'pending_payment' ? (
+                          // User has pending payment - show payment prompt
+                          <div className="p-4 lg:p-6 bg-gradient-to-br from-orange-100 to-yellow-50 rounded-xl lg:rounded-2xl border border-orange-300 shadow-lg">
+                            <div className="text-center">
+                              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-orange-200/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
+                                <DollarSign className="w-6 h-6 lg:w-8 lg:h-8 text-orange-600" />
+                              </div>
+                              <h3 className="text-lg lg:text-xl font-bold text-orange-900 mb-2">Complete Your Payment</h3>
+                              <p className="text-orange-700 mb-3 text-sm">
+                                Event is live! Complete payment to join now.
+                              </p>
+                              <div className="bg-white/60 rounded-lg p-3 mb-4">
+                                <p className="text-2xl font-bold text-orange-800">
+                                  ${event.ticket_price} <span className="text-sm font-normal">{event.currency}</span>
+                                </p>
+                              </div>
+                              
+                              {paymentError && (
+                                <div className="bg-red-100 border border-red-300 text-red-700 text-sm rounded-lg p-3 mb-4">
+                                  {paymentError}
+                                </div>
+                              )}
+                              
+                              {event.use_internal_payment ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={handleInternalPayment}
+                                    disabled={isProcessingPayment}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    {isProcessingPayment ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Processing...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <CreditCard className="w-4 h-4" />
+                                        Pay & Join Now
+                                      </>
+                                    )}
+                                  </button>
+                                  <p className="text-orange-600 text-xs mt-3">
+                                    Secure payment via Stripe
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => window.open(event.external_payment_url, '_blank')}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                    Pay & Join Now
+                                  </button>
+                                  <p className="text-orange-600 text-xs mt-3">
+                                    You'll be redirected to complete payment
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ) : myRegistration ? (
+                          // User is registered - show Join Now
+                          <div className="p-4 lg:p-6 bg-gradient-to-br from-green-100 to-emerald-50 rounded-xl lg:rounded-2xl border border-green-300 shadow-lg">
+                            <div className="text-center">
+                              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-green-200/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
+                                <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-green-600" />
+                              </div>
+                              <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Live!</h3>
+                              <p className="text-green-700 mb-4 text-sm">
+                                You're registered. Join the event now!
+                              </p>
+                              {event.is_virtual && event.meeting_link && (
+                                <a 
+                                  href={event.meeting_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                  Join Now
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          // User is not registered - show register button
+                          <div className="p-4 lg:p-6 bg-gradient-to-br from-pale_yellow to-yellow-50 rounded-xl lg:rounded-2xl border border-gold/30 shadow-lg">
+                            <div className="text-center">
+                              <p className="text-yellow-800 font-bold mb-2">🔴 Event is Live!</p>
+                              <p className="text-yellow-700 text-sm mb-4">Registration still open - join now!</p>
+                              
+                              {!event.is_free && event.ticket_price && (
+                                <div className="bg-white/60 rounded-lg p-3 mb-4">
+                                  <p className="text-xl font-bold text-yellow-800">
+                                    ${event.ticket_price} <span className="text-sm font-normal">{event.currency}</span>
+                                  </p>
+                                </div>
+                              )}
+                              
+                              <button
+                                type="button"
+                                onClick={handleRegister}
+                                disabled={isRegistering || (event.max_attendees && event.attendees_count >= event.max_attendees)}
+                                className="w-full bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white font-semibold py-3 px-6 rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                              >
+                                {isRegistering ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Registering...
+                                  </>
+                                ) : (
+                                  <>
+                                    <User2 className="w-4 h-4" />
+                                    {event.is_free ? 'Register & Join' : 'Register Now'}
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      // Registration closed
+                      <div className="text-center p-4 bg-gray-100 rounded-xl border border-gray-200">
+                        <p className="text-gray-700 font-medium">Registration Closed</p>
+                        <p className="text-gray-600 text-sm mt-1">Event is ongoing but registration has ended</p>
+                      </div>
                     )}
                   </div>
                 )}
-
                 {eventStatus.status === 'completed' && (
-                  <div className="text-center p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <p className="text-slate-700 font-medium">Event Completed</p>
-                    <p className="text-slate-600 text-sm mt-1">Thank you for your interest</p>
+                  <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p className="text-gray-700 font-medium">Event Completed</p>
+                    <p className="text-gray-600 text-sm mt-1">Thank you for your interest</p>
                   </div>
                 )}
               </div>
@@ -1106,28 +1463,28 @@ const WorkforceEventDetail = () => {
             {/* Contact Info */}
             {(event.contact_email || event.contact_phone) && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
                   <Phone className="w-5 h-5 mr-2 text-blue-600" />
                   Get in Touch
                 </h3>
                 <div className="space-y-1">
                   {event.contact_email && (
-                    <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center text-gray-700 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <Mail className="w-5 h-5 mr-3 text-blue-600" />
                       <a 
                         href={`mailto:${event.contact_email}`}
-                        className="text-slate-700 hover:text-blue-600 font-medium"
+                        className="text-gray-700 hover:text-blue-600 font-medium"
                       >
                         {event.contact_email}
                       </a>
                     </div>
                   )}
                   {event.contact_phone && (
-                    <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center text-gray-700 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <Phone className="w-5 h-5 mr-3 text-blue-600" />
                       <a 
                         href={`tel:${event.contact_phone}`}
-                        className="text-slate-700 hover:text-blue-600 font-medium"
+                        className="text-gray-700 hover:text-blue-600 font-medium"
                       >
                         {event.contact_phone}
                       </a>
@@ -1149,50 +1506,72 @@ const WorkforceEventDetail = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-900">Share This Event</h3>
+              <h3 className="text-xl font-bold text-gray-900">Share This Event</h3>
               <button
-                onClick={() => setShowShareModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                type="button"
+                onClick={() => {
+                  setShowShareModal(false);
+                  setLinkCopied(false);
+                }}
+                className="p-2 hover:bg-pale_yellow rounded-lg transition-colors"
               >
-                <XCircle className="w-5 h-5 text-slate-500" />
+                <XCircle className="w-5 h-5 text-gray-500" />
               </button>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg">
-                <Globe className="w-5 h-5 text-slate-500" />
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <Globe className="w-5 h-5 text-gold" />
                 <input
                   type="text"
                   value={window.location.href}
                   readOnly
-                  className="flex-1 bg-transparent text-slate-600 text-sm"
+                  className="flex-1 bg-transparent text-gray-600 text-sm overflow-hidden"
                 />
                 <button
+                  type="button"
                   onClick={copyEventLink}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-custom_yellow transition-colors"
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center ${
+                    linkCopied 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-gold text-gray-900 hover:bg-pale_yellow'
+                  }`}
                 >
-                  <Copy className="w-4 h-4" />
+                  {linkCopied ? (
+                    <>
+                      <Check className="w-4 h-4 mr-1" />
+                      Copied!
+                    </>
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this event: ${event.title}`)}&url=${encodeURIComponent(window.location.href)}`}
+                  href={`https://x.com/intent/tweet?text=${encodeURIComponent(`Check out this event: ${event.title}`)}&url=${encodeURIComponent(window.location.href)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="flex items-center justify-center py-3 px-4 bg-black rounded-lg hover:bg-gray-800 transition-colors font-medium"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Twitter
+                  {/* X (Twitter) Icon */}
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="white">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  <span className="text-white">Share on X</span>
                 </a>
                 <a
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center py-3 px-4 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+                  className="flex items-center justify-center py-3 px-4 bg-[#0A66C2] rounded-lg hover:bg-[#004182] transition-colors font-medium"
                 >
-                  <Building className="w-4 h-4 mr-2" />
-                  LinkedIn
+                  {/* LinkedIn Icon */}
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="white">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  <span className="text-white">Share on LinkedIn</span>
                 </a>
               </div>
             </div>

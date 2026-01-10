@@ -12,6 +12,7 @@ import {
   Bookmark,
   UserCircle,
   CalendarCheck,
+  DollarSign,
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
@@ -20,6 +21,7 @@ import UpcomingEvents from '../../components/events/UpcomingEvents';
 
 const WorkforceEvents = () => {
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [events, setEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [ongoingEvents, setOngoingEvents] = useState([]);
@@ -35,6 +37,13 @@ const WorkforceEvents = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    upcoming: { page: 1, hasMore: false, nextUrl: null },
+    ongoing: { page: 1, hasMore: false, nextUrl: null },
+    past: { page: 1, hasMore: false, nextUrl: null }
+  });
 
   // Helper function to apply filters to a specific event list
   const applyFiltersToEvents = useCallback((eventList) => {
@@ -190,6 +199,25 @@ const WorkforceEvents = () => {
       setOngoingEvents(ongoingData);
       setPastEvents(pastData);
       
+      // Update pagination info
+      setPagination({
+        upcoming: { 
+          page: 1, 
+          hasMore: !!upcomingResponse.data?.next, 
+          nextUrl: upcomingResponse.data?.next 
+        },
+        ongoing: { 
+          page: 1, 
+          hasMore: !!ongoingResponse.data?.next, 
+          nextUrl: ongoingResponse.data?.next 
+        },
+        past: { 
+          page: 1, 
+          hasMore: !!pastResponse.data?.next, 
+          nextUrl: pastResponse.data?.next 
+        }
+      });
+      
       // Combine all events for filtering/search purposes
       const allEvents = [...upcomingData, ...ongoingData, ...pastData];
       setEvents(allEvents);
@@ -204,6 +232,63 @@ const WorkforceEvents = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Load more events for the current tab
+  const loadMoreEvents = async () => {
+    if (loadingMore) return;
+    
+    try {
+      setLoadingMore(true);
+      
+      const tabToApiMap = {
+        'upcoming': { api: workforceAPI.getUpcomingEvents, setter: setUpcomingEvents, state: upcomingEvents },
+        'ongoing': { api: workforceAPI.getOngoingEvents, setter: setOngoingEvents, state: ongoingEvents },
+        'recent': { api: workforceAPI.getPastEvents, setter: setPastEvents, state: pastEvents }
+      };
+      
+      const currentTab = activeTab === 'all' ? 'upcoming' : activeTab;
+      const paginationKey = currentTab === 'recent' ? 'past' : currentTab;
+      const { api, setter, state } = tabToApiMap[currentTab] || tabToApiMap['upcoming'];
+      const currentPagination = pagination[paginationKey];
+      
+      if (!currentPagination?.hasMore) return;
+      
+      const nextPage = currentPagination.page + 1;
+      const response = await api({ page: nextPage });
+      
+      const newData = response.data?.results || response.data || [];
+      
+      // Append new events to existing
+      setter(prev => [...prev, ...newData]);
+      
+      // Update pagination
+      setPagination(prev => ({
+        ...prev,
+        [paginationKey]: {
+          page: nextPage,
+          hasMore: !!response.data?.next,
+          nextUrl: response.data?.next
+        }
+      }));
+      
+      // Update combined events
+      setEvents(prev => [...prev, ...newData]);
+      
+    } catch (error) {
+      console.error('Failed to load more events:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+  
+  // Check if there are more events to load for current tab
+  const hasMoreEvents = () => {
+    if (activeTab === 'all') {
+      return pagination.upcoming.hasMore || pagination.ongoing.hasMore || pagination.past.hasMore;
+    }
+    const paginationKey = activeTab === 'recent' ? 'past' : activeTab;
+    return pagination[paginationKey]?.hasMore || false;
   };
 
   const filterEvents = () => {
@@ -394,6 +479,13 @@ const WorkforceEvents = () => {
                 My Events
               </Link>
               <Link
+                to={webRoutes.workforceCompanyEarnings}
+                className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <DollarSign className="w-4 h-4 mr-2" />
+                Earnings
+              </Link>
+              <Link
                 to={webRoutes.workforceEventCreate}
                 className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
               >
@@ -427,6 +519,13 @@ const WorkforceEvents = () => {
             >
               <UserCircle className="w-4 h-4 mr-1" />
               Registrations
+            </Link>
+            <Link
+              to={webRoutes.workforceCompanyEarnings}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+            >
+              <DollarSign className="w-4 h-4 mr-1" />
+              Earnings
             </Link>
           </div>
 
@@ -657,10 +756,24 @@ const WorkforceEvents = () => {
         )}
 
         {/* Load More */}
-        {filteredEvents.length > 0 && (
+        {filteredEvents.length > 0 && hasMoreEvents() && (
           <div className="text-center mt-8">
-            <button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors">
-              Load More Events
+            <button 
+              onClick={loadMoreEvents}
+              disabled={loadingMore}
+              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            >
+              {loadingMore ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                'Load More Events'
+              )}
             </button>
           </div>
         )}

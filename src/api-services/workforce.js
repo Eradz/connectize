@@ -329,7 +329,7 @@ const workforce = {
   },
 
   updateEvent: async (id, data) => {
-    const response = await api.put(`/api/v1/workforce/events/${id}/`, data);
+    const response = await api.patch(`/api/v1/workforce/events/${id}/`, data);
     return response;
   },
 
@@ -340,6 +340,31 @@ const workforce = {
 
   registerForEvent: async (id, data = {}) => {
     const response = await api.post(`/api/v1/workforce/events/${id}/register/`, data);
+    return response;
+  },
+
+  payForEventRegistration: async (id) => {
+    const response = await api.post(`/api/v1/workforce/events/${id}/pay-registration/`);
+    return response;
+  },
+
+  createEventCheckoutSession: async (id) => {
+    const response = await api.post(`/api/v1/workforce/events/${id}/create-checkout-session/`, {
+      frontend_base_url: window.location.origin
+    });
+    return response;
+  },
+
+  verifyEventPayment: async (id) => {
+    const response = await api.post(`/api/v1/workforce/events/${id}/verify-payment/`);
+    return response;
+  },
+
+  confirmExternalPayment: async (eventId, attendeeId, paymentReference = '') => {
+    const response = await api.post(`/api/v1/workforce/events/${eventId}/confirm-external-payment/`, {
+      attendee_id: attendeeId,
+      payment_reference: paymentReference
+    });
     return response;
   },
 
@@ -389,6 +414,44 @@ const workforce = {
     const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
     console.log('🔗 Making past events API call to:', '/api/v1/workforce/events/past/', 'with params:', cleanParams);
     const response = await api.getPublic('/api/v1/workforce/events/past/', { params: cleanParams });
+    return response;
+  },
+
+  // ============ Payout & Earnings API ============
+  
+  // Get earnings summary for all companies user manages
+  getMyCompaniesEarnings: async () => {
+    const response = await api.get('/api/v1/workforce/payouts/my-companies/');
+    return response;
+  },
+
+  // Get detailed earnings for a specific company
+  getCompanyEarnings: async (companyId) => {
+    const response = await api.get(`/api/v1/workforce/payouts/${companyId}/earnings/`);
+    return response;
+  },
+
+  // Get bank details for a company
+  getCompanyBankDetails: async (companyId) => {
+    const response = await api.get(`/api/v1/workforce/payouts/${companyId}/bank-details/`);
+    return response;
+  },
+
+  // Update bank details for a company
+  updateCompanyBankDetails: async (companyId, data) => {
+    const response = await api.put(`/api/v1/workforce/payouts/${companyId}/bank-details/`, data);
+    return response;
+  },
+
+  // Get payout history for a company
+  getCompanyPayouts: async (companyId) => {
+    const response = await api.get(`/api/v1/workforce/payouts/${companyId}/payouts/`);
+    return response;
+  },
+
+  // Get platform fee information
+  getPlatformFees: async () => {
+    const response = await api.get('/api/v1/workforce/payouts/platform-fees/');
     return response;
   },
 

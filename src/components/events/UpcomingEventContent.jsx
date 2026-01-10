@@ -4,10 +4,16 @@ import { webRoutes } from '../../lib/webRoutes';
 import { Link } from 'react-router-dom';
 
 const UpcomingEventContent = ({ filteredEvents, currentIndex }) => {
+    const hasValidTopics = (topics) => {
+      if (!Array.isArray(topics) || topics.length === 0) return false;
+      return topics.some(t => t && typeof t === 'string' && t.trim() !== '' && t !== '[]');
+    };
     const getLongestString = (themes) => {
-    const longestStringArr = themes.sort((a, b) => a.length - b.length).reverse();
-    return longestStringArr;
-  };
+      if (!Array.isArray(themes)) return [];
+      const filtered = themes.filter(t => t && typeof t === 'string' && t.trim() !== '' && t !== '[]');
+      if (filtered.length === 0) return [];
+      return filtered.sort((a, b) => a.length - b.length).reverse();
+    };
   const getEventStatus = (event) => {
         if (!event) return 'unknown';
         if (event.is_cancelled) return 'cancelled';
@@ -112,17 +118,17 @@ const UpcomingEventContent = ({ filteredEvents, currentIndex }) => {
                             </div>
                         </div>
 
+                          {/* Topics (if any) */}
+                          {hasValidTopics(filteredEvents[currentIndex].topics) && (
                           <div className='flex gap-4'>
                             <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
-                            {/* Topics (if any) */}
-                            {Array.isArray(filteredEvents[currentIndex].topics) && filteredEvents[currentIndex].topics.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-4">
                                 {getLongestString(filteredEvents[currentIndex].topics.slice(0, 3)).map((t, i) => (
                                 <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
-                            )}
                           </div>
+                          )}
                     </div>
     
                   </div>

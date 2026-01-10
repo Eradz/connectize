@@ -17,8 +17,20 @@ const OngoingEventContent = ({filteredEvents, currentIndex}) => {
     
     
       const getTopicsDisplay = (topics) => {
+        if (!topics) return []
+        // Handle case where topics might be a string
+        if (typeof topics === 'string') {
+          try {
+            topics = JSON.parse(topics)
+          } catch {
+            return []
+          }
+        }
         if (!Array.isArray(topics) || topics.length === 0) return []
-        return topics.slice(0, 3).sort((a, b) => b.length - a.length)
+        // Filter out empty strings and "[]" 
+        const filtered = topics.filter(t => t && t.trim() && t !== '[]')
+        if (filtered.length === 0) return []
+        return filtered.slice(0, 3).sort((a, b) => b.length - a.length)
       }
   return (
     <div className="w-full h-full bg-gradient-to-br from-[#FFC000] to-[#FF1A00] p-4 lg:p-8 flex flex-col justify-between">
