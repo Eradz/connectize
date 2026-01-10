@@ -36,10 +36,7 @@ const DealRooms = () => {
       };
       const response = await dealRoomService.getAll(1, 50, params);
       const rooms = response?.results || response?.data || response || [];
-      // console.log("Params:", params);
-      // console.log("Rooms:", rooms);
       setDealRooms(Array.isArray(rooms) ? rooms : []);
-      // console.log("Deal Rooms:", dealRooms);
     } catch (error) {
       console.error('Failed to load deal rooms:', error);
       setDealRooms([]);

@@ -395,11 +395,11 @@ export const DiscoverPostItem = ({
       </div>
 
       {/* Colored blocks - Always show 3 blocks */}
-      <div className="mt-3 mb-3 grid grid-cols-3 gap-2">
+      {/* <div className="mt-3 mb-3 grid grid-cols-3 gap-2">
         <div className="h-40 rounded-lg bg-blue-400" />
         <div className="h-40 rounded-lg bg-purple-400" />
         <div className="h-40 rounded-lg bg-green-400" />
-      </div>
+      </div> */}
 
       <SocialShareModal
         isOpen={isSharing}

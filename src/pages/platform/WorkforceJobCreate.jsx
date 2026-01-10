@@ -246,7 +246,7 @@ if(currentPath.includes("update")) {
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{`${ currentPath.includes("update") ? 'Update Job' : 'Publish a Job'} a Job`}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{`${ currentPath.includes("update") ? 'Update Job' : 'Publish a Job'}`}</h1>
               <p className="text-gray-600 mt-1">Find the best oil & gas professionals</p>
             </div>
           </div>

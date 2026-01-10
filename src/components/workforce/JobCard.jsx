@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { useState } from "react";
 import { workforceJobService } from "../../api-services/oilgas";
+import { useSubscription } from "../../context/SubscriptionContext";
 
 
 export const JobCard = ({ job, myPostedJob, setShowDeleteModal, setJobToDelete, savedJobs: propSavedJobs, onToggleSave }) => {
+  const {getCurrencySymbol} = useSubscription();
   // Use prop savedJobs if provided, otherwise use local state for backwards compatibility
   const [localSavedJobs, setLocalSavedJobs] = useState(new Set());
   const savedJobs = propSavedJobs || localSavedJobs;
@@ -77,11 +79,11 @@ export const JobCard = ({ job, myPostedJob, setShowDeleteModal, setJobToDelete, 
     };
 
     if (min && max) {
-      return `$${formatAmount(min)} - $${formatAmount(max)}`;
+      return `${formatAmount(min)} - ${formatAmount(max)}`;
     } else if (min) {
-      return `$${formatAmount(min)}+`;
+      return `${formatAmount(min)}+`;
     } else if (max) {
-      return `Up to $${formatAmount(max)}`;
+      return `Up to ${formatAmount(max)}`;
     }
     return 'Salary not specified';
   };
@@ -145,7 +147,10 @@ return(
         <div className="space-y-2 mb-4 h-[30%]">
 
           <div className="flex items-center text-sm text-gray-600">
-            <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+            <span className="text-[18px] ml-[3px] mr-2 text-gray-400">
+              {getCurrencySymbol(job.currency)}
+            </span>
+            {/* <DollarSign  /> */}
             <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
           </div>
 

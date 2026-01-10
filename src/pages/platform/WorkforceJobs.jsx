@@ -13,6 +13,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { BriefCaseIcon } from '../../icon';
 import { workforceJobService } from '../../api-services/oilgas';
 import { JobCard } from '../../components/workforce/JobCard';
+import { useSubscription } from '../../context/SubscriptionContext';
 
 const WorkforceJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -26,7 +27,7 @@ const WorkforceJobs = () => {
   const [filterSalaryRange, setFilterSalaryRange] = useState('all');
   const [sortBy, setSortBy] = useState('created_at');
   const [savedJobs, setSavedJobs] = useState(new Set());
-
+  
   useEffect(() => {
     loadJobs();
     loadSavedJobs();
@@ -168,7 +169,6 @@ const WorkforceJobs = () => {
     return 'Startup (<10 employees)';
   };
 
-
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -205,7 +205,7 @@ const WorkforceJobs = () => {
 
       <div className="bg-white my-8">
         {/* Job Statistics */}
-        <div className="bg-background grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 pb-4">
+        {/* <div className="bg-background grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 pb-4">
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex flex-col text-center gap-1 items-center">
               <div className="bg-[#FFF1C6] p-3 rounded-lg">
@@ -253,7 +253,7 @@ const WorkforceJobs = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Filters and Search */}
         <div className="bg-white rounded-xl shadow-sm border p-6 mb-8 w-[95%] mx-auto ">

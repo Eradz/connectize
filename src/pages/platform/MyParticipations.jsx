@@ -156,7 +156,7 @@ export default function MyParticipations() {
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
                         <span className='lg:flex hidden'>Participants: </span>
-                        <span>{deal.participants_count ? deal.participants_count : 0}</span>
+                        <span>{deal?.participants_count ? deal.participants_count++ : 1}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <FileText className="h-4 w-4" />

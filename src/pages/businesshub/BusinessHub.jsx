@@ -79,7 +79,7 @@ const PlatformDashboard = () => {
         },
         analytics: {
           revenue: totalDealValue,
-          growth: 12.5, // Mock data
+          growth: 0, // Mock data
           activeUsers: 1248, // Mock data
           completedDeals: 23 // Mock data
         },

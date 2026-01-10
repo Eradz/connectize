@@ -461,8 +461,28 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className=" hidden md:flex">
+        <div>
+                <h4 className="text-base sm:text-lg font-semibold text-gray-900">Card Details</h4>
+                <p className="text-xs sm:text-sm text-gray-600">Set default payment methods</p>
+      </div>
+        <Button 
+          type="submit"
+          disabled={!stripe || loading || !cardholderName.trim()}
+          className="w-fit ml-auto bg-gray-300 hover:bg-gold hover: to-[#FFC000]  hover:from-[#FF8400] text-white"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Adding...
+            </>
+          ) : (
+            '+  Add Card'
+          )}
+        </Button>
+        </div>
       {/* Name on Card and Expiry Date */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Name on your Card
@@ -502,7 +522,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
       </div>
 
       {/* Card Number and CVV */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Card Number
@@ -554,7 +574,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
         <Button 
           type="submit"
           disabled={!stripe || loading || !cardholderName.trim()}
-          className="w-full ml-auto bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:bg-gold hover: to-[#FFC000]  hover:from-[#FF8400] text-white"
+          className="w-full ml-auto bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:bg-gold hover:to-[#FFC000]  hover:from-[#FF8400] text-white"
         >
           {loading ? (
             <>
