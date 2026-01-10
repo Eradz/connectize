@@ -328,6 +328,7 @@ const logistics = {
   // Aliases for backward compatibility
   getRequests: function(params) { return this.getShipmentRequests(params); },
   getRequest: function(id) { return this.getShipmentRequest(id); },
+  createRequest: function(data) { return this.createShipmentRequest(data); },
   updateRequest: function(id, data) { return this.updateShipmentRequest(id, data); },
   deleteRequest: function(id) { return this.deleteShipmentRequest(id); },
   deleteLogisticsRequest: function(id) { return this.deleteShipmentRequest(id); },
