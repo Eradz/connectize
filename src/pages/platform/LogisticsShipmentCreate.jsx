@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsShipmentService } from '../../api-services/oilgas';
+import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 
 const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
@@ -263,8 +264,6 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
   const handleSubmit = async (isDraft = false) => {
     try {
       setLoading(true);
-      
-      const { logisticsAPI } = await import('../../api-services/logistics');
 
       // Validate budget range if both provided
       const hasMin = formData.budget_min !== '' && formData.budget_min != null;
