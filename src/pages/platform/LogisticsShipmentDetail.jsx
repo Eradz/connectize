@@ -621,8 +621,8 @@ const LogisticsShipmentDetail = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <span className={`px-3 py-2 rounded-lg border font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                {getStatusIcon(shipment.status)}
+              <span className={`flex px-3 py-2 rounded-lg border font-medium capitalize ${getStatusColor(shipment.status)}`}>
+                <span className="">{getStatusIcon(shipment.status)}</span>
                 <span className="ml-2">{shipment.status.replace('_', ' ')}</span>
               </span>
               <button 
