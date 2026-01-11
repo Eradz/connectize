@@ -41,6 +41,8 @@ export default function CompaniesPage() {
 
   const sortBy = useMemo(() => {
     switch (selectedSortOption) {
+      case "company name":
+        return "company_name";
       case "company type":
         return "organization_type__name";
       case "products":
@@ -87,7 +89,7 @@ export default function CompaniesPage() {
         {
           page_size: 12, // ✅ Increased from 6 to reduce requests
           page: pageParam,
-          ordering: sortBy ? "-" + sortBy : undefined,
+          ordering: sortBy ? "" + sortBy : undefined,
         },
         true
       );
