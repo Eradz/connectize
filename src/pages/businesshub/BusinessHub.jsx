@@ -4,7 +4,8 @@ import {
   workforceJobService, 
   dealActivityService,
   aiOpportunityService,
-  aiComplianceService 
+  aiComplianceService, 
+  workforceEventService
 } from '../../api-services/oilgas';
 import BusinessHubHeader from '../../components/admin/businesshub/BusinessHubHeader';
 import PlatformModules from '../../components/admin/businesshub/PlatformModules';
@@ -47,7 +48,8 @@ const PlatformDashboard = () => {
         dealActivityService.getRecentActivities(10),
         aiOpportunityService.getOpportunities(),
         aiComplianceService.getComplianceAlerts(),
-        import('../../api-services/ads').then(m => m.featuredAdsApi.summary()).catch(() => ({ active_campaigns: 0, impressions: 0, clicks: 0, spent: 0 }))
+        workforceEventService.getAll(1, 5)
+        // import('../../api-services/ads').then(m => m.featuredAdsApi.summary()).catch(() => ({ active_campaigns: 0, impressions: 0, clicks: 0, spent: 0 }))
       ]);
 
       // Calculate total deal value
@@ -83,11 +85,15 @@ const PlatformDashboard = () => {
           activeUsers: 1248, // Mock data
           completedDeals: 23 // Mock data
         },
-        ads: {
-          active: adsSummaryRes?.active_campaigns || 0,
-          impressions: adsSummaryRes?.impressions || 0,
-          clicks: adsSummaryRes?.clicks || 0,
-          spent: adsSummaryRes?.spent || 0,
+        // ads: {
+        //   active: adsSummaryRes?.active_campaigns || 0,
+        //   impressions: adsSummaryRes?.impressions || 0,
+        //   clicks: adsSummaryRes?.clicks || 0,
+        //   spent: adsSummaryRes?.spent || 0,
+        // },
+        events: {
+          count: adsSummaryRes?.count || 0,
+          data: adsSummaryRes?.results || []
         }
       });
     } catch (error) {

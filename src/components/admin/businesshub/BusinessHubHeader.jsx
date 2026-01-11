@@ -57,10 +57,11 @@ export default function BusinessHubHeader({dashboardData}) {
       bgColor: "bg-[#FFF9E6]"
     },
     { 
-      label: "Featured Ads", 
-      value: dashboardData.ads.active, 
+      label: "Industrial Events", 
+      value: dashboardData.events.count, 
       icon: <StarIcon />, 
-      sublabel: `${formatCompactNumber(dashboardData.ads.impressions)} views · ${formatCompactNumber(dashboardData.ads.clicks)} clicks`,
+      // sublabel: `${formatCompactNumber(dashboardData.events.impressions)} views · ${formatCompactNumber(dashboardData.events.clicks)} clicks`,
+      sublabel: `Industrial Events`,
       bgColor: "bg-[#FFF9E6]"
     },
   ];
