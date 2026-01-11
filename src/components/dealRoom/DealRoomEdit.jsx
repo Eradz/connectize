@@ -15,6 +15,7 @@ export default function DealRoomEdit() {
     title: '',
     description: '',
     deal_type: 'exploration_rights',
+    status: 'draft',
     estimated_value: '',
     currency: 'USD',
     target_close_date: '',
@@ -23,6 +24,16 @@ export default function DealRoomEdit() {
     requires_nda: false,
     tags: []
   });
+
+  const dealStatuses = [
+    { value: 'draft', label: 'Draft' },
+    { value: 'active', label: 'Active' },
+    { value: 'negotiating', label: 'Negotiating' },
+    { value: 'due_diligence', label: 'Due Diligence' },
+    { value: 'closing', label: 'Closing' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ];
 
   const dealTypes = [
     { value: 'exploration_rights', label: 'Exploration Rights' },
@@ -66,6 +77,7 @@ export default function DealRoomEdit() {
         title: dealData.title || '',
         description: dealData.description || '',
         deal_type: dealData.deal_type || 'exploration_rights',
+        status: dealData.status || 'draft',
         estimated_value: dealData.estimated_value ? parseFloat(dealData.estimated_value).toString() : '',
         currency: dealData.currency || 'USD',
         target_close_date: dealData.target_close_date ? dealData.target_close_date.split('T')[0] : '',
@@ -255,6 +267,26 @@ export default function DealRoomEdit() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Deal Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {dealStatuses.map(status => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Set to "Active" to make the deal visible to participants
+                </p>
               </div>
 
               <div>

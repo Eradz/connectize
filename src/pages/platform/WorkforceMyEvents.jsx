@@ -4,10 +4,11 @@ import {
   Calendar, Clock, MapPin, Users, DollarSign, Plus,
   Eye, Edit, Trash2, Settings, BarChart3, 
   CheckCircle, AlertCircle, XCircle,
-  Search, Filter, Download, UserCheck
+  Search, Filter, Download, UserCheck, ChevronDown, Loader2
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
+import { toast } from 'sonner';
 
 const WorkforceMyEvents = () => {
   const [events, setEvents] = useState([]);
@@ -19,6 +20,7 @@ const WorkforceMyEvents = () => {
   const [showRegistrations, setShowRegistrations] = useState(false);
   const [registrations, setRegistrations] = useState([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(null); // registration id being updated
 
   useEffect(() => {
     loadMyEvents();
@@ -50,6 +52,29 @@ const WorkforceMyEvents = () => {
       setRegistrations([]);
     } finally {
       setLoadingRegistrations(false);
+    }
+  };
+
+  const handleUpdateRegistrationStatus = async (registrationId, newStatus) => {
+    if (!selectedEvent) return;
+    
+    try {
+      setUpdatingStatus(registrationId);
+      await workforceAPI.updateEventRegistration(selectedEvent.id, registrationId, { status: newStatus });
+      
+      // Update local state
+      setRegistrations(prev => 
+        prev.map(reg => 
+          reg.id === registrationId ? { ...reg, status: newStatus } : reg
+        )
+      );
+      
+      toast.success(`Registration status updated to ${newStatus}`);
+    } catch (err) {
+      console.error('Error updating registration status:', err);
+      toast.error(err.response?.data?.error || 'Failed to update registration status');
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -446,21 +471,49 @@ const WorkforceMyEvents = () => {
                 <div className="space-y-3">
                   {registrations.map((registration) => (
                     <div key={registration.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-medium text-slate-900">{registration.attendee_name || registration.user?.full_name || 'Unknown'}</h4>
                         <p className="text-sm text-slate-600">
                           {registration.user?.email && <span className="mr-3">{registration.user.email}</span>}
                           Registered: {formatDate(registration.registered_at || registration.created_at)}
                         </p>
+                        {registration.payment_status && registration.payment_status !== 'not_required' && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Payment: {registration.payment_status} 
+                            {registration.payment_amount && ` - $${registration.payment_amount}`}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center space-x-3">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium
-                          ${registration.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
-                            registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            registration.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                            'bg-slate-100 text-slate-800'}`}>
-                          {registration.status || 'registered'}
-                        </span>
+                        {/* Status Dropdown */}
+                        <div className="relative">
+                          <select
+                            value={registration.status || 'pending'}
+                            onChange={(e) => handleUpdateRegistrationStatus(registration.id, e.target.value)}
+                            disabled={updatingStatus === registration.id}
+                            className={`appearance-none px-3 py-1.5 pr-8 rounded-full text-sm font-medium cursor-pointer border-0 focus:ring-2 focus:ring-amber-500
+                              ${registration.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' :
+                                registration.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                registration.status === 'pending_payment' ? 'bg-orange-100 text-orange-800' :
+                                registration.status === 'waitlisted' ? 'bg-blue-100 text-blue-800' :
+                                registration.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                'bg-slate-100 text-slate-800'}
+                              ${updatingStatus === registration.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="pending_payment">Pending Payment</option>
+                            <option value="waitlisted">Waitlisted</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            {updatingStatus === registration.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <ChevronDown className="w-3 h-3" />
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

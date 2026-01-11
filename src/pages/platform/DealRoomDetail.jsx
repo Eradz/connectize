@@ -996,6 +996,12 @@ export default function DealRoomDetail() {
                           <div className="flex-1">
                             <div className="font-medium text-gray-800">{m.title || m.name || `Milestone ${i + 1}`}</div>
                             {m.description && <div className="text-sm text-gray-600 mt-1">{m.description}</div>}
+                            {m.notes && (
+                              <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                                <span className="font-medium text-yellow-800">Notes: </span>
+                                <span className="text-yellow-700">{m.notes}</span>
+                              </div>
+                            )}
                             {typeof m.progress !== 'undefined' && (
                               <div className="mt-2">
                                 <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
@@ -1015,7 +1021,7 @@ export default function DealRoomDetail() {
                             <button
                               onClick={() => {
                                 setEditingMilestone(m);
-                                setMilestoneForm({ progress: Number(m.progress ?? 0), notes: "" });
+                                setMilestoneForm({ progress: Number(m.progress ?? 0), notes: m.notes || "" });
                                 setShowMilestoneModal(true);
                               }}
                               className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"

@@ -402,6 +402,36 @@ export class DealMilestoneService extends CrudService {
       params: { deal_room: dealRoomId },
     });
   }
+
+  async uploadAttachment(milestoneId, file, description = '') {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('milestone', milestoneId);
+    if (description) {
+      formData.append('description', description);
+    }
+    return makeApiRequest({
+      url: 'api/v1/deals/milestone-attachments/',
+      method: 'POST',
+      data: formData,
+      contentType: 'multipart/form-data',
+    });
+  }
+
+  async getAttachments(milestoneId) {
+    return makeApiRequest({
+      url: 'api/v1/deals/milestone-attachments/',
+      method: 'GET',
+      params: { milestone: milestoneId },
+    });
+  }
+
+  async deleteAttachment(attachmentId) {
+    return makeApiRequest({
+      url: `api/v1/deals/milestone-attachments/${attachmentId}/`,
+      method: 'DELETE',
+    });
+  }
 }
 
 export class DealValuationService extends CrudService {

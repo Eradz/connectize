@@ -1463,7 +1463,35 @@ export default function DealRoomDetail() {
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <div className="font-medium text-gray-800">{m?.title || m?.name || `Milestone ${i + 1}`}</div>
-                            {m?.description && <div className="text-sm text-gray-600 mt-1">{m.description}</div>}
+                            {m?.notes && (
+                              <div className="mt-2 p-2 bg-gray-100 border border-gray-200 rounded text-sm">
+                                <span className="font-medium text-gray-700">Notes: </span>
+                                <span className="text-gray-600">{m.notes}</span>
+                              </div>
+                            )}
+                            {/* Attachments Section */}
+                            {m?.attachments && m.attachments.length > 0 && (
+                              <div className="mt-2">
+                                <div className="text-sm font-medium text-gray-700 mb-1">Attachments:</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {m.attachments.map((att) => (
+                                    <a
+                                      key={att.id}
+                                      href={att.file_url || att.file}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs hover:bg-blue-100"
+                                    >
+                                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                      </svg>
+                                      {att.filename}
+                                      <span className="ml-1 text-gray-500">({att.file_size_display})</span>
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             {typeof m?.progress !== 'undefined' && (
                               <div className="mt-2">
                                 <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
@@ -1479,35 +1507,37 @@ export default function DealRoomDetail() {
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center space-x-2 ml-4">
-                            <button
-                              onClick={() => {
-                                setEditingMilestone(m);
-                                setMilestoneForm({ progress: Number(m.progress ?? 0), notes: "" });
-                                setShowMilestoneModal(true);
-                              }}
-                              className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
-                            >
-                              Update
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (window.confirm('Mark this milestone as complete?')) {
-                                  try {
-                                    await dealMilestoneService.markComplete(m.id, "Completed");
-                                  } catch (err) {
-                                    notify.error(err.message || 'Failed to complete milestone');
-                                    return;
+                          <div className="flex flex-col items-end space-y-2 ml-4">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => {
+                                  setEditingMilestone(m);
+                                  setMilestoneForm({ progress: Number(m.progress ?? 0), notes: m.notes || "" });
+                                  setShowMilestoneModal(true);
+                                }}
+                                className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
+                              >
+                                Update
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm('Mark this milestone as complete?')) {
+                                    try {
+                                      await dealMilestoneService.markComplete(m.id, "Completed");
+                                    } catch (err) {
+                                      notify.error(err.message || 'Failed to complete milestone');
+                                      return;
+                                    }
+                                    const refreshed = await dealMilestoneService.getByDealRoom(id);
+                                    setMilestones(refreshed?.results || refreshed?.data || refreshed || []);
+                                    notify.success("Milestone completed");
                                   }
-                                  const refreshed = await dealMilestoneService.getByDealRoom(id);
-                                  setMilestones(refreshed?.results || refreshed?.data || refreshed || []);
-                                  notify.success("Milestone completed");
-                                }
-                              }}
-                              className="px-3 py-1.5 rounded bg-green-600 text-white text-sm hover:bg-green-700"
-                            >
-                              Complete
-                            </button>
+                                }}
+                                className="px-3 py-1.5 rounded bg-green-600 text-white text-sm hover:bg-green-700"
+                              >
+                                Complete
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1574,6 +1604,11 @@ export default function DealRoomDetail() {
           }}
           className="space-y-4"
         >
+          {/* Milestone Title Display */}
+          <div className="pb-2 border-b">
+            <h3 className="font-medium text-gray-900">{editingMilestone?.title}</h3>
+          </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Progress: {milestoneForm.progress}%</label>
             <input
@@ -1587,16 +1622,97 @@ export default function DealRoomDetail() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Completion Notes (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
             <textarea
               value={milestoneForm.notes}
               onChange={(e) => setMilestoneForm(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Add notes about completion..."
+              placeholder="Add notes about progress or completion..."
               className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-custom_yellow"
               rows={3}
             />
           </div>
-          <div className="flex justify-end space-x-3">
+          
+          {/* Attachments Section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+            
+            {/* Existing Attachments */}
+            {editingMilestone?.attachments && editingMilestone.attachments.length > 0 && (
+              <div className="mb-3 space-y-2">
+                {editingMilestone.attachments.map((att) => (
+                  <div key={att.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
+                    <a
+                      href={att.file_url || att.file}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-blue-600 hover:underline"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      {att.filename}
+                      <span className="ml-2 text-gray-500 text-xs">({att.file_size_display})</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (window.confirm('Delete this attachment?')) {
+                          try {
+                            await dealMilestoneService.deleteAttachment(att.id);
+                            const refreshed = await dealMilestoneService.getByDealRoom(id);
+                            const updatedMilestones = refreshed?.results || refreshed?.data || refreshed || [];
+                            setMilestones(updatedMilestones);
+                            // Update editingMilestone with refreshed data
+                            const updated = updatedMilestones.find(m => m.id === editingMilestone.id);
+                            if (updated) setEditingMilestone(updated);
+                            notify.success('Attachment deleted');
+                          } catch (err) {
+                            notify.error('Failed to delete attachment');
+                          }
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 p-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Upload New Attachment */}
+            <label className="flex items-center justify-center w-full p-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors">
+              <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="text-sm text-gray-600">Click to attach a file</span>
+              <input
+                type="file"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    await dealMilestoneService.uploadAttachment(editingMilestone.id, file);
+                    const refreshed = await dealMilestoneService.getByDealRoom(id);
+                    const updatedMilestones = refreshed?.results || refreshed?.data || refreshed || [];
+                    setMilestones(updatedMilestones);
+                    // Update editingMilestone with refreshed data
+                    const updated = updatedMilestones.find(m => m.id === editingMilestone.id);
+                    if (updated) setEditingMilestone(updated);
+                    notify.success('File attached successfully');
+                  } catch (err) {
+                    notify.error(err?.message || 'Failed to attach file');
+                  }
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-2">
             <button
               type="button"
               onClick={() => setShowMilestoneModal(false)}

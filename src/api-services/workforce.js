@@ -380,6 +380,11 @@ const workforce = {
   return response;
   },
 
+  updateEventRegistration: async (eventId, registrationId, data) => {
+    const response = await api.patch(`/api/v1/workforce/events/${eventId}/registrations/${registrationId}/`, data);
+    return response;
+  },
+
   getMyCreatedEvents: async () => {
     const response = await api.get('/api/v1/workforce/events/my_created/');
     return response;
