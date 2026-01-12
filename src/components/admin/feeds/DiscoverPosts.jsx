@@ -379,33 +379,35 @@ const CommentSection = ({
 
     setLoading(true);
     try {
-      const newComment = await commentOnPost(postItem.id, postItem, comment);
-      const { id } = newComment;
-
-      queryClient.setQueryData(
-        ["comments", { postId: postItem.id }],
-        (oldComments) => {
-          // const lastComment = oldComments?.at(0);
-          // const clone = { ...lastComment, id: Math.random(), content: comment };
-
-          return [...oldComments, newComment];
-        }
-      );
-
-      refetchComments().catch((e) =>
-        console.log("Could not update to lastest comments")
-      );
-      if (id) toast.success("Comment has been added");
-
-      // setRefetchInterval(1000);
-      // setTimeout(() => setRefetchInterval(false), 2000);
+      // Fixed: pass comment text, not the postItem object
+      const newComment = await commentOnPost(postItem.id, comment);
+      
+      // Comment created successfully
+      toast.success("Comment has been added");
       setComment("");
+
+      // Update cache if possible
+      if (newComment?.id) {
+        queryClient.setQueryData(
+          ["comments", { postId: postItem.id }],
+          (oldComments) => {
+            if (!oldComments) return [newComment];
+            return [...oldComments, newComment];
+          }
+        );
+      }
+
+      // Refetch to get latest comments
+      refetchComments().catch((e) =>
+        console.log("Could not update to latest comments")
+      );
     } catch (error) {
+      console.error("Comment submission error:", error);
       toast.error("Failed to submit the comment. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [comment, postItem, setRefetchInterval]);
+  }, [comment, postItem, queryClient, refetchComments]);
 
   const handleReplyToComment = useCallback(async (commentId, replyData) => {
     try {
