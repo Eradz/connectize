@@ -115,15 +115,37 @@ const logistics = {
     }
   },
 
+  // Get current user's provider profile
+  getMyProviderProfile: async () => {
+    const response = await api.get('/api/v1/logistics/providers/my_profile/');
+    return response.data;
+  },
+
   // Get available providers for requests
   getAvailableProviders: async (params = {}) => {
     const response = await api.get('/api/v1/logistics/providers/', { params });
     return response.data;
   },
 
-  createLogisticsProvider: async (data) => {
-    const response = await api.post('/api/v1/logistics/providers/', data);
+  // Search providers
+  searchProviders: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/providers/search/', { params });
     return response.data;
+  },
+
+  createLogisticsProvider: async (data) => {
+    try {
+      const response = await api.post('/api/v1/logistics/providers/', data);
+      // api.post returns { data: actualData } or { data: null } on error
+      if (!response || response.data === null || response.data === undefined) {
+        throw new Error('Failed to create provider - please check your session and try again');
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Create provider error:', error);
+      // Re-throw to allow component to handle
+      throw error;
+    }
   },
 
   updateLogisticsProvider: async (id, data) => {
@@ -310,6 +332,40 @@ const logistics = {
     return response.data;
   },
 
+  // Calculate rates for a shipment request
+  calculateRates: async (requestId, options = {}) => {
+    try {
+      console.log('💰 Calculating rates for request:', requestId, 'options:', options);
+      const response = await api.post(`/api/v1/logistics/requests/${requestId}/calculate-rates/`, options);
+      console.log('💰 Rates calculated:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Calculate rates error:', error);
+      // Return empty providers if not authorized or error
+      if (error.response?.status === 403) {
+        console.log('⚠️ User not authorized to view rates');
+        return { providers: [], metadata: { error: 'Not authorized' } };
+      }
+      throw error;
+    }
+  },
+
+  // Assign provider to a shipment request
+  assignProvider: async (requestId, providerId, serviceCode = null) => {
+    try {
+      console.log('🤝 Assigning provider:', providerId, 'to request:', requestId);
+      const response = await api.post(`/api/v1/logistics/requests/${requestId}/award-to-provider/`, {
+        provider_name: providerId,
+        service_code: serviceCode
+      });
+      console.log('🤝 Provider assigned:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Assign provider error:', error);
+      throw error;
+    }
+  },
+
   // Status update methods for requests
   approveRequest: async (id) => {
     const response = await api.patch(`/api/v1/logistics/requests/${id}/`, {
@@ -325,6 +381,40 @@ const logistics = {
     return response.data;
   },
 
+  // ==========================================
+  // Provider API Integration Settings
+  // ==========================================
+  
+  // Get provider API settings
+  getProviderAPISettings: async () => {
+    const response = await api.get('/api/v1/logistics/providers/api_settings/');
+    return response.data;
+  },
+
+  // Update provider API settings
+  updateProviderAPISettings: async (data) => {
+    const response = await api.patch('/api/v1/logistics/providers/api_settings/', data);
+    return response.data;
+  },
+
+  // Test provider API connection
+  testProviderAPIConnection: async () => {
+    const response = await api.post('/api/v1/logistics/providers/test_api_connection/');
+    return response.data;
+  },
+
+  // Get webhook logs
+  getProviderWebhookLogs: async () => {
+    const response = await api.get('/api/v1/logistics/providers/webhook_logs/');
+    return response.data;
+  },
+
+  // Generate new webhook secret
+  generateWebhookSecret: async () => {
+    const response = await api.post('/api/v1/logistics/providers/generate_webhook_secret/');
+    return response.data;
+  },
+
   // Aliases for backward compatibility
   getRequests: function(params) { return this.getShipmentRequests(params); },
   getRequest: function(id) { return this.getShipmentRequest(id); },
@@ -336,6 +426,7 @@ const logistics = {
   updateShipmentStatus: function(id, data) { return this.updateShipment(id, data); },
   adjustStock: function(id, data) { return this.updateInventoryItem(id, data); },
   getTrackingById: function(id) { return this.getShipmentTrackingById(id); },
+  awardToProvider: function(requestId, data) { return this.assignProvider(requestId, data.provider_id || data.provider_name, data.service_code); },
 };
 
 export default logistics;

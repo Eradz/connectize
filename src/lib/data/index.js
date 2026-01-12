@@ -155,7 +155,23 @@ export const hubNavItems = [
       { name: "Logistics Overview", to: webRoutes.logisticsDashboard },
       { name: "Shipment Requests", to: webRoutes.logisticsRequests },
       { name: "Inventory", to: webRoutes.logisticsInventory },
-      { name: "Shipments", to: webRoutes.logisticsShipments }
+      { name: "Shipments", to: webRoutes.logisticsShipments },
+      { name: "Become a Provider", to: webRoutes.logisticsBecomeProvider },
+      { name: "Provider Dashboard", to: webRoutes.logisticsProviderDashboard }
+    ]
+  },
+  {
+    name: "Marketplace",
+    to: webRoutes.marketplace,
+    icon: "StoreIcon",
+    description: "Buy and sell products",
+    subItems: [
+      { name: "Browse Listings", to: webRoutes.marketplace },
+      { name: "My Listings", to: webRoutes.marketplaceMyListings },
+      { name: "Create Listing", to: webRoutes.marketplaceCreateListing },
+      { name: "Shopping Cart", to: webRoutes.marketplaceCart },
+      { name: "My Orders", to: webRoutes.marketplaceOrders },
+      { name: "Seller Orders", to: webRoutes.marketplaceSellerOrders }
     ]
   },
   {

@@ -22,7 +22,8 @@ import {
   Package,
   BookOpen,
   CreditCard,
-  Lock
+  Lock,
+  Store
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import Logo from '../logo';
@@ -329,7 +330,24 @@ const PlatformNavigation = ({ children }) => {
         { name: 'Logistics Overview', href: webRoutes.logisticsDashboard },
         { name: 'Shipment Requests', href: webRoutes.logisticsRequests },
         { name: 'Inventory', href: webRoutes.logisticsInventory },
-        { name: 'Shipments', href: webRoutes.logisticsShipments }
+        { name: 'Shipments', href: webRoutes.logisticsShipments },
+        { name: '─── Provider ───', href: '#', disabled: true },
+        { name: 'Become a Provider', href: webRoutes.logisticsBecomeProvider },
+        { name: 'Provider Dashboard', href: webRoutes.logisticsProviderDashboard }
+      ]
+    },
+    {
+      name: 'Marketplace',
+      href: webRoutes.marketplace,
+      icon: Store,
+      current: location.pathname.startsWith('/marketplace'),
+      children: [
+        { name: 'Browse Listings', href: webRoutes.marketplace },
+        { name: 'My Listings', href: webRoutes.marketplaceMyListings },
+        { name: 'Create Listing', href: webRoutes.marketplaceCreateListing },
+        { name: 'Shopping Cart', href: webRoutes.marketplaceCart },
+        { name: 'My Orders', href: webRoutes.marketplaceOrders },
+        { name: 'Seller Orders', href: webRoutes.marketplaceSellerOrders }
       ]
     }
   ]), [location.pathname]);

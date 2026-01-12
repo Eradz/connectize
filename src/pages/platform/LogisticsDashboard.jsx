@@ -102,7 +102,8 @@ const LogisticsDashboard = () => {
         hasTokens: !!(session?.tokens),
         hasAccess: !!(session?.tokens?.access),
         hasRefresh: !!(session?.tokens?.refresh),
-        userInfo: session?.user ? { id: session.user.id, email: session.user.email } : null
+        // Session has { id, email, tokens } structure
+        userInfo: session?.id ? { id: session.id, email: session.email } : null
       });
       
       // Also check localStorage for any legacy tokens (for debugging)
@@ -684,7 +685,7 @@ const LogisticsDashboard = () => {
                 <InventoryDashboardWidget className="col-span-full" />
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                   <Link
                     to={webRoutes.logisticsShipmentCreate}
                     className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
@@ -726,6 +727,17 @@ const LogisticsDashboard = () => {
                       <FileText className="mx-auto h-8 w-8 text-gray-400 group-hover:text-orange-500" />
                       <h3 className="mt-2 text-sm font-medium text-gray-900">View Requests</h3>
                       <p className="mt-1 text-sm text-gray-500">Manage shipping requests</p>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to={webRoutes.logisticsBecomeProvider}
+                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 hover:bg-indigo-50 transition-colors group"
+                  >
+                    <div className="text-center">
+                      <Users className="mx-auto h-8 w-8 text-gray-400 group-hover:text-indigo-500" />
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">Become a Provider</h3>
+                      <p className="mt-1 text-sm text-gray-500">Offer logistics services</p>
                     </div>
                   </Link>
                 </div>
