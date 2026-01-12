@@ -60,8 +60,8 @@ function DiscoverPosts({
       )
     : posts?.pages[0]?.posts;
   const postLoading = isSearch ? searchLoading : isLoading;
-      console.log("final Array", finalArray)
-      console.log("posts", posts)
+      // console.log("final Array", finalArray)
+      // console.log("posts", posts)
   return (
     <section className="space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
@@ -342,7 +342,7 @@ export const DiscoverPostItem = ({
       <CommentSection
         showCommentSection={showCommentSection}
         setShowCommentSection={setShowCommentSection}
-        commentsData={comments}
+        commentsData={comments?.results}
         postItem={postItem}
         refetchComments={refetchComments}
         isLoading={isLoadingComments}
