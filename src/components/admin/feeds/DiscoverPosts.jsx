@@ -101,6 +101,8 @@ export const DiscoverPostItem = ({
     { postId: postItem.id },
     {
       enabled: showCommentSection,
+       refetchOnWindowFocus: false, 
+      refetchOnMount: false, 
     }
   );
 
@@ -159,7 +161,7 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
-
+  console.log("comments", comments)
   return (
     <motion.article
       initial={{ opacity: 0 }}
@@ -369,7 +371,7 @@ const CommentSection = ({
   const [loading, setLoading] = useState(false);
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
-
+  console.log("CommentsData", commentsData)
   const handleComment = useCallback(async () => {
     if (comment.trim().length < 1) return;
 
@@ -470,9 +472,9 @@ const CommentBlock = ({ comment, postUserId }) => {
       <div className="flex gap-2">
         <Link to={`/co/${comment?.user?.id}`}>
           <Avatar
-            name={`${comment.user.first_name} ${comment.user.last_name}`}
+            name={`${comment?.user?.first_name} ${comment?.user?.last_name}`}
             className={clsx(avatarStyle)}
-            src={comment.user.avatar}
+            src={comment?.user?.avatar}
             size="sm"
           />
         </Link>
@@ -480,20 +482,20 @@ const CommentBlock = ({ comment, postUserId }) => {
           <div className="flex items-center gap-1">
             <h5 className="font-bold text-sm">
               <Link to={`/co/${comment?.user?.id}`}>
-                {comment.user.first_name} {comment.user.last_name}
+                {comment?.user?.first_name} {comment?.user?.last_name}
               </Link>
-              {comment.user.id === postUserId && (
+              {comment?.user?.id === postUserId && (
                 <span className="text-[.65rem] text-gray-400 font-medium">
                   (author)
                 </span>
               )}
             </h5>
             <span className="text-gray-400 text-xs">
-              &bull; <TimeAgo time={comment.commented_at} />
+              &bull; <TimeAgo time={comment?.commented_at} />
             </span>
           </div>
           <MarkdownComponent
-            markdownContent={comment.content}
+            markdownContent={comment?.content}
             className="text-sm text-gray-600 mt-1"
           />
         </div>
