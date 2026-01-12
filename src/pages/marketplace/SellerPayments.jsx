@@ -140,8 +140,28 @@ const SellerPayments = () => {
       const result = await stripeConnectService.getDashboardLink();
       
       if (result.dashboard_url) {
-        window.open(result.dashboard_url, '_blank');
-        toast.success('Opening Stripe Dashboard...');
+        // Store the URL for manual fallback
+        setOnboardingUrl(result.dashboard_url);
+        
+        // Try to open in new tab
+        const newWindow = window.open(result.dashboard_url, '_blank');
+        
+        if (newWindow) {
+          if (result.is_onboarding) {
+            toast.info('Opening Stripe onboarding. Complete verification to access full dashboard.');
+          } else if (result.is_direct) {
+            toast.info('Opening Stripe Connect account page...');
+          } else {
+            toast.success('Opening Stripe Dashboard...');
+          }
+        } else {
+          // Popup was blocked
+          toast.info('Popup blocked! Click the link below to open Stripe Dashboard.', {
+            duration: 5000,
+          });
+        }
+      } else {
+        toast.error('No dashboard URL received');
       }
     } catch (err) {
       console.error('Failed to get dashboard link:', err);
@@ -191,10 +211,24 @@ const SellerPayments = () => {
       };
     }
 
+    // Build description based on what's missing
+    const requirements = accountStatus.requirements || [];
+    let description = 'Your account has some restrictions.';
+    
+    if (requirements.length > 0) {
+      description = `Stripe requires additional verification: ${requirements.slice(0, 3).join(', ')}${requirements.length > 3 ? '...' : ''}. Click "Open Stripe Dashboard" to complete.`;
+    } else if (!charges_enabled && !payouts_enabled) {
+      description = 'Stripe is still verifying your account. This may take a few minutes. Click "Open Stripe Dashboard" to check status.';
+    } else if (!charges_enabled) {
+      description = 'Your account cannot receive payments yet. Click "Open Stripe Dashboard" to complete verification.';
+    } else if (!payouts_enabled) {
+      description = 'Your account cannot process payouts yet. Click "Open Stripe Dashboard" to add bank account details.';
+    }
+
     return {
       icon: <AlertCircle className="w-8 h-8 text-yellow-500" />,
-      title: 'Account Restricted',
-      description: 'Your account has some restrictions. Please complete additional verification.',
+      title: 'Account Pending Verification',
+      description,
       borderClass: 'border-yellow-200',
       status: 'restricted'
     };
@@ -307,9 +341,9 @@ const SellerPayments = () => {
                 <ExternalLink className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <p className="text-blue-900 font-semibold text-lg">Complete Your Stripe Setup</p>
+                <p className="text-blue-900 font-semibold text-lg">Open Stripe Dashboard</p>
                 <p className="text-blue-700 text-sm mt-1 mb-3">
-                  Your browser blocked the popup. Click the button below to open Stripe onboarding:
+                  Your browser blocked the popup. Click the button below to open Stripe:
                 </p>
                 <a 
                   href={onboardingUrl}
@@ -317,7 +351,7 @@ const SellerPayments = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
                 >
-                  Open Stripe Onboarding
+                  Open Stripe
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </a>
               </div>
@@ -371,6 +405,7 @@ const SellerPayments = () => {
             buttonText="View Orders"
             buttonIcon={<ArrowUpRight className="w-4 h-4 ml-2" />}
             to="/marketplace/seller-orders"
+            primary
           />
         </div>
 
@@ -425,8 +460,8 @@ const StatusBadge = ({ label, active }) => (
 // Action Card Component
 const ActionCard = ({ icon, title, description, buttonText, buttonIcon, onClick, to, loading, primary }) => {
   const buttonClasses = primary
-    ? 'bg-gold hover:bg-yellow-500 text-black'
-    : 'bg-gray-900 hover:bg-gray-800 text-white';
+    ? 'bg-gold hover:bg-yellow-500 text-black font-medium'
+    : 'bg-gray-900 hover:bg-gray-800 text-white font-medium';
 
   const content = (
     <div className="bg-white rounded-xl shadow-sm p-6 h-full flex flex-col">
@@ -437,22 +472,22 @@ const ActionCard = ({ icon, title, description, buttonText, buttonIcon, onClick,
       {to ? (
         <Link
           to={to}
-          className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors ${buttonClasses}`}
+          className={`w-full py-3 px-4 rounded-lg flex items-center justify-center transition-colors ${buttonClasses}`}
         >
-          {buttonText}
+          <span>{buttonText}</span>
           {buttonIcon}
         </Link>
       ) : (
         <button
           onClick={onClick}
           disabled={loading}
-          className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${buttonClasses}`}
+          className={`w-full py-3 px-4 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${buttonClasses}`}
         >
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <>
-              {buttonText}
+              <span>{buttonText}</span>
               {buttonIcon}
             </>
           )}

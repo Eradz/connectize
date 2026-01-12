@@ -302,7 +302,7 @@ const Orders = () => {
                       Total
                     </p>
                     <p className="font-semibold text-gray-900">
-                      ${Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      ${Number(order.total || order.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
                   </div>
                 </div>
