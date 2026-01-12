@@ -7,6 +7,7 @@ import {
   aiComplianceService, 
   workforceEventService
 } from '../../api-services/oilgas';
+import { listingService } from '../../api-services/marketplace';
 import BusinessHubHeader from '../../components/admin/businesshub/BusinessHubHeader';
 import PlatformModules from '../../components/admin/businesshub/PlatformModules';
 import RecentActivities from '../../components/admin/businesshub/RecentActivities';
@@ -19,6 +20,7 @@ const PlatformDashboard = () => {
     activities: { count: 0, data: [] },
     opportunities: { count: 0, data: [] },
     compliance: { count: 0, alerts: 0, data: [] },
+    marketplace: { count: 0, data: [] },
   analytics: {
       revenue: 0,
       growth: 0,
@@ -41,15 +43,16 @@ const PlatformDashboard = () => {
         activitiesRes,
         opportunitiesRes,
         complianceRes,
-        adsSummaryRes
+        adsSummaryRes,
+        marketplaceRes
       ] = await Promise.all([
         dealRoomService.getAll(1, 5),
         workforceJobService.getAll(1, 5),
         dealActivityService.getRecentActivities(10),
         aiOpportunityService.getOpportunities(),
         aiComplianceService.getComplianceAlerts(),
-        workforceEventService.getAll(1, 5)
-        // import('../../api-services/ads').then(m => m.featuredAdsApi.summary()).catch(() => ({ active_campaigns: 0, impressions: 0, clicks: 0, spent: 0 }))
+        workforceEventService.getAll(1, 5),
+        listingService.getListings({ page_size: 5 }).catch(() => ({ count: 0, results: [] }))
       ]);
 
       // Calculate total deal value
@@ -78,6 +81,10 @@ const PlatformDashboard = () => {
           count: complianceRes?.count || 0,
           alerts: complianceRes?.results?.filter(alert => alert.status === 'pending')?.length || 0,
           data: complianceRes?.results || []
+        },
+        marketplace: {
+          count: marketplaceRes?.count || 0,
+          data: marketplaceRes?.results || []
         },
         analytics: {
           revenue: totalDealValue,

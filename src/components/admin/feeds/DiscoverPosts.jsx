@@ -423,9 +423,9 @@ const CommentSection = ({
       </div>
 
       {isLoading
-        ? Array.from({ length: 3 }, (i) => {
+        ? Array.from({ length: 3 }, (_, index) => {
             return (
-              <div className="mb-4 flex gap-2 w-full" key={i}>
+              <div className="mb-4 flex gap-2 w-full" key={index}>
                 <div className="">
                   <div className="w-7 h-7 skeleton rounded-full" />
                 </div>
