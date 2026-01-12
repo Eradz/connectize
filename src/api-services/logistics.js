@@ -85,6 +85,28 @@ const logistics = {
     return response.data;
   },
 
+  // ==================== PROVIDER DASHBOARD ====================
+  
+  // Get shipment requests awarded to the current provider
+  getMyAwardedRequests: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/requests/my-awarded/', { params });
+    return response.data;
+  },
+
+  // Get all quotes submitted by the current provider
+  getMyQuotes: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/requests/my-quotes/', { params });
+    return response.data;
+  },
+
+  // Get provider's assigned shipments (already exists in ShipmentViewSet via queryset)
+  getMyShipments: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/shipments/', { params });
+    return response.data;
+  },
+
+  // ==================== QUOTES ====================
+  
   // Quotes
   getShipmentQuotes: async (params = {}) => {
     const response = await api.get('/api/v1/logistics/quotes/', { params });
@@ -98,6 +120,12 @@ const logistics = {
   },
 
   createShipmentQuote: async (data) => {
+    const response = await api.post('/api/v1/logistics/quotes/', data);
+    return response.data;
+  },
+
+  // Alias for createShipmentQuote
+  createQuote: async (data) => {
     const response = await api.post('/api/v1/logistics/quotes/', data);
     return response.data;
   },
@@ -412,6 +440,26 @@ const logistics = {
   // Generate new webhook secret
   generateWebhookSecret: async () => {
     const response = await api.post('/api/v1/logistics/providers/generate_webhook_secret/');
+    return response.data;
+  },
+
+  // ==================== LOGISTICS NOTIFICATIONS ====================
+
+  // Get logistics-specific notifications
+  getLogisticsNotifications: async () => {
+    const response = await api.get('/api/notifications/logistics/');
+    return response.data;
+  },
+
+  // Mark all logistics notifications as read
+  markLogisticsNotificationsRead: async () => {
+    const response = await api.post('/api/notifications/logistics-mark-all-read/');
+    return response.data;
+  },
+
+  // Mark a single notification as read
+  markNotificationRead: async (notificationId) => {
+    const response = await api.post(`/api/notifications/${notificationId}/mark-as-read/`);
     return response.data;
   },
 
