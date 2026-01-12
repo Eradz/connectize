@@ -4,6 +4,7 @@ import CardIcon from "../../../icon/CardIcon";
 import LogisticIcon from "../../../icon/LogisticIcon";
 import AIIcon from "../../../icon/AIIcon";
 import WorkForceIcon from "../../../icon/WorkForceIcon";
+import StoreIcon from "../../../icon/StoreIcon";
 import { webRoutes } from "../../../lib/webRoutes";
 import { Link } from "react-router-dom";
 
@@ -40,6 +41,14 @@ export default function PlatformModules({dashboardData}) {
       link: "Global network",
       bgColor: "bg-green-50",
       to: webRoutes.logisticsDashboard
+    },
+    {
+      icon: <StoreIcon fill="#FEF3C7"/>,
+      title: "Marketplace",
+      description: "Buy and sell industrial products and equipment",
+      link: `${dashboardData.marketplace?.count || 0} listings`,
+      bgColor: "bg-amber-50",
+      to: webRoutes.marketplace
     },
     {
       icon: <StarIcon/>,

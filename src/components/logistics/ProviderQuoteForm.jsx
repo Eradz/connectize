@@ -63,13 +63,16 @@ const ProviderQuoteForm = ({ requestId, onSuccess, onCancel }) => {
       };
 
       const resp = await logisticsAPI.createQuote(payload);
-      if (resp?.data?.id) {
-        toast.success('Quote submitted');
-        onSuccess?.(resp.data);
-      } else {
-        toast.success('Quote submitted');
-        onSuccess?.(resp?.data || {});
+      
+      // Check if request failed (returns null on error)
+      if (!resp || resp.data === null) {
+        // Error toast is already shown by makeApiRequest
+        return;
       }
+      
+      // Success
+      toast.success('Quote submitted successfully!');
+      onSuccess?.(resp.data || resp);
     } catch (err) {
       const msg = err?.response?.data ? (typeof err.response.data === 'string' ? err.response.data : JSON.stringify(err.response.data)) : err.message;
       toast.error('Failed to submit quote', { description: msg });

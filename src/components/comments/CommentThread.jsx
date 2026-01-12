@@ -1,5 +1,5 @@
 import { useState, memo } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { Avatar } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import { HeartIcon, ChatBubbleOvalLeftIcon } from '@heroicons/react/24/outline';

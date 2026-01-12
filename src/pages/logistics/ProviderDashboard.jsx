@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Truck, Package, DollarSign, Star, TrendingUp, Clock,
   CheckCircle, AlertCircle, Eye, Send, BarChart3,
   Calendar, MapPin, ArrowRight, Filter, Search,
-  FileText, Settings, Bell, Award, ChevronRight
+  FileText, Settings, Bell, ChevronRight, Trophy, X
 } from 'lucide-react';
 import { logisticsAPI } from '../../api-services/logistics';
 import { getSession } from '../../lib/session';
@@ -18,16 +18,66 @@ const ProviderDashboard = () => {
     pendingQuotes: 0,
     completedShipments: 0,
     totalEarnings: 0,
+    wonBids: 0,
   });
   const [openRequests, setOpenRequests] = useState([]);
   const [myQuotes, setMyQuotes] = useState([]);
   const [activeShipments, setActiveShipments] = useState([]);
+  const [wonBids, setWonBids] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Notification state
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef(null);
 
   useEffect(() => {
     loadDashboardData();
+    loadNotifications();
+    
+    // Close notifications when clicking outside
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const response = await logisticsAPI.getLogisticsNotifications();
+      setNotifications(response?.results || []);
+      setUnreadCount(response?.unread_count || 0);
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  };
+
+  const handleMarkNotificationRead = async (notificationId) => {
+    try {
+      await logisticsAPI.markNotificationRead(notificationId);
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: new Date().toISOString() } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark notification read:', error);
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await logisticsAPI.markLogisticsNotificationsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: new Date().toISOString() })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to mark all notifications read:', error);
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -75,7 +125,12 @@ const ProviderDashboard = () => {
         provider: myProvider.id,
         page_size: 20 
       });
-      setMyQuotes(quotesResponse?.results || quotesResponse || []);
+      const allQuotes = quotesResponse?.results || quotesResponse || [];
+      setMyQuotes(allQuotes);
+
+      // Filter won bids (accepted quotes)
+      const wonQuotes = allQuotes.filter(q => q.accepted);
+      setWonBids(wonQuotes);
 
       // Load active shipments assigned to me
       const shipmentsResponse = await logisticsAPI.getShipments({ 
@@ -90,8 +145,7 @@ const ProviderDashboard = () => {
         ['preparing', 'picked_up', 'in_transit'].includes(s.status)
       ).length;
       const completedCount = shipments.filter(s => s.status === 'delivered').length;
-      const pendingQuotes = (quotesResponse?.results || quotesResponse || [])
-        .filter(q => q.is_active && !q.accepted).length;
+      const pendingQuotes = allQuotes.filter(q => q.is_active && !q.accepted).length;
 
       setStats({
         activeShipments: activeCount,
@@ -103,6 +157,7 @@ const ProviderDashboard = () => {
           }
           return sum;
         }, 0),
+        wonBids: wonQuotes.length,
       });
 
     } catch (error) {
@@ -194,9 +249,105 @@ const ProviderDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
-                <Bell className="w-5 h-5" />
-              </button>
+              {/* Notification Bell with Dropdown */}
+              <div className="relative" ref={notificationRef}>
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg relative"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Notification Dropdown */}
+                {showNotifications && (
+                  <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">Logistics Notifications</h3>
+                      <div className="flex items-center gap-2">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={handleMarkAllNotificationsRead}
+                            className="text-xs text-blue-600 hover:text-blue-700"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setShowNotifications(false)}
+                          className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500">
+                          <Bell className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                          <p>No notifications yet</p>
+                          <p className="text-sm mt-1">You'll be notified when quotes are accepted</p>
+                        </div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => {
+                              if (!notification.is_read) {
+                                handleMarkNotificationRead(notification.id);
+                              }
+                              if (notification.link) {
+                                navigate(notification.link);
+                                setShowNotifications(false);
+                              }
+                            }}
+                            className={`p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${
+                              !notification.is_read ? 'bg-blue-50' : ''
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                notification.notification_type === 'quote_accepted' 
+                                  ? 'bg-green-100 text-green-600' 
+                                  : notification.notification_type === 'shipment_status'
+                                  ? 'bg-blue-100 text-blue-600'
+                                  : 'bg-gray-100 text-gray-600'
+                              }`}>
+                                {notification.notification_type === 'quote_accepted' ? (
+                                  <Trophy className="w-5 h-5" />
+                                ) : notification.notification_type === 'shipment_status' ? (
+                                  <Truck className="w-5 h-5" />
+                                ) : (
+                                  <Bell className="w-5 h-5" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 text-sm">
+                                  {notification.title}
+                                </p>
+                                <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {new Date(notification.timestamp).toLocaleDateString()} at{' '}
+                                  {new Date(notification.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                              {!notification.is_read && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <Link
                 to="/logistics/provider-settings"
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
@@ -268,6 +419,7 @@ const ProviderDashboard = () => {
         <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit mb-6">
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'won', label: 'Won Bids', icon: Trophy, badge: stats.wonBids },
             { id: 'requests', label: 'Open Requests', icon: Package },
             { id: 'quotes', label: 'My Quotes', icon: FileText },
             { id: 'shipments', label: 'Active Shipments', icon: Truck },
@@ -285,6 +437,11 @@ const ProviderDashboard = () => {
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
+                {tab.badge > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -394,35 +551,35 @@ const ProviderDashboard = () => {
               </div>
             </div>
 
-            {/* Performance Card */}
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white">
-              <div className="flex items-center gap-3 mb-4">
-                <Award className="w-8 h-8" />
-                <h2 className="text-lg font-semibold">Performance Score</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-3xl font-bold">
-                    {Number(provider.on_time_delivery_rate || 0).toFixed(0)}%
-                  </div>
-                  <p className="text-blue-200 text-sm">On-Time Delivery</p>
+            {/* Performance Score Card - Only show if there's delivery data */}
+            {stats.completedShipments > 0 && (
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <Trophy className="w-8 h-8" />
+                  <h2 className="text-lg font-semibold">Performance Score</h2>
                 </div>
-                <div>
-                  <div className="text-3xl font-bold flex items-center gap-1">
-                    {Number(provider.safety_rating || 0).toFixed(1)}
-                    <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-3xl font-bold">
+                      {Number(provider.on_time_delivery_rate || 0).toFixed(0)}%
+                    </div>
+                    <p className="text-blue-200 text-sm">On-Time Delivery</p>
                   </div>
-                  <p className="text-blue-200 text-sm">Safety Rating</p>
+                  <div>
+                    <div className="text-3xl font-bold flex items-center gap-1">
+                      {Number(provider.safety_rating || 0).toFixed(1)}
+                      <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                    </div>
+                    <p className="text-blue-200 text-sm">Reliability Rating</p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-blue-500">
+                  <p className="text-sm text-blue-200">
+                    Based on {stats.completedShipments} completed {stats.completedShipments === 1 ? 'delivery' : 'deliveries'}
+                  </p>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-blue-500">
-                <p className="text-sm text-blue-200">
-                  {provider.on_time_delivery_rate >= 95 
-                    ? '🏆 Top Performer! You\'re in the top 10% of providers.'
-                    : 'Keep up the good work! Higher ratings mean more opportunities.'}
-                </p>
-              </div>
-            </div>
+            )}
 
             {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -442,19 +599,113 @@ const ProviderDashboard = () => {
                   <Truck className="w-5 h-5 text-blue-600" />
                   <span className="font-medium text-gray-900">My Shipments</span>
                 </Link>
-                <button
-                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
-                >
-                  <BarChart3 className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-gray-900">Analytics</span>
-                </button>
-                <button
-                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                <Link
+                  to="/logistics/provider-settings"
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
                 >
                   <Settings className="w-5 h-5 text-blue-600" />
                   <span className="font-medium text-gray-900">Settings</span>
+                </Link>
+                <button
+                  onClick={() => setActiveTab('shipments')}
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                >
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">View All Shipments</span>
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Won Bids Tab */}
+        {activeTab === 'won' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Won Bids</h2>
+                    <p className="text-sm text-gray-500">Quotes that have been accepted</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                  {wonBids.length} Won
+                </span>
+              </div>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {wonBids.map((quote) => (
+                <div key={quote.id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                          <Trophy className="w-3 h-3" />
+                          WON
+                        </span>
+                        <h3 className="font-semibold text-gray-900">{quote.request_title}</h3>
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-400 uppercase">Your Quote</p>
+                          <p className="text-lg font-bold text-green-600">{formatCurrency(quote.total_cost)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 uppercase">Delivery Est.</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {quote.estimated_days} days
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 uppercase">Accepted On</p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(quote.updated_at || quote.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      {quote.notes && (
+                        <p className="mt-2 text-sm text-gray-500 italic">"{quote.notes}"</p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Link
+                        to={`/logistics/requests/${quote.request}`}
+                        className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Details
+                      </Link>
+                      <Link
+                        to={`/logistics/shipments?request=${quote.request}`}
+                        className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      >
+                        <Truck className="w-4 h-4" />
+                        Manage Shipment
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {wonBids.length === 0 && (
+                <div className="p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="font-medium text-gray-900 mb-1">No Won Bids Yet</h3>
+                  <p className="text-gray-500 mb-4">Submit competitive quotes to win shipment contracts</p>
+                  <Link
+                    to="/logistics/requests"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Search className="w-4 h-4" />
+                    Browse Requests
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}

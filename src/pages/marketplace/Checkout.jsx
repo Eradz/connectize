@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, MapPin, FileText, Check, Loader2, AlertCircle, User } from "lucide-react";
+import { ArrowLeft, CreditCard, MapPin, FileText, Check, Loader2, AlertCircle, User, Lock } from "lucide-react";
 import { cartService, orderService } from "../../api-services/marketplace";
 import { getCurrentUser } from "../../api-services/users";
 import { getSession } from "../../lib/session";
 import { toast } from "sonner";
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { stripePromise } from "../../lib/stripeUtils";
 
-function CheckoutForm({ cart, onSuccess }) {
+function CheckoutFormInner({ cart, onSuccess }) {
+  const stripe = useStripe();
+  const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [loadingAddress, setLoadingAddress] = useState(true);
-  const [step, setStep] = useState(1); // 1: Address, 2: Review
+  const [step, setStep] = useState(1); // 1: Address, 2: Payment, 3: Review
   const [shippingAddress, setShippingAddress] = useState({
     first_name: "",
     last_name: "",
@@ -104,19 +108,73 @@ function CheckoutForm({ cart, onSuccess }) {
     e.preventDefault();
 
     if (!validateAddress()) return;
+    
+    if (!stripe || !elements) {
+      toast.error("Payment system not ready. Please try again.");
+      return;
+    }
+
+    // Get CardElement - it must be available
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      toast.error("Payment card information is missing. Please go back to the payment step.");
+      setStep(2); // Go back to payment step
+      return;
+    }
 
     setLoading(true);
 
     try {
-      // Create order with shipping address as JSON object
+      // Step 1: Create order with shipping address
       const order = await orderService.createOrder(
         shippingAddress,
         sameAsBilling ? null : billingAddress,
         buyerNotes
       );
 
-      toast.success("Order placed successfully!");
-      onSuccess(order);
+      // Step 2: Create payment intent for the order
+      const paymentData = await orderService.createPaymentIntent(order.id);
+      
+      if (!paymentData.client_secret) {
+        toast.error("Failed to initialize payment");
+        return;
+      }
+
+      // Step 3: Confirm the card payment with Stripe
+      const { error, paymentIntent } = await stripe.confirmCardPayment(
+        paymentData.client_secret,
+        {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: `${shippingAddress.first_name} ${shippingAddress.last_name}`,
+              email: shippingAddress.email,
+              address: {
+                line1: shippingAddress.street,
+                city: shippingAddress.city,
+                state: shippingAddress.state,
+                postal_code: shippingAddress.postal_code,
+                country: shippingAddress.country === 'United States' ? 'US' : shippingAddress.country,
+              },
+            },
+          },
+        }
+      );
+
+      if (error) {
+        console.error("Payment error:", error);
+        toast.error(error.message || "Payment failed");
+        return;
+      }
+
+      if (paymentIntent.status === 'succeeded') {
+        // Step 4: Confirm payment on backend
+        await orderService.confirmPayment(order.id, paymentIntent.id);
+        toast.success("Payment successful! Order placed.");
+        onSuccess(order);
+      } else {
+        toast.error("Payment not completed. Please try again.");
+      }
 
     } catch (error) {
       console.error("Checkout error:", error);
@@ -154,7 +212,8 @@ function CheckoutForm({ cart, onSuccess }) {
     <div className="flex items-center justify-center gap-2 mb-8">
       {[
         { num: 1, label: "Shipping" },
-        { num: 2, label: "Review" },
+        { num: 2, label: "Payment" },
+        { num: 3, label: "Review" },
       ].map((s, idx, arr) => (
         <React.Fragment key={s.num}>
           <button
@@ -352,14 +411,65 @@ function CheckoutForm({ cart, onSuccess }) {
             onClick={() => validateAddress() && setStep(2)}
             className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
           >
-            Review Order
+            Continue to Payment
           </button>
           )}
         </div>
       )}
 
-      {/* Step 2: Review */}
-      {step === 2 && (
+      {/* Step 2: Payment */}
+      <div className={`bg-white rounded-xl border border-gray-200 p-6 ${step !== 2 ? 'hidden' : ''}`}>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <CreditCard size={20} /> Payment Details
+        </h3>
+        
+        <div className="mb-4 p-4 border border-gray-200 rounded-lg">
+          <label className="block text-sm font-medium text-gray-700 mb-3">Card Information</label>
+          <CardElement 
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#374151',
+                  '::placeholder': {
+                    color: '#9CA3AF',
+                  },
+                  padding: '12px',
+                },
+                invalid: {
+                  color: '#EF4444',
+                },
+              },
+            }}
+            className="p-3 border border-gray-300 rounded-lg"
+          />
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+          <Lock size={14} />
+          <span>Your payment info is secured with SSL encryption</span>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep(3)}
+            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+          >
+            Review Order
+          </button>
+        </div>
+      </div>
+
+      {/* Step 3: Review */}
+      {step === 3 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <FileText size={20} /> Review Your Order
@@ -413,7 +523,7 @@ function CheckoutForm({ cart, onSuccess }) {
               <div>
                 <p className="text-sm text-blue-800 font-medium">Order & Shipping</p>
                 <p className="text-sm text-blue-700">
-                  A shipment request will be created automatically. You can track your order status and arrange payment with the seller through the Orders page.
+                  A shipment request will be created automatically for logistics tracking.
                 </p>
               </div>
             </div>
@@ -434,29 +544,41 @@ function CheckoutForm({ cart, onSuccess }) {
           <div className="flex gap-4 mt-6">
             <button
               type="button"
-              onClick={() => setStep(1)}
+              onClick={() => setStep(2)}
               className="flex-1 py-3 border border-gray-200 rounded-xl font-medium hover:bg-gray-50 transition"
             >
               Back
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !stripe}
               className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition"
             >
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" size={20} />
-                  Processing...
+                  Processing Payment...
                 </>
               ) : (
-                <>Place Order</>
+                <>
+                  <Lock size={16} />
+                  Pay & Place Order
+                </>
               )}
             </button>
           </div>
         </div>
       )}
     </form>
+  );
+}
+
+// Wrapper component that provides Stripe Elements context
+function CheckoutForm({ cart, onSuccess }) {
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutFormInner cart={cart} onSuccess={onSuccess} />
+    </Elements>
   );
 }
 

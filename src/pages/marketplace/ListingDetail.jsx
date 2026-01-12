@@ -81,13 +81,92 @@ const ListingDetail = () => {
     }
   };
 
+  const handleBuyNow = async () => {
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+      alert('Please log in to purchase');
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      setAddingToCart(true);
+      await marketplaceApi.addToCart(listing.id, quantity);
+      // Go directly to checkout instead of cart
+      navigate('/marketplace/checkout');
+    } catch (err) {
+      console.error('Failed to proceed to checkout:', err);
+      if (err.response?.status === 401) {
+        alert('Your session has expired. Please log in again.');
+        navigate('/login');
+      } else {
+        alert('Failed to proceed to checkout');
+      }
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
   const handleToggleWishlist = async () => {
+    // Check if user is logged in
+    if (!isLoggedIn()) {
+      alert('Please log in to save items to your wishlist');
+      navigate('/login');
+      return;
+    }
+    
     try {
       await marketplaceApi.toggleWishlist(listing.id);
       setInWishlist(!inWishlist);
     } catch (err) {
       console.error('Failed to update wishlist:', err);
+      if (err.response?.status === 401) {
+        alert('Your session has expired. Please log in again.');
+        navigate('/login');
+      } else {
+        alert('Failed to update wishlist');
+      }
     }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareTitle = listing?.title || 'Check out this listing';
+    const shareText = `Check out "${listing?.title}" on Connectize Marketplace - $${Number(listing?.price).toLocaleString()}`;
+    
+    // Try native share API first (works on mobile and some desktop browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (err) {
+        // User cancelled or share failed, fall back to clipboard
+        if (err.name !== 'AbortError') {
+          copyToClipboard(shareUrl);
+        }
+      }
+    } else {
+      // Fallback: copy link to clipboard
+      copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Link copied to clipboard!');
+    }).catch(() => {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Link copied to clipboard!');
+    });
   };
 
   const nextImage = () => {
@@ -221,10 +300,15 @@ const ListingDetail = () => {
                       ? 'bg-red-50 border-red-200 text-red-600' 
                       : 'border-gray-200 hover:bg-gray-50'
                   }`}
+                  title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
                   <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
                 </button>
-                <button className="p-2 rounded-full border border-gray-200 hover:bg-gray-50">
+                <button 
+                  onClick={handleShare}
+                  className="p-2 rounded-full border border-gray-200 hover:bg-gray-50"
+                  title="Share listing"
+                >
                   <Share2 size={20} />
                 </button>
               </div>
@@ -289,12 +373,11 @@ const ListingDetail = () => {
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </button>
                 <button
-                  onClick={() => {
-                    handleAddToCart();
-                  }}
-                  className="flex-1 bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition"
+                  onClick={handleBuyNow}
+                  disabled={addingToCart}
+                  className="flex-1 bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition disabled:opacity-50"
                 >
-                  Buy Now
+                  {addingToCart ? 'Processing...' : 'Buy Now'}
                 </button>
               </div>
             </div>
