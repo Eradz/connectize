@@ -145,6 +145,7 @@ import EditListing from "./pages/marketplace/EditListing";
 import MarketplaceOrders from "./pages/marketplace/Orders";
 import OrderConfirmation from "./pages/marketplace/OrderConfirmation";
 import SellerOrders from "./pages/marketplace/SellerOrders";
+import SellerPayments from "./pages/marketplace/SellerPayments";
 
 function App() {
   // Helper function to convert absolute paths to relative paths for nested routes
@@ -216,6 +217,7 @@ function App() {
           <Route path="marketplace/orders" element={<MarketplaceOrders />} />
           <Route path="marketplace/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="marketplace/seller-orders" element={<SellerOrders />} />
+          <Route path="marketplace/seller-payments" element={<SellerPayments />} />
           
           <Route path="messages" element={<MessagesLayout />} />
           <Route path="products/:id" element={<Product />} />
