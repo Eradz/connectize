@@ -126,6 +126,10 @@ const webRoutes = {
   logisticsInventoryCreate: "/logistics/inventory/create",
   logisticsInventoryEdit: "/logistics/inventory/:id/edit",
   logisticsTracking: "/logistics/tracking",
+  // Logistics Provider Routes
+  logisticsBecomeProvider: "/logistics/become-provider",
+  logisticsProviderDashboard: "/logistics/provider-dashboard",
+  logisticsProviderSettings: "/logistics/provider-settings",
 
   // Admin Routes
   admin: "/admin",
@@ -207,7 +211,19 @@ const webRoutes = {
   adminSubscriptionsRevenue: "/admin/subscriptions/revenue",
   adminSubscriptionsPlanManagement: "/admin/subscriptions/plan-management",
 
-   // Oil & Gas Platform Routes
+   // Marketplace
+  marketplace: "/marketplace",
+  marketplaceCart: "/marketplace/cart",
+  marketplaceCheckout: "/marketplace/checkout",
+  marketplaceListing: "/marketplace/listing/:id",
+  marketplaceMyListings: "/marketplace/my-listings",
+  marketplaceCreateListing: "/marketplace/create-listing",
+  marketplaceEditListing: "/marketplace/edit-listing/:id",
+  marketplaceOrders: "/marketplace/orders",
+  marketplaceOrderConfirmation: "/marketplace/order-confirmation/:id",
+  marketplaceSellerOrders: "/marketplace/seller-orders",
+
+  // Oil & Gas Platform Routes
   // Deal Management
   dealRooms: "/deals",
   myParticipations: "/deals/my-participations",

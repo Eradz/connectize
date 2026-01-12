@@ -82,12 +82,15 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
         include_analytics: true
       });
       
-      if (ratesResponse.data?.success || ratesResponse.data?.providers) {
-        setRates(ratesResponse.data);
-        setProviders(ratesResponse.data.providers || providersData || []);
+      // ratesResponse is already response.data from the API
+      console.log('📊 Rates response:', ratesResponse);
+      
+      if (ratesResponse?.success || ratesResponse?.providers) {
+        setRates(ratesResponse);
+        setProviders(ratesResponse.providers || providersData || []);
       } else {
-        console.error('Failed to get rates:', ratesResponse.data?.error);
-        setLoadError(ratesResponse.data?.error || 'Failed to fetch rates');
+        console.error('Failed to get rates:', ratesResponse?.error);
+        setLoadError(ratesResponse?.error || 'Failed to fetch rates');
       }
       
     } catch (error) {

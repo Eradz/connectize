@@ -67,9 +67,8 @@ const AdminAuth = () => {
               {currentSession ? (
                 <div className="space-y-2">
                   <p className="text-sm text-green-600">✅ Authenticated</p>
-                  <p className="text-sm text-gray-600">User: {currentSession.user?.email}</p>
-                  <p className="text-sm text-gray-600">Is Staff: {currentSession.user?.is_staff ? 'Yes' : 'No'}</p>
-                  <p className="text-sm text-gray-600">Is Superuser: {currentSession.user?.is_superuser ? 'Yes' : 'No'}</p>
+                  <p className="text-sm text-gray-600">User: {currentSession.email}</p>
+                  <p className="text-sm text-gray-600">User ID: {currentSession.id}</p>
                   <p className="text-sm text-gray-600">Has Tokens: {currentSession.tokens ? 'Yes' : 'No'}</p>
                 </div>
               ) : (

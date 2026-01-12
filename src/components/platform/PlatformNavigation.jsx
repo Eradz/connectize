@@ -258,7 +258,9 @@ const PlatformNavigation = ({ children }) => {
         { name: 'Logistics Overview', href: webRoutes.logisticsDashboard },
         { name: 'Shipment Requests', href: webRoutes.logisticsRequests },
         { name: 'Inventory', href: webRoutes.logisticsInventory },
-        { name: 'Shipments', href: webRoutes.logisticsShipments }
+        { name: 'Shipments', href: webRoutes.logisticsShipments },
+        { name: 'Become a Provider', href: webRoutes.logisticsBecomeProvider },
+        { name: 'Provider Dashboard', href: webRoutes.logisticsProviderDashboard }
       ]
     }
   ]), [location.pathname]);

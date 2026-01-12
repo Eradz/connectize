@@ -95,6 +95,9 @@ import LogisticsShipments from "./pages/platform/LogisticsShipments";
 import LogisticsShipmentCreate from "./pages/platform/LogisticsShipmentCreate";
 import LogisticsShipmentDetail from "./pages/platform/LogisticsShipmentDetail";
 import LogisticsTracking from "./pages/platform/LogisticsTracking";
+import BecomeProvider from "./pages/logistics/BecomeProvider";
+import ProviderDashboard from "./pages/logistics/ProviderDashboard";
+import ProviderSettings from "./pages/logistics/ProviderSettings";
 import LogisticsTest from "./pages/test/LogisticsTest";
 import FeaturedAdsPage from "./pages/platform/FeaturedAds";
 import SubscriptionsPage from "./pages/platform/Subscriptions";
@@ -130,6 +133,19 @@ import KnowledgeForumDetail from "./pages/knowledge/KnowledgeForumDetail";
 import KnowledgeTopicCreate from "./pages/knowledge/KnowledgeTopicCreate";
 import KnowledgeTopicDetail from "./pages/knowledge/KnowledgeTopicDetail";
 import KnowledgeForumInvite from "./pages/knowledge/KnowledgeForumInvite";
+
+// Marketplace Components
+import Marketplace from "./pages/marketplace/Marketplace";
+import MarketplaceCart from "./pages/marketplace/Cart";
+import MarketplaceCheckout from "./pages/marketplace/Checkout";
+import MyListings from "./pages/marketplace/MyListings";
+import CreateListing from "./pages/marketplace/CreateListing";
+import MarketplaceListingDetail from "./pages/marketplace/ListingDetail";
+import EditListing from "./pages/marketplace/EditListing";
+import MarketplaceOrders from "./pages/marketplace/Orders";
+import OrderConfirmation from "./pages/marketplace/OrderConfirmation";
+import SellerOrders from "./pages/marketplace/SellerOrders";
+import SellerPayments from "./pages/marketplace/SellerPayments";
 
 function App() {
   // Helper function to convert absolute paths to relative paths for nested routes
@@ -189,6 +205,20 @@ function App() {
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
           <Route path="market" element={<Market />} />
+          
+          {/* Marketplace Routes */}
+          <Route path="marketplace" element={<Marketplace />} />
+          <Route path="marketplace/cart" element={<MarketplaceCart />} />
+          <Route path="marketplace/checkout" element={<MarketplaceCheckout />} />
+          <Route path="marketplace/listing/:id" element={<MarketplaceListingDetail />} />
+          <Route path="marketplace/my-listings" element={<MyListings />} />
+          <Route path="marketplace/create-listing" element={<CreateListing />} />
+          <Route path="marketplace/edit-listing/:id" element={<EditListing />} />
+          <Route path="marketplace/orders" element={<MarketplaceOrders />} />
+          <Route path="marketplace/order-confirmation/:id" element={<OrderConfirmation />} />
+          <Route path="marketplace/seller-orders" element={<SellerOrders />} />
+          <Route path="marketplace/seller-payments" element={<SellerPayments />} />
+          
           <Route path="messages" element={<MessagesLayout />} />
           <Route path="products/:id" element={<Product />} />
           <Route path="products/listing" element={<Listing />} />
@@ -287,6 +317,9 @@ function App() {
           <Route path="logistics/shipments/create" element={<LogisticsShipmentCreate />} />
           <Route path="logistics/shipments/:id" element={<LogisticsShipmentDetail />} />
           <Route path="logistics/tracking" element={<LogisticsTracking />} />
+          <Route path="logistics/become-provider" element={<BecomeProvider />} />
+          <Route path="logistics/provider-dashboard" element={<ProviderDashboard />} />
+          <Route path="logistics/provider-settings" element={<ProviderSettings />} />
           
           {/* Inventory Management */}
           <Route path="inventory" element={<InventoryDashboard />} />
@@ -378,6 +411,8 @@ function App() {
           <Route path={toRelativePath(webRoutes.logisticsShipmentEdit)} element={<LogisticsShipmentCreate />} />
           <Route path={toRelativePath(webRoutes.logisticsShipmentDetail)} element={<LogisticsShipmentDetail />} />
           <Route path={toRelativePath(webRoutes.logisticsTracking)} element={<LogisticsTracking />} />
+          <Route path={toRelativePath(webRoutes.logisticsBecomeProvider)} element={<BecomeProvider />} />
+          <Route path={toRelativePath(webRoutes.logisticsProviderDashboard)} element={<ProviderDashboard />} />
           
           {/* Inventory Routes */}
           <Route path={toRelativePath(webRoutes.inventoryDashboard)} element={<InventoryDashboard />} />

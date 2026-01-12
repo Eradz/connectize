@@ -1,0 +1,669 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  Truck, Package, DollarSign, Star, TrendingUp, Clock,
+  CheckCircle, AlertCircle, Eye, Send, BarChart3,
+  Calendar, MapPin, ArrowRight, Filter, Search,
+  FileText, Settings, Bell, Award, ChevronRight
+} from 'lucide-react';
+import { logisticsAPI } from '../../api-services/logistics';
+import { getSession } from '../../lib/session';
+
+const ProviderDashboard = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [provider, setProvider] = useState(null);
+  const [stats, setStats] = useState({
+    activeShipments: 0,
+    pendingQuotes: 0,
+    completedShipments: 0,
+    totalEarnings: 0,
+  });
+  const [openRequests, setOpenRequests] = useState([]);
+  const [myQuotes, setMyQuotes] = useState([]);
+  const [activeShipments, setActiveShipments] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const session = getSession();
+      
+      // Session has { id, email, tokens } structure
+      if (!session?.id || !session?.tokens?.access) {
+        navigate('/login?redirect=/logistics/provider-dashboard');
+        return;
+      }
+
+      // Load provider profile using dedicated endpoint
+      let myProvider = null;
+      try {
+        myProvider = await logisticsAPI.getMyProviderProfile();
+      } catch (profileError) {
+        console.log('No provider profile found:', profileError);
+        // Fallback: try to find in all providers
+        try {
+          const providersResponse = await logisticsAPI.getLogisticsProviders();
+          const providers = providersResponse?.results || providersResponse || [];
+          myProvider = providers.find(p => p.user === session.id);
+        } catch (err) {
+          console.error('Failed to load providers:', err);
+        }
+      }
+
+      if (!myProvider) {
+        navigate('/logistics/become-provider');
+        return;
+      }
+
+      setProvider(myProvider);
+
+      // Load open shipment requests (that we can quote on)
+      const requestsResponse = await logisticsAPI.getShipmentRequests({ 
+        status: 'posted',
+        page_size: 10 
+      });
+      setOpenRequests(requestsResponse?.results || requestsResponse || []);
+
+      // Load my quotes
+      const quotesResponse = await logisticsAPI.getShipmentQuotes({ 
+        provider: myProvider.id,
+        page_size: 20 
+      });
+      setMyQuotes(quotesResponse?.results || quotesResponse || []);
+
+      // Load active shipments assigned to me
+      const shipmentsResponse = await logisticsAPI.getShipments({ 
+        provider: myProvider.id,
+        page_size: 20 
+      });
+      const shipments = shipmentsResponse?.results || shipmentsResponse || [];
+      setActiveShipments(shipments);
+
+      // Calculate stats
+      const activeCount = shipments.filter(s => 
+        ['preparing', 'picked_up', 'in_transit'].includes(s.status)
+      ).length;
+      const completedCount = shipments.filter(s => s.status === 'delivered').length;
+      const pendingQuotes = (quotesResponse?.results || quotesResponse || [])
+        .filter(q => q.is_active && !q.accepted).length;
+
+      setStats({
+        activeShipments: activeCount,
+        pendingQuotes: pendingQuotes,
+        completedShipments: completedCount,
+        totalEarnings: shipments.reduce((sum, s) => {
+          if (s.status === 'delivered' && s.quote?.total_cost) {
+            return sum + parseFloat(s.quote.total_cost);
+          }
+          return sum;
+        }, 0),
+      });
+
+    } catch (error) {
+      console.error('Failed to load dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitQuote = async (requestId) => {
+    navigate(`/logistics/requests/${requestId}?action=quote`);
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      preparing: 'bg-blue-100 text-blue-800',
+      picked_up: 'bg-indigo-100 text-indigo-800',
+      in_transit: 'bg-purple-100 text-purple-800',
+      delivered: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount || 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!provider) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Truck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Not a Provider Yet</h2>
+          <p className="text-gray-600 mb-4">Register as a logistics provider to access this dashboard</p>
+          <button
+            onClick={() => navigate('/logistics/become-provider')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Become a Provider
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <Truck className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{provider.company_name}</h1>
+                <div className="flex items-center gap-4 mt-1">
+                  <span className="flex items-center gap-1 text-sm text-gray-600">
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    {Number(provider.safety_rating || 0).toFixed(1)} Rating
+                  </span>
+                  <span className="flex items-center gap-1 text-sm text-gray-600">
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    {Number(provider.on_time_delivery_rate || 0).toFixed(0)}% On-Time
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    provider.is_active ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {provider.is_active ? 'Active' : 'Pending Verification'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                <Bell className="w-5 h-5" />
+              </button>
+              <Link
+                to="/logistics/provider-settings"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                title="API Integration Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </Link>
+              <Link
+                to="/logistics/requests"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <Search className="w-4 h-4" />
+                Find Shipments
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Truck className="w-6 h-6 text-blue-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">{stats.activeShipments}</span>
+            </div>
+            <h3 className="font-medium text-gray-600">Active Shipments</h3>
+            <p className="text-sm text-gray-400 mt-1">Currently in progress</p>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <Clock className="w-6 h-6 text-yellow-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">{stats.pendingQuotes}</span>
+            </div>
+            <h3 className="font-medium text-gray-600">Pending Quotes</h3>
+            <p className="text-sm text-gray-400 mt-1">Awaiting response</p>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">{stats.completedShipments}</span>
+            </div>
+            <h3 className="font-medium text-gray-600">Completed</h3>
+            <p className="text-sm text-gray-400 mt-1">Successfully delivered</p>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-purple-600" />
+              </div>
+              <span className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalEarnings)}</span>
+            </div>
+            <h3 className="font-medium text-gray-600">Total Earnings</h3>
+            <p className="text-sm text-gray-400 mt-1">From completed jobs</p>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit mb-6">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'requests', label: 'Open Requests', icon: Package },
+            { id: 'quotes', label: 'My Quotes', icon: FileText },
+            { id: 'shipments', label: 'Active Shipments', icon: Truck },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-2 gap-6">
+            {/* Recent Requests */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">New Shipment Requests</h2>
+                  <Link 
+                    to="/logistics/requests" 
+                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    View All <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {openRequests.slice(0, 5).map((request) => (
+                  <div key={request.id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">{request.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {request.origin_address} → {request.destination_address}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-xs text-gray-400">
+                            {request.weight} kg • {request.cargo_type?.replace('_', ' ')}
+                          </span>
+                          {request.budget_max && (
+                            <span className="text-xs font-medium text-green-600">
+                              Budget: {formatCurrency(request.budget_max)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleSubmitQuote(request.id)}
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+                      >
+                        <Send className="w-3 h-3" />
+                        Quote
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {openRequests.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    No open requests available
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Active Shipments */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">Active Shipments</h2>
+                  <button 
+                    onClick={() => setActiveTab('shipments')}
+                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    View All <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {activeShipments
+                  .filter(s => ['preparing', 'picked_up', 'in_transit'].includes(s.status))
+                  .slice(0, 5)
+                  .map((shipment) => (
+                    <div key={shipment.id} className="p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900">
+                              {shipment.tracking_number}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipment.status)}`}>
+                              {shipment.status?.replace('_', ' ')}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {shipment.request?.origin_address} → {shipment.request?.destination_address}
+                          </p>
+                        </div>
+                        <Link
+                          to={`/logistics/shipments/${shipment.id}`}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                {activeShipments.filter(s => ['preparing', 'picked_up', 'in_transit'].includes(s.status)).length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    No active shipments
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Performance Card */}
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white">
+              <div className="flex items-center gap-3 mb-4">
+                <Award className="w-8 h-8" />
+                <h2 className="text-lg font-semibold">Performance Score</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-3xl font-bold">
+                    {Number(provider.on_time_delivery_rate || 0).toFixed(0)}%
+                  </div>
+                  <p className="text-blue-200 text-sm">On-Time Delivery</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold flex items-center gap-1">
+                    {Number(provider.safety_rating || 0).toFixed(1)}
+                    <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                  </div>
+                  <p className="text-blue-200 text-sm">Safety Rating</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-blue-500">
+                <p className="text-sm text-blue-200">
+                  {provider.on_time_delivery_rate >= 95 
+                    ? '🏆 Top Performer! You\'re in the top 10% of providers.'
+                    : 'Keep up the good work! Higher ratings mean more opportunities.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <Link
+                  to="/logistics/requests"
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <Search className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Browse Shipments</span>
+                </Link>
+                <Link
+                  to="/logistics/shipments"
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <Truck className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">My Shipments</span>
+                </Link>
+                <button
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                >
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Analytics</span>
+                </button>
+                <button
+                  className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                >
+                  <Settings className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Settings</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'requests' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">Open Shipment Requests</h2>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search requests..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                    <Filter className="w-4 h-4" />
+                    Filter
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {openRequests
+                .filter(r => 
+                  r.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  r.origin_address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  r.destination_address?.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((request) => (
+                  <div key={request.id} className="p-6 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-gray-900">{request.title}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            request.urgency === 'urgent' ? 'bg-red-100 text-red-700' :
+                            request.urgency === 'high' ? 'bg-orange-100 text-orange-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {request.urgency || 'Normal'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
+                          <MapPin className="w-4 h-4" />
+                          <span>{request.origin_address}</span>
+                          <ArrowRight className="w-4 h-4" />
+                          <span>{request.destination_address}</span>
+                        </div>
+                        <div className="flex items-center gap-6 mt-3">
+                          <span className="text-sm text-gray-500">
+                            <strong>{request.weight}</strong> kg
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {request.cargo_type?.replace('_', ' ')}
+                          </span>
+                          {request.pickup_date_requested && (
+                            <span className="flex items-center gap-1 text-sm text-gray-500">
+                              <Calendar className="w-4 h-4" />
+                              Pickup: {new Date(request.pickup_date_requested).toLocaleDateString()}
+                            </span>
+                          )}
+                          {request.budget_max && (
+                            <span className="text-sm font-medium text-green-600">
+                              Budget: {formatCurrency(request.budget_min)} - {formatCurrency(request.budget_max)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/logistics/requests/${request.id}`}
+                          className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View
+                        </Link>
+                        <button
+                          onClick={() => handleSubmitQuote(request.id)}
+                          className="flex items-center gap-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                          <Send className="w-4 h-4" />
+                          Submit Quote
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              {openRequests.length === 0 && (
+                <div className="p-12 text-center">
+                  <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="font-medium text-gray-900 mb-1">No Open Requests</h3>
+                  <p className="text-gray-500">Check back later for new shipment opportunities</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'quotes' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="p-6 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">My Quotes</h2>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {myQuotes.map((quote) => (
+                <div key={quote.id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{quote.request_title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Quote: {formatCurrency(quote.total_cost)}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          quote.accepted ? 'bg-green-100 text-green-700' :
+                          quote.is_active ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {quote.accepted ? 'Accepted' : quote.is_active ? 'Pending' : 'Expired'}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          Submitted {new Date(quote.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <Link
+                      to={`/logistics/requests/${quote.request}`}
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+              {myQuotes.length === 0 && (
+                <div className="p-12 text-center">
+                  <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="font-medium text-gray-900 mb-1">No Quotes Yet</h3>
+                  <p className="text-gray-500 mb-4">Start quoting on shipment requests to win jobs</p>
+                  <Link
+                    to="/logistics/requests"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Search className="w-4 h-4" />
+                    Browse Requests
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'shipments' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="p-6 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">My Shipments</h2>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {activeShipments.map((shipment) => (
+                <div key={shipment.id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-gray-900">{shipment.tracking_number}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(shipment.status)}`}>
+                          {shipment.status?.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {shipment.request?.origin_address} → {shipment.request?.destination_address}
+                      </p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                        <span>Created {new Date(shipment.created_at).toLocaleDateString()}</span>
+                        {shipment.quote?.total_cost && (
+                          <span className="font-medium text-green-600">
+                            {formatCurrency(shipment.quote.total_cost)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <Link
+                      to={`/logistics/shipments/${shipment.id}`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+                    >
+                      <Eye className="w-4 h-4" />
+                      Manage
+                    </Link>
+                  </div>
+                </div>
+              ))}
+              {activeShipments.length === 0 && (
+                <div className="p-12 text-center">
+                  <Truck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="font-medium text-gray-900 mb-1">No Shipments Yet</h3>
+                  <p className="text-gray-500">Win quotes to start managing shipments</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ProviderDashboard;

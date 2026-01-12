@@ -4,6 +4,7 @@ import PlatformDashboardIcon from "../../icon/PlatformDashoardIcon"
 import BriefCaseIcon  from '../../icon/briefCaseIcon';
 import AISecondIcon from "../../icon/AISecondIcon"
 import LogisticIcon from "../../icon/LogisticIcon"
+import StoreIcon from "../../icon/StoreIcon"
 import {ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
 import { Link } from "react-router-dom";
 import {DealIcon} from '../../icon/deal';
@@ -41,6 +42,12 @@ const [isOpen, setIsOpen] = useState(false);
       to: webRoutes.logisticsHub,
       icon: <LogisticIcon width={36} height={36} fill="#F8F9FA"/>,
       excerpt: "Supply chain management",
+    },
+    {
+      name: "Marketplace",
+      to: webRoutes.marketplace,
+      icon: <StoreIcon width={36} height={36} fill="#F8F9FA"/>,
+      excerpt: "Buy and sell products",
     }
   ];
   return (

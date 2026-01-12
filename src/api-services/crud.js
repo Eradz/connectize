@@ -17,6 +17,15 @@ export class CrudService {
       params: { page, limit, ...status },
     });
   }
+  
+  // Alias for getAll - commonly used name
+  async list(params = {}) {
+    return makeApiRequest({
+      url: this.basePath,
+      method: "GET",
+      params,
+    });
+  }
 
   async getById(id) {
     return makeApiRequest({

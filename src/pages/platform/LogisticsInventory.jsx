@@ -275,8 +275,18 @@ const LogisticsInventoryEnhanced = () => {
         console.log('🧪 Direct API test response:', testResponse.status, testResponse.statusText);
         
         if (!testResponse.ok) {
-          const errorData = await testResponse.json();
-          console.error('🧪 Direct API test failed:', errorData);
+          // Try to parse as JSON, but handle non-JSON responses gracefully
+          const contentType = testResponse.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const errorData = await testResponse.json();
+              console.error('🧪 Direct API test failed:', errorData);
+            } catch (parseError) {
+              console.error('🧪 Direct API test failed (non-JSON response):', testResponse.status);
+            }
+          } else {
+            console.error('🧪 Direct API test failed (non-JSON response):', testResponse.status);
+          }
           
           if (testResponse.status === 401) {
             toast.error('Authentication expired. Please log in again.');
@@ -284,8 +294,18 @@ const LogisticsInventoryEnhanced = () => {
             return;
           }
         } else {
-          const testData = await testResponse.json();
-          console.log('🧪 Direct API test success:', testData);
+          // Try to parse as JSON, but handle non-JSON responses gracefully
+          const contentType = testResponse.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const testData = await testResponse.json();
+              console.log('🧪 Direct API test success:', testData);
+            } catch (parseError) {
+              console.log('🧪 Direct API test success (non-JSON response)');
+            }
+          } else {
+            console.log('🧪 Direct API test success (non-JSON response)');
+          }
         }
       } catch (directError) {
         console.error('🧪 Direct API test error:', directError);

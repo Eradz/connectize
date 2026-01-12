@@ -26,6 +26,7 @@ import {BusinessHub} from "../icon/BusinessHub"
 import LogisticIcon from "../icon/LogisticIcon";
 import CreditCardIcon from "../icon/CreditCardIcon";
 import OpenBookIcon from "../icon/OpenBookIcon";
+import StoreIcon from "../icon/StoreIcon";
 
 // Icon mapping for dynamic icons
 const iconMap = {
@@ -36,6 +37,7 @@ const iconMap = {
   LogisticIcon,
   CreditCardIcon,
   OpenBookIcon,
+  StoreIcon,
   BookOpen,
   CreditCard,
   Shield,
