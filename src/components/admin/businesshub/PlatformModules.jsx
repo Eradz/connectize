@@ -43,11 +43,11 @@ export default function PlatformModules({dashboardData}) {
     },
     {
       icon: <StarIcon/>,
-      title: "Featured Ads",
-      description: "Promote your content across the platform",
-      link: `${dashboardData.ads.active} Active`,
+      title: "Industrial Events",
+      description: "Showcase your industry events and webinars",
+      link: `${dashboardData.events.count} Active`,
       bgColor: "bg-orange-50",
-      to: webRoutes.featuredAds
+      to: webRoutes.workforceEvents
     },
     {
       icon: <CardIcon/>,

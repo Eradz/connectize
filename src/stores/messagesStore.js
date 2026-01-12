@@ -280,6 +280,20 @@ export const useMessagesStore = create((set, get) => ({
     try {
       const confirmed = await messageUser(formData);
       get().replaceOptimisticMessage(room_name, tempId, confirmed);
+      const lastMessages = get().lastMessages
+      const indexOfLastMessageToUnshift = lastMessages.findIndex(
+        (m) => m.room_name === room_name
+      );
+      if (indexOfLastMessageToUnshift !== -1) {
+         const messageToMove = lastMessages[indexOfLastMessageToUnshift];
+      const newLastMessages = [
+        messageToMove,
+        ...lastMessages.slice(0, indexOfLastMessageToUnshift),
+        ...lastMessages.slice(indexOfLastMessageToUnshift + 1)
+      ];
+      
+      set({ lastMessages: newLastMessages });
+      }
     } catch (err) {
       console.error("Failed to send message", err);
       get().replaceOptimisticMessage(room_name, tempId, {

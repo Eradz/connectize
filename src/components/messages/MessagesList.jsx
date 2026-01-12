@@ -30,7 +30,6 @@ export default function MessagesList() {
   );
 
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-
   const messagesToShow = useMemo(() => {
     if (!showOnlyFavorites) return lastMessages;
 
@@ -43,7 +42,7 @@ export default function MessagesList() {
     console.log("fav", v);
 
     return v;
-  }, [lastMessages.length, favoriteChats.length, showOnlyFavorites]);
+  }, [lastMessages, favoriteChats.length, showOnlyFavorites]);
 
   useEffect(() => {
     // Only fetch initially if we don't have any messages
