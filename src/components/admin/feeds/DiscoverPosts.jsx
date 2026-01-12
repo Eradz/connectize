@@ -19,6 +19,9 @@ import {
   deletePost,
   editPost,
   likePost,
+  likeComment,
+  replyToComment,
+  likeReply,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
@@ -41,6 +44,7 @@ import SocialShareModal from "../../CustomShareButton";
 import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
+import CommentThread from "../../comments/CommentThread";
 
 function DiscoverPosts({
   searchArray,
@@ -403,6 +407,46 @@ const CommentSection = ({
     }
   }, [comment, postItem, setRefetchInterval]);
 
+  const handleReplyToComment = useCallback(async (commentId, replyData) => {
+    try {
+      await replyToComment(
+        commentId,
+        replyData.text,
+        replyData.mentions || [],
+        [],
+        replyData.parentReplyId || null
+      );
+      refetchComments();
+      toast.success("Reply posted successfully");
+    } catch (error) {
+      console.error("Failed to reply:", error);
+      toast.error("Failed to post reply");
+      throw error;
+    }
+  }, [refetchComments]);
+
+  const handleLikeComment = useCallback(async (commentId, hasLiked) => {
+    try {
+      await likeComment(commentId, hasLiked);
+      refetchComments();
+    } catch (error) {
+      console.error("Failed to like comment:", error);
+      toast.error("Failed to like comment");
+      throw error;
+    }
+  }, [refetchComments]);
+
+  const handleLikeReply = useCallback(async (replyId, hasLiked) => {
+    try {
+      await likeReply(replyId, hasLiked);
+      refetchComments();
+    } catch (error) {
+      console.error("Failed to like reply:", error);
+      toast.error("Failed to like reply");
+      throw error;
+    }
+  }, [refetchComments]);
+
   useEffect(() => {
     if (!showCommentSection) setComment("");
   }, [showCommentSection]);
@@ -438,10 +482,17 @@ const CommentSection = ({
             );
           })
         : commentsData?.map((comment) => (
-            <MemoizedCommentBlock
+            <CommentThread
               key={comment.id}
               comment={comment}
               postUserId={postItem.user.id}
+              currentUser={null}
+              onReply={handleReplyToComment}
+              onLike={handleLikeComment}
+              onLikeReply={handleLikeReply}
+              users={[]}
+              companies={[]}
+              level={0}
             />
           ))}
       <div className="mt-4 border-t pt-4 relative">
@@ -463,46 +514,6 @@ const CommentSection = ({
     </section>
   );
 };
-
-const CommentBlock = ({ comment, postUserId }) => {
-  return (
-    <div className="mb-4">
-      <div className="flex gap-2">
-        <Link to={`/co/${comment?.user?.id}`}>
-          <Avatar
-            name={`${comment.user.first_name} ${comment.user.last_name}`}
-            className={clsx(avatarStyle)}
-            src={comment.user.avatar}
-            size="sm"
-          />
-        </Link>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1">
-            <h5 className="font-bold text-sm">
-              <Link to={`/co/${comment?.user?.id}`}>
-                {comment.user.first_name} {comment.user.last_name}
-              </Link>
-              {comment.user.id === postUserId && (
-                <span className="text-[.65rem] text-gray-400 font-medium">
-                  (author)
-                </span>
-              )}
-            </h5>
-            <span className="text-gray-400 text-xs">
-              &bull; <TimeAgo time={comment.commented_at} />
-            </span>
-          </div>
-          <MarkdownComponent
-            markdownContent={comment.content}
-            className="text-sm text-gray-600 mt-1"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const MemoizedCommentBlock = memo(CommentBlock);
 
 export function ButtonWithTooltipIcon({
   IconName,
