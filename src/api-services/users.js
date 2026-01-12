@@ -100,23 +100,23 @@ export const getAssociatedUsersForUser = async (userId) => {
   return [];
   // return allUsersInLocation;
 };
-// export const getSuggestedUsersForCurrentUser = async () => {
-//   const currentUser = await getCurrentUser();
+export const getSuggestedUsersForCurrentUser = async () => {
+  const currentUser = await getCurrentUser();
 
-//   const allUsers = await getAllUsers();
+  const allUsers = await getAllUsers();
 
-//   const allUsersInLocation = allUsers.filter(
-//     (user) =>
-//       currentUser.id !== user.id &&
-//       user.first_name &&
-//       (user.city === currentUser.city ||
-//         user.region === currentUser.region ||
-//         user.country === currentUser.country ||
-//         user)
-//   );
+  const allUsersInLocation = allUsers.filter(
+    (user) =>
+      currentUser.id !== user.id &&
+      user.first_name &&
+      (user.city === currentUser.city ||
+        user.region === currentUser.region ||
+        user.country === currentUser.country ||
+        user)
+  );
 
-//   return allUsersInLocation;
-// };
+  return allUsersInLocation;
+};
 
 export const getPeopleAssociatedForUser = async (thisUser, companyId) => {
   if (!thisUser) return [];

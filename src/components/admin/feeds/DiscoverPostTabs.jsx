@@ -13,9 +13,10 @@ import { Bookmark, VerifiedIcon } from "../../../icon";
 import CustomTabs from "../../custom/tabs";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
-import { ConjoinedAvatarSkeleton } from "./DiscoverPosts";
-
-import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
+import {
+  ButtonWithTooltipIcon,
+  ConjoinedAvatarSkeleton,
+} from "./DiscoverPosts";
 import { cn } from "../../../lib/utils";
 import { useGetServicesFirstPage } from "../../../hooks/useServices";
 import { useGetProductsFirstPage } from "../../../hooks/useProduct";
@@ -37,7 +38,7 @@ const DiscoverPostTabs = () => {
       logo: product?.company?.logo,
       verified: product?.featured,
       url: "/products/" + product.id,
-      slug: product?.company?.slug,
+      slug: `${product?.company?.company_name}`,
       whole: product,
     };
   });
@@ -51,7 +52,7 @@ const DiscoverPostTabs = () => {
       logo: service?.company?.logo,
       verified: service?.featured,
       url: "/services/" + service.id,
-      slug: service?.company?.slug,
+      slug: `${service?.company?.company_name}`,
       whole: service,
     };
   });
@@ -134,8 +135,8 @@ export const PostSlider = ({
         {children
           ? children
           : array.map((item, index) => (
-              <SwiperSlide className="h-auto self-stretch" key={index}>
-                <PostCard {...item} className={"h-full"} />
+              <SwiperSlide key={index}>
+                <PostCard {...item} />
               </SwiperSlide>
             ))}
       </Swiper>
@@ -160,7 +161,7 @@ export const PostCard = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={cn(
-        "p-4 lg:!px-3 !w-full max-w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0 overflow-hidden min-h-[280px]",
+        "p-4 lg:!px-3 !w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0",
         className
       )}
     >
@@ -168,12 +169,10 @@ export const PostCard = ({
         <h3 className="font-bold capitalize text-lg line-clamp-1">
           {title || "Remote Monitoring and Control"}
         </h3>
-        <div className="mr-5">
-          <BookMarkButton
-            service={isService ? whole : null}
-            product={!isService ? whole : null}
-          />
-        </div>
+        <BookMarkButton
+          service={isService ? whole : null}
+          product={!isService ? whole : null}
+        />
       </div>
 
       {/* <div className="flex mt-2">
@@ -185,8 +184,8 @@ export const PostCard = ({
         ))}
       </div> */}
 
-      <div className="mt-3 flex gap-2 min-h-0 overflow-hidden min-w-0">
-        <div className="line-clamp-3 flex-1 overflow-hidden break-words min-w-0">
+      <div className="my-3 flex gap-2 flex-1">
+        <div className="line-clamp-3 shrink-0 w-[70%]">
           <MarkdownComponent
             markdownContent={
               summary ||
@@ -211,9 +210,9 @@ export const PostCard = ({
         />
       )} */}
 
-      <div className="flex items-center justify-between gap-4 mt-4 pt-3 border-t shrink-0 min-w-0">
-        <div className="flex gap-2 items-center min-w-0 flex-1">
-          <Link to={`/${slug || companyName}`} className="relative shrink-0">
+      <div className="flex items-center justify-between gap-4 mt-4 py-3 border-t">
+        <div className="flex gap-2 items-center">
+          <Link to={`/${slug || companyName}`} className="relative">
             <Avatar
               src={logo || "images/default-company-logo.png"}
               alt={companyName}
@@ -225,7 +224,7 @@ export const PostCard = ({
           </Link>
           <Link
             to={`/${slug || companyName}`}
-            className="text-sm font-bold capitalize line-clamp-1 min-w-0 overflow-hidden text-ellipsis"
+            className="text-sm font-bold capitalize line-clamp-1"
           >
             {companyName || "West Land Oil"}
           </Link>
@@ -234,7 +233,7 @@ export const PostCard = ({
         <Link
           to={url || ""}
           // replace
-          className="bg-gold hover:opacity-60 rounded-full py-2 px-6 text-sm shrink-0 whitespace-nowrap mr-5"
+          className="bg-gold hover:opacity-60 rounded-full py-2 px-6 text-sm"
         >
           View
         </Link>
@@ -281,10 +280,10 @@ export const BookMarkButton = ({ service, product }) => {
         (serviceProp) => serviceProp?.user?.id === currentUser?.id
       )
     : product
-      ? product?.likes?.find(
-          (productProp) => productProp?.user?.id === currentUser?.id
-        )
-      : false;
+    ? product?.likes?.find(
+        (productProp) => productProp?.user?.id === currentUser?.id
+      )
+    : false;
   const [bookmarked, setBookmarked] = useState(userHasBookmarked);
   const [disabled, setDisabled] = useState(false);
 
