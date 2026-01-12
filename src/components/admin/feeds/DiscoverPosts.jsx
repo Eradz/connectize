@@ -437,7 +437,7 @@ const CommentSection = ({
               </div>
             );
           })
-        : commentsData.map((comment) => (
+        : commentsData?.map((comment) => (
             <MemoizedCommentBlock
               key={comment.id}
               comment={comment}
