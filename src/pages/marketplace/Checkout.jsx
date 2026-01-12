@@ -114,6 +114,14 @@ function CheckoutFormInner({ cart, onSuccess }) {
       return;
     }
 
+    // Get CardElement - it must be available
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      toast.error("Payment card information is missing. Please go back to the payment step.");
+      setStep(2); // Go back to payment step
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -137,7 +145,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
         paymentData.client_secret,
         {
           payment_method: {
-            card: elements.getElement(CardElement),
+            card: cardElement,
             billing_details: {
               name: `${shippingAddress.first_name} ${shippingAddress.last_name}`,
               email: shippingAddress.email,
@@ -410,57 +418,55 @@ function CheckoutFormInner({ cart, onSuccess }) {
       )}
 
       {/* Step 2: Payment */}
-      {step === 2 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <CreditCard size={20} /> Payment Details
-          </h3>
-          
-          <div className="mb-4 p-4 border border-gray-200 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Card Information</label>
-            <CardElement 
-              options={{
-                style: {
-                  base: {
-                    fontSize: '16px',
-                    color: '#374151',
-                    '::placeholder': {
-                      color: '#9CA3AF',
-                    },
-                    padding: '12px',
+      <div className={`bg-white rounded-xl border border-gray-200 p-6 ${step !== 2 ? 'hidden' : ''}`}>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <CreditCard size={20} /> Payment Details
+        </h3>
+        
+        <div className="mb-4 p-4 border border-gray-200 rounded-lg">
+          <label className="block text-sm font-medium text-gray-700 mb-3">Card Information</label>
+          <CardElement 
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#374151',
+                  '::placeholder': {
+                    color: '#9CA3AF',
                   },
-                  invalid: {
-                    color: '#EF4444',
-                  },
+                  padding: '12px',
                 },
-              }}
-              className="p-3 border border-gray-300 rounded-lg"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <Lock size={14} />
-            <span>Your payment info is secured with SSL encryption</span>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep(3)}
-              className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
-            >
-              Review Order
-            </button>
-          </div>
+                invalid: {
+                  color: '#EF4444',
+                },
+              },
+            }}
+            className="p-3 border border-gray-300 rounded-lg"
+          />
         </div>
-      )}
+        
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+          <Lock size={14} />
+          <span>Your payment info is secured with SSL encryption</span>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep(3)}
+            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+          >
+            Review Order
+          </button>
+        </div>
+      </div>
 
       {/* Step 3: Review */}
       {step === 3 && (
