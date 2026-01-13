@@ -52,26 +52,34 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { data: posts, isLoading } = usePollPosts();
+  const { data: posts, isLoading, error } = usePollPosts();
 
+  // Debug logging
+  if (error) {
+    console.error("❌ [DiscoverPosts] Error loading posts:", error);
+  }
+  
   const finalArray = isSearch
     ? searchArray
     : companyName
-    ? posts?.filter(
+    ? posts?.pages?.flatMap(page => page.posts)?.filter(
         (post) =>
           post?.company?.company_name?.toLowerCase() ===
           companyName?.toLowerCase()
       )
-    : posts?.pages[0]?.posts;
+    : posts?.pages?.flatMap(page => page.posts);
   const postLoading = isSearch ? searchLoading : isLoading;
-      // console.log("final Array", finalArray)
-      // console.log("posts", posts)
+  
   return (
     <section className="space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
         Array.from({ length: 5 }, (_, index) => (
           <DiscoverPostSkeleton key={index} />
         ))
+      ) : error ? (
+        <LightParagraph>
+          Failed to load posts. Please try again.
+        </LightParagraph>
       ) : finalArray?.length < 1 ? (
         <LightParagraph>
           {isSearch ? "No post found in search" : ""}
@@ -80,7 +88,7 @@ function DiscoverPosts({
         finalArray?.map((post, index) => (
           <DiscoverPostItem
             hasImage={post?.images?.length > 0}
-            key={index}
+            key={post?.id || index}
             postItem={post}
           />
         ))
@@ -97,16 +105,38 @@ export const DiscoverPostItem = ({
   isSinglePost = false,
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
+  
+  // Use preview_comments from post data initially - instant display!
+  const previewComments = postItem.preview_comments || [];
+  const totalComments = postItem.numberOfComments || 0;
+  const hasMoreComments = totalComments > previewComments.length;
+  
+  // Show all comments (switch from preview to full list)
+  const [showAllComments, setShowAllComments] = useState(false);
+  
+  // Background prefetch: Start loading ALL comments when comment section opens
+  // This way they're ready when user clicks "Load more"
   const {
-    data: comments,
+    data: allCommentsData,
     refetch: refetchComments,
-    isLoading: isLoadingComments,
+    isLoading: isLoadingMoreComments,
+    isFetched: commentsFetched,
   } = useGetPostComments(
     { postId: postItem.id },
     {
-      enabled: showCommentSection,
+      // Start fetching in background when comments section is shown AND there are more comments
+      enabled: showCommentSection && hasMoreComments,
+      staleTime: 30000, // Cache for 30 seconds
     }
   );
+  
+  // Use fetched comments if showing all and data is ready, otherwise use preview
+  const comments = showAllComments && allCommentsData?.results 
+    ? allCommentsData.results 
+    : previewComments;
+  
+  // Check if more comments are ready to show (prefetched in background)
+  const moreCommentsReady = commentsFetched && allCommentsData?.results;
 
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
@@ -131,10 +161,12 @@ export const DiscoverPostItem = ({
   const [disabled, setDisabled] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
+  // Update comment count when loaded
   useEffect(() => {
-    if (isLoadingComments || !comments) return;
-    setCommentsLength(comments?.length);
-  }, [comments?.length]);
+    if (allCommentsData?.results) {
+      setCommentsLength(allCommentsData.results.length);
+    }
+  }, [allCommentsData?.results]);
 
   const handleLikePost = async () => {
     const currentIsLiked = liked;
@@ -346,26 +378,30 @@ export const DiscoverPostItem = ({
       <CommentSection
         showCommentSection={showCommentSection}
         setShowCommentSection={setShowCommentSection}
-        commentsData={comments?.results}
+        commentsData={comments}
         postItem={postItem}
         refetchComments={refetchComments}
-        isLoading={isLoadingComments}
+        isLoadingMore={isLoadingMoreComments && !moreCommentsReady}
+        hasMoreComments={hasMoreComments && !showAllComments}
+        onLoadMore={() => setShowAllComments(true)}
+        moreCommentsReady={moreCommentsReady}
       />
     </motion.article>
   );
 };
 
 /**
- * @todo the refechPosts fuction actuall fetches all the posts again when a user adds a comment. Instead make this process optimistc and optimise it for speed
- * @param {*} param0
- * @returns
+ * Comment section with instant display - uses preview_comments from post data
+ * Background prefetching loads more comments while user views preview
  */
 const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
   commentsData = [],
-  isLoading,
-  // setCommentsLength.
+  isLoadingMore = false,
+  hasMoreComments = false,
+  onLoadMore,
+  moreCommentsReady = false,
   postItem,
   refetchComments,
 }) => {
@@ -457,7 +493,7 @@ const CommentSection = ({
     <section
       className={clsx("transition-all duration-300", {
         "mt-4": showCommentSection,
-        "h-0 opacity-0": !showCommentSection,
+        "h-0 opacity-0 overflow-hidden": !showCommentSection,
       })}
     >
       <div className="mb-4 flex justify-between items-center">
@@ -468,35 +504,59 @@ const CommentSection = ({
         />
       </div>
 
-      {isLoading
-        ? Array.from({ length: 3 }, (_, index) => {
-            return (
-              <div className="mb-4 flex gap-2 w-full" key={index}>
-                <div className="">
-                  <div className="w-7 h-7 skeleton rounded-full" />
+      {/* Instant display - no loading for initial comments */}
+      {commentsData?.length === 0 ? (
+        <p className="text-gray-500 text-sm py-2">No comments yet. Be the first to comment!</p>
+      ) : (
+        commentsData?.map((comment) => (
+          <CommentThread
+            key={comment.id}
+            comment={comment}
+            postUserId={postItem.user?.id}
+            currentUser={null}
+            onReply={handleReplyToComment}
+            onLike={handleLikeComment}
+            onLikeReply={handleLikeReply}
+            users={[]}
+            companies={[]}
+            level={0}
+          />
+        ))
+      )}
+      
+      {/* Load more button - shows instantly if prefetch is ready, skeleton if still loading */}
+      {hasMoreComments && (
+        <>
+          {isLoadingMore ? (
+            // Show skeleton while background loading
+            <div className="py-2 space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="flex gap-2 animate-pulse">
+                  <div className="w-7 h-7 bg-gray-200 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-24" />
+                    <div className="h-2 bg-gray-200 rounded w-3/4" />
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="mb-3 w-28 h-3 skeleton rounded" />
-                  <div className="mb-1 w-1/2 h-2 skeleton rounded" />
-                  <div className="w-1/2 h-2 skeleton rounded" />
-                </div>
-              </div>
-            );
-          })
-        : commentsData?.map((comment) => (
-            <CommentThread
-              key={comment.id}
-              comment={comment}
-              postUserId={postItem.user.id}
-              currentUser={null}
-              onReply={handleReplyToComment}
-              onLike={handleLikeComment}
-              onLikeReply={handleLikeReply}
-              users={[]}
-              companies={[]}
-              level={0}
-            />
-          ))}
+              ))}
+              <p className="text-xs text-gray-400 text-center">Loading more comments...</p>
+            </div>
+          ) : (
+            // Button ready to show more (already prefetched)
+            <button
+              onClick={onLoadMore}
+              className="w-full py-2 text-sm text-gold hover:text-custom_yellow transition-colors flex items-center justify-center gap-2"
+            >
+              {moreCommentsReady ? (
+                <>Show all comments</>
+              ) : (
+                <>Load more comments</>
+              )}
+            </button>
+          )}
+        </>
+      )}
+
       <div className="mt-4 border-t pt-4 relative">
         <ReactQuill
           value={comment}

@@ -23,6 +23,10 @@ export function useGetPostComments({ postId, page = 1 }, queryOpts = {}) {
       const comments = await fetchComments(postId, page);
       return comments;
     },
+    // ✅ Smart caching defaults
+    staleTime: 30 * 1000, // 30 seconds - comments stay fresh
+    gcTime: 5 * 60 * 1000, // 5 minutes - keep in cache
+    refetchOnWindowFocus: false, // Don't refetch on tab switch
     ...queryOpts,
   });
 }

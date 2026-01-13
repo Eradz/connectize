@@ -147,6 +147,9 @@ import OrderConfirmation from "./pages/marketplace/OrderConfirmation";
 import SellerOrders from "./pages/marketplace/SellerOrders";
 import SellerPayments from "./pages/marketplace/SellerPayments";
 
+// Global prefetch for instant loading
+import GlobalPrefetch from "./components/GlobalPrefetch";
+
 function App() {
   // Helper function to convert absolute paths to relative paths for nested routes
   // Adds a safety guard so undefined values don't crash the app.
@@ -167,6 +170,8 @@ function App() {
   return (
     <div>
       <SEO />
+      {/* Prefetch key data in background after user logs in */}
+      <GlobalPrefetch />
       <Routes>
         {/* Comprehensive Admin CMS System */}
         <Route path="/admin/*" element={<ComprehensiveAdmin />} />
