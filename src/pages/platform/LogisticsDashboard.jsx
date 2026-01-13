@@ -386,7 +386,7 @@ const LogisticsDashboard = () => {
             <div className="flex space-x-3">
               <Link
                 to={webRoutes.logisticsShipmentCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-yellow-600 flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Shipment
@@ -739,7 +739,7 @@ const LogisticsDashboard = () => {
                   <div className="flex space-x-2">
                     <Link
                       to={webRoutes.logisticsShipmentCreate}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                      className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Create Shipment Request</span>
@@ -836,7 +836,7 @@ const LogisticsDashboard = () => {
                       <div className="mt-6">
                         <Link
                           to={webRoutes.logisticsShipmentCreate}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Shipment Request
@@ -942,7 +942,7 @@ const LogisticsDashboard = () => {
                         </Link>
                         <Link
                           to={webRoutes.logisticsShipmentCreate}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Shipment
@@ -1014,7 +1014,7 @@ const LogisticsDashboard = () => {
                         <div className="mt-3 flex space-x-2">
                           <Link
                             to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                            className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                            className="flex-1 text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
                           >
                             View Details
                           </Link>
@@ -1029,7 +1029,7 @@ const LogisticsDashboard = () => {
                       <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <Link
                           to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                          className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
                         >
                           <Plus className="w-4 h-4 mr-2" /> Add Inventory
                         </Link>
@@ -1059,7 +1059,7 @@ const LogisticsDashboard = () => {
                   Real-time shipment tracking will be displayed here
                 </p>
                 <div className="mt-6">
-                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-yellow-600">
                     <MapPin className="w-4 h-4 mr-2" />
                     View Map
                   </button>
