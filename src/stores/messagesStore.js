@@ -27,6 +27,9 @@ function getCurrentUserId() {
  *
  */
 
+// Cache duration for messages (2 minutes)
+const MESSAGE_CACHE_DURATION = 2 * 60 * 1000;
+
 export const useMessagesStore = create((set, get) => ({
   /**
    * @type {Record<String, ChatMessage[]>}
@@ -35,6 +38,9 @@ export const useMessagesStore = create((set, get) => ({
   // messages: [],
   // chatMessages: {},
   lastMessages: [],
+  
+  // Cache timestamp for smart refetching
+  lastMessagesFetchedAt: null,
 
   // an array of room_names
   favoriteChats: [],
@@ -92,13 +98,24 @@ export const useMessagesStore = create((set, get) => ({
 
   /**
    * @description Fetches and sets the last chats and favorite
+   * Cache time: Only refetch if data is older than 2 minutes
+   * @param {boolean} forceRefresh - Force fetch even if cache is fresh
    * @returns
    */
-  getLastMessages: async () => {
+  getLastMessages: async (forceRefresh = false) => {
     // prevent multiple fetches (especially in dev mode)
     if (get().lastMessagesLoading) {
       return;
     }
+    
+    // ✅ Use cached data if fresh (under 2 minutes old)
+    const lastFetchTime = get().lastMessagesFetchedAt;
+    const now = Date.now();
+    if (!forceRefresh && lastFetchTime && (now - lastFetchTime) < MESSAGE_CACHE_DURATION) {
+      console.log("✅ [Messages] Using cached data, age:", Math.round((now - lastFetchTime) / 1000), "seconds");
+      return;
+    }
+    
     try {
       set({ lastMessagesLoading: true });
       let data = await getMessagesForUser({ last_chats: true });
@@ -128,7 +145,11 @@ export const useMessagesStore = create((set, get) => ({
       console.log("🔍 Raw lastMessages from API:", data);
 
       console.log("✅ Processed lastMessages:", data);
-      set({ lastMessages: data, favoriteChats: flattenedFavoriteChats });
+      set({ 
+        lastMessages: data, 
+        favoriteChats: flattenedFavoriteChats,
+        lastMessagesFetchedAt: Date.now() // ✅ Track cache time
+      });
     } catch (err) {
       console.error("Failed to fetch messages", err);
     } finally {

@@ -37,8 +37,10 @@ export function useGetPostComments({ postId, page = 1 }, queryOpts = {}) {
       console.log(`Comment fetch for post ${postId} took ${endTime - startTime}ms`);
       return data;
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    // ✅ Smart caching defaults
+    staleTime: 30 * 1000, // 30 seconds - comments stay fresh
+    gcTime: 5 * 60 * 1000, // 5 minutes - keep in cache
+    refetchOnWindowFocus: false, // Don't refetch on tab switch
     ...queryOpts,
   });
 }

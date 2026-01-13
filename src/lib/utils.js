@@ -9,7 +9,14 @@ export function cn(...inputs) {
 
 export const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { refetchInterval: 600000 },
+    queries: { 
+      refetchInterval: 600000, // 10 minutes
+      staleTime: 2 * 60 * 1000, // ✅ 2 minutes - data stays fresh longer
+      gcTime: 10 * 60 * 1000, // ✅ 10 minutes - keep in cache
+      refetchOnWindowFocus: false, // ✅ Don't refetch on tab focus
+      retry: 2, // ✅ Only retry twice
+      retryDelay: 1000,
+    },
   },
 });
 

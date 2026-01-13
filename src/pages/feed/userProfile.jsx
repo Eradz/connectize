@@ -36,6 +36,10 @@ export default function UserProfile() {
     queryKey: ["users", userId],
     queryFn: () => getUserById(userId),
     enabled: !!userId && !!currentUser,
+    // ✅ Cache profile data for instant display on revisit
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   const headerProps = useMemo(

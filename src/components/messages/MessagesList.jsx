@@ -45,12 +45,14 @@ export default function MessagesList() {
   }, [lastMessages, favoriteChats.length, showOnlyFavorites]);
 
   useEffect(() => {
-    // Only fetch initially if we don't have any messages
-    if (lastMessages.length === 0) {
-      // (async () => await fetchLastMessages())();
-      fetchLastMessages();
-    }
-  }, [lastMessages.length]);
+    // ✅ Smart fetch - uses cache if available and fresh
+    // The store will automatically skip fetching if cache is under 2 minutes old
+    fetchLastMessages();
+  }, []); // Only run once on mount
+  
+  // ✅ Show cached data immediately even if refreshing
+  // Only show loading state if we have NO data at all
+  const showLoadingSkeleton = lastMessagesLoading && lastMessages.length === 0;
 
   return (
     <>
@@ -82,7 +84,7 @@ export default function MessagesList() {
       </div>
 
       <section className="flex flex-col gap-2 divide-y divide-gray-200/70  overflow-x-auto scroll-smooth scrollbar-hidden">
-        {lastMessagesLoading ? (
+        {showLoadingSkeleton ? (
           <MessagesListSkeleton />
         ) : lastMessages?.length <= 0 ? (
           <div className="min-h-40 py-2 mt-2 space-y-4">
