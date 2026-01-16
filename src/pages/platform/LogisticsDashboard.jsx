@@ -901,7 +901,7 @@ const LogisticsDashboard = () => {
                         {/* Route Info */}
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-xs font-semibold text-gray-700 mb-1">Route:</p>
-                          <div className="text-[12px] text-right text-gray-600">
+                          <div className="text-[12px] text-right text-gray-600 line-clamp-2">
                             <p className="font-medium">{shipment.request_details?.origin_address || 'Origin not specified'}</p>
                             <p className="text-xs text-gray-500 flex items-center mt-1">
                               <span>→ {shipment.request_details?.destination_address || 'Destination not specified'}</span>
@@ -951,14 +951,14 @@ const LogisticsDashboard = () => {
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <Link
                         to={webRoutes.logisticsRequests}
-                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                        className="inline-flex items-center px-4 py-2 bg-pale_yellow rounded-lg hover:bg-custom_yellow"
                       >
                         <FileText className="w-4 h-4 mr-2" />
                         View Requests
                       </Link>
                       <Link
                         to={webRoutes.logisticsShipmentCreate}
-                        className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
+                        className="inline-flex items-center px-4 py-2 bg-gold/80 text-white rounded-lg hover:bg-gold"
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Create Shipment
