@@ -879,90 +879,93 @@ const LogisticsDashboard = () => {
                   </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  {dashboardData.shipments.data.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Tracking #</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">ETA</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Budget</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboardData.shipments.data.map((shipment) => (
-                          <tr key={shipment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-4 px-4">
-                              <Link 
-                                to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                                className="font-medium text-blue-600 hover:text-blue-700"
-                              >
-                                {shipment.tracking_number || `SHIP-${shipment.id?.slice(0,8)}`}
-                              </Link>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{shipment.request_details?.origin_address}</p>
-                                <p className="text-sm text-gray-600">→ {shipment.request_details?.destination_address}</p>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{shipment.request_details?.cargo_type?.replace('_', ' ')}</p>
-                                <p className="text-sm text-gray-600">{shipment.request_details?.weight} kg</p>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                                {shipment.status.replace('_', ' ')}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4 text-sm text-gray-900">
-                              {shipment.request_details?.delivery_date_requested ? new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 'N/A'}
-                            </td>
-                            <td className="py-4 px-4 font-medium text-gray-900">
-                              {shipment.request_details?.budget_max ? formatCurrency(shipment.request_details.budget_max) : 'N/A'}
-                            </td>
-                            <td className="py-4 px-4">
-                              <Link
-                                to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                              >
-                                View
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="text-center py-12">
-                      <Truck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Shipments</h3>
-                      <p className="text-gray-500 mb-4">{dashboardData.requests.total > 0 ? 'Award a request to generate a shipment' : "You haven't created any shipments yet"}</p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                {dashboardData.shipments.data.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {dashboardData.shipments.data.map((shipment) => (
+                      <div key={shipment.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow p-6 capitalize">
+                        {/* Header with Icon and Status */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="p-2 bg-yellow-100 rounded-lg">
+                            <Package className="w-5 h-5 text-yellow-600" />
+                          </div>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
+                            {shipment.status.replace('_', ' ')}
+                          </span>
+                        </div>
+
+                        {/* Tracking Number */}
+                        <h4 className="text-sm font-bold text-gray-900 mb-4">
+                          {shipment.tracking_number || `SHIP-${shipment.id?.slice(0,8)}`}
+                        </h4>
+
+                        {/* Route Info */}
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="text-xs font-semibold text-gray-700 mb-1">Route:</p>
+                          <div className="text-[12px] text-right text-gray-600">
+                            <p className="font-medium">{shipment.request_details?.origin_address || 'Origin not specified'}</p>
+                            <p className="text-xs text-gray-500 flex items-center mt-1">
+                              <span>→ {shipment.request_details?.destination_address || 'Destination not specified'}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Cargo Info */}
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="text-xs font-semibold text-gray-700 mb-1">Cargo:</p>
+                          <p className="text-sm text-gray-600">
+                            {shipment.request_details?.cargo_type?.replace('_', ' ') || 'N/A'} - {shipment.request_details?.weight || 'N/A'} kg
+                          </p>
+                        </div>
+
+                        {/* Budget Info */}
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="text-xs font-semibold text-gray-700 mb-1">Budget:</p>
+                          <p className="text-sm text-gray-600 font-medium">
+                            {shipment.request_details?.budget_max ? formatCurrency(shipment.request_details.budget_max) : 'N/A'}
+                          </p>
+                        </div>
+
+                        {/* ETA Info */}
+                        <div className="flex items-center justify-between mb-6">
+                          <p className="text-xs font-semibold text-gray-700 mb-1">ETA:</p>
+                          <p className="text-sm text-gray-600">
+                            {shipment.request_details?.delivery_date_requested ? new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 'N/A'}
+                          </p>
+                        </div>
+
+                        {/* View Details Button */}
                         <Link
-                          to={webRoutes.logisticsRequests}
-                          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                          to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
+                          className="w-full bg-yellow-400 text-white font-medium py-2 rounded-lg hover:bg-yellow-500 transition-colors text-sm inline-block text-center"
                         >
-                          <FileText className="w-4 h-4 mr-2" />
-                          View Requests
-                        </Link>
-                        <Link
-                          to={webRoutes.logisticsShipmentCreate}
-                          className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Shipment
+                          View Details
                         </Link>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Truck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Shipments</h3>
+                    <p className="text-gray-500 mb-4">{dashboardData.requests.total > 0 ? 'Award a request to generate a shipment' : "You haven't created any shipments yet"}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link
+                        to={webRoutes.logisticsRequests}
+                        className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        View Requests
+                      </Link>
+                      <Link
+                        to={webRoutes.logisticsShipmentCreate}
+                        className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Shipment
+                      </Link>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
