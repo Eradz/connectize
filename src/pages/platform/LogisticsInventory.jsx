@@ -4,12 +4,17 @@ import {
   ArrowLeft, Package, Search, Plus, Boxes, AlertCircle, TrendingUp,
   DollarSign, Eye, Edit, MoreVertical, Download, RefreshCw,
   AlertTriangle, CheckCircle, Wrench, Truck, Building, Settings,
-  MapPin, Trash2
+  MapPin, Trash2,
+  Pen,
+  Clock,
+  MessageCircleWarning,
+  CircleAlert
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 import { getSession } from '../../lib/session';
+import { WarningIcon } from '../../components/ui/ModernIcon';
 
 const LogisticsInventoryEnhanced = () => {
   const navigate = useNavigate();
@@ -646,18 +651,18 @@ const LogisticsInventoryEnhanced = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col py-6">
               <button
                 onClick={() => navigate(webRoutes.logistics)}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="w-fit mb-2 flex items-center p-2 rounded-lg bg-pale_yellow hover:bg-gold"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
+                <span className='ml-1'>Back</span>
               </button>
+            <div className="flex items-center justify-between space-x-4">
               <div>
                 <div className="flex items-center gap-4">
                   <h1 className="text-2xl font-bold text-gray-900">Enhanced Inventory Management</h1>
@@ -665,9 +670,27 @@ const LogisticsInventoryEnhanced = () => {
                 <p className="text-gray-600 mt-1">Oil & Gas equipment and supplies tracking</p>
                 {/* Debug session indicator removed as requested */}
               </div>
-            </div>
-            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3">
               <button
+                onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
+                className="bg-gold hover:bg-custom_yellow px-4 py-2 rounded-lg flex items-center"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Item
+              </button>
+              <button 
+                  onClick={handleExport}
+                  disabled={loading || filteredInventory.length === 0}
+                  className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
+                >
+                  {/* <Download className="w-4 h-4 mr-2" /> */}
+                  Export Csv
+              </button>
+              </div>
+            </div>
+            
+              {/* <button
                 onClick={loadInventoryData}
                 disabled={loading}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
@@ -685,345 +708,297 @@ const LogisticsInventoryEnhanced = () => {
               >
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Low Stock ({stats.low_stock_count || 0})
-              </button>
-              <button
-                onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-                className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Item
-              </button>
-            </div>
+              </button> */}
+            
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto ">
         {/* Enhanced Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {(stats.total_items || 0).toLocaleString()}
-                  {process.env.NODE_ENV === 'development' && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      (Array: {Array.isArray(inventory) ? inventory.length : 'Not Array'})
-                    </span>
-                  )}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Across all categories</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Boxes className="w-6 h-6 text-blue-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-4 sm:px-6 lg:px-8">
+          {/* Total Items Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-pale_yellow rounded-lg">
+                <Settings className="w-6 h-6" />
               </div>
             </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Total Items</p>
+            <p className="text-2xl font-bold text-gray-900 mb-2">
+              {(stats.total_items || 0).toLocaleString()}
+              {process.env.NODE_ENV === 'development' && (
+                <span className="text-xs text-gray-500 ml-2">
+                  (Array: {Array.isArray(inventory) ? inventory.length : 'Not Array'})
+                </span>
+              )}
+            </p>
+            <p className="text-xs text-gray-500">Across all categories</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.total_value || 0)}</p>
-                <p className="text-xs text-gray-500 mt-1">Current inventory worth</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <DollarSign className="w-6 h-6 text-green-600" />
+          {/* Total Value Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-pale_yellow rounded-lg">
+                <DollarSign className="w-6 h-6" />
               </div>
             </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Total Value</p>
+            <p className="text-2xl font-bold text-gray-900 mb-2">{formatCurrency(stats.total_value || 0)}</p>
+            <p className="text-xs text-gray-500">Current inventory worth</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Low Stock Alerts</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.low_stock_count || 0}</p>
-                <p className="text-xs text-gray-500 mt-1">Items need reordering</p>
-              </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <AlertTriangle className="w-6 h-6 text-orange-600" />
+          {/* Low Stock Alerts Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-pale_yellow rounded-lg">
+                <AlertTriangle className="w-6 h-6" />
               </div>
             </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Low Stock Alerts</p>
+            <p className="text-2xl font-bold text-gray-900 mb-2">{stats.low_stock_count || 0}</p>
+            <p className="text-xs text-gray-500">Items need reordering</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-                <p className="text-2xl font-bold text-red-600">{stats.out_of_stock_count || 0}</p>
-                <p className="text-xs text-gray-500 mt-1">Items unavailable</p>
-              </div>
-              <div className="p-3 bg-red-100 rounded-lg">
-                <AlertCircle className="w-6 h-6 text-red-600" />
+          {/* Out of Stock Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-pale_yellow rounded-lg">
+                <CircleAlert className="w-6 h-6" />
               </div>
             </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Out Of Stock</p>
+            <p className="text-3xl font-bold text-gray-900 mb-2">{stats.out_of_stock_count || 0}</p>
+            <p className="text-xs text-gray-500">Items unavailable</p>
           </div>
         </div>
+          <div className='bg-white space-y-2 p-5'>
+            {/* Enhanced Filters and Search */}
+            <div className=" ">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                <div className='col-span-6'>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search items, SKU, manufacturer..."
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                  <div className='flex gap-2 col-span-6'>
+                    <div>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="all">All Categories</option>
+                        {industryCategories.map(cat => (
+                          <option key={cat.value} value={cat.value}>{cat.label}</option>
+                        ))}
+                      </select>
+                    </div>
 
-        {/* Enhanced Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search items, SKU, manufacturer..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                    <div>
+                      <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="all">All Status</option>
+                        {statusOptions.map(status => (
+                          <option key={status.value} value={status.value}>{status.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <select
+                        value={selectedCondition}
+                        onChange={(e) => setSelectedCondition(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="all">All Conditions</option>
+                        {conditionOptions.map(condition => (
+                          <option key={condition.value} value={condition.value}>{condition.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <select
+                        value={selectedWarehouse}
+                        onChange={(e) => setSelectedWarehouse(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="all">All Warehouses</option>
+                        {[...new Set(inventory.map(item => item.warehouse).filter(Boolean))].map(warehouse => (
+                          <option key={warehouse} value={warehouse}>{warehouse}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <select
+                        value={`${sortBy}-${sortOrder}`}
+                        onChange={(e) => {
+                          const [field, order] = e.target.value.split('-');
+                          setSortBy(field);
+                          setSortOrder(order);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                        <option value="current_stock-asc">Stock Low-High</option>
+                        <option value="current_stock-desc">Stock High-Low</option>
+                        <option value="unit_cost-asc">Cost Low-High</option>
+                        <option value="unit_cost-desc">Cost High-Low</option>
+                        <option value="total_value-desc">Value High-Low</option>
+                        <option value="updated_at-desc">Recently Updated</option>
+                      </select>
+                    </div>
+
+                  </div>
               </div>
             </div>
 
+            {/* Enhanced Inventory Cards Grid */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Categories</option>
-                {industryCategories.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
-            </div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Inventory Items ({filteredInventory.length})
+                </h3>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Status</option>
-                {statusOptions.map(status => (
-                  <option key={status.value} value={status.value}>{status.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Condition</label>
-              <select
-                value={selectedCondition}
-                onChange={(e) => setSelectedCondition(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Conditions</option>
-                {conditionOptions.map(condition => (
-                  <option key={condition.value} value={condition.value}>{condition.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Warehouse</label>
-              <select
-                value={selectedWarehouse}
-                onChange={(e) => setSelectedWarehouse(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Warehouses</option>
-                {[...new Set(inventory.map(item => item.warehouse).filter(Boolean))].map(warehouse => (
-                  <option key={warehouse} value={warehouse}>{warehouse}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-              <select
-                value={`${sortBy}-${sortOrder}`}
-                onChange={(e) => {
-                  const [field, order] = e.target.value.split('-');
-                  setSortBy(field);
-                  setSortOrder(order);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="name-asc">Name A-Z</option>
-                <option value="name-desc">Name Z-A</option>
-                <option value="current_stock-asc">Stock Low-High</option>
-                <option value="current_stock-desc">Stock High-Low</option>
-                <option value="unit_cost-asc">Cost Low-High</option>
-                <option value="unit_cost-desc">Cost High-Low</option>
-                <option value="total_value-desc">Value High-Low</option>
-                <option value="updated_at-desc">Recently Updated</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Enhanced Inventory Table */}
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Inventory Items ({filteredInventory.length})
-              </h3>
-              <button 
-                onClick={handleExport}
-                disabled={loading || filteredInventory.length === 0}
-                className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Item Details
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category & Condition
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stock Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Location & Supplier
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Financial
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Activity
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : filteredInventory.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
+                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">No inventory items found</p>
+                  <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filters</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {filteredInventory.map((item) => {
                     const stockIndicator = getStockStatusIndicator(item);
                     const StatusIcon = stockIndicator.icon;
                     
                     return (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                            <div className="text-sm text-gray-500">SKU: {item.sku}</div>
-                            {item.description && (
-                              <div className="text-xs text-gray-400 mt-1 truncate max-w-xs">
-                                {item.description}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-2">
-                            <div>
-                              <span className="text-sm text-gray-900">
-                                {industryCategories.find(c => c.value === item.category)?.label || item.category}
-                              </span>
+                      <div key={item.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
+                        <div className="p-6">
+                          {/* Header with Title and Edit Button */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 pr-3">
+                              <h3 className="text-base font-bold text-gray-900">{item.name}</h3>
+                              <p className="text-xs text-gray-500 mt-1">SKU: {item.sku}</p>
+                              {item.description && (
+                                <p className="text-xs text-gray-600 mt-2 line-clamp-1">{item.description}</p>
+                              )}
                             </div>
-                            {item.condition && (
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getConditionColor(item.condition)}`}>
+                            <button
+                              onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', item.id))}
+                              className="flex-shrink-0 bg-pale_yellow px-3 py-1.5 rounded-lg hover:bg-gold text-xs font-medium transition-colors flex items-center space-x-1"
+                            >
+                              <Pen className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+                          </div>
+
+                          {/* Two Column Info Layout */}
+                          <div className="grid grid-cols-2 gap-4 mb-4 pr-[30%]">
+                            {/* Top Row */}
+                            <div className='flex justify-between col-span-2'>
+                              <div className="mb-4">
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Status</p>
+                                <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full mb-1 ${getStatusColor(item.status)}`}>
+                                  {statusOptions.find(s => s.value === item.status)?.label || item.status}
+                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <StatusIcon className={`w-4 h-4 ${stockIndicator.color}`} />
+                                  <span className="text-sm text-gray-900">
+                                    {item.current_stock} / {item.reorder_point || item.min_stock || 0} {item.unit || 'units'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="mb-4">
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Condition</p>
+                                {item.condition && (
+                              <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getConditionColor(item.condition)}`}>
                                 {item.condition.charAt(0).toUpperCase() + item.condition.slice(1)}
                               </span>
                             )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                                {statusOptions.find(s => s.value === item.status)?.label || item.status}
-                              </span>
-                              <StatusIcon className={`w-4 h-4 ${stockIndicator.color}`} />
+                                {/* <p className="text-sm text-gray-900">
+                                  {item.condition ? item.condition.charAt(0).toUpperCase() + item.condition.slice(1) : 'N/A'}
+                                </p> */}
+                              </div>
+                              
                             </div>
-                            <div className="text-xs text-gray-500">
-                              <div>{item.current_stock} / {item.reorder_point || item.min_stock} {item.unit}</div>
-                              {item.is_low_stock && (
-                                <div className="text-orange-600 font-medium">Below reorder point</div>
+
+                            {/* Bottom Row */}
+                            <div className='flex justify-between col-span-2'>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Financial</p>
+                                <div className="text-sm font-medium text-gray-900">{formatCurrency(item.unit_cost)}</div>
+                                <div className="text-xs text-gray-500">Total: {formatCurrency(item.total_value || (item.current_stock * item.unit_cost))}</div>
+                              </div>
+
+                              <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Last Activity</p>
+                                <p className="text-sm text-gray-900">
+                                  {item.updated_at ? new Date(item.updated_at).toLocaleDateString() : 
+                                  item.last_updated ? new Date(item.last_updated).toLocaleDateString() : '-'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Category & Warehouse Section */}
+                          <div className="border-t border-gray-200 pt-4 mb-4 space-y-3 pr-[25%]">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-700 mb-1">Category</p>
+                              <p className="text-sm text-gray-600">
+                                {industryCategories.find(c => c.value === item.category)?.label || item.category}
+                              </p>
+                            </div>
+                            <div className='flex justify-between'>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Warehouse</p>
+                                <p className="text-sm text-gray-600 line-clamp-1">{item.warehouse || 'Not specified'}</p>
+                              </div>
+
+                              {item.location && (
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-700 mb-1">Location/Bay</p>
+                                  <p className="text-sm text-gray-600 line-clamp-1">{item.location}</p>
+                                </div>
                               )}
                             </div>
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            {item.warehouse && (
-                              <div className="flex items-center text-sm text-gray-900">
-                                <Building className="w-4 h-4 mr-1 text-gray-400" />
-                                {item.warehouse}
-                              </div>
-                            )}
-                            {item.location && (
-                              <div className="flex items-center text-xs text-gray-500">
-                                <MapPin className="w-3 h-3 mr-1" />
-                                {item.location}
-                              </div>
-                            )}
-                            {item.supplier && (
-                              <div className="flex items-center text-xs text-gray-500">
-                                <Truck className="w-3 h-3 mr-1" />
-                                {item.supplier}
+
+                          {/* Supplier & Manufacturer Section */}
+                          <div className="flex justify-between pt-4 space-y-3 pr-[25%]">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-700 mb-1">Supplier</p>
+                              <p className="text-sm text-gray-600">{item.supplier || 'Not specified'}</p>
+                            </div>
+
+                            {item.manufacturer && (
+                              <div>
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Manufacturer</p>
+                                <p className="text-sm text-gray-600">{item.manufacturer}</p>
                               </div>
                             )}
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium text-gray-900">
-                              {formatCurrency(item.unit_cost)}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              Total: {formatCurrency(item.total_value || (item.current_stock * item.unit_cost))}
-                            </div>
-                            {item.last_purchase_price && (
-                              <div className="text-xs text-gray-400">
-                                Last: {formatCurrency(item.last_purchase_price)}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            <div className="text-sm text-gray-500">
-                              {item.updated_at ? new Date(item.updated_at).toLocaleDateString() : 
-                               item.last_updated ? new Date(item.last_updated).toLocaleDateString() : '-'}
-                            </div>
-                            {item.last_movement_type && (
-                              <div className="text-xs text-gray-400">
-                                Last: {item.last_movement_type} 
-                                {item.last_movement_quantity && ` (${item.last_movement_quantity})`}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right text-sm font-medium">
-                          <div className="flex items-center justify-end space-x-2">
-                            <button
-                              onClick={() => navigate(webRoutes.logisticsInventoryDetail.replace(':id', item.id))}
-                              className="text-blue-600 hover:text-blue-900"
-                              title="View Details"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', item.id))}
-                              className="text-green-600 hover:text-green-900"
-                              title="Edit"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
+
+                          {/* Action Buttons */}
+                          <div className="w-full md:w-[60%] flex items-center gap-3 pt-4 border-t border-gray-200">
                             <button
                               disabled={deletingId === item.id}
                               onClick={() => {
@@ -1049,32 +1024,28 @@ const LogisticsInventoryEnhanced = () => {
                                   },
                                 });
                               }}
-                              className={`text-red-600 hover:text-red-900 ${deletingId === item.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              title="Delete"
+                              className={`flex-1 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center space-x-1 ${deletingId === item.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete</span>
                             </button>
-                            <button className="text-gray-400 hover:text-gray-600" title="More options">
-                              <MoreVertical className="w-4 h-4" />
+
+                            <button
+                              onClick={() => navigate(webRoutes.logisticsInventoryDetail.replace(':id', item.id))}
+                              className="flex-1 bg-pale_yellow hover:bg-gold px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center space-x-1"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>View Details</span>
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
-
-              {filteredInventory.length === 0 && !loading && (
-                <div className="text-center py-12">
-                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No inventory items found</p>
-                  <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filters</p>
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
       </div>
     </div>
   );

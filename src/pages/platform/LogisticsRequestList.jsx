@@ -109,10 +109,10 @@ const LogisticsRequestList = () => {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'posted': return 'bg-blue-100 text-blue-800';
+      case 'posted': return 'bg-green-200 text-green-800';
       case 'quoted': return 'bg-yellow-100 text-yellow-800';
       case 'awarded': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-green-200 text-green-900';
+      case 'completed': return 'bg-blue-100 text-blue-900';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -344,13 +344,13 @@ const LogisticsRequestList = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>Pickup: {formatDate(request.pickup_date_requested)}</span>
+                        <span> <b>Pickup:</b> {formatDate(request.pickup_date_requested)}</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>Delivery: {formatDate(request.delivery_date_requested)}</span>
+                        <span><b>Delivery:</b> {formatDate(request.delivery_date_requested)}</span>
                       </div>
                     </div>
                   </div>
