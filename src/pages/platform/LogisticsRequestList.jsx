@@ -181,15 +181,15 @@ const LogisticsRequestList = () => {
       )}
       {/* Header */}
       <div className="">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between py-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Shipment Requests</h1>
               <p className="text-gray-600 mt-1">Manage your marketplace orders</p>
             </div>
             <button
               onClick={() => navigate(webRoutes.logisticsRequestCreate)}
-              className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center space-x-2 font-medium"
+              className="w-fit ml-[56%] md:ml-0 bg-custom_yellow px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center space-x-2 font-medium"
             >
               <Plus className="w-4 h-4" />
               <span>New Request</span>
@@ -201,21 +201,21 @@ const LogisticsRequestList = () => {
       <div className="max-w-7xl mx-auto py-8 px-4 bg-white space-y-4">
         {/* Filters */}
         <div className="">
-          <div className="flex flex-col md:flex-row gap-3 items-center">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search requests..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
-                />
+          <div className="w-full flex flex-col md:flex-row gap-3 items-center">
+            <div className="flex items-center space-x-2 w-full md:w-[70%]">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search requests..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
+              {/* <Filter className="w-4 h-4 text-gray-500" /> */}
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -229,17 +229,17 @@ const LogisticsRequestList = () => {
                 <option value="completed">Completed</option>
               </select>
             </div>
-            <div className="flex items-center">
-              <div className="bg-gray-100 rounded-lg p-1 flex">
+            <div className="flex items-center w-full md:w-[30%]">
+              <div className="bg-gray-100 rounded-lg p-1 flex w-full">
                 <button
                   onClick={() => setShowMineOnly(false)}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!showMineOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                  className={`w-[50%] px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!showMineOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
                 >
-                  All
+                  All Requests
                 </button>
                 <button
                   onClick={() => setShowMineOnly(true)}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${showMineOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                  className={`w-[50%] px-3 py-1.5 rounded-md text-sm font-medium transition-all ${showMineOnly ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
                 >
                   My Requests
                 </button>
