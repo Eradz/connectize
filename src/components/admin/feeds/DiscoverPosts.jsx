@@ -327,7 +327,7 @@ export const DiscoverPostItem = ({
       ></SocialShareModal>
 
       <div className="flex items-center gap-2 justify-between mt-4">
-        <ConJoinedImages
+        {/* <ConJoinedImages
           size={30}
           array={recentLikes?.map((post) => ({
             name: `${post?.user?.first_name} ${post?.user?.last_name}`,
@@ -335,7 +335,7 @@ export const DiscoverPostItem = ({
             href: `/co/${post?.user?.id}`,
           }))}
           sizeVariant="sm"
-        />
+        /> */}
 
         <div className="flex items-center gap-3">
           <ButtonWithTooltipIcon
