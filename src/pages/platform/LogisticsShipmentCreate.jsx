@@ -463,25 +463,31 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
       setCurrentStep(currentStep - 1);
     }
   };
-
-  const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3, 4].map((step) => (
-        <div key={step} className="flex items-center">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            step <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
-            {step}
-          </div>
-          {step < totalSteps && (
-            <div className={`w-16 h-1 mx-2 ${
-              step < currentStep ? 'bg-blue-600' : 'bg-gray-200'
-            }`} />
-          )}
+const renderStepIndicator = () => (
+  <div className="flex justify-center items-center gap-3 mb-8">
+    {[1, 2, 3, 4].map((step, index) => (
+      <React.Fragment key={step}>
+        {/* Step circle */}
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium"
+          style={{
+            backgroundColor: step === currentStep ? '#FFEF9A' : '#FFFFFF',
+            border: step === currentStep ? 'none' : '1px solid #E5E7EB',
+            color: '#111827',
+          }}
+        >
+          {step}
         </div>
-      ))}
-    </div>
-  );
+
+        {/* Connector */}
+        {index < 3 && (
+          <div className="w-10 h-px bg-gray-300" />
+        )}
+      </React.Fragment>
+    ))}
+  </div>
+);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -572,14 +578,14 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
                 </div>
 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cargo Description *
+                  <label className="block text-base font-normal text-gray-900 mb-2">
+                    Cargo Description
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange(null, 'description', e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={6}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none text-gray-900 placeholder-gray-400 resize-none"
                     placeholder="Provide detailed description of the cargo including specifications, handling requirements, etc."
                     required
                   />
@@ -587,24 +593,50 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
 
                 <div className="mt-6 space-y-4">
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="dangerous_goods"
-                      checked={formData.dangerous_goods}
-                      onChange={(e) => handleInputChange(null, 'dangerous_goods', e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="dangerous_goods" className="ml-2 text-sm text-gray-900">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        id="dangerous_goods"
+                        checked={formData.dangerous_goods}
+                        onChange={(e) => handleInputChange(null, 'dangerous_goods', e.target.checked)}
+                        className="h-5 w-5 rounded border-2 appearance-none cursor-pointer focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+                        style={{
+                          borderColor: '#D1D5DB',
+                          background: formData.dangerous_goods ? 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)' : 'white'
+                        }}
+                      />
+                      {formData.dangerous_goods && (
+                        <svg 
+                          className="absolute top-0 left-0 w-5 h-5 pointer-events-none" 
+                          fill="white"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                        </svg>
+                      )}
+                    </div>
+                    <label htmlFor="dangerous_goods" className="ml-3 text-base text-gray-700 cursor-pointer">
                       This shipment contains dangerous goods
                     </label>
                   </div>
 
                   {formData.dangerous_goods && (
-                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                      <div className="flex items-center">
-                        <AlertTriangle className="w-5 h-5 text-orange-600 mr-2" />
-                        <p className="text-sm text-orange-700">
-                          Dangerous goods require special handling and documentation. Additional fees may apply.
+                    <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <AlertTriangle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0" />
+                        <p 
+                          className="text-sm font-medium"
+                          style={{
+                            color: '#FF8400',
+                            background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            MozBackgroundClip: 'text',
+                            MozTextFillColor: 'transparent'
+                          }}
+                        >
+                          Dangerous Goods Require Special Handling And Documentation. Additional Fees May Apply.
                         </p>
                       </div>
                     </div>
@@ -1064,45 +1096,69 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
             <button
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-yellow-100 text-gray-700 rounded-lg hover:bg-yellow-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm font-medium"
             >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
               Previous
             </button>
 
+            
             <div className="flex space-x-3">
               {currentStep === totalSteps ? (
                 <>
                   <button
                     onClick={() => handleSubmit(true)}
                     disabled={loading}
-                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    className="px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm font-medium"
                   >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Draft
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancel
                   </button>
                   <button
                     onClick={() => handleSubmit(false)}
                     disabled={loading || !validateStep(currentStep)}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    className="px-6 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm font-medium"
                   >
                     {loading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2" />
                     ) : (
-                      <Send className="w-4 h-4 mr-2" />
+                      <>
+                        {isEditMode 
+                          ? `Update ${isRequestMode ? 'Request' : 'Shipment'}`
+                          : `Create ${isRequestMode ? 'Request' : 'Shipment'}`}
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </>
                     )}
-                    {isEditMode 
-                      ? `Update ${isRequestMode ? 'Request' : 'Shipment'}`
-                      : `Create ${isRequestMode ? 'Request' : 'Shipment'}`}
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={nextStep}
-                  disabled={!validateStep(currentStep)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next Step
-                </button>
+                <>
+                  <button
+                    onClick={() => navigate(isRequestMode ? webRoutes.logisticsRequests : webRoutes.logisticsShipments)}
+                    className="px-6 py-3 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 flex items-center text-sm font-medium"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancel
+                  </button>
+                  <button
+                    onClick={nextStep}
+                    disabled={!validateStep(currentStep)}
+                    className="px-6 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm font-medium"
+                  >
+                    Next
+                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
               )}
             </div>
           </div>
