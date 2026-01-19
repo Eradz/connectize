@@ -195,7 +195,7 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
-
+  console.log("comments", comments)
   return (
     <motion.article
       initial={{ opacity: 0 }}
@@ -327,7 +327,7 @@ export const DiscoverPostItem = ({
       ></SocialShareModal>
 
       <div className="flex items-center gap-2 justify-between mt-4">
-        <ConJoinedImages
+        {/* <ConJoinedImages
           size={30}
           array={recentLikes?.map((post) => ({
             name: `${post?.user?.first_name} ${post?.user?.last_name}`,
@@ -335,7 +335,7 @@ export const DiscoverPostItem = ({
             href: `/co/${post?.user?.id}`,
           }))}
           sizeVariant="sm"
-        />
+        /> */}
 
         <div className="flex items-center gap-3">
           <ButtonWithTooltipIcon
@@ -409,7 +409,7 @@ const CommentSection = ({
   const [loading, setLoading] = useState(false);
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
-
+  console.log("CommentsData", commentsData)
   const handleComment = useCallback(async () => {
     if (comment.trim().length < 1) return;
 

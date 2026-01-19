@@ -21,6 +21,10 @@ import {
   Globe,
   Warehouse,
   Ship,
+  User,
+  Box,
+  Scissors,
+
   FileText
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
@@ -28,348 +32,493 @@ import { logisticsAPI } from '../../api-services/logistics';
 import InventoryDashboardWidget from '../../components/dashboard/InventoryDashboardWidget';
 import { getSession } from '../../lib/session';
 
-const LogisticsDashboard = () => {
-  // Check session for user privileges
-  const session = getSession();
-  console.log('🔍 Session check in LogisticsDashboard:', {
-    hasSession: !!session,
-    user: session?.user,
-    tokens: session?.tokens ? 'present' : 'missing'
-  });
-  
-  const userIsStaff = (
-    session?.user?.is_staff === true ||
-    session?.user?.is_superuser === true ||
-    localStorage.getItem('user_is_staff') === 'true' ||
-    localStorage.getItem('user_is_admin') === 'true' ||
-    localStorage.getItem('force_inventory_scope_all') === '1'
-  );
-  
-  console.log('🔑 User privilege check:', {
-    userIsStaff,
-    sessionStaff: session?.user?.is_staff,
-    sessionSuperuser: session?.user?.is_superuser,
-    localStorageStaff: localStorage.getItem('user_is_staff'),
-    localStorageAdmin: localStorage.getItem('user_is_admin'),
-    forceScope: localStorage.getItem('force_inventory_scope_all')
-  });
-  const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState({
-    shipments: { total: 0, data: [] },
-    inventory: { total: 0, data: [] },
-    requests: { total: 0, data: [] },
-    analytics: {
-      totalShipments: 0,
-      onTimeDelivery: 0,
-      costSavings: 0,
-      activeRoutes: 0
-    }
-  });
 
-  const [activeTab, setActiveTab] = useState('overview');
-
-  // Early authentication check - redirect if not logged in
-  useEffect(() => {
-    const session = getSession();
-    if (!session?.tokens?.access) {
-      console.warn('❌ No authentication session found, redirecting to login');
-      window.location.href = '/login';
-      return;
-    }
-  }, []);
-
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  useEffect(() => {
-    if (!loading) {
-      console.log('🔄 dashboardData updated (post-render readiness check):', dashboardData);
-    }
-  }, [dashboardData, loading]);
-
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      console.log('🔍 Loading logistics dashboard data...');
-      console.log('🔑 Checking authentication state...');
-      
-      // Check session for proper authentication tokens
-      const session = getSession();
-      console.log('📦 Session state:', { 
-        hasSession: !!session, 
-        hasTokens: !!(session?.tokens),
-        hasAccess: !!(session?.tokens?.access),
-        hasRefresh: !!(session?.tokens?.refresh),
-        // Session has { id, email, tokens } structure
-        userInfo: session?.id ? { id: session.id, email: session.email } : null
-      });
-      
-      // Also check localStorage for any legacy tokens (for debugging)
-      const accessToken = localStorage.getItem('access');
-      const refreshToken = localStorage.getItem('refresh');
-      console.log('📦 LocalStorage tokens (legacy check):', { 
-        hasAccess: !!accessToken, 
-        hasRefresh: !!refreshToken,
-        accessPreview: accessToken ? accessToken.substring(0, 30) + '...' : null
-      });
-      
-      if (!session?.tokens?.access) {
-        console.error('❌ No valid authentication session found');
-        throw new Error('Authentication required. Please log in.');
+// Simulated API data
+const mockData = {
+  shipments: {
+    total: 231,
+    data: [
+      {
+        id: '1',
+        tracking_number: 'REQ-E8cc123a',
+        status: 'awarded',
+        request_details: {
+          origin_address: 'Houston, TX Oil Terminal',
+          destination_address: 'Refinery Complex, LA',
+          budget_max: 41000
+        }
+      },
+      {
+        id: '2',
+        tracking_number: 'REQ-E8cc123a',
+        status: 'awarded',
+        request_details: {
+          origin_address: 'Houston, TX Oil Terminal',
+          destination_address: 'Refinery Complex, LA',
+          budget_max: 41000
+        }
+      },
+      {
+        id: '3',
+        tracking_number: 'REQ-E8cc123a',
+        status: 'quoted',
+        request_details: {
+          origin_address: 'Houston, TX Oil Terminal',
+          destination_address: 'Refinery Complex, LA',
+          budget_max: 41000
+        }
       }
-      
-      // Fetch real data from APIs
-      console.log('🚀 Making API calls...');
-      // Helper to follow pagination for a given initial payload and base path
-      const fetchAllPages = async (initialPayload, baseUrl) => {
-        // initialPayload may be either the already-parsed object or wrapped
-        const first = (initialPayload?.data && initialPayload.data.results) ? initialPayload.data : initialPayload;
-        if (!first || first.next === undefined) return first; // Not paginated
-        let aggregated = {
-          count: first.count ?? (first.results ? first.results.length : 0),
-          results: [...(first.results || [])],
-          next: first.next
-        };
-        // Cap pages to avoid runaway (e.g., max 5 pages / 250 records typical 50 per page assumption)
-        let pageFetches = 0;
-        while (aggregated.next && aggregated.results.length < aggregated.count && pageFetches < 5) {
-          try {
-            const nextUrl = aggregated.next;
-            console.log('➡️ Fetching paginated page:', nextUrl);
-            // Use api helper directly via fetch since logisticsAPI currently only exposes root endpoints
-            const rel = nextUrl.replace(/^https?:\/\/[^/]+/, '');
-            const pageResp = await logisticsAPI.getRequests({ page: new URL(nextUrl).searchParams.get('page') });
-            if (pageResp?.results) {
-              aggregated.results.push(...pageResp.results);
-              aggregated.next = pageResp.next;
-            } else {
+    ]
+  },
+  requests: {
+    total: 29,
+    data: [
+      {
+        id: '1',
+        tracking_number: 'SHIP-USER1-53SE3533',
+        status: 'delivered',
+        origin_address: 'North Way, Oil Terminal',
+        destination_address: 'Refinery Complex, LA'
+      },
+      {
+        id: '2',
+        tracking_number: 'SHIP-USER1-53SE3533',
+        status: 'delivered',
+        origin_address: 'North Way, Oil Terminal',
+        destination_address: 'Refinery Complex, LA'
+      },
+      {
+        id: '3',
+        tracking_number: 'SHIP-USER1-53SE3533',
+        status: 'delivered',
+        origin_address: 'North Way, Oil Terminal',
+        destination_address: 'Refinery Complex, LA'
+      },
+      {
+        id: '4',
+        tracking_number: 'SHIP-USER1-53SE3533',
+        status: 'delivered',
+        origin_address: 'North Way, Oil Terminal',
+        destination_address: 'Refinery Complex, LA'
+      }
+    ]
+  },
+  inventory: {
+    total: 150,
+    data: [
+      {
+        id: '1',
+        name: 'Testing Inventory',
+        location: 'Lagos',
+        current_stock: 200.0,
+        reorder_point: 5.09
+      },
+      {
+        id: '2',
+        name: 'Chemical treatment activist',
+        location: 'Chemical storage houston',
+        current_stock: 200.0,
+        reorder_point: 5.09
+      },
+      {
+        id: '3',
+        name: 'Chemical treatment activist',
+        location: 'Chemical storage houston',
+        current_stock: 200.0,
+        reorder_point: 5.09
+      },
+      {
+        id: '4',
+        name: 'Chemical treatment activist',
+        location: 'Chemical storage houston',
+        current_stock: 200.0,
+        reorder_point: 5.09
+      },
+      {
+        id: '5',
+        name: 'Chemical treatment activist',
+        location: 'Chemical storage houston',
+        current_stock: 200.0,
+        reorder_point: 5.09
+      }
+    ]
+  },
+  analytics: {
+    totalShipments: 231,
+    onTimeDelivery: 100,
+    costSavings: 4238,
+    activeRoutes: 3,
+    monthlyGrowth: 86,
+    pendingQuotes: 0,
+    quoted: 11,
+    awarded: 3
+  }
+};
+
+const LogisticsHubDashboard = () => {
+  // Check session for user privileges
+    const session = getSession();
+      const [searchQuery, setSearchQuery] = useState('');
+    console.log('🔍 Session check in LogisticsDashboard:', {
+      hasSession: !!session,
+      user: session?.user,
+      tokens: session?.tokens ? 'present' : 'missing'
+    });
+    
+    const userIsStaff = (
+      session?.user?.is_staff === true ||
+      session?.user?.is_superuser === true ||
+      localStorage.getItem('user_is_staff') === 'true' ||
+      localStorage.getItem('user_is_admin') === 'true' ||
+      localStorage.getItem('force_inventory_scope_all') === '1'
+    );
+    
+    console.log('🔑 User privilege check:', {
+      userIsStaff,
+      sessionStaff: session?.user?.is_staff,
+      sessionSuperuser: session?.user?.is_superuser,
+      localStorageStaff: localStorage.getItem('user_is_staff'),
+      localStorageAdmin: localStorage.getItem('user_is_admin'),
+      forceScope: localStorage.getItem('force_inventory_scope_all')
+    });
+    const [loading, setLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState({
+      shipments: { total: 0, data: [] },
+      inventory: { total: 0, data: [] },
+      requests: { total: 0, data: [] },
+      analytics: {
+        totalShipments: 0,
+        onTimeDelivery: 0,
+        costSavings: 0,
+        activeRoutes: 0
+      }
+    });
+  
+    const [activeTab, setActiveTab] = useState('overview');
+  
+    // Early authentication check - redirect if not logged in
+    useEffect(() => {
+      const session = getSession();
+      if (!session?.tokens?.access) {
+        console.warn('❌ No authentication session found, redirecting to login');
+        window.location.href = '/login';
+        return;
+      }
+    }, []);
+  
+    useEffect(() => {
+      loadDashboardData();
+    }, []);
+  
+    useEffect(() => {
+      if (!loading) {
+        console.log('🔄 dashboardData updated (post-render readiness check):', dashboardData);
+      }
+    }, [dashboardData, loading]);
+  
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        console.log('🔍 Loading logistics dashboard data...');
+        console.log('🔑 Checking authentication state...');
+        
+        // Check session for proper authentication tokens
+        const session = getSession();
+        console.log('📦 Session state:', { 
+          hasSession: !!session, 
+          hasTokens: !!(session?.tokens),
+          hasAccess: !!(session?.tokens?.access),
+          hasRefresh: !!(session?.tokens?.refresh),
+          // Session has { id, email, tokens } structure
+          userInfo: session?.id ? { id: session.id, email: session.email } : null
+        });
+        
+        // Also check localStorage for any legacy tokens (for debugging)
+        const accessToken = localStorage.getItem('access');
+        const refreshToken = localStorage.getItem('refresh');
+        console.log('📦 LocalStorage tokens (legacy check):', { 
+          hasAccess: !!accessToken, 
+          hasRefresh: !!refreshToken,
+          accessPreview: accessToken ? accessToken.substring(0, 30) + '...' : null
+        });
+        
+        if (!session?.tokens?.access) {
+          console.error('❌ No valid authentication session found');
+          throw new Error('Authentication required. Please log in.');
+        }
+        
+        // Fetch real data from APIs
+        console.log('🚀 Making API calls...');
+        // Helper to follow pagination for a given initial payload and base path
+        const fetchAllPages = async (initialPayload, baseUrl) => {
+          // initialPayload may be either the already-parsed object or wrapped
+          const first = (initialPayload?.data && initialPayload.data.results) ? initialPayload.data : initialPayload;
+          if (!first || first.next === undefined) return first; // Not paginated
+          let aggregated = {
+            count: first.count ?? (first.results ? first.results.length : 0),
+            results: [...(first.results || [])],
+            next: first.next
+          };
+          // Cap pages to avoid runaway (e.g., max 5 pages / 250 records typical 50 per page assumption)
+          let pageFetches = 0;
+          while (aggregated.next && aggregated.results.length < aggregated.count && pageFetches < 5) {
+            try {
+              const nextUrl = aggregated.next;
+              console.log('➡️ Fetching paginated page:', nextUrl);
+              // Use api helper directly via fetch since logisticsAPI currently only exposes root endpoints
+              const rel = nextUrl.replace(/^https?:\/\/[^/]+/, '');
+              const pageResp = await logisticsAPI.getRequests({ page: new URL(nextUrl).searchParams.get('page') });
+              if (pageResp?.results) {
+                aggregated.results.push(...pageResp.results);
+                aggregated.next = pageResp.next;
+              } else {
+                break;
+              }
+            } catch (e) {
+              console.warn('⚠️ Failed to fetch additional page:', e);
               break;
             }
-          } catch (e) {
-            console.warn('⚠️ Failed to fetch additional page:', e);
-            break;
+            pageFetches++;
           }
-          pageFetches++;
-        }
-        return aggregated;
-      };
-
-      // Determine if we should request global scope based on component-scope userIsStaff
-      const scopeParams = userIsStaff ? { scope: 'all' } : {};
-      console.log('🔧 API scope params:', scopeParams);
-      console.log('🔧 User is staff check:', { userIsStaff, session: getSession()?.user });
-      
-      // Make API calls with individual error handling
-      let shipmentsResponse, inventoryResponse, requestsResponse;
-      
-      try {
-        console.log('🚛 Fetching shipments with URL: /api/v1/logistics/shipments/ and params:', scopeParams);
-        shipmentsResponse = await logisticsAPI.getShipments(scopeParams);
-        console.log('✅ Shipments response type:', typeof shipmentsResponse);
-        console.log('✅ Shipments response keys:', Object.keys(shipmentsResponse || {}));
-        console.log('✅ Shipments full response:', shipmentsResponse);
-      } catch (error) {
-        console.error('❌ Shipments API error:', error);
-        console.error('❌ Shipments error details:', error.response?.data);
-        shipmentsResponse = { results: [], count: 0 };
-      }
-      
-      try {
-        console.log('📦 Fetching inventory with URL: /api/v1/logistics/inventory-items/ and params:', scopeParams);
-        inventoryResponse = await logisticsAPI.getInventoryItems(scopeParams);
-        console.log('✅ Inventory response type:', typeof inventoryResponse);
-        console.log('✅ Inventory response keys:', Object.keys(inventoryResponse || {}));
-        console.log('✅ Inventory full response:', inventoryResponse);
-      } catch (error) {
-        console.error('❌ Inventory API error:', error);
-        console.error('❌ Inventory error details:', error.response?.data);
-        inventoryResponse = { results: [], count: 0 };
-      }
-      
-      try {
-        console.log('📋 Fetching requests with URL: /api/v1/logistics/requests/ and params:', scopeParams);
-        requestsResponse = await logisticsAPI.getRequests(scopeParams);
-        console.log('✅ Requests response type:', typeof requestsResponse);
-        console.log('✅ Requests response keys:', Object.keys(requestsResponse || {}));
-        console.log('✅ Requests full response:', requestsResponse);
-      } catch (error) {
-        console.error('❌ Requests API error:', error);
-        console.error('❌ Requests error details:', error.response?.data);
-        requestsResponse = { results: [], count: 0 };
-      }
-
-      console.log('📊 API responses received:', {
-        shipments: shipmentsResponse,
-        inventory: inventoryResponse,
-        requests: requestsResponse
-      });
-
-      // Normalize possible response shapes (either already the payload or wrapped in {data})
-      const normalize = (resp) => {
-        const payload = resp?.data && typeof resp.data === 'object' && (resp.data.results || resp.data.count !== undefined) ? resp.data : resp;
-        return {
-          list: payload?.results || (Array.isArray(payload) ? payload : []),
-          count: payload?.count || (Array.isArray(payload?.results) ? payload.results.length : (Array.isArray(payload) ? payload.length : 0))
+          return aggregated;
         };
-      };
-      const shipmentsNorm = normalize(shipmentsResponse);
-      const inventoryNorm = normalize(inventoryResponse);
-      let requestsNorm = normalize(requestsResponse);
-
-      // If requests are paginated and we have more than one page, pull additional pages
-      if (requestsNorm.count > requestsNorm.list.length && requestsResponse.next) {
-        console.log('🔁 Expanding paginated requests to gather more records...');
-        const full = await fetchAllPages(requestsResponse, '/api/v1/logistics/requests/');
-        requestsNorm = {
-          list: full.results,
-          count: full.count
-        };
-        console.log('📦 Aggregated requests records:', { gathered: requestsNorm.list.length, total: requestsNorm.count });
-      }
-
-      const shipments = shipmentsNorm.list;
-      const inventory = inventoryNorm.list;
-      const requests = requestsNorm.list;
-      const totalShipmentsCount = shipmentsNorm.count;
-      const totalInventoryCount = inventoryNorm.count;
-      const totalRequestsCount = requestsNorm.count;
-
-      console.log('✅ Processed data:', {
-        shipmentsCount: shipments.length,
-        inventoryCount: inventory.length,
-        requestsCount: requests.length,
-        totalShipmentsCount,
-        totalInventoryCount,
-        totalRequestsCount
-      });
-
-      // Calculate analytics from real data with corrected field mappings
-      const totalShipments = totalShipmentsCount;
-      const deliveredShipments = shipments.filter(s => s.status === 'delivered');
-      const onTimeDelivery = deliveredShipments.length > 0 
-        ? ((deliveredShipments.length / shipments.length) * 100).toFixed(1)
-        : 0;
-      
-      // Use corrected field mapping: budget_max from request_details
-      const totalValue = shipments.reduce((sum, shipment) => {
-        const budgetMax = shipment.request_details?.budget_max || 0;
-        return sum + parseFloat(budgetMax);
-      }, 0);
-      const costSavings = totalValue * 0.15; // Estimated 15% savings
-      const activeRoutes = shipments.filter(s => ['in_transit', 'picked_up', 'preparing'].includes(s.status)).length;
-      
-      const monthlyGrowth = 8.5; // This would come from analytics service
-
-  const newData = {
-        shipments: {
-          total: totalShipmentsCount,
-          data: shipments
-        },
-        inventory: {
-          total: totalInventoryCount,
-          data: inventory
-        },
-        requests: {
-          total: totalRequestsCount,
-          data: requests
-        },
-        analytics: {
-          totalShipments: totalShipmentsCount,
-          onTimeDelivery: parseFloat(onTimeDelivery),
-          costSavings,
-          activeRoutes,
-          monthlyGrowth: 8.5, // This would come from analytics service
-          totalValue
+  
+        // Determine if we should request global scope based on component-scope userIsStaff
+        const scopeParams = userIsStaff ? { scope: 'all' } : {};
+        console.log('🔧 API scope params:', scopeParams);
+        console.log('🔧 User is staff check:', { userIsStaff, session: getSession()?.user });
+        
+        // Make API calls with individual error handling
+        let shipmentsResponse, inventoryResponse, requestsResponse;
+        
+        try {
+          console.log('🚛 Fetching shipments with URL: /api/v1/logistics/shipments/ and params:', scopeParams);
+          shipmentsResponse = await logisticsAPI.getShipments(scopeParams);
+          console.log('✅ Shipments response type:', typeof shipmentsResponse);
+          console.log('✅ Shipments response keys:', Object.keys(shipmentsResponse || {}));
+          console.log('✅ Shipments full response:', shipmentsResponse);
+        } catch (error) {
+          console.error('❌ Shipments API error:', error);
+          console.error('❌ Shipments error details:', error.response?.data);
+          shipmentsResponse = { results: [], count: 0 };
         }
-  };
-  console.log('🧩 Setting dashboardData state with:', newData);
-  setDashboardData(newData);
-    } catch (error) {
-      console.error('❌ Failed to load logistics data:', error);
-      console.error('🔍 Error details:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data
-      });
-      
-      // Check if it's an authentication error
-      if (error.response?.status === 401 || error.message?.includes('Authentication required')) {
-        console.log('🔐 Authentication error detected - user needs to login');
-        console.log('🔑 Current tokens:', {
-          access: localStorage.getItem('access') ? 'present' : 'missing',
-          refresh: localStorage.getItem('refresh') ? 'present' : 'missing'
+        
+        try {
+          console.log('📦 Fetching inventory with URL: /api/v1/logistics/inventory-items/ and params:', scopeParams);
+          inventoryResponse = await logisticsAPI.getInventoryItems(scopeParams);
+          console.log('✅ Inventory response type:', typeof inventoryResponse);
+          console.log('✅ Inventory response keys:', Object.keys(inventoryResponse || {}));
+          console.log('✅ Inventory full response:', inventoryResponse);
+        } catch (error) {
+          console.error('❌ Inventory API error:', error);
+          console.error('❌ Inventory error details:', error.response?.data);
+          inventoryResponse = { results: [], count: 0 };
+        }
+        
+        try {
+          console.log('📋 Fetching requests with URL: /api/v1/logistics/requests/ and params:', scopeParams);
+          requestsResponse = await logisticsAPI.getRequests(scopeParams);
+          console.log('✅ Requests response type:', typeof requestsResponse);
+          console.log('✅ Requests response keys:', Object.keys(requestsResponse || {}));
+          console.log('✅ Requests full response:', requestsResponse);
+        } catch (error) {
+          console.error('❌ Requests API error:', error);
+          console.error('❌ Requests error details:', error.response?.data);
+          requestsResponse = { results: [], count: 0 };
+        }
+  
+        console.log('📊 API responses received:', {
+          shipments: shipmentsResponse,
+          inventory: inventoryResponse,
+          requests: requestsResponse
         });
-        // The makeApiRequest will already redirect to login, but we can add additional handling here
-        return; // Don't set empty data if redirecting to login
-      }
-      
-      // Initialize with empty data when API calls fail
-      setDashboardData({
-        shipments: { total: 0, data: [] },
-        inventory: { total: 0, data: [] },
-        requests: { total: 0, data: [] },
-        analytics: {
-          totalShipments: 0,
-          onTimeDelivery: 0,
-          costSavings: 0,
-          activeRoutes: 0,
-          monthlyGrowth: 0,
-          totalValue: 0
+  
+        // Normalize possible response shapes (either already the payload or wrapped in {data})
+        const normalize = (resp) => {
+          const payload = resp?.data && typeof resp.data === 'object' && (resp.data.results || resp.data.count !== undefined) ? resp.data : resp;
+          return {
+            list: payload?.results || (Array.isArray(payload) ? payload : []),
+            count: payload?.count || (Array.isArray(payload?.results) ? payload.results.length : (Array.isArray(payload) ? payload.length : 0))
+          };
+        };
+        const shipmentsNorm = normalize(shipmentsResponse);
+        const inventoryNorm = normalize(inventoryResponse);
+        let requestsNorm = normalize(requestsResponse);
+  
+        // If requests are paginated and we have more than one page, pull additional pages
+        if (requestsNorm.count > requestsNorm.list.length && requestsResponse.next) {
+          console.log('🔁 Expanding paginated requests to gather more records...');
+          const full = await fetchAllPages(requestsResponse, '/api/v1/logistics/requests/');
+          requestsNorm = {
+            list: full.results,
+            count: full.count
+          };
+          console.log('📦 Aggregated requests records:', { gathered: requestsNorm.list.length, total: requestsNorm.count });
         }
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  
+        const shipments = shipmentsNorm.list;
+        const inventory = inventoryNorm.list;
+        const requests = requestsNorm.list;
+        const totalShipmentsCount = shipmentsNorm.count;
+        const totalInventoryCount = inventoryNorm.count;
+        const totalRequestsCount = requestsNorm.count;
+  
+        console.log('✅ Processed data:', {
+          shipmentsCount: shipments.length,
+          inventoryCount: inventory.length,
+          requestsCount: requests.length,
+          totalShipmentsCount,
+          totalInventoryCount,
+          totalRequestsCount
+        });
+  
+        // Calculate analytics from real data with corrected field mappings
+        const totalShipments = totalShipmentsCount;
+        const deliveredShipments = shipments.filter(s => s.status === 'delivered');
+        const onTimeDelivery = deliveredShipments.length > 0 
+          ? ((deliveredShipments.length / shipments.length) * 100).toFixed(1)
+          : 0;
+        
+        // Use corrected field mapping: budget_max from request_details
+        const totalValue = shipments.reduce((sum, shipment) => {
+          const budgetMax = shipment.request_details?.budget_max || 0;
+          return sum + parseFloat(budgetMax);
+        }, 0);
+        const costSavings = totalValue * 0.15; // Estimated 15% savings
+        const activeRoutes = shipments.filter(s => ['in_transit', 'picked_up', 'preparing'].includes(s.status)).length;
+        
+        const monthlyGrowth = 8.5; // This would come from analytics service
+  
+    const newData = {
+          shipments: {
+            total: totalShipmentsCount,
+            data: shipments
+          },
+          inventory: {
+            total: totalInventoryCount,
+            data: inventory
+          },
+          requests: {
+            total: totalRequestsCount,
+            data: requests
+          },
+          analytics: {
+            totalShipments: totalShipmentsCount,
+            onTimeDelivery: parseFloat(onTimeDelivery),
+            costSavings,
+            activeRoutes,
+            monthlyGrowth: 8.5, // This would come from analytics service
+            totalValue
+          }
+    };
+    console.log('🧩 Setting dashboardData state with:', newData);
+    setDashboardData(newData);
+      } catch (error) {
+        console.error('❌ Failed to load logistics data:', error);
+        console.error('🔍 Error details:', {
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+        
+        // Check if it's an authentication error
+        if (error.response?.status === 401 || error.message?.includes('Authentication required')) {
+          console.log('🔐 Authentication error detected - user needs to login');
+          console.log('🔑 Current tokens:', {
+            access: localStorage.getItem('access') ? 'present' : 'missing',
+            refresh: localStorage.getItem('refresh') ? 'present' : 'missing'
+          });
+          // The makeApiRequest will already redirect to login, but we can add additional handling here
+          return; // Don't set empty data if redirecting to login
+        }
+        
+        // Initialize with empty data when API calls fail
+        setDashboardData({
+          shipments: { total: 0, data: [] },
+          inventory: { total: 0, data: [] },
+          requests: { total: 0, data: [] },
+          analytics: {
+            totalShipments: 0,
+            onTimeDelivery: 0,
+            costSavings: 0,
+            activeRoutes: 0,
+            monthlyGrowth: 0,
+            totalValue: 0
+          }
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getStatusColor = (status) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'delivered': return 'bg-green-100 text-green-800';
+        case 'in_transit': return 'bg-blue-100 text-blue-800';
+        case 'pending': return 'bg-yellow-100 text-yellow-800';
+        case 'preparing': return 'bg-orange-100 text-orange-800';
+        case 'delayed': return 'bg-red-100 text-red-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    };
+  
+    const getStatusIcon = (status) => {
+      switch (status) {
+        case 'delivered': return <CheckCircle className="w-4 h-4" />;
+        case 'in_transit': return <Truck className="w-4 h-4" />;
+        case 'pending': return <Clock className="w-4 h-4" />;
+        case 'preparing': return <Package className="w-4 h-4" />;
+        case 'delayed': return <AlertTriangle className="w-4 h-4" />;
+        default: return <Package className="w-4 h-4" />;
+      }
+    };
+  
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    };
+  
+    const getTimeAgo = (timestamp) => {
+      const now = new Date();
+      const time = new Date(timestamp);
+      const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
+      
+      if (diffInHours < 1) return 'Just now';
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    };
+  
+  
+    const getStatusBadgeColor = (status) => {
     switch (status) {
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'in_transit': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'preparing': return 'bg-orange-100 text-orange-800';
-      case 'delayed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'awarded':
+        return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+      case 'delivered':
+        return 'bg-red-50 text-red-600 border border-red-200';
+      case 'quoted':
+        return 'bg-cyan-50 text-cyan-600 border border-cyan-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border border-gray-200';
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'delivered': return <CheckCircle className="w-4 h-4" />;
-      case 'in_transit': return <Truck className="w-4 h-4" />;
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'preparing': return <Package className="w-4 h-4" />;
-      case 'delayed': return <AlertTriangle className="w-4 h-4" />;
-      default: return <Package className="w-4 h-4" />;
-    }
+  const getRequestIcon = (index) => {
+    const icons = [CheckCircle, Ship, Truck, Box];
+    const Icon = icons[index % icons.length];
+    return <Icon className="w-5 h-5 text-gray-500" />;
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const getTimeAgo = (timestamp) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
-  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
       </div>
     );
   }
@@ -377,712 +526,705 @@ const LogisticsDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Logistics Hub</h1>
-              <p className="text-gray-600 mt-1">Global supply chain & shipment management</p>
-            </div>
-            <div className="flex space-x-3">
-              <Link
-                to={webRoutes.logisticsShipmentCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                New Shipment
-              </Link>
-              <button
-                onClick={loadDashboardData}
-                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </button>
-            </div>
-          </div>
-        </div>
+     <div className="bg-white border-b">
+  <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Logistic Hub</h1>
+        <p className="text-gray-500 mt-1">Global Supply Chain And Shipment Management</p>
       </div>
+      <button
+        onClick={loadDashboardData}
+        className="flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+      >
+        <RefreshCw className="w-4 h-4" />
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+</div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Shipments</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData.analytics.totalShipments}</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <TrendingUp className="w-4 h-4 mr-1" />
-                  +{dashboardData.analytics.monthlyGrowth}% this month
-                </p>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Quick Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
+                <Plus className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
               </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Truck className="w-6 h-6 text-blue-600" />
-              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Create Shipment</h3>
+              <p className="text-xs text-gray-500">Schedule New Cargo Shipment</p>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">On-Time Delivery</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData.analytics.onTimeDelivery}%</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Above target
-                </p>
+          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:text-yellow-600 text-gray-600">
+                  <path d="M8 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H16M12 3V11M12 11L15 8M12 11L9 8M4 13H6.58579C6.851 13 7.10536 13.1054 7.29289 13.2929L9.70711 15.7071C9.89464 15.8946 10.149 16 10.4142 16H13.5858C13.851 16 14.1054 15.8946 14.2929 15.7071L16.7071 13.2929C16.8946 13.1054 17.149 13 17.4142 13H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Manage Inventory</h3>
+              <p className="text-xs text-gray-500">Update Stock Levels</p>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Cost Savings</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(dashboardData.analytics.costSavings)}</p>
-                <p className="text-sm text-blue-600 flex items-center mt-1">
-                  <DollarSign className="w-4 h-4 mr-1" />
-                  YTD savings
-                </p>
+          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
+                <MapPin className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
               </div>
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-yellow-600" />
-              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Track Shipment</h3>
+              <p className="text-xs text-gray-500">Real-Time Location Tracking</p>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Routes</p>
-                <p className="text-2xl font-bold text-gray-900">{dashboardData.analytics.activeRoutes}</p>
-                <p className="text-sm text-gray-600 flex items-center mt-1">
-                  <Globe className="w-4 h-4 mr-1" />
-                  Global network
-                </p>
+          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
+                <FileText className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
               </div>
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <MapPin className="w-6 h-6 text-purple-600" />
-              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Manage Request</h3>
+              <p className="text-xs text-gray-500">Manage Shipping Requests</p>
             </div>
-          </div>
+          </button>
+
+          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
+                <User className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">Become A Provider</h3>
+              <p className="text-xs text-gray-500">Offer Logistics Services</p>
+            </div>
+          </button>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
-              {[
-                { key: 'overview', label: 'Overview', icon: BarChart3 },
-                { key: 'requests', label: 'Shipment Requests', icon: FileText },
-                { key: 'shipments', label: 'Shipments', icon: Truck },
-                { key: 'inventory', label: 'Inventory', icon: Package },
-                { key: 'tracking', label: 'Live Tracking', icon: MapPin }
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
-                    activeTab === tab.key
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-t-xl border border-b-0">
+          <nav className="flex space-x-8 px-6">
+            {[
+              { key: 'overview', label: 'Overview', icon: BarChart3 },
+              { key: 'shipments', label: 'Shipments', icon: Ship },
+              { key: 'requests', label: 'Shipments Request', icon: FileText },
+              { key: 'inventory', label: 'Inventory', icon: Package },
+              { key: 'tracking', label: 'Live Tracking', icon: MapPin }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.key
+                    ? 'border-yellow-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
-          <div className="p-6">
-            {activeTab === 'overview' && (
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Recent Shipments - CORRECTED FIELD MAPPINGS */}
+        {/* Main Content */}
+        <div className="bg-white rounded-b-xl border p-6">
+          {activeTab === 'overview' && (
+            <>
+              {/* Metrics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-xl border">
+                <div className="flex items-center justify-between mb-4">
+                  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="44" height="44" rx="10" fill="#FFF1C6"/>
+                    <g clipPath="url(#clip0_1655_7195)">
+                      <path d="M33 30C32.7348 30 32.4804 30.1054 32.2929 30.2929C32.1054 30.4804 32 30.7348 32 31C32 31.344 31.318 32 30.25 32C29.95 32.0105 29.6514 31.9542 29.3759 31.835C29.1003 31.7158 28.8548 31.5368 28.657 31.311C28.6961 31.2472 28.7388 31.1858 28.785 31.127C30.4158 29.4167 31.5126 27.268 31.941 24.944C32.0678 24.2448 31.9423 23.5233 31.5869 22.9079C31.2314 22.2926 30.6691 21.8234 30 21.584V19C30 17.9391 29.5786 16.9217 28.8284 16.1716C28.0783 15.4214 27.0609 15 26 15V14C26 12.9391 25.5786 11.9217 24.8284 11.1716C24.0783 10.4214 23.0609 10 22 10C20.9391 10 19.9217 10.4214 19.1716 11.1716C18.4214 11.9217 18 12.9391 18 14V15C16.9391 15 15.9217 15.4214 15.1716 16.1716C14.4214 16.9217 14 17.9391 14 19V21.571C13.3226 21.805 12.7513 22.2738 12.3896 22.8925C12.0279 23.5112 11.8996 24.2389 12.028 24.944C12.4672 27.2708 13.5746 29.4193 15.215 31.127C15.263 31.1873 15.3074 31.2505 15.348 31.316C15.15 31.5426 14.9036 31.7218 14.627 31.8402C14.3503 31.9586 14.0506 32.0132 13.75 32C12.661 32 12 31.306 12 31C12 30.7348 11.8946 30.4804 11.7071 30.2929C11.5196 30.1054 11.2652 30 11 30C10.7348 30 10.4804 30.1054 10.2929 30.2929C10.1054 30.4804 10 30.7348 10 31C10 32.626 11.718 34 13.75 34C14.7612 34.0091 15.7419 33.6542 16.513 33C17.2821 33.6423 18.2516 33.9955 19.2536 33.9984C20.2556 34.0014 21.2272 33.6538 22 33.016C22.7756 33.6532 23.7491 34.0002 24.7529 33.9972C25.7567 33.9943 26.7281 33.6417 27.5 33C28.2665 33.6507 29.2406 34.0054 30.246 34C32.282 34 34 32.626 34 31C34 30.7348 33.8946 30.4804 33.7071 30.2929C33.5196 30.1054 33.2652 30 33 30ZM20 14C20 13.4696 20.2107 12.9609 20.5858 12.5858C20.9609 12.2107 21.4696 12 22 12C22.5304 12 23.0391 12.2107 23.4142 12.5858C23.7893 12.9609 24 13.4696 24 14V15H20V14ZM18 17H26C26.5304 17 27.0391 17.2107 27.4142 17.5858C27.7893 17.9609 28 18.4696 28 19V20.92L22.948 19.262C22.3339 19.06 21.6711 19.06 21.057 19.262L16 20.913V19C16 18.4696 16.2107 17.9609 16.5858 17.5858C16.9609 17.2107 17.4696 17 18 17ZM19.25 32C18.9158 32.0183 18.5825 31.9497 18.2826 31.8009C17.9828 31.6521 17.7266 31.4282 17.539 31.151C17.3307 30.6517 17.0445 30.1886 16.691 29.779C15.3124 28.3517 14.3776 26.5551 14 24.607C13.9538 24.3674 13.9953 24.1191 14.1168 23.9075C14.2383 23.6959 14.4318 23.5349 14.662 23.454L21 21.383V31C21 31.344 20.318 32 19.25 32ZM24.75 32C23.661 32 23 31.306 23 31V21.384L29.305 23.453C29.536 23.5338 29.7303 23.6948 29.8526 23.9068C29.9748 24.1188 30.0168 24.3676 29.971 24.608C29.6043 26.5535 28.6794 28.3502 27.309 29.779C26.9533 30.1892 26.6668 30.6546 26.461 31.157C26.2733 31.4338 26.0169 31.657 25.717 31.8048C25.417 31.9526 25.0838 32.0198 24.75 32Z" fill="#374957"/>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_1655_7195">
+                        <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.totalShipments}</p>
+                <p className="text-sm text-gray-600 mb-2">Total Shipment</p>
+                <p className="text-xs text-green-600 flex items-center">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  +{dashboardData.analytics.monthlyGrowth}% This Month
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl border">
+              <div className="flex items-center justify-between mb-4">
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="44" height="44" rx="10" fill="#FFF1C6"/>
+                  <g clipPath="url(#clip0_1655_7204)">
+                    <path d="M29 10H15C13.6744 10.0016 12.4036 10.5289 11.4662 11.4662C10.5289 12.4036 10.0016 13.6744 10 15L10 29C10.0016 30.3256 10.5289 31.5964 11.4662 32.5338C12.4036 33.4711 13.6744 33.9984 15 34H29C30.3256 33.9984 31.5964 33.4711 32.5338 32.5338C33.4711 31.5964 33.9984 30.3256 34 29V15C33.9984 13.6744 33.4711 12.4036 32.5338 11.4662C31.5964 10.5289 30.3256 10.0016 29 10V10ZM32 29C32 29.7956 31.6839 30.5587 31.1213 31.1213C30.5587 31.6839 29.7956 32 29 32H15C14.2044 32 13.4413 31.6839 12.8787 31.1213C12.3161 30.5587 12 29.7956 12 29V15C12 14.2044 12.3161 13.4413 12.8787 12.8787C13.4413 12.3161 14.2044 12 15 12H29C29.7956 12 30.5587 12.3161 31.1213 12.8787C31.6839 13.4413 32 14.2044 32 15V29Z" fill="#374957"/>
+                    <path d="M19.3328 25.9198L15.4138 22.0008C15.2263 21.8133 14.972 21.708 14.7068 21.708C14.4417 21.708 14.1873 21.8133 13.9998 22.0008C13.8123 22.1883 13.707 22.4426 13.707 22.7078C13.707 22.9729 13.8123 23.2273 13.9998 23.4148L17.9188 27.3338C18.1045 27.5196 18.3251 27.667 18.5678 27.7675C18.8105 27.8681 19.0706 27.9198 19.3333 27.9198C19.596 27.9198 19.8562 27.8681 20.0989 27.7675C20.3416 27.667 20.5621 27.5196 20.7478 27.3338L29.9998 18.0818C30.1873 17.8943 30.2926 17.6399 30.2926 17.3748C30.2926 17.1096 30.1873 16.8553 29.9998 16.6678C29.8123 16.4803 29.558 16.375 29.2928 16.375C29.0277 16.375 28.7733 16.4803 28.5858 16.6678L19.3328 25.9198Z" fill="#374957"/>
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_1655_7204">
+                      <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
+                    </clipPath>
+                  </defs>
+                </svg>
+              </div>
+              <p className="text-3xl font-bold text-gray-900 mb-1">+{dashboardData.analytics.onTimeDelivery}%</p>
+              <p className="text-sm text-gray-600 mb-2">On Time Delivery</p>
+              <p className="text-xs text-green-600 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Above Target
+              </p>
+            </div>
+                               
+                   <div className="bg-white p-6 rounded-xl border">
+                  <div className="flex items-center justify-between mb-4">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="40" height="40" rx="10" fill="#FFF1C6"/>
+                      <g clipPath="url(#clip0_1655_7213)">
+                        <path d="M25.8338 10H21.6671C21.4461 10 21.2342 10.0878 21.0779 10.2441C20.9216 10.4004 20.8338 10.6123 20.8338 10.8333C20.8338 11.0543 20.9216 11.2663 21.0779 11.4226C21.2342 11.5789 21.4461 11.6667 21.6671 11.6667H25.8338C26.205 11.6681 26.5711 11.7536 26.9046 11.9167L10.2446 28.5775C10.165 28.6544 10.1016 28.7463 10.0579 28.848C10.0142 28.9497 9.99123 29.059 9.99027 29.1697C9.9893 29.2803 10.0104 29.39 10.0523 29.4925C10.0942 29.5949 10.1561 29.6879 10.2343 29.7662C10.3126 29.8444 10.4056 29.9063 10.508 29.9482C10.6104 29.9901 10.7202 30.0112 10.8308 30.0102C10.9415 30.0092 11.0508 29.9863 11.1525 29.9426C11.2541 29.8989 11.3461 29.8354 11.423 29.7558L28.0838 13.0958C28.2469 13.4293 28.3324 13.7954 28.3338 14.1667V18.3333C28.3338 18.5543 28.4216 18.7663 28.5779 18.9226C28.7342 19.0789 28.9461 19.1667 29.1671 19.1667C29.3882 19.1667 29.6001 19.0789 29.7564 18.9226C29.9127 18.7663 30.0005 18.5543 30.0005 18.3333V14.1667C29.9992 13.062 29.5597 12.003 28.7786 11.2218C27.9975 10.4407 26.9385 10.0013 25.8338 10V10Z" fill="#374957"/>
+                        <path d="M15.0003 18.3327C15.6596 18.3327 16.3041 18.1372 16.8522 17.7709C17.4004 17.4046 17.8276 16.884 18.0799 16.275C18.3322 15.6659 18.3982 14.9957 18.2696 14.349C18.141 13.7024 17.8235 13.1085 17.3573 12.6423C16.8912 12.1762 16.2972 11.8587 15.6506 11.7301C15.004 11.6014 14.3338 11.6675 13.7247 11.9198C13.1156 12.172 12.595 12.5993 12.2288 13.1474C11.8625 13.6956 11.667 14.3401 11.667 14.9994C11.667 15.8834 12.0182 16.7313 12.6433 17.3564C13.2684 17.9815 14.1163 18.3327 15.0003 18.3327ZM15.0003 13.3327C15.33 13.3327 15.6522 13.4304 15.9263 13.6136C16.2004 13.7967 16.414 14.057 16.5401 14.3615C16.6663 14.6661 16.6993 15.0012 16.635 15.3245C16.5707 15.6478 16.4119 15.9448 16.1788 16.1779C15.9457 16.4109 15.6488 16.5697 15.3255 16.634C15.0022 16.6983 14.6671 16.6653 14.3625 16.5392C14.058 16.413 13.7977 16.1994 13.6145 15.9253C13.4314 15.6512 13.3337 15.329 13.3337 14.9994C13.3337 14.5573 13.5093 14.1334 13.8218 13.8208C14.1344 13.5083 14.5583 13.3327 15.0003 13.3327Z" fill="#374957"/>
+                        <path d="M25.0003 21.666C24.3411 21.666 23.6966 21.8615 23.1484 22.2278C22.6003 22.5941 22.173 23.1147 21.9207 23.7237C21.6684 24.3328 21.6024 25.003 21.731 25.6497C21.8597 26.2963 22.1771 26.8902 22.6433 27.3564C23.1095 27.8225 23.7034 28.14 24.35 28.2686C24.9966 28.3973 25.6669 28.3312 26.2759 28.0789C26.885 27.8267 27.4056 27.3994 27.7719 26.8512C28.1382 26.3031 28.3337 25.6586 28.3337 24.9993C28.3337 24.1153 27.9825 23.2674 27.3573 22.6423C26.7322 22.0172 25.8844 21.666 25.0003 21.666ZM25.0003 26.666C24.6707 26.666 24.3485 26.5683 24.0744 26.3851C23.8003 26.202 23.5867 25.9417 23.4605 25.6372C23.3344 25.3326 23.3014 24.9975 23.3657 24.6742C23.43 24.3509 23.5887 24.0539 23.8218 23.8208C24.0549 23.5878 24.3519 23.429 24.6752 23.3647C24.9985 23.3004 25.3336 23.3334 25.6381 23.4595C25.9427 23.5857 26.203 23.7993 26.3861 24.0734C26.5692 24.3475 26.667 24.6697 26.667 24.9993C26.667 25.4414 26.4914 25.8653 26.1788 26.1779C25.8663 26.4904 25.4424 26.666 25.0003 26.666Z" fill="#374957"/>
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_1655_7213">
+                          <rect width="20" height="20" fill="white" transform="translate(10 10)"/>
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.costSavings.toLocaleString()}</p>
+                  <p className="text-sm text-gray-600 mb-2">Cost Savings</p>
+                  <p className="text-xs" style={{ color: '#158AFF' }}>YTD Savings</p>
+                  </div>
+
+                <div className="bg-white p-6 rounded-xl border">
+                  <div className="flex items-center justify-between mb-4">
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="44" height="44" rx="10" fill="#FFF1C6"/>
+                      <g clipPath="url(#clip0_1655_7220)">
+                        <path d="M22 16C21.2089 16 20.4355 16.2346 19.7777 16.6741C19.1199 17.1136 18.6072 17.7384 18.3045 18.4693C18.0017 19.2002 17.9225 20.0044 18.0769 20.7804C18.2312 21.5563 18.6122 22.269 19.1716 22.8284C19.731 23.3878 20.4437 23.7688 21.2196 23.9231C21.9956 24.0775 22.7998 23.9983 23.5307 23.6955C24.2616 23.3928 24.8864 22.8801 25.3259 22.2223C25.7654 21.5645 26 20.7911 26 20C26 18.9391 25.5786 17.9217 24.8284 17.1716C24.0783 16.4214 23.0609 16 22 16ZM22 22C21.6044 22 21.2178 21.8827 20.8889 21.6629C20.56 21.4432 20.3036 21.1308 20.1522 20.7654C20.0009 20.3999 19.9613 19.9978 20.0384 19.6098C20.1156 19.2219 20.3061 18.8655 20.5858 18.5858C20.8655 18.3061 21.2219 18.1156 21.6098 18.0384C21.9978 17.9613 22.3999 18.0009 22.7654 18.1522C23.1308 18.3036 23.4432 18.56 23.6629 18.8889C23.8827 19.2178 24 19.6044 24 20C24 20.5304 23.7893 21.0391 23.4142 21.4142C23.0391 21.7893 22.5304 22 22 22Z" fill="#374957"/>
+                        <path d="M22.0003 34.0001C21.1583 34.0044 20.3274 33.8069 19.5774 33.4241C18.8273 33.0413 18.1799 32.4844 17.6893 31.8C13.8783 26.543 11.9453 22.591 11.9453 20.053C11.9453 17.3863 13.0047 14.8288 14.8904 12.9431C16.776 11.0574 19.3336 9.99805 22.0003 9.99805C24.6671 9.99805 27.2246 11.0574 29.1103 12.9431C30.9959 14.8288 32.0553 17.3863 32.0553 20.053C32.0553 22.591 30.1223 26.543 26.3113 31.8C25.8207 32.4844 25.1733 33.0413 24.4232 33.4241C23.6732 33.8069 22.8424 34.0044 22.0003 34.0001ZM22.0003 12.181C19.9127 12.1834 17.9113 13.0138 16.4352 14.4899C14.959 15.9661 14.1287 17.9675 14.1263 20.055C14.1263 22.065 16.0193 25.782 19.4553 30.521C19.747 30.9228 20.1297 31.2498 20.572 31.4753C21.0144 31.7008 21.5038 31.8183 22.0003 31.8183C22.4968 31.8183 22.9863 31.7008 23.4286 31.4753C23.8709 31.2498 24.2536 30.9228 24.5453 30.521C27.9813 25.782 29.8743 22.065 29.8743 20.055C29.8719 17.9675 29.0416 15.9661 27.5654 14.4899C26.0893 13.0138 24.0879 12.1834 22.0003 12.181Z" fill="#374957"/>
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_1655_7220">
+                          <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.activeRoutes}</p>
+                  <p className="text-sm text-gray-600 mb-2">Active Routes</p>
+                  <p className="text-xs text-green-600">Global Network</p>
+                </div>
+              </div>
+
+              {/* Search and Filter */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search Inventory..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  />
+                </div>
+                <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+                  <Filter className="w-4 h-4" />
+                  <span>Filter</span>
+                </button>
+              </div>
+
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column - 2/3 width */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Recent Shipments */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">Recent Shipments</h3>
-                      <Link 
-                        to={webRoutes.logisticsShipments}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      <button 
+                      onClick={() => setActiveTab('shipments')}
+                       className="text-sm text-gray-600 hover:text-gray-900"
                       >
-                        View all
-                      </Link>
+                       See All
+                        </button>
                     </div>
                     <div className="space-y-3">
-                      {dashboardData.shipments.data.length > 0 ? (
-                        dashboardData.shipments.data.slice(0, 5).map((shipment) => (
-                          <div key={shipment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <div className={`p-2 rounded-lg ${getStatusColor(shipment.status)}`}>
-                                {getStatusIcon(shipment.status)}
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">{shipment.tracking_number || `SHIP-${shipment.id?.slice(0,8)}`}</p>
-                                <p className="text-sm text-gray-600">
-                                  {shipment.request_details?.origin_address} → {shipment.request_details?.destination_address}
+                      {dashboardData.shipments.data.map((shipment) => (
+                        <div key={shipment.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3 flex-1">
+                              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="44" height="44" rx="22" fill="#F8F9FA"/>
+                                <g clipPath="url(#clip0_1655_7259)">
+                                  <path d="M32.3186 14.431L18.4996 28.249C18.4067 28.3423 18.2963 28.4163 18.1747 28.4668C18.0531 28.5173 17.9228 28.5433 17.7911 28.5433C17.6595 28.5433 17.5291 28.5173 17.4075 28.4668C17.286 28.4163 17.1755 28.3423 17.0826 28.249L11.7386 22.9C11.6457 22.8067 11.5353 22.7327 11.4137 22.6822C11.2921 22.6317 11.1618 22.6057 11.0301 22.6057C10.8985 22.6057 10.7681 22.6317 10.6465 22.6822C10.525 22.7327 10.4145 22.8067 10.3216 22.9C10.2284 22.9929 10.1543 23.1033 10.1038 23.2249C10.0533 23.3465 10.0273 23.4769 10.0273 23.6085C10.0273 23.7402 10.0533 23.8705 10.1038 23.9921C10.1543 24.1137 10.2284 24.2241 10.3216 24.317L15.6676 29.662C16.2316 30.2249 16.9958 30.5411 17.7926 30.5411C18.5894 30.5411 19.3537 30.2249 19.9176 29.662L33.7356 15.847C33.8288 15.7541 33.9026 15.6438 33.9531 15.5223C34.0035 15.4008 34.0294 15.2705 34.0294 15.139C34.0294 15.0075 34.0035 14.8772 33.9531 14.7557C33.9026 14.6343 33.8288 14.5239 33.7356 14.431C33.6427 14.3377 33.5323 14.2637 33.4107 14.2132C33.2891 14.1627 33.1588 14.1367 33.0271 14.1367C32.8955 14.1367 32.7651 14.1627 32.6435 14.2132C32.522 14.2637 32.4115 14.3377 32.3186 14.431Z" fill="#374957"/>
+                                </g>
+                                <defs>
+                                  <clipPath id="clip0_1655_7259">
+                                    <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
+                                  </clipPath>
+                                </defs>
+                              </svg>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <span className="font-semibold text-gray-900">{shipment.tracking_number}</span>
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
+                                    {shipment.status}
+                                  </span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-600">
+                                  <span>{shipment.request_details.origin_address}</span>
+                                  <span className="mx-2">→</span>
+                                  <span>{shipment.request_details.destination_address}</span>
+                                </div>
+                                <p className="text-sm font-semibold text-gray-900 mt-1">
+                                  ${shipment.request_details.budget_max.toLocaleString()}.00
                                 </p>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                                {shipment.status.replace('_', ' ')}
-                              </span>
-                            </div>
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-6 text-gray-500">
-                          <Truck className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                          <p>No recent shipments</p>
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
 
-                  {/* Inventory Alerts - CORRECTED FIELD MAPPINGS */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Inventory Alerts</h3>
-                      <Link 
-                        to={webRoutes.logisticsInventory}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
-                        View all
-                      </Link>
-                    </div>
-                    <div className="space-y-3">
-                      {dashboardData.inventory.data
-                        .filter(item => item.current_stock <= (item.reorder_point || item.minimum_stock))
-                        .slice(0, 5)
-                        .map((item) => (
-                          <div key={item.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-orange-100 rounded-lg">
-                                <AlertTriangle className="w-4 h-4 text-orange-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">{item.name}</p>
-                                <p className="text-sm text-gray-600">{item.warehouse || item.location || 'N/A'}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-medium text-orange-600">
-                                {item.current_stock} remaining
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                Reorder at {item.reorder_point || item.minimum_stock}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      {dashboardData.inventory.data.filter(item => item.current_stock <= (item.reorder_point || item.minimum_stock)).length === 0 && (
-                        <div className="text-center py-4 text-gray-500">
-                          No low stock alerts
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Requests Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Recent Requests */}
+                  {/* Recent Shipment Requests */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">Recent Shipment Requests</h3>
-                      <Link 
-                        to={webRoutes.logisticsRequests}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
-                        View all
-                      </Link>
                     </div>
                     <div className="space-y-3">
-                      {dashboardData.requests.data.length > 0 ? (
-                        dashboardData.requests.data.slice(0, 5).map((request) => (
-                          <div key={request.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-blue-100 rounded-lg">
-                                <FileText className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">REQ-{request.id?.slice(0,8)}</p>
-                                <p className="text-sm text-gray-600">
-                                  {request.origin_address} → {request.destination_address}
-                                </p>
-                              </div>
+                      {dashboardData.requests.data.map((request, index) => (
+                        <div key={request.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
+                              {getRequestIcon(index)}
                             </div>
-                            <div className="text-right">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                  request.status === 'quoted' ? 'bg-blue-100 text-blue-800' :
-                                  request.status === 'awarded' ? 'bg-green-100 text-green-800' :
-                                  'bg-gray-100 text-gray-800'}`}>
-                                {request.status}
-                              </span>
-                              <p className="text-xs text-gray-500 mt-1">
-                                ${request.budget_max || 'No budget'}
-                              </p>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className="font-semibold text-gray-900">{request.tracking_number}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
+                                  {request.status}
+                                </span>
+                              </div>
+                              <div className="flex items-center text-sm text-gray-600">
+                                <span>{request.origin_address}</span>
+                                <span className="mx-2">→</span>
+                                <span>{request.destination_address}</span>
+                              </div>
                             </div>
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-6 text-gray-500">
-                          <FileText className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                          <p>No recent shipment requests</p>
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
+                </div>
 
+                {/* Right Column - 1/3 width */}
+                <div className="space-y-6">
                   {/* Request Statistics */}
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Shipment Request Statistics</h3>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Total Shipment Requests</span>
-                          <span className="text-lg font-semibold text-gray-900">{dashboardData.requests.total}</span>
-                        </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Statistics</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white border rounded-xl p-4 text-center">
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.requests.total}</p>
+                        <p className="text-xs text-gray-600">Total Shipment Requests</p>
                       </div>
-                      <div className="p-4 bg-yellow-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Pending Quotes</span>
-                          <span className="text-lg font-semibold text-yellow-700">
-                            {dashboardData.requests.data.filter(r => r.status === 'pending').length}
-                          </span>
-                        </div>
+                      <div className="bg-white border rounded-xl p-4 text-center">
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.pendingQuotes}</p>
+                        <p className="text-xs text-gray-600">Pending Quotes</p>
                       </div>
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Quoted</span>
-                          <span className="text-lg font-semibold text-blue-700">
-                            {dashboardData.requests.data.filter(r => r.status === 'quoted').length}
-                          </span>
-                        </div>
+                      <div className="bg-white border rounded-xl p-4 text-center">
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.quoted}</p>
+                        <p className="text-xs text-gray-600">Quoted</p>
                       </div>
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Awarded</span>
-                          <span className="text-lg font-semibold text-green-700">
-                            {dashboardData.requests.data.filter(r => r.status === 'awarded').length}
-                          </span>
-                        </div>
+                      <div className="bg-white border rounded-xl p-4 text-center">
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.awarded}</p>
+                        <p className="text-xs text-gray-600">Awarded</p>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Enhanced Inventory Dashboard Widget */}
-                <InventoryDashboardWidget className="col-span-full" />
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                  <Link
-                    to={webRoutes.logisticsShipmentCreate}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors group"
-                  >
-                    <div className="text-center">
-                      <Plus className="mx-auto h-8 w-8 text-gray-400 group-hover:text-blue-500" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">Create Shipment</h3>
-                      <p className="mt-1 text-sm text-gray-500">Schedule new cargo shipment</p>
+                  {/* Inventory Alerts */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Inventory Alerts</h3>
+                      <button 
+                         onClick={() => setActiveTab('inventory')}
+                            className="text-sm text-gray-600 hover:text-gray-900"
+                          >
+                            View All
+                          </button>
                     </div>
-                  </Link>
-
-                  <Link
-                    to={webRoutes.logisticsInventory}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors group"
-                  >
-                    <div className="text-center">
-                      <Warehouse className="mx-auto h-8 w-8 text-gray-400 group-hover:text-green-500" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">Manage Inventory</h3>
-                      <p className="mt-1 text-sm text-gray-500">Update stock levels</p>
+                    <div className="space-y-2">
+                      {dashboardData.inventory.data.map((item) => (
+                        <div key={item.id} className="bg-white border rounded-lg p-3 hover:shadow-sm transition-shadow">
+                          <div className="flex items-start space-x-3">
+                            <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <AlertTriangle className="w-4 h-4 text-orange-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
+                              <p className="text-xs text-gray-500 truncate">{item.location}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="text-xs text-gray-600">{item.current_stock} Remaining</span>
+                                <span className="text-xs text-gray-500">Reorder at {item.reorder_point}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </Link>
-
-                  <Link
-                    to={webRoutes.logisticsTracking}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors group"
-                  >
-                    <div className="text-center">
-                      <MapPin className="mx-auto h-8 w-8 text-gray-400 group-hover:text-purple-500" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">Track Shipments</h3>
-                      <p className="mt-1 text-sm text-gray-500">Real-time location tracking</p>
-                    </div>
-                  </Link>
-
-                  <Link
-                    to={webRoutes.logisticsRequests}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-colors group"
-                  >
-                    <div className="text-center">
-                      <FileText className="mx-auto h-8 w-8 text-gray-400 group-hover:text-orange-500" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">View Requests</h3>
-                      <p className="mt-1 text-sm text-gray-500">Manage shipping requests</p>
-                    </div>
-                  </Link>
-
-                  <Link
-                    to={webRoutes.logisticsBecomeProvider}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 hover:bg-indigo-50 transition-colors group"
-                  >
-                    <div className="text-center">
-                      <Users className="mx-auto h-8 w-8 text-gray-400 group-hover:text-indigo-500" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">Become a Provider</h3>
-                      <p className="mt-1 text-sm text-gray-500">Offer logistics services</p>
-                    </div>
-                  </Link>
+                  </div>
                 </div>
               </div>
-            )}
+            </>
+          )}
 
-            {activeTab === 'requests' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">All Shipment Requests</h3>
-                  <div className="flex space-x-2">
-                    <Link
-                      to={webRoutes.logisticsShipmentCreate}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors flex items-center space-x-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Create Shipment Request</span>
-                    </Link>
-                    <Link
-                      to={webRoutes.logisticsRequests}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>View All</span>
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  {dashboardData.requests.data.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Request ID</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Title</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo Type</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Budget</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Created</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboardData.requests.data.slice(0, 10).map((request) => (
-                          <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-4 px-4">
-                              <Link 
-                                to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
-                                className="font-medium text-blue-600 hover:text-blue-700"
+          {activeTab === 'requests' && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">All Shipment Requests</h3>
+                            <div className="flex space-x-2">
+                              <Link
+                                to={webRoutes.logisticsShipmentCreate}
+                                className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2"
                               >
-                                REQ-{request.id?.slice(0,8)}
+                                <Plus className="w-4 h-4" />
+                                <span>Create Shipment Request</span>
                               </Link>
-                            </td>
-                            <td className="py-4 px-4">
-                              <p className="text-sm font-medium text-gray-900">{request.title}</p>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div>
-                                <p className="text-sm text-gray-900">{request.origin_address}</p>
-                                <p className="text-sm text-gray-500">→ {request.destination_address}</p>
+                              <Link
+                                to={webRoutes.logisticsRequests}
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                              >
+                                <Eye className="w-4 h-4" />
+                                <span>View All</span>
+                              </Link>
+                            </div>
+                          </div>
+          
+                          <div className="overflow-x-auto">
+                            {dashboardData.requests.data.length > 0 ? (
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-gray-200">
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Request ID</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Title</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo Type</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Budget</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Created</th>
+                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {dashboardData.requests.data.slice(0, 10).map((request) => (
+                                    <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                      <td className="py-4 px-4">
+                                        <Link 
+                                          to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
+                                          className="font-medium text-blue-600 hover:text-blue-700"
+                                        >
+                                          REQ-{request.id?.slice(0,8)}
+                                        </Link>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <p className="text-sm font-medium text-gray-900">{request.title}</p>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <div>
+                                          <p className="text-sm text-gray-900">{request.origin_address}</p>
+                                          <p className="text-sm text-gray-500">→ {request.destination_address}</p>
+                                        </div>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                                          {request.cargo_type?.replace('_', ' ')}
+                                        </span>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                                          ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                            request.status === 'posted' ? 'bg-blue-100 text-blue-800' :
+                                            request.status === 'quoted' ? 'bg-purple-100 text-purple-800' :
+                                            request.status === 'awarded' ? 'bg-green-100 text-green-800' :
+                                            'bg-gray-100 text-gray-800'}`}>
+                                          {request.status}
+                                        </span>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <p className="text-sm text-gray-900">
+                                          ${request.budget_min} - ${request.budget_max}
+                                        </p>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <p className="text-sm text-gray-900">
+                                          {new Date(request.created_at).toLocaleDateString()}
+                                        </p>
+                                      </td>
+                                      <td className="py-4 px-4">
+                                        <div className="flex space-x-2">
+                                          <Link
+                                            to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
+                                            className="text-blue-600 hover:text-blue-700"
+                                          >
+                                            <Eye className="w-4 h-4" />
+                                          </Link>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            ) : (
+                              <div className="text-center py-12">
+                                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                                <h3 className="mt-2 text-sm font-medium text-gray-900">No shipment requests found</h3>
+                                <p className="mt-1 text-sm text-gray-500">Get started by creating a new shipment request.</p>
+                                <div className="mt-6">
+                                  <Link
+                                    to={webRoutes.logisticsShipmentCreate}
+                                    className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
+                                  >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Create Shipment Request
+                                  </Link>
+                                </div>
                               </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                {request.cargo_type?.replace('_', ' ')}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                  request.status === 'posted' ? 'bg-blue-100 text-blue-800' :
-                                  request.status === 'quoted' ? 'bg-purple-100 text-purple-800' :
-                                  request.status === 'awarded' ? 'bg-green-100 text-green-800' :
-                                  'bg-gray-100 text-gray-800'}`}>
-                                {request.status}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4">
-                              <p className="text-sm text-gray-900">
-                                ${request.budget_min} - ${request.budget_max}
-                              </p>
-                            </td>
-                            <td className="py-4 px-4">
-                              <p className="text-sm text-gray-900">
-                                {new Date(request.created_at).toLocaleDateString()}
-                              </p>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex space-x-2">
+                            )}
+                          </div>
+                        </div>
+                      )}
+          
+                      {activeTab === 'shipments' && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">All Shipments</h3>
+                            <div className="flex space-x-2">
+                              <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                <Filter className="w-4 h-4" />
+                              </button>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Search shipments..."
+                                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+          
+                          {dashboardData.shipments.data.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {dashboardData.shipments.data.map((shipment) => (
+                                <div key={shipment.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow p-6 capitalize">
+                                  {/* Header with Icon and Status */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <div className="p-2 bg-yellow-100 rounded-lg">
+                                      <Package className="w-5 h-5 text-yellow-600" />
+                                    </div>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
+                                      {shipment.status.replace('_', ' ')}
+                                    </span>
+                                  </div>
+          
+                                  {/* Tracking Number */}
+                                  <h4 className="text-sm font-bold text-gray-900 mb-4">
+                                    {shipment.tracking_number || `SHIP-${shipment.id?.slice(0,8)}`}
+                                  </h4>
+          
+                                  {/* Route Info */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <p className="text-xs font-semibold text-gray-700 mb-1">Route:</p>
+                                    <div className="text-[12px] text-right text-gray-600 line-clamp-2">
+                                      <p className="font-medium">{shipment.request_details?.origin_address || 'Origin not specified'}</p>
+                                      <p className="text-xs text-gray-500 flex items-center mt-1">
+                                        <span>→ {shipment.request_details?.destination_address || 'Destination not specified'}</span>
+                                      </p>
+                                    </div>
+                                  </div>
+          
+                                  {/* Cargo Info */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <p className="text-xs font-semibold text-gray-700 mb-1">Cargo:</p>
+                                    <p className="text-sm text-gray-600">
+                                      {shipment.request_details?.cargo_type?.replace('_', ' ') || 'N/A'} - {shipment.request_details?.weight || 'N/A'} kg
+                                    </p>
+                                  </div>
+          
+                                  {/* Budget Info */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <p className="text-xs font-semibold text-gray-700 mb-1">Budget:</p>
+                                    <p className="text-sm text-gray-600 font-medium">
+                                      {shipment.request_details?.budget_max ? formatCurrency(shipment.request_details.budget_max) : 'N/A'}
+                                    </p>
+                                  </div>
+          
+                                  {/* ETA Info */}
+                                  <div className="flex items-center justify-between mb-6">
+                                    <p className="text-xs font-semibold text-gray-700 mb-1">ETA:</p>
+                                    <p className="text-sm text-gray-600">
+                                      {shipment.request_details?.delivery_date_requested ? new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 'N/A'}
+                                    </p>
+                                  </div>
+          
+                                  {/* View Details Button */}
+                                  <Link
+                                    to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
+                                    className="w-full bg-yellow-400 text-white font-medium py-2 rounded-lg hover:bg-yellow-500 transition-colors text-sm inline-block text-center"
+                                  >
+                                    View Details
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-12">
+                              <Truck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No Shipments</h3>
+                              <p className="text-gray-500 mb-4">{dashboardData.requests.total > 0 ? 'Award a request to generate a shipment' : "You haven't created any shipments yet"}</p>
+                              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                                 <Link
-                                  to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
-                                  className="text-blue-600 hover:text-blue-700"
+                                  to={webRoutes.logisticsRequests}
+                                  className="inline-flex items-center px-4 py-2 bg-pale_yellow rounded-lg hover:bg-custom_yellow"
                                 >
-                                  <Eye className="w-4 h-4" />
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  View Requests
+                                </Link>
+                                <Link
+                                  to={webRoutes.logisticsShipmentCreate}
+                                  className="inline-flex items-center px-4 py-2 bg-gold/80 text-white rounded-lg hover:bg-gold"
+                                >
+                                  <Plus className="w-4 h-4 mr-2" />
+                                  Create Shipment
                                 </Link>
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="text-center py-12">
-                      <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">No shipment requests found</h3>
-                      <p className="mt-1 text-sm text-gray-500">Get started by creating a new shipment request.</p>
-                      <div className="mt-6">
-                        <Link
-                          to={webRoutes.logisticsShipmentCreate}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Shipment Request
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'shipments' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">All Shipments</h3>
-                  <div className="flex space-x-2">
-                    <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                      <Filter className="w-4 h-4" />
-                    </button>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search shipments..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  {dashboardData.shipments.data.length > 0 ? (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Tracking #</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">ETA</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Budget</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dashboardData.shipments.data.map((shipment) => (
-                          <tr key={shipment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-4 px-4">
-                              <Link 
-                                to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                                className="font-medium text-blue-600 hover:text-blue-700"
-                              >
-                                {shipment.tracking_number || `SHIP-${shipment.id?.slice(0,8)}`}
-                              </Link>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{shipment.request_details?.origin_address}</p>
-                                <p className="text-sm text-gray-600">→ {shipment.request_details?.destination_address}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+          
+                      {activeTab === 'inventory' && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">Inventory Management</h3>
+                            <div className="flex space-x-2">
+                              <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                <Filter className="w-4 h-4" />
+                              </button>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Search inventory..."
+                                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                               </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{shipment.request_details?.cargo_type?.replace('_', ' ')}</p>
-                                <p className="text-sm text-gray-600">{shipment.request_details?.weight} kg</p>
+                            </div>
+                          </div>
+          
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {dashboardData.inventory.data.length > 0 ? (
+                              dashboardData.inventory.data.map((item) => (
+                                <div key={item.id} className="bg-gray-50 rounded-lg p-4">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h4 className="font-medium text-gray-900">{item.name}</h4>
+                                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                                      {item.category?.name || item.category || 'N/A'}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Available:</span>
+                                      <span className={`font-medium ${item.current_stock <= (item.reorder_point || item.minimum_stock) ? 'text-orange-600' : 'text-gray-900'}`}>
+                                        {item.current_stock} {item.unit}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Min Stock:</span>
+                                      <span className="text-gray-900">{item.minimum_stock} {item.unit}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Location:</span>
+                                      <span className="text-gray-900">{item.warehouse || item.location || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Unit Cost:</span>
+                                      <span className="text-gray-900">${item.unit_cost}</span>
+                                    </div>
+                                  </div>
+          
+                                  {item.current_stock <= (item.reorder_point || item.minimum_stock) && (
+                                    <div className="mt-3 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-700">
+                                      ⚠️ Below reorder level ({item.reorder_point || item.minimum_stock})
+                                    </div>
+                                  )}
+          
+                                  <div className="mt-3 flex space-x-2">
+                                    <Link
+                                      to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
+                                      className="flex-1 text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
+                                    >
+                                      View Details
+                                    </Link>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-3 text-center py-8 text-gray-500">
+                                <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                                <p>No inventory items found</p>
+                                <p className="text-sm mb-4">Add inventory items to get started{userIsStaff ? ' or view all items across users.' : ''}</p>
+                                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                  <Link
+                                    to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
+                                    className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
+                                  >
+                                    <Plus className="w-4 h-4 mr-2" /> Add Inventory
+                                  </Link>
+                                  {userIsStaff && (
+                                    <button
+                                      onClick={() => {
+                                        localStorage.setItem('force_inventory_scope_all','1');
+                                        loadDashboardData();
+                                      }}
+                                      className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                                    >
+                                      View All (Staff)
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                                {shipment.status.replace('_', ' ')}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4 text-sm text-gray-900">
-                              {shipment.request_details?.delivery_date_requested ? new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 'N/A'}
-                            </td>
-                            <td className="py-4 px-4 font-medium text-gray-900">
-                              {shipment.request_details?.budget_max ? formatCurrency(shipment.request_details.budget_max) : 'N/A'}
-                            </td>
-                            <td className="py-4 px-4">
-                              <Link
-                                to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                              >
-                                View
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <div className="text-center py-12">
-                      <Truck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Shipments</h3>
-                      <p className="text-gray-500 mb-4">{dashboardData.requests.total > 0 ? 'Award a request to generate a shipment' : "You haven't created any shipments yet"}</p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link
-                          to={webRoutes.logisticsRequests}
-                          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                        >
-                          <FileText className="w-4 h-4 mr-2" />
-                          View Requests
-                        </Link>
-                        <Link
-                          to={webRoutes.logisticsShipmentCreate}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Shipment
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'inventory' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Inventory Management</h3>
-                  <div className="flex space-x-2">
-                    <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                      <Filter className="w-4 h-4" />
-                    </button>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search inventory..."
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {dashboardData.inventory.data.length > 0 ? (
-                    dashboardData.inventory.data.map((item) => (
-                      <div key={item.id} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-medium text-gray-900">{item.name}</h4>
-                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                            {item.category?.name || item.category || 'N/A'}
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Available:</span>
-                            <span className={`font-medium ${item.current_stock <= (item.reorder_point || item.minimum_stock) ? 'text-orange-600' : 'text-gray-900'}`}>
-                              {item.current_stock} {item.unit}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Min Stock:</span>
-                            <span className="text-gray-900">{item.minimum_stock} {item.unit}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Location:</span>
-                            <span className="text-gray-900">{item.warehouse || item.location || 'N/A'}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Unit Cost:</span>
-                            <span className="text-gray-900">${item.unit_cost}</span>
+                            )}
                           </div>
                         </div>
-
-                        {item.current_stock <= (item.reorder_point || item.minimum_stock) && (
-                          <div className="mt-3 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-700">
-                            ⚠️ Below reorder level ({item.reorder_point || item.minimum_stock})
+                      )}
+          
+                      {activeTab === 'tracking' && (
+                        <div className="text-center py-12">
+                          <Ship className="mx-auto h-12 w-12 text-gray-400" />
+                          <h3 className="mt-2 text-sm font-medium text-gray-900">Live Tracking</h3>
+                          <p className="mt-1 text-sm text-gray-500">
+                            Real-time shipment tracking will be displayed here
+                          </p>
+                          <div className="mt-6">
+                            <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-yellow-600">
+                              <MapPin className="w-4 h-4 mr-2" />
+                              View Map
+                            </button>
                           </div>
-                        )}
-
-                        <div className="mt-3 flex space-x-2">
-                          <Link
-                            to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                            className="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-custom_yellow"
-                          >
-                            View Details
-                          </Link>
                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-3 text-center py-8 text-gray-500">
-                      <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p>No inventory items found</p>
-                      <p className="text-sm mb-4">Add inventory items to get started{userIsStaff ? ' or view all items across users.' : ''}</p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link
-                          to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow text-sm"
-                        >
-                          <Plus className="w-4 h-4 mr-2" /> Add Inventory
-                        </Link>
-                        {userIsStaff && (
-                          <button
-                            onClick={() => {
-                              localStorage.setItem('force_inventory_scope_all','1');
-                              loadDashboardData();
-                            }}
-                            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
-                          >
-                            View All (Staff)
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'tracking' && (
-              <div className="text-center py-12">
-                <Ship className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Live Tracking</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Real-time shipment tracking will be displayed here
-                </p>
-                <div className="mt-6">
-                  <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    View Map
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+                      )}
         </div>
       </div>
     </div>
   );
 };
 
-export default LogisticsDashboard;
+export default LogisticsHubDashboard;
