@@ -1,6 +1,5 @@
-import { logisticsAPI } from '../../api-services/logistics';
-import { getSession } from '../../lib/session';
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Truck,
   Package,
@@ -9,18 +8,30 @@ import {
   AlertTriangle,
   CheckCircle,
   TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Users,
+  Calendar,
+  BarChart3,
+  Eye,
   Plus,
   Filter,
   Search,
   RefreshCw,
+  Globe,
+  Warehouse,
   Ship,
-  FileText,
-  Calendar,
   User,
-  BarChart3,
   Box,
-  Scissors
+  Scissors,
+
+  FileText
 } from 'lucide-react';
+import { webRoutes } from '../../lib/webRoutes';
+import { logisticsAPI } from '../../api-services/logistics';
+import InventoryDashboardWidget from '../../components/dashboard/InventoryDashboardWidget';
+import { getSession } from '../../lib/session';
+
 
 // Simulated API data
 const mockData = {
@@ -145,111 +156,346 @@ const mockData = {
 };
 
 const LogisticsHubDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(false);
-  const [dashboardData, setDashboardData] = useState(mockData);
-  const [searchQuery, setSearchQuery] = useState('');
-
- 
-  const session = getSession();
-  const userIsStaff = (
-    session?.user?.is_staff === true ||
-    session?.user?.is_superuser === true ||
-    localStorage.getItem('user_is_staff') === 'true'
-  );
-  // Authentication check - runs once on mount
-  useEffect(() => {
+  // Check session for user privileges
     const session = getSession();
-    if (!session?.tokens?.access) {
-      console.warn('No authentication session found');
-      window.location.href = '/login';
-      return;
-    }
-  }, []);
-
-  // Real API calls
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true);
-      
+      const [searchQuery, setSearchQuery] = useState('');
+    console.log('🔍 Session check in LogisticsDashboard:', {
+      hasSession: !!session,
+      user: session?.user,
+      tokens: session?.tokens ? 'present' : 'missing'
+    });
+    
+    const userIsStaff = (
+      session?.user?.is_staff === true ||
+      session?.user?.is_superuser === true ||
+      localStorage.getItem('user_is_staff') === 'true' ||
+      localStorage.getItem('user_is_admin') === 'true' ||
+      localStorage.getItem('force_inventory_scope_all') === '1'
+    );
+    
+    console.log('🔑 User privilege check:', {
+      userIsStaff,
+      sessionStaff: session?.user?.is_staff,
+      sessionSuperuser: session?.user?.is_superuser,
+      localStorageStaff: localStorage.getItem('user_is_staff'),
+      localStorageAdmin: localStorage.getItem('user_is_admin'),
+      forceScope: localStorage.getItem('force_inventory_scope_all')
+    });
+    const [loading, setLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState({
+      shipments: { total: 0, data: [] },
+      inventory: { total: 0, data: [] },
+      requests: { total: 0, data: [] },
+      analytics: {
+        totalShipments: 0,
+        onTimeDelivery: 0,
+        costSavings: 0,
+        activeRoutes: 0
+      }
+    });
+  
+    const [activeTab, setActiveTab] = useState('overview');
+  
+    // Early authentication check - redirect if not logged in
+    useEffect(() => {
       const session = getSession();
       if (!session?.tokens?.access) {
+        console.warn('❌ No authentication session found, redirecting to login');
         window.location.href = '/login';
         return;
       }
-
-      const scopeParams = userIsStaff ? { scope: 'all' } : {};
-
-      const shipmentsResponse = await logisticsAPI.getShipments(scopeParams);
-      const requestsResponse = await logisticsAPI.getRequests(scopeParams);
-      const inventoryResponse = await logisticsAPI.getInventoryItems(scopeParams);
-
-      const normalize = (resp) => {
-        const payload = resp?.data || resp;
-        return {
-          list: payload?.results || [],
-          count: payload?.count || 0
-        };
-      };
-
-      const shipmentsNorm = normalize(shipmentsResponse);
-      const requestsNorm = normalize(requestsResponse);
-      const inventoryNorm = normalize(inventoryResponse);
-
-      const totalShipments = shipmentsNorm.count;
-      const deliveredShipments = shipmentsNorm.list.filter(s => s.status === 'delivered');
-      const onTimeDelivery = deliveredShipments.length > 0 
-        ? ((deliveredShipments.length / shipmentsNorm.list.length) * 100).toFixed(1)
-        : 0;
-      
-      const totalValue = shipmentsNorm.list.reduce((sum, shipment) => {
-        return sum + parseFloat(shipment.request_details?.budget_max || 0);
-      }, 0);
-      const costSavings = totalValue * 0.15;
-      const activeRoutes = shipmentsNorm.list.filter(s => 
-        ['in_transit', 'picked_up', 'preparing'].includes(s.status)
-      ).length;
-
-      setDashboardData({
-        shipments: {
-          total: shipmentsNorm.count,
-          data: shipmentsNorm.list
-        },
-        requests: {
-          total: requestsNorm.count,
-          data: requestsNorm.list
-        },
-        inventory: {
-          total: inventoryNorm.count,
-          data: inventoryNorm.list
-        },
-        analytics: {
-          totalShipments,
-          onTimeDelivery: parseFloat(onTimeDelivery),
-          costSavings,
-          activeRoutes,
-          monthlyGrowth: 8.5,
-          pendingQuotes: requestsNorm.list.filter(r => r.status === 'pending').length,
-          quoted: requestsNorm.list.filter(r => r.status === 'quoted').length,
-          awarded: requestsNorm.list.filter(r => r.status === 'awarded').length
-        }
-      });
-
-    } catch (error) {
-      console.error('Failed to load logistics data:', error);
-      if (error.response?.status === 401) {
-        window.location.href = '/login';
+    }, []);
+  
+    useEffect(() => {
+      loadDashboardData();
+    }, []);
+  
+    useEffect(() => {
+      if (!loading) {
+        console.log('🔄 dashboardData updated (post-render readiness check):', dashboardData);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, [dashboardData, loading]);
+  
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        console.log('🔍 Loading logistics dashboard data...');
+        console.log('🔑 Checking authentication state...');
+        
+        // Check session for proper authentication tokens
+        const session = getSession();
+        console.log('📦 Session state:', { 
+          hasSession: !!session, 
+          hasTokens: !!(session?.tokens),
+          hasAccess: !!(session?.tokens?.access),
+          hasRefresh: !!(session?.tokens?.refresh),
+          // Session has { id, email, tokens } structure
+          userInfo: session?.id ? { id: session.id, email: session.email } : null
+        });
+        
+        // Also check localStorage for any legacy tokens (for debugging)
+        const accessToken = localStorage.getItem('access');
+        const refreshToken = localStorage.getItem('refresh');
+        console.log('📦 LocalStorage tokens (legacy check):', { 
+          hasAccess: !!accessToken, 
+          hasRefresh: !!refreshToken,
+          accessPreview: accessToken ? accessToken.substring(0, 30) + '...' : null
+        });
+        
+        if (!session?.tokens?.access) {
+          console.error('❌ No valid authentication session found');
+          throw new Error('Authentication required. Please log in.');
+        }
+        
+        // Fetch real data from APIs
+        console.log('🚀 Making API calls...');
+        // Helper to follow pagination for a given initial payload and base path
+        const fetchAllPages = async (initialPayload, baseUrl) => {
+          // initialPayload may be either the already-parsed object or wrapped
+          const first = (initialPayload?.data && initialPayload.data.results) ? initialPayload.data : initialPayload;
+          if (!first || first.next === undefined) return first; // Not paginated
+          let aggregated = {
+            count: first.count ?? (first.results ? first.results.length : 0),
+            results: [...(first.results || [])],
+            next: first.next
+          };
+          // Cap pages to avoid runaway (e.g., max 5 pages / 250 records typical 50 per page assumption)
+          let pageFetches = 0;
+          while (aggregated.next && aggregated.results.length < aggregated.count && pageFetches < 5) {
+            try {
+              const nextUrl = aggregated.next;
+              console.log('➡️ Fetching paginated page:', nextUrl);
+              // Use api helper directly via fetch since logisticsAPI currently only exposes root endpoints
+              const rel = nextUrl.replace(/^https?:\/\/[^/]+/, '');
+              const pageResp = await logisticsAPI.getRequests({ page: new URL(nextUrl).searchParams.get('page') });
+              if (pageResp?.results) {
+                aggregated.results.push(...pageResp.results);
+                aggregated.next = pageResp.next;
+              } else {
+                break;
+              }
+            } catch (e) {
+              console.warn('⚠️ Failed to fetch additional page:', e);
+              break;
+            }
+            pageFetches++;
+          }
+          return aggregated;
+        };
+  
+        // Determine if we should request global scope based on component-scope userIsStaff
+        const scopeParams = userIsStaff ? { scope: 'all' } : {};
+        console.log('🔧 API scope params:', scopeParams);
+        console.log('🔧 User is staff check:', { userIsStaff, session: getSession()?.user });
+        
+        // Make API calls with individual error handling
+        let shipmentsResponse, inventoryResponse, requestsResponse;
+        
+        try {
+          console.log('🚛 Fetching shipments with URL: /api/v1/logistics/shipments/ and params:', scopeParams);
+          shipmentsResponse = await logisticsAPI.getShipments(scopeParams);
+          console.log('✅ Shipments response type:', typeof shipmentsResponse);
+          console.log('✅ Shipments response keys:', Object.keys(shipmentsResponse || {}));
+          console.log('✅ Shipments full response:', shipmentsResponse);
+        } catch (error) {
+          console.error('❌ Shipments API error:', error);
+          console.error('❌ Shipments error details:', error.response?.data);
+          shipmentsResponse = { results: [], count: 0 };
+        }
+        
+        try {
+          console.log('📦 Fetching inventory with URL: /api/v1/logistics/inventory-items/ and params:', scopeParams);
+          inventoryResponse = await logisticsAPI.getInventoryItems(scopeParams);
+          console.log('✅ Inventory response type:', typeof inventoryResponse);
+          console.log('✅ Inventory response keys:', Object.keys(inventoryResponse || {}));
+          console.log('✅ Inventory full response:', inventoryResponse);
+        } catch (error) {
+          console.error('❌ Inventory API error:', error);
+          console.error('❌ Inventory error details:', error.response?.data);
+          inventoryResponse = { results: [], count: 0 };
+        }
+        
+        try {
+          console.log('📋 Fetching requests with URL: /api/v1/logistics/requests/ and params:', scopeParams);
+          requestsResponse = await logisticsAPI.getRequests(scopeParams);
+          console.log('✅ Requests response type:', typeof requestsResponse);
+          console.log('✅ Requests response keys:', Object.keys(requestsResponse || {}));
+          console.log('✅ Requests full response:', requestsResponse);
+        } catch (error) {
+          console.error('❌ Requests API error:', error);
+          console.error('❌ Requests error details:', error.response?.data);
+          requestsResponse = { results: [], count: 0 };
+        }
+  
+        console.log('📊 API responses received:', {
+          shipments: shipmentsResponse,
+          inventory: inventoryResponse,
+          requests: requestsResponse
+        });
+  
+        // Normalize possible response shapes (either already the payload or wrapped in {data})
+        const normalize = (resp) => {
+          const payload = resp?.data && typeof resp.data === 'object' && (resp.data.results || resp.data.count !== undefined) ? resp.data : resp;
+          return {
+            list: payload?.results || (Array.isArray(payload) ? payload : []),
+            count: payload?.count || (Array.isArray(payload?.results) ? payload.results.length : (Array.isArray(payload) ? payload.length : 0))
+          };
+        };
+        const shipmentsNorm = normalize(shipmentsResponse);
+        const inventoryNorm = normalize(inventoryResponse);
+        let requestsNorm = normalize(requestsResponse);
+  
+        // If requests are paginated and we have more than one page, pull additional pages
+        if (requestsNorm.count > requestsNorm.list.length && requestsResponse.next) {
+          console.log('🔁 Expanding paginated requests to gather more records...');
+          const full = await fetchAllPages(requestsResponse, '/api/v1/logistics/requests/');
+          requestsNorm = {
+            list: full.results,
+            count: full.count
+          };
+          console.log('📦 Aggregated requests records:', { gathered: requestsNorm.list.length, total: requestsNorm.count });
+        }
+  
+        const shipments = shipmentsNorm.list;
+        const inventory = inventoryNorm.list;
+        const requests = requestsNorm.list;
+        const totalShipmentsCount = shipmentsNorm.count;
+        const totalInventoryCount = inventoryNorm.count;
+        const totalRequestsCount = requestsNorm.count;
+  
+        console.log('✅ Processed data:', {
+          shipmentsCount: shipments.length,
+          inventoryCount: inventory.length,
+          requestsCount: requests.length,
+          totalShipmentsCount,
+          totalInventoryCount,
+          totalRequestsCount
+        });
+  
+        // Calculate analytics from real data with corrected field mappings
+        const totalShipments = totalShipmentsCount;
+        const deliveredShipments = shipments.filter(s => s.status === 'delivered');
+        const onTimeDelivery = deliveredShipments.length > 0 
+          ? ((deliveredShipments.length / shipments.length) * 100).toFixed(1)
+          : 0;
+        
+        // Use corrected field mapping: budget_max from request_details
+        const totalValue = shipments.reduce((sum, shipment) => {
+          const budgetMax = shipment.request_details?.budget_max || 0;
+          return sum + parseFloat(budgetMax);
+        }, 0);
+        const costSavings = totalValue * 0.15; // Estimated 15% savings
+        const activeRoutes = shipments.filter(s => ['in_transit', 'picked_up', 'preparing'].includes(s.status)).length;
+        
+        const monthlyGrowth = 8.5; // This would come from analytics service
+  
+    const newData = {
+          shipments: {
+            total: totalShipmentsCount,
+            data: shipments
+          },
+          inventory: {
+            total: totalInventoryCount,
+            data: inventory
+          },
+          requests: {
+            total: totalRequestsCount,
+            data: requests
+          },
+          analytics: {
+            totalShipments: totalShipmentsCount,
+            onTimeDelivery: parseFloat(onTimeDelivery),
+            costSavings,
+            activeRoutes,
+            monthlyGrowth: 8.5, // This would come from analytics service
+            totalValue
+          }
+    };
+    console.log('🧩 Setting dashboardData state with:', newData);
+    setDashboardData(newData);
+      } catch (error) {
+        console.error('❌ Failed to load logistics data:', error);
+        console.error('🔍 Error details:', {
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+        
+        // Check if it's an authentication error
+        if (error.response?.status === 401 || error.message?.includes('Authentication required')) {
+          console.log('🔐 Authentication error detected - user needs to login');
+          console.log('🔑 Current tokens:', {
+            access: localStorage.getItem('access') ? 'present' : 'missing',
+            refresh: localStorage.getItem('refresh') ? 'present' : 'missing'
+          });
+          // The makeApiRequest will already redirect to login, but we can add additional handling here
+          return; // Don't set empty data if redirecting to login
+        }
+        
+        // Initialize with empty data when API calls fail
+        setDashboardData({
+          shipments: { total: 0, data: [] },
+          inventory: { total: 0, data: [] },
+          requests: { total: 0, data: [] },
+          analytics: {
+            totalShipments: 0,
+            onTimeDelivery: 0,
+            costSavings: 0,
+            activeRoutes: 0,
+            monthlyGrowth: 0,
+            totalValue: 0
+          }
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const getStatusBadgeColor = (status) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'delivered': return 'bg-green-100 text-green-800';
+        case 'in_transit': return 'bg-blue-100 text-blue-800';
+        case 'pending': return 'bg-yellow-100 text-yellow-800';
+        case 'preparing': return 'bg-orange-100 text-orange-800';
+        case 'delayed': return 'bg-red-100 text-red-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    };
+  
+    const getStatusIcon = (status) => {
+      switch (status) {
+        case 'delivered': return <CheckCircle className="w-4 h-4" />;
+        case 'in_transit': return <Truck className="w-4 h-4" />;
+        case 'pending': return <Clock className="w-4 h-4" />;
+        case 'preparing': return <Package className="w-4 h-4" />;
+        case 'delayed': return <AlertTriangle className="w-4 h-4" />;
+        default: return <Package className="w-4 h-4" />;
+      }
+    };
+  
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    };
+  
+    const getTimeAgo = (timestamp) => {
+      const now = new Date();
+      const time = new Date(timestamp);
+      const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
+      
+      if (diffInHours < 1) return 'Just now';
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+      return `${Math.floor(diffInHours / 24)}d ago`;
+    };
+  
+  
+    const getStatusBadgeColor = (status) => {
     switch (status) {
       case 'awarded':
         return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
@@ -267,6 +513,7 @@ const LogisticsHubDashboard = () => {
     const Icon = icons[index % icons.length];
     return <Icon className="w-5 h-5 text-gray-500" />;
   };
+
 
   if (loading) {
     return (
