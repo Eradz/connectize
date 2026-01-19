@@ -298,60 +298,61 @@ const LogisticsHubDashboard = () => {
 </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Quick Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <Plus className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Create Shipment</h3>
-              <p className="text-xs text-gray-500">Schedule New Cargo Shipment</p>
-            </div>
-          </button>
+       {/* Quick Action Cards - Mobile Optimized */}
+<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Create Shipment</h3>
+      <p className="text-xs text-gray-500 leading-tight">Schedule New Cargo Shipment</p>
+    </div>
+  </button>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:text-yellow-600 text-gray-600">
-                  <path d="M8 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H16M12 3V11M12 11L15 8M12 11L9 8M4 13H6.58579C6.851 13 7.10536 13.1054 7.29289 13.2929L9.70711 15.7071C9.89464 15.8946 10.149 16 10.4142 16H13.5858C13.851 16 14.1054 15.8946 14.2929 15.7071L16.7071 13.2929C16.8946 13.1054 17.149 13 17.4142 13H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Manage Inventory</h3>
-              <p className="text-xs text-gray-500">Update Stock Levels</p>
-            </div>
-          </button>
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:text-yellow-600 text-gray-600 sm:w-6 sm:h-6">
+          <path d="M8 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H16M12 3V11M12 11L15 8M12 11L9 8M4 13H6.58579C6.851 13 7.10536 13.1054 7.29289 13.2929L9.70711 15.7071C9.89464 15.8946 10.149 16 10.4142 16H13.5858C13.851 16 14.1054 15.8946 14.2929 15.7071L16.7071 13.2929C16.8946 13.1054 17.149 13 17.4142 13H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Manage Inventory</h3>
+      <p className="text-xs text-gray-500 leading-tight">Update Stock Levels</p>
+    </div>
+  </button>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <MapPin className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Track Shipment</h3>
-              <p className="text-xs text-gray-500">Real-Time Location Tracking</p>
-            </div>
-          </button>
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Track Shipment</h3>
+      <p className="text-xs text-gray-500 leading-tight">Real-Time Location Tracking</p>
+    </div>
+  </button>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <FileText className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Manage Request</h3>
-              <p className="text-xs text-gray-500">Manage Shipping Requests</p>
-            </div>
-          </button>
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Manage Request</h3>
+      <p className="text-xs text-gray-500 leading-tight">Manage Shipping Requests</p>
+    </div>
+  </button>
+</div>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <User className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Become A Provider</h3>
-              <p className="text-xs text-gray-500">Offer Logistics Services</p>
-            </div>
-          </button>
-        </div>
+{/* Become A Provider - Full Width on Mobile */}
+<button className="w-full mb-8 bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group md:hidden">
+  <div className="flex flex-col items-center text-center">
+    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+      <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+    </div>
+    <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Become A Provider</h3>
+    <p className="text-xs text-gray-500 leading-tight">Offer Logistics Services</p>
+  </div>
+</button>
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-t-xl border border-b-0">
@@ -474,7 +475,7 @@ const LogisticsHubDashboard = () => {
 
               {/* Search and Filter */}
               <div className="flex items-center justify-between mb-6">
-                <div className="relative flex-1 max-w-md">
+                <div className="relative flex-1 max-w-2xl">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
@@ -637,13 +638,277 @@ const LogisticsHubDashboard = () => {
             </>
           )}
 
-          {activeTab !== 'overview' && (
-            <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} View</h3>
-              <p className="text-gray-500">This section will display {activeTab} content</p>
+          
+         {activeTab === 'shipments' && (
+  <>
+    {/* Search and Filter */}
+    <div className="flex items-center justify-between mb-6">
+      <div className="relative flex-1 max-w-2xl">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search Inventory..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
+      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+        <Filter className="w-4 h-4" />
+        <span>Filter</span>
+      </button>
+    </div>
+
+    {/* All Shipments Header */}
+    <h2 className="text-xl font-semibold text-gray-900 mb-6">All Shipments</h2>
+
+    {/* Shipments Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {dashboardData.shipments.data.map((shipment) => {
+        const getStatusConfig = (status) => {
+          const configs = {
+            delivered: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: 'Delivered' },
+            in_transit: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', label: 'In Transit' },
+            preparing: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Preparing' },
+            awarded: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Awarded' }
+          };
+          return configs[status] || configs.preparing;
+        };
+
+        const statusConfig = getStatusConfig(shipment.status);
+
+        return (
+          <div key={shipment.id} className="bg-white border rounded-xl p-6 hover:shadow-md transition-shadow">
+            {/* Icon and Status */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <Package className="w-6 h-6 text-yellow-600" />
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
+                {statusConfig.label}
+              </span>
             </div>
-          )}
+
+            {/* Tracking Number */}
+            <h3 className="text-lg font-bold text-gray-900 mb-4">{shipment.tracking_number}</h3>
+
+            {/* Route */}
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-1">Route:</p>
+              <div className="flex items-start text-sm text-gray-700">
+                <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0 text-gray-400" />
+                <div>
+                  <p className="font-medium">{shipment.request_details.origin_address}</p>
+                  <p className="text-gray-500">→ {shipment.request_details.destination_address}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Cargo */}
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-1">Cargo:</p>
+              <p className="text-sm text-gray-700">{shipment.cargo || 'crude oil-70.5kg'}</p>
+            </div>
+
+            {/* Budget */}
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-1">Budget:</p>
+              <p className="text-sm font-semibold text-gray-900">${shipment.request_details.budget_max.toLocaleString()}</p>
+            </div>
+
+            {/* ETA */}
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 mb-1">ETA:</p>
+              <p className="text-sm text-gray-700">{shipment.eta || shipment.estimated_delivery || '02/09/2025'}</p>
+            </div>
+
+            {/* View Details Button */}
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2.5 rounded-lg transition-colors">
+              View Details
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  </>
+)}
+
+{activeTab === 'requests' && (
+  <>
+    {/* Search and Filter */}
+    <div className="flex items-center justify-between mb-6">
+      <div className="relative flex-1 max-w-2xl">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search Inventory..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
+      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+        <Filter className="w-4 h-4" />
+        <span>Filter</span>
+      </button>
+    </div>
+
+    {/* Header with See All */}
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl font-semibold text-gray-900">Shipment Request</h2>
+      <button className="px-4 py-2 bg-yellow-100 text-gray-900 rounded-lg hover:bg-yellow-200 transition-colors">
+        See All
+      </button>
+    </div>
+
+    {/* Requests Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {dashboardData.requests.data.map((request) => {
+        const getStatusConfig = (status) => {
+          const configs = {
+            posted: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' },
+            quoted: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' },
+            awarded: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Posted' },
+            delivered: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' }
+          };
+          return configs[status] || { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' };
+        };
+
+        const statusConfig = getStatusConfig(request.status);
+
+        return (
+          <div key={request.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
+            {/* Header with Title and Badge */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Marketplace Order</h3>
+                <p className="text-sm text-gray-600">#{request.tracking_number || `ORD-20260112-61467`}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
+                {statusConfig.label}
+              </span>
+            </div>
+
+            {/* Request Details - Flex Layout */}
+            <div className="flex items-start justify-between mb-4 pb-4 border-b">
+              {/* Left Side - Request ID */}
+              <div className="flex-1">
+                <div className="flex items-center space-x-1 mb-1">
+                  <p className="text-xs text-gray-500">Request ID</p>
+                  <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.77 2.18133L11.2473 0.608667C11.0603 0.416644 10.8369 0.263893 10.5901 0.159374C10.3432 0.0548549 10.078 0.000670954 9.81 0L6.66667 0C5.89853 0.000969683 5.15421 0.266727 4.55917 0.752479C3.96412 1.23823 3.55473 1.91428 3.4 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6V12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H7.33333C8.21706 15.9989 9.0643 15.6474 9.68919 15.0225C10.3141 14.3976 10.6656 13.5504 10.6667 12.6667V12.6C11.4191 12.4453 12.0951 12.0359 12.5809 11.4408C13.0666 10.8458 13.3324 10.1015 13.3333 9.33333V3.57333C13.3343 3.05361 13.1322 2.55408 12.77 2.18133ZM7.33333 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V9.33333C3.33439 10.2171 3.68592 11.0643 4.31081 11.6892C4.93571 12.3141 5.78294 12.6656 6.66667 12.6667H9.33333C9.33333 13.1971 9.12262 13.7058 8.74755 14.0809C8.37248 14.456 7.86377 14.6667 7.33333 14.6667ZM10 11.3333H6.66667C6.13623 11.3333 5.62753 11.1226 5.25245 10.7475C4.87738 10.3725 4.66667 9.86377 4.66667 9.33333V3.33333C4.66667 2.8029 4.87738 2.29419 5.25245 1.91912C5.62753 1.54405 6.13623 1.33333 6.66667 1.33333H9.33333V2.66667C9.33333 3.02029 9.47381 3.35943 9.72386 3.60948C9.97391 3.85952 10.313 4 10.6667 4H12V9.33333C12 9.86377 11.7893 10.3725 11.4142 10.7475C11.0391 11.1226 10.5304 11.3333 10 11.3333Z" fill="#374957"/>
+                  </svg>
+                </div>
+                <p className="text-sm font-semibold text-gray-900">REQ-BIS4089c</p>
+              </div>
+
+              {/* Right Side - Cargo Type */}
+              <div className="text-right">
+                <p className="text-xs text-gray-500 mb-1">Cargo Type</p>
+                <span 
+                  className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-white"
+                  style={{ 
+                    border: '1.5px solid transparent',
+                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                    backgroundOrigin: 'border-box',
+                    backgroundClip: 'padding-box, border-box'
+                  }}
+                >
+                  <span style={{
+                    background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>Crude Oil</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Route and Budget - Flex Layout */}
+            <div className="flex items-start justify-between mb-4">
+              {/* Left Side - Route */}
+              <div className="flex-1 pr-4">
+                <p className="text-xs text-gray-500 mb-2">Route</p>
+                <p className="text-xs text-gray-900 font-medium mb-1">{request.origin_address || 'ascase, Auchi, Nigeria'}</p>
+                <div className="flex items-start text-xs text-gray-600">
+                  <span className="mr-1">→</span>
+                  <span className="leading-tight">{request.destination_address || 'Oregbwe Street, Auchi, Nigeria'}</span>
+                </div>
+              </div>
+
+              {/* Right Side - Budget */}
+              <div className="text-right">
+                <p className="text-xs text-gray-500 mb-2">Budget</p>
+                <p className="text-base font-bold text-gray-900">${(request.budget_max || 7000).toLocaleString()}.00</p>
+              </div>
+            </div>
+
+            {/* Created Date */}
+            <p className="text-xs text-gray-400 mb-5">Created Jan 13, 2026</p>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button 
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
+                style={{ backgroundColor: '#FFE7A4' }}
+              >
+                <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clipPath="url(#clip0_1655_9100)">
+                    <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_1655_9100">
+                      <rect width="19" height="19" fill="white"/>
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span>View Details</span>
+              </button>
+              <button 
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-sm"
+                style={{ 
+                  border: '2px solid transparent',
+                  backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                  backgroundOrigin: 'border-box',
+                  backgroundClip: 'padding-box, border-box'
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clipPath="url(#clip0_1655_9103)">
+                    <path d="M13.3309 0.669151C12.9343 0.273183 12.3968 0.0507813 11.8364 0.0507812C11.276 0.0507813 10.7385 0.273183 10.3419 0.669151L0.854592 10.1565C0.582905 10.4266 0.367487 10.748 0.220799 11.1019C0.0741119 11.4559 -0.000932153 11.8354 8.73905e-06 12.2186V13.4162C8.73905e-06 13.5709 0.0614669 13.7192 0.170863 13.8286C0.280259 13.938 0.428632 13.9995 0.583342 13.9995H1.78093C2.16404 14.0006 2.54356 13.9256 2.89752 13.7791C3.25148 13.6325 3.57284 13.4171 3.84301 13.1455L13.3309 3.65757C13.7267 3.26102 13.949 2.72363 13.949 2.16336C13.949 1.60309 13.7267 1.0657 13.3309 0.669151ZM3.01818 12.3207C2.68918 12.6475 2.24465 12.8315 1.78093 12.8328H1.16668V12.2186C1.16609 11.9887 1.2111 11.761 1.29911 11.5486C1.38713 11.3362 1.51639 11.1434 1.67943 10.9813L8.87951 3.78123L10.2212 5.1229L3.01818 12.3207ZM12.5055 2.83273L11.0437 4.29515L9.70201 2.9564L11.1644 1.49398C11.2525 1.40608 11.3571 1.33639 11.4721 1.28889C11.5871 1.24139 11.7104 1.21701 11.8348 1.21715C11.9593 1.21728 12.0825 1.24193 12.1974 1.28968C12.3123 1.33743 12.4167 1.40735 12.5046 1.49544C12.5925 1.58354 12.6622 1.68808 12.7097 1.80311C12.7572 1.91814 12.7816 2.0414 12.7815 2.16585C12.7813 2.2903 12.7567 2.4135 12.7089 2.52843C12.6612 2.64335 12.5913 2.74775 12.5032 2.83565L12.5055 2.83273Z" fill="url(#paint0_linear_1655_9103)"/>
+                  </g>
+                  <defs>
+                    <linearGradient id="paint0_linear_1655_9103" x1="0" y1="7.02514" x2="13.949" y2="7.02514" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#FFC000"/>
+                      <stop offset="1" stopColor="#FF8400"/>
+                    </linearGradient>
+                    <clipPath id="clip0_1655_9103">
+                      <rect width="14" height="14" fill="white"/>
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span style={{
+                  background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>Edit</span>
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </>
+)}
+
+{activeTab !== 'overview' && activeTab !== 'shipments' && activeTab !== 'requests' && (
+  <div className="text-center py-12">
+    <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+    <h3 className="text-lg font-medium text-gray-900 mb-2">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} View</h3>
+    <p className="text-gray-500">This section will display {activeTab} content</p>
+  </div>
+)}
         </div>
       </div>
     </div>
