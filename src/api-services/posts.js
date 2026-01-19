@@ -2,6 +2,9 @@ import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
 import { getCompanyByIdOrEmail } from "./companies";
 
+/**
+ * Get all posts (Discover feed) - all published posts
+ */
 export const getPosts = async (page = 1, pageSize = 10) => {
   const response = await makeApiRequest({
     url: `api/posts/?page=${page}&page_size=${pageSize}`,
@@ -10,6 +13,80 @@ export const getPosts = async (page = 1, pageSize = 10) => {
 
   return {
     posts: response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED"),
+    count: response.count,
+    next: response.next,
+    previous: response.previous,
+    hasMore: !!response.next,
+    nextPage: page + 1
+  };
+};
+
+/**
+ * Get Following feed - posts from users/companies the user follows
+ * @param {number} page - Page number
+ * @param {number} pageSize - Number of posts per page  
+ * @param {Array} followingIds - Array of following objects {type, id}
+ */
+export const getFollowingPosts = async (page = 1, pageSize = 10, followingIds = []) => {
+  // Get all posts first
+  const response = await makeApiRequest({
+    url: `api/posts/?page=${page}&page_size=${pageSize}`,
+    method: "GET",
+  });
+
+  // Filter posts to only include those from followed users/companies
+  const followedUserIds = followingIds
+    .filter(f => f.type === 'user')
+    .map(f => f.id);
+  const followedCompanyIds = followingIds
+    .filter(f => f.type === 'company')
+    .map(f => f.id);
+
+  const filteredPosts = response.results
+    .filter((post) => post.status.toUpperCase() === "PUBLISHED")
+    .filter((post) => {
+      // Check if the post is from a followed user
+      const isFromFollowedUser = post.user?.id && followedUserIds.includes(post.user.id);
+      // Check if the post is from a followed company  
+      const isFromFollowedCompany = post.company?.id && followedCompanyIds.includes(post.company.id);
+      
+      return isFromFollowedUser || isFromFollowedCompany;
+    });
+
+  return {
+    posts: filteredPosts,
+    count: filteredPosts.length,
+    next: response.next,
+    previous: response.previous,
+    hasMore: !!response.next,
+    nextPage: page + 1
+  };
+};
+
+/**
+ * Get Trending posts - posts sorted by engagement (likes + comments)
+ * @param {number} page - Page number
+ * @param {number} pageSize - Number of posts per page
+ */
+export const getTrendingPosts = async (page = 1, pageSize = 10) => {
+  // Try to use ordering parameter if backend supports it
+  // Otherwise fetch and sort client-side
+  const response = await makeApiRequest({
+    url: `api/posts/?page=${page}&page_size=${pageSize}&ordering=-likes_count,-comments_count`,
+    method: "GET",
+  });
+
+  let posts = response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED");
+  
+  // Sort by engagement (likes + comments) client-side as fallback
+  posts = posts.sort((a, b) => {
+    const aEngagement = (a.numberOfLikes || 0) + (a.numberOfComments || 0);
+    const bEngagement = (b.numberOfLikes || 0) + (b.numberOfComments || 0);
+    return bEngagement - aEngagement;
+  });
+
+  return {
+    posts,
     count: response.count,
     next: response.next,
     previous: response.previous,

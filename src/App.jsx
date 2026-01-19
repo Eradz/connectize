@@ -251,15 +251,15 @@ function App() {
           <Route path="knowledge/articles/create" element={<KnowledgeArticleCreate />} />
           <Route path="knowledge/forums" element={<KnowledgeForums />} />
           <Route path="knowledge/forums/create" element={<KnowledgeForumCreate />} />
+          <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           <Route path="knowledge/forums/:slug" element={<KnowledgeForumDetail />} />
+          <Route path="knowledge/forums/:forumSlug/topics/create" element={<KnowledgeTopicCreate />} />
           <Route path="knowledge/topics" element={<KnowledgeTopics />} />
           <Route path="knowledge/topics/:slug" element={<KnowledgeTopicDetail />} />
-          <Route path="knowledge/forums/:forumSlug/topics/create" element={<KnowledgeTopicCreate />} />
           <Route path="knowledge/categories" element={<KnowledgeCategories />} />
           <Route path="knowledge/categories/:slug" element={<KnowledgeCategoryDetail />} />
           <Route path="knowledge/tags/:slug" element={<KnowledgeTagDetail />} />
           <Route path="knowledge/search" element={<KnowledgeSearch />} />
-          <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           
           {/* Hub Platform Routes - Using main app layout */}
           <Route path="dashboard" element={<PlatformDashboard />} />
@@ -434,6 +434,7 @@ function App() {
           <Route path={toRelativePath(webRoutes.knowledgeArticleCreate)} element={<KnowledgeArticleCreate />} />
           <Route path={toRelativePath(webRoutes.knowledgeForums)} element={<KnowledgeForums />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumCreate)} element={<KnowledgeForumCreate />} />
+          <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumDetail)} element={<KnowledgeForumDetail />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumTopicCreate)} element={<KnowledgeTopicCreate />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumTopicDetail)} element={<KnowledgeTopicDetail />} />
@@ -442,7 +443,6 @@ function App() {
           <Route path={toRelativePath(webRoutes.knowledgeCategoryDetail)} element={<KnowledgeCategoryDetail />} />
           <Route path={toRelativePath(webRoutes.knowledgeTagDetail)} element={<KnowledgeTagDetail />} />
           <Route path={toRelativePath(webRoutes.knowledgeSearch)} element={<KnowledgeSearch />} />
-          <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           
           {/* Test Routes */}
           <Route path="test/logistics" element={<LogisticsTest />} />

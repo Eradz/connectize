@@ -5,7 +5,7 @@ import {
   Truck, Info, Loader2 
 } from "lucide-react";
 import { listingService } from "../../api-services/marketplace";
-import { inventoryItemService } from "../../api-services/inventory";
+import { logisticsAPI } from "../../api-services/logistics";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 
@@ -45,10 +45,21 @@ export default function CreateListing() {
 
   const fetchInventoryItems = async () => {
     try {
-      const data = await inventoryItemService.list();
-      setInventoryItems(data.results || data || []);
+      // Use logistics inventory API - same items shown on the Inventory page
+      const response = await logisticsAPI.getInventoryItems();
+      // Handle different response structures
+      let items = [];
+      if (Array.isArray(response)) {
+        items = response;
+      } else if (response?.results) {
+        items = response.results;
+      } else if (response?.data) {
+        items = response.data;
+      }
+      console.log("📦 Logistics inventory items for listing:", items.length);
+      setInventoryItems(items);
     } catch (error) {
-      console.error("Error fetching inventory:", error);
+      console.error("Error fetching logistics inventory:", error);
     } finally {
       setLoadingInventory(false);
     }
@@ -56,12 +67,15 @@ export default function CreateListing() {
 
   const handleInventorySelect = (item) => {
     setSelectedInventoryItem(item);
+    // Map logistics inventory fields to form fields
+    const price = item.unit_cost || item.unit_price || "";
+    const quantity = item.current_stock ?? item.quantity_available ?? "";
     setFormData({
       ...formData,
       title: item.name,
       description: item.description || "",
-      price: item.unit_price || "",
-      quantity_available: item.quantity_available || "",
+      price: String(price),
+      quantity_available: String(quantity),
       condition: item.condition || "new",
     });
   };
@@ -120,12 +134,13 @@ export default function CreateListing() {
       let listing;
 
       if (creationMode === "inventory" && selectedInventoryItem) {
-        // Create from inventory
-        listing = await listingService.createFromInventory({
-          inventory_item_id: selectedInventoryItem.id,
+        // Create from logistics inventory (oil & gas equipment)
+        console.log("📤 Creating listing from logistics inventory:", selectedInventoryItem.id);
+        listing = await listingService.createFromLogisticsInventory({
+          logistics_inventory_item_id: selectedInventoryItem.id,
           price: formData.price,
           compare_at_price: formData.compare_at_price || null,
-          quantity_to_list: formData.quantity_available,
+          quantity_to_list: parseInt(formData.quantity_available) || 1,
           condition: formData.condition,
           title: formData.title,
           description: formData.description,
@@ -244,10 +259,12 @@ export default function CreateListing() {
                   >
                     <p className="font-medium line-clamp-1">{item.name}</p>
                     <p className="text-sm text-gray-500">SKU: {item.sku || 'N/A'}</p>
-                    <p className="text-sm text-gray-500">Stock: {item.quantity_available}</p>
-                    {item.unit_price && (
+                    <p className="text-sm text-gray-500">
+                      Stock: {item.current_stock ?? item.quantity_available ?? 0}
+                    </p>
+                    {(item.unit_cost || item.unit_price) && (
                       <p className="text-sm font-medium text-gold mt-1">
-                        ${parseFloat(item.unit_price).toFixed(2)}
+                        ${parseFloat(item.unit_cost || item.unit_price).toFixed(2)}
                       </p>
                     )}
                   </button>

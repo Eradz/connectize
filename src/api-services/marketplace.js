@@ -73,9 +73,15 @@ export const listingService = {
     return response.data;
   },
 
-  // Create listing from inventory item
+  // Create listing from inventory item (general marketplace inventory)
   createFromInventory: async (data) => {
     const response = await marketplaceApi.post("/listings/from_inventory/", data);
+    return response.data;
+  },
+
+  // Create listing from logistics inventory item (oil & gas equipment)
+  createFromLogisticsInventory: async (data) => {
+    const response = await marketplaceApi.post("/listings/from-logistics-inventory/", data);
     return response.data;
   },
 
@@ -170,12 +176,17 @@ export const orderService = {
   },
 
   // Create order from cart (checkout)
-  createOrder: async (shippingAddress, billingAddress = null, buyerNotes = "") => {
-    const response = await marketplaceApi.post("/orders/", {
-      shipping_address: shippingAddress,
-      billing_address: billingAddress,
-      buyer_notes: buyerNotes,
-    });
+  createOrder: async (data) => {
+    // Accept either object or separate params for backwards compatibility
+    const payload = typeof data === 'object' && data.shipping_address 
+      ? data 
+      : {
+          shipping_address: data,
+          billing_address: arguments[1] || null,
+          buyer_notes: arguments[2] || '',
+        };
+    
+    const response = await marketplaceApi.post("/orders/", payload);
     return response.data;
   },
 
@@ -411,6 +422,7 @@ export default {
   deleteListing: (id) => listingService.deleteListing(id),
   getMyListings: (params) => listingService.getMyListings(params),
   createFromInventory: (data) => listingService.createFromInventory(data),
+  createFromLogisticsInventory: (data) => listingService.createFromLogisticsInventory(data),
   uploadListingImage: (listingId, formData) => listingService.uploadImage(listingId, formData),
   deleteListingImage: (listingId, imageId) => listingService.deleteImage(listingId, imageId),
   
@@ -422,7 +434,7 @@ export default {
   
   getOrders: (params) => orderService.getOrders(params),
   getOrderById: (id) => orderService.getOrder(id),
-  createOrder: (shippingAddress, billingAddress, notes) => orderService.createOrder(shippingAddress, billingAddress, notes),
+  createOrder: (data) => orderService.createOrder(data),
   createPaymentIntent: (orderId) => orderService.createPaymentIntent(orderId),
   confirmPayment: (orderId, paymentIntentId) => orderService.confirmPayment(orderId, paymentIntentId),
   cancelOrder: (orderId) => orderService.cancelOrder(orderId),
