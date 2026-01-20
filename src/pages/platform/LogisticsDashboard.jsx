@@ -886,7 +886,7 @@ const LogisticsHubDashboard = () => {
           )}
 
           
-         {activeTab === 'shipments' && (
+{activeTab === 'shipments' && (
   <>
     {/* Search and Filter */}
     <div className="flex items-center justify-between mb-6">
@@ -894,7 +894,7 @@ const LogisticsHubDashboard = () => {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Search Inventory..."
+          placeholder="Search Shipments..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
@@ -912,17 +912,12 @@ const LogisticsHubDashboard = () => {
     {/* Shipments Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {dashboardData.shipments.data.map((shipment) => {
-        const getStatusConfig = (status) => {
-          const configs = {
-            delivered: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', label: 'Delivered' },
-            in_transit: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', label: 'In Transit' },
-            preparing: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Preparing' },
-            awarded: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Awarded' }
-          };
-          return configs[status] || configs.preparing;
+        // Helper to format date
+        const formatDate = (dateString) => {
+          if (!dateString) return 'N/A';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
         };
-
-        const statusConfig = getStatusConfig(shipment.status);
 
         return (
           <div key={shipment.id} className="bg-white border rounded-xl p-6 hover:shadow-md transition-shadow">
@@ -931,13 +926,17 @@ const LogisticsHubDashboard = () => {
               <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <Package className="w-6 h-6 text-yellow-600" />
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
-                {statusConfig.label}
-              </span>
+              {shipment.status && (
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
+                  {shipment.status.replace('_', ' ').toUpperCase()}
+                </span>
+              )}
             </div>
 
             {/* Tracking Number */}
-            <h3 className="text-lg font-bold text-gray-900 mb-4">{shipment.tracking_number}</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              {shipment.tracking_number || 'N/A'}
+            </h3>
 
             {/* Route */}
             <div className="mb-3">
@@ -945,28 +944,49 @@ const LogisticsHubDashboard = () => {
               <div className="flex items-start text-sm text-gray-700">
                 <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0 text-gray-400" />
                 <div>
-                  <p className="font-medium">{shipment.request_details.origin_address}</p>
-                  <p className="text-gray-500">→ {shipment.request_details.destination_address}</p>
+                  <p className="font-medium">
+                    {shipment.request_details?.origin_address || 'N/A'}
+                  </p>
+                  <p className="text-gray-500">
+                    → {shipment.request_details?.destination_address || 'N/A'}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Cargo */}
-            <div className="mb-3">
-              <p className="text-xs text-gray-500 mb-1">Cargo:</p>
-              <p className="text-sm text-gray-700">{shipment.cargo || 'crude oil-70.5kg'}</p>
-            </div>
+            {shipment.cargo && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Cargo:</p>
+                <p className="text-sm text-gray-700">
+                  {shipment.cargo}
+                  {shipment.cargo_weight && ` - ${shipment.cargo_weight}`}
+                  {shipment.cargo_unit && shipment.cargo_unit}
+                </p>
+              </div>
+            )}
 
             {/* Budget */}
-            <div className="mb-3">
-              <p className="text-xs text-gray-500 mb-1">Budget:</p>
-              <p className="text-sm font-semibold text-gray-900">${shipment.request_details.budget_max.toLocaleString()}</p>
-            </div>
+            {shipment.request_details?.budget_max && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Budget:</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {shipment.currency || '$'}
+                  {parseFloat(shipment.request_details.budget_max).toLocaleString()}
+                </p>
+              </div>
+            )}
 
             {/* ETA */}
             <div className="mb-4">
               <p className="text-xs text-gray-500 mb-1">ETA:</p>
-              <p className="text-sm text-gray-700">{shipment.eta || shipment.estimated_delivery || '02/09/2025'}</p>
+              <p className="text-sm text-gray-700">
+                {shipment.eta 
+                  ? formatDate(shipment.eta) 
+                  : shipment.estimated_delivery 
+                    ? formatDate(shipment.estimated_delivery)
+                    : 'N/A'}
+              </p>
             </div>
 
             {/* View Details Button */}
@@ -988,7 +1008,7 @@ const LogisticsHubDashboard = () => {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Search Inventory..."
+          placeholder="Search Requests..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
@@ -1011,29 +1031,30 @@ const LogisticsHubDashboard = () => {
     {/* Requests Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {dashboardData.requests.data.map((request) => {
-        const getStatusConfig = (status) => {
-          const configs = {
-            posted: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' },
-            quoted: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' },
-            awarded: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', label: 'Posted' },
-            delivered: { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' }
-          };
-          return configs[status] || { bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', label: 'Posted' };
+        // Helper to format date
+        const formatDate = (dateString) => {
+          if (!dateString) return 'Date not available';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         };
-
-        const statusConfig = getStatusConfig(request.status);
 
         return (
           <div key={request.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
             {/* Header with Title and Badge */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">Marketplace Order</h3>
-                <p className="text-sm text-gray-600">#{request.tracking_number || `ORD-20260112-61467`}</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1">
+                  {request.order_type || request.type || 'Order'}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  #{request.tracking_number || request.order_number || 'N/A'}
+                </p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.border}`}>
-                {statusConfig.label}
-              </span>
+              {request.status && (
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
+                  {request.status.replace('_', ' ').toUpperCase()}
+                </span>
+              )}
             </div>
 
             {/* Request Details - Flex Layout */}
@@ -1046,29 +1067,33 @@ const LogisticsHubDashboard = () => {
                     <path d="M12.77 2.18133L11.2473 0.608667C11.0603 0.416644 10.8369 0.263893 10.5901 0.159374C10.3432 0.0548549 10.078 0.000670954 9.81 0L6.66667 0C5.89853 0.000969683 5.15421 0.266727 4.55917 0.752479C3.96412 1.23823 3.55473 1.91428 3.4 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6V12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H7.33333C8.21706 15.9989 9.0643 15.6474 9.68919 15.0225C10.3141 14.3976 10.6656 13.5504 10.6667 12.6667V12.6C11.4191 12.4453 12.0951 12.0359 12.5809 11.4408C13.0666 10.8458 13.3324 10.1015 13.3333 9.33333V3.57333C13.3343 3.05361 13.1322 2.55408 12.77 2.18133ZM7.33333 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V9.33333C3.33439 10.2171 3.68592 11.0643 4.31081 11.6892C4.93571 12.3141 5.78294 12.6656 6.66667 12.6667H9.33333C9.33333 13.1971 9.12262 13.7058 8.74755 14.0809C8.37248 14.456 7.86377 14.6667 7.33333 14.6667ZM10 11.3333H6.66667C6.13623 11.3333 5.62753 11.1226 5.25245 10.7475C4.87738 10.3725 4.66667 9.86377 4.66667 9.33333V3.33333C4.66667 2.8029 4.87738 2.29419 5.25245 1.91912C5.62753 1.54405 6.13623 1.33333 6.66667 1.33333H9.33333V2.66667C9.33333 3.02029 9.47381 3.35943 9.72386 3.60948C9.97391 3.85952 10.313 4 10.6667 4H12V9.33333C12 9.86377 11.7893 10.3725 11.4142 10.7475C11.0391 11.1226 10.5304 11.3333 10 11.3333Z" fill="#374957"/>
                   </svg>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">REQ-BIS4089c</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {request.request_id || request.id || 'N/A'}
+                </p>
               </div>
 
               {/* Right Side - Cargo Type */}
-              <div className="text-right">
-                <p className="text-xs text-gray-500 mb-1">Cargo Type</p>
-                <span 
-                  className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-white"
-                  style={{ 
-                    border: '1.5px solid transparent',
-                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #4EB608 0%, #094300 100%)',
-                    backgroundOrigin: 'border-box',
-                    backgroundClip: 'padding-box, border-box'
-                  }}
-                >
-                  <span style={{
-                    background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}>Crude Oil</span>
-                </span>
-              </div>
+              {request.cargo_type && (
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-1">Cargo Type</p>
+                  <span 
+                    className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-white"
+                    style={{ 
+                      border: '1.5px solid transparent',
+                      backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                      backgroundOrigin: 'border-box',
+                      backgroundClip: 'padding-box, border-box'
+                    }}
+                  >
+                    <span style={{
+                      background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>{request.cargo_type}</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Route and Budget - Flex Layout */}
@@ -1076,28 +1101,39 @@ const LogisticsHubDashboard = () => {
               {/* Left Side - Route */}
               <div className="flex-1 pr-4">
                 <p className="text-xs text-gray-500 mb-2">Route</p>
-                <p className="text-xs text-gray-900 font-medium mb-1">{request.origin_address || 'ascase, Auchi, Nigeria'}</p>
+                <p className="text-xs text-gray-900 font-medium mb-1">
+                  {request.origin_address || 'N/A'}
+                </p>
                 <div className="flex items-start text-xs text-gray-600">
                   <span className="mr-1">→</span>
-                  <span className="leading-tight">{request.destination_address || 'Oregbwe Street, Auchi, Nigeria'}</span>
+                  <span className="leading-tight">
+                    {request.destination_address || 'N/A'}
+                  </span>
                 </div>
               </div>
 
               {/* Right Side - Budget */}
               <div className="text-right">
                 <p className="text-xs text-gray-500 mb-2">Budget</p>
-                <p className="text-base font-bold text-gray-900">${(request.budget_max || 7000).toLocaleString()}.00</p>
+                <p className="text-base font-bold text-gray-900">
+                  {request.budget_max 
+                    ? `${request.currency || '$'}${parseFloat(request.budget_max).toLocaleString()}`
+                    : 'N/A'}
+                </p>
               </div>
             </div>
 
             {/* Created Date */}
-            <p className="text-xs text-gray-400 mb-5">Created Jan 13, 2026</p>
+            {request.created_at && (
+              <p className="text-xs text-gray-400 mb-5">
+                Created {formatDate(request.created_at)}
+              </p>
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-3">
               <button 
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
-                style={{ backgroundColor: '#FFE7A4' }}
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
               >
                 <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g clipPath="url(#clip0_1655_9100)">
@@ -1149,7 +1185,118 @@ const LogisticsHubDashboard = () => {
   </>
 )}
 
-{activeTab !== 'overview' && activeTab !== 'shipments' && activeTab !== 'requests' && (
+{activeTab === 'inventory' && (
+  <>
+    {/* Search and Filter */}
+    <div className="flex items-center justify-between mb-6">
+      <div className="relative flex-1 max-w-2xl">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search Inventory..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
+      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+        <Filter className="w-4 h-4" />
+        <span>Filter</span>
+      </button>
+    </div>
+
+    {/* Header with See More */}
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl font-semibold text-gray-900">Inventory Management</h2>
+      <button className="px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 transition-colors font-medium">
+        See More
+      </button>
+    </div>
+
+    {/* Inventory Grid */}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {dashboardData.inventory.data && dashboardData.inventory.data.length > 0 ? (
+    dashboardData.inventory.data.map((item) => {
+      const isBelowReorder = item.current_stock <= item.reorder_point;
+
+      return (
+        <div key={item.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
+          {/* Header with Icon and View Details */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <Scissors className="w-5 h-5 text-yellow-600" />
+            </div>
+            <button className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              View Details
+            </button>
+          </div>
+
+          {/* Category - FROM API */}
+          {item.category && (
+            <p className="text-xs text-gray-500 mb-2">{item.category}</p>
+          )}
+
+          {/* Product Name */}
+          <h3 className="text-base font-semibold text-gray-900 mb-4">{item.name}</h3>
+
+          {/* Details Grid */}
+          <div className="space-y-3 mb-4">
+            {/* Available */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Available:</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {item.current_stock} {item.unit || item.measurement_unit || ''}
+              </span>
+            </div>
+
+            {/* Min Stock */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Min Stock:</span>
+              <span className="text-sm text-gray-900">
+                {item.reorder_point} {item.unit || item.measurement_unit || ''}
+              </span>
+            </div>
+
+            {/* Unit Cost - FROM API */}
+            {item.unit_cost !== undefined && item.unit_cost !== null && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Unit Cost:</span>
+                <span className="text-sm text-gray-900">
+                  {item.currency || '$'}{parseFloat(item.unit_cost).toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            {/* Location */}
+            <div className="flex items-start justify-between">
+              <span className="text-sm text-gray-600">Location:</span>
+              <span className="text-sm text-gray-900 text-right">{item.location}</span>
+            </div>
+          </div>
+
+          {/* Warning Badge */}
+          {isBelowReorder && (
+            <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+              <span className="text-xs text-yellow-700">
+                Below Reorder Level ({item.reorder_point})
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    })
+  ) : (
+    <div className="col-span-3 text-center py-12">
+      <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No Inventory Items</h3>
+      <p className="text-gray-500">No inventory items found. Add items to get started.</p>
+    </div>
+  )}
+</div>  </>
+)}
+
+{activeTab !== 'overview' && activeTab !== 'shipments' && activeTab !== 'requests' && activeTab !== 'inventory' && (
   <div className="text-center py-12">
     <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
     <h3 className="text-lg font-medium text-gray-900 mb-2">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} View</h3>
