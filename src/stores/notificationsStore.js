@@ -8,32 +8,40 @@ export const useNotificationsStore = create((set, get) => ({
   notifications: [],
 
   fetchNotifications: async () => {
-    const notifications = await getNotificationsForUser();
+    try {
+      const notifications = await getNotificationsForUser();
 
-    if (get().notifications.length) {
-      console.log(
-        "Skipped setting notifications because notification is not empty "
-      );
+      if (get().notifications.length) {
+        console.log(
+          "Skipped setting notifications because notification is not empty "
+        );
 
-      return;
+        return;
+      }
+
+      // Ensure we always set an array, never undefined
+      set({ notifications: Array.isArray(notifications) ? notifications : [] });
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+      // Don't update state on error, keep existing notifications
     }
-
-    set({ notifications });
   },
   setNotifications: (newNotifications) =>
-    set({ notifications: newNotifications }),
+    set({ notifications: Array.isArray(newNotifications) ? newNotifications : [] }),
 
   addNotification: (notification) =>
     set((state) => {
       // Only add if not already present
-      if (state.notifications.some((n) => n.id === notification.id)) {
+      const currentNotifications = state.notifications || [];
+      if (currentNotifications.some((n) => n.id === notification.id)) {
         return {};
       }
-      return { notifications: [notification, ...state.notifications] };
+      return { notifications: [notification, ...currentNotifications] };
     }),
 
   markAsRead: async (id) => {
-    const updated = get().notifications.map((notif) =>
+    const currentNotifications = get().notifications || [];
+    const updated = currentNotifications.map((notif) =>
       notif.id === id ? { ...notif, is_read: true } : notif
     );
     set({ notifications: updated });
@@ -46,7 +54,8 @@ export const useNotificationsStore = create((set, get) => ({
   },
 
   markAllAsRead: () => {
-    const updated = get().notifications.map((notif) => ({
+    const currentNotifications = get().notifications || [];
+    const updated = currentNotifications.map((notif) => ({
       ...notif,
       is_read: true,
     }));
@@ -55,7 +64,7 @@ export const useNotificationsStore = create((set, get) => ({
 
   deleteNotification: (id) => {
     set((state) => ({
-      notifications: state.notifications.filter((notif) => notif.id !== id),
+      notifications: (state.notifications || []).filter((notif) => notif.id !== id),
     }));
   },
 

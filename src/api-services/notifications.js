@@ -1,12 +1,19 @@
 import { makeApiRequest } from "../lib/helpers";
 
 export const getNotificationsForUser = async () => {
-  const { results: notifications } = await makeApiRequest({
-    url: "api/notifications/",
-    method: "GET",
-  });
+  try {
+    const response = await makeApiRequest({
+      url: "api/notifications/",
+      method: "GET",
+    });
 
-  return notifications || [];
+    // Handle different response formats
+    const notifications = response?.results || response?.data || response;
+    return Array.isArray(notifications) ? notifications : [];
+  } catch (error) {
+    console.error("Failed to fetch notifications:", error);
+    return [];
+  }
 };
 
 export const markNotificationAsRead = async (notificationId) => {
