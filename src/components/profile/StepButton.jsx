@@ -17,13 +17,14 @@ function StepButton({
       disabled={disabled}
       onClick={async () => {
         if (stepDirection === "back") {
-          navigate(`/${nextStep}`);
+           const back = nextStep.includes("company") ? nextStep : `/profile-update/${nextStep}`; 
+          navigate(back);
           return;
         }
 
         const canMove = await doStepChange();
-
-        if (canMove) navigate(`/${nextStep}`);
+        const next = nextStep.includes("company") ? nextStep : `/profile-update/${nextStep}`; 
+        if (canMove) navigate(next);
       }}
       className={clsx(
         "shadow-sm flex justify-center items-center gap-1 p-4 hover:opacity-60 transition-all duration-300",

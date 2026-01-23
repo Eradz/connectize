@@ -188,6 +188,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
 
           {/* Profile Update Routes */}
+          <Route path="update-profile" element={<Home />}/>
           <Route path="profile-update" element={<ProfileLayout />}>
             <Route path="address" element={<Address />} />
             <Route path="bio" element={<Bio />} />
@@ -458,6 +459,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
 
           {/* Profile Update Routes */}
+          <Route path="update-profile" element={<Home />}/>
           <Route path="profile-update" element={<ProfileLayout />}>
             <Route path="address" element={<Address />} />
             <Route path="bio" element={<Bio />} />
