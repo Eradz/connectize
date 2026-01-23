@@ -11,10 +11,14 @@ function AuthLayout({ redirectUrl = "/" }) {
 
   const isLogin = pathname === "/login";
   const isRegister = pathname === "/signup";
+  
+  // Allow password reset pages even when logged in
+  const isPasswordResetPage = pathname === "/reset-password" || pathname === "/confirm-reset-password";
 
   const isLoginOrRegister = isLogin || isRegister;
 
-  if (session) {
+  // Only redirect if logged in AND not on a password reset page
+  if (session && !isPasswordResetPage) {
     return <Navigate to={isLogin ? "/profile" : redirectUrl} replace />;
   }
 
