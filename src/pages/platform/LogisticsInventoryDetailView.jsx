@@ -9,7 +9,7 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
-import LogisticsInventoryForm from './LogisticsInventoryForm'; 
+import InventoryModal from './LogisticsInventoryForm';
 
 const GradientCheckIcon = ({ gradientId, startColor, endColor }) => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,8 +37,8 @@ const LogisticsInventoryDetailView = () => {
     reason: '',
     notes: ''
   });
+  const [showEditModal, setShowEditModal] = useState(false);
   const [adjusting, setAdjusting] = useState(false);
-
  
 
   // Oil & gas industry categories
@@ -256,28 +256,39 @@ const LogisticsInventoryDetailView = () => {
     }
   };
 
-  const handleDelete = async () => {
-    const tId = toast('Delete this inventory item?', {
-      description: 'This action cannot be undone and will remove all associated data.',
-      duration: 8000,
-      action: {
-        label: 'Confirm Delete',
-        onClick: async () => {
-          try {
-            await logisticsAPI.deleteInventoryItem(id);
-            toast.success('Inventory item deleted successfully');
-            navigate(webRoutes.logisticsInventory);
-          } catch (error) {
-            toast.error('Failed to delete item');
-            console.error('Error deleting item:', error);
-          } finally {
-            try { toast.dismiss?.(tId); } catch {}
-          }
-        },
-      },
-    });
-  };
+ const handleSave = async (formData, isEdit) => {
+  try {
+    await logisticsAPI.updateInventoryItem(id, formData);
+    toast.success('Inventory item updated successfully');
+    setShowEditModal(false);
+    await loadItemData(); // Reload the data
+  } catch (error) {
+    toast.error('Failed to update item');
+    console.error('Error:', error);
+  }
+};
 
+const handleDelete = async () => {
+  const tId = toast('Delete this inventory item?', {
+    description: 'This action cannot be undone and will remove all associated data.',
+    duration: 8000,
+    action: {
+      label: 'Confirm Delete',
+      onClick: async () => {
+        try {
+          await logisticsAPI.deleteInventoryItem(id);
+          toast.success('Inventory item deleted successfully');
+          navigate(webRoutes.logisticsInventory);
+        } catch (error) {
+          toast.error('Failed to delete item');
+          console.error('Error deleting item:', error);
+        } finally {
+          try { toast.dismiss?.(tId); } catch {}
+        }
+      },
+    },
+  });
+};
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -330,8 +341,7 @@ const LogisticsInventoryDetailView = () => {
               <button
   onClick={() => setShowEditModal(true)}
   className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
->
-                <Edit className="w-4 h-4 mr-2" />
+>                <Edit className="w-4 h-4 mr-2" />
                 Edit
               </button>
               <button
@@ -626,7 +636,7 @@ const LogisticsInventoryDetailView = () => {
         </div>
       </div>
 
-      {/* Stock Adjustment Modal */}
+{/* Stock Adjustment Modal */}
       {showAdjustStock && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
@@ -711,6 +721,14 @@ const LogisticsInventoryDetailView = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Modal - ADD THIS ENTIRE SECTION */}
+      <InventoryModal 
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        itemId={id}
+        onSave={handleSave}
+      />
     </div>
   );
 };
