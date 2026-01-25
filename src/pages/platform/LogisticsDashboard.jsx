@@ -544,10 +544,10 @@ const LogisticsHubDashboard = () => {
   </div>
 </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto py-8">
        {/* Quick Action Cards - Mobile Optimized */}
 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
-  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+  <Link to={webRoutes.logisticsShipmentCreate} className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
     <div className="flex flex-col items-center text-center">
       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
         <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
@@ -555,9 +555,9 @@ const LogisticsHubDashboard = () => {
       <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Create Shipment</h3>
       <p className="text-xs text-gray-500 leading-tight">Schedule New Cargo Shipment</p>
     </div>
-  </button>
+  </Link>
 
-  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+  <Link to={webRoutes.logisticsInventory} className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
     <div className="flex flex-col items-center text-center">
       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:text-yellow-600 text-gray-600 sm:w-6 sm:h-6">
@@ -567,9 +567,9 @@ const LogisticsHubDashboard = () => {
       <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Manage Inventory</h3>
       <p className="text-xs text-gray-500 leading-tight">Update Stock Levels</p>
     </div>
-  </button>
+  </Link>
 
-  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+  <Link to={webRoutes.logisticsTracking} className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
     <div className="flex flex-col items-center text-center">
       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
         <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
@@ -577,9 +577,9 @@ const LogisticsHubDashboard = () => {
       <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Track Shipment</h3>
       <p className="text-xs text-gray-500 leading-tight">Real-Time Location Tracking</p>
     </div>
-  </button>
+  </Link>
 
-  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+  <Link to={webRoutes.logisticsRequests} className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
     <div className="flex flex-col items-center text-center">
       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
         <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
@@ -587,11 +587,11 @@ const LogisticsHubDashboard = () => {
       <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Manage Request</h3>
       <p className="text-xs text-gray-500 leading-tight">Manage Shipping Requests</p>
     </div>
-  </button>
+  </Link>
 </div>
 
 {/* Become A Provider - Full Width on Mobile */}
-<button className="w-full mb-8 bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group md:hidden">
+<Link to={webRoutes.logisticsBecomeProvider} className="w-full mb-8 bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group md:hidden">
   <div className="flex flex-col items-center text-center">
     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
       <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
@@ -599,7 +599,7 @@ const LogisticsHubDashboard = () => {
     <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Become A Provider</h3>
     <p className="text-xs text-gray-500 leading-tight">Offer Logistics Services</p>
   </div>
-</button>
+</Link>
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-t-xl border border-b-0">
@@ -1184,6 +1184,119 @@ const LogisticsHubDashboard = () => {
     </div>
   </>
 )}
+
+{activeTab === 'inventory' && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">Inventory Management</h3>
+                            <div className="flex space-x-2">
+                              <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                                <Filter className="w-4 h-4" />
+                              </button>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Search inventory..."
+                                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+          
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {dashboardData.inventory.data.length > 0 ? (
+                              dashboardData.inventory.data.map((item) => (
+                                <div key={item.id} className="bg-gray-50 rounded-lg p-4">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h4 className="font-medium text-gray-900">{item.name}</h4>
+                                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                                      {item.category?.name || item.category || 'N/A'}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Available:</span>
+                                      <span className={`font-medium ${item.current_stock <= (item.reorder_point || item.minimum_stock) ? 'text-orange-600' : 'text-gray-900'}`}>
+                                        {item.current_stock} {item.unit}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Min Stock:</span>
+                                      <span className="text-gray-900">{item.minimum_stock} {item.unit}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Location:</span>
+                                      <span className="text-gray-900">{item.warehouse || item.location || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-600">Unit Cost:</span>
+                                      <span className="text-gray-900">${item.unit_cost}</span>
+                                    </div>
+                                  </div>
+          
+                                  {item.current_stock <= (item.reorder_point || item.minimum_stock) && (
+                                    <div className="mt-3 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-700">
+                                      ⚠️ Below reorder level ({item.reorder_point || item.minimum_stock})
+                                    </div>
+                                  )}
+          
+                                  <div className="mt-3 flex space-x-2">
+                                    <Link
+                                      to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
+                                      className="flex-1 text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
+                                    >
+                                      View Details
+                                    </Link>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-3 text-center py-8 text-gray-500">
+                                <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                                <p>No inventory items found</p>
+                                <p className="text-sm mb-4">Add inventory items to get started{userIsStaff ? ' or view all items across users.' : ''}</p>
+                                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                  <Link
+                                    to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
+                                    className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
+                                  >
+                                    <Plus className="w-4 h-4 mr-2" /> Add Inventory
+                                  </Link>
+                                  {userIsStaff && (
+                                    <button
+                                      onClick={() => {
+                                        localStorage.setItem('force_inventory_scope_all','1');
+                                        loadDashboardData();
+                                      }}
+                                      className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                                    >
+                                      View All (Staff)
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+          
+                      {activeTab === 'tracking' && (
+                        <div className="text-center py-12">
+                          <Ship className="mx-auto h-12 w-12 text-gray-400" />
+                          <h3 className="mt-2 text-sm font-medium text-gray-900">Live Tracking</h3>
+                          <p className="mt-1 text-sm text-gray-500">
+                            Real-time shipment tracking will be displayed here
+                          </p>
+                          <div className="mt-6">
+                            <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-yellow-600">
+                              <MapPin className="w-4 h-4 mr-2" />
+                              View Map
+                            </button>
+                          </div>
+                        </div>
+                      )}
         </div>
       </div>
     </div>
