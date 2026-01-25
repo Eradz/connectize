@@ -3,11 +3,25 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, Edit, Trash2, Download, Package, AlertCircle, CheckCircle,
   TrendingUp, Building, MapPin, DollarSign, Calendar, Wrench, Settings,
-  Eye, RefreshCw, Plus, Minus, FileText, Truck, User, Hash, AlertTriangle
+  Eye, RefreshCw, Plus, Minus, FileText, Truck, User, Hash, AlertTriangle,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
+import InventoryModal from './LogisticsInventoryForm';
+
+const GradientCheckIcon = ({ gradientId, startColor, endColor }) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10.1995 5.53338L7.40754 8.33339L5.91154 6.77339C5.8515 6.70774 5.77893 6.65478 5.69811 6.61762C5.61729 6.58045 5.52985 6.55984 5.44093 6.55699C5.35202 6.55415 5.26344 6.56912 5.18041 6.60104C5.09737 6.63296 5.02156 6.68117 4.95745 6.74283C4.89334 6.8045 4.84221 6.87838 4.80709 6.96011C4.77197 7.04184 4.75356 7.12977 4.75295 7.21872C4.75233 7.30768 4.76953 7.39586 4.80352 7.47806C4.83751 7.56027 4.88761 7.63484 4.95087 7.69739L6.4882 9.29739C6.60285 9.42123 6.74143 9.52052 6.89555 9.58928C7.04967 9.65803 7.21613 9.69481 7.38487 9.69739H7.40687C7.57224 9.69794 7.73607 9.66563 7.88885 9.60234C8.04164 9.53906 8.18033 9.44605 8.29687 9.32873L11.1449 6.48072C11.2071 6.41865 11.2564 6.34493 11.2902 6.26378C11.3239 6.18263 11.3413 6.09563 11.3414 6.00776C11.3415 5.91988 11.3242 5.83285 11.2907 5.75163C11.2572 5.67041 11.2079 5.59659 11.1459 5.53438C11.0838 5.47218 11.0101 5.42281 10.9289 5.3891C10.8478 5.35538 10.7608 5.33798 10.6729 5.33789C10.585 5.3378 10.498 5.35501 10.4168 5.38856C10.3356 5.4221 10.2617 5.47131 10.1995 5.53338V5.53338Z" fill={`url(#${gradientId})`}/>
+    <defs>
+      <linearGradient id={gradientId} x1="5.0436" y1="7.26995" x2="11.6152" y2="7.5443" gradientUnits="userSpaceOnUse">
+        <stop stopColor={startColor}/>
+        <stop offset="1" stopColor={endColor}/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 const LogisticsInventoryDetailView = () => {
   const navigate = useNavigate();
@@ -23,7 +37,9 @@ const LogisticsInventoryDetailView = () => {
     reason: '',
     notes: ''
   });
+  const [showEditModal, setShowEditModal] = useState(false);
   const [adjusting, setAdjusting] = useState(false);
+ 
 
   // Oil & gas industry categories
   const industryCategories = [
@@ -66,111 +82,43 @@ const LogisticsInventoryDetailView = () => {
     loadItemData();
   }, [id]);
 
-  const loadItemData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load item details and movement history in parallel
-      const [itemData, movementsData] = await Promise.allSettled([
-        logisticsAPI.getInventoryItem(id),
-        logisticsAPI.getInventoryMovements({ item: id })
-      ]);
+const loadItemData = async () => {
+  try {
+    setLoading(true);
 
-      if (itemData.status === 'fulfilled') {
-        setItem(itemData.value);
-      } else {
-        // Only use mock data in development mode
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Using mock data for development');
-          setItem(generateMockItemData());
-        } else {
-          toast.error('Failed to load inventory item');
-          navigate(webRoutes.logisticsInventory);
-          return;
-        }
-      }
+    const [itemRes, movementsRes] = await Promise.all([
+      logisticsAPI.getInventoryItem(id),
+      logisticsAPI.getInventoryMovements({ item: id })
+    ]);
 
-      if (movementsData.status === 'fulfilled') {
-        const movements = movementsData.value.results || movementsData.value.data || movementsData.value || [];
-        setMovements(movements);
-      } else {
-        // Only use mock data in development mode
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Using mock movements for development');
-          setMovements(generateMockMovements());
-        } else {
-          setMovements([]);
-        }
-      }
-
-    } catch (error) {
-      toast.error('Failed to load item details');
-      console.error('Error loading item:', error);
-      // Use mock data as fallback
-      setItem(generateMockItemData());
-      setMovements(generateMockMovements());
-    } finally {
-      setLoading(false);
+    // Inventory item is mandatory
+    if (!itemRes) {
+      toast.error('Inventory item not found');
+      navigate(webRoutes.logisticsInventory);
+      return;
     }
-  };
 
-  const generateMockItemData = () => ({
-    id: id,
-    name: 'Drilling Bit - PDC 8.5"',
-    sku: 'DRL-001',
-    description: 'Polycrystalline diamond compact drilling bit for hard formations. Designed for optimal performance in challenging drilling conditions.',
-    category: 'drilling_equipment',
-    current_stock: 5,
-    reorder_point: 2,
-    maximum_stock: 10,
-    minimum_stock: 1,
-    unit: 'pieces',
-    unit_cost: 15000,
-    status: 'available',
-    condition: 'new',
-    warehouse: 'Houston Main',
-    location: 'Bay 3-A',
-    supplier: 'Baker Hughes',
-    manufacturer: 'Baker Hughes',
-    model_number: 'PDC-85',
-    serial_number: 'SN123456',
-    purchase_date: '2024-01-15',
-    warranty_expiry: '2025-01-15',
-    is_low_stock: false,
-    stock_status: 'normal',
-    total_value: 75000,
-    updated_at: new Date().toISOString(),
-    specifications: {
-      'Diameter': '8.5 inches',
-      'Type': 'PDC (Polycrystalline Diamond Compact)',
-      'IADC Code': '619',
-      'Weight': '45 lbs',
-      'Connection': 'API 6-5/8 Reg Pin'
-    },
-    notes: 'High-performance drilling bit suitable for hard formations. Requires special handling and storage.'
-  });
+    setItem(itemRes);
 
-  const generateMockMovements = () => [
-    {
-      id: 'mov_1',
-      date: '2024-01-20',
-      type: 'receipt',
-      quantity: 5,
-      unit_cost: 15000,
-      reference: 'PO-2024-001',
-      notes: 'Initial stock receipt from Baker Hughes',
-      created_by: 'John Smith'
-    },
-    {
-      id: 'mov_2',
-      date: '2024-01-25',
-      type: 'issue',
-      quantity: -2,
-      reference: 'WO-2024-005',
-      notes: 'Issued for Rig Alpha drilling operation',
-      created_by: 'Jane Doe'
-    }
-  ];
+    // Movements can be empty but must be real
+    const movementList =
+      movementsRes?.results ||
+      movementsRes?.data ||
+      movementsRes ||
+      [];
+
+    setMovements(movementList);
+
+  } catch (error) {
+    console.error('Error loading inventory item:', error);
+    toast.error('Failed to load inventory item');
+    navigate(webRoutes.logisticsInventory);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const getStatusColor = (status) => {
     const statusConfig = statusOptions.find(s => s.value === status);
@@ -233,7 +181,6 @@ const LogisticsInventoryDetailView = () => {
       setShowAdjustStock(false);
       setAdjustmentData({ quantity: 0, type: 'add', reason: '', notes: '' });
       
-      // Reload data
       await loadItemData();
     } catch (error) {
       toast.error('Failed to adjust stock');
@@ -243,32 +190,43 @@ const LogisticsInventoryDetailView = () => {
     }
   };
 
-  const handleDelete = async () => {
-    const tId = toast('Delete this inventory item?', {
-      description: 'This action cannot be undone and will remove all associated data.',
-      duration: 8000,
-      action: {
-        label: 'Confirm Delete',
-        onClick: async () => {
-          try {
-            await logisticsAPI.deleteInventoryItem(id);
-            toast.success('Inventory item deleted successfully');
-            navigate(webRoutes.logisticsInventory);
-          } catch (error) {
-            toast.error('Failed to delete item');
-            console.error('Error deleting item:', error);
-          } finally {
-            try { toast.dismiss?.(tId); } catch {}
-          }
-        },
-      },
-    });
-  };
+ const handleSave = async (formData, isEdit) => {
+  try {
+    await logisticsAPI.updateInventoryItem(id, formData);
+    toast.success('Inventory item updated successfully');
+    setShowEditModal(false);
+    await loadItemData(); // Reload the data
+  } catch (error) {
+    toast.error('Failed to update item');
+    console.error('Error:', error);
+  }
+};
 
+const handleDelete = async () => {
+  const tId = toast('Delete this inventory item?', {
+    description: 'This action cannot be undone and will remove all associated data.',
+    duration: 8000,
+    action: {
+      label: 'Confirm Delete',
+      onClick: async () => {
+        try {
+          await logisticsAPI.deleteInventoryItem(id);
+          toast.success('Inventory item deleted successfully');
+          navigate(webRoutes.logisticsInventory);
+        } catch (error) {
+          toast.error('Failed to delete item');
+          console.error('Error deleting item:', error);
+        } finally {
+          try { toast.dismiss?.(tId); } catch {}
+        }
+      },
+    },
+  });
+};
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
       </div>
     );
   }
@@ -291,46 +249,38 @@ const LogisticsInventoryDetailView = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate(webRoutes.logisticsInventory)}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="p-2 rounded-lg bg-amber-400 hover:bg-amber-500 transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
+                <ArrowLeft className="w-5 h-5 text-white" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{item.name}</h1>
-                <p className="text-gray-600 mt-1">SKU: {item.sku}</p>
+                <h1 className="text-xl font-semibold text-gray-900">{item.name}</h1>
+                <p className="text-sm text-gray-500 mt-0.5">SKU: {item.sku}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={loadItemData}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </button>
+            <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowAdjustStock(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-custom_yellow text-white rounded-lg flex items-center"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center text-sm font-medium transition-colors"
               >
-                <TrendingUp className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 mr-2" />
                 Adjust Stock
               </button>
               <button
-                onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', item.id))}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center"
-              >
-                <Edit className="w-4 h-4 mr-2" />
+  onClick={() => setShowEditModal(true)}
+  className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
+>                <Edit className="w-4 h-4 mr-2" />
                 Edit
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
@@ -340,283 +290,267 @@ const LogisticsInventoryDetailView = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Basic Information */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                <Package className="w-5 h-5 mr-2 text-blue-600" />
-                Item Details
-              </h3>
+          <div className="lg:col-span-2 space-y-4">
+            {/* Item Details */}
+            <div className="bg-white rounded-lg border">
+              <div className="px-5 py-4">
+                <div className="flex items-center space-x-3 mb-4">
+                  <Package className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-base font-semibold text-gray-900">Item Details</h3>
+                </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Category</label>
-                  <div className="flex items-center">
-                    {categoryConfig?.icon && <categoryConfig.icon className="w-4 h-4 mr-2 text-gray-600" />}
-                    <span className="text-gray-900">{categoryConfig?.label || item.category}</span>
-                  </div>
-                </div>
+                <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
+                      <p className="text-sm text-gray-900">{item.description}</p>
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Unit of Measurement</label>
-                  <p className="text-gray-900">{item.unit}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                    {statusOptions.find(s => s.value === item.status)?.label || item.status}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Condition</label>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getConditionColor(item.condition)}`}>
-                    {conditionOptions.find(c => c.value === item.condition)?.label || item.condition}
-                  </span>
-                </div>
-
-                {item.model_number && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Model Number</label>
-                    <p className="text-gray-900">{item.model_number}</p>
-                  </div>
-                )}
-
-                {item.serial_number && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Serial Number</label>
-                    <p className="text-gray-900 font-mono">{item.serial_number}</p>
-                  </div>
-                )}
-              </div>
-
-              {item.description && (
-                <div className="mt-6">
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Description</label>
-                  <p className="text-gray-900">{item.description}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Location and Supplier */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                <MapPin className="w-5 h-5 mr-2 text-orange-600" />
-                Location & Supply Chain
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {item.warehouse && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Warehouse</label>
-                    <div className="flex items-center">
-                      <Building className="w-4 h-4 mr-2 text-gray-600" />
-                      <span className="text-gray-900">{item.warehouse}</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+                        <p className="text-sm text-gray-900">{categoryConfig?.label || item.category}</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Unit of Measurement</label>
+                        <p className="text-sm text-gray-900">{item.unit}</p>
+                      </div>
+                     <div>
+  <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
+  <span className="inline-flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-full border-2" style={{
+    borderColor: '#4EB608',
+    background: 'linear-gradient(to right, #4EB608, #094300)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  }}>
+    <span style={{
+      background: 'linear-gradient(to right, #4EB608, #094300)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text'
+    }}>{statusOptions.find(s => s.value === item.status)?.label || item.status}</span>
+    <div className="flex items-center space-x-1 ml-2">
+      <GradientCheckIcon gradientId="status-gradient" startColor="#4EB608" endColor="#094300" />
+      
+    </div>
+  </span>
+</div>
+                     <div>
+  <label className="block text-xs font-medium text-gray-500 mb-1">Condition</label>
+  <span className="inline-flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-full border-2" style={{
+    borderColor: '#FFC000',
+    background: 'linear-gradient(to right, #FFC000, #FF8400)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  }}>
+    <span style={{
+      background: 'linear-gradient(to right, #FFC000, #FF8400)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text'
+    }}>{conditionOptions.find(c => c.value === item.condition)?.label || item.condition}</span>
+    <div className="flex items-center space-x-1 ml-2">
+      <GradientCheckIcon gradientId="condition-gradient" startColor="#FFC000" endColor="#FF8400" />
+    </div>
+  </span>
+</div>
+                      {item.model_number && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Model Number</label>
+                          <p className="text-sm text-gray-900">{item.model_number}</p>
+                        </div>
+                      )}
+                      {item.serial_number && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Serial Number</label>
+                          <p className="text-sm text-gray-900 font-mono">{item.serial_number}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-
-                {item.location && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Location/Bay</label>
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-600" />
-                      <span className="text-gray-900">{item.location}</span>
-                    </div>
-                  </div>
-                )}
-
-                {item.supplier && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
-                    <div className="flex items-center">
-                      <Truck className="w-4 h-4 mr-2 text-gray-600" />
-                      <span className="text-gray-900">{item.supplier}</span>
-                    </div>
-                  </div>
-                )}
-
-                {item.manufacturer && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Manufacturer</label>
-                    <div className="flex items-center">
-                      <Building className="w-4 h-4 mr-2 text-gray-600" />
-                      <span className="text-gray-900">{item.manufacturer}</span>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Specifications */}
+            {/* Location & Supply Chain */}
+            <div className="bg-white rounded-lg border">
+              <div className="px-5 py-4">
+                <div className="flex items-center space-x-3 mb-4">
+                  <MapPin className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-base font-semibold text-gray-900">Location & Supply Chain</h3>
+                </div>
+              
+                <div className="grid grid-cols-2 gap-4">
+                    {item.warehouse && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Warehouse</label>
+                        <p className="text-sm text-gray-900">{item.warehouse}</p>
+                      </div>
+                    )}
+                    {item.location && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Location/Bay</label>
+                        <p className="text-sm text-gray-900">{item.location}</p>
+                      </div>
+                    )}
+                    {item.supplier && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Supplier</label>
+                        <p className="text-sm text-gray-900">{item.supplier}</p>
+                      </div>
+                    )}
+                    {item.manufacturer && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Manufacturer</label>
+                        <p className="text-sm text-gray-900">{item.manufacturer}</p>
+                      </div>
+                    )}
+                  </div>
+              </div>
+            </div>
+
+            {/* Technical Specifications */}
             {item.specifications && Object.keys(item.specifications).length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                  <Settings className="w-5 h-5 mr-2 text-indigo-600" />
-                  Technical Specifications
-                </h3>
+              <div className="bg-white rounded-lg border">
+                <div className="px-5 py-4">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Settings className="w-5 h-5 text-gray-600" />
+                    <h3 className="text-base font-semibold text-gray-900">Technical Specifications</h3>
+                  </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(item.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                      <span className="text-sm font-medium text-gray-500">{key}</span>
-                      <span className="text-sm text-gray-900">{value}</span>
+                  <div className="space-y-3">
+                      {Object.entries(item.specifications).map(([key, value]) => (
+                        <div key={key} className="flex justify-between items-center">
+                          <span className="text-xs font-medium text-gray-500">{key}</span>
+                          <span className="text-sm text-gray-900">{value}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
                 </div>
               </div>
             )}
 
             {/* Dates */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-purple-600" />
-                Important Dates
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {item.purchase_date && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Purchase Date</label>
-                    <p className="text-gray-900">{formatDate(item.purchase_date)}</p>
-                  </div>
-                )}
-
-                {item.warranty_expiry && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Warranty Expiry</label>
-                    <p className={`${new Date(item.warranty_expiry) < new Date() ? 'text-red-600' : 'text-gray-900'}`}>
-                      {formatDate(item.warranty_expiry)}
-                      {new Date(item.warranty_expiry) < new Date() && (
-                        <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Expired</span>
-                      )}
-                    </p>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">Last Updated</label>
-                  <p className="text-gray-900">{formatDate(item.updated_at)}</p>
+            <div className="bg-white rounded-lg border">
+              <div className="px-5 py-4">
+                <div className="flex items-center space-x-3 mb-4">
+                  <Calendar className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-base font-semibold text-gray-900">Dates</h3>
                 </div>
+              
+                <div className="space-y-3">
+                    {item.purchase_date && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-gray-500">Purchase Date</span>
+                        <span className="text-sm text-gray-900">{formatDate(item.purchase_date)}</span>
+                      </div>
+                    )}
+                    {item.warranty_expiry && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-gray-500">Warranty Expiry</span>
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-sm ${new Date(item.warranty_expiry) < new Date() ? 'text-red-600' : 'text-gray-900'}`}>
+                            {formatDate(item.warranty_expiry)}
+                          </span>
+                          {new Date(item.warranty_expiry) < new Date() && (
+                            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">Expired</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-gray-500">Last Updated</span>
+                      <span className="text-sm text-gray-900">{formatDate(item.updated_at)}</span>
+                    </div>
+                  </div>
               </div>
             </div>
-
-            {/* Notes */}
-            {item.notes && (
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <FileText className="w-5 h-5 mr-2 text-gray-600" />
-                  Notes
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{item.notes}</p>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-8">
+          <div className="space-y-4">
+            {/* Notes */}
+            {item.notes && (
+              <div className="bg-white rounded-lg border p-5">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Notes</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">{item.notes}</p>
+              </div>
+            )}
+
             {/* Stock Information */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
-                Stock Information
-              </h3>
+            <div className="bg-white rounded-lg border p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900">Stock Information</h3>
+                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                  {stockIndicator.label.toUpperCase()}
+                </span>
+              </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-500">Current Stock</span>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Current Stock</span>
                   <div className="flex items-center">
-                    <span className="text-2xl font-bold text-gray-900 mr-2">
-                      {item.current_stock}
-                    </span>
-                    <span className="text-sm text-gray-500">{item.unit}</span>
-                    <StatusIcon className={`w-5 h-5 ml-2 ${stockIndicator.color}`} />
+                    <span className="text-lg font-bold text-gray-900">{item.current_stock}</span>
+                    <span className="text-xs text-gray-500 ml-1">{item.unit}</span>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Min Stock:</span>
-                    <p className="font-medium">{item.minimum_stock || 0}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Reorder:</span>
-                    <p className="font-medium">{item.reorder_point || 0}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Max Stock:</span>
-                    <p className="font-medium">{item.maximum_stock || 0}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Status:</span>
-                    <p className={`font-medium ${stockIndicator.color}`}>
-                      {stockIndicator.label}
-                    </p>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Min Stock</span>
+                  <span className="text-sm text-gray-900">{item.minimum_stock || 0}</span>
                 </div>
-
-                {(item.is_low_stock || item.stock_status === 'low') && (
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                    <div className="flex items-center">
-                      <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
-                      <span className="text-sm font-medium text-orange-600">Low Stock Alert</span>
-                    </div>
-                    <p className="text-xs text-orange-600 mt-1">
-                      Current stock is below reorder point. Consider restocking.
-                    </p>
-                  </div>
-                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Max Stock</span>
+                  <span className="text-sm text-gray-900">{item.maximum_stock || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Reorder</span>
+                  <span className="text-sm text-gray-900">{item.reorder_point || 0}</span>
+                </div>
               </div>
             </div>
 
-            {/* Financial Information */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                <DollarSign className="w-5 h-5 mr-2 text-green-600" />
-                Financial Details
-              </h3>
+            {/* Financial Details */}
+            <div className="bg-white rounded-lg border p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Financial Details</h3>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Unit Cost</span>
+                  <span className="text-xs text-gray-500 block mb-1">Unit Cost</span>
                   <p className="text-xl font-bold text-gray-900">{formatCurrency(item.unit_cost)}</p>
                 </div>
-
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Total Value</span>
+                  <span className="text-xs text-gray-500 block mb-1">Total Value</span>
                   <p className="text-lg font-semibold text-green-600">
                     {formatCurrency(item.total_value || (item.current_stock * item.unit_cost))}
                   </p>
                 </div>
-
-                <div className="text-xs text-gray-500 border-t pt-3">
-                  <p>Based on current stock of {item.current_stock} {item.unit}</p>
-                </div>
+                <p className="text-xs text-gray-400 pt-2 border-t">
+                  Based on current stock of {item.current_stock} {item.unit}
+                </p>
               </div>
             </div>
 
             {/* Recent Movements */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                <RefreshCw className="w-5 h-5 mr-2 text-blue-600" />
-                Recent Movements
-              </h3>
+            <div className="bg-white rounded-lg border p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Movements</h3>
               
               <div className="space-y-3">
                 {movements.length > 0 ? (
                   movements.slice(0, 5).map((movement) => (
-                    <div key={movement.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                    <div key={movement.id} className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-xs font-medium text-gray-900">
                           {movement.type === 'receipt' ? 'Received' : 
                            movement.type === 'issue' ? 'Issued' :
                            movement.type === 'adjustment' ? 'Adjusted' : movement.type}
                         </p>
                         <p className="text-xs text-gray-500">{formatDate(movement.date)}</p>
+                        {movement.reference && (
+                          <p className="text-xs text-gray-400 mt-0.5">{movement.reference}</p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className={`text-sm font-semibold ${
@@ -624,33 +558,24 @@ const LogisticsInventoryDetailView = () => {
                         }`}>
                           {movement.quantity > 0 ? '+' : ''}{movement.quantity}
                         </p>
-                        {movement.reference && (
-                          <p className="text-xs text-gray-500">{movement.reference}</p>
-                        )}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 text-center py-4">No recent movements</p>
+                  <p className="text-xs text-gray-500 text-center py-4">No recent movements</p>
                 )}
               </div>
-
-              {movements.length > 5 && (
-                <button className="w-full mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
-                  View All Movements
-                </button>
-              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Stock Adjustment Modal */}
+{/* Stock Adjustment Modal */}
       {showAdjustStock && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Adjust Stock</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Adjust Stock</h3>
               
               <div className="space-y-4">
                 <div>
@@ -658,7 +583,7 @@ const LogisticsInventoryDetailView = () => {
                   <select
                     value={adjustmentData.type}
                     onChange={(e) => setAdjustmentData(prev => ({ ...prev, type: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                   >
                     <option value="add">Add Stock</option>
                     <option value="remove">Remove Stock</option>
@@ -673,7 +598,7 @@ const LogisticsInventoryDetailView = () => {
                     onChange={(e) => setAdjustmentData(prev => ({ ...prev, quantity: parseFloat(e.target.value) || 0 }))}
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                   />
                 </div>
 
@@ -682,7 +607,7 @@ const LogisticsInventoryDetailView = () => {
                   <select
                     value={adjustmentData.reason}
                     onChange={(e) => setAdjustmentData(prev => ({ ...prev, reason: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                   >
                     <option value="">Select reason</option>
                     <option value="inventory_count">Physical Inventory Count</option>
@@ -701,7 +626,7 @@ const LogisticsInventoryDetailView = () => {
                     onChange={(e) => setAdjustmentData(prev => ({ ...prev, notes: e.target.value }))}
                     rows={3}
                     placeholder="Additional details about this adjustment..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm resize-none"
                   />
                 </div>
               </div>
@@ -709,14 +634,14 @@ const LogisticsInventoryDetailView = () => {
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowAdjustStock(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleStockAdjustment}
                   disabled={adjusting || !adjustmentData.quantity || !adjustmentData.reason}
-                  className="px-4 py-2 bg-blue-600 hover:bg-custom_yellow text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center text-sm font-medium transition-colors"
                 >
                   {adjusting ? (
                     <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -730,8 +655,16 @@ const LogisticsInventoryDetailView = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Modal - ADD THIS ENTIRE SECTION */}
+      <InventoryModal 
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        itemId={id}
+        onSave={handleSave}
+      />
     </div>
   );
 };
 
-export default LogisticsInventoryDetailView;
+export default LogisticsInventoryDetailView

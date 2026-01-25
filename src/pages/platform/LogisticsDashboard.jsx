@@ -545,60 +545,61 @@ const LogisticsHubDashboard = () => {
 </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Quick Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <Plus className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Create Shipment</h3>
-              <p className="text-xs text-gray-500">Schedule New Cargo Shipment</p>
-            </div>
-          </button>
+       {/* Quick Action Cards - Mobile Optimized */}
+<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Create Shipment</h3>
+      <p className="text-xs text-gray-500 leading-tight">Schedule New Cargo Shipment</p>
+    </div>
+  </button>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:text-yellow-600 text-gray-600">
-                  <path d="M8 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H16M12 3V11M12 11L15 8M12 11L9 8M4 13H6.58579C6.851 13 7.10536 13.1054 7.29289 13.2929L9.70711 15.7071C9.89464 15.8946 10.149 16 10.4142 16H13.5858C13.851 16 14.1054 15.8946 14.2929 15.7071L16.7071 13.2929C16.8946 13.1054 17.149 13 17.4142 13H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Manage Inventory</h3>
-              <p className="text-xs text-gray-500">Update Stock Levels</p>
-            </div>
-          </button>
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:text-yellow-600 text-gray-600 sm:w-6 sm:h-6">
+          <path d="M8 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H16M12 3V11M12 11L15 8M12 11L9 8M4 13H6.58579C6.851 13 7.10536 13.1054 7.29289 13.2929L9.70711 15.7071C9.89464 15.8946 10.149 16 10.4142 16H13.5858C13.851 16 14.1054 15.8946 14.2929 15.7071L16.7071 13.2929C16.8946 13.1054 17.149 13 17.4142 13H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Manage Inventory</h3>
+      <p className="text-xs text-gray-500 leading-tight">Update Stock Levels</p>
+    </div>
+  </button>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <MapPin className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Track Shipment</h3>
-              <p className="text-xs text-gray-500">Real-Time Location Tracking</p>
-            </div>
-          </button>
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Track Shipment</h3>
+      <p className="text-xs text-gray-500 leading-tight">Real-Time Location Tracking</p>
+    </div>
+  </button>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <FileText className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Manage Request</h3>
-              <p className="text-xs text-gray-500">Manage Shipping Requests</p>
-            </div>
-          </button>
+  <button className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
+    <div className="flex flex-col items-center text-center">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+        <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+      </div>
+      <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Manage Request</h3>
+      <p className="text-xs text-gray-500 leading-tight">Manage Shipping Requests</p>
+    </div>
+  </button>
+</div>
 
-          <button className="bg-white p-6 rounded-xl border hover:shadow-md transition-shadow group">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3 group-hover:bg-yellow-50 transition-colors">
-                <User className="w-6 h-6 text-gray-600 group-hover:text-yellow-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Become A Provider</h3>
-              <p className="text-xs text-gray-500">Offer Logistics Services</p>
-            </div>
-          </button>
-        </div>
+{/* Become A Provider - Full Width on Mobile */}
+<button className="w-full mb-8 bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group md:hidden">
+  <div className="flex flex-col items-center text-center">
+    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+      <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+    </div>
+    <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Become A Provider</h3>
+    <p className="text-xs text-gray-500 leading-tight">Offer Logistics Services</p>
+  </div>
+</button>
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-t-xl border border-b-0">
@@ -721,7 +722,7 @@ const LogisticsHubDashboard = () => {
 
               {/* Search and Filter */}
               <div className="flex items-center justify-between mb-6">
-                <div className="relative flex-1 max-w-md">
+                <div className="relative flex-1 max-w-2xl">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
@@ -884,343 +885,396 @@ const LogisticsHubDashboard = () => {
             </>
           )}
 
-          {activeTab === 'requests' && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900">All Shipment Requests</h3>
-                            <div className="flex space-x-2">
-                              <Link
-                                to={webRoutes.logisticsShipmentCreate}
-                                className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2"
-                              >
-                                <Plus className="w-4 h-4" />
-                                <span>Create Shipment Request</span>
-                              </Link>
-                              <Link
-                                to={webRoutes.logisticsRequests}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                              >
-                                <Eye className="w-4 h-4" />
-                                <span>View All</span>
-                              </Link>
-                            </div>
-                          </div>
           
-                          <div className="overflow-x-auto">
-                            {dashboardData.requests.data.length > 0 ? (
-                              <table className="w-full">
-                                <thead>
-                                  <tr className="border-b border-gray-200">
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Request ID</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Title</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Cargo Type</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Budget</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Created</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {dashboardData.requests.data.slice(0, 10).map((request) => (
-                                    <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                      <td className="py-4 px-4">
-                                        <Link 
-                                          to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
-                                          className="font-medium text-blue-600 hover:text-blue-700"
-                                        >
-                                          REQ-{request.id?.slice(0,8)}
-                                        </Link>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <p className="text-sm font-medium text-gray-900">{request.title}</p>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <div>
-                                          <p className="text-sm text-gray-900">{request.origin_address}</p>
-                                          <p className="text-sm text-gray-500">→ {request.destination_address}</p>
-                                        </div>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                          {request.cargo_type?.replace('_', ' ')}
-                                        </span>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                          ${request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                            request.status === 'posted' ? 'bg-blue-100 text-blue-800' :
-                                            request.status === 'quoted' ? 'bg-purple-100 text-purple-800' :
-                                            request.status === 'awarded' ? 'bg-green-100 text-green-800' :
-                                            'bg-gray-100 text-gray-800'}`}>
-                                          {request.status}
-                                        </span>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <p className="text-sm text-gray-900">
-                                          ${request.budget_min} - ${request.budget_max}
-                                        </p>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <p className="text-sm text-gray-900">
-                                          {new Date(request.created_at).toLocaleDateString()}
-                                        </p>
-                                      </td>
-                                      <td className="py-4 px-4">
-                                        <div className="flex space-x-2">
-                                          <Link
-                                            to={webRoutes.logisticsShipmentDetail.replace(':id', request.id)}
-                                            className="text-blue-600 hover:text-blue-700"
-                                          >
-                                            <Eye className="w-4 h-4" />
-                                          </Link>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            ) : (
-                              <div className="text-center py-12">
-                                <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                                <h3 className="mt-2 text-sm font-medium text-gray-900">No shipment requests found</h3>
-                                <p className="mt-1 text-sm text-gray-500">Get started by creating a new shipment request.</p>
-                                <div className="mt-6">
-                                  <Link
-                                    to={webRoutes.logisticsShipmentCreate}
-                                    className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600"
-                                  >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Create Shipment Request
-                                  </Link>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-          
-                      {activeTab === 'shipments' && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900">All Shipments</h3>
-                            <div className="flex space-x-2">
-                              <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                                <Filter className="w-4 h-4" />
-                              </button>
-                              <div className="relative">
-                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                <input
-                                  type="text"
-                                  placeholder="Search shipments..."
-                                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            </div>
-                          </div>
-          
-                          {dashboardData.shipments.data.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                              {dashboardData.shipments.data.map((shipment) => (
-                                <div key={shipment.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow p-6 capitalize">
-                                  {/* Header with Icon and Status */}
-                                  <div className="flex items-center justify-between mb-4">
-                                    <div className="p-2 bg-yellow-100 rounded-lg">
-                                      <Package className="w-5 h-5 text-yellow-600" />
-                                    </div>
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusColor(shipment.status)}`}>
-                                      {shipment.status.replace('_', ' ')}
-                                    </span>
-                                  </div>
-          
-                                  {/* Tracking Number */}
-                                  <h4 className="text-sm font-bold text-gray-900 mb-4">
-                                    {shipment.tracking_number || `SHIP-${shipment.id?.slice(0,8)}`}
-                                  </h4>
-          
-                                  {/* Route Info */}
-                                  <div className="flex items-center justify-between mb-4">
-                                    <p className="text-xs font-semibold text-gray-700 mb-1">Route:</p>
-                                    <div className="text-[12px] text-right text-gray-600 line-clamp-2">
-                                      <p className="font-medium">{shipment.request_details?.origin_address || 'Origin not specified'}</p>
-                                      <p className="text-xs text-gray-500 flex items-center mt-1">
-                                        <span>→ {shipment.request_details?.destination_address || 'Destination not specified'}</span>
-                                      </p>
-                                    </div>
-                                  </div>
-          
-                                  {/* Cargo Info */}
-                                  <div className="flex items-center justify-between mb-4">
-                                    <p className="text-xs font-semibold text-gray-700 mb-1">Cargo:</p>
-                                    <p className="text-sm text-gray-600">
-                                      {shipment.request_details?.cargo_type?.replace('_', ' ') || 'N/A'} - {shipment.request_details?.weight || 'N/A'} kg
-                                    </p>
-                                  </div>
-          
-                                  {/* Budget Info */}
-                                  <div className="flex items-center justify-between mb-4">
-                                    <p className="text-xs font-semibold text-gray-700 mb-1">Budget:</p>
-                                    <p className="text-sm text-gray-600 font-medium">
-                                      {shipment.request_details?.budget_max ? formatCurrency(shipment.request_details.budget_max) : 'N/A'}
-                                    </p>
-                                  </div>
-          
-                                  {/* ETA Info */}
-                                  <div className="flex items-center justify-between mb-6">
-                                    <p className="text-xs font-semibold text-gray-700 mb-1">ETA:</p>
-                                    <p className="text-sm text-gray-600">
-                                      {shipment.request_details?.delivery_date_requested ? new Date(shipment.request_details.delivery_date_requested).toLocaleDateString() : 'N/A'}
-                                    </p>
-                                  </div>
-          
-                                  {/* View Details Button */}
-                                  <Link
-                                    to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                                    className="w-full bg-yellow-400 text-white font-medium py-2 rounded-lg hover:bg-yellow-500 transition-colors text-sm inline-block text-center"
-                                  >
-                                    View Details
-                                  </Link>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-12">
-                              <Truck className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                              <h3 className="text-lg font-medium text-gray-900 mb-2">No Shipments</h3>
-                              <p className="text-gray-500 mb-4">{dashboardData.requests.total > 0 ? 'Award a request to generate a shipment' : "You haven't created any shipments yet"}</p>
-                              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                <Link
-                                  to={webRoutes.logisticsRequests}
-                                  className="inline-flex items-center px-4 py-2 bg-pale_yellow rounded-lg hover:bg-custom_yellow"
-                                >
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  View Requests
-                                </Link>
-                                <Link
-                                  to={webRoutes.logisticsShipmentCreate}
-                                  className="inline-flex items-center px-4 py-2 bg-gold/80 text-white rounded-lg hover:bg-gold"
-                                >
-                                  <Plus className="w-4 h-4 mr-2" />
-                                  Create Shipment
-                                </Link>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-          
-                      {activeTab === 'inventory' && (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900">Inventory Management</h3>
-                            <div className="flex space-x-2">
-                              <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                                <Filter className="w-4 h-4" />
-                              </button>
-                              <div className="relative">
-                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                                <input
-                                  type="text"
-                                  placeholder="Search inventory..."
-                                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                              </div>
-                            </div>
-                          </div>
-          
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {dashboardData.inventory.data.length > 0 ? (
-                              dashboardData.inventory.data.map((item) => (
-                                <div key={item.id} className="bg-gray-50 rounded-lg p-4">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <h4 className="font-medium text-gray-900">{item.name}</h4>
-                                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                                      {item.category?.name || item.category || 'N/A'}
-                                    </span>
-                                  </div>
-                                  
-                                  <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                      <span className="text-gray-600">Available:</span>
-                                      <span className={`font-medium ${item.current_stock <= (item.reorder_point || item.minimum_stock) ? 'text-orange-600' : 'text-gray-900'}`}>
-                                        {item.current_stock} {item.unit}
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                      <span className="text-gray-600">Min Stock:</span>
-                                      <span className="text-gray-900">{item.minimum_stock} {item.unit}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                      <span className="text-gray-600">Location:</span>
-                                      <span className="text-gray-900">{item.warehouse || item.location || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                      <span className="text-gray-600">Unit Cost:</span>
-                                      <span className="text-gray-900">${item.unit_cost}</span>
-                                    </div>
-                                  </div>
-          
-                                  {item.current_stock <= (item.reorder_point || item.minimum_stock) && (
-                                    <div className="mt-3 p-2 bg-orange-100 border border-orange-200 rounded text-xs text-orange-700">
-                                      ⚠️ Below reorder level ({item.reorder_point || item.minimum_stock})
-                                    </div>
-                                  )}
-          
-                                  <div className="mt-3 flex space-x-2">
-                                    <Link
-                                      to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                                      className="flex-1 text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
-                                    >
-                                      View Details
-                                    </Link>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="col-span-3 text-center py-8 text-gray-500">
-                                <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                                <p>No inventory items found</p>
-                                <p className="text-sm mb-4">Add inventory items to get started{userIsStaff ? ' or view all items across users.' : ''}</p>
-                                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                  <Link
-                                    to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
-                                    className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
-                                  >
-                                    <Plus className="w-4 h-4 mr-2" /> Add Inventory
-                                  </Link>
-                                  {userIsStaff && (
-                                    <button
-                                      onClick={() => {
-                                        localStorage.setItem('force_inventory_scope_all','1');
-                                        loadDashboardData();
-                                      }}
-                                      className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
-                                    >
-                                      View All (Staff)
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-          
-                      {activeTab === 'tracking' && (
-                        <div className="text-center py-12">
-                          <Ship className="mx-auto h-12 w-12 text-gray-400" />
-                          <h3 className="mt-2 text-sm font-medium text-gray-900">Live Tracking</h3>
-                          <p className="mt-1 text-sm text-gray-500">
-                            Real-time shipment tracking will be displayed here
-                          </p>
-                          <div className="mt-6">
-                            <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-yellow-600">
-                              <MapPin className="w-4 h-4 mr-2" />
-                              View Map
-                            </button>
-                          </div>
-                        </div>
-                      )}
+{activeTab === 'shipments' && (
+  <>
+    {/* Search and Filter */}
+    <div className="flex items-center justify-between mb-6">
+      <div className="relative flex-1 max-w-2xl">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search Shipments..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
+      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+        <Filter className="w-4 h-4" />
+        <span>Filter</span>
+      </button>
+    </div>
+
+    {/* All Shipments Header */}
+    <h2 className="text-xl font-semibold text-gray-900 mb-6">All Shipments</h2>
+
+    {/* Shipments Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {dashboardData.shipments.data.map((shipment) => {
+        // Helper to format date
+        const formatDate = (dateString) => {
+          if (!dateString) return 'N/A';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        };
+
+        return (
+          <div key={shipment.id} className="bg-white border rounded-xl p-6 hover:shadow-md transition-shadow">
+            {/* Icon and Status */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <Package className="w-6 h-6 text-yellow-600" />
+              </div>
+              {shipment.status && (
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
+                  {shipment.status.replace('_', ' ').toUpperCase()}
+                </span>
+              )}
+            </div>
+
+            {/* Tracking Number */}
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              {shipment.tracking_number || 'N/A'}
+            </h3>
+
+            {/* Route */}
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-1">Route:</p>
+              <div className="flex items-start text-sm text-gray-700">
+                <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0 text-gray-400" />
+                <div>
+                  <p className="font-medium">
+                    {shipment.request_details?.origin_address || 'N/A'}
+                  </p>
+                  <p className="text-gray-500">
+                    → {shipment.request_details?.destination_address || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Cargo */}
+            {shipment.cargo && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Cargo:</p>
+                <p className="text-sm text-gray-700">
+                  {shipment.cargo}
+                  {shipment.cargo_weight && ` - ${shipment.cargo_weight}`}
+                  {shipment.cargo_unit && shipment.cargo_unit}
+                </p>
+              </div>
+            )}
+
+            {/* Budget */}
+            {shipment.request_details?.budget_max && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Budget:</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {shipment.currency || '$'}
+                  {parseFloat(shipment.request_details.budget_max).toLocaleString()}
+                </p>
+              </div>
+            )}
+
+            {/* ETA */}
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 mb-1">ETA:</p>
+              <p className="text-sm text-gray-700">
+                {shipment.eta 
+                  ? formatDate(shipment.eta) 
+                  : shipment.estimated_delivery 
+                    ? formatDate(shipment.estimated_delivery)
+                    : 'N/A'}
+              </p>
+            </div>
+
+            {/* View Details Button */}
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2.5 rounded-lg transition-colors">
+              View Details
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  </>
+)}
+
+{activeTab === 'requests' && (
+  <>
+    {/* Search and Filter */}
+    <div className="flex items-center justify-between mb-6">
+      <div className="relative flex-1 max-w-2xl">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search Requests..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        />
+      </div>
+      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+        <Filter className="w-4 h-4" />
+        <span>Filter</span>
+      </button>
+    </div>
+
+    {/* Header with See All */}
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl font-semibold text-gray-900">Shipment Request</h2>
+      <button className="px-4 py-2 bg-yellow-100 text-gray-900 rounded-lg hover:bg-yellow-200 transition-colors">
+        See All
+      </button>
+    </div>
+
+    {/* Requests Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {dashboardData.requests.data.map((request) => {
+        // Helper to format date
+        const formatDate = (dateString) => {
+          if (!dateString) return 'Date not available';
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        };
+
+        return (
+          <div key={request.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
+            {/* Header with Title and Badge */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">
+                  {request.order_type || request.type || 'Order'}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  #{request.tracking_number || request.order_number || 'N/A'}
+                </p>
+              </div>
+              {request.status && (
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
+                  {request.status.replace('_', ' ').toUpperCase()}
+                </span>
+              )}
+            </div>
+
+            {/* Request Details - Flex Layout */}
+            <div className="flex items-start justify-between mb-4 pb-4 border-b">
+              {/* Left Side - Request ID */}
+              <div className="flex-1">
+                <div className="flex items-center space-x-1 mb-1">
+                  <p className="text-xs text-gray-500">Request ID</p>
+                  <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.77 2.18133L11.2473 0.608667C11.0603 0.416644 10.8369 0.263893 10.5901 0.159374C10.3432 0.0548549 10.078 0.000670954 9.81 0L6.66667 0C5.89853 0.000969683 5.15421 0.266727 4.55917 0.752479C3.96412 1.23823 3.55473 1.91428 3.4 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6V12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H7.33333C8.21706 15.9989 9.0643 15.6474 9.68919 15.0225C10.3141 14.3976 10.6656 13.5504 10.6667 12.6667V12.6C11.4191 12.4453 12.0951 12.0359 12.5809 11.4408C13.0666 10.8458 13.3324 10.1015 13.3333 9.33333V3.57333C13.3343 3.05361 13.1322 2.55408 12.77 2.18133ZM7.33333 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V9.33333C3.33439 10.2171 3.68592 11.0643 4.31081 11.6892C4.93571 12.3141 5.78294 12.6656 6.66667 12.6667H9.33333C9.33333 13.1971 9.12262 13.7058 8.74755 14.0809C8.37248 14.456 7.86377 14.6667 7.33333 14.6667ZM10 11.3333H6.66667C6.13623 11.3333 5.62753 11.1226 5.25245 10.7475C4.87738 10.3725 4.66667 9.86377 4.66667 9.33333V3.33333C4.66667 2.8029 4.87738 2.29419 5.25245 1.91912C5.62753 1.54405 6.13623 1.33333 6.66667 1.33333H9.33333V2.66667C9.33333 3.02029 9.47381 3.35943 9.72386 3.60948C9.97391 3.85952 10.313 4 10.6667 4H12V9.33333C12 9.86377 11.7893 10.3725 11.4142 10.7475C11.0391 11.1226 10.5304 11.3333 10 11.3333Z" fill="#374957"/>
+                  </svg>
+                </div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {request.request_id || request.id || 'N/A'}
+                </p>
+              </div>
+
+              {/* Right Side - Cargo Type */}
+              {request.cargo_type && (
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-1">Cargo Type</p>
+                  <span 
+                    className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-white"
+                    style={{ 
+                      border: '1.5px solid transparent',
+                      backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                      backgroundOrigin: 'border-box',
+                      backgroundClip: 'padding-box, border-box'
+                    }}
+                  >
+                    <span style={{
+                      background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>{request.cargo_type}</span>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Route and Budget - Flex Layout */}
+            <div className="flex items-start justify-between mb-4">
+              {/* Left Side - Route */}
+              <div className="flex-1 pr-4">
+                <p className="text-xs text-gray-500 mb-2">Route</p>
+                <p className="text-xs text-gray-900 font-medium mb-1">
+                  {request.origin_address || 'N/A'}
+                </p>
+                <div className="flex items-start text-xs text-gray-600">
+                  <span className="mr-1">→</span>
+                  <span className="leading-tight">
+                    {request.destination_address || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Side - Budget */}
+              <div className="text-right">
+                <p className="text-xs text-gray-500 mb-2">Budget</p>
+                <p className="text-base font-bold text-gray-900">
+                  {request.budget_max 
+                    ? `${request.currency || '$'}${parseFloat(request.budget_max).toLocaleString()}`
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            {/* Created Date */}
+            {request.created_at && (
+              <p className="text-xs text-gray-400 mb-5">
+                Created {formatDate(request.created_at)}
+              </p>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button 
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
+              >
+                <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clipPath="url(#clip0_1655_9100)">
+                    <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_1655_9100">
+                      <rect width="19" height="19" fill="white"/>
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span>View Details</span>
+              </button>
+              <button 
+                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-sm"
+                style={{ 
+                  border: '2px solid transparent',
+                  backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                  backgroundOrigin: 'border-box',
+                  backgroundClip: 'padding-box, border-box'
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clipPath="url(#clip0_1655_9103)">
+                    <path d="M13.3309 0.669151C12.9343 0.273183 12.3968 0.0507813 11.8364 0.0507812C11.276 0.0507813 10.7385 0.273183 10.3419 0.669151L0.854592 10.1565C0.582905 10.4266 0.367487 10.748 0.220799 11.1019C0.0741119 11.4559 -0.000932153 11.8354 8.73905e-06 12.2186V13.4162C8.73905e-06 13.5709 0.0614669 13.7192 0.170863 13.8286C0.280259 13.938 0.428632 13.9995 0.583342 13.9995H1.78093C2.16404 14.0006 2.54356 13.9256 2.89752 13.7791C3.25148 13.6325 3.57284 13.4171 3.84301 13.1455L13.3309 3.65757C13.7267 3.26102 13.949 2.72363 13.949 2.16336C13.949 1.60309 13.7267 1.0657 13.3309 0.669151ZM3.01818 12.3207C2.68918 12.6475 2.24465 12.8315 1.78093 12.8328H1.16668V12.2186C1.16609 11.9887 1.2111 11.761 1.29911 11.5486C1.38713 11.3362 1.51639 11.1434 1.67943 10.9813L8.87951 3.78123L10.2212 5.1229L3.01818 12.3207ZM12.5055 2.83273L11.0437 4.29515L9.70201 2.9564L11.1644 1.49398C11.2525 1.40608 11.3571 1.33639 11.4721 1.28889C11.5871 1.24139 11.7104 1.21701 11.8348 1.21715C11.9593 1.21728 12.0825 1.24193 12.1974 1.28968C12.3123 1.33743 12.4167 1.40735 12.5046 1.49544C12.5925 1.58354 12.6622 1.68808 12.7097 1.80311C12.7572 1.91814 12.7816 2.0414 12.7815 2.16585C12.7813 2.2903 12.7567 2.4135 12.7089 2.52843C12.6612 2.64335 12.5913 2.74775 12.5032 2.83565L12.5055 2.83273Z" fill="url(#paint0_linear_1655_9103)"/>
+                  </g>
+                  <defs>
+                    <linearGradient id="paint0_linear_1655_9103" x1="0" y1="7.02514" x2="13.949" y2="7.02514" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#FFC000"/>
+                      <stop offset="1" stopColor="#FF8400"/>
+                    </linearGradient>
+                    <clipPath id="clip0_1655_9103">
+                      <rect width="14" height="14" fill="white"/>
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span style={{
+                  background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>Edit</span>
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </>
+)}
+
+
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {dashboardData.inventory.data && dashboardData.inventory.data.length > 0 ? (
+    dashboardData.inventory.data.map((item) => {
+      const isBelowReorder = item.current_stock <= item.reorder_point;
+
+      return (
+        <div key={item.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
+          {/* Header with Custom SVG Icon and View Details */}
+          <div className="flex items-start justify-between mb-4">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="44" height="44" rx="10" fill="#FFECB2"/>
+              <g clipPath="url(#clip0_1655_9519)">
+                <path d="M30.5271 14.2179L24.5001 10.7379C23.7396 10.3005 22.8775 10.0703 22.0001 10.0703C21.1228 10.0703 20.2607 10.3005 19.5001 10.7379L13.4731 14.2179C12.714 14.6578 12.0836 15.2892 11.6449 16.049C11.2062 16.8089 10.9746 17.6705 10.9731 18.5479V25.5079C10.9746 26.3854 11.2062 27.2472 11.6449 28.0071C12.0836 28.7671 12.714 29.3987 13.4731 29.8389L19.5001 33.3179C20.2606 33.7555 21.1227 33.9859 22.0001 33.9859C22.8776 33.9859 23.7397 33.7555 24.5001 33.3179L30.5271 29.8389C31.2863 29.3987 31.9167 28.7671 32.3554 28.0071C32.794 27.2472 33.0257 26.3854 33.0271 25.5079V18.5479C33.0257 17.6705 32.7941 16.8089 32.3554 16.049C31.9167 15.2892 31.2863 14.6578 30.5271 14.2179ZM20.5001 12.4709C20.9562 12.2076 21.4735 12.0689 22.0001 12.0689C22.5268 12.0689 23.0441 12.2076 23.5001 12.4709L29.5271 15.9499C29.68 16.0465 29.8236 16.1569 29.9561 16.2799L23.7631 19.8549C23.227 20.164 22.619 20.3266 22.0001 20.3266C21.3813 20.3266 20.7733 20.164 20.2371 19.8549L14.0441 16.2799C14.1767 16.1569 14.3203 16.0465 14.4731 15.9499L20.5001 12.4709ZM14.4731 28.1059C14.0173 27.8418 13.6389 27.4626 13.3757 27.0063C13.1124 26.5501 12.9736 26.0326 12.9731 25.5059V18.5479C12.9801 18.3677 13.0039 18.1886 13.0441 18.0129L19.2371 21.5879C19.7841 21.899 20.3804 22.1138 21.0001 22.2229V31.7919C20.8274 31.739 20.66 31.67 20.5001 31.5859L14.4731 28.1059ZM31.0271 25.5059C31.0267 26.0326 30.8879 26.5501 30.6246 27.0063C30.3614 27.4626 29.9829 27.8418 29.5271 28.1059L23.5001 31.5859C23.3403 31.67 23.1729 31.739 23.0001 31.7919V22.2229C23.6199 22.1138 24.2162 21.899 24.7631 21.5879L30.9561 18.0129C30.9964 18.1886 31.0202 18.3677 31.0271 18.5479V25.5059Z" fill="#374957"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_1655_9519">
+                  <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
+                </clipPath>
+              </defs>
+            </svg>
+            
+            <Link to={webRoutes.logisticsInventoryDetail.replace(":id",item.id)} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              View Details
+            </Link>
+          </div>
+
+          {/* Category - FROM API */}
+          {item.category && (
+            <p className="text-xs text-gray-500 mb-2">{item.category}</p>
+          )}
+
+          {/* Product Name */}
+          <h3 className="text-base font-semibold text-gray-900 mb-4">{item.name}</h3>
+
+          {/* Details Grid */}
+          <div className="space-y-3 mb-4">
+            {/* Available */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Available:</span>
+              <span className="text-sm font-semibold text-gray-900">
+                {item.current_stock} {item.unit || item.measurement_unit || ''}
+              </span>
+            </div>
+
+            {/* Min Stock */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Min Stock:</span>
+              <span className="text-sm text-gray-900">
+                {item.reorder_point} {item.unit || item.measurement_unit || ''}
+              </span>
+            </div>
+
+            {/* Unit Cost - FROM API */}
+            {item.unit_cost !== undefined && item.unit_cost !== null && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Unit Cost:</span>
+                <span className="text-sm text-gray-900">
+                  {item.currency || '$'}{parseFloat(item.unit_cost).toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            {/* Location */}
+            <div className="flex items-start justify-between">
+              <span className="text-sm text-gray-600">Location:</span>
+              <span className="text-sm text-gray-900 text-right">{item.location}</span>
+            </div>
+          </div>
+
+          {/* Warning Badge */}
+          {isBelowReorder && (
+            <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+              <span className="text-xs text-yellow-700">
+                Below Reorder Level ({item.reorder_point})
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    })
+  ) : (
+    <div className="col-span-3 text-center py-12">
+      <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+      <h3 className="text-lg font-medium text-gray-900 mb-2">No Inventory Items</h3>
+      <p className="text-gray-500">No inventory items found. Add items to get started.</p>
+    </div>
+  )}
+</div>
         </div>
       </div>
     </div>
