@@ -407,7 +407,7 @@ const LogisticsShipments = () => {
               </button>
               <Link
                 to={webRoutes.logisticsShipmentCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Shipment
@@ -428,14 +428,14 @@ const LogisticsShipments = () => {
                 placeholder="Search by tracking number, origin, destination, cargo type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-goldfocus:border-transparent"
               />
             </div>
             <div className="flex gap-3">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-goldfocus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -447,7 +447,7 @@ const LogisticsShipments = () => {
               <select
                 value={methodFilter}
                 onChange={(e) => setMethodFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-goldfocus:border-transparent"
               >
                 <option value="all">All Methods</option>
                 <option value="Ocean Freight">Ocean Freight</option>
@@ -459,7 +459,7 @@ const LogisticsShipments = () => {
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-goldfocus:border-transparent"
               >
                 <option value="all">All Time</option>
                 <option value="today">Today</option>
@@ -500,7 +500,7 @@ const LogisticsShipments = () => {
                 <p className="text-2xl font-bold text-gray-900">{Array.isArray(shipments) ? shipments.length : 0}</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
-                <Package className="w-6 h-6 text-blue-600" />
+                <Package className="w-6 h-6 text-gold" />
               </div>
             </div>
           </div>
@@ -514,7 +514,7 @@ const LogisticsShipments = () => {
                 </p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
-                <Truck className="w-6 h-6 text-blue-600" />
+                <Truck className="w-6 h-6 text-gold" />
               </div>
             </div>
           </div>
@@ -569,7 +569,7 @@ const LogisticsShipments = () => {
                 <div className="mt-6">
                   <Link
                     to={webRoutes.logisticsShipmentCreate}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-custom_yellow"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Shipment
@@ -600,7 +600,7 @@ const LogisticsShipments = () => {
                         <td className="py-4 px-6">
                           <Link 
                             to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                            className="font-medium text-blue-600 hover:text-blue-700"
+                            className="font-medium text-gold hover:text-blue-700"
                           >
                             {shipment.tracking_number}
                           </Link>
@@ -675,13 +675,13 @@ const LogisticsShipments = () => {
                           <div className="flex items-center space-x-2">
                             <Link
                               to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                              className="text-blue-600 hover:text-blue-700 p-1"
+                              className="text-gold hover:text-blue-700 p-1"
                             >
                               <Eye className="w-4 h-4" />
                             </Link>
                             <button 
                               onClick={() => handleEditShipment(shipment.id)}
-                              className="text-blue-600 hover:text-blue-700 p-1"
+                              className="text-gold hover:text-blue-700 p-1"
                               title="Edit Shipment"
                             >
                               <Edit className="w-4 h-4" />
@@ -704,7 +704,7 @@ const LogisticsShipments = () => {
                     <div className="flex items-center justify-between mb-3">
                       <Link 
                         to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                        className="font-medium text-blue-600 hover:text-blue-700"
+                        className="font-medium text-gold hover:text-blue-700"
                       >
                         {shipment.tracking_number}
                       </Link>
@@ -759,14 +759,14 @@ const LogisticsShipments = () => {
                       <div className="flex items-center space-x-2">
                         <Link
                           to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)}
-                          className="text-blue-600 hover:text-blue-700 p-1"
+                          className="text-gold hover:text-blue-700 p-1"
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
                         <button 
                           onClick={() => handleEditShipment(shipment.id)}
-                          className="text-blue-600 hover:text-blue-700 p-1"
+                          className="text-gold hover:text-blue-700 p-1"
                           title="Edit Shipment"
                         >
                           <Edit className="w-4 h-4" />
@@ -813,7 +813,7 @@ const LogisticsShipments = () => {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`px-3 py-2 rounded-lg text-sm ${
                         currentPage === pageNum
-                          ? 'bg-blue-600 text-white hover:bg-custom_yellow'
+                          ? 'bg-gold text-white hover:bg-custom_yellow'
                           : 'border border-gray-300 hover:bg-gray-50'
                       }`}
                     >

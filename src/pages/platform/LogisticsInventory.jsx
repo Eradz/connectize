@@ -662,7 +662,7 @@ const LogisticsInventoryEnhanced = () => {
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
                 <span className='ml-1'>Back</span>
               </button>
-            <div className="flex items-center justify-between space-x-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between lg:space-x-4">
               <div>
                 <div className="flex items-center gap-4">
                   <h1 className="text-2xl font-bold text-gray-900">Enhanced Inventory Management</h1>
@@ -670,10 +670,10 @@ const LogisticsInventoryEnhanced = () => {
                 <p className="text-gray-600 mt-1">Oil & Gas equipment and supplies tracking</p>
                 {/* Debug session indicator removed as requested */}
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex lg:items-center gap-3 w-full lg:w-max">
               <button
                 onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-                className="bg-gold hover:bg-custom_yellow px-4 py-2 rounded-lg flex items-center"
+                className="w-[50%] lg:w-fit text-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Item
@@ -681,7 +681,7 @@ const LogisticsInventoryEnhanced = () => {
               <button 
                   onClick={handleExport}
                   disabled={loading || filteredInventory.length === 0}
-                  className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-[50%] lg:w-fit text-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
                 >
                   {/* <Download className="w-4 h-4 mr-2" /> */}
@@ -715,7 +715,7 @@ const LogisticsInventoryEnhanced = () => {
 
       <div className="max-w-7xl mx-auto ">
         {/* Enhanced Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-4 sm:px-6 lg:px-8">
           {/* Total Items Card */}
           <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
             <div className="flex justify-center mb-4">
@@ -787,7 +787,7 @@ const LogisticsInventoryEnhanced = () => {
                     />
                   </div>
                 </div>
-                  <div className='flex gap-2 col-span-6'>
+                  <div className='flex flex-wrap md:flex-row gap-2 col-span-6'>
                     <div>
                       <select
                         value={selectedCategory}

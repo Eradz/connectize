@@ -194,7 +194,7 @@ const ProviderDashboard = () => {
     return (
       <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -210,7 +210,7 @@ const ProviderDashboard = () => {
           <p className="text-gray-600 mb-4">Register as a logistics provider to access this dashboard</p>
           <button
             onClick={() => navigate('/logistics/become-provider')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow"
           >
             Become a Provider
           </button>
@@ -226,7 +226,7 @@ const ProviderDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-gold/90 to-custom_yellow rounded-xl flex items-center justify-center">
                 <Truck className="w-7 h-7 text-white" />
               </div>
               <div>
@@ -272,7 +272,7 @@ const ProviderDashboard = () => {
                         {unreadCount > 0 && (
                           <button
                             onClick={handleMarkAllNotificationsRead}
-                            className="text-xs text-blue-600 hover:text-blue-700"
+                            className="text-xs text-gold hover:text-custom_yellow"
                           >
                             Mark all read
                           </button>
@@ -314,7 +314,7 @@ const ProviderDashboard = () => {
                                 notification.notification_type === 'quote_accepted' 
                                   ? 'bg-green-100 text-green-600' 
                                   : notification.notification_type === 'shipment_status'
-                                  ? 'bg-blue-100 text-blue-600'
+                                  ? 'bg-blue-100 text-gold'
                                   : 'bg-gray-100 text-gray-600'
                               }`}>
                                 {notification.notification_type === 'quote_accepted' ? (
@@ -338,7 +338,7 @@ const ProviderDashboard = () => {
                                 </p>
                               </div>
                               {!notification.is_read && (
-                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
+                                <div className="w-2 h-2 bg-gold/90 rounded-full flex-shrink-0 mt-2" />
                               )}
                             </div>
                           </div>
@@ -357,7 +357,7 @@ const ProviderDashboard = () => {
               </Link>
               <Link
                 to="/logistics/requests"
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow"
               >
                 <Search className="w-4 h-4" />
                 Find Shipments
@@ -373,7 +373,7 @@ const ProviderDashboard = () => {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Truck className="w-6 h-6 text-blue-600" />
+                <Truck className="w-6 h-6 text-gold" />
               </div>
               <span className="text-2xl font-bold text-gray-900">{stats.activeShipments}</span>
             </div>
@@ -431,7 +431,7 @@ const ProviderDashboard = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-white text-blue-600 shadow-sm'
+                    ? 'bg-white text-gold shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -457,7 +457,7 @@ const ProviderDashboard = () => {
                   <h2 className="text-lg font-semibold text-gray-900">New Shipment Requests</h2>
                   <Link 
                     to="/logistics/requests" 
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-sm text-gold hover:text-custom_yellow flex items-center gap-1"
                   >
                     View All <ChevronRight className="w-4 h-4" />
                   </Link>
@@ -485,7 +485,7 @@ const ProviderDashboard = () => {
                       </div>
                       <button
                         onClick={() => handleSubmitQuote(request.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-gold rounded-lg hover:bg-blue-100"
                       >
                         <Send className="w-3 h-3" />
                         Quote
@@ -508,7 +508,7 @@ const ProviderDashboard = () => {
                   <h2 className="text-lg font-semibold text-gray-900">Active Shipments</h2>
                   <button 
                     onClick={() => setActiveTab('shipments')}
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-sm text-gold hover:text-custom_yellow flex items-center gap-1"
                   >
                     View All <ChevronRight className="w-4 h-4" />
                   </button>
@@ -536,7 +536,7 @@ const ProviderDashboard = () => {
                         </div>
                         <Link
                           to={`/logistics/shipments/${shipment.id}`}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                          className="p-2 text-gray-400 hover:text-gold hover:bg-blue-50 rounded-lg"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
@@ -553,7 +553,7 @@ const ProviderDashboard = () => {
 
             {/* Performance Score Card - Only show if there's delivery data */}
             {stats.completedShipments > 0 && (
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-br from-gold to-custom_yellow rounded-xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
                   <Trophy className="w-8 h-8" />
                   <h2 className="text-lg font-semibold">Performance Score</h2>
@@ -563,18 +563,18 @@ const ProviderDashboard = () => {
                     <div className="text-3xl font-bold">
                       {Number(provider.on_time_delivery_rate || 0).toFixed(0)}%
                     </div>
-                    <p className="text-blue-200 text-sm">On-Time Delivery</p>
+                    <p className=" text-sm">On-Time Delivery</p>
                   </div>
                   <div>
                     <div className="text-3xl font-bold flex items-center gap-1">
                       {Number(provider.safety_rating || 0).toFixed(1)}
                       <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
                     </div>
-                    <p className="text-blue-200 text-sm">Reliability Rating</p>
+                    <p className=" text-sm">Reliability Rating</p>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-blue-500">
-                  <p className="text-sm text-blue-200">
+                <div className="mt-4 pt-4 border-t border-gold/90">
+                  <p className="text-sm ">
                     Based on {stats.completedShipments} completed {stats.completedShipments === 1 ? 'delivery' : 'deliveries'}
                   </p>
                 </div>
@@ -589,28 +589,28 @@ const ProviderDashboard = () => {
                   to="/logistics/requests"
                   className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
                 >
-                  <Search className="w-5 h-5 text-blue-600" />
+                  <Search className="w-5 h-5 text-gold" />
                   <span className="font-medium text-gray-900">Browse Shipments</span>
                 </Link>
                 <Link
                   to="/logistics/shipments"
                   className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
                 >
-                  <Truck className="w-5 h-5 text-blue-600" />
+                  <Truck className="w-5 h-5 text-gold" />
                   <span className="font-medium text-gray-900">My Shipments</span>
                 </Link>
                 <Link
                   to="/logistics/provider-settings"
                   className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors"
                 >
-                  <Settings className="w-5 h-5 text-blue-600" />
+                  <Settings className="w-5 h-5 text-gold" />
                   <span className="font-medium text-gray-900">Settings</span>
                 </Link>
                 <button
                   onClick={() => setActiveTab('shipments')}
                   className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
                 >
-                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  <BarChart3 className="w-5 h-5 text-gold" />
                   <span className="font-medium text-gray-900">View All Shipments</span>
                 </button>
               </div>
@@ -674,7 +674,7 @@ const ProviderDashboard = () => {
                     <div className="flex flex-col items-end gap-2">
                       <Link
                         to={`/logistics/requests/${quote.request}`}
-                        className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="flex items-center gap-2 px-4 py-2 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
                       >
                         <Eye className="w-4 h-4" />
                         View Details
@@ -699,7 +699,7 @@ const ProviderDashboard = () => {
                   <p className="text-gray-500 mb-4">Submit competitive quotes to win shipment contracts</p>
                   <Link
                     to="/logistics/requests"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow"
                   >
                     <Search className="w-4 h-4" />
                     Browse Requests
@@ -723,7 +723,7 @@ const ProviderDashboard = () => {
                       placeholder="Search requests..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gold/90"
                     />
                   </div>
                   <button className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
@@ -790,7 +790,7 @@ const ProviderDashboard = () => {
                         </Link>
                         <button
                           onClick={() => handleSubmitQuote(request.id)}
-                          className="flex items-center gap-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          className="flex items-center gap-1 px-4 py-2 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
                         >
                           <Send className="w-4 h-4" />
                           Submit Quote
@@ -839,7 +839,7 @@ const ProviderDashboard = () => {
                     </div>
                     <Link
                       to={`/logistics/requests/${quote.request}`}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                      className="p-2 text-gray-400 hover:text-gold hover:bg-blue-50 rounded-lg"
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
@@ -853,7 +853,7 @@ const ProviderDashboard = () => {
                   <p className="text-gray-500 mb-4">Start quoting on shipment requests to win jobs</p>
                   <Link
                     to="/logistics/requests"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow"
                   >
                     <Search className="w-4 h-4" />
                     Browse Requests
@@ -894,7 +894,7 @@ const ProviderDashboard = () => {
                     </div>
                     <Link
                       to={`/logistics/shipments/${shipment.id}`}
-                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+                      className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-gold rounded-lg hover:bg-blue-100"
                     >
                       <Eye className="w-4 h-4" />
                       Manage
