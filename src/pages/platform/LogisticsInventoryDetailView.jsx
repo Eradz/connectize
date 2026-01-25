@@ -82,107 +82,42 @@ const LogisticsInventoryDetailView = () => {
     loadItemData();
   }, [id]);
 
-  const loadItemData = async () => {
-    try {
-      setLoading(true);
-      
-      const [itemData, movementsData] = await Promise.allSettled([
-        logisticsAPI.getInventoryItem(id),
-        logisticsAPI.getInventoryMovements({ item: id })
-      ]);
+const loadItemData = async () => {
+  try {
+    setLoading(true);
 
-      if (itemData.status === 'fulfilled') {
-        setItem(itemData.value);
-      } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Using mock data for development');
-          setItem(generateMockItemData());
-        } else {
-          toast.error('Failed to load inventory item');
-          navigate(webRoutes.logisticsInventory);
-          return;
-        }
-      }
+    const [itemRes, movementsRes] = await Promise.all([
+      logisticsAPI.getInventoryItem(id),
+      logisticsAPI.getInventoryMovements({ item: id })
+    ]);
 
-      if (movementsData.status === 'fulfilled') {
-        const movements = movementsData.value.results || movementsData.value.data || movementsData.value || [];
-        setMovements(movements);
-      } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Using mock movements for development');
-          setMovements(generateMockMovements());
-        } else {
-          setMovements([]);
-        }
-      }
-
-    } catch (error) {
-      toast.error('Failed to load item details');
-      console.error('Error loading item:', error);
-      setItem(generateMockItemData());
-      setMovements(generateMockMovements());
-    } finally {
-      setLoading(false);
+    // Inventory item is mandatory
+    if (!itemRes) {
+      toast.error('Inventory item not found');
+      navigate(webRoutes.logisticsInventory);
+      return;
     }
-  };
 
-  const generateMockItemData = () => ({
-    id: id,
-    name: 'Chemical Treatment Additives',
-    sku: 'DRL-001',
-    description: 'Polycrystalline diamond compact drilling bit for hard formations. Designed for optimal performance in challenging drilling conditions.',
-    category: 'drilling_equipment',
-    current_stock: 5,
-    reorder_point: 2,
-    maximum_stock: 10,
-    minimum_stock: 1,
-    unit: 'pieces',
-    unit_cost: 15000,
-    status: 'available',
-    condition: 'new',
-    warehouse: 'Houston Main',
-    location: 'Bay 3-A',
-    supplier: 'Baker Hughes',
-    manufacturer: 'Baker Hughes',
-    model_number: 'PDC-85',
-    serial_number: 'SN123456',
-    purchase_date: '2024-01-15',
-    warranty_expiry: '2025-01-15',
-    is_low_stock: false,
-    stock_status: 'normal',
-    total_value: 75000,
-    updated_at: new Date().toISOString(),
-    specifications: {
-      'Diameter': '8.5 inches',
-      'Type': 'PDC (Polycrystalline Diamond Compact)',
-      'IADC Code': '619',
-      'Weight': '45 lbs',
-      'Connection': 'API 6-5/8 Reg Pin'
-    },
-    notes: 'High-performance drilling bit suitable for hard formations. Requires special handling and storage.'
-  });
+    setItem(itemRes);
 
-  const generateMockMovements = () => [
-    {
-      id: 'mov_1',
-      date: '2024-01-20',
-      type: 'receipt',
-      quantity: 5,
-      unit_cost: 15000,
-      reference: 'PO-2024-001',
-      notes: 'Initial stock receipt from Baker Hughes',
-      created_by: 'John Smith'
-    },
-    {
-      id: 'mov_2',
-      date: '2024-01-25',
-      type: 'issue',
-      quantity: -2,
-      reference: 'WO-2024-005',
-      notes: 'Issued for Rig Alpha drilling operation',
-      created_by: 'Jane Doe'
-    }
-  ];
+    // Movements can be empty but must be real
+    const movementList =
+      movementsRes?.results ||
+      movementsRes?.data ||
+      movementsRes ||
+      [];
+
+    setMovements(movementList);
+
+  } catch (error) {
+    console.error('Error loading inventory item:', error);
+    toast.error('Failed to load inventory item');
+    navigate(webRoutes.logisticsInventory);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   
 
