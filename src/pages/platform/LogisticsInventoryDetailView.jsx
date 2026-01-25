@@ -119,7 +119,6 @@ const loadItemData = async () => {
 };
 
 
-  
 
   const getStatusColor = (status) => {
     const statusConfig = statusOptions.find(s => s.value === status);
