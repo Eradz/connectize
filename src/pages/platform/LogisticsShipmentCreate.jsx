@@ -471,7 +471,7 @@ const renderStepIndicator = () => (
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium"
           style={{
-            backgroundColor: step === currentStep ? '#FFEF9A' : '#FFFFFF',
+            backgroundColor: step === currentStep ? '#F1C644' : '#FFFFFF',
             border: step === currentStep ? 'none' : '1px solid #E5E7EB',
             color: '#111827',
           }}
