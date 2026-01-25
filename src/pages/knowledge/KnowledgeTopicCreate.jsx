@@ -103,7 +103,7 @@ const KnowledgeTopicCreate = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading forum information...</p>
@@ -114,7 +114,7 @@ const KnowledgeTopicCreate = () => {
 
   if (!forum) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Forum Not Found</h1>
           <p className="text-gray-600 mb-4">The forum you're trying to post in doesn't exist.</p>
@@ -131,7 +131,7 @@ const KnowledgeTopicCreate = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

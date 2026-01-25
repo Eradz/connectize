@@ -207,7 +207,7 @@ const SubscriptionPlanDetail = () => {
   // Error state
   if (error || !planData) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen  p-6">
         <div className="max-w-7xl mx-auto">
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-6">

@@ -66,7 +66,7 @@ const KnowledgeForumInvite = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen  p-6">
       <div className="max-w-xl mx-auto bg-white rounded-lg shadow-sm border p-6">
         <h1 className="text-2xl font-semibold mb-2">Forum Invitation</h1>
         {!token ? (

@@ -88,7 +88,7 @@ const WorkforceProfileDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="h-8 w-48 bg-gray-200 rounded-lg mb-6 animate-pulse" />
           
@@ -144,7 +144,7 @@ const WorkforceProfileDetail = () => {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <Link to={webRoutes.workforceProfiles} className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
@@ -171,7 +171,7 @@ const WorkforceProfileDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

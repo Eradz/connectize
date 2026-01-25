@@ -120,7 +120,7 @@ const KnowledgeArticleDetail = () => {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <BookOpen className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Article not found</h3>

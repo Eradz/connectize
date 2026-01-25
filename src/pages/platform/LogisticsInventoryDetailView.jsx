@@ -225,7 +225,7 @@ const handleDelete = async () => {
 };
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
       </div>
     );
@@ -233,7 +233,7 @@ const handleDelete = async () => {
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500">Item not found</p>
@@ -247,7 +247,7 @@ const handleDelete = async () => {
   const categoryConfig = industryCategories.find(c => c.value === item.category);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -661,6 +661,7 @@ const handleDelete = async () => {
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         itemId={id}
+        currentData={item}
         onSave={handleSave}
       />
     </div>

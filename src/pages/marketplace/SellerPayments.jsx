@@ -236,7 +236,7 @@ const SellerPayments = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-gold animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading payment settings...</p>
@@ -247,7 +247,7 @@ const SellerPayments = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen  p-6">
         <div className="max-w-2xl mx-auto">
           <div className={`${isUnauthorized ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'} border rounded-xl p-6 text-center`}>
             <AlertCircle className={`w-12 h-12 ${isUnauthorized ? 'text-yellow-500' : 'text-red-500'} mx-auto mb-4`} />
@@ -279,7 +279,7 @@ const SellerPayments = () => {
   const statusDisplay = getStatusDisplay();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen  p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">

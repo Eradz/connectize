@@ -147,7 +147,7 @@ const WorkforceProfileEdit = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen ">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="h-8 w-48 bg-gray-200 rounded mb-4 animate-pulse" />
           <div className="bg-white border rounded-xl p-6">
@@ -161,7 +161,7 @@ const WorkforceProfileEdit = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button

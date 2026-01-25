@@ -517,14 +517,14 @@ const LogisticsHubDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       {/* Header */}
      <div className="bg-white border-b">
   <div className="max-w-7xl mx-auto px-6 py-8">
@@ -1184,97 +1184,6 @@ const LogisticsHubDashboard = () => {
     </div>
   </>
 )}
-
-
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {dashboardData.inventory.data && dashboardData.inventory.data.length > 0 ? (
-    dashboardData.inventory.data.map((item) => {
-      const isBelowReorder = item.current_stock <= item.reorder_point;
-
-      return (
-        <div key={item.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
-          {/* Header with Custom SVG Icon and View Details */}
-          <div className="flex items-start justify-between mb-4">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="44" height="44" rx="10" fill="#FFECB2"/>
-              <g clipPath="url(#clip0_1655_9519)">
-                <path d="M30.5271 14.2179L24.5001 10.7379C23.7396 10.3005 22.8775 10.0703 22.0001 10.0703C21.1228 10.0703 20.2607 10.3005 19.5001 10.7379L13.4731 14.2179C12.714 14.6578 12.0836 15.2892 11.6449 16.049C11.2062 16.8089 10.9746 17.6705 10.9731 18.5479V25.5079C10.9746 26.3854 11.2062 27.2472 11.6449 28.0071C12.0836 28.7671 12.714 29.3987 13.4731 29.8389L19.5001 33.3179C20.2606 33.7555 21.1227 33.9859 22.0001 33.9859C22.8776 33.9859 23.7397 33.7555 24.5001 33.3179L30.5271 29.8389C31.2863 29.3987 31.9167 28.7671 32.3554 28.0071C32.794 27.2472 33.0257 26.3854 33.0271 25.5079V18.5479C33.0257 17.6705 32.7941 16.8089 32.3554 16.049C31.9167 15.2892 31.2863 14.6578 30.5271 14.2179ZM20.5001 12.4709C20.9562 12.2076 21.4735 12.0689 22.0001 12.0689C22.5268 12.0689 23.0441 12.2076 23.5001 12.4709L29.5271 15.9499C29.68 16.0465 29.8236 16.1569 29.9561 16.2799L23.7631 19.8549C23.227 20.164 22.619 20.3266 22.0001 20.3266C21.3813 20.3266 20.7733 20.164 20.2371 19.8549L14.0441 16.2799C14.1767 16.1569 14.3203 16.0465 14.4731 15.9499L20.5001 12.4709ZM14.4731 28.1059C14.0173 27.8418 13.6389 27.4626 13.3757 27.0063C13.1124 26.5501 12.9736 26.0326 12.9731 25.5059V18.5479C12.9801 18.3677 13.0039 18.1886 13.0441 18.0129L19.2371 21.5879C19.7841 21.899 20.3804 22.1138 21.0001 22.2229V31.7919C20.8274 31.739 20.66 31.67 20.5001 31.5859L14.4731 28.1059ZM31.0271 25.5059C31.0267 26.0326 30.8879 26.5501 30.6246 27.0063C30.3614 27.4626 29.9829 27.8418 29.5271 28.1059L23.5001 31.5859C23.3403 31.67 23.1729 31.739 23.0001 31.7919V22.2229C23.6199 22.1138 24.2162 21.899 24.7631 21.5879L30.9561 18.0129C30.9964 18.1886 31.0202 18.3677 31.0271 18.5479V25.5059Z" fill="#374957"/>
-              </g>
-              <defs>
-                <clipPath id="clip0_1655_9519">
-                  <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
-                </clipPath>
-              </defs>
-            </svg>
-            
-            <Link to={webRoutes.logisticsInventoryDetail.replace(":id",item.id)} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-              View Details
-            </Link>
-          </div>
-
-          {/* Category - FROM API */}
-          {item.category && (
-            <p className="text-xs text-gray-500 mb-2">{item.category}</p>
-          )}
-
-          {/* Product Name */}
-          <h3 className="text-base font-semibold text-gray-900 mb-4">{item.name}</h3>
-
-          {/* Details Grid */}
-          <div className="space-y-3 mb-4">
-            {/* Available */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Available:</span>
-              <span className="text-sm font-semibold text-gray-900">
-                {item.current_stock} {item.unit || item.measurement_unit || ''}
-              </span>
-            </div>
-
-            {/* Min Stock */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Min Stock:</span>
-              <span className="text-sm text-gray-900">
-                {item.reorder_point} {item.unit || item.measurement_unit || ''}
-              </span>
-            </div>
-
-            {/* Unit Cost - FROM API */}
-            {item.unit_cost !== undefined && item.unit_cost !== null && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Unit Cost:</span>
-                <span className="text-sm text-gray-900">
-                  {item.currency || '$'}{parseFloat(item.unit_cost).toFixed(2)}
-                </span>
-              </div>
-            )}
-
-            {/* Location */}
-            <div className="flex items-start justify-between">
-              <span className="text-sm text-gray-600">Location:</span>
-              <span className="text-sm text-gray-900 text-right">{item.location}</span>
-            </div>
-          </div>
-
-          {/* Warning Badge */}
-          {isBelowReorder && (
-            <div className="flex items-center space-x-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-              <span className="text-xs text-yellow-700">
-                Below Reorder Level ({item.reorder_point})
-              </span>
-            </div>
-          )}
-        </div>
-      );
-    })
-  ) : (
-    <div className="col-span-3 text-center py-12">
-      <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-      <h3 className="text-lg font-medium text-gray-900 mb-2">No Inventory Items</h3>
-      <p className="text-gray-500">No inventory items found. Add items to get started.</p>
-    </div>
-  )}
-</div>
         </div>
       </div>
     </div>
