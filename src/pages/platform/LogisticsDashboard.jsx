@@ -31,6 +31,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import InventoryDashboardWidget from '../../components/dashboard/InventoryDashboardWidget';
 import { getSession } from '../../lib/session';
+import Scroll from '../../components/Scroll';
 
 
 // Simulated API data
@@ -526,7 +527,7 @@ const LogisticsHubDashboard = () => {
   return (
     <div className="min-h-screen ">
       {/* Header */}
-     <div className="bg-white border-b">
+     <div className="lg:bg-white border-b">
   <div className="max-w-7xl mx-auto px-6 py-8">
     <div className="flex items-center justify-between">
       <div>
@@ -546,7 +547,7 @@ const LogisticsHubDashboard = () => {
 
       <div className="max-w-7xl mx-auto py-8">
        {/* Quick Action Cards - Mobile Optimized */}
-<div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+<div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 mb-6">
   <Link to={webRoutes.logisticsShipmentCreate} className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group">
     <div className="flex flex-col items-center text-center">
       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
@@ -588,10 +589,9 @@ const LogisticsHubDashboard = () => {
       <p className="text-xs text-gray-500 leading-tight">Manage Shipping Requests</p>
     </div>
   </Link>
-</div>
 
-{/* Become A Provider - Full Width on Mobile */}
-<Link to={webRoutes.logisticsBecomeProvider} className="w-full mb-8 bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group md:hidden">
+  {/* Become A Provider - Full Width on Mobile */}
+<Link to={webRoutes.logisticsBecomeProvider} className="bg-white p-4 sm:p-6 rounded-xl border hover:shadow-md transition-shadow group hidden md:block">
   <div className="flex flex-col items-center text-center">
     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
       <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
@@ -600,10 +600,21 @@ const LogisticsHubDashboard = () => {
     <p className="text-xs text-gray-500 leading-tight">Offer Logistics Services</p>
   </div>
 </Link>
+</div>
+
+{/* Become A Provider - Full Width on Mobile */}
+<Link to={webRoutes.logisticsBecomeProvider} className="flex flex-col items-center text-center w-full mb-8 bg-white p-4 rounded-xl border hover:shadow-md transition-shadow">
+    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
+      <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
+    </div>
+    <h3 className="font-semibold text-gray-900 text-sm sm:text-base mb-1">Become A Provider</h3>
+    <p className="text-xs text-gray-500 leading-tight">Offer Logistics Services</p>
+</Link>
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-t-xl border border-b-0">
-          <nav className="flex space-x-8 px-6">
+          <Scroll>
+          <nav className="flex space-x-8 px-6 6 min-w-min">
             {[
               { key: 'overview', label: 'Overview', icon: BarChart3 },
               { key: 'shipments', label: 'Shipments', icon: Ship },
@@ -625,6 +636,7 @@ const LogisticsHubDashboard = () => {
               </button>
             ))}
           </nav>
+          </Scroll>
         </div>
 
         {/* Main Content */}
@@ -939,15 +951,14 @@ const LogisticsHubDashboard = () => {
             </h3>
 
             {/* Route */}
-            <div className="mb-3">
+            <div className="mb-3 flex justify-between">
               <p className="text-xs text-gray-500 mb-1">Route:</p>
-              <div className="flex items-start text-sm text-gray-700">
-                <MapPin className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0 text-gray-400" />
+              <div className="flex items-start text-sm text-gray-700 text-right">
                 <div>
-                  <p className="font-medium">
+                  <p className="font-medium line-clamp-1">
                     {shipment.request_details?.origin_address || 'N/A'}
                   </p>
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 line-clamp-1">
                     → {shipment.request_details?.destination_address || 'N/A'}
                   </p>
                 </div>
@@ -956,7 +967,7 @@ const LogisticsHubDashboard = () => {
 
             {/* Cargo */}
             {shipment.cargo && (
-              <div className="mb-3">
+              <div className="mb-3 flex justify-between">
                 <p className="text-xs text-gray-500 mb-1">Cargo:</p>
                 <p className="text-sm text-gray-700">
                   {shipment.cargo}
@@ -968,7 +979,7 @@ const LogisticsHubDashboard = () => {
 
             {/* Budget */}
             {shipment.request_details?.budget_max && (
-              <div className="mb-3">
+              <div className="mb-3 flex justify-between">
                 <p className="text-xs text-gray-500 mb-1">Budget:</p>
                 <p className="text-sm font-semibold text-gray-900">
                   {shipment.currency || '$'}
@@ -978,7 +989,7 @@ const LogisticsHubDashboard = () => {
             )}
 
             {/* ETA */}
-            <div className="mb-4">
+            <div className="mb-4 flex justify-between">
               <p className="text-xs text-gray-500 mb-1">ETA:</p>
               <p className="text-sm text-gray-700">
                 {shipment.eta 
