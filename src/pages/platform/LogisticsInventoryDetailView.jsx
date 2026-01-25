@@ -119,6 +119,7 @@ const loadItemData = async () => {
 };
 
 
+  
 
   const getStatusColor = (status) => {
     const statusConfig = statusOptions.find(s => s.value === status);
@@ -252,40 +253,43 @@ const handleDelete = async () => {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate(webRoutes.logisticsInventory)}
-                className="p-2 rounded-lg bg-amber-400 hover:bg-amber-500 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5 text-white" />
-              </button>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">{item.name}</h1>
-                <p className="text-sm text-gray-500 mt-0.5">SKU: {item.sku}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setShowAdjustStock(true)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center text-sm font-medium transition-colors"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Adjust Stock
-              </button>
-              <button
-  onClick={() => setShowEditModal(true)}
-  className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
->                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  <div className="flex items-center space-x-4">
+    <button
+      onClick={() => navigate(webRoutes.logisticsInventory)}
+      className="p-2 rounded-lg bg-amber-400 hover:bg-amber-500 transition-colors"
+    >
+      <ArrowLeft className="w-5 h-5 text-white" />
+    </button>
+    <div>
+      <h1 className="text-xl font-semibold text-gray-900">{item.name}</h1>
+      <p className="text-sm text-gray-500 mt-0.5">SKU: {item.sku}</p>
+    </div>
+  </div>
+  <div className="flex items-center space-x-2 pl-14 sm:pl-0">
+    <button
+  onClick={() => setShowAdjustStock(true)}
+  className="px-3 py-2 sm:px-4 sm:bg-gray-100 bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center text-xs sm:text-sm font-medium transition-colors"
+>
+  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+  Adjust Stock
+</button>
+    <button
+      onClick={() => setShowEditModal(true)}
+      className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
+    >
+      <Edit className="w-4 h-4 mr-2" />
+      Edit
+    </button>
+    <button
+      onClick={handleDelete}
+      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
+    >
+      <Trash2 className="w-4 h-4 mr-2" />
+      Delete
+    </button>
+  </div>
+</div>
           </div>
         </div>
       </div>
