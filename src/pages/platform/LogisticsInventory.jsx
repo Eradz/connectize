@@ -875,7 +875,7 @@ const LogisticsInventoryEnhanced = () => {
 
               {loading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
                 </div>
               ) : filteredInventory.length === 0 ? (
                 <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
@@ -998,7 +998,7 @@ const LogisticsInventoryEnhanced = () => {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="w-full md:w-[60%] flex items-center gap-3 pt-4 border-t border-gray-200">
+                          <div className="w-full md:w-[70%] flex items-center gap-3 pt-4 border-t border-gray-200">
                             <button
                               disabled={deletingId === item.id}
                               onClick={() => {

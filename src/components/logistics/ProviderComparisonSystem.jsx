@@ -215,16 +215,16 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
       {/* Header with Comparison Controls */}
       {/* Lightweight provider quote CTA for providers viewing a request */}
       {shipmentRequest && (shipmentRequest.status === 'posted' || shipmentRequest.status === 'quoted') && shipmentRequest.allow_bids && (
-        <div className="border rounded-lg p-4 bg-blue-50">
+        <div className="border rounded-lg p-4 bg-yellow-50">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-blue-800">Are you a provider? Submit a quote for this request.</p>
+              <p className="text-sm text-yellow-800">Are you a provider? Submit a quote for this request.</p>
             </div>
             {/* This button is a hook; actual quote form may be a modal in your provider dashboard */}
             <button
               type="button"
               onClick={() => onProviderSelected && onProviderSelected({ provider_name: 'self', action: 'open-quote-form' })}
-              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
+              className="px-3 py-2 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
             >
               Submit Quote
             </button>
@@ -333,7 +333,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
   {isOwner && calculatingRates && (
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gold"></div>
             <div>
               <h4 className="font-medium text-blue-900">Calculating Shipping Rates</h4>
               <p className="text-sm text-blue-700">Fetching real-time quotes from all available providers...</p>
@@ -399,7 +399,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
       {/* Provider List */}
   <div className="space-y-4">
         {/* Compact list view */}
-        {isCompact && (
+        {(isCompact && isOwner) && (
           <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
             <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-2 text-xs font-medium text-gray-600 bg-gray-50 border-b">
               <div className="col-span-5">Provider</div>
@@ -724,7 +724,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
       )}
 
       {/* Shipment Summary */}
-  {shipmentRequest && (
+  {/* {shipmentRequest && (
         <div className="bg-gray-50 rounded-lg p-6">
           <h4 className="font-medium text-gray-900 mb-4 flex items-center">
             <Info className="w-4 h-4 mr-2" />
@@ -754,7 +754,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Action Button */}
   {isOwner ? (
@@ -781,14 +781,6 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
           Only the request owner can view market overview or assign a provider. You can still submit a quote if bids are allowed.
         </div>
       )}
-
-      {/* Help Text */}
-      <div className="text-xs text-gray-500 space-y-1">
-        <p>• Rates are fetched in real-time from provider APIs</p>
-        <p>• All prices include applicable fees and surcharges</p>
-        <p>• Transit times are business days and may vary based on location</p>
-        <p>• Tracking information will be available immediately after assignment</p>
-      </div>
     </div>
   );
 };

@@ -18,7 +18,9 @@ import {
   Star,
   FileText,
   Send,
-  Plus
+  Plus,
+  AlertTriangle,
+  Edit
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
@@ -190,7 +192,7 @@ const LogisticsRequestDetail = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'draft': return <Edit3 className="w-5 h-5 text-gray-500" />;
-      case 'posted': return <Clock className="w-5 h-5 text-blue-500" />;
+      case 'posted': return <Clock className="w-5 h-5 text-gold" />;
       case 'quoted': return <DollarSign className="w-5 h-5 text-yellow-500" />;
       case 'awarded': return <CheckCircle className="w-5 h-5 text-green-500" />;
       case 'completed': return <CheckCircle className="w-5 h-5 text-green-600" />;
@@ -244,17 +246,25 @@ const LogisticsRequestDetail = () => {
     });
   };
 
+  const formatTime = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold"></div>
       </div>
     );
   }
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Request not found</h2>
@@ -271,18 +281,19 @@ const LogisticsRequestDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen mt-4">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
+      <div className="">
+        <div className="max-w-7xl mx-auto px-4">
               <button
                 onClick={() => navigate(webRoutes.logisticsRequests)}
-                className="p-2 rounded-lg hover:bg-gray-100"
+                className="bg-pale_yellow hover:bg-gold flex p-2 rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
+                <span className="text-sm font-medium">Back</span>
               </button>
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center space-x-4">
               <div>
                 <div className="flex items-center space-x-3">
                   <h1 className="text-2xl font-bold text-gray-900">
@@ -292,11 +303,11 @@ const LogisticsRequestDetail = () => {
                     {getStatusIcon(request.status)}
                     <span className="text-sm font-medium">{getStatusLabel(request.status)}</span>
                   </div>
-                  {userId != null && String(request.requested_by) === String(userId) && (
+                  {/* {userId != null && String(request.requested_by) === String(userId) && (
                     <span className="px-2 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium">Mine</span>
-                  )}
+                  )} */}
                 </div>
-                <p className="text-gray-600 mt-1">Request ID: {request.id}</p>
+                {/* <p className="text-gray-600 mt-1">Request ID: {request.id}</p> */}
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -304,15 +315,15 @@ const LogisticsRequestDetail = () => {
                 <>
                   <button
                     onClick={() => navigate(`${webRoutes.logisticsRequests}/${request.id}/edit`)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
+                    className="px-4 py-2 bg-gold rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
                   >
-                    <Edit3 className="w-4 h-4" />
+                    <Edit className="w-4 h-4" />
                     <span>Edit</span>
                   </button>
                   {(request.status === 'draft' || request.status === 'posted') && (
                     <button
                       onClick={handleDeleteRequest}
-                      className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 flex items-center space-x-2"
+                      className="px-4 py-2 bg-[#FF383C] text-white rounded-lg hover:bg-red-400 flex items-center space-x-2"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Delete</span>
@@ -320,7 +331,7 @@ const LogisticsRequestDetail = () => {
                   )}
                 </>
               )}
-              <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100">
+              {/* <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100">
                 <span className={`w-2 h-2 rounded-full ${request.allow_bids ? 'bg-green-500' : 'bg-gray-400'}`} />
                 <span className="text-sm">{request.allow_bids ? 'Bids allowed' : 'Private'}</span>
                 {userId != null && String(request.requested_by) === String(userId) && (request.status === 'draft' || request.status === 'posted' || request.status === 'quoted' || request.status === 'awarded') && (
@@ -332,7 +343,7 @@ const LogisticsRequestDetail = () => {
                     {togglingBids ? 'Updating…' : request.allow_bids ? 'Disable' : 'Enable'}
                   </button>
                 )}
-              </div>
+              </div> */}
               {/* Comprehensive provider comparison system is now integrated below, removing simple assign button */}
               {false && (request.status === 'posted' || request.status === 'quoted') && (
                 <button
@@ -348,160 +359,112 @@ const LogisticsRequestDetail = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Request Details */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Details</h3>
-              <div className="space-y-4">
+          {/* Left Column - Main Details */}
+          <div className="bg-white lg:col-span-2 space-y-6 p-6">
+            {/* Tracking History & Status */}
+            <div className="">
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-300">
+              <div className="flex items-center space-x-2">
+                <Package className='w-5 h-5 text-gray-700'/>
+                <h3 className="text-lg font-semibold text-gray-900">Tracking History</h3>
+              </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  request.status === 'posted' ? 'bg-yellow-100 text-yellow-700' :
+                  request.status === 'quoted' ? 'bg-blue-100 text-blue-700' :
+                  request.status === 'awarded' ? 'bg-green-100 text-green-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {getStatusLabel(request.status)}
+                </span>
+              </div>
+              <div className="space-y-3 text-sm">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">Description</label>
-                  <p className="text-sm text-gray-900 mt-1">{request.description || 'No description provided'}</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Cargo Type</label>
-                    <p className="text-sm text-gray-900 mt-1">{request.cargo_type?.replace('_', ' ') || 'General Cargo'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Urgency</label>
-                    <p className="text-sm text-gray-900 mt-1">{request.urgency || 'Standard'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Weight</label>
-                    <p className="text-sm text-gray-900 mt-1">{request.weight || 0} tons</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600">Volume</label>
-                    <p className="text-sm text-gray-900 mt-1">{request.volume || 0} m³</p>
-                  </div>
+                  <p className="font-medium text-gray-900">Origin</p>
+                  <p className="text-gray-600">Shipment created with {request.origin_contact_name || 'Shipper'}</p>
+                  <p className="text-gray-500 text-xs mt-1">{formatDate(request.created_at)} {formatTime(request.created_at)}</p>
                 </div>
               </div>
             </div>
 
-            {/* Locations */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Locations & Contacts</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Origin */}
+            {/* Cargo Information */}
+            <div className="pb-6 border-b border-gray-300">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Cargo Information</h3>
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <MapPin className="w-5 h-5 text-green-500" />
-                    <h4 className="font-medium text-gray-900">Pickup Location</h4>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-900">{request.origin_address || 'Address not specified'}</p>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <User className="w-3 h-3" />
-                      <span className="text-sm">{request.origin_contact_name || 'Contact not specified'}</span>
-                    </div>
-                    {request.origin_contact_phone && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Phone className="w-3 h-3" />
-                        <span className="text-sm">{request.origin_contact_phone}</span>
-                      </div>
-                    )}
-                    {request.origin_contact_email && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Mail className="w-3 h-3" />
-                        <span className="text-sm">{request.origin_contact_email}</span>
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Cargo Type</p>
+                  <p className="text-sm text-gray-900">{request.cargo_type?.replace('_', ' ') || 'General Cargo'}</p>
                 </div>
-
-                {/* Destination */}
                 <div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <MapPin className="w-5 h-5 text-red-500" />
-                    <h4 className="font-medium text-gray-900">Delivery Location</h4>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-900">{request.destination_address || 'Address not specified'}</p>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <User className="w-3 h-3" />
-                      <span className="text-sm">{request.destination_contact_name || 'Contact not specified'}</span>
-                    </div>
-                    {request.destination_contact_phone && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Phone className="w-3 h-3" />
-                        <span className="text-sm">{request.destination_contact_phone}</span>
-                      </div>
-                    )}
-                    {request.destination_contact_email && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Mail className="w-3 h-3" />
-                        <span className="text-sm">{request.destination_contact_email}</span>
-                      </div>
-                    )}
-                  </div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Value</p>
+                  <p className="text-sm text-gray-900">{request.special_requirements?.includes('$') ? 'See description' : 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Description</p>
+                  <p className="text-sm text-gray-600">{request.description?.split('\n')[0] || 'See full details'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Volume</p>
+                  <p className="text-sm text-gray-900">{request.volume || 0} m³</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Commodity Code</p>
+                  <p className="text-sm text-gray-900">general</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Weight</p>
+                  <p className="text-sm text-gray-900">{request.weight || 0} kg</p>
                 </div>
               </div>
             </div>
 
-            {/* Timeline */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Preferred Pickup Date</label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{formatDate(request.pickup_date_requested)}</span>
-                  </div>
+            {/* Provider Assignment Required */}
+            {!request.awarded_to ? (
+              <div className="bg-white rounded-lg border-2 border-red-200 p-6">
+                <div className="flex items-start space-x-3 mb-4">
+                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <h3 className="text-lg font-semibold text-gray-900">Provider Assignment Required</h3>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Requested Delivery Date</label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{formatDate(request.delivery_date_requested)}</span>
-                  </div>
+                <p className="text-sm text-gray-700 mb-4">
+                  This shipment request has not been assigned to a logistics provider yet. Compare available providers below and select the best option based on rates, transit times, and service quality.
+                </p>
+                
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-2">Why assign a provider?</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center space-x-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Economy flight</span>
+                    </li>
+                    <li className="flex items-center space-x-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>5 nights in standard room</span>
+                    </li>
+                    <li className="flex items-center space-x-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>All-access summit entry</span>
+                    </li>
+                    <li className="flex items-center space-x-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Meals + Gala</span>
+                    </li>
+                    <li className="flex items-center space-x-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Shuttle transport</span>
+                    </li>
+                    <li className="flex items-center space-x-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span>Visa assistance</span>
+                    </li>
+                  </ul>
                 </div>
-              </div>
-            </div>
 
-            {/* Quotes Section */}
-            {quotes.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Received Quotes ({quotes.length})</h3>
-                <div className="space-y-4">
-                  {quotes.map((quote) => (
-                    <div key={quote.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium text-gray-900">{quote.provider_name}</h4>
-                          <p className="text-sm text-gray-600">{quote.service_description}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-semibold text-gray-900">
-                            {formatCurrency(quote.total_cost, quote.currency)}
-                          </p>
-                          <p className="text-xs text-gray-500">Valid until {formatDate(quote.valid_until)}</p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-3">
-                        <div>Pickup: {formatDate(quote.estimated_pickup_date)}</div>
-                        <div>Delivery: {formatDate(quote.estimated_delivery_date)}</div>
-                        <div>Payment: {quote.payment_terms}</div>
-                      </div>
-                      {userId != null && String(request.requested_by) === String(userId) && request.status === 'quoted' && (
-                        <button
-                          onClick={() => handleAwardQuote(quote.id)}
-                          disabled={awarding}
-                          className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {awarding ? 'Awarding...' : 'Award This Quote'}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                <p className="text-xs text-gray-600 mb-4">
+                  Only the request owner can view market overview or assign a provider. You can still submit a quote if bids are allowed
+                </p>
 
-            {/* Comprehensive Provider Assignment System (for unassigned requests) */}
+              {/* Comprehensive Provider Assignment System (for unassigned requests) */}
             {(['draft', 'posted', 'quoted'].includes(request.status)) && !request.awarded_to && (
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <ProviderComparisonSystem
@@ -526,113 +489,185 @@ const LogisticsRequestDetail = () => {
                 />
               </div>
             )}
+                {/* Shipment Summary */}
+                <div className="bg-white rounded-lg p-4 mb-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-3">Shipment summary</p>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-600">Cargo type</p>
+                      <p className="text-sm font-medium text-gray-900">{request.cargo_type?.replace('_', ' ') || 'General cargo'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Weight</p>
+                      <p className="text-sm font-medium text-gray-900">{request.weight || 0} tons</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Volume</p>
+                      <p className="text-sm font-medium text-gray-900">{request.volume || 0} m³</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">Budget</p>
+                      <p className="text-sm font-medium text-gray-900">${request.budget_min}-{request.budget_max}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-600 space-y-1">
+                  <div>• Rates are fetched in real-time from provider APIs</div>
+                  <div>• All prices include applicable fees and surcharges</div>
+                  <div>• Transit times are business days and may vary based on location</div>
+                  <div>• Tracking information will be available immediately after assignment</div>
+                </p>
+              </div>
+            ) : (
+              <div className="pb-6 border-b border-gray-300">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Provider Assignment</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Logistics Provider</p>
+                    <p className="text-sm text-gray-600">{request.awarded_to_name || 'Assigned'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Service Type</p>
+                    <p className="text-sm text-gray-600">Air freight</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Assignment Date</p>
+                    <p className="text-sm text-gray-600">{request.updated_at ? formatDate(request.updated_at) : 'Assigned'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Provider Contact</p>
+                    <p className="text-sm text-gray-600">Contact via platform</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Shipping Information */}
+            {/* <div className="pb-6 border-b border-gray-300">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Shipping Information</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Method</p>
+                  <p className="text-sm text-gray-900">Air freight</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Current Location</p>
+                  <p className="text-sm text-gray-600">{request.origin_address || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Vessel/Flight Info</p>
+                  <p className="text-sm text-gray-600">Not available</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Transit Time</p>
+                  <p className="text-sm text-gray-600">standard</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Container/Booking Ref</p>
+                  <p className="text-sm text-gray-600">Not assigned</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Delays</p>
+                  <p className="text-sm text-gray-600">0 events - 0.00h</p>
+                </div>
+              </div>
+            </div> */}
           </div>
 
-          {/* Sidebar */}
+          {/* Right Column - Sidebar Information */}
           <div className="space-y-6">
-            {/* Budget Information */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Budget Information</h3>
+            {/* Provider Status */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Provider Status</h3>
+              <p className="text-sm text-gray-600">
+                High-performance drilling bit suitable for hard formations. Requires special handling and storage
+              </p>
+            </div>
+
+            {/* Stock Information */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Stock Information</h3>
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+              </div>
               <div className="space-y-3">
-                {request.budget_min && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Minimum Budget</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {formatCurrency(request.budget_min, request.currency)}
-                    </span>
-                  </div>
-                )}
-                {request.budget_max && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Maximum Budget</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {formatCurrency(request.budget_max, request.currency)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Currency</span>
-                  <span className="text-sm font-medium text-gray-900">{request.currency || 'USD'}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Current Stock</span>
+                  <span className="font-medium text-gray-900">5 pieces</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Min Stock</span>
+                  <span className="font-medium text-gray-900">2</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Max Stock</span>
+                  <span className="font-medium text-gray-900">10</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Reorder</span>
+                  <span className="font-medium text-gray-900">2</span>
                 </div>
               </div>
             </div>
 
-            {/* Special Requirements */}
-            {request.special_requirements && (
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Special Requirements</h3>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.special_requirements}</p>
-              </div>
-            )}
-
-            {/* Request Info */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Information</h3>
+            {/* Financial Details */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Details</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Created</span>
-                  <span className="text-sm font-medium text-gray-900">{formatDate(request.created_at)}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Unit Cost</span>
+                  <span className="font-medium text-gray-900">{formatCurrency(request.budget_min, request.currency)}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Updated</span>
-                  <span className="text-sm font-medium text-gray-900">{formatDate(request.updated_at)}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Total Value</span>
+                  <span className="font-medium text-gray-900">{formatCurrency(request.budget_max, request.currency)}</span>
                 </div>
-                {request.awarded_to && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Awarded To</span>
-                    <span className="text-sm font-medium text-gray-900">{request.awarded_to_name || request.awarded_to}</span>
-                  </div>
-                )}
-                {request.shipment_tracking_number && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Tracking #</span>
-                    <span className="text-sm font-medium text-gray-900">{request.shipment_tracking_number}</span>
-                  </div>
-                )}
-                {request.shipment_status && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Shipment Status</span>
-                    <span className="text-sm font-medium text-gray-900">{request.shipment_status.replace('_', ' ')}</span>
-                  </div>
-                )}
-                {request.shipment_id && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Shipment</span>
-                    <button
-                      onClick={() => navigate(`${webRoutes.logisticsShipments}/${request.shipment_id}`)}
-                      className="text-sm text-blue-600 hover:text-blue-800 underline"
-                    >
-                      View Shipment
-                    </button>
-                  </div>
-                )}
+                <p className="text-xs text-gray-500 mt-2">Based on current stock of 5 pieces</p>
               </div>
             </div>
 
-            {/* Initial Tracking */}
-            {request.shipment_id && (
-              <div className="bg-white rounded-xl shadow-sm border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Initial Tracking</h3>
-                {initialTracking.length === 0 ? (
-                  <p className="text-sm text-gray-600">No tracking events yet.</p>
-                ) : (
-                  <ul className="divide-y divide-gray-200">
-                    {initialTracking.slice(0, 3).map((ev) => (
-                      <li key={ev.id} className="py-3 flex items-start justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{ev.event_type.replace('_', ' ')}</p>
-                          <p className="text-xs text-gray-600">{ev.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-600">{formatDate(ev.timestamp)}</p>
-                          {ev.location && <p className="text-xs text-gray-500">{ev.location}</p>}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+            {/* Recent Movements */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Movements</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Received</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">+5</span>
+                    <span className="text-gray-500">{formatDate(request.created_at)}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Issued</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">-2</span>
+                    <span className="text-gray-500">{formatDate(new Date().toISOString())}</span>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Dates */}
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Dates</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Purchase Date</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Last Updated</span>
+                    <span className="font-medium text-gray-900">{formatDate(request.pickup_date_requested)}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Warranty Expiry</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">{formatDate(request.delivery_date_requested)}</span>
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Expiring</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -651,7 +686,7 @@ const LogisticsRequestDetail = () => {
                 <select
                   value={selectedProvider}
                   onChange={(e) => setSelectedProvider(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                   required
                 >
                   <option value="">Choose a provider...</option>
@@ -671,7 +706,7 @@ const LogisticsRequestDetail = () => {
                   <select
                     value={selectedService}
                     onChange={(e) => setSelectedService(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                   >
                     <option value="">Standard Service</option>
                     {providers.find(p => p.name === selectedProvider)?.service_types.map((service) => (
@@ -687,14 +722,14 @@ const LogisticsRequestDetail = () => {
             <div className="flex items-center justify-end space-x-3 mt-6">
               <button
                 onClick={() => setShowProviderModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAwardToProvider}
                 disabled={!selectedProvider || awarding}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {awarding ? 'Assigning...' : 'Assign Provider'}
               </button>
@@ -706,12 +741,12 @@ const LogisticsRequestDetail = () => {
       {/* Provider Quote Submission Modal */}
       {showQuoteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-2xl mx-4">
+          <div className="bg-white  h-[90vh] overflow-y-scroll rounded-xl p-6 w-full max-w-2xl mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Submit a Quote</h3>
               <button
                 onClick={() => setShowQuoteModal(false)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover"
               >
                 Close
               </button>
