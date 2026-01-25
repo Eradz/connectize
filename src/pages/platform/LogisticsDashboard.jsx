@@ -25,13 +25,16 @@ import {
   Box,
   Scissors,
 
-  FileText
+  FileText,
+  Book
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import InventoryDashboardWidget from '../../components/dashboard/InventoryDashboardWidget';
 import { getSession } from '../../lib/session';
 import Scroll from '../../components/Scroll';
+import { DealIcon } from '../../icon/deal';
+import { getCurrencySymbol } from '../../utils/currency';
 
 
 // Simulated API data
@@ -603,7 +606,7 @@ const LogisticsHubDashboard = () => {
 </div>
 
 {/* Become A Provider - Full Width on Mobile */}
-<Link to={webRoutes.logisticsBecomeProvider} className="flex flex-col items-center text-center w-full mb-8 bg-white p-4 rounded-xl border hover:shadow-md transition-shadow">
+<Link to={webRoutes.logisticsBecomeProvider} className="flex lg:hidden flex-col items-center text-center w-full mb-8 bg-white p-4 rounded-xl border hover:shadow-md transition-shadow">
     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mb-2 sm:mb-3 group-hover:bg-yellow-50 transition-colors">
       <User className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 group-hover:text-yellow-600" />
     </div>
@@ -1052,13 +1055,13 @@ const LogisticsHubDashboard = () => {
         return (
           <div key={request.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
             {/* Header with Title and Badge */}
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-4 border-b">
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">
-                  {request.order_type || request.type || 'Order'}
+                <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-1">
+                  {request.title || request.type || 'Order'}
                 </h3>
-                <p className="text-sm text-gray-600">
-                  #{request.tracking_number || request.order_number || 'N/A'}
+                <p className="text-sm text-gray-600 line-clamp-1">
+                  #{request.shipment_tracking_number || request.order_number || 'N/A'}
                 </p>
               </div>
               {request.status && (
@@ -1069,7 +1072,7 @@ const LogisticsHubDashboard = () => {
             </div>
 
             {/* Request Details - Flex Layout */}
-            <div className="flex items-start justify-between mb-4 pb-4 border-b">
+            <div className="flex items-start justify-between pb-4">
               {/* Left Side - Request ID */}
               <div className="flex-1">
                 <div className="flex items-center space-x-1 mb-1">
@@ -1078,7 +1081,7 @@ const LogisticsHubDashboard = () => {
                     <path d="M12.77 2.18133L11.2473 0.608667C11.0603 0.416644 10.8369 0.263893 10.5901 0.159374C10.3432 0.0548549 10.078 0.000670954 9.81 0L6.66667 0C5.89853 0.000969683 5.15421 0.266727 4.55917 0.752479C3.96412 1.23823 3.55473 1.91428 3.4 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6V12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H7.33333C8.21706 15.9989 9.0643 15.6474 9.68919 15.0225C10.3141 14.3976 10.6656 13.5504 10.6667 12.6667V12.6C11.4191 12.4453 12.0951 12.0359 12.5809 11.4408C13.0666 10.8458 13.3324 10.1015 13.3333 9.33333V3.57333C13.3343 3.05361 13.1322 2.55408 12.77 2.18133ZM7.33333 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V9.33333C3.33439 10.2171 3.68592 11.0643 4.31081 11.6892C4.93571 12.3141 5.78294 12.6656 6.66667 12.6667H9.33333C9.33333 13.1971 9.12262 13.7058 8.74755 14.0809C8.37248 14.456 7.86377 14.6667 7.33333 14.6667ZM10 11.3333H6.66667C6.13623 11.3333 5.62753 11.1226 5.25245 10.7475C4.87738 10.3725 4.66667 9.86377 4.66667 9.33333V3.33333C4.66667 2.8029 4.87738 2.29419 5.25245 1.91912C5.62753 1.54405 6.13623 1.33333 6.66667 1.33333H9.33333V2.66667C9.33333 3.02029 9.47381 3.35943 9.72386 3.60948C9.97391 3.85952 10.313 4 10.6667 4H12V9.33333C12 9.86377 11.7893 10.3725 11.4142 10.7475C11.0391 11.1226 10.5304 11.3333 10 11.3333Z" fill="#374957"/>
                   </svg>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-semibold text-gray-900 line-clamp-1">
                   {request.request_id || request.id || 'N/A'}
                 </p>
               </div>
@@ -1096,12 +1099,12 @@ const LogisticsHubDashboard = () => {
                       backgroundClip: 'padding-box, border-box'
                     }}
                   >
-                    <span style={{
+                    <span className='capitalize' style={{
                       background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text'
-                    }}>{request.cargo_type}</span>
+                    }}>{request.cargo_type?.replace("_", " ")}</span>
                   </span>
                 </div>
               )}
@@ -1112,12 +1115,12 @@ const LogisticsHubDashboard = () => {
               {/* Left Side - Route */}
               <div className="flex-1 pr-4">
                 <p className="text-xs text-gray-500 mb-2">Route</p>
-                <p className="text-xs text-gray-900 font-medium mb-1">
+                <p className="line-clamp-1 text-xs text-gray-900 font-medium mb-1">
                   {request.origin_address || 'N/A'}
                 </p>
                 <div className="flex items-start text-xs text-gray-600">
                   <span className="mr-1">→</span>
-                  <span className="leading-tight">
+                  <span className="leading-tight line-clamp-1">
                     {request.destination_address || 'N/A'}
                   </span>
                 </div>
@@ -1128,7 +1131,7 @@ const LogisticsHubDashboard = () => {
                 <p className="text-xs text-gray-500 mb-2">Budget</p>
                 <p className="text-base font-bold text-gray-900">
                   {request.budget_max 
-                    ? `${request.currency || '$'}${parseFloat(request.budget_max).toLocaleString()}`
+                    ? `${getCurrencySymbol(request.currency) || '$'}${parseFloat(request.budget_max).toLocaleString()}`
                     : 'N/A'}
                 </p>
               </div>
@@ -1136,7 +1139,7 @@ const LogisticsHubDashboard = () => {
 
             {/* Created Date */}
             {request.created_at && (
-              <p className="text-xs text-gray-400 mb-5">
+              <p className="text-xs text-gray-400 mb-2 pb-4 border-b">
                 Created {formatDate(request.created_at)}
               </p>
             )}
@@ -1144,22 +1147,13 @@ const LogisticsHubDashboard = () => {
             {/* Action Buttons */}
             <div className="flex gap-3">
               <button 
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
+                className="flex-1 flex items-center justify-center space-x-1 p-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
               >
-                <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <g clipPath="url(#clip0_1655_9100)">
-                    <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_1655_9100">
-                      <rect width="19" height="19" fill="white"/>
-                    </clipPath>
-                  </defs>
-                </svg>
-                <span>View Details</span>
+                <FileText className="w-4 h-4" />
+                <span className='text-gray-800 text-xs'>View Details</span>
               </button>
               <button 
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-sm"
+                className="flex-1 flex items-center justify-center space-x-1 p-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-xs"
                 style={{ 
                   border: '2px solid transparent',
                   backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
@@ -1201,9 +1195,9 @@ const LogisticsHubDashboard = () => {
                           <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold text-gray-900">Inventory Management</h3>
                             <div className="flex space-x-2">
-                              <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
+                              {/* <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
                                 <Filter className="w-4 h-4" />
-                              </button>
+                              </button> */}
                               <div className="relative">
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                                 <input
@@ -1218,12 +1212,25 @@ const LogisticsHubDashboard = () => {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {dashboardData.inventory.data.length > 0 ? (
                               dashboardData.inventory.data.map((item) => (
-                                <div key={item.id} className="bg-gray-50 rounded-lg p-4">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <h4 className="font-medium text-gray-900">{item.name}</h4>
-                                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                                      {item.category?.name || item.category || 'N/A'}
-                                    </span>
+                                <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                                  <div className='q'>
+                                    <div className="flex items-center justify-between mb-3">
+                                      <span className='bg-pale_yellow rounded-lg '>
+                                        <Box className='m-2'/>
+                                      </span>
+                                      <Link
+                                        to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
+                                        className="w-fit text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
+                                      >
+                                        View Details
+                                      </Link>
+                                    </div>
+                                    <div>
+                                        <span className="capitalize text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full mb-2">
+                                          {item.category?.name?.replace('_', ' ') || item.category?.replace('_', ' ') || 'N/A'}
+                                        </span>
+                                        <h4 className="font-medium text-gray-900">{item.name}</h4>
+                                      </div>
                                   </div>
                                   
                                   <div className="space-y-2">
@@ -1252,15 +1259,6 @@ const LogisticsHubDashboard = () => {
                                       ⚠️ Below reorder level ({item.reorder_point || item.minimum_stock})
                                     </div>
                                   )}
-          
-                                  <div className="mt-3 flex space-x-2">
-                                    <Link
-                                      to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                                      className="flex-1 text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
-                                    >
-                                      View Details
-                                    </Link>
-                                  </div>
                                 </div>
                               ))
                             ) : (
