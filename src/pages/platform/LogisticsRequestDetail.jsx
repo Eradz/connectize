@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft,
   Package,
@@ -803,104 +803,173 @@ const LogisticsRequestDetail = () => {
                       <span className="text-gray-600">Status</span>
                       <span className="font-medium text-gray-900 capitalize">{request?.status || 'Open'}</span>
                     </div>
-                    {request?.status === 'posted' && (
+                    {/* {request?.status === 'posted' && (
                       <div className="pt-3 border-t">
                         <Link
                           to={`${webRoutes.logisticsRequestDetail.replace(':id', request?.id)}`}
-                          className="inline-flex items-center justify-center w-full px-3 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-gold/30 hover:bg-blue-100"
                         >
+                          <button  className="inline-flex items-center justify-center w-full px-3 py-2 border border-gold shadow-sm text-sm font-medium rounded-md text-gold hover:bg-pale_yellow/30">
                           <Truck className="w-4 h-4 mr-2" />
                           Assign Provider
+                          </button>
                         </Link>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
               </div>
 
-            {/* Stock Information */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Stock Information</h3>
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Current Stock</span>
-                  <span className="font-medium text-gray-900">5 pieces</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Min Stock</span>
-                  <span className="font-medium text-gray-900">2</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Max Stock</span>
-                  <span className="font-medium text-gray-900">10</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Reorder</span>
-                  <span className="font-medium text-gray-900">2</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Financial Details */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Financial Details</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Unit Cost</span>
-                  <span className="font-medium text-gray-900">{formatCurrency(request.budget_min, request.currency)}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Total Value</span>
-                  <span className="font-medium text-gray-900">{formatCurrency(request.budget_max, request.currency)}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">Based on current stock of 5 pieces</p>
-              </div>
-            </div>
-
-            {/* Recent Movements */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Movements</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-1">Received</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">+5</span>
-                    <span className="text-gray-500">{formatDate(request.created_at)}</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-1">Issued</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">-2</span>
-                    <span className="text-gray-500">{formatDate(new Date().toISOString())}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Dates */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Dates</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-1">Purchase Date</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Last Updated</span>
-                    <span className="font-medium text-gray-900">{formatDate(request.pickup_date_requested)}</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-1">Warranty Expiry</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">{formatDate(request.delivery_date_requested)}</span>
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Expiring</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                     {/* Key Information */}
+                     <div className="bg-white rounded-xl shadow-sm border p-6">
+                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Details</h3>
+                       <div className="space-y-4">
+                         <div className="flex items-center justify-between">
+                           <span className="text-sm text-gray-600">Request ID</span>
+                           <span className="text-sm font-mono font-medium text-gray-900">
+                             {`REQ-${request?.id?.slice(0, 8)}` || 'Not assigned'}
+                           </span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                           <span className="text-sm text-gray-600">Pickup Date</span>
+                           <span className="text-sm font-medium text-gray-900">
+                             {request?.actual_pickup_date
+                               ? new Date(request.actual_pickup_date).toLocaleDateString()
+                               : request?.pickup_date_requested 
+                                 ? new Date(request.pickup_date_requested).toLocaleDateString()
+                                 : request?.timeline?.pickup_date 
+                                   ? new Date(request.timeline.pickup_date).toLocaleDateString()
+                                   : 'Not specified'}
+                           </span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                           <span className="text-sm text-gray-600">Est. Delivery</span>
+                           <span className="text-sm font-medium text-gray-900">
+                             {request?.actual_delivery_date
+                               ? new Date(request.actual_delivery_date).toLocaleDateString()
+                               : request?.delivery_date_requested 
+                                 ? new Date(request.delivery_date_requested).toLocaleDateString()
+                                 : request?.timeline?.estimated_delivery 
+                                   ? new Date(request.timeline.estimated_delivery).toLocaleDateString()
+                                   : 'Not specified'}
+                           </span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                           <span className="text-sm text-gray-600">Transit Time</span>
+                           <span className="text-sm font-medium text-gray-900">
+                             {request?.timeline?.transit_time || request?.urgency || 'Not specified'}
+                           </span>
+                         </div>
+                       </div>
+                     </div>
+         
+                     {/* Origin & Destination */}
+                     <div className="bg-white rounded-xl shadow-sm border p-6">
+                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Locations</h3>
+                       <div className="space-y-6">
+                         <div>
+                           <h4 className="text-sm font-medium text-gray-900 mb-2">Origin</h4>
+                           <div className="text-sm space-y-1">
+                             <p className="font-medium">{request?.origin?.name || 'Origin Location'}</p>
+                             <p className="text-gray-600">{request?.origin_address || 'Address not specified'}</p>
+                             <div className="flex items-center space-x-2 text-gray-600">
+                               <User className="w-3 h-3" />
+                               <span>{request?.origin?.contact_name || request?.origin_contact_name || parseSpecial(request).origin_contact_name || 'Contact not specified'}</span>
+                             </div>
+                             <div className="flex items-center space-x-2 text-gray-600">
+                               <Phone className="w-3 h-3" />
+                               <span>{request?.origin?.contact_phone || request?.origin_contact_phone || parseSpecial(request).origin_contact_phone || 'Phone not specified'}</span>
+                             </div>
+                             <div className="flex items-center space-x-2 text-gray-600">
+                               <Mail className="w-3 h-3" />
+                               <span>{request?.origin?.contact_email || request?.origin_contact_email || parseSpecial(request).origin_contact_email || 'Email not specified'}</span>
+                             </div>
+                           </div>
+                         </div>
+                         
+                         <div className="border-t border-gray-200 pt-6">
+                           <h4 className="text-sm font-medium text-gray-900 mb-2">Destination</h4>
+                           <div className="text-sm space-y-1">
+                             <p className="font-medium">{request?.destination?.name || 'Destination Location'}</p>
+                             <p className="text-gray-600">{request?.destination_address || 'Address not specified'}</p>
+                             <div className="flex items-center space-x-2 text-gray-600">
+                               <User className="w-3 h-3" />
+                               <span>{request?.destination?.contact_name || request?.destination_contact_name || parseSpecial(request).dest_contact_name || 'Contact not specified'}</span>
+                             </div>
+                             <div className="flex items-center space-x-2 text-gray-600">
+                               <Phone className="w-3 h-3" />
+                               <span>{request?.destination?.contact_phone || request?.destination_contact_phone || parseSpecial(request).dest_contact_phone || 'Phone not specified'}</span>
+                             </div>
+                             <div className="flex items-center space-x-2 text-gray-600">
+                               <Mail className="w-3 h-3" />
+                               <span>{request?.destination?.contact_email || request?.destination_contact_email || parseSpecial(request).dest_contact_email || 'Email not specified'}</span>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+         
+                     {/* Cost Breakdown */}
+                     <div className="bg-white rounded-xl shadow-sm border p-6">
+                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                         {request?.costs ? 'Cost Breakdown' : 'Budget Information'}
+                       </h3>
+                       <div className="space-y-3">
+                         {request?.costs ? (
+                           <>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Freight</span>
+                               <span className="text-sm font-medium text-gray-900">{formatCurrency(request.costs.freight)}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Insurance</span>
+                               <span className="text-sm font-medium text-gray-900">{formatCurrency(request.costs.insurance)}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Handling</span>
+                               <span className="text-sm font-medium text-gray-900">{formatCurrency(request.costs.handling)}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Customs</span>
+                               <span className="text-sm font-medium text-gray-900">{formatCurrency(request.costs.customs)}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Fuel Surcharge</span>
+                               <span className="text-sm font-medium text-gray-900">{formatCurrency(request.costs.fuel_surcharge)}</span>
+                             </div>
+                             <div className="border-t border-gray-200 pt-3">
+                               <div className="flex items-center justify-between">
+                                 <span className="text-sm font-medium text-gray-900">Total</span>
+                                 <span className="text-sm font-bold text-gray-900">{formatCurrency(request.costs.total)}</span>
+                               </div>
+                             </div>
+                           </>
+                         ) : (
+                           <>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Budget Range</span>
+                               <span className="text-sm font-medium text-gray-900">
+                                 {request?.budget_min && request?.budget_max 
+                                   ? `${formatCurrency(request.budget_min)} - ${formatCurrency(request.budget_max)}`
+                                   : request?.budget ? formatCurrency(request.budget) : 'Not specified'
+                                 }
+                               </span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Currency</span>
+                               <span className="text-sm font-medium text-gray-900">{request?.currency || 'USD'}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Quotes Received</span>
+                               <span className="text-sm font-medium text-gray-900">{request?.quotes_count || 0}</span>
+                             </div>
+                             <div className="flex items-center justify-between">
+                               <span className="text-sm text-gray-600">Status</span>
+                               <span className="text-sm font-medium text-gray-900 capitalize">{request?.status || 'Posted'}</span>
+                             </div>
+                           </>
+                         )}
+                       </div>
+                     </div>
           </div>
         </div>
       </div>
