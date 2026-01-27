@@ -390,7 +390,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
+                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Item</span>
@@ -807,18 +807,48 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
     }
   };
 
+  const renderStepIndicator = () => (
+    <div className="flex justify-center items-center gap-3 mb-8">
+      {steps.map((step, index) => (
+        <React.Fragment key={step.id}>
+          {/* Step circle */}
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium 
+              ${ currentStep > step.id 
+                  ? 'bg-gold border-gold text-white'
+                  : currentStep === step.id
+                  ? 'bg-gold border-gold text-white'
+                  : 'bg-white border-gray-300 text-gray-400'
+              }`}
+          >
+             {currentStep > step.id ? (
+                  <CheckCircle className="w-6 h-6" />
+                ) : (
+                  <span className="text-sm font-medium">{step.id}</span>
+                )}
+          </div>
+  
+          {/* Connector */}
+          {index < 4 && (
+            <div className="w-10 h-px bg-gray-300" />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* Progress Indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        {renderStepIndicator()}
+        {/* <div className="flex justify-center items-center gap-3">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
                 currentStep > step.id 
                   ? 'bg-green-600 border-green-600 text-white'
                   : currentStep === step.id
-                  ? 'bg-blue-600 border-blue-600 text-white'
+                  ? 'bg-gold border-gold text-white'
                   : 'bg-white border-gray-300 text-gray-400'
               }`}>
                 {currentStep > step.id ? (
@@ -826,16 +856,15 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 ) : (
                   <span className="text-sm font-medium">{step.id}</span>
                 )}
-              </div>
-              
               {index < steps.length - 1 && (
                 <div className={`w-full h-1 mx-4 ${
                   currentStep > step.id ? 'bg-green-600' : 'bg-gray-300'
                 }`} />
               )}
-            </div>
+              </div>
+              
           ))}
-        </div>
+        </div> */}
         
         <div className="mt-4">
           <h2 className="text-xl font-semibold text-gray-900">
@@ -870,7 +899,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
           <button
             onClick={nextStep}
             disabled={!validateStep(currentStep)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             <span>Next</span>
             <ArrowRight className="w-4 h-4" />

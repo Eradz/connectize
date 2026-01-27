@@ -231,7 +231,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
           </div>
         </div>
       )}
-  {isOwner && (
+  {/* {isOwner && (
   <div className="bg-white rounded-xl shadow-sm border p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
@@ -253,7 +253,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
           </button>
         </div>
 
-        {/* View Controls */}
+       
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex bg-gray-100 rounded-lg p-1">
@@ -305,7 +305,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
           </div>
         </div>
   </div>
-  )}
+  )} */}
 
       {/* Authentication Check */}
   {!isAuthenticated && (
@@ -343,7 +343,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
       )}
 
       {/* Summary Dashboard */}
-  {isOwner && rates && !calculatingRates && (
+  {/* {isOwner && rates && !calculatingRates && (
         <div className="bg-white rounded-xl shadow-sm border p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Market Overview</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -394,7 +394,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Provider List */}
   <div className="space-y-4">
@@ -416,7 +416,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
                 return (
                   <div
                     key={providerKey}
-                    className={`px-4 py-3 grid grid-cols-12 gap-2 items-center cursor-pointer hover:bg-gray-50 ${isSelected ? 'bg-blue-50/50' : ''}`}
+                    className={`px-2 py-3 grid grid-cols-12 gap-2 items-center cursor-pointer hover:bg-gray-50 ${isSelected ? 'bg-blue-50/50' : ''}`}
                     onClick={() => {
                       setSelectedProvider(providerKey);
                       setSelectedService('');

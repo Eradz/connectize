@@ -254,6 +254,47 @@ const LogisticsRequestDetail = () => {
     });
   };
 
+  const parseSpecial = (data) => {
+    const sr = data?.special_requirements || data?.request_details?.special_requirements || '';
+    if (!sr || typeof sr !== 'string') return {};
+    const lines = sr.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const out = {};
+    for (const ln of lines) {
+      const lower = ln.toLowerCase();
+      if (lower.startsWith('pickup contact:')) {
+        out.origin_contact_raw = ln.replace(/^[^:]*:\s*/, '');
+        const parts = out.origin_contact_raw.split('|').map(s => s.trim());
+        out.origin_contact_name = parts[0] || undefined;
+        out.origin_contact_phone = parts[1] || undefined;
+        out.origin_contact_email = parts[2] || undefined;
+      } else if (lower.startsWith('delivery contact:')) {
+        out.dest_contact_raw = ln.replace(/^[^:]*:\s*/, '');
+        const parts = out.dest_contact_raw.split('|').map(s => s.trim());
+        out.dest_contact_name = parts[0] || undefined;
+        out.dest_contact_phone = parts[1] || undefined;
+        out.dest_contact_email = parts[2] || undefined;
+      } else if (lower.startsWith('shipping method:')) {
+        out.shipping_method = ln.replace(/^[^:]*:\s*/, '');
+      } else if (lower.startsWith('preferred carrier:')) {
+        out.preferred_carrier = ln.replace(/^[^:]*:\s*/, '');
+      }
+    }
+    return out;
+  };
+
+  // Determine if this shipment/request is actually assigned to a provider.
+  // Consider it assigned only when there is a concrete assignment signal,
+  // not just a "preferred carrier" hint from free text.
+  const isAssigned = (() => {
+    const status = (request?.status || '').toLowerCase();
+    return Boolean(
+      request?.provider_name ||
+      request?.shipping?.carrier ||
+      request?.request_details?.awarded_to ||
+      ['awarded', 'assigned'].includes(status)
+    );
+  })();
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -271,7 +312,7 @@ const LogisticsRequestDetail = () => {
           <p className="text-gray-600 mb-4">The shipment request you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate(webRoutes.logisticsRequests)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
+            className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
           >
             Back to Requests
           </button>
@@ -338,7 +379,7 @@ const LogisticsRequestDetail = () => {
                   <button
                     onClick={toggleAllowBids}
                     disabled={togglingBids}
-                    className="ml-2 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                    className="ml-2 text-sm text-gold hover:text-blue-800 disabled:opacity-50"
                   >
                     {togglingBids ? 'Updating…' : request.allow_bids ? 'Disable' : 'Enable'}
                   </button>
@@ -348,7 +389,7 @@ const LogisticsRequestDetail = () => {
               {false && (request.status === 'posted' || request.status === 'quoted') && (
                 <button
                   onClick={() => setShowProviderModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
+                  className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
                 >
                   <Send className="w-4 h-4" />
                   <span>Assign Provider</span>
@@ -466,7 +507,7 @@ const LogisticsRequestDetail = () => {
 
               {/* Comprehensive Provider Assignment System (for unassigned requests) */}
             {(['draft', 'posted', 'quoted'].includes(request.status)) && !request.awarded_to && (
-              <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="bg-white rounded-xl shadow-sm border py-6 px-4">
                 <ProviderComparisonSystem
                   shipmentRequest={request}
                   onProviderSelected={(data) => {
@@ -520,70 +561,262 @@ const LogisticsRequestDetail = () => {
                 </p>
               </div>
             ) : (
-              <div className="pb-6 border-b border-gray-300">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Provider Assignment</h3>
+              <div>
+                 <div className="bg-pale_yellow/20 rounded-xl shadow-sm border border-pale_yellow p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                        <Truck className="w-5 h-5 text-gold mr-2" />
+                        Provider Assignment
+                      </h3>
+                      <span className="px-3 py-1 border border-gold text-gold text-sm font-medium rounded-full">
+                        Assigned
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Logistics Provider</label>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {request?.provider_name || request?.shipping?.carrier || request?.request_details?.awarded_to_name || 'Assigned Provider'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Service Type</label>
+                          <p className="text-sm text-gray-900">
+                            {request?.shipping?.method || request?.shipping_method || parseSpecial(request).shipping_method || 'Standard Shipping'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Assignment Date</label>
+                          <p className="text-sm text-gray-900">
+                            {request?.assigned_at ? new Date(request.assigned_at).toLocaleDateString() : 
+                              request?.updated_at ? new Date(request.updated_at).toLocaleDateString() : 'Recently assigned'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                          <p className="text-sm font-mono bg-white px-3 py-2 rounded border">
+                            {request?.tracking_number || `REQ-${request?.id?.slice(0, 8)}`}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Current Status</label>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(request?.status)}
+                            <span className="text-sm font-medium text-gray-900 capitalize">
+                              {request?.status?.replace('_', ' ') || 'In Progress'}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Provider Contact</label>
+                          <div className="text-sm text-gray-900">
+                            <div className="flex items-center space-x-2">
+                              <Phone className="w-3 h-3 text-gray-400" />
+                              <span>{request?.provider_contact_phone || 'Contact via platform'}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Mail className="w-3 h-3 text-gray-400" />
+                              <span>{request?.provider_contact_email || 'Contact via platform'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                        {/* Shipping Information */}
+               <div className="pb-6 border-b border-gray-300">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Shipping Information</h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Logistics Provider</p>
-                    <p className="text-sm text-gray-600">{request.awarded_to_name || 'Assigned'}</p>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Method</p>
+                    <p className="text-sm text-gray-900">{request?.shipping?.method || request?.shipping_method || parseSpecial(request).shipping_method || 'Not specified'}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Service Type</p>
-                    <p className="text-sm text-gray-600">Air freight</p>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Current Location</p>
+                    <p className="text-sm text-gray-600">{request?.current_location || 'Not available'}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Assignment Date</p>
-                    <p className="text-sm text-gray-600">{request.updated_at ? formatDate(request.updated_at) : 'Assigned'}</p>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Vessel/Flight Info</p>
+                    <p className="text-sm text-gray-600">
+                       {request?.shipping?.vessel_name ? `${request.shipping.vessel_name}` : 
+                       request?.shipping?.flight_number ? `Flight ${request.shipping.flight_number}` : 'Not available'}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Provider Contact</p>
-                    <p className="text-sm text-gray-600">Contact via platform</p>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Transit Time</p>
+                    <p className="text-sm text-gray-600">
+                      {request?.timeline?.transit_time || request?.urgency || 'Not specified'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Container/Booking Ref</p>
+                    <p className="text-sm text-gray-600">
+                       {request?.shipping?.container_number || request?.shipping?.booking_reference || 'Not assigned'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Delays</p>
+                    <p className="text-sm text-gray-600">
+                      {request?.delays_count || 0} events{request?.total_delay_hours ? ` • ${request.total_delay_hours}h` : ''}
+                    </p>
                   </div>
                 </div>
+              </div> 
               </div>
+
             )}
 
-            {/* Shipping Information */}
-            {/* <div className="pb-6 border-b border-gray-300">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Shipping Information</h3>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Method</p>
-                  <p className="text-sm text-gray-900">Air freight</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Current Location</p>
-                  <p className="text-sm text-gray-600">{request.origin_address || 'Not specified'}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Vessel/Flight Info</p>
-                  <p className="text-sm text-gray-600">Not available</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Transit Time</p>
-                  <p className="text-sm text-gray-600">standard</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Container/Booking Ref</p>
-                  <p className="text-sm text-gray-600">Not assigned</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Delays</p>
-                  <p className="text-sm text-gray-600">0 events - 0.00h</p>
-                </div>
+            {/* Documents */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Documents</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(request?.documents || []).map((doc, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Download className="w-4 h-4 text-gold" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                        <p className="text-xs text-gray-500">{doc.type}</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      doc.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                ))}
+                {/* Render file fields from API if present */}
+                {(request?.bill_of_lading || request?.delivery_receipt || request?.customs_documents) && (
+                  <>
+                    {request?.bill_of_lading && (
+                      <a href={request.bill_of_lading} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Download className="w-4 h-4 text-gold" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Bill of Lading</p>
+                            <p className="text-xs text-gray-500">BOL</p>
+                          </div>
+                        </div>
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">available</span>
+                      </a>
+                    )}
+                    {request?.delivery_receipt && (
+                      <a href={request.delivery_receipt} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Download className="w-4 h-4 text-gold" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Delivery Receipt</p>
+                            <p className="text-xs text-gray-500">POD</p>
+                          </div>
+                        </div>
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">available</span>
+                      </a>
+                    )}
+                    {request?.customs_documents && (
+                      <a href={request.customs_documents} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Download className="w-4 h-4 text-gold" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Customs Documents</p>
+                            <p className="text-xs text-gray-500">CD</p>
+                          </div>
+                        </div>
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">available</span>
+                      </a>
+                    )}
+                  </>
+                )}
+                {(!request?.documents || request.documents.length === 0) && !request?.bill_of_lading && !request?.delivery_receipt && !request?.customs_documents && (
+                  <div className="col-span-2 text-center py-8 text-gray-500">
+                    <Package className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                    <p>No documents available yet</p>
+                  </div>
+                )}
               </div>
-            </div> */}
+            </div>
           </div>
 
           {/* Right Column - Sidebar Information */}
           <div className="space-y-6">
             {/* Provider Status */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Provider Status</h3>
-              <p className="text-sm text-gray-600">
-                High-performance drilling bit suitable for hard formations. Requires special handling and storage
-              </p>
-            </div>
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Truck className="w-5 h-5 text-gold mr-2" />
+                  Provider Status
+                </h3>
+                {isAssigned ? (
+                  <div className="space-y-4">
+                    <div className="text-center p-4 bg-pale_yellow/20 rounded-lg border border-pale_yellow">
+                      <div className="text-lg font-bold text-gold">
+            {request?.provider_name || request?.shipping?.carrier || request?.request_details?.awarded_to_name || 'Assigned Provider'}
+                      </div>
+                      <div className="text-sm text-gold mt-1">
+                        {request?.shipping?.method || request?.shipping_method || parseSpecial(request).shipping_method || 'Logistics Provider'}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Assignment Status</span>
+                      <span className="font-medium text-green-600">Active</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Service Level</span>
+                      <span className="font-medium text-gray-900">
+                        {request?.urgency || 'Standard'}
+                      </span>
+                    </div>
+                    {request?.tracking_number && (
+                      <div className="pt-3 border-t">
+                        <div className="text-sm text-gray-600 mb-1">Tracking Reference</div>
+                        <div className="font-mono text-sm bg-gray-50 p-2 rounded border">
+                          {request.tracking_number}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="text-lg font-bold text-yellow-900">
+                        Pending Assignment
+                      </div>
+                      <div className="text-sm text-yellow-600 mt-1">
+                        Awaiting provider selection
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Quotes Received</span>
+                      <span className="font-medium text-gray-900">{request?.quotes_count || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Status</span>
+                      <span className="font-medium text-gray-900 capitalize">{request?.status || 'Open'}</span>
+                    </div>
+                    {request?.status === 'posted' && (
+                      <div className="pt-3 border-t">
+                        <Link
+                          to={`${webRoutes.logisticsRequestDetail.replace(':id', request?.id)}`}
+                          className="inline-flex items-center justify-center w-full px-3 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-gold/30 hover:bg-blue-100"
+                        >
+                          <Truck className="w-4 h-4 mr-2" />
+                          Assign Provider
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
             {/* Stock Information */}
             <div className="bg-white rounded-lg shadow-sm border p-6">

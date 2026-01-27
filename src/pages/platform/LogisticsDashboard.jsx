@@ -1004,9 +1004,11 @@ const LogisticsHubDashboard = () => {
             </div>
 
             {/* View Details Button */}
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2.5 rounded-lg transition-colors">
+            <Link
+            to={webRoutes.logisticsShipmentDetail.replace(":id", shipment.id)}
+            className="flex justify-center w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2.5 rounded-lg transition-colors">
               View Details
-            </button>
+            </Link>
           </div>
         );
       })}
@@ -1146,13 +1148,15 @@ const LogisticsHubDashboard = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <button 
+              <Link 
+                to={webRoutes.logisticsRequestDetail.replace(":id", request.id)} 
                 className="flex-1 flex items-center justify-center space-x-1 p-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
               >
                 <FileText className="w-4 h-4" />
                 <span className='text-gray-800 text-xs'>View Details</span>
-              </button>
-              <button 
+              </Link>
+              <Link
+                to={webRoutes.logisticsRequestEdit.replace(":id", request.id)}
                 className="flex-1 flex items-center justify-center space-x-1 p-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-xs"
                 style={{ 
                   border: '2px solid transparent',
@@ -1181,7 +1185,7 @@ const LogisticsHubDashboard = () => {
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
                 }}>Edit</span>
-              </button>
+              </Link>
             </div>
           </div>
         );
