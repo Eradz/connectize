@@ -648,8 +648,8 @@ const LogisticsHubDashboard = () => {
             <>
               {/* Metrics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl border">
-                <div className="flex items-center justify-between mb-4">
+                <div className="bg-white flex items-center flex-col p-6 rounded-xl border">
+                <div className="flex justify-center items-center text-center mb-4">
                   <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect width="44" height="44" rx="10" fill="#FFF1C6"/>
                     <g clipPath="url(#clip0_1655_7195)">
@@ -670,8 +670,8 @@ const LogisticsHubDashboard = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border">
-              <div className="flex items-center justify-between mb-4">
+              <div className="bg-white flex items-center flex-col p-6 rounded-xl border">
+              <div className="flex justify-center items-center text-center mb-4">
                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="44" height="44" rx="10" fill="#FFF1C6"/>
                   <g clipPath="url(#clip0_1655_7204)">
@@ -693,8 +693,8 @@ const LogisticsHubDashboard = () => {
               </p>
             </div>
                                
-                   <div className="bg-white p-6 rounded-xl border">
-                  <div className="flex items-center justify-between mb-4">
+                   <div className="bg-white flex items-center flex-col p-6 rounded-xl border">
+                  <div className="flex justify-center items-center text-center mb-4">
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect width="40" height="40" rx="10" fill="#FFF1C6"/>
                       <g clipPath="url(#clip0_1655_7213)">
@@ -714,8 +714,8 @@ const LogisticsHubDashboard = () => {
                   <p className="text-xs" style={{ color: '#158AFF' }}>YTD Savings</p>
                   </div>
 
-                <div className="bg-white p-6 rounded-xl border">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="bg-white flex items-center flex-col p-6 rounded-xl border">
+                  <div className="flex justify-center items-center text-center mb-4">
                     <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect width="44" height="44" rx="10" fill="#FFF1C6"/>
                       <g clipPath="url(#clip0_1655_7220)">
@@ -736,7 +736,7 @@ const LogisticsHubDashboard = () => {
               </div>
 
               {/* Search and Filter */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex justify-center items-center text-center mb-6">
                 <div className="relative flex-1 max-w-2xl">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
@@ -769,41 +769,58 @@ const LogisticsHubDashboard = () => {
                         </button>
                     </div>
                     <div className="space-y-3">
-                      {dashboardData.shipments.data.map((shipment) => (
-                        <div key={shipment.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3 flex-1">
-                              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="44" height="44" rx="22" fill="#F8F9FA"/>
-                                <g clipPath="url(#clip0_1655_7259)">
-                                  <path d="M32.3186 14.431L18.4996 28.249C18.4067 28.3423 18.2963 28.4163 18.1747 28.4668C18.0531 28.5173 17.9228 28.5433 17.7911 28.5433C17.6595 28.5433 17.5291 28.5173 17.4075 28.4668C17.286 28.4163 17.1755 28.3423 17.0826 28.249L11.7386 22.9C11.6457 22.8067 11.5353 22.7327 11.4137 22.6822C11.2921 22.6317 11.1618 22.6057 11.0301 22.6057C10.8985 22.6057 10.7681 22.6317 10.6465 22.6822C10.525 22.7327 10.4145 22.8067 10.3216 22.9C10.2284 22.9929 10.1543 23.1033 10.1038 23.2249C10.0533 23.3465 10.0273 23.4769 10.0273 23.6085C10.0273 23.7402 10.0533 23.8705 10.1038 23.9921C10.1543 24.1137 10.2284 24.2241 10.3216 24.317L15.6676 29.662C16.2316 30.2249 16.9958 30.5411 17.7926 30.5411C18.5894 30.5411 19.3537 30.2249 19.9176 29.662L33.7356 15.847C33.8288 15.7541 33.9026 15.6438 33.9531 15.5223C34.0035 15.4008 34.0294 15.2705 34.0294 15.139C34.0294 15.0075 34.0035 14.8772 33.9531 14.7557C33.9026 14.6343 33.8288 14.5239 33.7356 14.431C33.6427 14.3377 33.5323 14.2637 33.4107 14.2132C33.2891 14.1627 33.1588 14.1367 33.0271 14.1367C32.8955 14.1367 32.7651 14.1627 32.6435 14.2132C32.522 14.2637 32.4115 14.3377 32.3186 14.431Z" fill="#374957"/>
-                                </g>
-                                <defs>
-                                  <clipPath id="clip0_1655_7259">
-                                    <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
-                                  </clipPath>
-                                </defs>
-                              </svg>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <span className="font-semibold text-gray-900">{shipment.tracking_number}</span>
-                                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
-                                    {shipment.status}
-                                  </span>
+                      {dashboardData.shipments.data.length > 0 ? (
+                        dashboardData.shipments.data.slice(0, 3).map((shipment) => (
+                          <div key={shipment.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3 flex-1">
+                                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <rect width="44" height="44" rx="22" fill="#F8F9FA"/>
+                                  <g clipPath="url(#clip0_1655_7259)">
+                                    <path d="M32.3186 14.431L18.4996 28.249C18.4067 28.3423 18.2963 28.4163 18.1747 28.4668C18.0531 28.5173 17.9228 28.5433 17.7911 28.5433C17.6595 28.5433 17.5291 28.5173 17.4075 28.4668C17.286 28.4163 17.1755 28.3423 17.0826 28.249L11.7386 22.9C11.6457 22.8067 11.5353 22.7327 11.4137 22.6822C11.2921 22.6317 11.1618 22.6057 11.0301 22.6057C10.8985 22.6057 10.7681 22.6317 10.6465 22.6822C10.525 22.7327 10.4145 22.8067 10.3216 22.9C10.2284 22.9929 10.1543 23.1033 10.1038 23.2249C10.0533 23.3465 10.0273 23.4769 10.0273 23.6085C10.0273 23.7402 10.0533 23.8705 10.1038 23.9921C10.1543 24.1137 10.2284 24.2241 10.3216 24.317L15.6676 29.662C16.2316 30.2249 16.9958 30.5411 17.7926 30.5411C18.5894 30.5411 19.3537 30.2249 19.9176 29.662L33.7356 15.847C33.8288 15.7541 33.9026 15.6438 33.9531 15.5223C34.0035 15.4008 34.0294 15.2705 34.0294 15.139C34.0294 15.0075 34.0035 14.8772 33.9531 14.7557C33.9026 14.6343 33.8288 14.5239 33.7356 14.431C33.6427 14.3377 33.5323 14.2637 33.4107 14.2132C33.2891 14.1627 33.1588 14.1367 33.0271 14.1367C32.8955 14.1367 32.7651 14.1627 32.6435 14.2132C32.522 14.2637 32.4115 14.3377 32.3186 14.431Z" fill="#374957"/>
+                                  </g>
+                                  <defs>
+                                    <clipPath id="clip0_1655_7259">
+                                      <rect width="24" height="24" fill="white" transform="translate(10 10)"/>
+                                    </clipPath>
+                                  </defs>
+                                </svg>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-1">
+                                    <span className="font-semibold text-gray-900">{shipment.tracking_number}</span>
+                                    <span className={`capitalize px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
+                                      {shipment.status}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-600">
+                                    <span>{shipment.request_details.origin_address}</span>
+                                    <span className="mx-2">→</span>
+                                    <span>{shipment.request_details.destination_address}</span>
+                                  </div>
+                                  <p className="text-sm font-semibold text-gray-900 mt-1">
+                                    ${shipment.request_details.budget_max.toLocaleString()}.00
+                                  </p>
                                 </div>
-                                <div className="flex items-center text-sm text-gray-600">
-                                  <span>{shipment.request_details.origin_address}</span>
-                                  <span className="mx-2">→</span>
-                                  <span>{shipment.request_details.destination_address}</span>
-                                </div>
-                                <p className="text-sm font-semibold text-gray-900 mt-1">
-                                  ${shipment.request_details.budget_max.toLocaleString()}.00
-                                </p>
                               </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="bg-white border rounded-xl p-8 text-center">
+                          <div className="flex justify-center mb-4">
+                            <Truck className="w-12 h-12 text-gray-300" />
+                          </div>
+                          <h4 className="text-gray-900 font-medium mb-2">No Recent Shipments</h4>
+                          <p className="text-gray-500 text-sm mb-4">You don't have any recent shipments yet</p>
+                          <button 
+                            onClick={() => setActiveTab('shipments')}
+                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span>Create Shipment</span>
+                          </button>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 
@@ -813,28 +830,45 @@ const LogisticsHubDashboard = () => {
                       <h3 className="text-lg font-semibold text-gray-900">Recent Shipment Requests</h3>
                     </div>
                     <div className="space-y-3">
-                      {dashboardData.requests.data.map((request, index) => (
-                        <div key={request.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
-                              {getRequestIcon(index)}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="font-semibold text-gray-900">{request.tracking_number}</span>
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
-                                  {request.status}
-                                </span>
+                      {dashboardData.requests.data.length > 0 ? (
+                        dashboardData.requests.data.slice(0, 3).map((request, index) => (
+                          <div key={request.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
+                                {getRequestIcon(index)}
                               </div>
-                              <div className="flex items-center text-sm text-gray-600">
-                                <span>{request.origin_address}</span>
-                                <span className="mx-2">→</span>
-                                <span>{request.destination_address}</span>
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <span className="font-semibold text-gray-900">{request.title}</span>
+                                  <span className={`capitalize px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
+                                    {request.status}
+                                  </span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-600">
+                                  <span>{request.origin_address}</span>
+                                  <span className="mx-2">→</span>
+                                  <span>{request.destination_address}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="bg-white border rounded-xl p-8 text-center">
+                          <div className="flex justify-center mb-4">
+                            <Package className="w-12 h-12 text-gray-300" />
+                          </div>
+                          <h4 className="text-gray-900 font-medium mb-2">No Recent Requests</h4>
+                          <p className="text-gray-500 text-sm mb-4">You don't have any recent shipment requests yet</p>
+                          <Link 
+                            to={webRoutes.createShipmentRequest}
+                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                          >
+                            <Plus className="w-4 h-4" />
+                            <span>Create Request</span>
+                          </Link>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -876,23 +910,40 @@ const LogisticsHubDashboard = () => {
                           </button>
                     </div>
                     <div className="space-y-2">
-                      {dashboardData.inventory.data.map((item) => (
-                        <div key={item.id} className="bg-white border rounded-lg p-3 hover:shadow-sm transition-shadow">
-                          <div className="flex items-start space-x-3">
-                            <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <AlertTriangle className="w-4 h-4 text-orange-500" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
-                              <p className="text-xs text-gray-500 truncate">{item.location}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-xs text-gray-600">{item.current_stock} Remaining</span>
-                                <span className="text-xs text-gray-500">Reorder at {item.reorder_point}</span>
+                      {dashboardData.inventory.data.length > 0 ? (
+                        dashboardData.inventory.data.slice(0, 5).map((item) => (
+                          <div key={item.id} className="bg-white border rounded-lg p-3 hover:shadow-sm transition-shadow">
+                            <div className="flex items-start space-x-3">
+                              <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <AlertTriangle className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{item.location}</p>
+                                <div className="flex items-center justify-between mt-2">
+                                  <span className="text-xs text-gray-600">{item.current_stock} Remaining</span>
+                                  <span className="text-xs text-gray-500">Reorder at {item.reorder_point}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="bg-white border rounded-lg p-6 text-center">
+                          <div className="flex justify-center mb-3">
+                            <Warehouse className="w-10 h-10 text-gray-300" />
+                          </div>
+                          <h4 className="text-gray-900 font-medium mb-1 text-sm">No Inventory Alerts</h4>
+                          <p className="text-gray-500 text-xs mb-3">All inventory levels are healthy</p>
+                          <button 
+                            onClick={() => setActiveTab('inventory')}
+                            className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>View Inventory</span>
+                          </button>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>

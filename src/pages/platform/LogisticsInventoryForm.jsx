@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 
-const InventoryModal = ({ isOpen, onClose, itemId = null, onSave }) => {
+const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = null }) => {
   const isEdit = Boolean(itemId);
   
   const [loading, setLoading] = useState(false);
@@ -20,16 +20,66 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave }) => {
     unit_cost: 0
   });
 
+  // Populate form with current data when editing
+  useEffect(() => {
+    if (isEdit && currentData && isOpen) {
+      setFormData({
+        name: currentData.name || '',
+        sku: currentData.sku || '',
+        category: currentData.category || '',
+        unit: currentData.unit || 'PCS',
+        status: currentData.status || 'in_stock',
+        location: currentData.location || '',
+        supplier: currentData.supplier || '',
+        current_stock: currentData.current_stock || 0,
+        minimum_stock: currentData.minimum_stock || 0,
+        maximum_stock: currentData.maximum_stock || 0,
+        unit_cost: currentData.unit_cost || 0
+      });
+    }
+  }, [isEdit, currentData, isOpen]);
+
   const statusOptions = [
-    { value: 'in_stock', label: 'In stock' },
+    { value: 'available', label: 'Available' },
     { value: 'reserved', label: 'Reserved' },
     { value: 'in_use', label: 'In Use' },
     { value: 'maintenance', label: 'Under Maintenance' },
     { value: 'damaged', label: 'Damaged' },
-    { value: 'obsolete', label: 'Obsolete' }
+    { value: 'obsolete', label: 'Obsolete' },
+    { value: 'disposed', label: 'Disposed' }
   ];
 
-  const unitOptions = ['PCS', 'Units', 'Boxes', 'Pallets', 'Barrels', 'Gallons', 'Liters', 'Tons', 'Pounds', 'KG', 'Meters', 'Feet'];
+  const unitOptions = [
+  { id: 1, value: "pcs", label: "Pieces" },
+  { id: 2, value: "ft", label: "Feet" },
+  { id: 3, value: "m", label: "Meters" },
+  { id: 4, value: "kg", label: "Kilograms" },
+  { id: 5, value: "lb", label: "Pounds" },
+  { id: 6, value: "gal", label: "Gallons" },
+  { id: 7, value: "l", label: "Liters" },
+  { id: 8, value: "bbl", label: "Barrels" },
+  { id: 9, value: "tons", label: "Tons" },
+  { id: 10, value: "set", label: "Sets" },
+  { id: 11, value: "roll", label: "Rolls" },
+  { id: 12, value: "box", label: "Boxes" }
+]
+
+  const categoryOptions = [
+    { value: 'drilling_equipment', label: 'Drilling Equipment' },
+    { value: 'pipe_tubing', label: 'Pipes & Tubing' },
+    { value: 'wellhead_equipment', label: 'Wellhead Equipment' },
+    { value: 'production_equipment', label: 'Production Equipment' },
+    { value: 'safety_equipment', label: 'Safety Equipment' },
+    { value: 'maintenance_tools', label: 'Maintenance Tools' },
+    { value: 'chemicals', label: 'Chemicals & Fluids' },
+    { value: 'valves_fittings', label: 'Valves & Fittings' },
+    { value: 'electrical_equipment', label: 'Electrical Equipment' },
+    { value: 'instrumentation', label: 'Instrumentation' },
+    { value: 'ppe', label: 'Personal Protective Equipment' },
+    { value: 'consumables', label: 'Consumables' },
+    { value: 'spare_parts', label: 'Spare Parts' },
+    { value: 'other', label: 'Other' }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -115,14 +165,17 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category
                 </label>
-                <input
-                  type="text"
+                <select
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  placeholder="E.g drilling Equipment"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
+                >
+                  <option value="">Select a category</option>
+                  {categoryOptions.map(cat => (
+                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Unit */}
@@ -137,7 +190,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 >
                   {unitOptions.map(unit => (
-                    <option key={unit} value={unit}>{unit}</option>
+                    <option key={unit.id} value={unit.value}>{unit.label}</option>
                   ))}
                 </select>
               </div>

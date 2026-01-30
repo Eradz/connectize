@@ -43,21 +43,21 @@ const LogisticsInventoryDetailView = () => {
 
   // Oil & gas industry categories
   const industryCategories = [
-    { value: 'drilling_equipment', label: 'Drilling Equipment', icon: Wrench },
-    { value: 'pipe_tubing', label: 'Pipes & Tubing', icon: Building },
-    { value: 'wellhead_equipment', label: 'Wellhead Equipment', icon: Settings },
-    { value: 'production_equipment', label: 'Production Equipment', icon: TrendingUp },
-    { value: 'safety_equipment', label: 'Safety Equipment', icon: AlertTriangle },
-    { value: 'maintenance_tools', label: 'Maintenance Tools', icon: Wrench },
-    { value: 'chemicals', label: 'Chemicals & Fluids', icon: Package },
-    { value: 'valves_fittings', label: 'Valves & Fittings', icon: Settings },
-    { value: 'electrical_equipment', label: 'Electrical Equipment', icon: TrendingUp },
-    { value: 'instrumentation', label: 'Instrumentation', icon: Settings },
-    { value: 'ppe', label: 'Personal Protective Equipment', icon: AlertTriangle },
-    { value: 'consumables', label: 'Consumables', icon: Package },
-    { value: 'spare_parts', label: 'Spare Parts', icon: Settings },
-    { value: 'other', label: 'Other', icon: Package }
-  ];
+  { id: 1, value: "drilling_equipment", label: "Drilling Equipment" },
+  { id: 2, value: "pipe_tubing", label: "Pipes & Tubing" },
+  { id: 3, value: "wellhead_equipment", label: "Wellhead Equipment" },
+  { id: 4, value: "production_equipment", label: "Production Equipment" },
+  { id: 5, value: "safety_equipment", label: "Safety Equipment" },
+  { id: 6, value: "maintenance_tools", label: "Maintenance Tools" },
+  { id: 7, value: "chemicals", label: "Chemicals & Fluids" },
+  { id: 8, value: "valves_fittings", label: "Valves & Fittings" },
+  { id: 9, value: "electrical_equipment", label: "Electrical Equipment" },
+  { id: 10, value: "instrumentation", label: "Instrumentation" },
+  { id: 11, value: "ppe", label: "Personal Protective Equipment" },
+  { id: 12, value: "consumables", label: "Consumables" },
+  { id: 13, value: "spare_parts", label: "Spare Parts" },
+  { id: 14, value: "other", label: "Other" }
+]
 
   const statusOptions = [
     { value: 'available', label: 'Available', color: 'text-green-600 bg-green-100' },
@@ -252,45 +252,44 @@ const handleDelete = async () => {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-  <div className="flex items-center space-x-4">
-    <button
-      onClick={() => navigate(webRoutes.logisticsInventory)}
-      className="p-2 rounded-lg bg-amber-400 hover:bg-amber-500 transition-colors"
-    >
-      <ArrowLeft className="w-5 h-5 text-white" />
-    </button>
-    <div>
-      <h1 className="text-xl font-semibold text-gray-900">{item.name}</h1>
-      <p className="text-sm text-gray-500 mt-0.5">SKU: {item.sku}</p>
-    </div>
-  </div>
-  <div className="flex items-center space-x-2 pl-14 sm:pl-0">
-    <button
-  onClick={() => setShowAdjustStock(true)}
-  className="px-3 py-2 sm:px-4 sm:bg-gray-100 bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center text-xs sm:text-sm font-medium transition-colors"
->
-  <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-  Adjust Stock
-</button>
-    <button
-      onClick={() => setShowEditModal(true)}
-      className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
-    >
-      <Edit className="w-4 h-4 mr-2" />
-      Edit
-    </button>
-    <button
-      onClick={handleDelete}
-      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
-    >
-      <Trash2 className="w-4 h-4 mr-2" />
-      Delete
-    </button>
-  </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => navigate(webRoutes.logisticsInventory)}
+                  className="p-2 rounded-lg bg-amber-400 hover:bg-amber-500 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5 text-white" />
+                </button>
+                <div>
+                  <h1 className="text-xl font-semibold text-gray-900">{item.name}</h1>
+                  <p className="text-sm text-gray-500 mt-0.5">SKU: {item.sku}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 pl-14 sm:pl-0">
+                <button
+              onClick={() => setShowAdjustStock(true)}
+              className="px-3 py-2 sm:px-4 sm:bg-gray-100 bg-white border border-gray-300 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center text-xs sm:text-sm font-medium transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+              Adjust Stock
+            </button>
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center text-sm font-medium transition-colors"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </button>
+              </div>
 </div>
-          </div>
+
         </div>
       </div>
 
