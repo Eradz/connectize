@@ -199,7 +199,9 @@ const LogisticsHubDashboard = () => {
     });
   
     const [activeTab, setActiveTab] = useState('overview');
-  
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
+
     // Early authentication check - redirect if not logged in
     useEffect(() => {
       const session = getSession();
@@ -518,6 +520,52 @@ const LogisticsHubDashboard = () => {
     return <Icon className="w-5 h-5 text-gray-500" />;
   };
 
+  // Filter and search functions
+  const filterShipments = (shipments) => {
+    let filtered = shipments.filter((shipment) => {
+      const matchesSearch = 
+        shipment.tracking_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        shipment.request_details?.origin_address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        shipment.request_details?.destination_address?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesStatus = filterStatus === 'all' || shipment.status === filterStatus;
+      
+      return matchesSearch && matchesStatus;
+    });
+
+    // Apply sorting
+    if (sortBy === 'budget_high') {
+      filtered.sort((a, b) => (b.request_details?.budget_max || 0) - (a.request_details?.budget_max || 0));
+    } else if (sortBy === 'budget_low') {
+      filtered.sort((a, b) => (a.request_details?.budget_max || 0) - (b.request_details?.budget_max || 0));
+    }
+
+    return filtered;
+  };
+
+  const filterRequests = (requests) => {
+    return requests.filter((request) => {
+      const matchesSearch = 
+        request.tracking_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.origin_address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.destination_address?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesStatus = filterStatus === 'all' || request.status === filterStatus;
+      
+      return matchesSearch && matchesStatus;
+    });
+  };
+
+  const filterInventory = (inventory) => {
+    return inventory.filter((item) => {
+      return (
+        item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.sku?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
+  };
 
   if (loading) {
     return (
@@ -736,8 +784,8 @@ const LogisticsHubDashboard = () => {
               </div>
 
               {/* Search and Filter */}
-              <div className="flex justify-center items-center text-center mb-6">
-                <div className="relative flex-1 max-w-2xl">
+              {/* <div className="flex flex-col sm:flex-row items-center justify-center mb-6 gap-4">
+                <div className="relative flex-1 max-w-2xl w-full">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
@@ -747,11 +795,11 @@ const LogisticsHubDashboard = () => {
                     className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
                   />
                 </div>
-                <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
+                <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
                   <Filter className="w-4 h-4" />
                   <span>Filter</span>
                 </button>
-              </div>
+              </div> */}
 
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -955,21 +1003,43 @@ const LogisticsHubDashboard = () => {
 {activeTab === 'shipments' && (
   <>
     {/* Search and Filter */}
-    <div className="flex items-center justify-between mb-6">
-      <div className="relative flex-1 max-w-2xl">
+    <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+      <div className="relative flex-1 max-w-md w-full">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Search Shipments..."
+          placeholder="Search by tracking number, origin, or destination..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
         />
       </div>
-      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
-        <Filter className="w-4 h-4" />
-        <span>Filter</span>
-      </button>
+      <div className='flex gap-2'>
+        {/* Status Filter */}
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        >
+          <option value="all">All Status</option>
+          <option value="awarded">Awarded</option>
+          <option value="quoted">Quoted</option>
+          <option value="pending">Pending</option>
+          <option value="in_transit">In Transit</option>
+          <option value="delivered">Delivered</option>
+        </select>
+
+        {/* Sort Dropdown */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        >
+          <option value="recent">Recent</option>
+          <option value="budget_high">Budget: High to Low</option>
+          <option value="budget_low">Budget: Low to High</option>
+        </select>
+      </div>
     </div>
 
     {/* All Shipments Header */}
@@ -977,92 +1047,113 @@ const LogisticsHubDashboard = () => {
 
     {/* Shipments Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {dashboardData.shipments.data.map((shipment) => {
-        // Helper to format date
-        const formatDate = (dateString) => {
-          if (!dateString) return 'N/A';
-          const date = new Date(dateString);
-          return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        };
+      {filterShipments(dashboardData.shipments.data).length > 0 ? (
+        filterShipments(dashboardData.shipments.data).map((shipment) => {
+          // Helper to format date
+          const formatDate = (dateString) => {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+          };
 
-        return (
-          <div key={shipment.id} className="bg-white border rounded-xl p-6 hover:shadow-md transition-shadow">
-            {/* Icon and Status */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-yellow-600" />
+          return (
+            <div key={shipment.id} className="bg-white border rounded-xl p-6 hover:shadow-md transition-shadow">
+              {/* Icon and Status */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <Package className="w-6 h-6 text-yellow-600" />
+                </div>
+                {shipment.status && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
+                    {shipment.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                )}
               </div>
-              {shipment.status && (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(shipment.status)}`}>
-                  {shipment.status.replace('_', ' ').toUpperCase()}
-                </span>
-              )}
-            </div>
 
-            {/* Tracking Number */}
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
-              {shipment.tracking_number || 'N/A'}
-            </h3>
+              {/* Tracking Number */}
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                {shipment.tracking_number || 'N/A'}
+              </h3>
 
-            {/* Route */}
-            <div className="mb-3 flex justify-between">
-              <p className="text-xs text-gray-500 mb-1">Route:</p>
-              <div className="flex items-start text-sm text-gray-700 text-right">
-                <div>
-                  <p className="font-medium line-clamp-1">
-                    {shipment.request_details?.origin_address || 'N/A'}
-                  </p>
-                  <p className="text-gray-500 line-clamp-1">
-                    → {shipment.request_details?.destination_address || 'N/A'}
-                  </p>
+              {/* Route */}
+              <div className="mb-3 flex justify-between">
+                <p className="text-xs text-gray-500 mb-1">Route:</p>
+                <div className="flex items-start text-sm text-gray-700 text-right">
+                  <div>
+                    <p className="font-medium line-clamp-1">
+                      {shipment.request_details?.origin_address || 'N/A'}
+                    </p>
+                    <p className="text-gray-500 line-clamp-1">
+                      → {shipment.request_details?.destination_address || 'N/A'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Cargo */}
-            {shipment.cargo && (
-              <div className="mb-3 flex justify-between">
-                <p className="text-xs text-gray-500 mb-1">Cargo:</p>
+              {/* Cargo */}
+              {shipment.cargo && (
+                <div className="mb-3 flex justify-between">
+                  <p className="text-xs text-gray-500 mb-1">Cargo:</p>
+                  <p className="text-sm text-gray-700">
+                    {shipment.cargo}
+                    {shipment.cargo_weight && ` - ${shipment.cargo_weight}`}
+                    {shipment.cargo_unit && shipment.cargo_unit}
+                  </p>
+                </div>
+              )}
+
+              {/* Budget */}
+              {shipment.request_details?.budget_max && (
+                <div className="mb-3 flex justify-between">
+                  <p className="text-xs text-gray-500 mb-1">Budget:</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {shipment.currency || '$'}
+                    {parseFloat(shipment.request_details.budget_max).toLocaleString()}
+                  </p>
+                </div>
+              )}
+
+              {/* ETA */}
+              <div className="mb-4 flex justify-between">
+                <p className="text-xs text-gray-500 mb-1">ETA:</p>
                 <p className="text-sm text-gray-700">
-                  {shipment.cargo}
-                  {shipment.cargo_weight && ` - ${shipment.cargo_weight}`}
-                  {shipment.cargo_unit && shipment.cargo_unit}
+                  {shipment.eta 
+                    ? formatDate(shipment.eta) 
+                    : shipment.estimated_delivery 
+                      ? formatDate(shipment.estimated_delivery)
+                      : 'N/A'}
                 </p>
               </div>
-            )}
 
-            {/* Budget */}
-            {shipment.request_details?.budget_max && (
-              <div className="mb-3 flex justify-between">
-                <p className="text-xs text-gray-500 mb-1">Budget:</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {shipment.currency || '$'}
-                  {parseFloat(shipment.request_details.budget_max).toLocaleString()}
-                </p>
-              </div>
-            )}
-
-            {/* ETA */}
-            <div className="mb-4 flex justify-between">
-              <p className="text-xs text-gray-500 mb-1">ETA:</p>
-              <p className="text-sm text-gray-700">
-                {shipment.eta 
-                  ? formatDate(shipment.eta) 
-                  : shipment.estimated_delivery 
-                    ? formatDate(shipment.estimated_delivery)
-                    : 'N/A'}
-              </p>
+              {/* View Details Button */}
+              <Link
+              to={webRoutes.logisticsShipmentDetail.replace(":id", shipment.id)}
+              className="flex justify-center w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2.5 rounded-lg transition-colors">
+                View Details
+              </Link>
             </div>
-
-            {/* View Details Button */}
-            <Link
-            to={webRoutes.logisticsShipmentDetail.replace(":id", shipment.id)}
-            className="flex justify-center w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2.5 rounded-lg transition-colors">
-              View Details
-            </Link>
+          );
+        })
+      ) : (
+        <div className="col-span-full bg-white border rounded-xl p-12 text-center">
+          <div className="flex justify-center mb-4">
+            <Package className="w-12 h-12 text-gray-300" />
           </div>
-        );
-      })}
+          <h4 className="text-gray-900 font-medium mb-2">No Shipments Found</h4>
+          <p className="text-gray-500 text-sm mb-4">Try adjusting your search or filters to find shipments</p>
+          <button 
+            onClick={() => {
+              setSearchQuery('');
+              setFilterStatus('all');
+              setSortBy('recent');
+            }}
+            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-gray-900 rounded-lg hover:bg-custom_yellow transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            <span>Clear Filters</span>
+          </button>
+        </div>
+      )}
     </div>
   </>
 )}
@@ -1070,26 +1161,35 @@ const LogisticsHubDashboard = () => {
 {activeTab === 'requests' && (
   <>
     {/* Search and Filter */}
-    <div className="flex items-center justify-between mb-6">
-      <div className="relative flex-1 max-w-2xl">
+    <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+      <div className="relative flex-1 max-w-md w-full">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
-          placeholder="Search Requests..."
+          placeholder="Search by tracking number, title, or location..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
         />
       </div>
-      <button className="ml-4 px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center space-x-2">
-        <Filter className="w-4 h-4" />
-        <span>Filter</span>
-      </button>
+      
+      {/* Status Filter */}
+      <select
+        value={filterStatus}
+        onChange={(e) => setFilterStatus(e.target.value)}
+        className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+      >
+        <option value="all">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="quoted">Quoted</option>
+        <option value="awarded">Awarded</option>
+        <option value="delivered">Delivered</option>
+      </select>
     </div>
 
     {/* Header with See All */}
     <div className="flex items-center justify-between mb-6">
-      <h2 className="text-xl font-semibold text-gray-900">Shipment Request</h2>
+      <h2 className="text-xl font-semibold text-gray-900">Shipment Requests</h2>
       <button className="px-4 py-2 bg-yellow-100 text-gray-900 rounded-lg hover:bg-yellow-200 transition-colors">
         See All
       </button>
@@ -1097,150 +1197,170 @@ const LogisticsHubDashboard = () => {
 
     {/* Requests Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {dashboardData.requests.data.map((request) => {
-        // Helper to format date
-        const formatDate = (dateString) => {
-          if (!dateString) return 'Date not available';
-          const date = new Date(dateString);
-          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-        };
+      {filterRequests(dashboardData.requests.data).length > 0 ? (
+        filterRequests(dashboardData.requests.data).map((request) => {
+          // Helper to format date
+          const formatDate = (dateString) => {
+            if (!dateString) return 'Date not available';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          };
 
-        return (
-          <div key={request.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
-            {/* Header with Title and Badge */}
-            <div className="flex items-start justify-between mb-4 border-b">
-              <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-1">
-                  {request.title || request.type || 'Order'}
-                </h3>
-                <p className="text-sm text-gray-600 line-clamp-1">
-                  #{request.shipment_tracking_number || request.order_number || 'N/A'}
-                </p>
-              </div>
-              {request.status && (
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
-                  {request.status.replace('_', ' ').toUpperCase()}
-                </span>
-              )}
-            </div>
-
-            {/* Request Details - Flex Layout */}
-            <div className="flex items-start justify-between pb-4">
-              {/* Left Side - Request ID */}
-              <div className="flex-1">
-                <div className="flex items-center space-x-1 mb-1">
-                  <p className="text-xs text-gray-500">Request ID</p>
-                  <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12.77 2.18133L11.2473 0.608667C11.0603 0.416644 10.8369 0.263893 10.5901 0.159374C10.3432 0.0548549 10.078 0.000670954 9.81 0L6.66667 0C5.89853 0.000969683 5.15421 0.266727 4.55917 0.752479C3.96412 1.23823 3.55473 1.91428 3.4 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6V12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H7.33333C8.21706 15.9989 9.0643 15.6474 9.68919 15.0225C10.3141 14.3976 10.6656 13.5504 10.6667 12.6667V12.6C11.4191 12.4453 12.0951 12.0359 12.5809 11.4408C13.0666 10.8458 13.3324 10.1015 13.3333 9.33333V3.57333C13.3343 3.05361 13.1322 2.55408 12.77 2.18133ZM7.33333 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V9.33333C3.33439 10.2171 3.68592 11.0643 4.31081 11.6892C4.93571 12.3141 5.78294 12.6656 6.66667 12.6667H9.33333C9.33333 13.1971 9.12262 13.7058 8.74755 14.0809C8.37248 14.456 7.86377 14.6667 7.33333 14.6667ZM10 11.3333H6.66667C6.13623 11.3333 5.62753 11.1226 5.25245 10.7475C4.87738 10.3725 4.66667 9.86377 4.66667 9.33333V3.33333C4.66667 2.8029 4.87738 2.29419 5.25245 1.91912C5.62753 1.54405 6.13623 1.33333 6.66667 1.33333H9.33333V2.66667C9.33333 3.02029 9.47381 3.35943 9.72386 3.60948C9.97391 3.85952 10.313 4 10.6667 4H12V9.33333C12 9.86377 11.7893 10.3725 11.4142 10.7475C11.0391 11.1226 10.5304 11.3333 10 11.3333Z" fill="#374957"/>
-                  </svg>
+          return (
+            <div key={request.id} className="bg-white border rounded-xl p-5 hover:shadow-md transition-shadow">
+              {/* Header with Title and Badge */}
+              <div className="flex items-start justify-between mb-4 border-b">
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-1">
+                    {request.title || request.type || 'Order'}
+                  </h3>
+                  <p className="text-sm text-gray-600 line-clamp-1">
+                    #{request.shipment_tracking_number || request.order_number || 'N/A'}
+                  </p>
                 </div>
-                <p className="text-sm font-semibold text-gray-900 line-clamp-1">
-                  {request.request_id || request.id || 'N/A'}
-                </p>
+                {request.status && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(request.status)}`}>
+                    {request.status.replace('_', ' ').toUpperCase()}
+                  </span>
+                )}
               </div>
 
-              {/* Right Side - Cargo Type */}
-              {request.cargo_type && (
+              {/* Request Details - Flex Layout */}
+              <div className="flex items-start justify-between pb-4">
+                {/* Left Side - Request ID */}
+                <div className="flex-1">
+                  <div className="flex items-center space-x-1 mb-1">
+                    <p className="text-xs text-gray-500">Request ID</p>
+                    <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.77 2.18133L11.2473 0.608667C11.0603 0.416644 10.8369 0.263893 10.5901 0.159374C10.3432 0.0548549 10.078 0.000670954 9.81 0L6.66667 0C5.89853 0.000969683 5.15421 0.266727 4.55917 0.752479C3.96412 1.23823 3.55473 1.91428 3.4 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6V12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H7.33333C8.21706 15.9989 9.0643 15.6474 9.68919 15.0225C10.3141 14.3976 10.6656 13.5504 10.6667 12.6667V12.6C11.4191 12.4453 12.0951 12.0359 12.5809 11.4408C13.0666 10.8458 13.3324 10.1015 13.3333 9.33333V3.57333C13.3343 3.05361 13.1322 2.55408 12.77 2.18133ZM7.33333 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V9.33333C3.33439 10.2171 3.68592 11.0643 4.31081 11.6892C4.93571 12.3141 5.78294 12.6656 6.66667 12.6667H9.33333C9.33333 13.1971 9.12262 13.7058 8.74755 14.0809C8.37248 14.456 7.86377 14.6667 7.33333 14.6667ZM10 11.3333H6.66667C6.13623 11.3333 5.62753 11.1226 5.25245 10.7475C4.87738 10.3725 4.66667 9.86377 4.66667 9.33333V3.33333C4.66667 2.8029 4.87738 2.29419 5.25245 1.91912C5.62753 1.54405 6.13623 1.33333 6.66667 1.33333H9.33333V2.66667C9.33333 3.02029 9.47381 3.35943 9.72386 3.60948C9.97391 3.85952 10.313 4 10.6667 4H12V9.33333C12 9.86377 11.7893 10.3725 11.4142 10.7475C11.0391 11.1226 10.5304 11.3333 10 11.3333Z" fill="#374957"/>
+                    </svg>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900 line-clamp-1">
+                    {request.request_id || request.id || 'N/A'}
+                  </p>
+                </div>
+
+                {/* Right Side - Cargo Type */}
+                {request.cargo_type && (
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500 mb-1">Cargo Type</p>
+                    <span 
+                      className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-white"
+                      style={{ 
+                        border: '1.5px solid transparent',
+                        backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                        backgroundOrigin: 'border-box',
+                        backgroundClip: 'padding-box, border-box'
+                      }}
+                    >
+                      <span className='capitalize' style={{
+                        background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text'
+                      }}>{request.cargo_type?.replace("_", " ")}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Route and Budget - Flex Layout */}
+              <div className="flex items-start justify-between mb-4">
+                {/* Left Side - Route */}
+                <div className="flex-1 pr-4">
+                  <p className="text-xs text-gray-500 mb-2">Route</p>
+                  <p className="line-clamp-1 text-xs text-gray-900 font-medium mb-1">
+                    {request.origin_address || 'N/A'}
+                  </p>
+                  <div className="flex items-start text-xs text-gray-600">
+                    <span className="mr-1">→</span>
+                    <span className="leading-tight line-clamp-1">
+                      {request.destination_address || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Side - Budget */}
                 <div className="text-right">
-                  <p className="text-xs text-gray-500 mb-1">Cargo Type</p>
-                  <span 
-                    className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-white"
-                    style={{ 
-                      border: '1.5px solid transparent',
-                      backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #4EB608 0%, #094300 100%)',
-                      backgroundOrigin: 'border-box',
-                      backgroundClip: 'padding-box, border-box'
-                    }}
-                  >
-                    <span className='capitalize' style={{
-                      background: 'linear-gradient(135deg, #4EB608 0%, #094300 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text'
-                    }}>{request.cargo_type?.replace("_", " ")}</span>
-                  </span>
+                  <p className="text-xs text-gray-500 mb-2">Budget</p>
+                  <p className="text-base font-bold text-gray-900">
+                    {request.budget_max 
+                      ? `${getCurrencySymbol(request.currency) || '$'}${parseFloat(request.budget_max).toLocaleString()}`
+                      : 'N/A'}
+                  </p>
                 </div>
+              </div>
+
+              {/* Created Date */}
+              {request.created_at && (
+                <p className="text-xs text-gray-400 mb-2 pb-4 border-b">
+                  Created {formatDate(request.created_at)}
+                </p>
               )}
-            </div>
 
-            {/* Route and Budget - Flex Layout */}
-            <div className="flex items-start justify-between mb-4">
-              {/* Left Side - Route */}
-              <div className="flex-1 pr-4">
-                <p className="text-xs text-gray-500 mb-2">Route</p>
-                <p className="line-clamp-1 text-xs text-gray-900 font-medium mb-1">
-                  {request.origin_address || 'N/A'}
-                </p>
-                <div className="flex items-start text-xs text-gray-600">
-                  <span className="mr-1">→</span>
-                  <span className="leading-tight line-clamp-1">
-                    {request.destination_address || 'N/A'}
-                  </span>
-                </div>
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Link 
+                  to={webRoutes.logisticsRequestDetail.replace(":id", request.id)} 
+                  className="flex-1 flex items-center justify-center space-x-1 p-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span className='text-gray-800 text-xs'>View Details</span>
+                </Link>
+                <Link
+                  to={webRoutes.logisticsRequestEdit.replace(":id", request.id)}
+                  className="flex-1 flex items-center justify-center space-x-1 p-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-xs"
+                  style={{ 
+                    border: '2px solid transparent',
+                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                    backgroundOrigin: 'border-box',
+                    backgroundClip: 'padding-box, border-box'
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clipPath="url(#clip0_1655_9103)">
+                      <path d="M13.3309 0.669151C12.9343 0.273183 12.3968 0.0507813 11.8364 0.0507812C11.276 0.0507813 10.7385 0.273183 10.3419 0.669151L0.854592 10.1565C0.582905 10.4266 0.367487 10.748 0.220799 11.1019C0.0741119 11.4559 -0.000932153 11.8354 8.73905e-06 12.2186V13.4162C8.73905e-06 13.5709 0.0614669 13.7192 0.170863 13.8286C0.280259 13.938 0.428632 13.9995 0.583342 13.9995H1.78093C2.16404 14.0006 2.54356 13.9256 2.89752 13.7791C3.25148 13.6325 3.57284 13.4171 3.84301 13.1455L13.3309 3.65757C13.7267 3.26102 13.949 2.72363 13.949 2.16336C13.949 1.60309 13.7267 1.0657 13.3309 0.669151ZM3.01818 12.3207C2.68918 12.6475 2.24465 12.8315 1.78093 12.8328H1.16668V12.2186C1.16609 11.9887 1.2111 11.761 1.29911 11.5486C1.38713 11.3362 1.51639 11.1434 1.67943 10.9813L8.87951 3.78123L10.2212 5.1229L3.01818 12.3207ZM12.5055 2.83273L11.0437 4.29515L9.70201 2.9564L11.1644 1.49398C11.2525 1.40608 11.3571 1.33639 11.4721 1.28889C11.5871 1.24139 11.7104 1.21701 11.8348 1.21715C11.9593 1.21728 12.0825 1.24193 12.1974 1.28968C12.3123 1.33743 12.4167 1.40735 12.5046 1.49544C12.5925 1.58354 12.6622 1.68808 12.7097 1.80311C12.7572 1.91814 12.7816 2.0414 12.7815 2.16585C12.7813 2.2903 12.7567 2.4135 12.7089 2.52843C12.6612 2.64335 12.5913 2.74775 12.5032 2.83565L12.5055 2.83273Z" fill="url(#paint0_linear_1655_9103)"/>
+                    </g>
+                    <defs>
+                      <linearGradient id="paint0_linear_1655_9103" x1="0" y1="7.02514" x2="13.949" y2="7.02514" gradientUnits="userSpaceOnUse">
+                        <stop stopColor="#FFC000"/>
+                        <stop offset="1" stopColor="#FF8400"/>
+                      </linearGradient>
+                      <clipPath id="clip0_1655_9103">
+                        <rect width="14" height="14" fill="white"/>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                  <span style={{
+                    background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>Edit</span>
+                </Link>
               </div>
-
-              {/* Right Side - Budget */}
-              <div className="text-right">
-                <p className="text-xs text-gray-500 mb-2">Budget</p>
-                <p className="text-base font-bold text-gray-900">
-                  {request.budget_max 
-                    ? `${getCurrencySymbol(request.currency) || '$'}${parseFloat(request.budget_max).toLocaleString()}`
-                    : 'N/A'}
-                </p>
-              </div>
             </div>
-
-            {/* Created Date */}
-            {request.created_at && (
-              <p className="text-xs text-gray-400 mb-2 pb-4 border-b">
-                Created {formatDate(request.created_at)}
-              </p>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Link 
-                to={webRoutes.logisticsRequestDetail.replace(":id", request.id)} 
-                className="flex-1 flex items-center justify-center space-x-1 p-2 bg-yellow-100 text-gray-900 font-medium rounded-lg transition-all hover:opacity-90 text-sm"
-              >
-                <FileText className="w-4 h-4" />
-                <span className='text-gray-800 text-xs'>View Details</span>
-              </Link>
-              <Link
-                to={webRoutes.logisticsRequestEdit.replace(":id", request.id)}
-                className="flex-1 flex items-center justify-center space-x-1 p-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-xs"
-                style={{ 
-                  border: '2px solid transparent',
-                  backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
-                  backgroundOrigin: 'border-box',
-                  backgroundClip: 'padding-box, border-box'
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <g clipPath="url(#clip0_1655_9103)">
-                    <path d="M13.3309 0.669151C12.9343 0.273183 12.3968 0.0507813 11.8364 0.0507812C11.276 0.0507813 10.7385 0.273183 10.3419 0.669151L0.854592 10.1565C0.582905 10.4266 0.367487 10.748 0.220799 11.1019C0.0741119 11.4559 -0.000932153 11.8354 8.73905e-06 12.2186V13.4162C8.73905e-06 13.5709 0.0614669 13.7192 0.170863 13.8286C0.280259 13.938 0.428632 13.9995 0.583342 13.9995H1.78093C2.16404 14.0006 2.54356 13.9256 2.89752 13.7791C3.25148 13.6325 3.57284 13.4171 3.84301 13.1455L13.3309 3.65757C13.7267 3.26102 13.949 2.72363 13.949 2.16336C13.949 1.60309 13.7267 1.0657 13.3309 0.669151ZM3.01818 12.3207C2.68918 12.6475 2.24465 12.8315 1.78093 12.8328H1.16668V12.2186C1.16609 11.9887 1.2111 11.761 1.29911 11.5486C1.38713 11.3362 1.51639 11.1434 1.67943 10.9813L8.87951 3.78123L10.2212 5.1229L3.01818 12.3207ZM12.5055 2.83273L11.0437 4.29515L9.70201 2.9564L11.1644 1.49398C11.2525 1.40608 11.3571 1.33639 11.4721 1.28889C11.5871 1.24139 11.7104 1.21701 11.8348 1.21715C11.9593 1.21728 12.0825 1.24193 12.1974 1.28968C12.3123 1.33743 12.4167 1.40735 12.5046 1.49544C12.5925 1.58354 12.6622 1.68808 12.7097 1.80311C12.7572 1.91814 12.7816 2.0414 12.7815 2.16585C12.7813 2.2903 12.7567 2.4135 12.7089 2.52843C12.6612 2.64335 12.5913 2.74775 12.5032 2.83565L12.5055 2.83273Z" fill="url(#paint0_linear_1655_9103)"/>
-                  </g>
-                  <defs>
-                    <linearGradient id="paint0_linear_1655_9103" x1="0" y1="7.02514" x2="13.949" y2="7.02514" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#FFC000"/>
-                      <stop offset="1" stopColor="#FF8400"/>
-                    </linearGradient>
-                    <clipPath id="clip0_1655_9103">
-                      <rect width="14" height="14" fill="white"/>
-                    </clipPath>
-                  </defs>
-                </svg>
-                <span style={{
-                  background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>Edit</span>
-              </Link>
-            </div>
+          );
+        })
+      ) : (
+        <div className="col-span-full bg-white border rounded-xl p-12 text-center">
+          <div className="flex justify-center mb-4">
+            <FileText className="w-12 h-12 text-gray-300" />
           </div>
-        );
-      })}
+          <h4 className="text-gray-900 font-medium mb-2">No Requests Found</h4>
+          <p className="text-gray-500 text-sm mb-4">Try adjusting your search or filters to find requests</p>
+          <button 
+            onClick={() => {
+              setSearchQuery('');
+              setFilterStatus('all');
+            }}
+            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-gray-900 rounded-lg hover:bg-custom_yellow transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            <span>Clear Filters</span>
+          </button>
+        </div>
+      )}
     </div>
   </>
 )}
