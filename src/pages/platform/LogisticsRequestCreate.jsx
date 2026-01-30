@@ -16,7 +16,7 @@ const LogisticsRequestCreate = () => {
     console.log('Shipment assigned:', assignmentData);
     // Navigate to the request detail page to show the assigned shipment
     if (assignmentData.request?.id) {
-      navigate(webRoutes.logistics.requests.detail(assignmentData.request.id));
+      navigate(webRoutes.logisticsRequestDetail.replace(':id', assignmentData.request.id));
     }
   };
 

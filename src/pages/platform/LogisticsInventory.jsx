@@ -673,7 +673,7 @@ const LogisticsInventoryEnhanced = () => {
               <div className="flex lg:items-center gap-3 w-full lg:w-max">
               <button
                 onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-                className="w-[50%] lg:w-fit text-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
+                className="w-[50%] lg:w-fit justify-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Item
@@ -681,7 +681,7 @@ const LogisticsInventoryEnhanced = () => {
               <button 
                   onClick={handleExport}
                   disabled={loading || filteredInventory.length === 0}
-                  className="w-[50%] lg:w-fit text-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-[50%] lg:w-fit justify-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
                 >
                   {/* <Download className="w-4 h-4 mr-2" /> */}

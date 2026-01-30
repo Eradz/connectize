@@ -19,17 +19,19 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
   const [showProviderComparison, setShowProviderComparison] = useState(false);
   
   const [requestData, setRequestData] = useState({
+    title: '',
+    description: '',
     cargo_type: '',
     origin_address: '',
     destination_address: '',
-    pickup_date: '',
-    delivery_date: '',
+    pickup_date_requested: '',
+    delivery_date_requested: '',
     weight: '',
     volume: '',
     budget_min: '',
     budget_max: '',
-    special_instructions: '',
-    priority_level: 'standard',
+    special_requirements: '',
+    urgency: 'standard',
     insurance_required: false,
     insurance_value: '',
   allow_bids: true,
@@ -47,6 +49,12 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
         commodity_code: ''
       }
     ],
+    origin_contact_phone: '',
+    origin_contact_name: '',
+    origin_contact_email: '',
+    destination_contact_email: '',
+    destination_contact_name: '',
+    destination_contact_phone: '',
     contact_info: {
       pickup_contact: {
         name: '',
@@ -158,7 +166,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
         return requestData.cargo_type && 
                requestData.origin_address && 
                requestData.destination_address && 
-               requestData.pickup_date;
+               requestData.pickup_date_requested;
       case 2:
         return requestData.weight && 
                requestData.volume && 
@@ -194,8 +202,9 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
       // Format data for API submission
       const submitData = {
         ...requestData,
-        pickup_date: new Date(requestData.pickup_date).toISOString().split('T')[0],
-        delivery_date: requestData.delivery_date ? new Date(requestData.delivery_date).toISOString().split('T')[0] : null,
+
+        pickup_date_requested: new Date(requestData.pickup_date_requested).toISOString().split('T')[0],
+        delivery_date_requested: requestData.delivery_date_requested ? new Date(requestData.delivery_date_requested).toISOString().split('T')[0] : null,
         weight: parseFloat(requestData.weight),
         volume: parseFloat(requestData.volume),
         budget_min: parseFloat(requestData.budget_min),
@@ -216,15 +225,19 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
       };
 
       const response = await logisticsAPI.createRequest(submitData);
+      console.log('Request API Response:', response);
       
-      if (response.data) {
-        setCreatedRequest(response.data);
+      // Handle response - could be response.data or response directly
+      const responseData = response?.data || response;
+      
+      if (responseData && responseData.id) {
+        setCreatedRequest(responseData);
         toast.success('Shipment request created successfully!');
         setShowProviderComparison(true);
         setCurrentStep(5);
         
         if (onRequestCreated) {
-          onRequestCreated(response.data);
+          onRequestCreated(responseData);
         }
       } else {
         throw new Error('Failed to create request');
@@ -257,6 +270,35 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900">Basic Shipment Information</h3>
+
+            {/* Shipment Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Shipment Title *
+              </label>
+              <input
+                type="text"
+                value={requestData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., Oil Shipment to Lagos Port"
+                required
+              />
+            </div>
+          
+            {/* Shipment Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Shipment Description
+              </label>
+              <textarea
+                value={requestData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                rows="3"
+                placeholder="Provide additional context about your shipment request"
+              />
+            </div>
             
             {/* Cargo Type */}
             <div>
@@ -270,18 +312,15 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 required
               >
                 <option value="">Select cargo type</option>
-                <option value="general">General Cargo</option>
-                <option value="electronics">Electronics</option>
-                <option value="textiles">Textiles</option>
-                <option value="machinery">Machinery</option>
-                <option value="food">Food Products</option>
+                <option value="crude_oil">Crude Oil</option>
+                <option value="refined_products">Refined Products</option>
+                <option value="natural_gas">Natural Gas</option>
+                <option value="drilling_equipment">Drilling Equipment</option>
+                <option value="pipes">Pipes & Tubulars</option>
                 <option value="chemicals">Chemicals</option>
-                <option value="automotive">Automotive Parts</option>
-                <option value="medical">Medical Supplies</option>
-                <option value="documents">Documents</option>
-                <option value="fragile">Fragile Items</option>
+                <option value="general_cargo">General Cargo</option>
+                <option value="project_cargo">Project Cargo</option>
                 <option value="hazardous">Hazardous Materials</option>
-                <option value="other">Other</option>
               </select>
             </div>
 
@@ -323,8 +362,8 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 </label>
                 <input
                   type="date"
-                  value={requestData.pickup_date}
-                  onChange={(e) => handleInputChange('pickup_date', e.target.value)}
+                  value={requestData.pickup_date_requested}
+                  onChange={(e) => handleInputChange('pickup_date_requested', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   min={new Date().toISOString().split('T')[0]}
                   required
@@ -336,10 +375,10 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 </label>
                 <input
                   type="date"
-                  value={requestData.delivery_date}
-                  onChange={(e) => handleInputChange('delivery_date', e.target.value)}
+                  value={requestData.delivery_date_requested}
+                  onChange={(e) => handleInputChange('delivery_date_requested', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  min={requestData.pickup_date}
+                  min={requestData.pickup_date_requested}
                 />
               </div>
             </div>
@@ -561,14 +600,14 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 Priority Level
               </label>
               <select
-                value={requestData.priority_level}
-                onChange={(e) => handleInputChange('priority_level', e.target.value)}
+                value={requestData.urgency}
+                onChange={(e) => handleInputChange('urgency', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="low">Low - Cost effective, flexible timing</option>
+                {/* <option value="low">Low - Cost effective, flexible timing</option> */}
                 <option value="standard">Standard - Balanced cost and speed</option>
-                <option value="high">High - Fast delivery, premium service</option>
                 <option value="urgent">Urgent - Fastest possible delivery</option>
+                <option value="emergency">Emergency - Fast delivery, premium service</option>
               </select>
             </div>
 
@@ -631,8 +670,8 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 Special Instructions
               </label>
               <textarea
-                value={requestData.special_instructions}
-                onChange={(e) => handleInputChange('special_instructions', e.target.value)}
+                value={requestData.special_requirements}
+                onChange={(e) => handleInputChange('special_requirements', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 rows="4"
                 placeholder="Any special handling requirements, delivery instructions, or notes..."
@@ -646,22 +685,22 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 <div className="space-y-3">
                   <input
                     type="text"
-                    value={requestData.contact_info.pickup_contact.name}
-                    onChange={(e) => handleNestedInputChange('contact_info.pickup_contact.name', e.target.value)}
+                    value={requestData.origin_contact_name}
+                    onChange={(e) => handleNestedInputChange('origin_contact_name', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Contact name"
                   />
                   <input
                     type="tel"
-                    value={requestData.contact_info.pickup_contact.phone}
-                    onChange={(e) => handleNestedInputChange('contact_info.pickup_contact.phone', e.target.value)}
+                    value={requestData.origin_contact_phone}
+                    onChange={(e) => handleNestedInputChange('origin_contact_phone', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Phone number"
                   />
                   <input
                     type="email"
-                    value={requestData.contact_info.pickup_contact.email}
-                    onChange={(e) => handleNestedInputChange('contact_info.pickup_contact.email', e.target.value)}
+                    value={requestData.origin_contact_email}
+                    onChange={(e) => handleNestedInputChange('origin_contact_email', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Email address"
                   />
@@ -673,22 +712,22 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 <div className="space-y-3">
                   <input
                     type="text"
-                    value={requestData.contact_info.delivery_contact.name}
-                    onChange={(e) => handleNestedInputChange('contact_info.delivery_contact.name', e.target.value)}
+                    value={requestData.destination_contact_name}
+                    onChange={(e) => handleNestedInputChange('destination_contact_name', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Contact name"
                   />
                   <input
                     type="tel"
-                    value={requestData.contact_info.delivery_contact.phone}
-                    onChange={(e) => handleNestedInputChange('contact_info.delivery_contact.phone', e.target.value)}
+                    value={requestData.destination_contact_phone}
+                    onChange={(e) => handleNestedInputChange('destination_contact_phone', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Phone number"
                   />
                   <input
                     type="email"
-                    value={requestData.contact_info.delivery_contact.email}
-                    onChange={(e) => handleNestedInputChange('contact_info.delivery_contact.email', e.target.value)}
+                    value={requestData.destination_contact_email}
+                    onChange={(e) => handleNestedInputChange('destination_contact_email', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Email address"
                   />
@@ -726,8 +765,8 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 <div className="space-y-2 text-sm">
                   <p><strong>From:</strong> {requestData.origin_address.slice(0, 50)}...</p>
                   <p><strong>To:</strong> {requestData.destination_address.slice(0, 50)}...</p>
-                  <p><strong>Pickup:</strong> {requestData.pickup_date}</p>
-                  {requestData.delivery_date && <p><strong>Delivery:</strong> {requestData.delivery_date}</p>}
+                  <p><strong>Pickup:</strong> {requestData.pickup_date_requested}</p>
+                  {requestData.delivery_date_requested && <p><strong>Delivery:</strong> {requestData.delivery_date_requested}</p>}
                 </div>
               </div>
 
@@ -738,7 +777,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 </h4>
                 <div className="space-y-2 text-sm">
                   <p><strong>Budget:</strong> ${requestData.budget_min} - ${requestData.budget_max}</p>
-                  <p><strong>Priority:</strong> {requestData.priority_level}</p>
+                  <p><strong>Priority:</strong> {requestData.urgency}</p>
                   <p><strong>Insurance:</strong> {requestData.insurance_required ? 'Yes' : 'No'}</p>
                 </div>
               </div>
@@ -751,7 +790,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
                 <div className="space-y-2 text-sm">
                   <p><strong>Special Instructions:</strong></p>
                   <p className="text-gray-600">
-                    {requestData.special_instructions || 'None specified'}
+                    {requestData.special_requirements || 'None specified'}
                   </p>
                 </div>
               </div>
