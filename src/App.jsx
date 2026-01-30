@@ -149,6 +149,7 @@ import SellerPayments from "./pages/marketplace/SellerPayments";
 
 // Global prefetch for instant loading
 import GlobalPrefetch from "./components/GlobalPrefetch";
+import LogisticsInventoryCreate from "./pages/platform/LogisticsInventoryCreate";
 
 function App() {
   // Helper function to convert absolute paths to relative paths for nested routes
@@ -312,7 +313,7 @@ function App() {
           {/* Logistics Hub */}
           <Route path="logistics" element={<LogisticsDashboard />} />
           <Route path="logistics/inventory" element={<LogisticsInventory />} />
-          <Route path="logistics/inventory/create" element={<LogisticsInventoryForm />} />
+          <Route path="logistics/inventory/create" element={<LogisticsInventoryCreate />} />
           <Route path="logistics/inventory/:id/edit" element={<LogisticsInventoryEdit />} />
           <Route path="logistics/inventory/:id" element={<LogisticsInventoryDetailView />} />
           <Route path="logistics/requests" element={<LogisticsRequestList />} />
