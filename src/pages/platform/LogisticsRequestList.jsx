@@ -182,7 +182,7 @@ const LogisticsRequestList = () => {
       {/* Header */}
       <div className="">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between py-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between py-6 gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Shipment Requests</h1>
               <p className="text-gray-600 mt-1">Manage your marketplace orders</p>
@@ -248,7 +248,7 @@ const LogisticsRequestList = () => {
           </div>
         </div>
 
-        <h1 className="text-xl font-medium text-gray-900">My Request</h1>
+        <h1 className="text-xl font-medium text-gray-900">{showMineOnly ? 'My Requests' : 'All Requests'}</h1>
 
         {/* Request Grid */}
         {filteredRequests.length === 0 ? (
