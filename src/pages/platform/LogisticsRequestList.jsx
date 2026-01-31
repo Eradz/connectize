@@ -43,21 +43,12 @@ const LogisticsRequestList = () => {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      console.log('🔍 Debug Info:', {
-        showMineOnly,
-        statusFilter,
-        searchTerm,
-        userId,
-        session: session?.user
-      });
-      
       const response = await logisticsAPI.getRequests({
         mine: showMineOnly ? 'true' : undefined,
         status: statusFilter,
         search: searchTerm || undefined,
       });
       
-      console.log('📡 API Response:', response);
       
       // Handle paginated and non-paginated responses
       const data = response?.data ?? response;
@@ -148,16 +139,6 @@ const LogisticsRequestList = () => {
     // When "My Requests" is selected, the API already filters by owner.
     // Avoid client-side owner filtering to prevent hiding results when userId isn't loaded yet.
     const matchesOwner = true;
-    
-    console.log('🔍 Filtering request:', {
-      id: request.id,
-      requested_by: request.requested_by,
-      userId,
-      isOwner,
-      showMineOnly,
-      matchesOwner,
-      matches: matchesSearch && matchesStatus && matchesOwner
-    });
     
     return matchesSearch && matchesStatus && matchesOwner;
   });
@@ -284,7 +265,7 @@ const LogisticsRequestList = () => {
                       </p>
                     </div>
                     <button
-                      onClick={() => navigate(`${webRoutes.logisticsRequests}/${request.id}`)}
+                      onClick={() => navigate(webRoutes.logisticsRequestEdit.replace(':id', request.id))}
                       className="flex items-center bg-pale_yellow p-2 hover:bg-gold rounded-lg transition-colors"
                       title="Edit"
                     >

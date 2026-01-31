@@ -2,7 +2,7 @@
  * Enhanced Shipment Request Flow
  * Removes premature carrier selection and implements proper request → comparison → assignment workflow
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
   Package, MapPin, Calendar, DollarSign, FileText, 
@@ -12,7 +12,7 @@ import {
 import { logisticsAPI } from '../../api-services/logistics';
 import ProviderComparisonSystem from './ProviderComparisonSystem';
 
-const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) => {
+const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isEditing = false, initialData = null, requestId = null }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [createdRequest, setCreatedRequest] = useState(null);
@@ -68,6 +68,35 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
       }
     }
   });
+
+  // Initialize form data when editing
+  useEffect(() => {
+    if (isEditing && initialData) {
+      console.log('Initializing form with data:', initialData);
+      setRequestData(prev => ({
+        ...prev,
+        title: initialData.title || '',
+        description: initialData.description || '',
+        cargo_type: initialData.cargo_type || '',
+        origin_address: initialData.origin_address || '',
+        destination_address: initialData.destination_address || '',
+        pickup_date_requested: initialData.pickup_date_requested || '',
+        delivery_date_requested: initialData.delivery_date_requested || '',
+        weight: initialData.weight || '',
+        volume: initialData.volume || '',
+        budget_min: initialData.budget_min || '',
+        budget_max: initialData.budget_max || '',
+        special_requirements: initialData.special_requirements || '',
+        urgency: initialData.urgency || 'standard',
+        insurance_required: initialData.insurance_required || false,
+        insurance_value: initialData.insurance_value || '',
+        items: initialData.items && initialData.items.length > 0 ? initialData.items : prev.items,
+      }));
+      if (initialData.id) {
+        setCreatedRequest(initialData);
+      }
+    }
+  }, [isEditing, initialData]);
 
   const steps = [
     { id: 1, title: 'Basic Information', description: 'Cargo type, addresses, and dates' },
@@ -224,7 +253,11 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
         }))
       };
 
-      const response = await logisticsAPI.createRequest(submitData);
+      // Use update API if editing, create API if creating
+      const response = isEditing && requestId 
+        ? await logisticsAPI.updateRequest(requestId, submitData)
+        : await logisticsAPI.createRequest(submitData);
+      
       console.log('Request API Response:', response);
       
       // Handle response - could be response.data or response directly
@@ -232,7 +265,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
       
       if (responseData && responseData.id) {
         setCreatedRequest(responseData);
-        toast.success('Shipment request created successfully!');
+        toast.success(isEditing ? 'Shipment request updated successfully!' : 'Shipment request created successfully!');
         setShowProviderComparison(true);
         setCurrentStep(5);
         
@@ -240,12 +273,12 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned }) =
           onRequestCreated(responseData);
         }
       } else {
-        throw new Error('Failed to create request');
+        throw new Error(isEditing ? 'Failed to update request' : 'Failed to create request');
       }
       
     } catch (error) {
-      console.error('Request creation error:', error);
-      toast.error('Failed to create request', {
+      console.error('Request submission error:', error);
+      toast.error(isEditing ? 'Failed to update request' : 'Failed to create request', {
         description: error.response?.data?.error || error.message || 'Please try again'
       });
     } finally {
