@@ -559,11 +559,28 @@ const LogisticsHubDashboard = () => {
 
   const filterInventory = (inventory) => {
     return inventory.filter((item) => {
-      return (
+      // Search filter
+      const matchesSearch = 
         item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.sku?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+        item.sku?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Status filter
+      let matchesStatus = true;
+      if (filterStatus !== 'all') {
+        const reorderPoint = item.reorder_point || item.minimum_stock || 0;
+        const currentStock = item.current_stock || 0;
+        
+        if (filterStatus === 'in_stock') {
+          matchesStatus = currentStock > reorderPoint;
+        } else if (filterStatus === 'low_stock') {
+          matchesStatus = currentStock <= reorderPoint && currentStock > 0;
+        } else if (filterStatus === 'out_of_stock') {
+          matchesStatus = currentStock === 0;
+        }
+      }
+      
+      return matchesSearch && matchesStatus;
     });
   };
 
@@ -1004,7 +1021,7 @@ const LogisticsHubDashboard = () => {
   <>
     {/* Search and Filter */}
     <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-      <div className="relative flex-1 max-w-md w-full">
+      <div className="relative flex-1 w-full">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
@@ -1161,8 +1178,8 @@ const LogisticsHubDashboard = () => {
 {activeTab === 'requests' && (
   <>
     {/* Search and Filter */}
-    <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-      <div className="relative flex-1 max-w-md w-full">
+    <div className="flex flex-row items-center justify-between mb-6 gap-4">
+      <div className="relative flex-1 w-full">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
@@ -1367,21 +1384,43 @@ const LogisticsHubDashboard = () => {
 
 {activeTab === 'inventory' && (
                         <div className="space-y-4">
+                          {/* Search and Filter */}
+                          <div className="flex flex-row items-center justify-between mb-6 gap-4">
+                            <div className="relative flex-1 w-full">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                              <input
+                                type="text"
+                                placeholder="Search by name, location, or SKU..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                              />
+                            </div>
+                            
+                            {/* Status Filter for Inventory */}
+                            <select
+                              value={filterStatus}
+                              onChange={(e) => setFilterStatus(e.target.value)}
+                              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            >
+                              <option value="all">All Status</option>
+                              <option value="in_stock">In Stock</option>
+                              <option value="low_stock">Low Stock</option>
+                              <option value="out_of_stock">Out of Stock</option>
+                            </select>
+
+                          </div>
+
                           <div className="flex items-center justify-between">
                             <h3 className="text-lg font-semibold text-gray-900">Inventory Management</h3>
-                            <div className="flex space-x-2">
-                              {/* <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
-                                <Filter className="w-4 h-4" />
-                              </button> */}
-                              <Link to={webRoutes.logisticsInventory} className="bg-gold/80 hover:bg-gold text-gray-800 rounded-lg px-3 py-2">
-                                See More
-                              </Link>
-                            </div>
+                            <Link to={webRoutes.logisticsInventory} className="bg-gold/80 hover:bg-gold text-gray-800 rounded-lg px-3 py-2 whitespace-nowrap">
+                              See More
+                            </Link>
                           </div>
           
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {dashboardData.inventory.data.length > 0 ? (
-                              dashboardData.inventory.data.map((item) => (
+                            {filterInventory(dashboardData.inventory.data).length > 0 ? (
+                              filterInventory(dashboardData.inventory.data).map((item) => (
                                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-4">
                                   <div className='q'>
                                     <div className="flex items-center justify-between mb-3">
@@ -1434,9 +1473,17 @@ const LogisticsHubDashboard = () => {
                             ) : (
                               <div className="col-span-3 text-center py-8 text-gray-500">
                                 <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                                <p>No inventory items found</p>
-                                <p className="text-sm mb-4">Add inventory items to get started{userIsStaff ? ' or view all items across users.' : ''}</p>
+                                <p className="font-medium">No inventory items found</p>
+                                <p className="text-sm mb-4">Try adjusting your search or filters to find inventory items{userIsStaff ? ', or view all items across users.' : '.'}</p>
                                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                                  {searchQuery && (
+                                    <button
+                                      onClick={() => setSearchQuery('')}
+                                      className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
+                                    >
+                                      <Search className="w-4 h-4 mr-2" /> Clear Search
+                                    </button>
+                                  )}
                                   <Link
                                     to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
                                     className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
