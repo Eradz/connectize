@@ -695,7 +695,7 @@ const LogisticsHubDashboard = () => {
           {activeTab === 'overview' && (
             <>
               {/* Metrics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white flex items-center flex-col p-6 rounded-xl border">
                 <div className="flex justify-center items-center text-center mb-4">
                   <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -804,7 +804,7 @@ const LogisticsHubDashboard = () => {
               {/* Two Column Layout */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - 2/3 width */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="order-2 md:order-1 lg:col-span-2 space-y-6">
                   {/* Recent Shipments */}
                   <div>
                     <div className="flex items-center justify-between mb-4">
@@ -922,7 +922,7 @@ const LogisticsHubDashboard = () => {
                 </div>
 
                 {/* Right Column - 1/3 width */}
-                <div className="space-y-6">
+                <div className="order-1 md:order-2 space-y-6">
                   {/* Request Statistics */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Statistics</h3>
@@ -932,15 +932,15 @@ const LogisticsHubDashboard = () => {
                         <p className="text-xs text-gray-600">Total Shipment Requests</p>
                       </div>
                       <div className="bg-white border rounded-xl p-4 text-center">
-                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.pendingQuotes}</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.requests.data.filter(r => r.status === 'pending').length}</p>
                         <p className="text-xs text-gray-600">Pending Quotes</p>
                       </div>
                       <div className="bg-white border rounded-xl p-4 text-center">
-                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.quoted}</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.requests.data.filter(r => r.status === 'quoted').length}</p>
                         <p className="text-xs text-gray-600">Quoted</p>
                       </div>
                       <div className="bg-white border rounded-xl p-4 text-center">
-                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.analytics.awarded}</p>
+                        <p className="text-3xl font-bold text-gray-900 mb-1">{dashboardData.requests.data.filter(r => r.status === 'awarded').length}</p>
                         <p className="text-xs text-gray-600">Awarded</p>
                       </div>
                     </div>
