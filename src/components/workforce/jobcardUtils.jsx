@@ -81,3 +81,35 @@ import { Briefcase, Clock, ExternalLink, Eye, Users } from "lucide-react";
     if (diffInDays < 7) return `${diffInDays}d ago`;
     return `${Math.floor(diffInDays / 7)}w ago`;
   };
+
+    export const formatDate = (dateString) => {
+    if (!dateString) return 'Not Reviewed Yet';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  export const getStatusColor = (status) => {
+    switch (status) {
+      case 'submitted': return 'bg-green-200 text-green-900';
+      case 'under_review': return 'bg-blue-100 text-blue-800';
+      case 'shortlisted': return 'bg-cyan-100 text-cyan-800';
+      case 'interview_scheduled': return 'bg-purple-100 text-purple-800';
+      case 'offer_made': return 'bg-green-100 text-green-800';
+      case 'hired': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      case 'withdrawn': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+  export const getStatusBackgroundColor = (status) => {
+    switch (status) {
+      case 'submitted': return 'bg-green-300';
+      case 'under_review': return 'bg-blue-100';
+      case 'shortlisted': return 'bg-cyan-100';
+      case 'interview_scheduled': return 'bg-purple-100';
+      case 'offer_made': return 'bg-green-100';
+      case 'hired': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent';
+      case 'rejected': return 'bg-red-100';
+      case 'withdrawn': return 'bg-gray-100';
+      default: return 'bg-gray-100';
+    }
+  };
