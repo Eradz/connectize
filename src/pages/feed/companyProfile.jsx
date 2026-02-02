@@ -121,7 +121,7 @@ const CompanyProfile = React.memo(() => {
     </div>
   </div>
 
-  {/* Navigation Tabs - UPDATED STYLING */}
+
   <div className="flex gap-8 border-b overflow-x-auto mb-6">
     {["Activities", "Services", "Products", "Deal Room", "Events", "Work Force"].map((tab) => (
       <button
@@ -146,8 +146,8 @@ const CompanyProfile = React.memo(() => {
   {activeTab === "Events" && <EventsSection company={company} />}
   {activeTab === "Work Force" && <WorkForceSection company={company} />}
   {activeTab === "Activities" && <div>Activities content coming soon...</div>}
-  {activeTab === "Services" && <div>Services content coming soon...</div>}
-  {activeTab === "Products" && <div>Products content coming soon...</div>}
+  {activeTab === "Services" && <ServicesSection company={company} />}
+ {activeTab === "Products" && <ProductsSection company={company} />}
   {activeTab === "Deal Room" && <DealRoomSection company={company} />}
 </ProfileSection>
       </section>
@@ -695,7 +695,7 @@ const WorkForceSection = React.memo(({ company }) => {
 });
 
 const DealRoomSection = React.memo(({ company }) => {
-  const [activeTab, setActiveTab] = useState("My Deals");
+  const [activeTab, setActiveTab] = useState("My Participants");
   
   const tabs = ["My Deals", "My Participants"];
   
@@ -751,6 +751,41 @@ const DealRoomSection = React.memo(({ company }) => {
     }
   ];
 
+    const participants = [
+    {
+      id: 1,
+      title: "RENO Oil Platform",
+      description: "Secure collaboration spaces for M&A and partnerships",
+      dateCreated: "7/10/2025",
+      documents: 12,
+      participantCount: 23
+    },
+    {
+      id: 2,
+      title: "RENO Oil Platform",
+      description: "Secure collaboration spaces for M&A and partnerships",
+      dateCreated: "7/10/2025",
+      documents: 12,
+      participantCount: 23
+    },
+    {
+      id: 3,
+      title: "RENO Oil Platform",
+      description: "Secure collaboration spaces for M&A and partnerships",
+      dateCreated: "7/10/2025",
+      documents: 12,
+      participantCount: 23
+    },
+    {
+      id: 4,
+      title: "RENO Oil Platform",
+      description: "Secure collaboration spaces for M&A and partnerships",
+      dateCreated: "7/10/2025",
+      documents: 12,
+      participantCount: 23
+    }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header with Tabs and Button */}
@@ -777,113 +812,309 @@ const DealRoomSection = React.memo(({ company }) => {
       </div>
 
       {/* Section Title */}
-      <h2 className="text-2xl font-bold text-gray-900">My Deals</h2>
+      <h2 className="text-2xl font-bold text-gray-900">{activeTab}</h2>
 
-      {/* Deal Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {deals.map((deal) => (
-          <div key={deal.id} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4 hover:shadow-lg transition-shadow">
-            {/* Icon */}
-            <div className="w-12 h-12 bg-[#FFE8A3] rounded-xl flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M14 2V8H20" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 13H8" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 17H8" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M10 9H9H8" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
 
-            {/* Title and Type */}
-            <div>
-              <h3 className="font-semibold text-lg mb-2 text-gray-900">{deal.title}</h3>
-              <span className="inline-block bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200">
-                {deal.type}
-              </span>
-            </div>
-
-            {/* Description */}
-            <p className="text-sm text-gray-600 leading-relaxed">{deal.description}</p>
-
-            {/* Details */}
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Estimated value :</span>
-                <span className="font-semibold text-gray-900">{deal.estimatedValue}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Target closed :</span>
-                <span className="font-semibold text-gray-900">{deal.targetClosed}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Status</span>
-                {/* UPDATED STATUS STYLING */}
-                <span 
-                  className="font-semibold px-3 py-1 rounded-md"
-                  style={{
-                    color: '#00D707',
-                    backgroundColor: '#00D7071C'
-                  }}
-                >
-                  {deal.status}
-                </span>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
-                {/* Participants Icon */}
-                <span className="flex items-center gap-1.5">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5"/>
-                    <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  <span className="font-medium text-gray-700">{deal.participants}</span>
-                </span>
-                
-                {/* Files Icon */}
-                <span className="flex items-center gap-1.5">
-                  <svg width="16" height="16" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g clipPath="url(#clip0_1984_10255)">
-                      <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_1984_10255">
-                        <rect width="19" height="19" fill="white"/>
-                      </clipPath>
-                    </defs>
-                  </svg>
-                  <span className="font-medium text-gray-700">{deal.files}</span>
-                </span>
-                
-                {/* Verified Badge */}
-                {deal.verified && (
-                  <span className="flex items-center gap-1.5 text-gray-700">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clipPath="url(#clip0_1984_10257)">
-                        <path d="M12.6667 0H3.33333C2.4496 0.00105857 1.60237 0.352588 0.97748 0.97748C0.352588 1.60237 0.00105857 2.4496 0 3.33333L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V3.33333C15.9989 2.4496 15.6474 1.60237 15.0225 0.97748C14.3976 0.352588 13.5504 0.00105857 12.6667 0V0ZM14.6667 12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V3.33333C1.33333 2.8029 1.54405 2.29419 1.91912 1.91912C2.29419 1.54405 2.8029 1.33333 3.33333 1.33333H12.6667C13.1971 1.33333 13.7058 1.54405 14.0809 1.91912C14.456 2.29419 14.6667 2.8029 14.6667 3.33333V12.6667Z" fill="#374957"/>
-                        <path d="M6.2222 10.6132L3.60954 8.00052C3.48452 7.87554 3.31498 7.80533 3.1382 7.80533C2.96143 7.80533 2.79189 7.87554 2.66687 8.00052C2.54189 8.12554 2.47168 8.29508 2.47168 8.47185C2.47168 8.64863 2.54189 8.81817 2.66687 8.94319L5.27954 11.5558C5.40336 11.6797 5.55037 11.778 5.71217 11.845C5.87397 11.9121 6.0474 11.9466 6.22254 11.9466C6.39768 11.9466 6.5711 11.9121 6.73291 11.845C6.89471 11.778 7.04172 11.6797 7.16554 11.5558L13.3335 5.38786C13.4585 5.26284 13.5287 5.0933 13.5287 4.91652C13.5287 4.73975 13.4585 4.57021 13.3335 4.44519C13.2085 4.32021 13.039 4.25 12.8622 4.25C12.6854 4.25 12.5159 4.32021 12.3909 4.44519L6.2222 10.6132Z" fill="#374957"/>
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_1984_10257">
-                          <rect width="16" height="16" fill="white"/>
-                        </clipPath>
-                      </defs>
-                    </svg>
-                    <span className="font-medium text-xs">Verified</span>
-                  </span>
-                )}
-              </div>
-              
-              {/* View Details Button */}
-              <button className="px-4 py-2 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl text-xs sm:text-sm font-medium text-gray-900 transition-colors whitespace-nowrap">
-                View Details
-              </button>
-            </div>
+{/* Content based on active tab */}
+{activeTab === "My Participants" ? (
+  // My Participants Cards
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {participants.map((participant) => (
+      <div key={participant.id} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4 hover:shadow-lg transition-shadow">
+        <h3 className="font-semibold text-lg text-gray-900">{participant.title}</h3>
+        <p className="text-sm text-gray-600 leading-relaxed">{participant.description}</p>
+        
+        <div className="space-y-3 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="3" width="12" height="11" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M5 1V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M11 1V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span>Date Created: {participant.dateCreated}</span>
           </div>
-        ))}
+          
+          <div className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M9 1H3C2.44772 1 2 1.44772 2 2V14C2 14.5523 2.44772 15 3 15H13C13.5523 15 14 14.5523 14 14V6L9 1Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M9 1V6H14" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+            <span>Documents: {participant.documents}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M2 14C2 11 4.5 9 8 9C11.5 9 14 11 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span>Participants: {participant.participantCount}</span>
+          </div>
+        </div>
+        
+        <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 transition-colors">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3C4.5 3 1.5 5.5 0.5 8C1.5 10.5 4.5 13 8 13C11.5 13 14.5 10.5 15.5 8C14.5 5.5 11.5 3 8 3Z" stroke="currentColor" strokeWidth="1.5"/>
+            <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
+          </svg>
+          View
+        </button>
       </div>
+    ))}
+  </div>
+) : (
+  // My Deals Cards
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {deals.map((deal) => (
+      <div key={deal.id} className="bg-white border border-gray-200 rounded-xl p-6 space-y-4 hover:shadow-lg transition-shadow">
+        {/* Icon */}
+        <div className="w-12 h-12 bg-[#FFE8A3] rounded-xl flex items-center justify-center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M14 2V8H20" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M16 13H8" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M16 17H8" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M10 9H9H8" stroke="#374957" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+
+        {/* Title and Type */}
+        <div>
+          <h3 className="font-semibold text-lg mb-2 text-gray-900">{deal.title}</h3>
+          <span className="inline-block bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200">
+            {deal.type}
+          </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-sm text-gray-600 leading-relaxed">{deal.description}</p>
+
+        {/* Details */}
+        <div className="space-y-2.5 text-sm">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Estimated value :</span>
+            <span className="font-semibold text-gray-900">{deal.estimatedValue}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Target closed :</span>
+            <span className="font-semibold text-gray-900">{deal.targetClosed}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">Status</span>
+            <span 
+              className="font-semibold px-3 py-1 rounded-md"
+              style={{
+                color: '#00D707',
+                backgroundColor: '#00D7071C'
+              }}
+            >
+              {deal.status}
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-3 text-sm text-gray-600 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span className="font-medium text-gray-700">{deal.participants}</span>
+            </span>
+            
+            <span className="flex items-center gap-1.5">
+              <svg width="16" height="16" viewBox="0 0 19 19" fill="none">
+                <g clipPath="url(#clip0_1984_10255)">
+                  <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584Z" fill="#374957"/>
+                </g>
+              </svg>
+              <span className="font-medium text-gray-700">{deal.files}</span>
+            </span>
+            
+            {deal.verified && (
+              <span className="flex items-center gap-1.5 text-gray-700">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <g clipPath="url(#clip0_1984_10257)">
+                    <path d="M12.6667 0H3.33333C2.4496 0.00105857 1.60237 0.352588 0.97748 0.97748C0.352588 1.60237 0.00105857 2.4496 0 3.33333L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V3.33333C15.9989 2.4496 15.6474 1.60237 15.0225 0.97748C14.3976 0.352588 13.5504 0.00105857 12.6667 0V0ZM14.6667 12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V3.33333C1.33333 2.8029 1.54405 2.29419 1.91912 1.91912C2.29419 1.54405 2.8029 1.33333 3.33333 1.33333H12.6667C13.1971 1.33333 13.7058 1.54405 14.0809 1.91912C14.456 2.29419 14.6667 2.8029 14.6667 3.33333V12.6667Z" fill="#374957"/>
+                    <path d="M6.2222 10.6132L3.60954 8.00052C3.48452 7.87554 3.31498 7.80533 3.1382 7.80533C2.96143 7.80533 2.79189 7.87554 2.66687 8.00052C2.54189 8.12554 2.47168 8.29508 2.47168 8.47185C2.47168 8.64863 2.54189 8.81817 2.66687 8.94319L5.27954 11.5558C5.40336 11.6797 5.55037 11.778 5.71217 11.845C5.87397 11.9121 6.0474 11.9466 6.22254 11.9466C6.39768 11.9466 6.5711 11.9121 6.73291 11.845C6.89471 11.778 7.04172 11.6797 7.16554 11.5558L13.3335 5.38786C13.4585 5.26284 13.5287 5.0933 13.5287 4.91652C13.5287 4.73975 13.4585 4.57021 13.3335 4.44519C13.2085 4.32021 13.039 4.25 12.8622 4.25C12.6854 4.25 12.5159 4.32021 12.3909 4.44519L6.2222 10.6132Z" fill="#374957"/>
+                  </g>
+                </svg>
+                <span className="font-medium text-xs">Verified</span>
+              </span>
+            )}
+          </div>
+          
+          <button className="px-4 py-2 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl text-xs sm:text-sm font-medium text-gray-900 transition-colors whitespace-nowrap">
+            View Details
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+    </div>
+  );
+});
+
+// ==========================================
+// SERVICES SECTION COMPONENT (with bottom "View more services" button)
+// Add this at the bottom of your file (before export default CompanyProfile)
+// ==========================================
+
+const ServicesSection = React.memo(({ company }) => {
+  // Use actual company services data
+  const services = company?.services || [];
+
+  // Helper function to strip HTML tags and truncate text
+  const getTruncatedText = (htmlString, maxLength = 150) => {
+    if (!htmlString) return "No description available";
+    
+    // Strip HTML tags
+    const strippedText = htmlString.replace(/<[^>]*>/g, ' ')
+                                   .replace(/&nbsp;/g, ' ')
+                                   .replace(/\s+/g, ' ')
+                                   .trim();
+    
+    // Truncate if longer than maxLength
+    if (strippedText.length > maxLength) {
+      return strippedText.substring(0, maxLength) + '...';
+    }
+    
+    return strippedText;
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Services List */}
+      {services.length > 0 ? (
+        <>
+          {services.map((service) => (
+            <div key={service.id} className="bg-white border rounded-xl p-6 space-y-4 hover:shadow-md transition">
+              {/* Service Header */}
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-semibold text-gray-900">{service.title || service.name}</h3>
+                
+                {/* Bookmark Icon */}
+                <button className="text-gray-400 hover:text-gray-600">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Description - Truncated */}
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {getTruncatedText(service.description || service.about, 150)}
+              </p>
+
+              {/* Footer with Company Info and View Button */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={company?.logo || "images/default-company-logo.png"} 
+                      alt={company?.company_name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-xs font-bold">' + (company?.company_name?.charAt(0) || 'C') + '</span>';
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{company?.company_name || "Company"}</span>
+                </div>
+
+                {/* View Button with Link */}
+                <Link 
+                  to={`/services/${service.id}`}
+                  className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2 rounded-full text-sm font-medium transition-colors"
+                >
+                  View
+                </Link>
+              </div>
+            </div>
+          ))}
+
+          {/* "View more services" button at the bottom - centered */}
+          <div className="flex justify-center pt-6">
+            <Link 
+              to={`/co/services?company=${company?.id}`}
+              className="bg-yellow-400 hover:bg-yellow-500 px-8 py-3 rounded-full text-sm font-medium transition-colors"
+            >
+              View more services
+            </Link>
+          </div>
+        </>
+      ) : (
+        /* Empty State */
+        <div className="text-center py-12">
+          <p className="text-gray-500">No services available yet</p>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const ProductsSection = React.memo(({ company }) => {
+  const products = company?.products || [];
+
+  return (
+    <div className="space-y-6">
+      {products.length > 0 ? (
+        <>
+          {/* Products Grid - 3 columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <Link 
+                key={product.id} 
+                to={`/products/${product.id}`}
+                className="block"
+              >
+                <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition">
+                  {/* Product Image */}
+                  <div className="aspect-[4/3] bg-gray-200">
+                    <img 
+                      src={product.image || product.product_image || product.images?.[0] || "/images/default-product.png"}
+                      alt={product.name || product.title || "Product"}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { 
+                        e.target.onerror = null;
+                        e.target.src = "/images/default-product.png"; 
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Product Info */}
+                  <div className="p-4 space-y-1">
+                    <h3 className="font-semibold text-base text-gray-900 line-clamp-1">
+                      {product.name || product.title || product.product_name || "Untitled Product"}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {company?.company_name || "Connectize"}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* View more products button */}
+          <div className="flex justify-center pt-4">
+            <Link 
+              to={`/products?company=${company?.id}`}
+              className="bg-yellow-400 hover:bg-yellow-500 px-8 py-3 rounded-full text-sm font-medium transition-colors inline-block"
+            >
+              View more products
+            </Link>
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No products available yet</p>
+        </div>
+      )}
     </div>
   );
 });
