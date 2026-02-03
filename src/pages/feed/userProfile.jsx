@@ -8,7 +8,7 @@ import { Badge } from "@chakra-ui/react";
 import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import React, { use, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getUserById } from "../../api-services/users";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
@@ -29,6 +29,8 @@ import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard"
 import { dealRoomService, workforceService } from "../../api-services/oilgas";
 import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
 import clsx from "clsx";
+import { webRoutes } from "../../lib/webRoutes";
+import Scroll from "../../components/Scroll";
 
 const emptyWord = "Not Added";
 
@@ -157,7 +159,7 @@ export default function UserProfile() {
   }
 
   return (
-    <section className="rounded-md overflow-hidden">
+    <section className="rounded-md overflow-hidden bg-white px-6">
       <SEO
         title={`${paramUser?.first_name || paramUser?.email || ""} ${
           paramUser?.last_name || ""
@@ -175,34 +177,36 @@ export default function UserProfile() {
           )}
 
         <section className="flex max-lg:flex-col gap-y-4 gap-x-3 w-full">
-          <section className="space-y-4 lg:w-[65.5%] shrink-0">
+          <section className="space-y-4 lg:w-[59%] shrink-0">
 
             {/* Tabbed About Section */}
-            <ProfileSection title="">
+            <section >
               <div className="border-b">
-                <div className="flex gap-8">
-                  {[
-                    { id: 'about', label: 'About', icon: null },
-                    { id: 'events', label: 'Events', icon: null },
-                    { id: 'workforce', label: 'Workforce', icon: null },
-                    { id: 'deals', label: 'My Deals', icon:null }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`pb-4 px-2 font-medium text-sm transition-all ${
-                        activeTab === tab.id
-                          ? 'text-gray-900 border-b-2 border-gold'
-                          : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {tab.icon && <tab.icon className="w-4 h-4" />}
-                        {tab.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                <Scroll >
+                  <div className="flex gap-2 lg:gap-8 min-w-min">
+                    {[
+                      { id: 'about', label: 'About', icon: null },
+                      { id: 'events', label: 'Events', icon: null },
+                      { id: 'workforce', label: 'Workforce', icon: null },
+                      { id: 'deals', label: 'My Deals', icon:null }
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`pb-4 px-2 font-medium text-sm transition-all ${
+                          activeTab === tab.id
+                            ? 'text-gray-900 border-b-2 border-gold'
+                            : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {tab.icon && <tab.icon className="w-4 h-4" />}
+                          {tab.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </Scroll>
               </div>
 
               {/* Tab Content */}
@@ -295,9 +299,16 @@ export default function UserProfile() {
 
                 {activeTab === 'workforce' && (
                   applications.length > 0 ? (
-                    applications.map((job) => (
-                      <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
-                    ))
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold mb-4">My applied jobs</h2>
+                        <Link to={webRoutes.workforceMyAppliedJobs} className="bg-gold p-2 rounded-lg">All applications</Link>
+                      </div>
+
+                      {applications.slice(0,2).map((job) => (
+                        <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
+                      ))}
+                    </div>
                   ) : (
                     <div className="py-12 text-center">
                       <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -307,12 +318,19 @@ export default function UserProfile() {
                   )
                 )}
 
-                {activeTab === 'deals' && (
+                {activeTab === 'deals' && (    
                   jobs.length > 0 ? (
-                    <div className="md:bg-white border-gray-200 md:px-4  grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {jobs.slice(0,3).map((job) => (
-                        <DealRoomCard key={job.id} deal={job} />
-                      ))}
+                    <div >
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-lg font-semibold">My Deals</h2>
+                        <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">Visit Deals</Link>
+                      </div>
+
+                      <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {jobs.slice(0,3).map((job) => (
+                          <DealRoomCard key={job.id} deal={job} />
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="py-12 text-center">
@@ -323,7 +341,7 @@ export default function UserProfile() {
                   )
                 )}
               </div>
-            </ProfileSection>
+            </section>
 
             <ProfileSection title="Badges">
               <section className="flex flex-wrap gap-x-4 gap-y-2">
@@ -337,14 +355,72 @@ export default function UserProfile() {
             </ProfileSection>
           </section>
 
-          <ProfileSection title="People Associated" className="h-fit lg:w-1/3">
-            <SuggestionList
-              hasSeeMore
-              associated={false}
-              thisUser={paramUser}
-              viewMoreUrl={`/co/representatives/?user=${paramUser?.id}&status=True`}
-            />
-          </ProfileSection>
+         <div className="h-fit ">
+              <h2 className="text-xl font-semibold mb-4">Quick action</h2>
+              <div className="mb-6">
+    <div className="flex gap-3 flex-wrap">
+      <Link to={webRoutes.dealRooms} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm  flex items-center gap-2 shadow-sm">
+        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clipPath="url(#clip0_1984_9010)">
+            <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064V8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_1984_9010">
+              <rect width="19" height="19" fill="white"/>
+            </clipPath>
+          </defs>
+        </svg>
+        Deal Rooms
+      </Link>
+      <Link to={webRoutes.workforceJobs} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm  flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.6667 2.66667H11.9333C11.7786 1.91428 11.3692 1.23823 10.7742 0.752479C10.1791 0.266727 9.4348 0.000969683 8.66667 0L7.33333 0C6.5652 0.000969683 5.82088 0.266727 5.22583 0.752479C4.63079 1.23823 4.2214 1.91428 4.06667 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V6C15.9989 5.11627 15.6474 4.26904 15.0225 3.64415C14.3976 3.01925 13.5504 2.66773 12.6667 2.66667V2.66667ZM7.33333 1.33333H8.66667C9.07884 1.33504 9.48042 1.46406 9.81647 1.70273C10.1525 1.94139 10.4066 2.27806 10.544 2.66667H5.456C5.59339 2.27806 5.84749 1.94139 6.18353 1.70273C6.51958 1.46406 6.92116 1.33504 7.33333 1.33333V1.33333ZM3.33333 4H12.6667C13.1971 4 13.7058 4.21071 14.0809 4.58579C14.456 4.96086 14.6667 5.46957 14.6667 6V8H1.33333V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V4ZM12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V9.33333H7.33333V10C7.33333 10.1768 7.40357 10.3464 7.5286 10.4714C7.65362 10.5964 7.82319 10.6667 8 10.6667C8.17681 10.6667 8.34638 10.5964 8.4714 10.4714C8.59643 10.3464 8.66667 10.1768 8.66667 10V9.33333H14.6667V12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667Z" fill="#374957"/>
+        </svg>
+        Work Force
+      </Link>
+      <Link to={webRoutes.workforceEvents} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm  flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clipPath="url(#clip0_1984_8944)">
+            <path d="M12.6667 1.33333H12V0.666667C12 0.489856 11.9298 0.320286 11.8047 0.195262C11.6797 0.0702379 11.5101 0 11.3333 0C11.1565 0 10.987 0.0702379 10.8619 0.195262C10.7369 0.320286 10.6667 0.489856 10.6667 0.666667V1.33333H5.33333V0.666667C5.33333 0.489856 5.2631 0.320286 5.13807 0.195262C5.01305 0.0702379 4.84348 0 4.66667 0C4.48986 0 4.32029 0.0702379 4.19526 0.195262C4.07024 0.320286 4 0.489856 4 0.666667V1.33333H3.33333C2.4496 1.33439 1.60237 1.68592 0.97748 2.31081C0.352588 2.93571 0.00105857 3.78294 0 4.66667L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V4.66667C15.9989 3.78294 15.6474 2.93571 15.0225 2.31081C14.3976 1.68592 13.5504 1.33439 12.6667 1.33333ZM1.33333 4.66667C1.33333 4.13623 1.54405 3.62753 1.91912 3.25245C2.29419 2.87738 2.8029 2.66667 3.33333 2.66667H12.6667C13.1971 2.66667 13.7058 2.87738 14.0809 3.25245C14.456 3.62753 14.6667 4.13623 14.6667 4.66667V5.33333H1.33333V4.66667ZM12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6.66667H14.6667V12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667Z" fill="#374957"/>
+            <path d="M8 11C8.55228 11 9 10.5523 9 10C9 9.44772 8.55228 9 8 9C7.44772 9 7 9.44772 7 10C7 10.5523 7.44772 11 8 11Z" fill="#374957"/>
+            <path d="M4.66699 11C5.21928 11 5.66699 10.5523 5.66699 10C5.66699 9.44772 5.21928 9 4.66699 9C4.11471 9 3.66699 9.44772 3.66699 10C3.66699 10.5523 4.11471 11 4.66699 11Z" fill="#374957"/>
+            <path d="M11.333 11C11.8853 11 12.333 10.5523 12.333 10C12.333 9.44772 11.8853 9 11.333 9C10.7807 9 10.333 9.44772 10.333 10C10.333 10.5523 10.7807 11 11.333 11Z" fill="#374957"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_1984_8944">
+              <rect width="16" height="16" fill="white"/>
+            </clipPath>
+          </defs>
+        </svg>
+        Events
+      </Link>
+      <Link to={webRoutes.logisticsDashboard} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm  flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clipPath="url(#clip0_1984_8947)">
+            <path d="M12.6667 3.33268H11.2667C11.1119 2.58029 10.7025 1.90425 10.1075 1.41849C9.51245 0.932742 8.76814 0.666985 8 0.666016H3.33333C2.4496 0.667074 1.60237 1.0186 0.97748 1.6435C0.352588 2.26839 0.00105857 3.11562 0 3.99935L0 9.99935C0.00167587 10.5964 0.203692 11.1757 0.573691 11.6443C0.94369 12.113 1.46026 12.4439 2.04067 12.584C1.97784 12.9177 1.98858 13.261 2.07213 13.59C2.15568 13.9191 2.31002 14.2259 2.5244 14.4892C2.73877 14.7524 3.00801 14.9657 3.31332 15.1142C3.61864 15.2627 3.95267 15.3427 4.29211 15.3488C4.63156 15.3548 4.96823 15.2867 5.27864 15.1492C5.58905 15.0118 5.86572 14.8082 6.08934 14.5527C6.31296 14.2973 6.47815 13.9961 6.57337 13.6703C6.66859 13.3444 6.69156 13.0017 6.64067 12.666H9.362C9.34485 12.7763 9.33571 12.8877 9.33467 12.9994C9.33467 13.6182 9.5805 14.2117 10.0181 14.6493C10.4557 15.0869 11.0492 15.3327 11.668 15.3327C12.2868 15.3327 12.8803 15.0869 13.3179 14.6493C13.7555 14.2117 14.0013 13.6182 14.0013 12.9994C14.0006 12.86 13.987 12.7209 13.9607 12.584C14.5408 12.4436 15.0571 12.1126 15.4268 11.644C15.7966 11.1754 15.9984 10.5963 16 9.99935V6.66602C15.9989 5.78229 15.6474 4.93505 15.0225 4.31016C14.3976 3.68527 13.5504 3.33374 12.6667 3.33268ZM14.6667 6.66602V7.33268H11.3333V4.66602H12.6667C13.1971 4.66602 13.7058 4.87673 14.0809 5.2518C14.456 5.62688 14.6667 6.13558 14.6667 6.66602ZM1.33333 9.99935V3.99935C1.33333 3.46892 1.54405 2.96021 1.91912 2.58514C2.29419 2.21006 2.8029 1.99935 3.33333 1.99935H8C8.53043 1.99935 9.03914 2.21006 9.41421 2.58514C9.78929 2.96021 10 3.46892 10 3.99935V11.3327H2.66667C2.31304 11.3327 1.97391 11.1922 1.72386 10.9422C1.47381 10.6921 1.33333 10.353 1.33333 9.99935ZM5.33333 12.9994C5.33333 13.2646 5.22798 13.5189 5.04044 13.7065C4.8529 13.894 4.59855 13.9994 4.33333 13.9994C4.06812 13.9994 3.81376 13.894 3.62623 13.7065C3.43869 13.5189 3.33333 13.2646 3.33333 12.9994C3.33374 12.8854 3.35475 12.7725 3.39533 12.666H5.27133C5.31192 12.7725 5.33292 12.8854 5.33333 12.9994ZM11.6667 13.9994C11.4015 13.9994 11.1471 13.894 10.9596 13.7065C10.772 13.5189 10.6667 13.2646 10.6667 12.9994C10.667 12.8854 10.688 12.7725 10.7287 12.666H12.6047C12.6454 12.7725 12.6664 12.8854 12.6667 12.9994C12.6667 13.2646 12.5613 13.5189 12.3738 13.7065C12.1862 13.894 11.9319 13.9994 11.6667 13.9994ZM13.3333 11.3327H11.3333V8.66602H14.6667V9.99935C14.6667 10.353 14.5262 10.6921 14.2761 10.9422C14.0261 11.1922 13.687 11.3327 13.3333 11.3327Z" fill="#374957"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_1984_8947">
+              <rect width="16" height="16" fill="white"/>
+            </clipPath>
+          </defs>
+        </svg>
+        Logistics
+      </Link>
+      <Link to={webRoutes.businessHub} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm ">
+        visit Business hub
+      </Link>
+    </div>
+                    </div>
+                    <ProfileSection title="People Associated">
+                      <SuggestionList
+                        hasSeeMore
+                        associated={false}
+                        thisUser={paramUser}
+                        viewMoreUrl={`/co/representatives/?user=${paramUser?.id}&status=True`}
+                      />
+                    </ProfileSection>
+                </div>
         </section>
       </section>
     </section>
@@ -441,40 +517,14 @@ export const EventsSection = React.memo(({ company }) => {
     <div className="space-y-6">
       {/* Events Header - UPDATED */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Events</h2>
-        <button className="bg-yellow-100 hover:bg-yellow-200 px-6 py-2.5 rounded-xl text-sm font-medium">
+        <h2 className="text-2xl font-bold">My Events</h2>
+        <Link to={webRoutes.workforceEvents} className="bg-gold hover:bg-custom_yellow px-6 py-2.5 rounded-xl text-sm font-medium">
           See all Events
-        </button>
-      </div>
-
-      {/* Filter Tabs - UPDATED STYLING */}
-      {/* <div className="flex gap-3 flex-wrap">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={clsx(
-              "px-6 py-2.5 rounded-full text-sm font-medium transition-colors",
-              activeFilter === filter
-                ? "bg-yellow-400 text-black"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            )}
-          >
-            {filter}
-          </button>
-        ))}
-      </div> */}
-
-      {/* Recent Section with Badge */}
-      <div className="flex items-center gap-2">
-        <h3 className="text-xl font-semibold">Recent</h3>
-        <span className="bg-red-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
-          {company.length}
-        </span>
+        </Link>
       </div>
 
       {/* Event Cards Grid - KEEP AS IS */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-col-1 md:grid-cols-2 gap-4">
       {company?.map(({event}) => (
           <div key={event.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col h-full">
             <span className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white px-3 py-1 rounded-full text-xs font-medium inline-block w-fit">

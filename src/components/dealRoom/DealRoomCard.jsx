@@ -1,21 +1,7 @@
-  import { 
-  Plus, 
-  Search, 
-  Filter, 
+  import {  
   FileText, 
   User, 
-  Calendar, 
-  DollarSign,
-  MapPin,
-  Eye,
-  Lock,
-  Clock,
-  TrendingUp,
-  AlertCircle,
   CheckSquare,
-  MoreVertical,
-  Download,
-  Share2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';
@@ -35,16 +21,6 @@ import { DealIcon } from '../../icon/deal';
     if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
     if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
     return num.toString();
-  };
-
-  const getTimeAgo = (timestamp) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
   export const DealRoomCard = ({ deal }) => (
@@ -110,19 +86,5 @@ import { DealIcon } from '../../icon/deal';
           </Link>
         </div>
       </div>
-
-      {/* {deal.recent_activities && deal.recent_activities.length > 0 && (
-        <div className="border-t border-gray-100 px-6 py-4 bg-gray-50">
-          <div className="flex items-center space-x-2 text-sm">
-            <Clock className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-600">
-              Last activity: {deal.recent_activities[0]?.description}
-            </span>
-            <span className="text-gray-400">
-              {getTimeAgo(deal.recent_activities[0]?.timestamp)}
-            </span>
-          </div>
-        </div>
-      )} */}
     </div>
   );
