@@ -494,9 +494,6 @@ const ProfileBadge = ({ color, text }) => {
 };
 
 export const EventsSection = React.memo(({ company }) => {
-  const [activeFilter, setActiveFilter] = useState("Recent event");
-  
-  const filters = ["Recent event", "Pending", "Upcoming", "ongoing"];
   const getEventStatus = (event) => {
       if (!event || !event.start_date) return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
   

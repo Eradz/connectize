@@ -1,7 +1,7 @@
 import { LocationOnOutlined } from "@mui/icons-material";
 import { EnvelopeClosedIcon, GlobeIcon, DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Reviews from "../../components/admin/feeds/reviews";
 import Summary from "../../components/admin/feeds/summary";
@@ -17,10 +17,22 @@ import { useAuth } from "../../context/userContext";
 import { usePollCurrentCompany } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
-import { ProfileAboutList } from "./userProfile";
+import { EventsSection, ProfileAboutList } from "./userProfile";
 import BlockCompanyButton from "../../components/moderation/BlockCompanyButton";
 import ReportModal from "../../components/moderation/ReportModal";
 import { Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
+import Scroll from "../../components/Scroll";
+import { webRoutes } from "../../lib/webRoutes";
+import { workforceAPI } from "../../api-services/workforce";
+import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard";
+import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
+import { Calendar, FileText } from "lucide-react";
+import { dealRoomService } from "../../api-services/oilgas";
+import CreatePost from "../../components/admin/feeds/CreatePost";
+import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
+import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
+import PrimaryButton from "../../components/PrimaryButton";
+import { ProductListCard } from "../../components/admin/markets/newlyListed";
 
 export const meta = () =>
   createSEO({
@@ -30,9 +42,65 @@ export const meta = () =>
 const CompanyProfile = React.memo(() => {
   const { company: companyName } = useParams();
   const { user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState("Events");
+  const [activeTab, setActiveTab] = useState("Activities");
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
+  const [registrations, setRegistrations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [jobs, setJobs] = useState([]);
+
+  const loadMyRegistrations = async () => {
+    try {
+      setLoading(true);
+      const response = await workforceAPI.getMyEventRegistrations();
+      setRegistrations(response.data.results || response.data || []);
+          setError(null);
+        } catch (err) {
+          console.error('Error loading registrations:', err);
+          setError('Failed to load your event registrations. Please try again.');
+          setRegistrations([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const loadApplications = async () => {
+              try {
+                setLoading(true);
+                const response = await workforceAPI.getApplications();
+                const data = response.data?.results || response.data || response || [];
+                setApplications(data);
+            // No separate filtered state; derived via useMemo
+              } catch (error) {
+                console.error('Failed to load applications:', error);
+                setApplications([]);
+            // No separate filtered state; derived via useMemo
+              } finally {
+                setLoading(false);
+              }
+            };
+      
+            const loadJobs = async () => {
+                try {
+                  setLoading(true);
+                  const response = await dealRoomService.getAll(1, 4, {});
+                  const rooms = response?.results || response?.data || response || [];
+                  setJobs(Array.isArray(rooms) ? rooms : []);
+                } catch (error) {
+                  console.error('Failed to load deal rooms:', error);
+                  setJobs([]);
+                } finally {
+                  setLoading(false);
+                }
+              };
+
+      useEffect(() => {
+        loadMyRegistrations();
+        loadApplications();
+        loadJobs();
+      }, []);
 
   const headerProps = useMemo(
     () => ({
@@ -68,7 +136,7 @@ const CompanyProfile = React.memo(() => {
   <div className="mb-6">
 <div className="flex gap-3 flex-wrap">
   <Link
-    to={`/deal-rooms?company=${company?.id || ''}`}
+    to={webRoutes.dealRooms}
     className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-sm"
   >
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,7 +154,7 @@ const CompanyProfile = React.memo(() => {
   </Link>
 
   <Link
-    to={`/workforce?company=${company?.id || ''}`}
+    to={webRoutes.workforceJobs}
     className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
   >
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,7 +172,7 @@ const CompanyProfile = React.memo(() => {
   </Link>
 
   <Link
-    to={`/events?company=${company?.id || ''}`}
+    to={webRoutes.workforceEvents}
     className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
   >
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -125,7 +193,7 @@ const CompanyProfile = React.memo(() => {
   </Link>
 
   <Link
-    to={`/logistics?company=${company?.id || ''}`}
+    to={webRoutes.logisticsDashboard}
     className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
   >
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,7 +211,7 @@ const CompanyProfile = React.memo(() => {
   </Link>
 
   <Link
-    to="/business-hub"  // or external link if needed: target="_blank" rel="noopener noreferrer"
+    to={webRoutes.businessHub}
     className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium"
   >
     visit Business hub
@@ -151,26 +219,27 @@ const CompanyProfile = React.memo(() => {
 </div>
   </div>
 
-
-  <div className="flex gap-8 border-b overflow-x-auto mb-6">
-    {["Activities", "Services", "Products", "Deal Room", "Events", "Work Force"].map((tab) => (
-      <button
-        key={tab}
-        onClick={() => setActiveTab(tab)}
-        className={clsx(
-          "pb-3 px-1 text-base font-normal whitespace-nowrap relative",
-          activeTab === tab 
-            ? "text-black font-medium" 
-            : "text-gray-500 hover:text-gray-700"
-        )}
-      >
-        {tab}
-        {activeTab === tab && (
-          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400"></span>
-        )}
-      </button>
-    ))}
-  </div>
+    <Scroll>
+      <div className="flex gap-4 md:gap-0 justify-between  min-w-min mb-6 text-[14px]">
+        {["Activities", "Services", "Products", "Deal Room", "Events", "Work Force"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={clsx(
+              "pb-2 px-1 font-normal whitespace-nowrap relative",
+              activeTab === tab 
+                ? "text-black font-medium" 
+                : "text-gray-500 hover:text-gray-700"
+            )}
+          >
+            {tab}
+            {activeTab === tab && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold"></span>
+            )}
+          </button>
+        ))}
+      </div>
+    </Scroll>
   {activeTab === "Reviews" && (
   <div className="bg-white rounded-lg p-6">
     <Reviews reviews={company?.reviews} />
@@ -178,12 +247,112 @@ const CompanyProfile = React.memo(() => {
 )}
 
   {/* Tab Content */}
-  {activeTab === "Events" && <EventsSection company={company} />}
-  {activeTab === "Work Force" && <WorkForceSection company={company} />}
-  {activeTab === "Activities" && <ActivitiesSection company={company} />}
-  {activeTab === "Services" && <ServicesSection company={company} />}
- {activeTab === "Products" && <ProductsSection company={company} />}
-  {activeTab === "Deal Room" && <DealRoomSection company={company} />}
+  {activeTab === "Events" && (registrations.length > 0 ? (
+      <EventsSection company={registrations} />
+    ) : (
+      <div className="py-12 text-center">
+        <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-gray-900 font-medium mb-2">No Events</h3>
+        <p className="text-gray-500 text-sm">This user hasn't created any events yet</p>
+      </div>
+    ) )}
+  {activeTab === "Work Force" &&  (
+      applications.length > 0 ? (
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold mb-4">My applied jobs</h2>
+            <Link to={webRoutes.workforceMyAppliedJobs} className="bg-gold p-2 rounded-lg">All applications</Link>
+          </div>
+
+          {applications.slice(0,2).map((job) => (
+            <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-12 text-center">
+          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-gray-900 font-medium mb-2">No Workforce</h3>
+          <p className="text-gray-500 text-sm">This user hasn't added any workforce members</p>
+        </div>
+      )
+    )}
+  {activeTab === "Activities" && (<section className="space-y-6 w-full shrink-0">
+        <CreatePost />
+        <DiscoverPosts companyName={company?.company_name} />
+      </section>)}
+  {activeTab === "Services" && (
+    <div className="">
+        <div className="grid gap-x-3 gap-y-4">
+          {company?.services?.map((service, index) => (
+            <PostCard
+              key={index}
+              //  image={product?.images?.[0].image}
+              companyName={service?.company?.company_name}
+              verified={service?.companyInfo?.verified}
+              logo={service?.company?.logo}
+              title={service?.title}
+              summary={service?.sub_title}
+              url={`/services/${service?.id}`}
+              slug={service?.company?.slug}
+              whole={service}
+              isService
+            />
+          ))}
+        </div>
+  
+        {company?.services?.length ? (
+          <div className="mt-6 flex justify-center">
+            <Link
+              to={`/market?s=services&company=${company.id}---${company.slug}`}
+            >
+              <PrimaryButton>View more services</PrimaryButton>
+            </Link>
+          </div>
+        ) : null}
+      </div>)}
+ {activeTab === "Products" && (
+  <div className="">
+        <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+          {company?.products?.map((product, index) => (
+            <ProductListCard
+              key={index}
+              id={product.id}
+              image={product?.images?.[0].image}
+              title={product.title}
+              subtitle={product.company?.company_name}
+              isSummary
+            />
+          ))}
+        </div>
+        {company?.products?.length ? (
+          <div className="mt-6 flex justify-center">
+            <Link to={`/market?company=${company.id}---${company.slug}`}>
+              <PrimaryButton>View more products</PrimaryButton>
+            </Link>
+          </div>
+        ) : null}
+      </div>
+ )}
+  {activeTab === "Deal Room" && (jobs.length > 0 ? (
+      <div >
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">My Deals</h2>
+          <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">Visit Deals</Link>
+        </div>
+
+        <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+          {jobs.slice(0,3).map((job) => (
+            <DealRoomCard key={job.id} deal={job} />
+          ))}
+        </div>
+      </div>
+    ) : (
+      <div className="py-12 text-center">
+        <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-gray-900 font-medium mb-2">No Deals</h3>
+        <p className="text-gray-500 text-sm">This user hasn't posted any deals yet</p>
+      </div>
+    ))}
 </ProfileSection>
       </section>
     </section>
@@ -455,119 +624,119 @@ export const StatsText = React.memo(({ text }) => {
   );
 });
 
-const EventsSection = React.memo(({ company }) => {
-  const [activeFilter, setActiveFilter] = useState("Recent event");
+// const EventsSection = React.memo(({ company }) => {
+//   const [activeFilter, setActiveFilter] = useState("Recent event");
   
-  const filters = ["Recent event", "Pending", "Upcoming", "ongoing"];
+//   const filters = ["Recent event", "Pending", "Upcoming", "ongoing"];
   
-  const events = [
-    {
-      id: 1,
-      status: "Upcoming",
-      title: "Drilling And Completion Workshop",
-      themes: ["Sustainability", "Free Energy"]
-    },
-    {
-      id: 2,
-      status: "Upcoming",
-      title: "Drilling And Completion Workshop",
-      themes: ["Sustainability", "Free Energy"]
-    },
-    {
-      id: 3,
-      status: "Upcoming",
-      title: "Drilling And Completion Workshop",
-      themes: ["Sustainability", "Free Energy"]
-    },
-    {
-      id: 4,
-      status: "Upcoming",
-      title: "Drilling And Completion Workshop",
-      themes: ["Sustainability", "Free Energy"]
-    },
-  ];
+//   const events = [
+//     {
+//       id: 1,
+//       status: "Upcoming",
+//       title: "Drilling And Completion Workshop",
+//       themes: ["Sustainability", "Free Energy"]
+//     },
+//     {
+//       id: 2,
+//       status: "Upcoming",
+//       title: "Drilling And Completion Workshop",
+//       themes: ["Sustainability", "Free Energy"]
+//     },
+//     {
+//       id: 3,
+//       status: "Upcoming",
+//       title: "Drilling And Completion Workshop",
+//       themes: ["Sustainability", "Free Energy"]
+//     },
+//     {
+//       id: 4,
+//       status: "Upcoming",
+//       title: "Drilling And Completion Workshop",
+//       themes: ["Sustainability", "Free Energy"]
+//     },
+//   ];
 
-  return (
-    <div className="space-y-6">
-      {/* Events Header - UPDATED */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Events</h2>
-<Link
-  to={`/events?company=${company?.id || ''}`}
-  className="bg-yellow-100 hover:bg-yellow-200 px-6 py-2.5 rounded-xl text-sm font-medium"
->
-  See all Events
-</Link>
-      </div>
+//   return (
+//     <div className="space-y-6">
+//       {/* Events Header - UPDATED */}
+//       <div className="flex justify-between items-center">
+//         <h2 className="text-2xl font-bold">Events</h2>
+// <Link
+//   to={`/events?company=${company?.id || ''}`}
+//   className="bg-yellow-100 hover:bg-yellow-200 px-6 py-2.5 rounded-xl text-sm font-medium"
+// >
+//   See all Events
+// </Link>
+//       </div>
 
-      {/* Filter Tabs - UPDATED STYLING */}
-      <div className="flex gap-3 flex-wrap">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={clsx(
-              "px-6 py-2.5 rounded-full text-sm font-medium transition-colors",
-              activeFilter === filter
-                ? "bg-yellow-400 text-black"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            )}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
+//       {/* Filter Tabs - UPDATED STYLING */}
+//       <div className="flex gap-3 flex-wrap">
+//         {filters.map((filter) => (
+//           <button
+//             key={filter}
+//             onClick={() => setActiveFilter(filter)}
+//             className={clsx(
+//               "px-6 py-2.5 rounded-full text-sm font-medium transition-colors",
+//               activeFilter === filter
+//                 ? "bg-yellow-400 text-black"
+//                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+//             )}
+//           >
+//             {filter}
+//           </button>
+//         ))}
+//       </div>
 
-      {/* Recent Section with Badge */}
-      <div className="flex items-center gap-2">
-        <h3 className="text-xl font-semibold">Recent</h3>
-        <span className="bg-red-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
-          4
-        </span>
-      </div>
+//       {/* Recent Section with Badge */}
+//       <div className="flex items-center gap-2">
+//         <h3 className="text-xl font-semibold">Recent</h3>
+//         <span className="bg-red-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">
+//           4
+//         </span>
+//       </div>
 
-      {/* Event Cards Grid - KEEP AS IS */}
-      <div className="grid grid-cols-2 gap-4">
-        {events.map((event) => (
-          <div key={event.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition">
-            <span className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white px-3 py-1 rounded-full text-xs font-medium inline-block">
-              {event.status}
-            </span>
+//       {/* Event Cards Grid - KEEP AS IS */}
+//       <div className="grid grid-cols-2 gap-4">
+//         {events.map((event) => (
+//           <div key={event.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition">
+//             <span className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white px-3 py-1 rounded-full text-xs font-medium inline-block">
+//               {event.status}
+//             </span>
             
-            <h4 className="font-semibold text-base">{event.title}</h4>
+//             <h4 className="font-semibold text-base">{event.title}</h4>
             
-            <div className="flex gap-2 flex-wrap items-center">
-              <span className="text-sm text-gray-700">Theme:</span>
-              {event.themes.map((theme, idx) => (
-                <span key={idx} className="text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-full">
-                  {theme}
-                </span>
-              ))}
-            </div>
+//             <div className="flex gap-2 flex-wrap items-center">
+//               <span className="text-sm text-gray-700">Theme:</span>
+//               {event.themes.map((theme, idx) => (
+//                 <span key={idx} className="text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-full">
+//                   {theme}
+//                 </span>
+//               ))}
+//             </div>
             
-            <Link
-  to={`/events/${event.id}`}
-  className="w-full bg-yellow-100 hover:bg-yellow-200 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
->
-  {/* your svg */}
-  <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g clipPath="url(#clip0_1984_9010)">
-                  <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064V8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
-                </g>
-                <defs>
-                  <clipPath id="clip0_1984_9010">
-                    <rect width="19" height="19" fill="white"/>
-                  </clipPath>
-                </defs>
-              </svg>
-  View Event Details
-</Link>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-});
+//             <Link
+//   to={`/events/${event.id}`}
+//   className="w-full bg-yellow-100 hover:bg-yellow-200 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+// >
+//   {/* your svg */}
+//   <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+//                 <g clipPath="url(#clip0_1984_9010)">
+//                   <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064V8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
+//                 </g>
+//                 <defs>
+//                   <clipPath id="clip0_1984_9010">
+//                     <rect width="19" height="19" fill="white"/>
+//                   </clipPath>
+//                 </defs>
+//               </svg>
+//   View Event Details
+// </Link>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// });
 
 const WorkForceSection = React.memo(({ company }) => {
   // Mock job postings data
