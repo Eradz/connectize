@@ -66,59 +66,89 @@ const CompanyProfile = React.memo(() => {
   </div>
 </div>
   <div className="mb-6">
-    <div className="flex gap-3 flex-wrap">
-      <button className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-sm">
-        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clipPath="url(#clip0_1984_9010)">
-            <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064V8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_1984_9010">
-              <rect width="19" height="19" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>
-        Deal Rooms
-      </button>
-      <button className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12.6667 2.66667H11.9333C11.7786 1.91428 11.3692 1.23823 10.7742 0.752479C10.1791 0.266727 9.4348 0.000969683 8.66667 0L7.33333 0C6.5652 0.000969683 5.82088 0.266727 5.22583 0.752479C4.63079 1.23823 4.2214 1.91428 4.06667 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V6C15.9989 5.11627 15.6474 4.26904 15.0225 3.64415C14.3976 3.01925 13.5504 2.66773 12.6667 2.66667V2.66667ZM7.33333 1.33333H8.66667C9.07884 1.33504 9.48042 1.46406 9.81647 1.70273C10.1525 1.94139 10.4066 2.27806 10.544 2.66667H5.456C5.59339 2.27806 5.84749 1.94139 6.18353 1.70273C6.51958 1.46406 6.92116 1.33504 7.33333 1.33333V1.33333ZM3.33333 4H12.6667C13.1971 4 13.7058 4.21071 14.0809 4.58579C14.456 4.96086 14.6667 5.46957 14.6667 6V8H1.33333V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V4ZM12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V9.33333H7.33333V10C7.33333 10.1768 7.40357 10.3464 7.5286 10.4714C7.65362 10.5964 7.82319 10.6667 8 10.6667C8.17681 10.6667 8.34638 10.5964 8.4714 10.4714C8.59643 10.3464 8.66667 10.1768 8.66667 10V9.33333H14.6667V12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667Z" fill="#374957"/>
-        </svg>
-        Work Force
-      </button>
-      <button className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clipPath="url(#clip0_1984_8944)">
-            <path d="M12.6667 1.33333H12V0.666667C12 0.489856 11.9298 0.320286 11.8047 0.195262C11.6797 0.0702379 11.5101 0 11.3333 0C11.1565 0 10.987 0.0702379 10.8619 0.195262C10.7369 0.320286 10.6667 0.489856 10.6667 0.666667V1.33333H5.33333V0.666667C5.33333 0.489856 5.2631 0.320286 5.13807 0.195262C5.01305 0.0702379 4.84348 0 4.66667 0C4.48986 0 4.32029 0.0702379 4.19526 0.195262C4.07024 0.320286 4 0.489856 4 0.666667V1.33333H3.33333C2.4496 1.33439 1.60237 1.68592 0.97748 2.31081C0.352588 2.93571 0.00105857 3.78294 0 4.66667L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V4.66667C15.9989 3.78294 15.6474 2.93571 15.0225 2.31081C14.3976 1.68592 13.5504 1.33439 12.6667 1.33333ZM1.33333 4.66667C1.33333 4.13623 1.54405 3.62753 1.91912 3.25245C2.29419 2.87738 2.8029 2.66667 3.33333 2.66667H12.6667C13.1971 2.66667 13.7058 2.87738 14.0809 3.25245C14.456 3.62753 14.6667 4.13623 14.6667 4.66667V5.33333H1.33333V4.66667ZM12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6.66667H14.6667V12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667Z" fill="#374957"/>
-            <path d="M8 11C8.55228 11 9 10.5523 9 10C9 9.44772 8.55228 9 8 9C7.44772 9 7 9.44772 7 10C7 10.5523 7.44772 11 8 11Z" fill="#374957"/>
-            <path d="M4.66699 11C5.21928 11 5.66699 10.5523 5.66699 10C5.66699 9.44772 5.21928 9 4.66699 9C4.11471 9 3.66699 9.44772 3.66699 10C3.66699 10.5523 4.11471 11 4.66699 11Z" fill="#374957"/>
-            <path d="M11.333 11C11.8853 11 12.333 10.5523 12.333 10C12.333 9.44772 11.8853 9 11.333 9C10.7807 9 10.333 9.44772 10.333 10C10.333 10.5523 10.7807 11 11.333 11Z" fill="#374957"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_1984_8944">
-              <rect width="16" height="16" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>
-        Events
-      </button>
-      <button className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clipPath="url(#clip0_1984_8947)">
-            <path d="M12.6667 3.33268H11.2667C11.1119 2.58029 10.7025 1.90425 10.1075 1.41849C9.51245 0.932742 8.76814 0.666985 8 0.666016H3.33333C2.4496 0.667074 1.60237 1.0186 0.97748 1.6435C0.352588 2.26839 0.00105857 3.11562 0 3.99935L0 9.99935C0.00167587 10.5964 0.203692 11.1757 0.573691 11.6443C0.94369 12.113 1.46026 12.4439 2.04067 12.584C1.97784 12.9177 1.98858 13.261 2.07213 13.59C2.15568 13.9191 2.31002 14.2259 2.5244 14.4892C2.73877 14.7524 3.00801 14.9657 3.31332 15.1142C3.61864 15.2627 3.95267 15.3427 4.29211 15.3488C4.63156 15.3548 4.96823 15.2867 5.27864 15.1492C5.58905 15.0118 5.86572 14.8082 6.08934 14.5527C6.31296 14.2973 6.47815 13.9961 6.57337 13.6703C6.66859 13.3444 6.69156 13.0017 6.64067 12.666H9.362C9.34485 12.7763 9.33571 12.8877 9.33467 12.9994C9.33467 13.6182 9.5805 14.2117 10.0181 14.6493C10.4557 15.0869 11.0492 15.3327 11.668 15.3327C12.2868 15.3327 12.8803 15.0869 13.3179 14.6493C13.7555 14.2117 14.0013 13.6182 14.0013 12.9994C14.0006 12.86 13.987 12.7209 13.9607 12.584C14.5408 12.4436 15.0571 12.1126 15.4268 11.644C15.7966 11.1754 15.9984 10.5963 16 9.99935V6.66602C15.9989 5.78229 15.6474 4.93505 15.0225 4.31016C14.3976 3.68527 13.5504 3.33374 12.6667 3.33268ZM14.6667 6.66602V7.33268H11.3333V4.66602H12.6667C13.1971 4.66602 13.7058 4.87673 14.0809 5.2518C14.456 5.62688 14.6667 6.13558 14.6667 6.66602ZM1.33333 9.99935V3.99935C1.33333 3.46892 1.54405 2.96021 1.91912 2.58514C2.29419 2.21006 2.8029 1.99935 3.33333 1.99935H8C8.53043 1.99935 9.03914 2.21006 9.41421 2.58514C9.78929 2.96021 10 3.46892 10 3.99935V11.3327H2.66667C2.31304 11.3327 1.97391 11.1922 1.72386 10.9422C1.47381 10.6921 1.33333 10.353 1.33333 9.99935ZM5.33333 12.9994C5.33333 13.2646 5.22798 13.5189 5.04044 13.7065C4.8529 13.894 4.59855 13.9994 4.33333 13.9994C4.06812 13.9994 3.81376 13.894 3.62623 13.7065C3.43869 13.5189 3.33333 13.2646 3.33333 12.9994C3.33374 12.8854 3.35475 12.7725 3.39533 12.666H5.27133C5.31192 12.7725 5.33292 12.8854 5.33333 12.9994ZM11.6667 13.9994C11.4015 13.9994 11.1471 13.894 10.9596 13.7065C10.772 13.5189 10.6667 13.2646 10.6667 12.9994C10.667 12.8854 10.688 12.7725 10.7287 12.666H12.6047C12.6454 12.7725 12.6664 12.8854 12.6667 12.9994C12.6667 13.2646 12.5613 13.5189 12.3738 13.7065C12.1862 13.894 11.9319 13.9994 11.6667 13.9994ZM13.3333 11.3327H11.3333V8.66602H14.6667V9.99935C14.6667 10.353 14.5262 10.6921 14.2761 10.9422C14.0261 11.1922 13.687 11.3327 13.3333 11.3327Z" fill="#374957"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_1984_8947">
-              <rect width="16" height="16" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>
-        Logistics
-      </button>
-      <button className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium">
-        visit Business hub
-      </button>
-    </div>
+<div className="flex gap-3 flex-wrap">
+  <Link
+    to={`/deal-rooms?company=${company?.id || ''}`}
+    className="bg-yellow-400 hover:bg-yellow-500 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-sm"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1984_9558)">
+<path d="M6.66667 6.66668C6.13623 6.66668 5.62753 6.87739 5.25245 7.25246C4.87738 7.62754 4.66667 8.13624 4.66667 8.66668C4.66667 9.19711 4.87738 9.70582 5.25245 10.0809C5.62753 10.456 6.13623 10.6667 6.66667 10.6667H9.33333C9.86377 10.6667 10.3725 10.456 10.7475 10.0809C11.1226 9.70582 11.3333 9.19711 11.3333 8.66668C11.3333 8.13624 11.1226 7.62754 10.7475 7.25246C10.3725 6.87739 9.86377 6.66668 9.33333 6.66668H6.66667ZM10 8.66668C10 8.84349 9.92976 9.01306 9.80474 9.13808C9.67971 9.26311 9.51014 9.33334 9.33333 9.33334H6.66667C6.48986 9.33334 6.32029 9.26311 6.19526 9.13808C6.07024 9.01306 6 8.84349 6 8.66668C6 8.48987 6.07024 8.3203 6.19526 8.19527C6.32029 8.07025 6.48986 8.00001 6.66667 8.00001H9.33333C9.51014 8.00001 9.67971 8.07025 9.80474 8.19527C9.92976 8.3203 10 8.48987 10 8.66668ZM11.3333 12.6667C11.3333 12.8435 11.2631 13.0131 11.1381 13.1381C11.013 13.2631 10.8435 13.3333 10.6667 13.3333H5.33333C5.15652 13.3333 4.98695 13.2631 4.86193 13.1381C4.7369 13.0131 4.66667 12.8435 4.66667 12.6667C4.66667 12.4899 4.7369 12.3203 4.86193 12.1953C4.98695 12.0702 5.15652 12 5.33333 12H10.6667C10.8435 12 11.013 12.0702 11.1381 12.1953C11.2631 12.3203 11.3333 12.4899 11.3333 12.6667ZM13.024 2.08068L11.9187 0.976677C11.6099 0.666178 11.2427 0.419985 10.8381 0.252342C10.4336 0.0846994 9.99988 -0.00106532 9.562 9.98748e-06H5.33333C4.4496 0.00106856 3.60237 0.352598 2.97748 0.97749C2.35259 1.60238 2.00106 2.44961 2 3.33334V12.6667C2.00106 13.5504 2.35259 14.3976 2.97748 15.0225C3.60237 15.6474 4.4496 15.999 5.33333 16H10.6667C11.5504 15.999 12.3976 15.6474 13.0225 15.0225C13.6474 14.3976 13.9989 13.5504 14 12.6667V4.43801C14.0013 4.00007 13.9156 3.56622 13.7481 3.16159C13.5806 2.75696 13.3345 2.38956 13.024 2.08068ZM12.0813 3.02334C12.1751 3.1183 12.2595 3.22211 12.3333 3.33334H10.6667V1.66668C10.7781 1.7397 10.8817 1.82391 10.976 1.91801L12.0813 3.02334ZM12.6667 12.6667C12.6667 13.1971 12.456 13.7058 12.0809 14.0809C11.7058 14.456 11.1971 14.6667 10.6667 14.6667H5.33333C4.8029 14.6667 4.29419 14.456 3.91912 14.0809C3.54405 13.7058 3.33333 13.1971 3.33333 12.6667V3.33334C3.33333 2.80291 3.54405 2.2942 3.91912 1.91913C4.29419 1.54406 4.8029 1.33334 5.33333 1.33334H9.33333V3.33334C9.33333 3.68697 9.47381 4.0261 9.72386 4.27615C9.97391 4.5262 10.313 4.66668 10.6667 4.66668H12.6667V12.6667Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1984_9558">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+    Deal Rooms
+  </Link>
+
+  <Link
+    to={`/workforce?company=${company?.id || ''}`}
+    className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1984_9561)">
+<path d="M12.6667 2.66667H11.9333C11.7786 1.91428 11.3692 1.23823 10.7742 0.752479C10.1791 0.266727 9.4348 0.000969683 8.66667 0L7.33333 0C6.5652 0.000969683 5.82088 0.266727 5.22583 0.752479C4.63079 1.23823 4.2214 1.91428 4.06667 2.66667H3.33333C2.4496 2.66773 1.60237 3.01925 0.97748 3.64415C0.352588 4.26904 0.00105857 5.11627 0 6L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V6C15.9989 5.11627 15.6474 4.26904 15.0225 3.64415C14.3976 3.01925 13.5504 2.66773 12.6667 2.66667V2.66667ZM7.33333 1.33333H8.66667C9.07884 1.33504 9.48042 1.46406 9.81647 1.70273C10.1525 1.94139 10.4066 2.27806 10.544 2.66667H5.456C5.59339 2.27806 5.84749 1.94139 6.18353 1.70273C6.51958 1.46406 6.92116 1.33504 7.33333 1.33333V1.33333ZM3.33333 4H12.6667C13.1971 4 13.7058 4.21071 14.0809 4.58579C14.456 4.96086 14.6667 5.46957 14.6667 6V8H1.33333V6C1.33333 5.46957 1.54405 4.96086 1.91912 4.58579C2.29419 4.21071 2.8029 4 3.33333 4V4ZM12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V9.33333H7.33333V10C7.33333 10.1768 7.40357 10.3464 7.5286 10.4714C7.65362 10.5964 7.82319 10.6667 8 10.6667C8.17681 10.6667 8.34638 10.5964 8.4714 10.4714C8.59643 10.3464 8.66667 10.1768 8.66667 10V9.33333H14.6667V12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1984_9561">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+    Work Force
+  </Link>
+
+  <Link
+    to={`/events?company=${company?.id || ''}`}
+    className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1984_9564)">
+<path d="M12.6667 1.33333H12V0.666667C12 0.489856 11.9298 0.320286 11.8047 0.195262C11.6797 0.0702379 11.5101 0 11.3333 0C11.1565 0 10.987 0.0702379 10.8619 0.195262C10.7369 0.320286 10.6667 0.489856 10.6667 0.666667V1.33333H5.33333V0.666667C5.33333 0.489856 5.2631 0.320286 5.13807 0.195262C5.01305 0.0702379 4.84348 0 4.66667 0C4.48986 0 4.32029 0.0702379 4.19526 0.195262C4.07024 0.320286 4 0.489856 4 0.666667V1.33333H3.33333C2.4496 1.33439 1.60237 1.68592 0.97748 2.31081C0.352588 2.93571 0.00105857 3.78294 0 4.66667L0 12.6667C0.00105857 13.5504 0.352588 14.3976 0.97748 15.0225C1.60237 15.6474 2.4496 15.9989 3.33333 16H12.6667C13.5504 15.9989 14.3976 15.6474 15.0225 15.0225C15.6474 14.3976 15.9989 13.5504 16 12.6667V4.66667C15.9989 3.78294 15.6474 2.93571 15.0225 2.31081C14.3976 1.68592 13.5504 1.33439 12.6667 1.33333ZM1.33333 4.66667C1.33333 4.13623 1.54405 3.62753 1.91912 3.25245C2.29419 2.87738 2.8029 2.66667 3.33333 2.66667H12.6667C13.1971 2.66667 13.7058 2.87738 14.0809 3.25245C14.456 3.62753 14.6667 4.13623 14.6667 4.66667V5.33333H1.33333V4.66667ZM12.6667 14.6667H3.33333C2.8029 14.6667 2.29419 14.456 1.91912 14.0809C1.54405 13.7058 1.33333 13.1971 1.33333 12.6667V6.66667H14.6667V12.6667C14.6667 13.1971 14.456 13.7058 14.0809 14.0809C13.7058 14.456 13.1971 14.6667 12.6667 14.6667Z" fill="#374957"/>
+<path d="M8 11C8.55228 11 9 10.5523 9 10C9 9.44772 8.55228 9 8 9C7.44772 9 7 9.44772 7 10C7 10.5523 7.44772 11 8 11Z" fill="#374957"/>
+<path d="M4.66699 11C5.21928 11 5.66699 10.5523 5.66699 10C5.66699 9.44772 5.21928 9 4.66699 9C4.11471 9 3.66699 9.44772 3.66699 10C3.66699 10.5523 4.11471 11 4.66699 11Z" fill="#374957"/>
+<path d="M11.333 11C11.8853 11 12.333 10.5523 12.333 10C12.333 9.44772 11.8853 9 11.333 9C10.7807 9 10.333 9.44772 10.333 10C10.333 10.5523 10.7807 11 11.333 11Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1984_9564">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+    Events
+  </Link>
+
+  <Link
+    to={`/logistics?company=${company?.id || ''}`}
+    className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1984_9567)">
+<path d="M12.6667 3.33268H11.2667C11.1119 2.58029 10.7025 1.90425 10.1075 1.41849C9.51245 0.932742 8.76814 0.666985 8 0.666016H3.33333C2.4496 0.667074 1.60237 1.0186 0.97748 1.6435C0.352588 2.26839 0.00105857 3.11562 0 3.99935L0 9.99935C0.00167587 10.5964 0.203692 11.1757 0.573691 11.6443C0.94369 12.113 1.46026 12.4439 2.04067 12.584C1.97784 12.9176 1.98858 13.261 2.07213 13.59C2.15568 13.9191 2.31002 14.2259 2.5244 14.4892C2.73877 14.7524 3.00801 14.9657 3.31333 15.1142C3.61864 15.2627 3.95267 15.3427 4.29211 15.3488C4.63155 15.3548 4.96823 15.2867 5.27864 15.1492C5.58905 15.0118 5.86572 14.8082 6.08934 14.5527C6.31296 14.2973 6.47815 13.9961 6.57337 13.6703C6.66859 13.3444 6.69156 13.0017 6.64067 12.666H9.362C9.34485 12.7763 9.33571 12.8877 9.33467 12.9994C9.33467 13.6182 9.5805 14.2117 10.0181 14.6493C10.4557 15.0869 11.0492 15.3327 11.668 15.3327C12.2868 15.3327 12.8803 15.0869 13.3179 14.6493C13.7555 14.2117 14.0013 13.6182 14.0013 12.9994C14.0006 12.8599 13.987 12.7209 13.9607 12.584C14.5408 12.4436 15.0571 12.1126 15.4268 11.644C15.7966 11.1754 15.9984 10.5963 16 9.99935V6.66602C15.9989 5.78229 15.6474 4.93505 15.0225 4.31016C14.3976 3.68527 13.5504 3.33374 12.6667 3.33268V3.33268ZM14.6667 6.66602V7.33268H11.3333V4.66602H12.6667C13.1971 4.66602 13.7058 4.87673 14.0809 5.2518C14.456 5.62688 14.6667 6.13558 14.6667 6.66602ZM1.33333 9.99935V3.99935C1.33333 3.46892 1.54405 2.96021 1.91912 2.58514C2.29419 2.21006 2.8029 1.99935 3.33333 1.99935H8C8.53043 1.99935 9.03914 2.21006 9.41421 2.58514C9.78929 2.96021 10 3.46892 10 3.99935V11.3327H2.66667C2.31304 11.3327 1.97391 11.1922 1.72386 10.9422C1.47381 10.6921 1.33333 10.353 1.33333 9.99935ZM5.33333 12.9994C5.33333 13.2646 5.22798 13.5189 5.04044 13.7065C4.8529 13.894 4.59855 13.9994 4.33333 13.9994C4.06812 13.9994 3.81376 13.894 3.62623 13.7065C3.43869 13.5189 3.33333 13.2646 3.33333 12.9994C3.33374 12.8854 3.35475 12.7725 3.39533 12.666H5.27133C5.31192 12.7725 5.33292 12.8854 5.33333 12.9994V12.9994ZM11.6667 13.9994C11.4015 13.9994 11.1471 13.894 10.9596 13.7065C10.772 13.5189 10.6667 13.2646 10.6667 12.9994C10.667 12.8854 10.688 12.7725 10.7287 12.666H12.6047C12.6454 12.7725 12.6664 12.8854 12.6667 12.9994C12.6667 13.2646 12.5613 13.5189 12.3738 13.7065C12.1862 13.894 11.9319 13.9994 11.6667 13.9994ZM13.3333 11.3327H11.3333V8.66602H14.6667V9.99935C14.6667 10.353 14.5262 10.6921 14.2761 10.9422C14.0261 11.1922 13.687 11.3327 13.3333 11.3327Z" fill="#374957"/>
+</g>
+<defs>
+<clipPath id="clip0_1984_9567">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+    Logistics
+  </Link>
+
+  <Link
+    to="/business-hub"  // or external link if needed: target="_blank" rel="noopener noreferrer"
+    className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-2.5 rounded-xl text-sm font-medium"
+  >
+    visit Business hub
+  </Link>
+</div>
   </div>
 
 
@@ -141,11 +171,16 @@ const CompanyProfile = React.memo(() => {
       </button>
     ))}
   </div>
+  {activeTab === "Reviews" && (
+  <div className="bg-white rounded-lg p-6">
+    <Reviews reviews={company?.reviews} />
+  </div>
+)}
 
   {/* Tab Content */}
   {activeTab === "Events" && <EventsSection company={company} />}
   {activeTab === "Work Force" && <WorkForceSection company={company} />}
-  {activeTab === "Activities" && <div>Activities content coming soon...</div>}
+  {activeTab === "Activities" && <ActivitiesSection company={company} />}
   {activeTab === "Services" && <ServicesSection company={company} />}
  {activeTab === "Products" && <ProductsSection company={company} />}
   {activeTab === "Deal Room" && <DealRoomSection company={company} />}
@@ -159,14 +194,8 @@ export const ManageRepresentativesLink = ({ main = false }) => {
   return (
     <Link
       to="/co/representatives/manage"
-      className={clsx(
-        "bg-gold hover:bg-opacity-60 text-sm xs:text-xs lg:text-sm font-semibold py-1.5 px-4 h-fit rounded-full block shrink-0",
-        {
-          "absolute right-0 -top-9 md:-top-14": main,
-        }
-      )}
+     
     >
-      Manage Representatives
     </Link>
   );
 };
@@ -463,9 +492,12 @@ const EventsSection = React.memo(({ company }) => {
       {/* Events Header - UPDATED */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Events</h2>
-        <button className="bg-yellow-100 hover:bg-yellow-200 px-6 py-2.5 rounded-xl text-sm font-medium">
-          See all Events
-        </button>
+<Link
+  to={`/events?company=${company?.id || ''}`}
+  className="bg-yellow-100 hover:bg-yellow-200 px-6 py-2.5 rounded-xl text-sm font-medium"
+>
+  See all Events
+</Link>
       </div>
 
       {/* Filter Tabs - UPDATED STYLING */}
@@ -513,8 +545,12 @@ const EventsSection = React.memo(({ company }) => {
               ))}
             </div>
             
-            <button className="w-full bg-yellow-100 hover:bg-yellow-200 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
-              <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <Link
+  to={`/events/${event.id}`}
+  className="w-full bg-yellow-100 hover:bg-yellow-200 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+>
+  {/* your svg */}
+  <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clipPath="url(#clip0_1984_9010)">
                   <path d="M13.458 11.0834C13.458 11.2933 13.3746 11.4947 13.2261 11.6431C13.0777 11.7916 12.8763 11.875 12.6663 11.875H6.33301C6.12304 11.875 5.92168 11.7916 5.77322 11.6431C5.62475 11.4947 5.54134 11.2933 5.54134 11.0834C5.54134 10.8734 5.62475 10.672 5.77322 10.5236C5.92168 10.3751 6.12304 10.2917 6.33301 10.2917H12.6663C12.8763 10.2917 13.0777 10.3751 13.2261 10.5236C13.3746 10.672 13.458 10.8734 13.458 11.0834ZM10.2913 13.4584H6.33301C6.12304 13.4584 5.92168 13.5418 5.77322 13.6902C5.62475 13.8387 5.54134 14.0401 5.54134 14.25C5.54134 14.46 5.62475 14.6613 5.77322 14.8098C5.92168 14.9583 6.12304 15.0417 6.33301 15.0417H10.2913C10.5013 15.0417 10.7027 14.9583 10.8511 14.8098C10.9996 14.6613 11.083 14.46 11.083 14.25C11.083 14.0401 10.9996 13.8387 10.8511 13.6902C10.7027 13.5418 10.5013 13.4584 10.2913 13.4584ZM17.4163 8.30064V15.0417C17.4151 16.0911 16.9976 17.0972 16.2556 17.8393C15.5135 18.5813 14.5074 18.9988 13.458 19H5.54134C4.49191 18.9988 3.48582 18.5813 2.74377 17.8393C2.00171 17.0972 1.58426 16.0911 1.58301 15.0417V3.95835C1.58426 2.90892 2.00171 1.90283 2.74377 1.16078C3.48582 0.418716 4.49191 0.0012753 5.54134 1.82469e-05H9.11572C9.84375 -0.00185557 10.5649 0.140609 11.2376 0.419173C11.9102 0.697738 12.5209 1.10688 13.0345 1.62293L15.7926 4.38268C16.309 4.89587 16.7184 5.50642 16.9971 6.17896C17.2758 6.85149 17.4183 7.57264 17.4163 8.30064V8.30064ZM11.915 2.74235C11.6659 2.50102 11.3862 2.29342 11.083 2.12485V5.54168C11.083 5.75165 11.1664 5.95301 11.3149 6.10148C11.4633 6.24994 11.6647 6.33335 11.8747 6.33335H15.2915C15.1228 6.03029 14.915 5.7508 14.6732 5.5021L11.915 2.74235ZM15.833 8.30064C15.833 8.17002 15.8077 8.04493 15.7958 7.91668H11.8747C11.2448 7.91668 10.6407 7.66646 10.1953 7.22106C9.7499 6.77566 9.49967 6.17157 9.49967 5.54168V1.62056C9.37142 1.60868 9.24555 1.58335 9.11572 1.58335H5.54134C4.91145 1.58335 4.30736 1.83357 3.86196 2.27897C3.41656 2.72437 3.16634 3.32846 3.16634 3.95835V15.0417C3.16634 15.6716 3.41656 16.2757 3.86196 16.7211C4.30736 17.1665 4.91145 17.4167 5.54134 17.4167H13.458C14.0879 17.4167 14.692 17.1665 15.1374 16.7211C15.5828 16.2757 15.833 15.6716 15.833 15.0417V8.30064Z" fill="#374957"/>
                 </g>
@@ -524,8 +560,8 @@ const EventsSection = React.memo(({ company }) => {
                   </clipPath>
                 </defs>
               </svg>
-              View Event Details
-            </button>
+  View Event Details
+</Link>
           </div>
         ))}
       </div>
@@ -678,14 +714,21 @@ const WorkForceSection = React.memo(({ company }) => {
                 </span>
               </div>
               
-            <div className="flex gap-2">
-              <button className="bg-[#FFCF3F] hover:bg-[#e6ba39] px-4 py-2 rounded-lg text-sm font-medium">
-                Apply Now
-              </button>
-              <button className="bg-[#FFE7A4] border hover:bg-[#f5dd94] px-4 py-2 rounded-lg text-sm font-medium">
-                View Details
-              </button>
-            </div>
+<div className="flex gap-2">
+  <Link
+    to={`/jobs/${job.id}/apply`}
+    className="bg-[#FFCF3F] hover:bg-[#e6ba39] px-4 py-2 rounded-lg text-sm font-medium"
+  >
+    Apply Now
+  </Link>
+
+  <Link
+    to={`/jobs/${job.id}`}
+    className="bg-[#FFE7A4] border hover:bg-[#f5dd94] px-4 py-2 rounded-lg text-sm font-medium"
+  >
+    View Details
+  </Link>
+</div>
             </div>
           </div>
         ))}
@@ -806,9 +849,12 @@ const DealRoomSection = React.memo(({ company }) => {
             </button>
           ))}
         </div>
-        <button className="inline-flex items-center gap-2 px-5 py-3 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl transition-colors font-medium text-gray-900 text-sm">
-          visit Deal room
-        </button>
+        <Link
+  to={`/deal-rooms?company=${company?.id || ''}`}
+  className="inline-flex items-center gap-2 px-5 py-3 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl transition-colors font-medium text-gray-900 text-sm"
+>
+  visit Deal room
+</Link>
       </div>
 
       {/* Section Title */}
@@ -946,9 +992,12 @@ const DealRoomSection = React.memo(({ company }) => {
             )}
           </div>
           
-          <button className="px-4 py-2 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl text-xs sm:text-sm font-medium text-gray-900 transition-colors whitespace-nowrap">
-            View Details
-          </button>
+          <Link
+  to={`/deal-rooms/${deal.id}`}
+  className="px-4 py-2 bg-[#FFE8A3] hover:bg-[#FFD700] rounded-xl text-xs sm:text-sm font-medium text-gray-900 transition-colors whitespace-nowrap"
+>
+  View Details
+</Link>
         </div>
       </div>
     ))}
@@ -1113,6 +1162,243 @@ const ProductsSection = React.memo(({ company }) => {
       ) : (
         <div className="text-center py-12">
           <p className="text-gray-500">No products available yet</p>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const ActivitiesSection = React.memo(({ company }) => {
+  // State for post creation
+  const [postContent, setPostContent] = React.useState("");
+  const [selectedImage, setSelectedImage] = React.useState(null);
+  const fileInputRef = React.useRef(null);
+
+  // Use real posts/activities data from company
+  const posts = company?.posts || company?.activities || [];
+
+  // Handle image selection
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      // You can also preview the image here if needed
+    }
+  };
+
+  // Handle post creation
+  const handleCreatePost = () => {
+    if (!postContent.trim() && !selectedImage) return;
+    
+    // TODO: Add your API call here to create the post
+    console.log('Creating post:', {
+      content: postContent,
+      image: selectedImage,
+      company_id: company?.id
+    });
+    
+    // Reset form after posting
+    setPostContent("");
+    setSelectedImage(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Create Post Section */}
+      <div className="bg-white rounded-lg p-6">
+        {/* Input field */}
+        <textarea
+          value={postContent}
+          onChange={(e) => setPostContent(e.target.value)}
+          placeholder="What's happening?"
+          className="w-full text-gray-400 text-xl mb-4 resize-none border-none outline-none focus:ring-0"
+          rows={2}
+        />
+        
+        <div className="flex items-center justify-between">
+          {/* Media buttons */}
+          <div className="flex gap-3">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+
+            {/* Image button */}
+            <button 
+              onClick={handleImageClick}
+              className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"
+              title="Add image"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 5C2.5 4.33696 2.76339 3.70107 3.23223 3.23223C3.70107 2.76339 4.33696 2.5 5 2.5H15C15.663 2.5 16.2989 2.76339 16.7678 3.23223C17.2366 3.70107 17.5 4.33696 17.5 5V15C17.5 15.663 17.2366 16.2989 16.7678 16.7678C16.2989 17.2366 15.663 17.5 15 17.5H5C4.33696 17.5 3.70107 17.2366 3.23223 16.7678C2.76339 16.2989 2.5 15.663 2.5 15V5Z" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7.5 8.125C7.84518 8.125 8.125 7.84518 8.125 7.5C8.125 7.15482 7.84518 6.875 7.5 6.875C7.15482 6.875 6.875 7.15482 6.875 7.5C6.875 7.84518 7.15482 8.125 7.5 8.125Z" fill="#22C55E" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M17.5 11.25L13.125 6.875L5 15" stroke="#22C55E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {/* GIF button */}
+            <button 
+              onClick={() => {
+                // TODO: Add GIF picker modal here
+                console.log('GIF button clicked');
+                alert('GIF picker would open here - needs integration');
+              }}
+              className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"
+              title="Add GIF"
+            >
+              <span className="text-orange-500 font-bold text-sm">GIF</span>
+            </button>
+
+            {/* Emoji button */}
+            <button 
+              onClick={() => {
+                // TODO: Add emoji picker here
+                console.log('Emoji button clicked');
+                alert('Emoji picker would open here - needs integration');
+              }}
+              className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200"
+              title="Add emoji"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="7.5" stroke="#F59E0B" strokeWidth="1.5"/>
+                <circle cx="7.5" cy="8.75" r="0.625" fill="#F59E0B"/>
+                <circle cx="12.5" cy="8.75" r="0.625" fill="#F59E0B"/>
+                <path d="M7.5 11.875C7.5 11.875 8.125 13.125 10 13.125C11.875 13.125 12.5 11.875 12.5 11.875" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Create Post button */}
+          <button 
+            onClick={handleCreatePost}
+            disabled={!postContent.trim() && !selectedImage}
+            className="bg-yellow-400 hover:bg-yellow-500 px-8 py-2.5 rounded-full font-semibold text-black disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Create Post
+          </button>
+        </div>
+
+        {/* Show selected image preview */}
+        {selectedImage && (
+          <div className="mt-4 flex items-center gap-2">
+            <span className="text-sm text-gray-600">Image selected: {selectedImage.name}</span>
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="text-red-500 hover:text-red-700 text-sm"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+
+        {/* Yellow divider line */}
+        <div className="border-t border-yellow-400 mt-4"></div>
+      </div>
+
+      {/* Posts Feed */}
+      {posts.length > 0 ? (
+        posts.map((post) => (
+          <div key={post.id} className="bg-white rounded-lg p-6">
+            {/* Post Header */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                {/* Company Logo */}
+                <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center overflow-hidden">
+                  {post.author_avatar || company?.logo ? (
+                    <img 
+                      src={post.author_avatar || company?.logo}
+                      alt={post.author || company?.company_name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span class="text-xl font-bold">' + (company?.company_name?.charAt(0) || 'C') + '</span>';
+                      }}
+                    />
+                  ) : (
+                    <span className="text-xl font-bold">{company?.company_name?.charAt(0) || 'C'}</span>
+                  )}
+                </div>
+                
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-black">
+                      {post.author || company?.company_name || "Connectize"}
+                    </span>
+                    <span className="text-gray-500 text-sm">
+                      {post.username || `@${company?.slug || "prosper"}`}
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      • {post.timestamp || post.created_at || "a week ago"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Three dots menu */}
+              <button className="text-gray-400 hover:text-gray-600">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="4" r="1.5" fill="currentColor"/>
+                  <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                  <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Post Content - YELLOW TEXT */}
+            <p className="text-yellow-500 font-medium mb-4">
+              {post.content || post.text || post.description || ""}
+            </p>
+
+            {/* Post Actions */}
+            <div className="flex items-center gap-6 text-gray-500 text-sm">
+              {/* Comments */}
+              <button className="flex items-center gap-1.5 hover:text-blue-500">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M6 14H14L18 18V4C18 3.46957 17.7893 2.96086 17.4142 2.58579C17.0391 2.21071 16.5304 2 16 2H4C3.46957 2 2.96086 2.21071 2.58579 2.58579C2.21071 2.96086 2 3.46957 2 4V14C2 14.5304 2.21071 15.0391 2.58579 15.4142C2.96086 15.7893 3.46957 16 4 16H6V14Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>{post.comments || post.comments_count || 0}</span>
+              </button>
+
+              {/* Likes */}
+              <button className="flex items-center gap-1.5 hover:text-red-500">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 17.5L8.825 16.45C4.5 12.525 1.875 10.175 1.875 7.25C1.875 4.9 3.65 3.125 6 3.125C7.325 3.125 8.5875 3.7375 10 4.7375C11.4125 3.7375 12.675 3.125 14 3.125C16.35 3.125 18.125 4.9 18.125 7.25C18.125 10.175 15.5 12.525 11.175 16.45L10 17.5Z" fill="currentColor"/>
+                </svg>
+                <span>{post.likes || post.likes_count || 1}</span>
+              </button>
+
+              {/* Downloads */}
+              <button className="flex items-center gap-1.5 hover:text-green-500">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 13.75L6.25 10L7.3125 8.9375L9.375 11V3.75H10.625V11L12.6875 8.9375L13.75 10L10 13.75ZM5 16.25C4.65833 16.25 4.36979 16.1302 4.13438 15.8906C3.89896 15.651 3.78125 15.3583 3.75 15V12.5H5V15H15V12.5H16.25V15C16.25 15.3417 16.1302 15.6302 15.8906 15.8656C15.651 16.101 15.3583 16.2187 15 16.25H5Z" fill="currentColor"/>
+                </svg>
+              </button>
+
+              {/* Share */}
+              <button className="flex items-center gap-1.5 hover:text-blue-500">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M15 6.66667C16.3807 6.66667 17.5 5.54738 17.5 4.16667C17.5 2.78595 16.3807 1.66667 15 1.66667C13.6193 1.66667 12.5 2.78595 12.5 4.16667C12.5 5.54738 13.6193 6.66667 15 6.66667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5 12.5C6.38071 12.5 7.5 11.3807 7.5 10C7.5 8.61929 6.38071 7.5 5 7.5C3.61929 7.5 2.5 8.61929 2.5 10C2.5 11.3807 3.61929 12.5 5 12.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15 18.3333C16.3807 18.3333 17.5 17.214 17.5 15.8333C17.5 14.4526 16.3807 13.3333 15 13.3333C13.6193 13.3333 12.5 14.4526 12.5 15.8333C12.5 17.214 13.6193 18.3333 15 18.3333Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7.15833 11.1417L12.85 14.6917" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12.8417 5.30833L7.15833 8.85833" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        ))
+      ) : (
+        /* Empty State */
+        <div className="bg-white rounded-lg p-12 text-center">
+          <p className="text-gray-500 text-lg">No activities yet</p>
         </div>
       )}
     </div>
