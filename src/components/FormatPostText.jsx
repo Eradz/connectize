@@ -94,7 +94,7 @@ const FormatPostText = ({ text, isSinglePost = false, postId }) => {
       ) : (
         <div
           className="line-clamp-5 cursor-pointer"
-          onClick={() => navigate(`/posts/${postId}`)}
+          onClick={() => navigate(`/feed/posts/${postId}`)}
         >
           <Markdown options={options}>{sanitizedText}</Markdown>
         </div>
