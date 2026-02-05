@@ -172,14 +172,14 @@ export const DiscoverPostItem = ({
     const currentIsLiked = liked;
     setLiked(!currentIsLiked);
     setLikes((prev) => (!currentIsLiked ? prev + 1 : prev - 1));
-    setDisabled(true);
+    // setDisabled(true);
     try {
       await likePost(postItem?.id, postItem, currentIsLiked);
     } catch (error) {
       setLiked(currentIsLiked);
       setLikes((prev) => (!currentIsLiked ? prev - 1 : prev + 1));
     }
-    setDisabled(false);
+    // setDisabled(false);
     setRefetchInterval(1000);
     setTimeout(() => setRefetchInterval(false), 2000);
   };
