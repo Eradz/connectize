@@ -183,7 +183,9 @@ export const DiscoverPostItem = ({
     setRefetchInterval(1000);
     setTimeout(() => setRefetchInterval(false), 2000);
   };
-  const shareUrlString = window.location.href + "posts/" + postItem.id;
+  const shareUrlString = window?.location?.hostname?.includes("localhost")
+    ? `http://${window.location.hostname}:3000/feed/posts/${postItem.id}`
+    : `https://${window.location.hostname}/feed/posts/${postItem.id}`;
   const shareData = {
     title: postTitle,
     text: postItem.body,
@@ -195,7 +197,6 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
-  console.log("comments", comments)
   return (
     <motion.article
       initial={{ opacity: 0 }}
@@ -354,11 +355,11 @@ export const DiscoverPostItem = ({
             text={formatNumber(likes)}
           />
 
-          <PDFPreview
+          {/* <PDFPreview
             postBody={postItem?.body}
             postTitle={postTitle}
             postImages={postItem.images}
-          />
+          /> */}
 
           <CustomShareButton
             shareData={shareData}
