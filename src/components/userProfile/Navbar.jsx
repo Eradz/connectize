@@ -8,7 +8,7 @@ import { Tooltip } from "@chakra-ui/react";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
-import { Setting } from "../../icon";
+import { Message, Setting } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
 import FeedSearch from "../custom/FeedSearch";
 import NavbarDropdown from "../NavbarDropdown";
@@ -62,9 +62,14 @@ const Navbar = () => {
 
             <div className="flex items-center gap-3 xs:gap-5 md:gap-7 shrink-0">
               {currentUser?.user_type === CompanyUserType && <NavbarDropdown />}
-              <Link to={webRoutes.coNotifications}>
-                <NotificationPopOver />
-              </Link>
+              <div className="flex pt-2 gap-3 xs:gap-5 md:gap-7 shrink-0">
+                <Link to={webRoutes.messages}>
+                  <Message width={20} height={20} />
+                </Link>
+                <Link to={webRoutes.coNotifications}>
+                  <NotificationPopOver />
+                </Link>
+              </div>
 
               {/* <LinkWithTooltipIcon
                 IconName={Setting}

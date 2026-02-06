@@ -154,7 +154,7 @@ export const JoinedUserCompanyImages = () => {
                 className="flex px-3 py-3 items-center transition-all active:scale-90 duration-300 hover:text-mid_grey text-gray-500 text-sm"
               >
                 <User className="mr-2 text-gray-500" />{" "}
-                <span className="!leading-none">My Boolmarks</span>
+                <span className="!leading-none">My Bookmarks</span>
               </Link>
 
               <Link

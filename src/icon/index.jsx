@@ -234,15 +234,15 @@ export const Home = ({
   </svg>
 );
 export const Message = ({
-  width = "18",
-  height = "18",
+  width,
+  height,
   color = "currentColor",
   className,
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={width}
-    height={height}
+    width={width || 18}
+    height={height || 18}
     className={className}
     viewBox="0 0 24 24"
     fill={color}
