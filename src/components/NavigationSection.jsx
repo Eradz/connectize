@@ -27,6 +27,7 @@ import LogisticIcon from "../icon/LogisticIcon";
 import CreditCardIcon from "../icon/CreditCardIcon";
 import OpenBookIcon from "../icon/OpenBookIcon";
 import StoreIcon from "../icon/StoreIcon";
+import { webRoutes } from "../lib/webRoutes";
 
 // Icon mapping for dynamic icons
 const iconMap = {
@@ -107,7 +108,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   }, [pathname]); // Remove expandedHubItems and expandedSections from dependencies to prevent loops
 
   const navigators = useMemo(
-    () => (isSmallNavigation ? feedNavItems.slice(0, 6) : feedNavItems),
+    () => (isSmallNavigation ? feedNavItems.filter((navItem, index)=> navItem.name === "Home" || navItem.name === "Representatives" || navItem.name === "Companies" || navItem.name === "Market" ) : feedNavItems),
     [isSmallNavigation]
   );
 
@@ -205,7 +206,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
 
   if (hasHeader) {
     return (
-      <ul className="flex items-center justify-between h-12 xs:text-sm">
+      <ul className="w-full flex items-center justify-between h-14 xs:text-sm">
         {navigators.map(({ to, icon, name }, index) => {
           const isActive = to === "/" ? pathname === "/" : pathname.startsWith(to);
           return (
@@ -214,7 +215,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                 onClick={() => toggleNav(false)}
                 className={clsx(
-                  "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm flex-col text-xs xs:text-[.65rem]",
+                  "flex items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm flex-col text-xs xs:text-[.65rem]",
                   {
                     "bg-mid_grey pointer-events-none": isActive,
                     "!text-gold rounded": isActive,
@@ -226,7 +227,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   IconName={icon}
                   tip={name}
                   iconClassName={clsx(
-                    "hover:!text-gold text-xl !size-5 lg:!size-4",
+                    "hover:!text-gold text-xl !size-[28px] md:!size-5 lg:!size-4",
                     {
                       "!text-gold rounded": isActive,
                       "!text-gray-500": !isActive,
@@ -234,7 +235,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                     }
                   )}
                 />
-                <span className="max-md:sr-only lg:!text-sm">{name}</span>
+                <span className="text-white text-xs">{name}</span>
               </Link>
             </li>
           );
@@ -251,6 +252,17 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             </button>
           </li>
         )}
+         <li className="md:hidden">
+            <Link
+              to={webRoutes.platformDashboard}
+              className={clsx(
+                "flex flex-col items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded"
+              )}
+            >
+              <BusinessHub fill={'#ffffff'} width={28} height={28} />
+              <span className="text-white text-xs">Business hub</span>
+            </Link>
+        </li>
       </ul>
     );
   }
@@ -293,6 +305,16 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
               </li>
             );
           })}
+          <li className="md:hidden">
+                <Link
+                  to={webRoutes.platformDashboard}
+                  className={clsx(
+                    "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded"
+                  )}
+                >
+                 <BusinessHub />
+                </Link>
+              </li>
         </ul>
       </div>
 
