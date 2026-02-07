@@ -29,6 +29,7 @@ import ProviderComparisonSystem from '../../components/logistics/ProviderCompari
 import ProviderQuoteForm from '../../components/logistics/ProviderQuoteForm';
 import { getSession } from '../../lib/session';
 import { useAuth } from '../../context/userContext';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const LogisticsRequestDetail = () => {
   const navigate = useNavigate();
@@ -325,15 +326,17 @@ const LogisticsRequestDetail = () => {
     <div className="min-h-screen mt-4">
       {/* Header */}
       <div className="">
-        <div className="max-w-7xl mx-auto p-4">
-              <button
+        <div className="max-w-7xl mx-auto px-4">
+              {/* <button
                 onClick={() => navigate(webRoutes.logisticsRequests)}
                 className="bg-pale_yellow hover:bg-gold flex p-2 rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
                 <span className="text-sm font-medium">Back</span>
-              </button>
-          <div className="flex items-center justify-between pt-2">
+              </button> */}
+              
+              <BackArrowButton />
+          <div className="flex items-center justify-between py-2">
             <div className="flex items-center space-x-4">
               <div>
                 <div className="flex items-center space-x-3">
