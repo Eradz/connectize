@@ -69,7 +69,7 @@ export const feedNavItems = [
   },
   {
     name: "Market",
-    to: webRoutes.market,
+    to: webRoutes.marketplace,
     icon: StoreIcon,
     smallNavigation: true,
   },
