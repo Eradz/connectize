@@ -47,7 +47,6 @@ const KnowledgeSearch = () => {
   };
 
   const handleSearch = (e) => {
-    console.log("Y")
     e.preventDefault();
     performSearch();
   };

@@ -10,6 +10,12 @@ import Overview from "./components/profile/overview";
 import Profile from "./components/profile/profile";
 import { webRoutes } from "./lib/webRoutes";
 import AppLayout from "./pages/AppLayout";
+
+// Helper function to remove leading slash from route paths
+const removeLeadingSlash = (path) => {
+  if (!path) return path;
+  return path.startsWith("/") ? path.slice(1) : path.includes("/co/") ? path.replace("/co/", "")  :path;
+};
 import FeedLayout from "./pages/FeedLayout";
 import AuthLayout from "./pages/authentication/AuthLayout";
 import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
@@ -179,24 +185,24 @@ function App() {
         
   {/* Main App Routes - Feed as Home Page */}
         <Route path="/" element={<AppLayout />}>
-          <Route index element={<Navigate to="/feed" replace />} />
+          <Route index element={<Navigate to={webRoutes.feedLayout} replace />} />
           
-          <Route path="feed" element={<FeedLayout />}>
+          <Route path={removeLeadingSlash(webRoutes.feedLayout)} element={<FeedLayout />}>
             <Route index element={<NewsFeed />} />
           </Route>
           <Route path="" element={<FeedLayout />}>
             <Route path="posts/:id" element={<SinglePostPage />} />
           </Route>
-          <Route path="profile" element={<Profile />} />
+          <Route path={removeLeadingSlash(webRoutes.profile)} element={<Profile />} />
 
           {/* Profile Update Routes */}
-          <Route path="update-profile" element={<Home />}/>
+          <Route path={removeLeadingSlash(webRoutes.home)} element={<Home />}/>
           <Route path="profile-update" element={<ProfileLayout />}>
-            <Route path="address" element={<Address />} />
-            <Route path="bio" element={<Bio />} />
-            <Route path="contact" element={<Contact />} />
+            <Route path={removeLeadingSlash(webRoutes.address)} element={<Address />} />
+            <Route path={removeLeadingSlash(webRoutes.bio)} element={<Bio />} />
+            <Route path={removeLeadingSlash(webRoutes.contact)} element={<Contact />} />
             <Route path="home" element={<Home />} />
-            <Route path="overview" element={<Overview />} />
+            <Route path={removeLeadingSlash(webRoutes.overview)} element={<Overview />} />
           </Route>
 
           {/* Company Routes */}
@@ -206,105 +212,105 @@ function App() {
             <Route path="information" element={<CompanyInformation />} />
           </Route>
 
-          <Route path="analysis" element={<Analysis />} />
-          <Route path="bookmarks" element={<BookMark />} />
-          <Route path="companies" element={<CompaniesPage />} />
-          <Route path="notifications" element={<NotificationItem />} />
+          <Route path={removeLeadingSlash(webRoutes.analysis)} element={<Analysis />} />
+          <Route path={removeLeadingSlash(webRoutes.bookmark)} element={<BookMark />} />
+          <Route path={removeLeadingSlash(webRoutes.companies)} element={<CompaniesPage />} />
+          <Route path={removeLeadingSlash(webRoutes.notifications)} element={<NotificationItem />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
-          <Route path="market" element={<Market />} />
+          <Route path={removeLeadingSlash(webRoutes.market)} element={<Market />} />
           
           {/* Marketplace Routes */}
-          <Route path="marketplace" element={<Marketplace />} />
-          <Route path="marketplace/cart" element={<MarketplaceCart />} />
-          <Route path="marketplace/checkout" element={<MarketplaceCheckout />} />
-          <Route path="marketplace/listing/:id" element={<MarketplaceListingDetail />} />
-          <Route path="marketplace/my-listings" element={<MyListings />} />
-          <Route path="marketplace/create-listing" element={<CreateListing />} />
-          <Route path="marketplace/edit-listing/:id" element={<EditListing />} />
-          <Route path="marketplace/orders" element={<MarketplaceOrders />} />
-          <Route path="marketplace/order-confirmation/:id" element={<OrderConfirmation />} />
-          <Route path="marketplace/seller-orders" element={<SellerOrders />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplace)} element={<Marketplace />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceCart)} element={<MarketplaceCart />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceCheckout)} element={<MarketplaceCheckout />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceListing)} element={<MarketplaceListingDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceMyListings)} element={<MyListings />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceCreateListing)} element={<CreateListing />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceEditListing)} element={<EditListing />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceOrders)} element={<MarketplaceOrders />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceOrderConfirmation)} element={<OrderConfirmation />} />
+          <Route path={removeLeadingSlash(webRoutes.marketplaceSellerOrders)} element={<SellerOrders />} />
           <Route path="marketplace/seller-payments" element={<SellerPayments />} />
           
-          <Route path="messages" element={<MessagesLayout />} />
-          <Route path="products/:id" element={<Product />} />
-          <Route path="products/listing" element={<Listing />} />
-          <Route path="representatives" element={<RepresentativesPage />} />
+          <Route path={removeLeadingSlash(webRoutes.messages)} element={<MessagesLayout />} />
+          <Route path={removeLeadingSlash(webRoutes.productDetails)} element={<Product />} />
+          <Route path={removeLeadingSlash(webRoutes.productListing)} element={<Listing />} />
+          <Route path={removeLeadingSlash(webRoutes.representative)} element={<RepresentativesPage />} />
           <Route path="representatives/assign" element={<AssignRepresentative />} />
-          <Route path="representatives/accept" element={<AcceptRepresentation />} />
-          <Route path="search" element={<Search />} />
-          <Route path="services" element={<Services />} />
-          <Route path="services/add" element={<ServiceAdmin />} />
-          <Route path="services/:id" element={<ServiceOverView />} />
-          <Route path="co/settings" element={<SettingsPage />} />
-          <Route path="user/:userId" element={<UserProfile />} />
+          <Route path={removeLeadingSlash(webRoutes.acceptRepresentation)} element={<AcceptRepresentation />} />
+          <Route path={removeLeadingSlash(webRoutes.search)} element={<Search />} />
+          <Route path={removeLeadingSlash(webRoutes.services)} element={<Services />} />
+          <Route path={removeLeadingSlash(webRoutes.servicesAdd)} element={<ServiceAdmin />} />
+          <Route path={removeLeadingSlash(webRoutes.servicesDetail)} element={<ServiceOverView />} />
+          <Route path={removeLeadingSlash(webRoutes.settings)} element={<SettingsPage />} />
+          <Route path={removeLeadingSlash(webRoutes.userProfile)} element={<UserProfile />} />
           
           {/* Company-specific routes with "co" prefix */}
-          <Route path="co/bookmarks" element={<BookMark />} />
-          <Route path="co/representatives" element={<RepresentativesPage />} />
+          <Route path={removeLeadingSlash(webRoutes.bookmarks)} element={<BookMark />} />
+          <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />
           <Route path="co/:userId" element={<UserProfile />} />
           <Route path="co/:company" element={<CompanyProfile />} />
-          <Route path="co/notifications" element={<NotificationItem />} />
+          <Route path={removeLeadingSlash(webRoutes.coNotifications)} element={<NotificationItem />} />
           
           {/* Knowledge Hub Routes */}
-          <Route path="knowledge" element={<KnowledgeHubDashboard />} />
-          <Route path="knowledge/articles" element={<KnowledgeArticles />} />
-          <Route path="knowledge/articles/:slug" element={<KnowledgeArticleDetail />} />
-          <Route path="knowledge/articles/create" element={<KnowledgeArticleCreate />} />
-          <Route path="knowledge/forums" element={<KnowledgeForums />} />
-          <Route path="knowledge/forums/create" element={<KnowledgeForumCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeHub)} element={<KnowledgeHubDashboard />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeArticles)} element={<KnowledgeArticles />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeArticleDetail)} element={<KnowledgeArticleDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeArticleCreate)} element={<KnowledgeArticleCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForums)} element={<KnowledgeForums />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForumCreate)} element={<KnowledgeForumCreate />} />
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
-          <Route path="knowledge/forums/:slug" element={<KnowledgeForumDetail />} />
-          <Route path="knowledge/forums/:forumSlug/topics/create" element={<KnowledgeTopicCreate />} />
-          <Route path="knowledge/topics" element={<KnowledgeTopics />} />
-          <Route path="knowledge/topics/:slug" element={<KnowledgeTopicDetail />} />
-          <Route path="knowledge/categories" element={<KnowledgeCategories />} />
-          <Route path="knowledge/categories/:slug" element={<KnowledgeCategoryDetail />} />
-          <Route path="knowledge/tags/:slug" element={<KnowledgeTagDetail />} />
-          <Route path="knowledge/search" element={<KnowledgeSearch />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForumDetail)} element={<KnowledgeForumDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForumTopicCreate)} element={<KnowledgeTopicCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeTopics)} element={<KnowledgeTopics />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForumTopicDetail)} element={<KnowledgeTopicDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeCategories)} element={<KnowledgeCategories />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeCategoryDetail)} element={<KnowledgeCategoryDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeTagDetail)} element={<KnowledgeTagDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeSearch)} element={<KnowledgeSearch />} />
           
           {/* Hub Platform Routes - Using main app layout */}
-          <Route path="dashboard" element={<PlatformDashboard />} />
+          <Route path={removeLeadingSlash(webRoutes.dashboard)} element={<PlatformDashboard />} />
           
           {/* Deal Rooms */}
-          <Route path="deals" element={<DealRooms />} />
-          <Route path="deals/create" element={<DealRoomCreate />} />
-          <Route path="deals/:id" element={<DealRoomDetail />} />
-          <Route path="deals/:id/edit" element={<DealRoomEdit />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRooms)} element={<DealRooms />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomCreate)} element={<DealRoomCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomDetail)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomEdit)} element={<DealRoomEdit />} />
           {/* Deal Room Detail Tab Routes (previously only available under /platform) */}
-          <Route path="deals/:id/documents" element={<DealRoomDetail />} />
-          <Route path="deals/:id/participants" element={<DealRoomDetail />} />
-          <Route path="deals/:id/milestones" element={<DealRoomDetail />} />
-          <Route path="deals/:id/activities" element={<DealRoomDetail />} />
-          <Route path="deals/:id/valuations" element={<DealRoomDetail />} />
-          <Route path="deals/:id/reports" element={<DealRoomDetail />} />
-          <Route path="deals/my-participations" element={<MyParticipations />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomDocuments)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomParticipants)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomMilestones)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomActivities)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomValuations)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.dealRoomReports)} element={<DealRoomDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.myParticipations)} element={<MyParticipations />} />
           
           {/* Workforce */}
-          <Route path="jobs" element={<WorkforceJobs />} />
-          <Route path="jobs/create" element={<WorkforceJobCreate />} />
-          <Route path="jobs/update/:id" element={<WorkforceJobCreate />} />
-          <Route path="jobs/saved" element={<WorkforceSavedJobs />} />
-          <Route path="jobs/:id" element={<WorkforceJobDetail />} />
-          <Route path="jobs/:id/apply" element={<WorkforceJobDetail />} />
-          <Route path="jobs/my-posted" element={<WorkforceMyPostedJobs />} />
-          <Route path="professionals" element={<WorkforceProfessionals />} />
-          <Route path="professionals/create" element={<WorkforceProfileCreate />} />
-          <Route path="professionals/:id" element={<WorkforceProfileDetail />} />
-          <Route path="professionals/:id/edit" element={<WorkforceProfileEdit />} />
-          <Route path="events" element={<WorkforceEvents />} />
-          <Route path="events/create" element={<WorkforceEventCreate />} />
-          <Route path="events/earnings" element={<CompanyEarnings />} />
-          <Route path="events/my-events" element={<WorkforceMyEvents />} />
-          <Route path="events/my-registrations" element={<WorkforceMyRegistrations />} />
-          <Route path="events/my-bookmarks" element={<WorkforceMyBookmarks />} />
-          <Route path="events/:id/edit" element={<WorkforceEventCreate />} />
-          <Route path="events/:id" element={<WorkforceEventDetail />} />
-          <Route path="applications" element={<WorkforceApplications />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceJobs)} element={<WorkforceJobs />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceJobCreate)} element={<WorkforceJobCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceJobUpdate)} element={<WorkforceJobCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceSavedJobs)} element={<WorkforceSavedJobs />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceJobDetail)} element={<WorkforceJobDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceJobApply)} element={<WorkforceJobDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceMyPostedJobs)} element={<WorkforceMyPostedJobs />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceProfiles)} element={<WorkforceProfessionals />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceProfileCreate)} element={<WorkforceProfileCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceProfileDetail)} element={<WorkforceProfileDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceProfileEdit)} element={<WorkforceProfileEdit />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceEvents)} element={<WorkforceEvents />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceEventCreate)} element={<WorkforceEventCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceCompanyEarnings)} element={<CompanyEarnings />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceMyEvents)} element={<WorkforceMyEvents />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceMyRegistrations)} element={<WorkforceMyRegistrations />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceMyBookmarks)} element={<WorkforceMyBookmarks />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceEventEdit)} element={<WorkforceEventCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceEventDetail)} element={<WorkforceEventDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceApplications)} element={<WorkforceApplications />} />
           
           {/* AI Services */}
-          <Route path="ai" element={<AIDashboard />} />
+          <Route path={removeLeadingSlash(webRoutes.aiDashboard)} element={<AIDashboard />} />
           <Route path="ai/matching" element={<AISubpage />} />
           <Route path="ai/opportunities" element={<AISubpage />} />
           <Route path="ai/compliance" element={<AISubpage />} />
@@ -312,38 +318,38 @@ function App() {
           <Route path="ai/insights" element={<AISubpage />} />
           
           {/* Logistics Hub */}
-          <Route path="logistics" element={<LogisticsDashboard />} />
-          <Route path="logistics/inventory" element={<LogisticsInventory />} />
-          <Route path="logistics/inventory/create" element={<LogisticsInventoryCreate />} />
-          <Route path="logistics/inventory/:id/edit" element={<LogisticsInventoryEdit />} />
-          <Route path="logistics/inventory/:id" element={<LogisticsInventoryDetailView />} />
-          <Route path="logistics/requests" element={<LogisticsRequestList />} />
-          <Route path="logistics/requests/create" element={<LogisticsRequestCreate />} />
-          <Route path="logistics/requests/:id" element={<LogisticsRequestDetail />} />
-          <Route path="logistics/requests/:id/edit" element={<LogisticsRequestEdit />} />
-          <Route path="logistics/shipments" element={<LogisticsShipments />} />
-          <Route path="logistics/shipments/create" element={<LogisticsShipmentCreate />} />
-          <Route path="logistics/shipments/:id" element={<LogisticsShipmentDetail />} />
-          <Route path="logistics/tracking" element={<LogisticsTracking />} />
-          <Route path="logistics/become-provider" element={<BecomeProvider />} />
-          <Route path="logistics/provider-dashboard" element={<ProviderDashboard />} />
-          <Route path="logistics/provider-settings" element={<ProviderSettings />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsDashboard)} element={<LogisticsDashboard />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsInventory)} element={<LogisticsInventory />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsInventoryCreate)} element={<LogisticsInventoryCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsInventoryEdit)} element={<LogisticsInventoryEdit />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsInventoryDetail)} element={<LogisticsInventoryDetailView />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsRequests)} element={<LogisticsRequestList />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsRequestCreate)} element={<LogisticsRequestCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsRequestDetail)} element={<LogisticsRequestDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsRequestEdit)} element={<LogisticsRequestEdit />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsShipments)} element={<LogisticsShipments />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsShipmentCreate)} element={<LogisticsShipmentCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsShipmentDetail)} element={<LogisticsShipmentDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsTracking)} element={<LogisticsTracking />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsBecomeProvider)} element={<BecomeProvider />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsProviderDashboard)} element={<ProviderDashboard />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsProviderSettings)} element={<ProviderSettings />} />
           
           {/* Inventory Management */}
-          <Route path="inventory" element={<InventoryDashboard />} />
-          <Route path="inventory/items" element={<InventoryItems />} />
-          <Route path="inventory/warehouses" element={<InventoryWarehouses />} />
-          <Route path="inventory/transactions" element={<InventoryTransactions />} />
-          <Route path="inventory/alerts" element={<InventoryAlerts />} />
-          <Route path="inventory/reports" element={<InventoryReports />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryDashboard)} element={<InventoryDashboard />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryItems)} element={<InventoryItems />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryWarehouses)} element={<InventoryWarehouses />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryTransactions)} element={<InventoryTransactions />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryAlerts)} element={<InventoryAlerts />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryReports)} element={<InventoryReports />} />
           
           {/* Subscriptions */}
-          <Route path="subscriptions" element={<SubscriptionsPage />} />
-          <Route path="subscriptions/*" element={<SubscriptionRoutes />} />
+          <Route path={removeLeadingSlash(webRoutes.subscriptions)} element={<SubscriptionsPage />} />
+          <Route path={removeLeadingSlash(webRoutes.subscriptions) + "/*"} element={<SubscriptionRoutes />} />
           {/* Direct plan detail (plural form) route to match webRoutes.subscriptionPlanDetail */}
-          <Route path="subscriptions/plans/:planId" element={<SubscriptionPlanDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.subscriptionPlanDetail)} element={<SubscriptionPlanDetail />} />
           
-          <Route path='ads' element={<FeaturedAdsPage />} />
+          <Route path="ads" element={<FeaturedAdsPage />} />
           {/* Direct company routes (for URLs like /Connectize) - Must be last to avoid conflicts */}
           <Route path=":company" element={<CompanyProfile />} />
         </Route>
