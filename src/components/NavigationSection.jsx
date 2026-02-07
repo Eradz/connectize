@@ -206,7 +206,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
 
   if (hasHeader) {
     return (
-      <ul className="w-full flex items-center justify-between h-14 xs:text-sm">
+      <ul className="w-full flex items-center justify-between xs:text-sm">
         {navigators.map(({ to, icon, name }, index) => {
           const isActive = to === "/" ? pathname === "/" : pathname.startsWith(to);
           return (
@@ -227,7 +227,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   IconName={icon}
                   tip={name}
                   iconClassName={clsx(
-                    "hover:!text-gold text-xl !size-[28px] md:!size-5 lg:!size-4",
+                    "hover:!text-gold text-xl !size-[25px] md:!size-5 lg:!size-4",
                     {
                       "!text-gold rounded": isActive,
                       "!text-gray-500": !isActive,
@@ -235,7 +235,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                     }
                   )}
                 />
-                <span className="text-white text-xs">{name}</span>
+                <span className="text-white text-[9px]">{name}</span>
               </Link>
             </li>
           );
@@ -259,8 +259,8 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 "flex flex-col items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded"
               )}
             >
-              <BusinessHub fill={'#ffffff'} width={28} height={28} />
-              <span className="text-white text-xs">Business hub</span>
+              <BusinessHub fill={'#ffffff'} width={25} height={25} />
+              <span className="text-white text-[9px]">Business hub</span>
             </Link>
         </li>
       </ul>
