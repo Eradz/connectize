@@ -3,6 +3,7 @@ import Markdown from "markdown-to-jsx";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import LightParagraph from "./ParagraphText";
+import { webRoutes } from "../lib/webRoutes";
 
 const CustomLink = ({ children, ...props }) => (
   <a
@@ -94,7 +95,7 @@ const FormatPostText = ({ text, isSinglePost = false, postId }) => {
       ) : (
         <div
           className="line-clamp-5 cursor-pointer"
-          onClick={() => navigate(`/feed/posts/${postId}`)}
+          onClick={() => navigate(webRoutes.singlePost.replace(":id", postId))}
         >
           <Markdown options={options}>{sanitizedText}</Markdown>
         </div>

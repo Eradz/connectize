@@ -45,6 +45,7 @@ import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import CommentThread from "../../comments/CommentThread";
+import { webRoutes } from "../../../lib/webRoutes";
 
 function DiscoverPosts({
   searchArray,
@@ -184,8 +185,8 @@ export const DiscoverPostItem = ({
     setTimeout(() => setRefetchInterval(false), 2000);
   };
   const shareUrlString = window?.location?.hostname?.includes("localhost")
-    ? `http://${window.location.hostname}:3000/feed/posts/${postItem.id}`
-    : `https://${window.location.hostname}/feed/posts/${postItem.id}`;
+    ? `http://${window.location.hostname}:3000${webRoutes.singlePost.replace(":id", postItem.id)}`
+    : `https://${window.location.hostname}${webRoutes.singlePost.replace(":id", postItem.id)}`;
   const shareData = {
     title: postTitle,
     text: postItem.body,

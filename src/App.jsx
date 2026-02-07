@@ -183,9 +183,10 @@ function App() {
           
           <Route path="feed" element={<FeedLayout />}>
             <Route index element={<NewsFeed />} />
+          </Route>
+          <Route path="" element={<FeedLayout />}>
             <Route path="posts/:id" element={<SinglePostPage />} />
           </Route>
-
           <Route path="profile" element={<Profile />} />
 
           {/* Profile Update Routes */}
