@@ -325,7 +325,7 @@ const LogisticsRequestDetail = () => {
     <div className="min-h-screen mt-4">
       {/* Header */}
       <div className="">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto p-4">
               <button
                 onClick={() => navigate(webRoutes.logisticsRequests)}
                 className="bg-pale_yellow hover:bg-gold flex p-2 rounded-lg"
@@ -340,10 +340,10 @@ const LogisticsRequestDetail = () => {
                   <h1 className="text-2xl font-bold text-gray-900">
                     {request.title || `${request.cargo_type} Request`}
                   </h1>
-                  <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100">
+                  {/* <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100">
                     {getStatusIcon(request.status)}
                     <span className="text-sm font-medium">{getStatusLabel(request.status)}</span>
-                  </div>
+                  </div> */}
                   {/* {userId != null && String(request.requested_by) === String(userId) && (
                     <span className="px-2 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium">Mine</span>
                   )} */}

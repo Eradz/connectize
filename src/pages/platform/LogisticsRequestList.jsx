@@ -173,7 +173,7 @@ const LogisticsRequestList = () => {
               className="w-fit ml-[56%] md:ml-0 bg-custom_yellow px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center space-x-2 font-medium"
             >
               <Plus className="w-4 h-4" />
-              <span>New Request</span>
+              <span className='text-[12px] md:text-base'>New Request</span>
             </button>
           </div>
         </div>
