@@ -203,7 +203,6 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
       </li>
     );
   };
-
   if (hasHeader) {
     return (
       <ul className="w-full flex items-center justify-between xs:text-sm">
@@ -259,7 +258,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 "flex flex-col items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded"
               )}
             >
-              <BusinessHub fill={'#ffffff'} width={25} height={25} />
+              <BusinessHub fill={pathname.startsWith(webRoutes.platformDashboard) ? '#f1c644' : '#ffffff'} width={25} height={25} />
               <span className="text-white text-[9px]">Business hub</span>
             </Link>
         </li>

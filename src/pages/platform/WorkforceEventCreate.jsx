@@ -369,7 +369,7 @@ const WorkforceEventCreate = () => {
       <div className="sticky top-0 z-40 backdrop-blur-xl bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col md:flex-row md:items-center space-x-4">
               <button
                 onClick={() => navigate(-1)}
                 className="group flex items-center space-x-2 text-gray-600 hover:text-gold transition-all duration-200"
@@ -379,11 +379,11 @@ const WorkforceEventCreate = () => {
                 </div>
                 <span className="font-medium">Back</span>
               </button>
-              <div className="h-6 w-px bg-gray-200"></div>
+              {/* <div className="h-6 w-px bg-gray-200"></div> */}
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-xl bg-gold shadow-lg">
+                {/* <div className="p-2 rounded-xl bg-gold shadow-lg">
                   <Calendar className="w-5 h-5 text-white" />
-                </div>
+                </div> */}
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
                     {isEditMode ? 'Edit Event' : 'Create Event'}
@@ -395,12 +395,12 @@ const WorkforceEventCreate = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-pale_yellow border border-gold/30">
                 <Crown className="w-4 h-4 text-gold" />
                 <span className="text-sm font-medium text-gray-700">{isEditMode ? 'Edit Mode' : 'New Event'}</span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

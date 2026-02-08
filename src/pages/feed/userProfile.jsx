@@ -38,16 +38,25 @@ export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('about');
+  const [activeEventTab, setActiveEventTab] = useState('registered');
+  const [activeDealTab, setActiveDealTab] = useState('participating');
+  const [activeJobTab, setActiveJobTab] = useState('applied');
   const [registrations, setRegistrations] = useState([]);
+  const [createdEvents, setCreatedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [applications, setApplications] = useState([]);
+  const [createdJobs, setCreatedJobs] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [createdDeals, setCreatedDeals] = useState([]);
 
     useEffect(() => {
       loadMyRegistrations();
+      loadMyCreatedEvents();
       loadApplications();
       loadJobs();
+      loadMyCreatedJobs();
+      // loadMyCreatedDeals();
     }, []);
   
     const loadMyRegistrations = async () => {
@@ -60,6 +69,22 @@ export default function UserProfile() {
         console.error('Error loading registrations:', err);
         setError('Failed to load your event registrations. Please try again.');
         setRegistrations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const loadMyCreatedEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await workforceAPI.getMyCreatedEvents();
+        setCreatedEvents(response.data.results || response.data || response.results || []);
+        console.log("created events",createdEvents)
+        setError(null);
+      } catch (err) {
+        console.error('Error loading created events:', err);
+        setError('Failed to load your created events. Please try again.');
+        setCreatedEvents([]);
       } finally {
         setLoading(false);
       }
@@ -87,6 +112,7 @@ export default function UserProfile() {
             const response = await dealRoomService.getAll(1, 4, {});
             const rooms = response?.results || response?.data || response || [];
             setJobs(Array.isArray(rooms) ? rooms : []);
+            setCreatedDeals(Array.isArray(rooms) ? rooms.filter(deal => deal?.initiator == userId) : []);
           } catch (error) {
             console.error('Failed to load deal rooms:', error);
             setJobs([]);
@@ -94,6 +120,35 @@ export default function UserProfile() {
             setLoading(false);
           }
         };
+
+      const loadMyCreatedJobs = async () => {
+        try {
+          setLoading(true);
+          const response = await workforceAPI.getJobApplications();
+          const data = response.data?.results || response.data || [];
+          setCreatedJobs(Array.isArray(data) ? data : []);
+        } catch (error) {
+          console.error('Failed to load created jobs:', error);
+          setCreatedJobs([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      // const loadMyCreatedDeals = async () => {
+      //   try {
+      //     setLoading(true);
+      //     const response = await dealRoomService.getAll();
+      //     const data = response.data?.results || response.data || [];
+      //     console.log("created deals", data);
+      //     setCreatedDeals(Array.isArray(data) ? data.filter(deal => deal?.initiator == userId) : []);
+      //   } catch (error) {
+      //     console.error('Failed to load created deals:', error);
+      //     setCreatedDeals([]);
+      //   } finally {
+      //     setLoading(false);
+      //   }
+      // };
   // console.log(userId);
 
   const { data: paramUser, isLoading } = useQuery({
@@ -286,59 +341,211 @@ export default function UserProfile() {
                 )}
 
                 {activeTab === 'events' && (
-                  registrations.length > 0 ? (
-                    <EventsSection company={registrations} />
-                  ) : (
-                    <div className="py-12 text-center">
-                      <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-gray-900 font-medium mb-2">No Events</h3>
-                      <p className="text-gray-500 text-sm">This user hasn't created any events yet</p>
+                  <div>
+                    {/* Events Sub-tabs */}
+                    <div className="border-b mb-6">
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => setActiveEventTab('registered')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeEventTab === 'registered'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Registered Events
+                        </button>
+                        <button
+                          onClick={() => setActiveEventTab('created')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeEventTab === 'created'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Created Events
+                        </button>
+                      </div>
                     </div>
-                  ) 
+
+                    {/* Registered Events Tab */}
+                    {activeEventTab === 'registered' && (
+                      registrations.length > 0 ? (
+                        <EventsSection company={registrations} />
+                      ) : (
+                        <div className="py-12 text-center">
+                          <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-gray-900 font-medium mb-2">No Registered Events</h3>
+                          <p className="text-gray-500 text-sm">This user hasn't registered for any events yet</p>
+                        </div>
+                      ) 
+                    )}
+
+                    {/* Created Events Tab */}
+                    {activeEventTab === 'created' && (
+                      createdEvents.length > 0 ? (
+                        <EventsSection company={createdEvents} />
+                      ) : (
+                        <div className="py-12 text-center">
+                          <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-gray-900 font-medium mb-2">No Created Events</h3>
+                          <p className="text-gray-500 text-sm">This user hasn't created any events yet</p>
+                        </div>
+                      ) 
+                    )}
+                  </div>
                 )}
 
                 {activeTab === 'workforce' && (
-                  applications.length > 0 ? (
-                    <div>
-                      <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-lg font-semibold mb-4">My applied jobs</h2>
-                        <Link to={webRoutes.workforceMyAppliedJobs} className="bg-gold p-2 rounded-lg">All applications</Link>
+                  <div>
+                    {/* Workforce Sub-tabs */}
+                    <div className="border-b mb-6">
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => setActiveJobTab('applied')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeJobTab === 'applied'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Applied Jobs
+                        </button>
+                        <button
+                          onClick={() => setActiveJobTab('created')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeJobTab === 'created'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Created Jobs
+                        </button>
                       </div>
+                    </div>
 
-                      {applications.slice(0,2).map((job) => (
-                        <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-12 text-center">
-                      <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-gray-900 font-medium mb-2">No Workforce</h3>
-                      <p className="text-gray-500 text-sm">This user hasn't added any workforce members</p>
-                    </div>
-                  )
+                    {/* Applied Jobs Tab */}
+                    {activeJobTab === 'applied' && (
+                      applications.length > 0 ? (
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold">My applied jobs</h2>
+                            <Link to={webRoutes.workforceMyAppliedJobs} className="bg-gold p-2 rounded-lg">All applications</Link>
+                          </div>
+
+                          {applications.slice(0,2).map((job) => (
+                            <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-gray-900 font-medium mb-2">No Applied Jobs</h3>
+                          <p className="text-gray-500 text-sm">This user hasn't applied for any jobs yet</p>
+                        </div>
+                      )
+                    )}
+
+                    {/* Created Jobs Tab */}
+                    {activeJobTab === 'created' && (
+                      createdJobs.length > 0 ? (
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold">My created jobs</h2>
+                            <Link to={webRoutes.workforceMyPostedJobs} className="bg-gold p-2 rounded-lg">All jobs</Link>
+                          </div>
+
+                          {createdJobs.slice(0,2).map((job) => (
+                            <ApplicationJobsCard key={job.id} job={job} setApplications={setCreatedJobs} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-gray-900 font-medium mb-2">No Created Jobs</h3>
+                          <p className="text-gray-500 text-sm">This user hasn't created any jobs yet</p>
+                        </div>
+                      )
+                    )}
+                  </div>
                 )}
 
                 {activeTab === 'deals' && (    
-                  jobs.length > 0 ? (
-                    <div >
-                      <div className="flex justify-between items-center">
-                        <h2 className="text-lg font-semibold">My Deals</h2>
-                        <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">Visit Deals</Link>
+                  <div>
+                    {/* Deals Sub-tabs */}
+                    <div className="border-b mb-6">
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => setActiveDealTab('participating')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeDealTab === 'participating'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Participating Deals
+                        </button>
+                        <button
+                          onClick={() => setActiveDealTab('created')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeDealTab === 'created'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Created Deals
+                        </button>
                       </div>
+                    </div>
 
-                      <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {jobs.slice(0,3).map((job) => (
-                          <DealRoomCard key={job.id} deal={job} />
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-12 text-center">
-                      <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-gray-900 font-medium mb-2">No Deals</h3>
-                      <p className="text-gray-500 text-sm">This user hasn't posted any deals yet</p>
-                    </div>
-                  )
+                    {/* Participating Deals Tab */}
+                    {activeDealTab === 'participating' && (
+                      jobs.length > 0 ? (
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold">Participating Deals</h2>
+                            <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">Visit Deals</Link>
+                          </div>
+
+                          <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {jobs.slice(0,3).map((job) => (
+                              <DealRoomCard key={job.id} deal={job} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-gray-900 font-medium mb-2">No Participating Deals</h3>
+                          <p className="text-gray-500 text-sm">This user isn't participating in any deals yet</p>
+                        </div>
+                      )
+                    )}
+
+                    {/* Created Deals Tab */}
+                    {activeDealTab === 'created' && (
+                      createdDeals.length > 0 ? (
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold">My Created Deals</h2>
+                            <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">All Deals</Link>
+                          </div>
+
+                          <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {createdDeals.slice(0,3).map((deal) => (
+                              <DealRoomCard key={deal.id} deal={deal} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center">
+                          <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                          <h3 className="text-gray-900 font-medium mb-2">No Created Deals</h3>
+                          <p className="text-gray-500 text-sm">This user hasn't created any deals yet</p>
+                        </div>
+                      )
+                    )}
+                  </div>
                 )}
               </div>
             </section>
@@ -495,11 +702,11 @@ const ProfileBadge = ({ color, text }) => {
 
 export const EventsSection = React.memo(({ company }) => {
   const getEventStatus = (event) => {
-      if (!event || !event.start_date) return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
+      if (!event || !event?.start_date) return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
   
       const now = new Date();
       const start = new Date(event.start_date);
-      const end = event.end_date ? new Date(event.end_date) : null;
+      const end = event?.end_date ? new Date(event.end_date) : null;
   
       if (start > now) {
         return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
@@ -509,7 +716,7 @@ export const EventsSection = React.memo(({ company }) => {
         return { status: 'completed', label: 'Completed', color: 'gray' };
       }
     };
-
+console.log("company", company);
   return (
     <div className="space-y-6">
       {/* Events Header - UPDATED */}
@@ -523,12 +730,12 @@ export const EventsSection = React.memo(({ company }) => {
       {/* Event Cards Grid - KEEP AS IS */}
       <div className="grid grid-col-1 md:grid-cols-2 gap-4">
       {company?.map(({event}) => (
-          <div key={event.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col h-full">
+          <div key={event?.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col h-full">
             <span className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white px-3 py-1 rounded-full text-xs font-medium inline-block w-fit">
-              {getEventStatus(event).label}
+              {getEventStatus(event)?.label}
             </span>
             
-            <h4 className="font-semibold text-base line-clamp-3 min-h-[60px]">{event.title}</h4>
+            <h4 className="font-semibold text-base line-clamp-3 min-h-[60px]">{event?.title}</h4>
             
             <div className="flex gap-2 flex-wrap items-start min-h-[40px]">
               <span className="text-sm text-gray-700 whitespace-nowrap">Theme:</span>
