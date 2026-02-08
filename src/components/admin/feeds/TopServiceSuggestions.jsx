@@ -104,7 +104,7 @@ export function SuggestionList({
     queryKey,
     queryFn: associated
       ? () => getPeopleAssociatedForUser(thisUser)
-      : getSuggestedUsersForCurrentUser,
+      : getSuggestedUsersForCurrentUser(),
     enabled: !!currentUser && !!thisUser?.id,
     keepPreviousData: true,
   });
