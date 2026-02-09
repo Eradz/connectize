@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { dealRoomService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast as notify } from 'sonner';
 import { useAuth } from '../../context/userContext';
+import { getCompanyByIdOrEmail } from '../../api-services/companies';
 
 export default function DealRoomEdit() {
   const { id } = useParams();
@@ -28,10 +29,24 @@ export default function DealRoomEdit() {
     company: ''
   });
 
-  const companies = useMemo(() => {
-    if (Array.isArray(user?.companies)) return user.companies;
-    if (Array.isArray(user?.companies?.results)) return user.companies.results;
-    return [];
+  const [companies, setCompanies] = useState([]);
+
+  // Fetch the current user's companies from the API
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchCompanies = async () => {
+      try {
+        const result = await getCompanyByIdOrEmail(null);
+        if (!cancelled && Array.isArray(result)) {
+          setCompanies(result);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user companies:', err);
+      }
+    };
+    fetchCompanies();
+    return () => { cancelled = true; };
   }, [user]);
 
   const dealStatuses = [

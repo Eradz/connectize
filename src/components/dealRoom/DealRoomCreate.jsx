@@ -16,6 +16,7 @@ import {
   Tag
 } from 'lucide-react';
 import dealRoomAPI from '../../api-services/dealRoom';
+import { getCompanyByIdOrEmail } from '../../api-services/companies';
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
@@ -487,12 +488,27 @@ const DealRoomCreate = () => {
     }));
   }, []);
 
-  const companies = useMemo(() => {
-    if (Array.isArray(user?.companies)) return user.companies;
-    if (Array.isArray(user?.companies?.results)) return user.companies.results;
-    return [];
+  const [companies, setCompanies] = useState([]);
+
+  // Fetch the current user's companies from the API
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchCompanies = async () => {
+      try {
+        const result = await getCompanyByIdOrEmail(null);
+        if (!cancelled && Array.isArray(result)) {
+          setCompanies(result);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user companies:', err);
+      }
+    };
+    fetchCompanies();
+    return () => { cancelled = true; };
   }, [user]);
 
+  // Auto-select company if only one exists
   useEffect(() => {
     if (!formData.company && companies.length === 1) {
       setFormData((prev) => ({
