@@ -124,7 +124,7 @@ export default function UserProfile() {
       const loadMyCreatedJobs = async () => {
         try {
           setLoading(true);
-          const response = await workforceAPI.getJobApplications();
+          const response = await workforceAPI.getMyCompanyJobs();
           const data = response.data?.results || response.data || [];
           setCreatedJobs(Array.isArray(data) ? data : []);
         } catch (error) {
@@ -729,18 +729,18 @@ console.log("company", company);
 
       {/* Event Cards Grid - KEEP AS IS */}
       <div className="grid grid-col-1 md:grid-cols-2 gap-4">
-      {company?.map(({event}) => (
-          <div key={event?.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col h-full">
+      {company?.map((event) => (
+          <div key={event?.id || event?.event?.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col h-full">
             <span className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white px-3 py-1 rounded-full text-xs font-medium inline-block w-fit">
-              {getEventStatus(event)?.label}
+              {getEventStatus(event || event?.event)?.label}
             </span>
             
-            <h4 className="font-semibold text-base line-clamp-3 min-h-[60px]">{event?.title}</h4>
+            <h4 className="font-semibold text-base line-clamp-3 min-h-[60px]">{event?.title || event?.event?.title}</h4>
             
             <div className="flex gap-2 flex-wrap items-start min-h-[40px]">
               <span className="text-sm text-gray-700 whitespace-nowrap">Theme:</span>
               <div className="flex gap-2 flex-wrap">
-                {event?.topics.map((theme, idx) => (
+                {(event?.topics || event?.event?.topics).map((theme, idx) => (
                   <span key={idx} className="text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-full whitespace-nowrap">
                     {theme}
                   </span>

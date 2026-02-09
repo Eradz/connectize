@@ -26,7 +26,7 @@ import { webRoutes } from "../../lib/webRoutes";
 import { workforceAPI } from "../../api-services/workforce";
 import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard";
 import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
-import { Calendar, FileText } from "lucide-react";
+import { Briefcase, Calendar, FileText } from "lucide-react";
 import { dealRoomService } from "../../api-services/oilgas";
 import CreatePost from "../../components/admin/feeds/CreatePost";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
@@ -69,7 +69,7 @@ const CompanyProfile = React.memo(() => {
       const loadApplications = async () => {
               try {
                 setLoading(true);
-                const response = await workforceAPI.getApplications();
+                const response = await workforceAPI.getMyCompanyJobs();
                 const data = response.data?.results || response.data || response || [];
                 setApplications(data);
             // No separate filtered state; derived via useMemo
@@ -260,8 +260,8 @@ const CompanyProfile = React.memo(() => {
       applications.length > 0 ? (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold mb-4">My applied jobs</h2>
-            <Link to={webRoutes.workforceMyAppliedJobs} className="bg-gold p-2 rounded-lg">All applications</Link>
+            <h2 className="text-lg font-semibold mb-4">My Created jobs</h2>
+            <Link to={webRoutes.workforceMyPostedJobs} className="bg-gold p-2 rounded-lg">All Jobs</Link>
           </div>
 
           {applications.slice(0,2).map((job) => (
