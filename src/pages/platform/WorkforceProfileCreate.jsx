@@ -116,10 +116,10 @@ const WorkforceProfileCreate = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col md:flex-row md:items-center space-x-4">
               <button
                 onClick={() => navigate(webRoutes.workforceProfiles)}
-                className="inline-flex items-center px-3 py-2 rounded-lg border text-sm hover:bg-gray-50"
+                className="inline-flex items-center px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 w-fit"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Professionals
