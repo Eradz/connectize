@@ -541,7 +541,7 @@ const WorkforceEventCreate = () => {
                   {/* Organizer Selection */}
                   <div className="space-y-4">
                     <label className="block text-sm font-semibold text-gray-700">Event Organizer *</label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-col-1 md:grid-cols-2 gap-4">
                       <div 
                         className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
                           formData.organizer_type === 'personal' 
@@ -750,7 +750,7 @@ const WorkforceEventCreate = () => {
                 
                 {/* Virtual/Physical Toggle */}
                 <div className="mb-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-col-1 md:grid-cols-2 gap-4">
                     <div 
                       className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
                         !formData.is_virtual 

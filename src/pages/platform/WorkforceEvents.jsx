@@ -18,6 +18,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
 import OngoingEvents from '../../components/events/OngoingEvents';
 import UpcomingEvents from '../../components/events/UpcomingEvents';
+import Scroll from '../../components/Scroll';
 
 const WorkforceEvents = () => {
   const [loading, setLoading] = useState(true);
@@ -529,28 +530,31 @@ const WorkforceEvents = () => {
             </Link>
           </div>
 
-          <nav className="flex gap-2" aria-label="Tabs">
-              {[
-                { key: 'ongoing', label: 'Ongoing Events' },
-                { key: 'upcoming', label: 'Upcoming Events' },
-                { key: 'recent', label: 'Past Events' },
-              ].map((tab) => ( 
-                <button
-                  key={tab.key}
-                  onClick={() => { setActiveTab(tab.key); scrollToId(tab.key); }}
-                  className={`${
-                    activeTab === tab.key
-                      ? 'border-transparent bg-[#FFDB76]'
-                      : 'border-[#D9D9D9] text-[#495057] hover:text-gray-700 hover:border-gray-300'
-                  } whitespace-nowrap p-2 border-2 rounded-full font-medium text-sm flex items-center`}
-                >
-                  {tab.label}
-                  <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
-                    {getTabCount(tab.key)}
-                  </span>
-                </button>
-              ))}
-            </nav>
+          <Scroll>
+              <nav className="flex gap-2 min-w-min" aria-label="Tabs">
+
+                  {[
+                    { key: 'ongoing', label: 'Ongoing Events' },
+                    { key: 'upcoming', label: 'Upcoming Events' },
+                    { key: 'recent', label: 'Past Events' },
+                  ].map((tab) => ( 
+                    <button
+                      key={tab.key}
+                      onClick={() => { setActiveTab(tab.key); scrollToId(tab.key); }}
+                      className={`${
+                        activeTab === tab.key
+                        ? 'border-transparent bg-[#FFDB76]'
+                        : 'border-[#D9D9D9] text-[#495057] hover:text-gray-700 hover:border-gray-300'
+                      } whitespace-nowrap p-2 border-2 rounded-full font-medium text-sm flex items-center`}
+                    >
+                      {tab.label}
+                      <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                        {getTabCount(tab.key)}
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+            </Scroll>
         </div>
       </div>
 
