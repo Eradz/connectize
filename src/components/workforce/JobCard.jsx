@@ -89,8 +89,8 @@ export const JobCard = ({ job, myPostedJob, setShowDeleteModal, setJobToDelete, 
   };
 
 return(
-    <div className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow h-[100%]">
-        <div className="flex items-start justify-between mb-4 h-[30%]">
+    <div className="bg-white flex flex-col justify-between rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow min-h-min w-[90%] md:w-full mx-auto">
+        <div className="flex items-start justify-between mb-4 ">
           <div className="flex-1">
             <div className="flex justify-between items-center space-x-3 mb-2">
                 <div className="flex gap-2">
@@ -142,9 +142,9 @@ return(
           
         </div>
 
-        <p className="text-gray-600 text-sm my-4 line-clamp-3 h-[12%] text-ellipsis overflow-hidden">{job.description}</p>
+        <p className="text-gray-600 text-sm my-4 line-clamp-3 text-ellipsis overflow-hidden">{job.description}</p>
 
-        <div className="space-y-2 mb-4 h-[30%]">
+        <div className="space-y-2 mb-4 ">
 
           <div className="flex items-center text-sm text-gray-600">
             <span className="text-[18px] ml-[3px] mr-2 text-gray-400">
@@ -154,7 +154,7 @@ return(
             <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
           </div>
 
-          <div className="flex items-center text-sm text-gray-600">
+          <div className="flex items-center text-sm text-gray-600 line-clamp-1">
             <MapPin className="w-4 h-4 mr-2 text-gray-400" />
             <span>{job.location}</span>
             {job.requires_relocation && (
@@ -173,8 +173,8 @@ return(
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 h-[10%]">
-          <div className="flex items-center space-x-1 text-[12px] text-gray-500">
+        <div className="flex flex-col md:flex-row md:items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between md:justify-normal space-x-1 text-[12px] text-gray-500 mb-3 md:mb-0">
             <div className="flex items-center">
               <Users className="w-4 h-4 mr-1" />
               {job.applications_count || 0} applicants
@@ -188,7 +188,7 @@ return(
           
           {
             myPostedJob ? 
-            <div className="flex items-center space-x-2 text-[12px]">
+            <div className="flex items-center justify-between md:justify-normal space-x-2 text-[12px]">
             <button
               onClick={()=>{setShowDeleteModal(true); setJobToDelete(job)}}
               className="bg-[#FFDCDC] flex p-2 rounded-lg hover:bg-gold transition-colors font-medium"
@@ -206,16 +206,16 @@ return(
           </div>
             :
 
-          <div className="flex items-center space-x-2 text-[12px]">
+          <div className="flex items-center justify-between md:justify-normal space-x-2 text-[12px]">
             <Link
               to={webRoutes.workforceJobApply.replace(':id', job.id)}
-              className="bg-custom_yellow text-white p-2 rounded-lg hover:bg-gold transition-colors font-medium"
+              className="bg-custom_yellow text-white  text-center p-2 rounded-lg hover:bg-gold transition-colors font-medium w-[50%] md:w-fit"
             >
               Apply Now
             </Link>
             <Link
               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
-              className="font-medium bg-pale_yellow p-2 rounded-lg"
+              className="font-medium bg-pale_yellow text-center p-2 rounded-lg w-[50%] md:w-fit"
             >
               View Details
             </Link>

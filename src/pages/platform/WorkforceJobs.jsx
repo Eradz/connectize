@@ -179,12 +179,12 @@ const WorkforceJobs = () => {
               <h1 className="text-3xl font-bold text-gray-900">Oil & Gas Jobs</h1>
               <p className="text-gray-600 mt-1">Find your next opportunity in the energy sector</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-[6px] md:gap-3">
               <Link
                 to={webRoutes.workforceSavedJobs}
                 className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center"
               >
-                <Bookmark className="w-4 h-4 mr-2" />
+                <Bookmark className="w-4 h-4 md:mr-2" />
                 <span className="hidden md:flex">
                   Saved Jobs ({savedJobs.size})
                 </span>
@@ -193,7 +193,7 @@ const WorkforceJobs = () => {
                 to={webRoutes.workforceJobCreate}
                 className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 md:mr-2" />
                 <span className="hidden md:flex">
                   Post a Job
                 </span>
@@ -203,7 +203,7 @@ const WorkforceJobs = () => {
         </div>
       </div>
 
-      <div className="bg-white my-8">
+      <div className="md:bg-white my-8">
         {/* Job Statistics */}
         {/* <div className="bg-background grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 pb-4">
           <div className="bg-white p-6 rounded-xl shadow-sm border">

@@ -251,6 +251,7 @@ function App() {
           <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />
           <Route path="co/:userId" element={<UserProfile />} />
           <Route path="co/:company" element={<CompanyProfile />} />
+          <Route path="co/company/:company/edit" element={<EditCompanyPage />} />
           <Route path={removeLeadingSlash(webRoutes.coNotifications)} element={<NotificationItem />} />
           
           {/* Knowledge Hub Routes */}
@@ -352,6 +353,7 @@ function App() {
           <Route path="ads" element={<FeaturedAdsPage />} />
           {/* Direct company routes (for URLs like /Connectize) - Must be last to avoid conflicts */}
           <Route path=":company" element={<CompanyProfile />} />
+          <Route path=":company/edit" element={<CompanyProfile />} />
         </Route>
 
   {/* Oil & Gas Platform Routes */}

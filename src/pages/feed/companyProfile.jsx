@@ -467,7 +467,7 @@ const ProductSidebar = React.memo(({ company }) => {
             <GlobeIcon className="text-gray-600 text-xl" />
             <div>
               <p className="text-xs text-gray-500 mb-1">Website :</p>
-              <p className="text-sm text-gray-800">{company?.website || "Dangoteoilplant.com"}</p>
+              <p className="text-sm text-gray-800">{company?.website || "No website"}</p>
             </div>
           </div>
 
@@ -476,12 +476,12 @@ const ProductSidebar = React.memo(({ company }) => {
             <EnvelopeClosedIcon className="text-gray-600 text-xl" />
             <div>
               <p className="text-xs text-gray-500 mb-1">Email :</p>
-              <p className="text-sm text-gray-800">{company?.email || "Company.email.com"}</p>
+              <p className="text-sm text-gray-800">{company?.email || "No email"}</p>
             </div>
           </div>
 
           {/* Links */}
-          <div className="flex items-start gap-3">
+          {/* <div className="flex items-start gap-3">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-gray-600">
               <path d="M8 11C8 11.5304 8.21071 12.0391 8.58579 12.4142C8.96086 12.7893 9.46957 13 10 13H14C14.5304 13 15.0391 12.7893 15.4142 12.4142C15.7893 12.0391 16 11.5304 16 11V10C16 9.46957 15.7893 8.96086 15.4142 8.58579C15.0391 8.21071 14.5304 8 14 8H10C9.46957 8 8.96086 8.21071 8.58579 8.58579C8.21071 8.96086 8 9.46957 8 10V11Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -494,7 +494,7 @@ const ProductSidebar = React.memo(({ company }) => {
                 <a href="#" className="text-gray-600 hover:text-black"><span className="text-sm">tw</span></a>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
