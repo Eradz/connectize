@@ -9,21 +9,33 @@ import { toast } from 'sonner'
 import React from 'react'
 
   const getTopicsDisplay = (topics) => {
-        if (!topics) return []
-        // Handle case where topics might be a string
-        if (typeof topics === 'string') {
-          try {
-            topics = JSON.parse(topics)
-          } catch {
-            return []
-          }
-        }
-        if (!Array.isArray(topics) || topics.length === 0) return []
-        // Filter out empty strings and "[]" 
-        const filtered = topics.filter(t => t && t.trim() && t !== '[]')
-        if (filtered.length === 0) return []
-        return filtered.slice(0, 3).sort((a, b) => b.length - a.length)
-      }
+  if (!topics) return []
+  
+  // Handle case where topics might be a string
+  if (typeof topics === 'string') {
+    try {
+      topics = JSON.parse(topics)
+    } catch {
+      return []
+    }
+  }
+  
+  if (!Array.isArray(topics) || topics.length === 0) return []
+  
+  if (topics.length === 1 && typeof topics[0] === 'string' && topics[0].startsWith('[')) {
+    try {
+      topics = JSON.parse(topics[0])
+    } catch {
+      return []
+    }
+  }
+  
+  // Filter out empty strings and "[]" 
+  const filtered = topics.filter(t => t && t.trim() && t !== '[]')
+  if (filtered.length === 0) return []
+  
+  return filtered.slice(0, 3).sort((a, b) => b.length - a.length)
+}
 
 const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilters, handleFilterChange, filters, clearFilters, filteredEvents, events}) => {
   const [localFilteredEvents, setLocalFilteredEvents] = React.useState(filteredEvents);
@@ -103,7 +115,9 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
               <Scroll>
                 <div className='flex gap-2 md:gap-6 min-w-min'>
               {localFilteredEvents.map((currentEvent, index) => (
-                 <div key={index} className="w-[340px] md:w-[820px] h-full rounded-lg bg-gradient-to-br from-[#FFC000] to-[#FF1A00] p-4 lg:p-8 flex flex-col justify-between">
+                    <div key={index} className="w-[340px] md:w-[820px] h-full rounded-lg p-4 lg:p-8 flex flex-col justify-between"
+                    style={{ background: `url(${currentEvent.image})` || 'linear-gradient(to bottom right, #FFC000, #FF1A00)' }}
+                    >
                   {/* Header Section */}
                   <div className="flex-1 flex flex-col justify-start">
                     <h2 className="text-xl md:text-4xl font-bold text-white mb-4">{currentEvent.title}</h2>
