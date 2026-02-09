@@ -1,0 +1,16 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.connectize.app",
+      "sha256_cert_fingerprints": [
+        "98:2E:96:23:B8:22:F4:94:FF:36:D1:B6:B7:DD:18:73:10:D8:28:AD:EB:8B:58:A0:24:61:64:EB:1C:48:30:4B",
+        "63:3D:CF:B1:12:DB:40:C1:28:75:42:7C:3C:0F:02:34:D1:D2:B4:F7:2D:CC:91:F7:B2:0E:16:04:A9:B1:35:A8"
+      ]
+    }
+  }
+]
