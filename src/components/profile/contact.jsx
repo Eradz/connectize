@@ -105,7 +105,7 @@ function Contact() {
 
       <div className="flex justify-between my-6">
         <StepButton
-          nextStep="update-profile"
+          nextStep="/"
           // nextStep="home"
           stepDirection="back"
           stepText="Back"

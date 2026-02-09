@@ -11,6 +11,7 @@ import ConnectButton from "../ConnectButton";
 import { useState } from "react";
 import BlockUserButton from "../moderation/BlockUserButton";
 import ReportModal from "../moderation/ReportModal";
+import { webRoutes } from "../../lib/webRoutes";
 
 export default function UserProfileHeadings({
   first_name,
@@ -56,7 +57,7 @@ export default function UserProfileHeadings({
 
       {currentUser?.id === id ? (
         <Link
-          to="/update-profile"
+          to={webRoutes.profileUpdate}
           className="block font-bold py-1.5 px-10 !bg-gold w-fit !rounded-full transition-all duration-300 active:scale-95 text-sm"
         >
           {is_first_time_user ? "Complete your profile" : "Edit profile"}

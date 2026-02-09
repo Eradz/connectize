@@ -37,6 +37,7 @@ const webRoutes = {
   productDetails: "/products/:id",
   productListing: "/products/listing",
   profile: "/profile",
+  profileUpdate: "/update-profile",
   reactivateAccount: "/reactivate-account",
   representatives: "/co/representatives",
   representative: "/representatives",

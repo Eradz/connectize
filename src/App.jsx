@@ -197,7 +197,7 @@ function App() {
 
           {/* Profile Update Routes */}
           <Route path={removeLeadingSlash(webRoutes.home)} element={<Home />}/>
-          <Route path="profile-update" element={<ProfileLayout />}>
+          <Route path={removeLeadingSlash(webRoutes.profileUpdate)} element={<ProfileLayout />}>
             <Route path={removeLeadingSlash(webRoutes.address)} element={<Address />} />
             <Route path={removeLeadingSlash(webRoutes.bio)} element={<Bio />} />
             <Route path={removeLeadingSlash(webRoutes.contact)} element={<Contact />} />
@@ -469,7 +469,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
 
           {/* Profile Update Routes */}
-          <Route path="update-profile" element={<Home />}/>
+          <Route path={removeLeadingSlash(webRoutes.profileUpdate)} element={<Home />}/>
           <Route path="profile-update" element={<ProfileLayout />}>
             <Route path="address" element={<Address />} />
             <Route path="bio" element={<Bio />} />

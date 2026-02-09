@@ -3,6 +3,7 @@ import { Button } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { webRoutes } from "../../lib/webRoutes";
 
 function StepButton({
   nextStep = "contact",
@@ -17,13 +18,13 @@ function StepButton({
       disabled={disabled}
       onClick={async () => {
         if (stepDirection === "back") {
-           const back = nextStep.includes("company") ? nextStep : `/profile-update/${nextStep}`; 
+           const back = nextStep.includes("company") ? nextStep : `/${webRoutes.profileUpdate.slice(1)}/${nextStep}`; 
           navigate(back);
           return;
         }
 
         const canMove = await doStepChange();
-        const next = nextStep.includes("company") ? nextStep : `/profile-update/${nextStep}`; 
+        const next = nextStep.includes("company") ? nextStep : `/${webRoutes.profileUpdate.slice(1)}/${nextStep}`; 
         if (canMove) navigate(next);
       }}
       className={clsx(
