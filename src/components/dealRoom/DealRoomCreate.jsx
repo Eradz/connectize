@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft,  
@@ -18,6 +18,7 @@ import {
 import dealRoomAPI from '../../api-services/dealRoom';
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
+import { useAuth } from '../../context/userContext';
 
 // --- Child Component: Step Indicator (FIXED VERSION) ---
 const StepIndicator = ({ currentStep }) => {
@@ -88,7 +89,8 @@ const StepContent = ({
   setCurrentParticipant,
   addParticipant,
   removeParticipant,
-  participantRoles
+  participantRoles,
+  companies
 }) => {
   
   // --- Step 1: Basic Information (Split Layout on Desktop) ---
@@ -132,6 +134,28 @@ const StepContent = ({
                 placeholder="E.g North east Acquisition"
                 className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all placeholder-gray-400"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Company</label>
+              {companies.length === 0 ? (
+                <div className="p-3 rounded-lg border border-yellow-200 bg-yellow-50 text-sm text-yellow-800">
+                  You don’t have a company yet. Create a company first to open a deal room.
+                </div>
+              ) : (
+                <select
+                  value={formData.company || ''}
+                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all bg-white"
+                >
+                  <option value="">Select a company</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name || company.company_name || company.title || `Company #${company.id}`}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
         </div>
@@ -412,6 +436,7 @@ const StepContent = ({
 // --- Main Component ---
 const DealRoomCreate = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -427,6 +452,7 @@ const DealRoomCreate = () => {
     requires_nda: true,
     location: '',
     tags: [],
+    company: '',
     participants: [],
     documents: []
   });
@@ -460,6 +486,21 @@ const DealRoomCreate = () => {
       [field]: value
     }));
   }, []);
+
+  const companies = useMemo(() => {
+    if (Array.isArray(user?.companies)) return user.companies;
+    if (Array.isArray(user?.companies?.results)) return user.companies.results;
+    return [];
+  }, [user]);
+
+  useEffect(() => {
+    if (!formData.company && companies.length === 1) {
+      setFormData((prev) => ({
+        ...prev,
+        company: String(companies[0].id ?? companies[0].pk ?? '')
+      }));
+    }
+  }, [companies, formData.company]);
 
   const handleAddTagWrapper = (val) => {
      if (typeof val === 'string') {
@@ -519,6 +560,14 @@ const DealRoomCreate = () => {
           toast.error('Please select a deal type');
           return false;
         }
+        if (companies.length === 0) {
+          toast.error('Create a company first to open a deal room');
+          return false;
+        }
+        if (!formData.company) {
+          toast.error('Please select a company');
+          return false;
+        }
         return true;
       
       case 2:
@@ -558,6 +607,7 @@ const DealRoomCreate = () => {
         target_close_date: formData.target_close_date || null,
         is_confidential: !!formData.is_confidential,
         requires_nda: !!formData.requires_nda,
+        company: formData.company || null,
       };
 
       const response = await dealRoomAPI.createDealRoom(payload);
@@ -593,7 +643,7 @@ const DealRoomCreate = () => {
           </div>
           
           <div className="min-h-[500px] ">
-            <StepContent 
+      <StepContent 
                 currentStep={currentStep} 
                 formData={formData} 
                 securityTypes={securityTypes}
@@ -608,6 +658,7 @@ const DealRoomCreate = () => {
                 participantRoles={participantRoles} 
                 addParticipant={addParticipant} 
                 removeParticipant={removeParticipant} 
+        companies={companies}
             />
           </div>
 
