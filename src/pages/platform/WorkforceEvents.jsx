@@ -19,6 +19,7 @@ import { workforceAPI } from '../../api-services/workforce';
 import OngoingEvents from '../../components/events/OngoingEvents';
 import UpcomingEvents from '../../components/events/UpcomingEvents';
 import Scroll from '../../components/Scroll';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceEvents = () => {
   const [loading, setLoading] = useState(true);
@@ -457,9 +458,10 @@ const WorkforceEvents = () => {
   return (
     <div className="min-h-screen px-5 lg:px-0">
       {/* Header */}
-      <div className="">
-        <div className="flex flex-col mb-6 ">
-          <div className="flex justify-between items-center py-6">
+      <div className="pt-2 md:py-6 flex flex-col md:flex-row">
+        <BackArrowButton  className={"w-fit"}/>
+        <div className="flex flex-col ">
+          <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Industry Events</h1>
               <p className="text-gray-600 mt-1">Professional development, networking & training opportunities</p>

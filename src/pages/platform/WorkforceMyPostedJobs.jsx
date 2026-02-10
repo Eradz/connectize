@@ -115,12 +115,12 @@ const WorkforceMyPostedJobs = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="my-6">
           <div className="flex flex-row items-end md:items-center justify-between">
             <div className='flex flex-col md:flex-row'>
-              <BackArrowButton />
+              <BackArrowButton className={"w-fit"} />
               <div>
               <h1 className="text-3xl font-bold text-gray-900">My Posted Jobs</h1>
               <p className="mt-2 text-gray-600">

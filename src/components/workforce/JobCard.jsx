@@ -89,7 +89,7 @@ export const JobCard = ({ job, myPostedJob, setShowDeleteModal, setJobToDelete, 
   };
 
 return(
-    <div className="bg-white flex flex-col justify-between rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow min-h-min w-[90%] md:w-full mx-auto">
+    <div className="bg-white flex flex-col justify-between rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow min-h-min md:w-full md:mx-auto">
         <div className="flex items-start justify-between mb-4 ">
           <div className="flex-1">
             <div className="flex justify-between items-center space-x-3 mb-2">

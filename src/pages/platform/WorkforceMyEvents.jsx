@@ -9,6 +9,7 @@ import {
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast } from 'sonner';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceMyEvents = () => {
   const [events, setEvents] = useState([]);
@@ -190,25 +191,28 @@ const WorkforceMyEvents = () => {
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">My Created Events</h1>
-            <p className="mt-2 text-lg text-slate-600">
-              Manage your events and track registrations
-            </p>
-          </div>
-          <Link
-            to={webRoutes.workforceEventCreate}
-            className="mt-4 sm:mt-0 inline-flex items-center bg-gold text-white p-3 sm:px-6 sm:py-3 rounded-lg hover:bg-slate-700 transition-colors"
-          >
-            <Plus className="w-5 h-5 sm:mr-2" />
-            <span className="hidden sm:inline">Create Event</span>
-          </Link>
+        <div className='flex flex-col md:flex-row'>
+            <BackArrowButton className={"w-fit"} />
+            <div className="flex flex-row justify-between items-start sm:items-center mb-8 w-full">
+              <div>
+                <h1 className="text-xl md:text-3xl font-bold text-slate-900">My Created Events</h1>
+                <p className="mt-1 md:mt-2 text-slate-600">
+                  Manage your events and track registrations
+                </p>
+              </div>
+              <Link
+                to={webRoutes.workforceEventCreate}
+                className="mt-4 sm:mt-0 inline-flex items-center bg-gold text-white p-3 sm:px-6 sm:py-3 rounded-lg hover:bg-slate-700 transition-colors"
+              >
+                <Plus className="w-5 h-5 sm:mr-2" />
+                <span className="hidden sm:inline">Create Event</span>
+              </Link>
+            </div>
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="md:bg-white rounded-lg md:shadow-sm md:p-6 mb-6">
+          <div className="flex justify-between gap-4">
             {/* Search */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -223,7 +227,6 @@ const WorkforceMyEvents = () => {
 
             {/* Filter */}
             <div className="flex items-center space-x-2">
-              <Filter className="w-5 h-5 text-slate-500" />
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}

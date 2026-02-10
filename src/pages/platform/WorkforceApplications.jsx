@@ -306,14 +306,14 @@ const WorkforceApplications = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="">
         <div className="">
           <div className="flex justify-between items-center py-6">
-            <div className='flex items-start'>
-              <BackArrowButton/>
-              <div>
+            <div className='flex flex-col md:flex-row items-start w-full'>
+              <BackArrowButton className={"w-fit"}/>
+              <div className='flex flex-col w-full'>
               <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
               <p className="text-gray-600 mt-1">Track and manage your job applications</p>
               </div>
@@ -399,7 +399,7 @@ const WorkforceApplications = () => {
           <div className='bg-white mt-4 p-4'>
               {/* Search and Filters */}
               <div className="pb-4">
-                <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex flex-row gap-4">
                   <div className="flex-1">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -416,8 +416,8 @@ const WorkforceApplications = () => {
                     onClick={() => setShowFilters(!showFilters)}
                     className="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 flex items-center"
                   >
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filters
+                    <Filter className="w-4 h-4 md:mr-2" />
+                    <span className='hidden md:flex'>Filters</span>
                   </button>
                 </div>
 

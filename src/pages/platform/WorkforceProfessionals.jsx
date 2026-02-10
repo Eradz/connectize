@@ -22,6 +22,7 @@ import { workforceAPI } from '../../api-services/workforce';
 import { workforceProfileService } from '../../api-services/oilgas';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/userContext';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceProfessionals = () => {
   const { user } = useAuth(); // Get authentication state
@@ -240,13 +241,6 @@ const WorkforceProfessionals = () => {
     setSearchTerm('');
   };
 
-  // Mock stats for mobile header
-  const stats = {
-    activeJobs: 30,
-    growth: "+12,000%",
-    rating: 4.8,
-    successRate: 98
-  };
 
   if (loading) {
     return (
@@ -274,52 +268,20 @@ const WorkforceProfessionals = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* ========== MOBILE HEADER - ONLY VISIBLE ON MOBILE ========== */}
-      <div className="lg:hidden bg-white border-b sticky top-0 z-10">
-        <div className="px-4 py-4">
-          <div className="flex items-center mb-4">
-            <button className="mr-3">
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900">Oil & Gas Jobs</h1>
-              <p className="text-xs text-gray-600">Find Your Next Opportunity in The Energy Sector</p>
-            </div>
-            <button className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Plus className="w-5 h-5 text-black" />
-            </button>
-          </div>
-
-          {/* Mobile Stats Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
-                <Briefcase className="w-6 h-6 text-yellow-700" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.activeJobs}</p>
-              <p className="text-xs text-gray-600">Active Jobs</p>
-            </div>
-            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
-                <TrendingUp className="w-6 h-6 text-yellow-700" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.growth}</p>
-              <p className="text-xs text-gray-600">Growth This Month</p>
-            </div>
-            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
-                <Star className="w-6 h-6 text-yellow-700" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.rating}</p>
-              <p className="text-xs text-gray-600">Average Rating</p>
-            </div>
-            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-yellow-200 rounded-lg flex items-center justify-center mb-3">
-                <Target className="w-6 h-6 text-yellow-700" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900 mb-1">{stats.successRate}%</p>
-              <p className="text-xs text-gray-600">Success Rate</p>
+      <div className="lg:hidden ">
+        <div className="py-4">
+          <div className="flex flex-col mb-4">
+            <BackArrowButton className={"w-fit"}/>
+            <div className='flex justify-between'>
+                <div className="flex-1">
+                  <h1 className="text-xl font-bold text-gray-900">Oil & Gas Jobs</h1>
+                  <p className="text-xs text-gray-600">Find Your Next Opportunity in The Energy Sector</p>
+                </div>
+                <Link to={webRoutes.workforceProfileCreate} className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Plus className="w-5 h-5 text-black" />
+                </Link>
             </div>
           </div>
 
@@ -394,7 +356,6 @@ const WorkforceProfessionals = () => {
           )}
         </div>
       </div>
-      {/* ========== END MOBILE HEADER ========== */}
 
       {/* Header */}
       <div className="hidden lg:block">
@@ -438,7 +399,7 @@ const WorkforceProfessionals = () => {
         </div>
       </div>
 
-      <div className=" bg-white p-6">
+      <div className=" md:bg-white md:p-6">
         {/* Search and Filters */}
         <div className="hidden lg:block">
           <div className="flex flex-col lg:flex-row gap-4">
@@ -576,7 +537,7 @@ const WorkforceProfessionals = () => {
                           .filter(skill => skill && skill.skill_name)
                           .slice(0, 4)
                           .map((skill, index) => (
-                            <span key={skill.id || index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
+                            <span key={skill.id || index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-lg">
                               {skill.skill_name}
                             </span>
                           ))}
@@ -587,11 +548,11 @@ const WorkforceProfessionals = () => {
                   </div>
                 </div>
 
-                <div className="mb-3 pb-3 border-b">
+                <div className="mb-3 ">
                   <span className="text-lg font-bold text-gray-900">$ {professional.hourly_rate || '0'}/hr</span>
                 </div>
 
-                <div className="space-y-2 mb-4">
+                <div className="space-y-2 mb-4 pb-3 border-b">
                   <div className="flex items-start text-xs text-gray-600">
                     <MapPin className="w-3.5 h-3.5 mr-2 mt-0.5 flex-shrink-0" />
                     <span>{professional.current_location || 'Location not specified'}</span>

@@ -157,7 +157,7 @@ const WorkforceMyRegistrations = () => {
                </Link>
                </div>
           </div>
-           <nav className="flex gap-2 mt-4" aria-label="Tabs">
+           {/* <nav className="flex gap-2 mt-4" aria-label="Tabs">
               {[
                 { key: 'pending', label: 'Pending' },
                 { key: 'confirmed', label: 'Confirmed' },
@@ -172,12 +172,12 @@ const WorkforceMyRegistrations = () => {
                   } whitespace-nowrap py-2 px-6 border-2 rounded-full font-medium text-sm flex items-center`}
                 >
                   {tab.label}
-                  {/* <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
+                  <span className={`ml-1 px-2 py-1 text-xs rounded-full bg-[#FF1212] text-white`}>
                     {getTabCount(tab.key)}
-                  </span> */}
+                  </span>
                 </button>
               ))}
-            </nav>
+            </nav> */}
         </div>
 
         {/* Filters and Search */}
@@ -295,7 +295,7 @@ const WorkforceMyRegistrations = () => {
             </p>
             <Link
               to={webRoutes.workforceEvents}
-              className="inline-flex items-center bg-slate-600 text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center bg-gold text-white px-6 py-3 rounded-lg hover:bg-custom_yellow transition-colors"
             >
               Explore Events
             </Link>
@@ -323,9 +323,9 @@ const WorkforceMyRegistrations = () => {
 
               return (
                 <div key={registration.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl  w-full md:w-[49%]">
-                <div className="bg-white rounded-xl border h-full">
+                <div className="bg-white rounded-xl border min-h-min flex flex-col justify-between">
                   {/* Registration Top */}
-                  <div className="p-4 pb-1 h-[70%]">
+                  <div className="p-4 pb-1 ">
                     {/* Organizer */}
                     <div className='flex justify-between text-[12px] mb-3'>
                       <div className='flex gap-3 '>
@@ -410,7 +410,7 @@ const WorkforceMyRegistrations = () => {
     
                   </div>
                             {/* Registration Details and Attendees */}
-                  <div className='flex gap-2 py-3 h-[12%] text-[14px] font-medium text-gray-600 justify-center border-t border-gray-300 '>
+                  <div className='flex flex-col md:flex-row md:gap-2 px-4 md:py-3 text-[14px] font-medium text-gray-600 justify-center border-t border-gray-300 '>
                         <div className='flex' >
                           <p className="mr-1">Registration On:</p>
                           <p className="">{formatDate(registration.registered_at)}</p>

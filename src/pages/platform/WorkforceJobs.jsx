@@ -14,6 +14,7 @@ import { BriefCaseIcon } from '../../icon';
 import { workforceJobService } from '../../api-services/oilgas';
 import { JobCard } from '../../components/workforce/JobCard';
 import { useSubscription } from '../../context/SubscriptionContext';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -170,11 +171,11 @@ const WorkforceJobs = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 md:py-4">
       {/* Header */}
-      <div className="">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center pt-6">
+      <div className="flex flex-col md:flex-row">
+        <BackArrowButton  className={"w-fit"}/>
+          <div className="flex justify-between items-center w-full">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Oil & Gas Jobs</h1>
               <p className="text-gray-600 mt-1">Find your next opportunity in the energy sector</p>
@@ -200,6 +201,82 @@ const WorkforceJobs = () => {
               </Link>
             </div>
           </div>
+      </div>
+
+      {/* NAVIGATION GRID */}
+      <div className="md:hidden pt-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Link
+            to={webRoutes.workforceJobs}
+            className="flex items-center gap-4 p-5 bg-gradient-to-r from-[#FFE8A3] to-[#FFD700] rounded-xl border-2 border-[#FFD700] hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">Job Marketplace</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceSavedJobs}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">Saved Jobs</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceMyPostedJobs}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">My Posted Jobs</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceMyAppliedJobs}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">My Applications</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceProfiles}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">Professionals</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceEvents}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">Industry Events</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceMyRegistrations}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">My Registered Events</p>
+            </div>
+          </Link>
+
+          <Link
+            to={webRoutes.workforceMyEvents}
+            className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          >
+            <div className="flex-1">
+              <p className="text-[12px] text-gray-900">My Created Events</p>
+            </div>
+          </Link>
         </div>
       </div>
 
@@ -256,7 +333,7 @@ const WorkforceJobs = () => {
         </div> */}
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8 w-[95%] mx-auto ">
+        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8 md:w-[95%] mx-auto ">
           <form onSubmit={handleSearch} className="mb-6">
             <div className="relative max-w-2xl">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -371,7 +448,7 @@ const WorkforceJobs = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-[95%] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:w-[95%] mx-auto">
             {filteredJobs.map((job) => (
               <JobCard 
                 key={job.id} 

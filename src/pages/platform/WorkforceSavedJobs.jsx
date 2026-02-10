@@ -9,6 +9,7 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceJobService } from '../../api-services/oilgas';
 import { JobCard } from '../../components/workforce/JobCard';
+import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceSavedJobs = () => {
   const [savedJobsData, setSavedJobsData] = useState([]);
@@ -60,31 +61,27 @@ const WorkforceSavedJobs = () => {
     <div className="min-h-screen">
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center pt-6">
-          <div className="flex items-center gap-4">
-            <Link 
-              to={webRoutes.workforceJobs}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </Link>
+        <div className="flex flex-col md:flex-row md:items-center pt-6">
+           <BackArrowButton className={"w-fit"}/>
+          <div className="flex justify-between items-center w-full">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                <Bookmark className="w-8 h-8 text-gold" />
+                <Bookmark className="w-8 h-8 text-gold hidden md:flex" />
                 Saved Jobs
               </h1>
               <p className="text-gray-600 mt-1">
                 Jobs you've bookmarked for later
               </p>
             </div>
-          </div>
           <Link
             to={webRoutes.workforceJobs}
-            className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/80 flex items-center gap-2"
+            className="bg-gold text-white md:px-4 py-2 text-[14px] rounded-lg hover:bg-gold/80 flex items-center md:gap-2"
           >
-            <Briefcase className="w-4 h-4" />
-            Browse All Jobs
+            <Briefcase className="w-4 h-4 md:flex hidden" />
+            <span className="hidden md:flex">Browse All Jobs</span>
+            <span className="md:hidden flex text-center">View All Jobs</span>
           </Link>
+          </div>
         </div>
       </div>
 

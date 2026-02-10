@@ -10,12 +10,6 @@ import Overview from "./components/profile/overview";
 import Profile from "./components/profile/profile";
 import { webRoutes } from "./lib/webRoutes";
 import AppLayout from "./pages/AppLayout";
-
-// Helper function to remove leading slash from route paths
-const removeLeadingSlash = (path) => {
-  if (!path) return path;
-  return path.startsWith("/") ? path.slice(1) : path.includes("/co/") ? path.replace("/co/", "")  :path;
-};
 import FeedLayout from "./pages/FeedLayout";
 import AuthLayout from "./pages/authentication/AuthLayout";
 import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
@@ -166,6 +160,11 @@ function App() {
     }
     return path.startsWith('/') ? path.slice(1) : path;
   };
+  
+const removeLeadingSlash = (path) => {
+  if (!path) return path;
+  return path.startsWith("/") ? path.slice(1) : path.includes("/co/") ? path.replace("/co/", "")  :path;
+};
   
   // Redirect legacy /platform/* URLs to new root-based routes
   const LegacyPlatformRedirect = () => {
