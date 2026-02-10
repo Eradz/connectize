@@ -3,10 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { dealRoomService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast as notify } from 'sonner';
+import { useAuth } from '../../context/userContext';
+import { getCompanyByIdOrEmail } from '../../api-services/companies';
 
 export default function DealRoomEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -22,8 +25,29 @@ export default function DealRoomEdit() {
     location: '',
     is_confidential: false,
     requires_nda: false,
-    tags: []
+    tags: [],
+    company: ''
   });
+
+  const [companies, setCompanies] = useState([]);
+
+  // Fetch the current user's companies from the API
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchCompanies = async () => {
+      try {
+        const result = await getCompanyByIdOrEmail(null);
+        if (!cancelled && Array.isArray(result)) {
+          setCompanies(result);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user companies:', err);
+      }
+    };
+    fetchCompanies();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const dealStatuses = [
     { value: 'draft', label: 'Draft' },
@@ -84,7 +108,8 @@ export default function DealRoomEdit() {
         location: dealData.location || '',
         is_confidential: dealData.is_confidential || false,
         requires_nda: dealData.requires_nda || false,
-        tags: dealData.tags || []
+        tags: dealData.tags || [],
+        company: dealData.company || dealData.company_id || ''
       });
     } catch (error) {
       console.error('Error loading deal:', error);
@@ -117,7 +142,8 @@ export default function DealRoomEdit() {
         estimated_value: formData.estimated_value && formData.estimated_value.trim() !== '' 
           ? parseFloat(formData.estimated_value) 
           : null,
-        tags: Array.isArray(formData.tags) ? formData.tags : []
+        tags: Array.isArray(formData.tags) ? formData.tags : [],
+        company: formData.company || null
       };
 
       console.log('Sending update data:', updateData);
@@ -216,6 +242,30 @@ export default function DealRoomEdit() {
               </button>
             </div>
           </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Company
+                </label>
+                {companies.length === 0 ? (
+                  <div className="text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    You don’t have a company yet. Create one before assigning this deal room.
+                  </div>
+                ) : (
+                  <select
+                    value={formData.company}
+                    onChange={(e) => handleInputChange('company', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    <option value="">Select a company</option>
+                    {companies.map((company) => (
+                      <option key={company.id} value={company.id}>
+                        {company.name || company.company_name || company.title || `Company #${company.id}`}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
         </div>
       </div>
 

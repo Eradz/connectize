@@ -59,6 +59,7 @@ export const DealRoomListItem = ({ deal }) => (
             <p className="text-gray-600 text-sm mt-1">{deal.description}</p>
             <div className="flex items-center space-x-6 mt-2 text-sm text-gray-500">
               <span className="capitalize">{deal.deal_type?.replace('_', ' ')}</span>
+              <span>{deal.company_name || deal.company?.name || 'Unassigned company'}</span>
               <span>{formatCompactNumber(deal.estimated_value)}</span>
               <span>Due: {new Date(deal.target_close_date).toLocaleDateString()}</span>
             </div>

@@ -537,6 +537,9 @@ export default function DealRoomDetail() {
                         {deal?.description ? deal.description.slice(0, 100) + (deal.description.length > 100 ? '...' : '') : 'Manage documents, participants, milestones, and more.'}
                       </p>
                     </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {deal?.company_name || deal?.company?.name || 'Unassigned company'}
+                    </p>
                 </div>
               {deal?.status && (
                   <div className={`flex items-center mt-4 md:mt-2 md:px-2 md:py-1 justify-center text-xs font-semibold rounded-full  md:w-fit md:h-fit  ${
@@ -683,6 +686,7 @@ export default function DealRoomDetail() {
                       <h4 className="text-[20px] font-medium text-[#212529] mb-2">Deal Information</h4>
                       <div className="space-y-4 text-[12px]">
                         <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
+                        <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Company:</span> {deal?.company_name || deal?.company?.name || 'Unassigned company'}</div>
                         <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
                           {deal?.access_code || "N/A"}
                         </div>
