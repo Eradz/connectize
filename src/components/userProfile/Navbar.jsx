@@ -92,7 +92,7 @@ const Navbar = () => {
         // initial={{ y: 0 }}
         // animate={{ y: 100 }} // showBottomNav ? 0 :
       >
-        <section className="w-full px-2">
+        <section className="w-full">
           <NavigationSection hasHeader isSmallNavigation />
         </section>
       </motion.nav>

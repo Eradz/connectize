@@ -205,7 +205,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   };
   if (hasHeader) {
     return (
-      <ul className="w-full flex items-center justify-between xs:text-sm">
+      <ul className="w-full flex items-center justify-between xs:text-sm max-h-max px-2">
         {navigators.map(({ to, icon, name }, index) => {
           const isActive = to === "/" ? pathname === "/" : pathname.startsWith(to);
           return (

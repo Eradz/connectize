@@ -20,6 +20,7 @@ import {
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import BackArrowButton from "../../components/BackArrowButton"
+import { getCurrencySymbol } from '../../utils/currency';
 
 const WorkforceMyRegistrations = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -80,6 +81,35 @@ const WorkforceMyRegistrations = () => {
     }
   };
 
+   const getTopicsDisplay = (topics) => {
+  if (!topics) return []
+  
+  // Handle case where topics might be a string
+  if (typeof topics === 'string') {
+    try {
+      topics = JSON.parse(topics)
+    } catch {
+      return []
+    }
+  }
+  
+  if (!Array.isArray(topics) || topics.length === 0) return []
+  
+  if (topics.length === 1 && typeof topics[0] === 'string' && topics[0].startsWith('[')) {
+    try {
+      topics = JSON.parse(topics[0])
+    } catch {
+      return []
+    }
+  }
+  
+  // Filter out empty strings and "[]" 
+  const filtered = topics.filter(t => t && t.trim() && t !== '[]')
+  if (filtered.length === 0) return []
+  
+  return filtered.slice(0, 3).sort((a, b) => b.length - a.length)
+}
+
   const formatDate = (dateString) => {
     if (!dateString) return 'TBD';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -137,7 +167,7 @@ const WorkforceMyRegistrations = () => {
         <div className="mb-8 mt-4">
           <div className='flex justify-between items-end md:items-start '>
             <div className='flex flex-col md:flex-row md:w-[70%]'>
-                <BackArrowButton  />
+                <BackArrowButton  className={"w-fit"} />
               <div className='flex flex-col'>
                 <h1 className="text-xl md:text-2xl font-bold text-slate-900">My Registered Events</h1>
                 <p className="mt-2 text-sm md:text-lg text-slate-600">
@@ -182,7 +212,7 @@ const WorkforceMyRegistrations = () => {
 
         {/* Filters and Search */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -196,7 +226,7 @@ const WorkforceMyRegistrations = () => {
             </div>
 
             {/* Filter */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
@@ -322,8 +352,8 @@ const WorkforceMyRegistrations = () => {
                                       eventStatus.status === 'ongoing' ? AlertCircle : Clock;
 
               return (
-                <div key={registration.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl  w-full md:w-[49%]">
-                <div className="bg-white rounded-xl border min-h-min flex flex-col justify-between">
+                <div key={registration.id} className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] p-[0.9px] rounded-xl min-h-min flex flex-col justify-between  w-full md:w-[49%]">
+                <div className="bg-white rounded-xl border flex flex-col h-full justify-between ">
                   {/* Registration Top */}
                   <div className="p-4 pb-1 ">
                     {/* Organizer */}
@@ -344,7 +374,7 @@ const WorkforceMyRegistrations = () => {
                         <span className='bg-gradient-to-br from-[#258B00] to-[#53FF09] rounded-full text-white px-2 py-1'>Free Event</span>
                       ) : (
                         <span className='bg-gradient-to-br from-[#FFC000] to-[#FF8400] rounded-full text-white px-2 py-1'>
-                          ${parseFloat(registration.event.ticket_price).toFixed(2)} {registration.event.currency || 'USD'}
+                          { getCurrencySymbol(registration.event.currency) || '$'}{parseFloat(registration.event.ticket_price).toFixed(2)} 
                         </span>
                       )}
                     </div>
@@ -398,7 +428,7 @@ const WorkforceMyRegistrations = () => {
                             {Array.isArray(registration.event.topics) && 
                              registration.event.topics.filter(t => t && t !== '[]' && t.trim() !== '').length > 0 ? (
                             <div className="flex flex-wrap gap-1 mb-4">
-                                {getLongestString(registration.event.topics.filter(t => t && t !== '[]' && t.trim() !== '').slice(0, 3)).map((t, i) => (
+                                {getLongestString(getTopicsDisplay(registration.event.topics)).map((t, i) => (
                                 <span key={i} className="bg-gray-100 text-gray-700 text-[12px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
