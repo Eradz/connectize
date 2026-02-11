@@ -120,7 +120,7 @@ export function SuggestionList({
     queryKey,
 
     // queryFn: () => getSuggestedUsersForCurrentUser(),
-    enabled: !associated && !!currentUser && !!thisUser?.id,
+    enabled: !associated && !!currentUser && (!!thisUser?.id || !!currentUser.id),
     // enabled:
     queryFn: associated
       ? () => getPeopleAssociatedForUser(thisUser, companyId)
