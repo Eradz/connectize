@@ -266,3 +266,33 @@ export function ensureUrlProtocol(url) {
   // Add https:// by default
   return `https://${trimmedUrl}`;
 }
+
+  export const getTopicsDisplay = (topics) => {
+  if (!topics) return []
+  
+  // Handle case where topics might be a string
+  if (typeof topics === 'string') {
+    try {
+      topics = JSON.parse(topics)
+    } catch {
+      return []
+    }
+  }
+  
+  if (!Array.isArray(topics) || topics.length === 0) return []
+  
+  if (topics.length === 1 && typeof topics[0] === 'string' && topics[0].startsWith('[')) {
+    try {
+      topics = JSON.parse(topics[0])
+    } catch {
+      return []
+    }
+  }
+  
+  // Filter out empty strings and "[]" 
+  const filtered = topics.filter(t => t && t.trim() && t !== '[]')
+  if (filtered.length === 0) return []
+  
+  return filtered.slice(0, 3).sort((a, b) => b.length - a.length)
+}
+

@@ -7,12 +7,12 @@ import ApplicationActionModal from './ApplicationActionModal'
 import { useState } from 'react'
 import { workforceService } from '../../api-services/oilgas'
 
-const ApplicationJobsCard = ({job, setApplications}) => {
+const ApplicationJobsCard = ({job, setApplications, profile}) => {
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
-
+    console.log("Job data:", job);
     const handleOpenApplicationModal = (application) => {
         setSelectedApplication(application);
         setIsModalOpen(true);
@@ -83,7 +83,7 @@ const ApplicationJobsCard = ({job, setApplications}) => {
                         <div className="bg-[#FFF1C6] p-2 rounded-lg">
                             {getJobTypeIcon(job.job_type)}
                         </div>
-                            <h3 className="font-semibold text-gray-900 text-lg">{job.job_title}</h3>
+                            <h3 className="font-semibold text-gray-900 text-lg">{job.job_title || job.title }</h3>
                     </div>
             
                 <Link to={`/jobs/${job?.job_posting}`} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
@@ -93,9 +93,10 @@ const ApplicationJobsCard = ({job, setApplications}) => {
             </div>
                 <div className="flex items-center text-sm text-gray-600 pb-4">
                     <Building className="w-4 h-4 mr-1" />
-                    <span className="font-medium">{job.job_company || 'Company'}</span>
+                    <span className="font-medium">{job.job_company || job.company_name || 'Company'}</span>
                 </div>
-                <div className='flex flex-col md:flex-row md:items-center justify-between'>
+                {profile != "company" && (
+                     <div className='flex flex-col md:flex-row md:items-center justify-between'>
                     <div className='flex flex-col md:flex-row md:items-center gap-2'>
                     <div className="flex items-center text-sm text-gray-600">
                         <CalendarDays className="w-4 h-4 mr-2 " />
@@ -115,6 +116,7 @@ const ApplicationJobsCard = ({job, setApplications}) => {
                         </span>
                     </div>
                 </div>
+                )}
                 </div>
             </div>
             <div className="h-[28%] md:h-[30%] border-b-gray-500 ">

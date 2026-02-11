@@ -22,7 +22,7 @@ import UserProfileHeadings from "../../components/userProfile/user-profile-headi
 import { useAuth } from "../../context/userContext";
 import { VerifiedIcon } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
-import { capitalizeFirst, formatPhoneNumber, ensureUrlProtocol } from "../../lib/utils";
+import { capitalizeFirst, formatPhoneNumber, ensureUrlProtocol, getTopicsDisplay } from "../../lib/utils";
 import { Calendar, Briefcase, FileText } from "lucide-react";
 import { workforceAPI } from "../../api-services/workforce";
 import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard";
@@ -31,6 +31,8 @@ import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
 import clsx from "clsx";
 import { webRoutes } from "../../lib/webRoutes";
 import Scroll from "../../components/Scroll";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import HeadingText from "../../components/HeadingText";
 
 const emptyWord = "Not Added";
 
@@ -38,9 +40,9 @@ export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('about');
-  const [activeEventTab, setActiveEventTab] = useState('registered');
-  const [activeDealTab, setActiveDealTab] = useState('participating');
-  const [activeJobTab, setActiveJobTab] = useState('applied');
+  const [activeEventTab, setActiveEventTab] = useState('created');
+  const [activeDealTab, setActiveDealTab] = useState('created');
+  const [activeJobTab, setActiveJobTab] = useState('created');
   const [registrations, setRegistrations] = useState([]);
   const [createdEvents, setCreatedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,8 +79,8 @@ export default function UserProfile() {
     const loadMyCreatedEvents = async () => {
       try {
         setLoading(true);
-        const response = await workforceAPI.getMyCreatedEvents();
-        setCreatedEvents(response.data.results || response.data || response.results || []);
+        const response = await workforceAPI.getEvents();
+        setCreatedEvents((response.data.results || response.data || response.results)?.filter(event => event?.organizer == userId) || []);
         console.log("created events",createdEvents)
         setError(null);
       } catch (err) {
@@ -171,7 +173,31 @@ export default function UserProfile() {
   );
 
   if (isLoading) return <PageLoading hasLogo={false} />;
-  if (!paramUser) return <NoPage />;
+  if (!paramUser) return (
+      <section className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-3">
+            <DotLottieReact
+              src="/lottie/notfound.lottie"
+              loop
+              autoplay
+              className="size-10/12 xs:size-1/2 md:size-56 overflow-hidden scale-150 aspect-square"
+            />
+            <HeadingText>User profile not found</HeadingText>
+            <div className="flex gap-2">
+              <button
+                className="bg-gray-200 py-1.5 xs:text-sm px-6 xs:px-10 rounded-full"
+                onClick={() => window.history.back()}
+              >
+                Go back
+              </button>
+              <Link
+                to="/"
+                className="bg-gold py-1.5 xs:text-sm px-6 xs:px-10 rounded-full"
+              >
+                Go Home
+              </Link>
+            </div>
+          </section>
+    );
 
   const {
     verified,
@@ -346,16 +372,6 @@ export default function UserProfile() {
                     <div className="border-b mb-6">
                       <div className="flex gap-4">
                         <button
-                          onClick={() => setActiveEventTab('registered')}
-                          className={`pb-3 px-1 font-medium text-sm transition-all ${
-                            activeEventTab === 'registered'
-                              ? 'text-gray-900 border-b-2 border-gold'
-                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
-                          }`}
-                        >
-                          Registered Events
-                        </button>
-                        <button
                           onClick={() => setActiveEventTab('created')}
                           className={`pb-3 px-1 font-medium text-sm transition-all ${
                             activeEventTab === 'created'
@@ -365,13 +381,23 @@ export default function UserProfile() {
                         >
                           Created Events
                         </button>
+                       { userId == currentUser.id && ( <button
+                          onClick={() => setActiveEventTab('registered')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeEventTab === 'registered'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Registered Events
+                        </button>)}
                       </div>
                     </div>
 
                     {/* Registered Events Tab */}
-                    {activeEventTab === 'registered' && (
+                    {userId == currentUser.id && activeEventTab === 'registered' && (
                       registrations.length > 0 ? (
-                        <EventsSection company={registrations} />
+                        <EventsSection company={registrations} title={"Registered Events"}/>
                       ) : (
                         <div className="py-12 text-center">
                           <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -384,7 +410,7 @@ export default function UserProfile() {
                     {/* Created Events Tab */}
                     {activeEventTab === 'created' && (
                       createdEvents.length > 0 ? (
-                        <EventsSection company={createdEvents} />
+                        <EventsSection company={createdEvents} title={"Created Events"}/>
                       ) : (
                         <div className="py-12 text-center">
                           <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -402,16 +428,6 @@ export default function UserProfile() {
                     <div className="border-b mb-6">
                       <div className="flex gap-4">
                         <button
-                          onClick={() => setActiveJobTab('applied')}
-                          className={`pb-3 px-1 font-medium text-sm transition-all ${
-                            activeJobTab === 'applied'
-                              ? 'text-gray-900 border-b-2 border-gold'
-                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
-                          }`}
-                        >
-                          Applied Jobs
-                        </button>
-                        <button
                           onClick={() => setActiveJobTab('created')}
                           className={`pb-3 px-1 font-medium text-sm transition-all ${
                             activeJobTab === 'created'
@@ -421,6 +437,16 @@ export default function UserProfile() {
                         >
                           Created Jobs
                         </button>
+                        { currentUser.id == userId && (<button
+                          onClick={() => setActiveJobTab('applied')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeJobTab === 'applied'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Applied Jobs
+                        </button>)}
                       </div>
                     </div>
 
@@ -476,16 +502,6 @@ export default function UserProfile() {
                     <div className="border-b mb-6">
                       <div className="flex gap-4">
                         <button
-                          onClick={() => setActiveDealTab('participating')}
-                          className={`pb-3 px-1 font-medium text-sm transition-all ${
-                            activeDealTab === 'participating'
-                              ? 'text-gray-900 border-b-2 border-gold'
-                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
-                          }`}
-                        >
-                          Participating Deals
-                        </button>
-                        <button
                           onClick={() => setActiveDealTab('created')}
                           className={`pb-3 px-1 font-medium text-sm transition-all ${
                             activeDealTab === 'created'
@@ -495,11 +511,22 @@ export default function UserProfile() {
                         >
                           Created Deals
                         </button>
+                        { userId == currentUser.id && <button
+                          onClick={() => setActiveDealTab('participating')}
+                          className={`pb-3 px-1 font-medium text-sm transition-all ${
+                            activeDealTab === 'participating'
+                              ? 'text-gray-900 border-b-2 border-gold'
+                              : 'text-gray-600 hover:text-gray-900 border-b-2 border-transparent'
+                          }`}
+                        >
+                          Participating Deals
+                        </button>
+                        }
                       </div>
                     </div>
 
                     {/* Participating Deals Tab */}
-                    {activeDealTab === 'participating' && (
+                    {userId == currentUser.id && activeDealTab === 'participating' && (
                       jobs.length > 0 ? (
                         <div>
                           <div className="flex justify-between items-center mb-4">
@@ -527,7 +554,7 @@ export default function UserProfile() {
                       createdDeals.length > 0 ? (
                         <div>
                           <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">My Created Deals</h2>
+                            <h2 className="text-lg font-semibold">Created Deals</h2>
                             <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">All Deals</Link>
                           </div>
 
@@ -700,7 +727,7 @@ const ProfileBadge = ({ color, text }) => {
   );
 };
 
-export const EventsSection = React.memo(({ company }) => {
+export const EventsSection = React.memo(({ company, title }) => {
   const getEventStatus = (event) => {
       if (!event || !event?.start_date) return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
   
@@ -716,12 +743,11 @@ export const EventsSection = React.memo(({ company }) => {
         return { status: 'completed', label: 'Completed', color: 'gray' };
       }
     };
-console.log("company", company);
   return (
     <div className="space-y-6">
       {/* Events Header - UPDATED */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">My Events</h2>
+        <h2 className="text-2xl font-bold">{title}</h2>
         <Link to={webRoutes.workforceEvents} className="bg-gold hover:bg-custom_yellow px-6 py-2.5 rounded-xl text-sm font-medium">
           See all Events
         </Link>
@@ -730,17 +756,17 @@ console.log("company", company);
       {/* Event Cards Grid - KEEP AS IS */}
       <div className="grid grid-col-1 md:grid-cols-2 gap-4">
       {company?.map((event) => (
-          <div key={event?.id || event?.event?.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col h-full">
+          <div key={event?.id || event?.event?.id} className="border rounded-xl p-4 space-y-4 hover:shadow-md transition flex flex-col min-h-min justify-between">
             <span className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white px-3 py-1 rounded-full text-xs font-medium inline-block w-fit">
               {getEventStatus(event || event?.event)?.label}
             </span>
             
-            <h4 className="font-semibold text-base line-clamp-3 min-h-[60px]">{event?.title || event?.event?.title}</h4>
+            <h4 className="font-semibold text-base line-clamp-3">{event?.title || event?.event?.title}</h4>
             
             <div className="flex gap-2 flex-wrap items-start min-h-[40px]">
               <span className="text-sm text-gray-700 whitespace-nowrap">Theme:</span>
               <div className="flex gap-2 flex-wrap">
-                {(event?.topics || event?.event?.topics).map((theme, idx) => (
+                {getTopicsDisplay(event?.topics || event?.event?.topics)?.slice(0,2).map((theme, idx) => (
                   <span key={idx} className="text-gray-500 text-sm bg-gray-100 px-3 py-1 rounded-full whitespace-nowrap">
                     {theme}
                   </span>

@@ -33,6 +33,8 @@ import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
 import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
 import PrimaryButton from "../../components/PrimaryButton";
 import { ProductListCard } from "../../components/admin/markets/newlyListed";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import HeadingText from "../../components/HeadingText";
 
 export const meta = () =>
   createSEO({
@@ -69,8 +71,9 @@ const CompanyProfile = React.memo(() => {
       const loadApplications = async () => {
               try {
                 setLoading(true);
-                const response = await workforceAPI.getMyCompanyJobs();
-                const data = response.data?.results || response.data || response || [];
+                const response = await workforceAPI.getJobs();
+                const data = (response.data?.results || response.data || response)?.filter(job => job?.company_name == companyName) || [];
+                console.log("Filtered jobs:", data);
                 setApplications(data);
             // No separate filtered state; derived via useMemo
               } catch (error) {
@@ -114,7 +117,31 @@ const CompanyProfile = React.memo(() => {
   if (isLoading)
     return <PageLoading text="Getting profile ready..." hasLogo={false} />;
 
-  if (!company) return <NoPage />;
+  if (!company) return(
+    <section className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-3">
+          <DotLottieReact
+            src="/lottie/notfound.lottie"
+            loop
+            autoplay
+            className="size-10/12 xs:size-1/2 md:size-56 overflow-hidden scale-150 aspect-square"
+          />
+          <HeadingText>Company not found</HeadingText>
+          <div className="flex gap-2">
+            <button
+              className="bg-gray-200 py-1.5 xs:text-sm px-6 xs:px-10 rounded-full"
+              onClick={() => window.history.back()}
+            >
+              Go back
+            </button>
+            <Link
+              to="/"
+              className="bg-gold py-1.5 xs:text-sm px-6 xs:px-10 rounded-full"
+            >
+              Go Home
+            </Link>
+          </div>
+        </section>
+  );
 
   return (
     <section className="rounded-md overflow-hidden w-full">
@@ -264,15 +291,15 @@ const CompanyProfile = React.memo(() => {
             <Link to={webRoutes.workforceMyPostedJobs} className="bg-gold p-2 rounded-lg">All Jobs</Link>
           </div>
 
-          {applications.slice(0,2).map((job) => (
-            <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
+          {applications.slice(0,3).map((job) => (
+            <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} profile={"company"}/>
           ))}
         </div>
       ) : (
         <div className="py-12 text-center">
           <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-gray-900 font-medium mb-2">No Workforce</h3>
-          <p className="text-gray-500 text-sm">This user hasn't added any workforce members</p>
+          <p className="text-gray-500 text-sm">This company has no workforce jobs</p>
         </div>
       )
     )}
