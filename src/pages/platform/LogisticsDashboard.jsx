@@ -37,128 +37,6 @@ import { DealIcon } from '../../icon/deal';
 import { getCurrencySymbol } from '../../utils/currency';
 
 
-// Simulated API data
-const mockData = {
-  shipments: {
-    total: 231,
-    data: [
-      {
-        id: '1',
-        tracking_number: 'REQ-E8cc123a',
-        status: 'awarded',
-        request_details: {
-          origin_address: 'Houston, TX Oil Terminal',
-          destination_address: 'Refinery Complex, LA',
-          budget_max: 41000
-        }
-      },
-      {
-        id: '2',
-        tracking_number: 'REQ-E8cc123a',
-        status: 'awarded',
-        request_details: {
-          origin_address: 'Houston, TX Oil Terminal',
-          destination_address: 'Refinery Complex, LA',
-          budget_max: 41000
-        }
-      },
-      {
-        id: '3',
-        tracking_number: 'REQ-E8cc123a',
-        status: 'quoted',
-        request_details: {
-          origin_address: 'Houston, TX Oil Terminal',
-          destination_address: 'Refinery Complex, LA',
-          budget_max: 41000
-        }
-      }
-    ]
-  },
-  requests: {
-    total: 29,
-    data: [
-      {
-        id: '1',
-        tracking_number: 'SHIP-USER1-53SE3533',
-        status: 'delivered',
-        origin_address: 'North Way, Oil Terminal',
-        destination_address: 'Refinery Complex, LA'
-      },
-      {
-        id: '2',
-        tracking_number: 'SHIP-USER1-53SE3533',
-        status: 'delivered',
-        origin_address: 'North Way, Oil Terminal',
-        destination_address: 'Refinery Complex, LA'
-      },
-      {
-        id: '3',
-        tracking_number: 'SHIP-USER1-53SE3533',
-        status: 'delivered',
-        origin_address: 'North Way, Oil Terminal',
-        destination_address: 'Refinery Complex, LA'
-      },
-      {
-        id: '4',
-        tracking_number: 'SHIP-USER1-53SE3533',
-        status: 'delivered',
-        origin_address: 'North Way, Oil Terminal',
-        destination_address: 'Refinery Complex, LA'
-      }
-    ]
-  },
-  inventory: {
-    total: 150,
-    data: [
-      {
-        id: '1',
-        name: 'Testing Inventory',
-        location: 'Lagos',
-        current_stock: 200.0,
-        reorder_point: 5.09
-      },
-      {
-        id: '2',
-        name: 'Chemical treatment activist',
-        location: 'Chemical storage houston',
-        current_stock: 200.0,
-        reorder_point: 5.09
-      },
-      {
-        id: '3',
-        name: 'Chemical treatment activist',
-        location: 'Chemical storage houston',
-        current_stock: 200.0,
-        reorder_point: 5.09
-      },
-      {
-        id: '4',
-        name: 'Chemical treatment activist',
-        location: 'Chemical storage houston',
-        current_stock: 200.0,
-        reorder_point: 5.09
-      },
-      {
-        id: '5',
-        name: 'Chemical treatment activist',
-        location: 'Chemical storage houston',
-        current_stock: 200.0,
-        reorder_point: 5.09
-      }
-    ]
-  },
-  analytics: {
-    totalShipments: 231,
-    onTimeDelivery: 100,
-    costSavings: 4238,
-    activeRoutes: 3,
-    monthlyGrowth: 86,
-    pendingQuotes: 0,
-    quoted: 11,
-    awarded: 3
-  }
-};
-
 const LogisticsHubDashboard = () => {
   // Check session for user privileges
     const session = getSession();
@@ -176,15 +54,7 @@ const LogisticsHubDashboard = () => {
       localStorage.getItem('user_is_admin') === 'true' ||
       localStorage.getItem('force_inventory_scope_all') === '1'
     );
-    
-    console.log('🔑 User privilege check:', {
-      userIsStaff,
-      sessionStaff: session?.user?.is_staff,
-      sessionSuperuser: session?.user?.is_superuser,
-      localStorageStaff: localStorage.getItem('user_is_staff'),
-      localStorageAdmin: localStorage.getItem('user_is_admin'),
-      forceScope: localStorage.getItem('force_inventory_scope_all')
-    });
+
     const [loading, setLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState({
       shipments: { total: 0, data: [] },
@@ -292,8 +162,6 @@ const LogisticsHubDashboard = () => {
   
         // Determine if we should request global scope based on component-scope userIsStaff
         const scopeParams = userIsStaff ? { scope: 'all' } : {};
-        console.log('🔧 API scope params:', scopeParams);
-        console.log('🔧 User is staff check:', { userIsStaff, session: getSession()?.user });
         
         // Make API calls with individual error handling
         let shipmentsResponse, inventoryResponse, requestsResponse;
@@ -301,9 +169,6 @@ const LogisticsHubDashboard = () => {
         try {
           console.log('🚛 Fetching shipments with URL: /api/v1/logistics/shipments/ and params:', scopeParams);
           shipmentsResponse = await logisticsAPI.getShipments(scopeParams);
-          console.log('✅ Shipments response type:', typeof shipmentsResponse);
-          console.log('✅ Shipments response keys:', Object.keys(shipmentsResponse || {}));
-          console.log('✅ Shipments full response:', shipmentsResponse);
         } catch (error) {
           console.error('❌ Shipments API error:', error);
           console.error('❌ Shipments error details:', error.response?.data);
@@ -311,11 +176,7 @@ const LogisticsHubDashboard = () => {
         }
         
         try {
-          console.log('📦 Fetching inventory with URL: /api/v1/logistics/inventory-items/ and params:', scopeParams);
           inventoryResponse = await logisticsAPI.getInventoryItems(scopeParams);
-          console.log('✅ Inventory response type:', typeof inventoryResponse);
-          console.log('✅ Inventory response keys:', Object.keys(inventoryResponse || {}));
-          console.log('✅ Inventory full response:', inventoryResponse);
         } catch (error) {
           console.error('❌ Inventory API error:', error);
           console.error('❌ Inventory error details:', error.response?.data);
@@ -333,12 +194,7 @@ const LogisticsHubDashboard = () => {
           console.error('❌ Requests error details:', error.response?.data);
           requestsResponse = { results: [], count: 0 };
         }
-  
-        console.log('📊 API responses received:', {
-          shipments: shipmentsResponse,
-          inventory: inventoryResponse,
-          requests: requestsResponse
-        });
+
   
         // Normalize possible response shapes (either already the payload or wrapped in {data})
         const normalize = (resp) => {
@@ -370,14 +226,6 @@ const LogisticsHubDashboard = () => {
         const totalInventoryCount = inventoryNorm.count;
         const totalRequestsCount = requestsNorm.count;
   
-        console.log('✅ Processed data:', {
-          shipmentsCount: shipments.length,
-          inventoryCount: inventory.length,
-          requestsCount: requests.length,
-          totalShipmentsCount,
-          totalInventoryCount,
-          totalRequestsCount
-        });
   
         // Calculate analytics from real data with corrected field mappings
         const totalShipments = totalShipmentsCount;
@@ -459,46 +307,6 @@ const LogisticsHubDashboard = () => {
       }
     };
 
-    const getStatusColor = (status) => {
-      switch (status) {
-        case 'delivered': return 'bg-green-100 text-green-800';
-        case 'in_transit': return 'bg-blue-100 text-blue-800';
-        case 'pending': return 'bg-yellow-100 text-yellow-800';
-        case 'preparing': return 'bg-orange-100 text-orange-800';
-        case 'delayed': return 'bg-red-100 text-red-800';
-        default: return 'bg-gray-100 text-gray-800';
-      }
-    };
-  
-    const getStatusIcon = (status) => {
-      switch (status) {
-        case 'delivered': return <CheckCircle className="w-4 h-4" />;
-        case 'in_transit': return <Truck className="w-4 h-4" />;
-        case 'pending': return <Clock className="w-4 h-4" />;
-        case 'preparing': return <Package className="w-4 h-4" />;
-        case 'delayed': return <AlertTriangle className="w-4 h-4" />;
-        default: return <Package className="w-4 h-4" />;
-      }
-    };
-  
-    const formatCurrency = (amount) => {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(amount);
-    };
-  
-    const getTimeAgo = (timestamp) => {
-      const now = new Date();
-      const time = new Date(timestamp);
-      const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
-      
-      if (diffInHours < 1) return 'Just now';
-      if (diffInHours < 24) return `${diffInHours}h ago`;
-      return `${Math.floor(diffInHours / 24)}d ago`;
-    };
   
   
     const getStatusBadgeColor = (status) => {
@@ -1207,9 +1015,9 @@ const LogisticsHubDashboard = () => {
     {/* Header with See All */}
     <div className="flex items-center justify-between mb-6">
       <h2 className="text-xl font-semibold text-gray-900">Shipment Requests</h2>
-      <button className="px-4 py-2 bg-yellow-100 text-gray-900 rounded-lg hover:bg-yellow-200 transition-colors">
+      <Link to={webRoutes.logisticsRequests} className="px-4 py-2 bg-yellow-100 text-gray-900 rounded-lg hover:bg-yellow-200 transition-colors">
         See All
-      </button>
+      </Link>
     </div>
 
     {/* Requests Grid */}

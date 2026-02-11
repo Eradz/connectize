@@ -164,17 +164,17 @@ const LogisticsRequestList = () => {
       {/* Header */}
       <div className="">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className='flex items-center'>
+          <div className="flex flex-row items-center md:items-center md:justify-between gap-4">
+          <div className='flex flex-col md:flex-row md:items-center'>
             <BackArrowButton className={"md:w-fit w-fit"} />
             <div className='ml-2 md:ml-0'>
-              <h1 className="text-2xl font-bold text-gray-900">Shipment Requests</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Shipment Requests</h1>
               <p className="text-gray-600 mt-1">Manage your marketplace orders</p>
             </div>
           </div>
             <button
               onClick={() => navigate(webRoutes.logisticsRequestCreate)}
-              className="w-fit ml-[56%] md:ml-0 bg-custom_yellow px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center space-x-2 font-medium"
+              className="w-fit h-fit md:ml-0 bg-custom_yellow px-4 py-2 rounded-lg hover:bg-yellow-500 flex items-center space-x-2 font-medium"
             >
               <Plus className="w-4 h-4" />
               <span className='text-[12px] md:text-base'>New Request</span>

@@ -280,14 +280,14 @@ const SubscriptionPlanDetail = () => {
             {/* Price Card */}
             <Card>
               <CardContent className="py-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-0 justify-between">
                   <div>
                     <div className="text-sm text-gray-700 mb-2 font-medium">
-                      {planData.plan_type?.charAt(0).toUpperCase() + planData.plan_type?.slice(1) || 'Professional'}
+                      {planData.plan_type?.charAt(0).toUpperCase() + planData.plan_type?.slice(1) || 'Unavailable'}
                     </div>
                     <div className="flex items-baseline">
                       <span className="text-4xl font-bold text-gray-900 border-b-4 border-red-500 pb-1">
-                        ${planData.price || '99.99'}
+                        ${planData.price || 'Unavailable'}
                       </span>
                       <span className="text-gray-600 ml-2 text-lg">
                         / {planData.billing_cycle || 'month'}

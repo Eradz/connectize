@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useEffect } from "react";
 import { getServices } from "../../../api-services/services";
 import {
+  getAssociatedUsersForUser,
   getPeopleAssociatedForUser,
   getSuggestedUsersForCurrentUser,
 } from "../../../api-services/users";
@@ -118,12 +119,12 @@ export function SuggestionList({
   const { data: associatedUsers = [], isLoading } = useQuery({
     queryKey,
 
-    queryFn: () => getAssociatedUsersForUser(),
+    // queryFn: () => getSuggestedUsersForCurrentUser(),
     enabled: !associated && !!currentUser && !!thisUser?.id,
     // enabled:
-    // queryFn: associated
-    //   ? () => getPeopleAssociatedForUser(thisUser, companyId)
-    //   : () => getSuggestedUsersForCurrentUser(),
+    queryFn: associated
+      ? () => getPeopleAssociatedForUser(thisUser, companyId)
+      : () => getSuggestedUsersForCurrentUser(),
     // enabled: !!currentUser && !!thisUser?.id,
     keepPreviousData: true,
   });
