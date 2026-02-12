@@ -1,5 +1,6 @@
 import { makeApiRequest, REGISTER_EMAIL_KEY, clearTokenCache } from "../lib/helpers";
 import { setSession } from "../lib/session";
+import { queryClient } from "../lib/utils";
 
 export const authenticationService = async ({
   url,
@@ -27,6 +28,8 @@ export const authenticationService = async ({
       if (tokens?.access && tokens?.refresh) {
         // Clear any stale cached tokens before setting new session
         clearTokenCache();
+        // Clear all cached API data from previous user session
+        queryClient.clear();
         setSession(payload);
       } else {
         console.warn("Login succeeded response but no tokens present; skipping session set");
