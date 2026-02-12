@@ -80,7 +80,7 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
             <div className="flex-1">
                 <div className="flex justify-between items-center space-x-3 mb-2">
                     <div className="flex gap-2">
-                        <div className="bg-[#FFF1C6] p-2 rounded-lg">
+                        <div className="bg-[#FFF1C6] p-2 rounded-lg h-fit">
                             {getJobTypeIcon(job.job_type)}
                         </div>
                             <h3 className="font-semibold text-gray-900 text-lg">{job.job_title || job.title }</h3>

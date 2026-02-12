@@ -368,8 +368,8 @@ const workforce = {
     return response;
   },
 
-  getMyEventRegistrations: async () => {
-    const response = await api.get('/api/v1/workforce/events/my_registrations/');
+  getMyEventRegistrations: async (query) => {
+    const response = query ?  await api.get(`/api/v1/workforce/events/my_registrations/?user_id=${query.userId}`) : await api.get(`/api/v1/workforce/events/my_registrations/`);
     return response;
   },
 

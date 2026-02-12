@@ -33,6 +33,7 @@ import { webRoutes } from "../../lib/webRoutes";
 import Scroll from "../../components/Scroll";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import HeadingText from "../../components/HeadingText";
+import DealRoomParticipationCard from "../../components/dealRoom/DealRoomParticipationCard";
 
 const emptyWord = "Not Added";
 
@@ -43,28 +44,33 @@ export default function UserProfile() {
   const [activeEventTab, setActiveEventTab] = useState('created');
   const [activeDealTab, setActiveDealTab] = useState('created');
   const [activeJobTab, setActiveJobTab] = useState('created');
-  const [registrations, setRegistrations] = useState([]);
-  const [createdEvents, setCreatedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [createdEvents, setCreatedEvents] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
+
   const [applications, setApplications] = useState([]);
+
   const [createdJobs, setCreatedJobs] = useState([]);
   const [jobs, setJobs] = useState([]);
+
   const [createdDeals, setCreatedDeals] = useState([]);
+  const [participatingDeals, setParticipatingDeals] = useState([]);
 
     useEffect(() => {
       loadMyRegistrations();
       loadMyCreatedEvents();
       loadApplications();
       loadJobs();
+      loadParticipatingDealRooms();
       loadMyCreatedJobs();
-      // loadMyCreatedDeals();
     }, []);
   
     const loadMyRegistrations = async () => {
       try {
         setLoading(true);
-        const response = await workforceAPI.getMyEventRegistrations();
+        const response = await workforceAPI.getMyEventRegistrations({ userId });
         setRegistrations(response.data.results || response.data || []);
         setError(null);
       } catch (err) {
@@ -137,21 +143,22 @@ export default function UserProfile() {
         }
       };
 
-      // const loadMyCreatedDeals = async () => {
-      //   try {
-      //     setLoading(true);
-      //     const response = await dealRoomService.getAll();
-      //     const data = response.data?.results || response.data || [];
-      //     console.log("created deals", data);
-      //     setCreatedDeals(Array.isArray(data) ? data.filter(deal => deal?.initiator == userId) : []);
-      //   } catch (error) {
-      //     console.error('Failed to load created deals:', error);
-      //     setCreatedDeals([]);
-      //   } finally {
-      //     setLoading(false);
-      //   }
-      // };
-  // console.log(userId);
+      const loadParticipatingDealRooms = async () => {
+        try {
+          setLoading(true);
+          console.log("Loading participating deals...");
+          const response = await dealRoomService.getParticipantDealRoom();
+          const data = response.data?.results || response.data || response.results || [];
+          console.log("participating deals", data.filter(deal => deal?.user == userId));
+          // setParticipatingDeals(Array.isArray(data) ? data.filter(deal => deal?.user == userId) : []);
+          setParticipatingDeals(data || []);
+        } catch (error) {
+          console.error('Failed to load participating deals:', error);
+          setParticipatingDeals([]);
+        } finally {
+          setLoading(false);
+        }
+      };
 
   const { data: paramUser, isLoading } = useQuery({
     queryKey: ["users", userId],
@@ -163,6 +170,7 @@ export default function UserProfile() {
     refetchOnWindowFocus: false,
   });
 
+  console.log("Created Deals",createdDeals.length)
   const headerProps = useMemo(
     () => ({
       banner: paramUser?.banner || "",
@@ -381,7 +389,7 @@ export default function UserProfile() {
                         >
                           Created Events
                         </button>
-                       { userId == currentUser.id && ( <button
+                       {  <button
                           onClick={() => setActiveEventTab('registered')}
                           className={`pb-3 px-1 font-medium text-sm transition-all ${
                             activeEventTab === 'registered'
@@ -390,12 +398,12 @@ export default function UserProfile() {
                           }`}
                         >
                           Registered Events
-                        </button>)}
+                        </button>}
                       </div>
                     </div>
 
                     {/* Registered Events Tab */}
-                    {userId == currentUser.id && activeEventTab === 'registered' && (
+                    {activeEventTab === 'registered' && (
                       registrations.length > 0 ? (
                         <EventsSection company={registrations} title={"Registered Events"}/>
                       ) : (
@@ -437,7 +445,7 @@ export default function UserProfile() {
                         >
                           Created Jobs
                         </button>
-                        { currentUser.id == userId && (<button
+                        { currentUser?.id == userId && (<button
                           onClick={() => setActiveJobTab('applied')}
                           className={`pb-3 px-1 font-medium text-sm transition-all ${
                             activeJobTab === 'applied'
@@ -453,15 +461,14 @@ export default function UserProfile() {
                     {/* Applied Jobs Tab */}
                     {activeJobTab === 'applied' && (
                       applications.length > 0 ? (
-                        <div>
-                          <div className="flex justify-between items-center mb-4">
+                        <div className="flex flex-col gap-4">
+                          <div className="flex justify-between items-center">
                             <h2 className="text-lg font-semibold">My applied jobs</h2>
                             <Link to={webRoutes.workforceMyAppliedJobs} className="bg-gold p-2 rounded-lg">All applications</Link>
                           </div>
-
-                          {applications.slice(0,2).map((job) => (
-                            <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
-                          ))}
+                            {applications.slice(0,2).map((job) => (
+                              <ApplicationJobsCard key={job.id} job={job} setApplications={setApplications} />
+                            ))}
                         </div>
                       ) : (
                         <div className="py-12 text-center">
@@ -475,9 +482,9 @@ export default function UserProfile() {
                     {/* Created Jobs Tab */}
                     {activeJobTab === 'created' && (
                       createdJobs.length > 0 ? (
-                        <div>
+                        <div className="flex flex-col gap-4">
                           <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">My created jobs</h2>
+                            <h2 className="text-lg font-semibold">Created jobs</h2>
                             <Link to={webRoutes.workforceMyPostedJobs} className="bg-gold p-2 rounded-lg">All jobs</Link>
                           </div>
 
@@ -511,7 +518,7 @@ export default function UserProfile() {
                         >
                           Created Deals
                         </button>
-                        { userId == currentUser.id && <button
+                        { currentUser?.id === Number(userId) && <button
                           onClick={() => setActiveDealTab('participating')}
                           className={`pb-3 px-1 font-medium text-sm transition-all ${
                             activeDealTab === 'participating'
@@ -526,8 +533,8 @@ export default function UserProfile() {
                     </div>
 
                     {/* Participating Deals Tab */}
-                    {userId == currentUser.id && activeDealTab === 'participating' && (
-                      jobs.length > 0 ? (
+                    { currentUser?.id  == userId && activeDealTab === 'participating' && (
+                      participatingDeals.length > 0 ? (
                         <div>
                           <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-semibold">Participating Deals</h2>
@@ -535,8 +542,8 @@ export default function UserProfile() {
                           </div>
 
                           <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {jobs.slice(0,3).map((job) => (
-                              <DealRoomCard key={job.id} deal={job} />
+                            {participatingDeals.map((deal) => (
+                              <DealRoomParticipationCard key={deal.deal_room}  deal={deal} />
                             ))}
                           </div>
                         </div>
@@ -551,7 +558,7 @@ export default function UserProfile() {
 
                     {/* Created Deals Tab */}
                     {activeDealTab === 'created' && (
-                      createdDeals.length > 0 ? (
+                      createdDeals.length != 0 ? (
                         <div>
                           <div className="flex justify-between items-center mb-4">
                             <h2 className="text-lg font-semibold">Created Deals</h2>

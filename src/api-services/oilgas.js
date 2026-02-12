@@ -173,6 +173,27 @@ export class DealRoomService extends CrudService {
       }
     }
   }
+
+  async getParticipantDealRoom(){
+    try {
+      const res = await makeApiRequest({
+        url: `api/v1/deals/participants/`,
+        method: "GET",
+      });
+       if (!res) {
+        const err = new Error('Authentication required. Please log in to add activities.');
+        err.status = 401;
+        throw err;
+      }
+      return res;
+    } catch (error) {
+      // Re-throw with better error context
+      console.error('Get user deal rooms API error:', error);
+      throw error;
+    }
+  } 
+
+
   async addDealRoom(dealRoomId, dealRoomData) {
     try {
       const res = await makeApiRequest({
