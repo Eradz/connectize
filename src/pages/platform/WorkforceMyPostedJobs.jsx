@@ -9,6 +9,8 @@ import {
   UserPlus2,
   ClockCheck
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
 import { toast } from 'sonner';
@@ -17,6 +19,7 @@ import { JobCard } from '../../components/workforce/JobCard';
 import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceMyPostedJobs = () => {
+  const seoData = getSEOConfig("workforceMyPostedJobs");
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -115,6 +118,11 @@ const WorkforceMyPostedJobs = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="my-6">

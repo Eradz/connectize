@@ -16,6 +16,8 @@ import {
   X,
   BookOpen
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 
 import { webRoutes } from '../../lib/webRoutes';
 import {
@@ -79,6 +81,7 @@ const StartDiscussionIcon = (props) => (
   </svg>
 );
 const KnowledgeHubDashboard = () => {
+  const seoData = getSEOConfig("knowledgeHub");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -257,6 +260,11 @@ const KnowledgeHubDashboard = () => {
 
   return (
     <div className="min-h-screen ">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header - Desktop */}
       <div className="hidden md:block ">
         <div className="max-w-7xl mx-auto px-6 py-6">

@@ -18,6 +18,8 @@ import {
   Clock,
   BarChart3
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import {
   inventoryItemService,
@@ -28,6 +30,7 @@ import {
 import { toast } from 'sonner';
 
 const InventoryDashboard = () => {
+  const seoData = getSEOConfig("inventoryDashboard");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -202,6 +205,11 @@ const InventoryDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

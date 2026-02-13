@@ -21,6 +21,8 @@ import {
   ArrowDownRight,
   Plus
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { 
   dealRoomService, 
@@ -32,6 +34,7 @@ import {
 import SubscriptionCard from '../../components/dashboard/SubscriptionCard';
 
 const PlatformDashboard = () => {
+  const seoData = getSEOConfig("platformDashboard");
   const [dashboardData, setDashboardData] = useState({
     dealRooms: { count: 0, value: 0, data: [] },
     jobs: { count: 0, data: [] },
@@ -153,6 +156,11 @@ const PlatformDashboard = () => {
 
   return (
     <div className="min-h-screen ">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

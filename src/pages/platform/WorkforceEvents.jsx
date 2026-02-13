@@ -14,6 +14,8 @@ import {
   CalendarCheck,
   DollarSign,
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
 import OngoingEvents from '../../components/events/OngoingEvents';
@@ -22,6 +24,7 @@ import Scroll from '../../components/Scroll';
 import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceEvents = () => {
+  const seoData = getSEOConfig("workforceEvents");
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [events, setEvents] = useState([]);
@@ -457,6 +460,11 @@ const WorkforceEvents = () => {
 
   return (
     <div className="min-h-screen px-5 lg:px-0">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header */}
       <div className="pt-2 md:py-6 flex flex-col md:flex-row">
         <BackArrowButton  className={"w-fit"}/>

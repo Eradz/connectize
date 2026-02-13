@@ -9,6 +9,8 @@ import {
   LucideChartNoAxesCombined,
   Bookmark,
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { BriefCaseIcon } from '../../icon';
 import { workforceJobService } from '../../api-services/oilgas';
@@ -17,6 +19,7 @@ import { useSubscription } from '../../context/SubscriptionContext';
 import BackArrowButton from '../../components/BackArrowButton';
 
 const WorkforceJobs = () => {
+  const seoData = getSEOConfig("workforceJobs");
   const [jobs, setJobs] = useState([]);
   // derive filtered list to avoid setState on each keypress
   // keeps input focus stable and reduces unnecessary renders
@@ -172,6 +175,11 @@ const WorkforceJobs = () => {
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 md:py-4">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header */}
       <div className="flex flex-col md:flex-row">
         <BackArrowButton  className={"w-fit"}/>

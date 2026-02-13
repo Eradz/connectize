@@ -754,7 +754,7 @@ export const EventsSection = React.memo(({ company, title }) => {
     <div className="space-y-6">
       {/* Events Header - UPDATED */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="bold">{title}</h2>
         <Link to={webRoutes.workforceEvents} className="bg-gold hover:bg-custom_yellow px-6 py-2.5 rounded-xl text-sm font-medium">
           See all Events
         </Link>

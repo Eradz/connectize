@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SEO from "../../components/SEO";
+import { getSEOConfig } from "../../lib/seoConfig";
 import { getSearchResults } from "../../api-services/search";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
 import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
@@ -56,6 +58,7 @@ function useSearchResults(searchQuery) {
 }
 
 export const SearchTab = () => {
+  const seoData = getSEOConfig("search");
   // const { user: currentUser } = useAuth();
   // const { data: companies } = usePollAllCompanies();
   const navigate = useNavigate();
@@ -235,22 +238,36 @@ export const SearchTab = () => {
   // Show loading state while searching
   if (isAnyLoading && searchQuery) {
     return (
-      <section className="flex items-center justify-center flex-col gap-4 px-4 py-8 min-h-[40vh]">
-        <DotLottieReact
-          src="/lottie/notification.lottie"
-          loop
-          autoplay
-          className="size-32 shrink-0 pointer-events-none"
+      <>
+        <SEO 
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords}
         />
-        <LightParagraph center>
-          Searching for <b className="!text-gold">{searchQuery}</b>...
-        </LightParagraph>
-      </section>
+        <section className="flex items-center justify-center flex-col gap-4 px-4 py-8 min-h-[40vh]">
+          <DotLottieReact
+            src="/lottie/notification.lottie"
+            loop
+            autoplay
+            className="size-32 shrink-0 pointer-events-none"
+          />
+          <LightParagraph center>
+            Searching for <b className="!text-gold">{searchQuery}</b>...
+          </LightParagraph>
+        </section>
+      </>
     );
   }
 
-  return tabsHeading?.length <= 0 ? (
-    <section
+  return (
+    <>
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
+      {tabsHeading?.length <= 0 ? (
+        <section
       className={clsx(
         "flex items-center justify-center flex-col gap-4 px-4 py-6",
         {
@@ -292,5 +309,7 @@ export const SearchTab = () => {
     </section>
   ) : (
     <CustomTabs tabsHeading={tabsHeading} tabsPanels={tabsPanels} />
+  )}
+    </>
   );
 };

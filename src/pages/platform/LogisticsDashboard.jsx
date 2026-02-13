@@ -28,6 +28,8 @@ import {
   FileText,
   Book
 } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import InventoryDashboardWidget from '../../components/dashboard/InventoryDashboardWidget';
@@ -38,6 +40,7 @@ import { getCurrencySymbol } from '../../utils/currency';
 
 
 const LogisticsHubDashboard = () => {
+  const seoData = getSEOConfig("logisticsDashboard");
   // Check session for user privileges
     const session = getSession();
       const [searchQuery, setSearchQuery] = useState('');
@@ -402,6 +405,11 @@ const LogisticsHubDashboard = () => {
 
   return (
     <div className="min-h-screen ">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header */}
      <div className="lg:bg-white border-b">
   <div className="max-w-7xl mx-auto px-6 py-8">

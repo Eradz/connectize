@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Search, Filter, Star, ChevronRight, Truck, Store } from "lucide-react";
+import SEO from "../../components/SEO";
+import { getSEOConfig } from "../../lib/seoConfig";
 import { listingService, cartService, wishlistService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 
 export default function Marketplace() {
+  const seoData = getSEOConfig("marketplace");
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
   const [featuredListings, setFeaturedListings] = useState([]);
@@ -245,6 +248,11 @@ export default function Marketplace() {
 
   return (
     <section className="min-h-screen bg-background">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="container py-4">

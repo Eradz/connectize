@@ -11,6 +11,7 @@ import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
 import SEO, { createSEO } from "../../components/SEO";
+import { getSEOConfig } from "../../lib/seoConfig";
 import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
@@ -42,22 +43,23 @@ export const meta = () =>
   });
 
 const CompanyProfile = React.memo(() => {
+  const baseSeoData = getSEOConfig("companyProfile");
   const { company: companyName } = useParams();
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState("Activities");
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
-  const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [registrations, setRegistrations] = useState([]);
   const [applications, setApplications] = useState([]);
-  const [jobs, setJobs] = useState([]);
+  const [dealRooms, setDealRooms] = useState([]);
 
   const loadMyRegistrations = async () => {
     try {
       setLoading(true);
-      const response = await workforceAPI.getMyEventRegistrations();
-      setRegistrations(response.data.results || response.data || []);
+      const response = await workforceAPI.getEvents();
+      setRegistrations((response.data.results || response.data).filter(event => event?.organizer_company_name === companyName) || []);
           setError(null);
         } catch (err) {
           console.error('Error loading registrations:', err);
@@ -68,7 +70,7 @@ const CompanyProfile = React.memo(() => {
         }
       };
 
-      const loadApplications = async () => {
+      const loadCreatedJobs = async () => {
               try {
                 setLoading(true);
                 const response = await workforceAPI.getJobs();
@@ -85,15 +87,15 @@ const CompanyProfile = React.memo(() => {
               }
             };
       
-      const loadJobs = async () => {
+      const loadDealRooms = async () => {
           try {
             setLoading(true);
             const response = await dealRoomService.getAll(1, 4, {});
-            const rooms = response?.results || response?.data || response || [];
-            setJobs(Array.isArray(rooms) ? rooms : []);
+            const rooms = (response?.results || response?.data || response).filter(room => room?.company == company.id) || [];
+            setDealRooms(Array.isArray(rooms) ? rooms : []);
           } catch (error) {
             console.error('Failed to load deal rooms:', error);
-            setJobs([]);
+            setDealRooms([]);
           } finally {
             setLoading(false);
           }
@@ -101,8 +103,8 @@ const CompanyProfile = React.memo(() => {
 
       useEffect(() => {
         loadMyRegistrations();
-        loadApplications();
-        loadJobs();
+        loadCreatedJobs();
+        loadDealRooms();
       }, []);
 
   const headerProps = useMemo(
@@ -143,9 +145,19 @@ const CompanyProfile = React.memo(() => {
         </section>
   );
 
+  // Dynamic SEO for company profile
+  const seoTitle = company?.company_name 
+    ? `${company.company_name} | Connectize` 
+    : baseSeoData.title;
+  const seoDescription = company?.company_description || baseSeoData.description;
+
   return (
     <section className="rounded-md overflow-hidden w-full">
-      {/* <SEO title={`${company?.company_name || ""} | Connectize Companies`} /> */}
+      <SEO 
+        title={seoTitle}
+        description={seoDescription}
+        keywords={baseSeoData.keywords}
+      />
       <Header {...headerProps} />
 
       <section className="mt-12 md:mt-20 flex max-xl:flex-col items-start gap-2 relative sm:px-2">
@@ -194,7 +206,6 @@ const CompanyProfile = React.memo(() => {
 </clipPath>
 </defs>
 </svg>
-
     Work Force
   </Link>
 
@@ -275,7 +286,7 @@ const CompanyProfile = React.memo(() => {
 
   {/* Tab Content */}
   {activeTab === "Events" && (registrations.length > 0 ? (
-      <EventsSection company={registrations} />
+      <EventsSection company={registrations} title={"Events"}/>
     ) : (
       <div className="py-12 text-center">
         <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
@@ -285,10 +296,10 @@ const CompanyProfile = React.memo(() => {
     ) )}
   {activeTab === "Work Force" &&  (
       applications.length > 0 ? (
-        <div>
+        <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold mb-4">My Created jobs</h2>
-            <Link to={webRoutes.workforceMyPostedJobs} className="bg-gold p-2 rounded-lg">All Jobs</Link>
+            <h2 className="text-lg font-semibold mb-4">Created jobs</h2>
+            <Link to={webRoutes.workforceJobs} className="bg-gold p-2 rounded-lg">All Jobs</Link>
           </div>
 
           {applications.slice(0,3).map((job) => (
@@ -360,16 +371,16 @@ const CompanyProfile = React.memo(() => {
         ) : null}
       </div>
  )}
-  {activeTab === "Deal Room" && (jobs.length > 0 ? (
+  {activeTab === "Deal Room" && (dealRooms.length > 0 ? (
       <div >
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">My Deals</h2>
+          <h2 className="text-lg font-semibold">Deals</h2>
           <Link to={webRoutes.dealRooms} className="bg-gold p-2 rounded-lg">Visit Deals</Link>
         </div>
 
         <div className="md:bg-white border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-2">
-          {jobs.slice(0,3).map((job) => (
-            <DealRoomCard key={job.id} deal={job} />
+          {dealRooms.slice(0,3).map((dealRoom) => (
+            <DealRoomCard key={dealRoom.id} deal={dealRoom} />
           ))}
         </div>
       </div>

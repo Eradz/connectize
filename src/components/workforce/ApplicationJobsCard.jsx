@@ -75,8 +75,8 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
 
   return (
     <div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow h-[400px]">
-            <div className="flex items-start justify-between mb-2 md:mb-4 h-[50%] md:h-[35%] ">
+        <div className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow min-h-min">
+            <div className="flex items-start justify-between mb-4 ">
             <div className="flex-1">
                 <div className="flex justify-between items-center space-x-3 mb-2">
                     <div className="flex gap-2">
@@ -119,7 +119,7 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
                 )}
                 </div>
             </div>
-            <div className="h-[28%] md:h-[30%] border-b-gray-500 ">
+            <div className="border-b-gray-500 ">
                 <div className="flex items-center text-sm text-gray-600">
                 <DollarSign className="w-4 h-4 mr-2 " />
                 <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
@@ -152,7 +152,7 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
             </div>
             </div>
 
-            <div className=' flex items-center text-sm h-[10%] md:h-[15%] text-[#6C757D] border border-y-gray-400 border-x-transparent py-2'>
+            <div className=' flex items-center text-sm text-[#6C757D] border border-y-gray-400 border-x-transparent py-2 mt-2'>
             <User2 className='w-4 h-4 mr-2'/>
             <div className='flex items-center gap-2'>
                 <p>Person contact:</p>
@@ -160,7 +160,7 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
             </div>
             </div>
     
-            <div className="flex items-center my-2  h-[10%]">
+            <div className="flex items-center my-2">
             <div className="flex flex-row-reverse w-full justify-between  items-center space-x-2 text-[12px]">
                 <button
                 onClick={() => handleOpenApplicationModal(job)}

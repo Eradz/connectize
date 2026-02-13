@@ -8,6 +8,7 @@ import { avatarStyle, ConJoinedImages } from "../../components/ResponsiveNav";
 import CompanyName from "../../components/company/CompanyName";
 import Heading from "../../components/company/Heading";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
+import { getSEOConfig } from "../../lib/seoConfig";
 
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -34,6 +35,7 @@ const sortOptions = [
 ];
 
 export default function CompaniesPage() {
+  const seoData = getSEOConfig("companies");
   const { updateSearchParams, searchParams } = useCustomSearchParams();
 
   // const { data: companiesList, isLoading } = usePollAllCompanies();
@@ -144,10 +146,11 @@ export default function CompaniesPage() {
 
   return (
     <section className="space-y-6 px-2 md:px-0">
-      {/* <SEO
-        title="Companies | Connectize"
-        description="Discover top companies in the oil and gas industry on Connectize. Create or explore detailed company profiles, connect with industry professionals, showcase services, attract investors, and collaborate on innovative projects. Join the leading platform transforming energy sector networking."
-      /> */}
+      <SEO
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       <section className="flex items-center justify-between">
         <Heading />
         {currentUser &&

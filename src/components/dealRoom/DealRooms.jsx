@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, ArrowLeft } from 'lucide-react';
+import SEO from '../../components/SEO';
+import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { dealRoomService } from '../../api-services/oilgas';
 import GridIcon from '../../icon/GridIcon';
@@ -10,6 +12,7 @@ import { DealRoomCard } from './DealRoomCard';
 import { DealRoomListItem } from './DealRoomListItem';
 
 const DealRooms = () => {
+  const seoData = getSEOConfig("dealRooms");
   const navigate = useNavigate();
   const [dealRooms, setDealRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +54,11 @@ const DealRooms = () => {
 
   return (
     <div className="min-h-screen ">
+      <SEO 
+        title={seoData.title}
+        description={seoData.description}
+        keywords={seoData.keywords}
+      />
       {/* HEADER*/}
       
         <div className="max-w-7xl mx-auto p-4">
