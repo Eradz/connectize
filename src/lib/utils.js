@@ -11,9 +11,9 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: { 
       refetchInterval: 600000, // 10 minutes
-      staleTime: 2 * 60 * 1000, // ✅ 2 minutes - data stays fresh longer
-      gcTime: 10 * 60 * 1000, // ✅ 10 minutes - keep in cache
-      refetchOnWindowFocus: false, // ✅ Don't refetch on tab focus
+      staleTime: 30 * 1000, // ✅ 30 seconds - keep data fresh, avoid serving stale content
+      gcTime: 5 * 60 * 1000, // ✅ 5 minutes - garbage collect unused cache entries
+      refetchOnWindowFocus: true, // ✅ Refetch when user returns to tab (picks up changes)
       retry: 2, // ✅ Only retry twice
       retryDelay: 1000,
     },
@@ -266,33 +266,3 @@ export function ensureUrlProtocol(url) {
   // Add https:// by default
   return `https://${trimmedUrl}`;
 }
-
-  export const getTopicsDisplay = (topics) => {
-  if (!topics) return []
-  
-  // Handle case where topics might be a string
-  if (typeof topics === 'string') {
-    try {
-      topics = JSON.parse(topics)
-    } catch {
-      return []
-    }
-  }
-  
-  if (!Array.isArray(topics) || topics.length === 0) return []
-  
-  if (topics.length === 1 && typeof topics[0] === 'string' && topics[0].startsWith('[')) {
-    try {
-      topics = JSON.parse(topics[0])
-    } catch {
-      return []
-    }
-  }
-  
-  // Filter out empty strings and "[]" 
-  const filtered = topics.filter(t => t && t.trim() && t !== '[]')
-  if (filtered.length === 0) return []
-  
-  return filtered.slice(0, 3).sort((a, b) => b.length - a.length)
-}
-

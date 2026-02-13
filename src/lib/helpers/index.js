@@ -1,6 +1,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { getSession, removeSession, setSession } from "../session";
+import { queryClient } from "../utils";
 
 // Constants
 export const REGISTER_EMAIL_KEY = "register_email";
@@ -24,6 +25,8 @@ export const frontendUrl = () => window.location.origin;
 
 export function goToLogin() {
   removeSession();
+  // Clear all cached API data so stale user data doesn't persist across logins
+  queryClient.clear();
   const pathname = window.location.pathname || "/";
   const authPaths = new Set([
     "/login",
