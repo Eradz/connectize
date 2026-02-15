@@ -98,8 +98,8 @@ export default function Cart() {
       <div className="container py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Link to="/marketplace" className="p-2 hover:bg-gray-100 rounded-lg">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <Link to="/marketplace" className="p-2 bg-white w-fit hover:bg-gray-100 rounded-lg">
               <ArrowLeft size={20} />
             </Link>
             <HeadingText>Shopping Cart</HeadingText>
@@ -133,13 +133,13 @@ export default function Cart() {
             </Link>
           </div>
         ) : (
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className=" col-span-1 lg:col-span-2 space-y-4">
               {cart.items.map((item) => (
                 <div
                   key={item.id}
-                  className={`bg-white rounded-lg p-4 ${updating === item.id ? 'opacity-50' : ''}`}
+                  className={`bg-white relative rounded-lg p-4 ${updating === item.id ? 'opacity-50' : ''}`}
                 >
                   <div className="flex gap-4">
                     {/* Image */}
@@ -148,10 +148,10 @@ export default function Cart() {
                         <img
                           src={item.listing.images[0].image}
                           alt={item.listing.title}
-                          className="w-24 h-24 object-cover rounded-lg"
+                          className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg"
                         />
                       ) : (
-                        <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg flex items-center justify-center">
                           <ShoppingBag size={32} className="text-gray-300" />
                         </div>
                       )}
@@ -163,7 +163,7 @@ export default function Cart() {
                         to={`/marketplace/listing/${item.listing.id}`}
                         className="font-semibold hover:text-primary line-clamp-2"
                       >
-                        {item.listing.title}
+                        {item.listing.title.length > 20 ? item.listing.title.slice(0, 22) + "..." : item.listing.title}
                       </Link>
                       
                       <p className="text-sm text-gray-500 mt-1">
@@ -198,7 +198,7 @@ export default function Cart() {
                         
                         {/* Price */}
                         <div className="text-right">
-                          <p className="text-lg font-bold text-primary">
+                          <p className="text-base md:text-lg font-bold text-primary">
                             ${parseFloat(item.line_total).toFixed(2)}
                           </p>
                           <p className="text-sm text-gray-500">
@@ -212,7 +212,7 @@ export default function Cart() {
                     <button
                       onClick={() => handleRemoveItem(item.id)}
                       disabled={updating === item.id}
-                      className="p-2 text-gray-400 hover:text-red-500 self-start"
+                      className="p-2 text-gray-400 hover:text-red-500 absolute top-0 right-0"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -222,7 +222,7 @@ export default function Cart() {
             </div>
             
             {/* Order Summary */}
-            <div className="lg:col-span-1">
+            <div className="col-span-1 lg:col-span-1">
               <div className="bg-white rounded-lg p-6 sticky top-4">
                 <h3 className="text-lg font-bold mb-4">Order Summary</h3>
                 

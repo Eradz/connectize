@@ -564,14 +564,12 @@ export default function DealRoomDetail() {
                   </div>
                 )}
               </div>
-            <div className="flex space-x-2 mb-4">
-              <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-pale_yellow">
+             {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
               <PencilIcon className= "w-4 h-4"/>
               <span className="hidden md:flex">
                 Edit Deal Room
               </span>
-              </Link>
-            </div>
+              </Link>}
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}

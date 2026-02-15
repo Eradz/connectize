@@ -37,9 +37,11 @@ import { getSession } from '../../lib/session';
 import Scroll from '../../components/Scroll';
 import { DealIcon } from '../../icon/deal';
 import { getCurrencySymbol } from '../../utils/currency';
+import { useAuth } from '../../context/userContext';
 
 
 const LogisticsHubDashboard = () => {
+  const { user } = useAuth();
   const seoData = getSEOConfig("logisticsDashboard");
   // Check session for user privileges
     const session = getSession();
@@ -1140,7 +1142,7 @@ const LogisticsHubDashboard = () => {
                   <FileText className="w-4 h-4" />
                   <span className='text-gray-800 text-xs'>View Details</span>
                 </Link>
-                <Link
+              { request.requested_by == user.id &&  <Link
                   to={webRoutes.logisticsRequestEdit.replace(":id", request.id)}
                   className="flex-1 flex items-center justify-center space-x-1 p-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-xs"
                   style={{ 
@@ -1170,7 +1172,7 @@ const LogisticsHubDashboard = () => {
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text'
                   }}>Edit</span>
-                </Link>
+                </Link>}
               </div>
             </div>
           );

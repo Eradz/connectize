@@ -268,14 +268,13 @@ const LogisticsRequestList = () => {
                         {`${request.description}` || 'No description provided'}
                       </p>
                     </div>
-                    <button
+                    {request.requested_by == userId &&  <button
                       onClick={() => navigate(webRoutes.logisticsRequestEdit.replace(':id', request.id))}
                       className="flex items-center bg-pale_yellow p-2 hover:bg-gold rounded-lg transition-colors"
                       title="Edit"
                     >
                       <Pen className="w-4 h-4" />
-                      {/* <span>Edit</span> */}
-                    </button>
+                    </button>}
                   </div>
 
                   {/* Status Badges */}
