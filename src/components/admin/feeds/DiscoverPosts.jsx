@@ -10,7 +10,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -53,13 +53,22 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
 }) {
-  const { data: posts, isLoading, error } = usePollPosts();
+  // const { data: posts, isLoading, error } = usePollPosts();
 
+  const { 
+    data: posts, 
+    isLoading, 
+    error,
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = usePollPosts();
   // Debug logging
   if (error) {
     console.error("❌ [DiscoverPosts] Error loading posts:", error);
   }
-  
+   const observerRef = useRef();
+  const lastPostRef = useRef();
   const finalArray = isSearch
     ? searchArray
     : companyName
@@ -70,6 +79,30 @@ function DiscoverPosts({
       )
     : posts?.pages?.flatMap(page => page.posts);
   const postLoading = isSearch ? searchLoading : isLoading;
+
+   // Infinite scroll observer
+  useEffect(() => {
+    if (isSearch || companyName) return; // Disable infinite scroll for filtered views
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.5, rootMargin: '200px' }
+    );
+
+    if (lastPostRef.current) {
+      observer.observe(lastPostRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.disconnect();
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName]);
   
   return (
     <section className="space-y-1.5 md:space-y-6 mt-6">
@@ -86,13 +119,37 @@ function DiscoverPosts({
           {isSearch ? "No post found in search" : ""}
         </LightParagraph>
       ) : (
-        finalArray?.map((post, index) => (
-          <DiscoverPostItem
-            hasImage={post?.images?.length > 0}
-            key={post?.id || index}
-            postItem={post}
-          />
-        ))
+        <>
+          {finalArray?.map((post, index) => (
+            <div
+              key={post.id}
+              ref={index === finalArray.length - 1 ? lastPostRef : null}
+            >
+              <DiscoverPostItem
+                hasImage={post?.images?.length > 0}
+                key={post?.id || index}
+                postItem={post}
+              />
+            </div>
+          ))}
+          
+          {/* Loading indicator for next page */}
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Spinner size="md" color="blue.500" />
+              <LightParagraph className="ml-2">Loading more posts...</LightParagraph>
+            </div>
+          )}
+          
+          {/* End of posts message */}
+          {!hasNextPage && !isSearch && finalArray.length > 0 && (
+            <div className="text-center py-6">
+              <LightParagraph className="text-gray-500">
+                You've reached the end! No more posts to load.
+              </LightParagraph>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

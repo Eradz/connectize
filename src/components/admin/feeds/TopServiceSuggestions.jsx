@@ -83,7 +83,7 @@ export function Suggestions({
     <div
       className={clsx("bg-white rounded p-4 space-y-4 w-full h-fit", className)}
     >
-      <h2 className="text-xl font-bold">{heading}</h2>
+      <h2 className="text-sm font-semibold">{heading}</h2>
       <SuggestionList hasSeeMore={hasSeeMore} />
     </div>
   );

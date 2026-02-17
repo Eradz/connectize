@@ -17,9 +17,9 @@ const DiscoverFeed = () => {
   }, [currentUser, setUser]);
 
   return (
-    <section className="space-y-6">
-      <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-4">
-        <h1 className="text-3xl font-semibold">Discover</h1>
+    <section className="">
+      <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">
+        <h1 className="text-2xl font-bold">Discover</h1>
         {currentUser &&
           currentUser?.user_type === CompanyUserType &&
           (currentUser?.is_first_time_user || companies.length < 1) && (

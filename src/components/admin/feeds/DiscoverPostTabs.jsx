@@ -161,12 +161,12 @@ export const PostCard = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={cn(
-        "p-4 lg:!px-3 !w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0",
+        "p-4 !w-full bg-white transition-colors hover:bg-services_yellow/80 rounded-md flex flex-col shrink-0",
         className
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-bold capitalize text-lg line-clamp-1">
+        <h3 className="font-bold capitalize text-base line-clamp-1">
           {title || "Remote Monitoring and Control"}
         </h3>
         <BookMarkButton
