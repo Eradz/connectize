@@ -188,15 +188,15 @@ const WorkforceProfileDetail = () => {
               <div className="flex items-center space-x-3">
                 <Link 
                   to={webRoutes.workforceProfileEdit.replace(':id', id)}
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800 transition-all duration-200"
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-gold/80 text-white text-sm font-medium hover:bg-gold transition-all duration-200"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Profile
                 </Link>
-                <button className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
+                <Link to={webRoutes.messagesRoom.replace(":room_name", `?room_name=room_${user?.id}_${profile?.user}`)} className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Contact
-                </button>
+                </Link>
               </div>
             )}
           </div>
@@ -285,10 +285,10 @@ const WorkforceProfileDetail = () => {
               {/* Action Buttons */}
               {(!user || profile.user !== user.id) && (
                 <div className="flex space-x-3">
-                  <button className="inline-flex items-center px-6 py-3 rounded-lg bg-slate-700 text-white font-medium hover:bg-slate-800 transition-all duration-200">
+                  <Link to={webRoutes.messagesRoom.replace(":room_name", `?room_name=room_${user?.id}_${profile?.user}`)} className="inline-flex items-center px-6 py-3 rounded-lg bg-gold/90 text-white font-medium hover:bg-gold transition-all duration-200">
                     <MessageCircle className="w-5 h-5 mr-2" />
                     Connect
-                  </button>
+                  </Link>
                   <button className="inline-flex items-center px-6 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium bg-white hover:bg-gray-50 transition-all duration-200">
                     <Heart className="w-5 h-5 mr-2" />
                     Save

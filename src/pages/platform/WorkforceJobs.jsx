@@ -134,6 +134,72 @@ const WorkforceJobs = () => {
     return filtered;
   }, [jobs, searchTerm, filterLocation, filterType, filterExperience, filterSalaryRange, sortBy]);
 
+  // Fallback options if backend data is insufficient
+  const defaultLocations = [
+    'Houston, TX',
+    'Aberdeen, UK',
+    'Stavanger, Norway',
+    'Dubai, UAE',
+    'Lagos, Nigeria',
+    'Rio de Janeiro, Brazil',
+    'Perth, Australia',
+    'Calgary, Canada',
+    'Luanda, Angola',
+    'Doha, Qatar'
+  ];
+
+  const defaultJobTypes = [
+    { value: 'full_time', label: 'Full-time' },
+    { value: 'part_time', label: 'Part-time' },
+    { value: 'contract', label: 'Contract' },
+    { value: 'temporary', label: 'Temporary' }
+  ];
+
+  const defaultExperienceLevels = [
+    { value: 'entry', label: 'Entry Level' },
+    { value: 'mid', label: 'Mid Level' },
+    { value: 'senior', label: 'Senior Level' },
+    { value: 'executive', label: 'Executive' }
+  ];
+
+  // Extract unique locations, job types, and experience levels from jobs
+  const { uniqueLocations, uniqueJobTypes, uniqueExperienceLevels } = useMemo(() => {
+    if (!Array.isArray(jobs) || jobs.length === 0) {
+      return {
+        uniqueLocations: defaultLocations,
+        uniqueJobTypes: defaultJobTypes,
+        uniqueExperienceLevels: defaultExperienceLevels
+      };
+    }
+
+    const locations = new Set();
+    const jobTypes = new Set();
+    const experienceLevels = new Set();
+
+    jobs.forEach(job => {
+      if (job.location) {
+        locations.add(job.location);
+      }
+      if (job.job_type) {
+        jobTypes.add(job.job_type);
+      }
+      if (job.experience_level) {
+        experienceLevels.add(job.experience_level);
+      }
+    });
+
+    const locationsArray = Array.from(locations).sort();
+    const jobTypesArray = Array.from(jobTypes).sort();
+    const experienceLevelsArray = Array.from(experienceLevels).sort();
+
+    // Use backend data if we have enough options, otherwise fall back to defaults
+    return {
+      uniqueLocations: locationsArray.length > 2 ? locationsArray : defaultLocations,
+      uniqueJobTypes: jobTypesArray.length > 1 ? jobTypesArray.map(type => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ') })) : defaultJobTypes,
+      uniqueExperienceLevels: experienceLevelsArray.length > 1 ? experienceLevelsArray.map(level => ({ value: level, label: level.charAt(0).toUpperCase() + level.slice(1).replace('_', ' ') })) : defaultExperienceLevels
+    };
+  }, [jobs]);
+
   const loadJobs = async () => {
     try {
       setLoading(true);
@@ -288,62 +354,12 @@ const WorkforceJobs = () => {
         </div>
       </div>
 
-      <div className="md:bg-white my-8">
-        {/* Job Statistics */}
-        {/* <div className="bg-background grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 pb-4">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex flex-col text-center gap-1 items-center">
-              <div className="bg-[#FFF1C6] p-3 rounded-lg">
-                <BriefCaseIcon className="w-6 h-6 text-[#495057]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{jobs.length}</p>
-                <p className="text-sm text-gray-600">Active Jobs</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex flex-col text-center gap-1 items-center">
-              <div className="bg-[#FFF1C6] p-3 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-[#495057]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">25%</p>
-                <p className="text-sm text-gray-600">Growth This Month</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex flex-col text-center gap-1 items-center">
-              <div className="bg-[#FFF1C6] p-3 rounded-lg">
-                <Star className="w-6 h-6 text-[#495057]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">4.8</p>
-                <p className="text-sm text-gray-600">Average Rating</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex flex-col text-center gap-1 items-center">
-              <div className="bg-[#FFF1C6] p-3 rounded-lg">
-                <LucideChartNoAxesCombined className="w-6 h-6 text-[#495057]" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">98%</p>
-                <p className="text-sm text-gray-600">Success Rate</p>
-              </div>
-            </div>
-          </div>
-        </div> */}
+      <div className="md:bg-white my-8 pt-4">
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8 md:w-[95%] mx-auto ">
+        <div className="mb-8 md:w-[95%] mx-auto ">
           <form onSubmit={handleSearch} className="mb-6">
-            <div className="relative max-w-2xl">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
@@ -355,23 +371,18 @@ const WorkforceJobs = () => {
             </div>
           </form>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <select
               value={filterLocation}
               onChange={(e) => setFilterLocation(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Locations</option>
-              <option value="Houston">Houston, TX</option>
-              <option value="Aberdeen">Aberdeen, UK</option>
-              <option value="Stavanger">Stavanger, Norway</option>
-              <option value="Dubai">Dubai, UAE</option>
-              <option value="Lagos">Lagos, Nigeria</option>
-              <option value="Rio de Janeiro">Rio de Janeiro, Brazil</option>
-              <option value="Perth">Perth, Australia</option>
-              <option value="Calgary">Calgary, Canada</option>
-              <option value="Luanda">Luanda, Angola</option>
-              <option value="Doha">Doha, Qatar</option>
+              {Array.isArray(uniqueLocations) && uniqueLocations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
             </select>
 
             <select
@@ -380,10 +391,11 @@ const WorkforceJobs = () => {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Job Types</option>
-              <option value="full_time">Full-time</option>
-              <option value="part_time">Part-time</option>
-              <option value="contract">Contract</option>
-              <option value="temporary">Temporary</option>
+              {Array.isArray(uniqueJobTypes) && uniqueJobTypes.map((jobType) => (
+                <option key={jobType.value} value={jobType.value}>
+                  {jobType.label}
+                </option>
+              ))}
             </select>
 
             <select
@@ -392,10 +404,11 @@ const WorkforceJobs = () => {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="all">All Experience</option>
-              <option value="entry">Entry Level</option>
-              <option value="mid">Mid Level</option>
-              <option value="senior">Senior Level</option>
-              <option value="executive">Executive</option>
+              {Array.isArray(uniqueExperienceLevels) && uniqueExperienceLevels.map((experienceLevel) => (
+                <option key={experienceLevel.value} value={experienceLevel.value}>
+                  {experienceLevel.label}
+                </option>
+              ))}
             </select>
 
             <select

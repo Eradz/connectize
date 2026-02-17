@@ -642,8 +642,6 @@ const WorkforceApplications = () => {
                 </div>
               ))}
             </div>
-        </div>
-
         {/* Empty State */}
   {filteredApplications.length === 0 && (
           <div className="text-center py-12">
@@ -662,6 +660,8 @@ const WorkforceApplications = () => {
             </div>
           </div>
         )}
+        </div>
+
 
         {/* Load More */}
   {filteredApplications.length > 0 && (

@@ -505,7 +505,7 @@ const ProductSidebar = React.memo(({ company }) => {
             <GlobeIcon className="text-gray-600 text-xl" />
             <div>
               <p className="text-xs text-gray-500 mb-1">Website :</p>
-              <p className="text-sm text-gray-800">{company?.website || "No website"}</p>
+              <Link to={company?.website || ''} className="text-sm text-gray-800 hover:text-gold">{company?.website || "No website"}</Link>
             </div>
           </div>
 

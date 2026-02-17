@@ -118,7 +118,7 @@ const PlatformDashboard = () => {
   }
 
   return (
-    <div className='px-6 md:px-0'>
+    <div className='px-6 md:px-0 lg:w-[968px]'>
       {/* Header */}
       <BusinessHubHeader dashboardData={dashboardData} />
       
