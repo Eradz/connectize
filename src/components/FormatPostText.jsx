@@ -42,7 +42,18 @@ const CustomStrong = ({ children, ...props }) => (
 
 const CustomHashTag = ({ children, ...props }) => {
   const navigate = useNavigate();
-  const searchQuery = children.slice(1).trim();
+  const childrenStr = String(children).trim();
+  const isHashTag = childrenStr.startsWith("#");
+
+  if (!isHashTag) {
+    return (
+      <span {...props} className="!text-black">
+        {children}
+      </span>
+    );
+  }
+
+  const searchQuery = childrenStr.slice(1).trim();
 
   return (
     <span
