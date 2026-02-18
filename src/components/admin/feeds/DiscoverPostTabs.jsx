@@ -184,7 +184,7 @@ export const PostCard = ({
         ))}
       </div> */}
 
-      <div className="my-3 flex gap-2 flex-1">
+      <div className="my-1 flex gap-2 flex-1">
         <div className="line-clamp-3 shrink-0 w-[70%]">
           <MarkdownComponent
             markdownContent={

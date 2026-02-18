@@ -96,7 +96,7 @@ function RenderGrayTextMarkdown({
     <div
       // ref={descRef}
       className={clsx(
-        "remove-br prose space-y-1 !leading-tight max-md:prose-sm prose-p:text-sm  prose-p:text-gray-600 prose-a:text-gold prose-a:no-underline prose-a:transition-colors prose-a:duration-200 prose-a:hover:text-gold prose-img:rounded-lg prose-img:max-w-full !text-dark",
+        "remove-br text-sm space-y-1 !leading-tight max-md:prose-sm prose-p:text-sm  prose-p:text-gray-600 prose-a:text-gold prose-a:no-underline prose-a:transition-colors prose-a:duration-200 prose-a:hover:text-gold prose-img:rounded-lg prose-img:max-w-full !text-dark",
         {
           "md:line-clamp-5": isDescription,
         },

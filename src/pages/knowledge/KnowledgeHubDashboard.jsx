@@ -152,7 +152,6 @@ const KnowledgeHubDashboard = () => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await knowledgeArticleService.like(articleSlug);
       
       // Update local state - toggle like status and update count
       const updateArticles = (articles) => 
@@ -167,12 +166,13 @@ const KnowledgeHubDashboard = () => {
           }
           return article;
         });
+        
+        setFeaturedArticles(updateArticles);
+        setTrendingArticles(updateArticles);
+        setRecentArticles(updateArticles);
+        await knowledgeArticleService.like(articleSlug);
       
-      setFeaturedArticles(updateArticles);
-      setTrendingArticles(updateArticles);
-      setRecentArticles(updateArticles);
-      
-      toast.success('Article liked!');
+      // toast.success('Article liked!');
     } catch (error) {
       console.error('Failed to like article:', error);
       toast.error('Failed to like article');
