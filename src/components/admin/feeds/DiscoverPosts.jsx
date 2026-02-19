@@ -188,13 +188,21 @@ export const DiscoverPostItem = ({
     }
   );
   
-  // Use fetched comments if showing all and data is ready, otherwise use preview
-  const comments = showAllComments && allCommentsData?.results 
+  // Use fetched comments if available, otherwise use preview
+  // Automatically show all comments once they're fetched (no need to click button)
+  const comments = allCommentsData?.results && commentsFetched
     ? allCommentsData.results 
     : previewComments;
   
   // Check if more comments are ready to show (prefetched in background)
   const moreCommentsReady = commentsFetched && allCommentsData?.results;
+  
+  // Auto-show all comments when they're ready
+  useEffect(() => {
+    if (moreCommentsReady && !showAllComments) {
+      setShowAllComments(true);
+    }
+  }, [moreCommentsReady, showAllComments]);
 
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
@@ -444,6 +452,7 @@ export const DiscoverPostItem = ({
         hasMoreComments={hasMoreComments && !showAllComments}
         onLoadMore={() => setShowAllComments(true)}
         moreCommentsReady={moreCommentsReady}
+        showAllComments={showAllComments}
       />
     </motion.article>
   );
@@ -463,6 +472,7 @@ const CommentSection = ({
   moreCommentsReady = false,
   postItem,
   refetchComments,
+  showAllComments = false,
 }) => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -564,7 +574,7 @@ const CommentSection = ({
       </div>
 
       {/* Instant display - no loading for initial comments */}
-      {commentsData?.length === 0 ? (
+      {(commentsData?.length === 0 && !isLoadingMore) ? (
         <p className="text-gray-500 text-sm py-2">No comments yet. Be the first to comment!</p>
       ) : (
         commentsData?.map((comment) => (
@@ -584,7 +594,7 @@ const CommentSection = ({
       )}
       
       {/* Load more button - shows instantly if prefetch is ready, skeleton if still loading */}
-      {hasMoreComments && (
+      {hasMoreComments && !showAllComments && (
         <>
           {isLoadingMore ? (
             // Show skeleton while background loading
