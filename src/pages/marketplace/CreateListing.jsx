@@ -8,6 +8,7 @@ import { listingService } from "../../api-services/marketplace";
 import { logisticsAPI } from "../../api-services/logistics";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
+import { webRoutes } from "../../lib/webRoutes";
 
 export default function CreateListing() {
   const navigate = useNavigate();
@@ -184,7 +185,7 @@ export default function CreateListing() {
       <div className="container py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link to="/marketplace/my-listings" className="p-2 hover:bg-gray-100 rounded-lg">
+          <Link to={webRoutes.marketplaceMyListings} className="p-2 hover:bg-gray-100 rounded-lg">
             <ArrowLeft size={20} />
           </Link>
           <HeadingText>Create Listing</HeadingText>

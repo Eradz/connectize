@@ -28,6 +28,7 @@ import {
 } from '../../api-services/oilgas';
 import { toast } from 'sonner';
 import Scroll from '../../components/Scroll';
+import BackArrowButton from '../../components/BackArrowButton';
 
 // Custom SVG Icons
 const WriteArticleIcon = (props) => (
@@ -277,9 +278,7 @@ const KnowledgeHubDashboard = () => {
 
       {/* Header - Mobile */}
       <div className="md:hidden bg-white px-4 py-4">
-        <button className="mb-4">
-          <ArrowLeft className="w-6 h-6 text-gray-700" />
-        </button>
+        <BackArrowButton className={"w-fit"} />
         <h1 className="text-xl font-bold text-gray-900 mb-1">Knowledge Hub</h1>
         <p className="text-sm text-gray-500">
           Stay Informed With Industry Insights, Analysis And Discussion

@@ -10,6 +10,7 @@ import {
   Loader2
 } from 'lucide-react';
 import marketplaceApi from '../../api-services/marketplace';
+import { webRoutes } from '../../lib/webRoutes';
 
 const EditListing = () => {
   const { id } = useParams();
@@ -176,7 +177,7 @@ const EditListing = () => {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button
-          onClick={() => navigate('/marketplace/my-listings')}
+          onClick={() => navigate(webRoutes.marketplaceMyListings)}
           className="p-2 hover:bg-gray-100 rounded-lg transition"
         >
           <ArrowLeft size={24} />

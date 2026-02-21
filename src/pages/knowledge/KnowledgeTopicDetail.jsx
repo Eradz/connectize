@@ -283,7 +283,7 @@ const KnowledgeTopicDetail = () => {
           <p className="text-gray-600 mb-4">The topic you're looking for doesn't exist.</p>
           <Link 
             to={webRoutes.knowledgeForums}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center text-gold/90 hover:text-gold"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Forums

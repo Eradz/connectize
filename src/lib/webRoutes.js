@@ -235,6 +235,7 @@ const webRoutes = {
   marketplaceOrders: "/marketplace/orders",
   marketplaceOrderConfirmation: "/marketplace/order-confirmation/:id",
   marketplaceSellerOrders: "/marketplace/seller-orders",
+  marketplaceSellerPayments: "/marketplace/seller-payments",
 
   // Oil & Gas Platform Routes
   // Deal Management

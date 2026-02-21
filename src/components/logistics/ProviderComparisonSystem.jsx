@@ -214,7 +214,7 @@ const ProviderComparisonSystem = ({ shipmentRequest, onProviderSelected, onSucce
     <div className="space-y-6">
       {/* Header with Comparison Controls */}
       {/* Lightweight provider quote CTA for providers viewing a request */}
-      {shipmentRequest && (shipmentRequest.status === 'posted' || shipmentRequest.status === 'quoted') && shipmentRequest.allow_bids && (
+      {shipmentRequest && (shipmentRequest.status === 'posted' || shipmentRequest.status === 'quoted') && shipmentRequest.allow_bids && !isOwner && (
         <div className="border rounded-lg p-4 bg-yellow-50">
           <div className="flex items-center justify-between">
             <div>

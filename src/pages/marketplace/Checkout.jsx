@@ -7,6 +7,7 @@ import { getSession } from "../../lib/session";
 import { toast } from "sonner";
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from "../../lib/stripeUtils";
+import { webRoutes } from "../../lib/webRoutes";
 
 function CheckoutFormInner({ cart, onSuccess }) {
   const stripe = useStripe();
@@ -625,7 +626,7 @@ export default function Checkout() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link to="/marketplace/cart" className="p-2 hover:bg-gray-100 rounded-lg transition">
+          <Link to={webRoutes.marketplaceCart} className="p-2 hover:bg-gray-100 rounded-lg transition">
             <ArrowLeft size={20} />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>

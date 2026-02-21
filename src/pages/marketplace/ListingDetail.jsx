@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import marketplaceApi from '../../api-services/marketplace';
 import { getSession } from '../../lib/session';
+import { webRoutes } from '../../lib/webRoutes';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -208,7 +209,7 @@ const ListingDetail = () => {
           <span>{error || 'Listing not found'}</span>
         </div>
         <button
-          onClick={() => navigate('/marketplace')}
+          onClick={() => navigate(webRoutes.marketplace)}
           className="mt-4 text-blue-600 hover:underline flex items-center gap-2"
         >
           <ArrowLeft size={18} />

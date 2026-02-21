@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { Plus, Trash2 } from 'lucide-react';
 import { logisticsAPI } from '../../api-services/logistics';
 
 const toISODateTime = (dateStr, endOfDay = false) => {
@@ -19,11 +20,36 @@ const ProviderQuoteForm = ({ requestId, onSuccess, onCancel }) => {
     insurance_included: false,
     insurance_value: '',
     valid_until: '',
-    cost_breakdown: '' // JSON string optional
+    cost_breakdown: [] // Array of {key, value} objects
   });
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Add a new cost breakdown item
+  const addCostBreakdownItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      cost_breakdown: [...prev.cost_breakdown, { key: '', value: '' }]
+    }));
+  };
+
+  // Update a cost breakdown item
+  const updateCostBreakdownItem = (index, field, value) => {
+    setForm((prev) => {
+      const updated = [...prev.cost_breakdown];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, cost_breakdown: updated };
+    });
+  };
+
+  // Remove a cost breakdown item
+  const removeCostBreakdownItem = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      cost_breakdown: prev.cost_breakdown.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -36,15 +62,14 @@ const ProviderQuoteForm = ({ requestId, onSuccess, onCancel }) => {
         return;
       }
 
+      // Convert cost_breakdown array to object
       let parsedBreakdown = {};
-      if (form.cost_breakdown) {
-        try {
-          parsedBreakdown = JSON.parse(form.cost_breakdown);
-        } catch (err) {
-          toast.error('Cost breakdown must be valid JSON');
-          setSubmitting(false);
-          return;
-        }
+      if (form.cost_breakdown && form.cost_breakdown.length > 0) {
+        form.cost_breakdown.forEach((item) => {
+          if (item.key && item.value) {
+            parsedBreakdown[item.key] = item.value;
+          }
+        });
       }
 
       const payload = {
@@ -138,8 +163,54 @@ const ProviderQuoteForm = ({ requestId, onSuccess, onCancel }) => {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Cost Breakdown (JSON)</label>
-        <textarea value={form.cost_breakdown} onChange={(e) => handleChange('cost_breakdown', e.target.value)} className="w-full border px-3 py-2 rounded-lg" rows={3} placeholder='{"base": 1000, "fuel": 100}' />
+        <label className="block text-sm font-medium text-gray-700 mb-3">Cost Breakdown</label>
+        <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          {form.cost_breakdown.length === 0 ? (
+            <p className="text-sm text-gray-500 italic">No cost items added yet</p>
+          ) : (
+            form.cost_breakdown.map((item, index) => (
+              <div key={index} className="flex gap-2 items-end bg-white p-3 rounded-lg border border-gray-200">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Item Name</label>
+                  <input
+                    type="text"
+                    value={item.key}
+                    onChange={(e) => updateCostBreakdownItem(index, 'key', e.target.value)}
+                    placeholder="e.g., Base Fare, Fuel Surcharge, Tax"
+                    className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Amount/Description</label>
+                  <input
+                    type="text"
+                    value={item.value}
+                    onChange={(e) => updateCostBreakdownItem(index, 'value', e.target.value)}
+                    placeholder="e.g., 1000, 10% of base"
+                    className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeCostBreakdownItem(index)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                  title="Remove item"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ))
+          )}
+          
+          <button
+            type="button"
+            onClick={addCostBreakdownItem}
+            className="w-full mt-2 py-2 px-3 border-2 border-dashed border-gold text-gold rounded-lg hover:bg-gold/5 flex items-center justify-center gap-2 transition-colors"
+          >
+            <Plus size={18} />
+            Add Cost Item
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center justify-end gap-3 pt-2">

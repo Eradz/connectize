@@ -7,6 +7,7 @@ import {
 import { listingService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
+import { webRoutes } from "../../lib/webRoutes";
 
 export default function MyListings() {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ export default function MyListings() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link to="/marketplace" className="p-2 hover:bg-gray-100 rounded-lg">
+            <Link to={webRoutes.marketplace} className="p-2 hover:bg-gray-100 rounded-lg">
               <ArrowLeft size={20} />
             </Link>
             <HeadingText>My Listings</HeadingText>
@@ -93,14 +94,14 @@ export default function MyListings() {
           
           <div className="flex items-center gap-3">
             <Link
-              to="/marketplace/seller-payments"
+              to={webRoutes.marketplaceSellerPayments}
               className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <CreditCard size={18} />
               <span className="hidden sm:inline">Payment Settings</span>
             </Link>
             <Link
-              to="/marketplace/create-listing"
+              to={webRoutes.marketplaceCreateListing}
               className="flex items-center gap-2 bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/90"
             >
               <Plus size={20} />

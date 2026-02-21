@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { stripeConnectService } from '../../api-services/marketplace';
 import { toast } from 'sonner';
+import { webRoutes } from '../../lib/webRoutes';
 
 const SellerPayments = () => {
   const [searchParams] = useSearchParams();
@@ -284,7 +285,7 @@ const SellerPayments = () => {
         {/* Header */}
         <div className="mb-8">
           <Link 
-            to="/marketplace/my-listings"
+            to={webRoutes.marketplaceMyListings}
             className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

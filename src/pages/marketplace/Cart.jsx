@@ -4,6 +4,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ShoppingBag, Truck } from
 import { cartService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
+import { webRoutes } from "../../lib/webRoutes";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ export default function Cart() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <Link to="/marketplace" className="p-2 bg-white w-fit hover:bg-gray-100 rounded-lg">
+            <Link to={webRoutes.marketplace} className="p-2 bg-white w-fit hover:bg-gray-100 rounded-lg">
               <ArrowLeft size={20} />
             </Link>
             <HeadingText>Shopping Cart</HeadingText>

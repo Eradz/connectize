@@ -23,6 +23,7 @@ import {
   Clock,
 } from 'lucide-react';
 import './ProviderSettings.css';
+import { webRoutes } from '../../lib/webRoutes';
 
 const PROVIDER_TYPES = [
   { value: 'custom', label: 'Custom API', description: 'Your own shipping system API' },
@@ -205,7 +206,7 @@ const ProviderSettings = () => {
   return (
     <div className="provider-settings">
       <header className="settings-header">
-        <button className="back-button" onClick={() => navigate('/logistics/provider-dashboard')}>
+        <button className="back-button" onClick={() => navigate(webRoutes.logisticsProviderDashboard)}>
           <ArrowLeft size={20} />
           Back to Dashboard
         </button>

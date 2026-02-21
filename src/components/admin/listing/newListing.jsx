@@ -17,6 +17,7 @@ import axios from "axios";
 import { Close } from "@mui/icons-material";
 import { ArrowLeft, ImageIcon } from "../../../icon";
 import { toast } from "sonner";
+import { webRoutes } from "../../../lib/webRoutes";
 
 const FILE_SIZE = 4 * 1024 * 1024; // 4MB
 export const SUPPORTED_FORMATS = [
@@ -251,7 +252,7 @@ export default function NewListing({ productToEdit }) {
       <div className="flex items-center mb-4">
         {editId && (
           <Link
-            to={`/products/${editId}`}
+            to={webRoutes.productDetails.replace(":id", editId)}
             className="mr-2 flex items-center justify-center rounded-full size-8 bg-light_grey/50"
           >
             <ArrowLeft className={"size-6"} />
