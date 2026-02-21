@@ -78,7 +78,7 @@ const KnowledgeForumCreate = () => {
 
   const goBack = () => {
     // Navigate back
-    console.log('Navigate back');
+    navigate(-1);
   };
 
   if (loading) {
@@ -93,12 +93,12 @@ const KnowledgeForumCreate = () => {
   }
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
 
       <div className="py-4">
         {/* Desktop Header */}
         <div className="flex flex-col md:flex-row mb-4 px-4 md:px-0">
-          <BackArrowButton/>
+          <BackArrowButton className={"w-fit"}/>
           <div>
           <h1 className="text-xl md:text-2xl font-bold text-gray-900">Create Forum</h1>
           <p className="text-sm text-gray-500 mt-1">Create Forum For Discussion</p>
