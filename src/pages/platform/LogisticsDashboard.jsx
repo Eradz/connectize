@@ -101,36 +101,15 @@ const LogisticsHubDashboard = () => {
       try {
         setLoading(true);
         
-        console.log('🔍 Loading logistics dashboard data...');
-        console.log('🔑 Checking authentication state...');
-        
-        // Check session for proper authentication tokens
-        const session = getSession();
-        console.log('📦 Session state:', { 
-          hasSession: !!session, 
-          hasTokens: !!(session?.tokens),
-          hasAccess: !!(session?.tokens?.access),
-          hasRefresh: !!(session?.tokens?.refresh),
-          // Session has { id, email, tokens } structure
-          userInfo: session?.id ? { id: session.id, email: session.email } : null
-        });
-        
         // Also check localStorage for any legacy tokens (for debugging)
         const accessToken = localStorage.getItem('access');
         const refreshToken = localStorage.getItem('refresh');
-        console.log('📦 LocalStorage tokens (legacy check):', { 
-          hasAccess: !!accessToken, 
-          hasRefresh: !!refreshToken,
-          accessPreview: accessToken ? accessToken.substring(0, 30) + '...' : null
-        });
         
         if (!session?.tokens?.access) {
           console.error('❌ No valid authentication session found');
           throw new Error('Authentication required. Please log in.');
         }
         
-        // Fetch real data from APIs
-        console.log('🚀 Making API calls...');
         // Helper to follow pagination for a given initial payload and base path
         const fetchAllPages = async (initialPayload, baseUrl) => {
           // initialPayload may be either the already-parsed object or wrapped

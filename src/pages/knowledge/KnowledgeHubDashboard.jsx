@@ -285,7 +285,7 @@ const KnowledgeHubDashboard = () => {
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-0 py-4 md:py-0 ">
         {/* Featured Articles - Desktop */}
         <div className="hidden md:block mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Articles</h2>
