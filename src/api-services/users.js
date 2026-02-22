@@ -83,96 +83,45 @@ export const updateCurrentUserInfo = async (values) => {
 };
 
 export const getAssociatedUsersForUser = async (userId) => {
-  // const currentUser = await getCurrentUser();
-
-  // const allUsers = await getAllUsers();
-
-  // const allUsersInLocation = allUsers.filter(
-  //   (user) =>
-  //     currentUser.id !== user.id &&
-  //     user.first_name &&
-  //     (user.city === currentUser.city ||
-  //       user.region === currentUser.region ||
-  //       user.country === currentUser.country ||
-  //       user)
-  // );
-
-  return [];
-  // return allUsersInLocation;
+  // Use the backend connections endpoint for real associated users
+  if (!userId) return [];
+  try {
+    const results = await makeApiRequest({
+      url: `api/users/${userId}/connections/?limit=10`,
+      method: "GET",
+    });
+    return Array.isArray(results) ? results : [];
+  } catch {
+    return [];
+  }
 };
+
 export const getSuggestedUsersForCurrentUser = async () => {
-  const currentUser = await getCurrentUser();
-
-  const allUsers = await getAllUsers();
-
-  const allUsersInLocation = allUsers.filter(
-    (user) =>
-      currentUser.id !== user.id &&
-      user.first_name &&
-      (user.city === currentUser.city ||
-        user.region === currentUser.region ||
-        user.country === currentUser.country ||
-        user)
-  );
-
-  return allUsersInLocation;
+  // Use the backend suggestions endpoint for smart recommendations
+  try {
+    const results = await makeApiRequest({
+      url: `api/users/suggestions/?limit=10`,
+      method: "GET",
+    });
+    return Array.isArray(results) ? results : [];
+  } catch {
+    return [];
+  }
 };
 
 export const getPeopleAssociatedForUser = async (thisUser, companyId) => {
   if (!thisUser) return [];
 
-  const nonProfessionalEmailDomains = new Set([
-    "gmail.com",
-    "yahoo.com",
-    "hotmail.com",
-    "aol.com",
-    "outlook.com",
-    "icloud.com",
-    "mail.com",
-    "zoho.com",
-    "admin.com",
-    "superadmin.com",
-  ]);
-  const [allUsers, representatives] = await Promise.all([
-    getAllUsers(),
-    getAllRepresentatives({ company_id: companyId }),
-  ]);
-
-  // Fetch representatives' associated users
-  const representativesAssociated = await Promise.all(
-    representatives.map(async (rep) => {
-      // if (rep.user === thisUser.id) {
-      //   const companyUser = await getCompanyByIdOrEmail(rep.company);
-      //   return companyUser?.[0]?.user || null;
-      // }
-
-      return getUserById(rep.user);
-    })
-  );
-
-  // Filter valid users & ensure uniqueness
-  const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
-  const allUsersAssociated = allUsers.filter(
-    ({ id, email, first_name, last_name }) => {
-      if (!first_name && !last_name) return false;
-      if (id === thisUser.id) return false;
-
-      const userDomain = email.split("@")[1].toLowerCase();
-      return (
-        userDomain === thisUserDomain &&
-        !nonProfessionalEmailDomains.has(userDomain)
-      );
-    }
-  );
-
-  const uniqueUsers = new Set(
-    [
-      ...representativesAssociated.map((ra) => ({ ...ra, rep: true })),
-      ...allUsersAssociated.map((du) => ({ ...du, domain: true })),
-    ].filter(Boolean)
-  );
-
-  return Array.from(uniqueUsers);
+  try {
+    // Fetch actual connections for this user from the backend
+    const results = await makeApiRequest({
+      url: `api/users/${thisUser.id}/connections/?limit=10`,
+      method: "GET",
+    });
+    return Array.isArray(results) ? results : [];
+  } catch {
+    return [];
+  }
 };
 
 // get and create user

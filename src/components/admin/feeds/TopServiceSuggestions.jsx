@@ -1,19 +1,15 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { useEffect } from "react";
 import {
   getAssociatedUsersForUser,
-  getPeopleAssociatedForUser,
   getSuggestedUsersForCurrentUser,
 } from "../../../api-services/users";
 import { useAuth } from "../../../context/userContext";
-import { queryClient } from "../../../lib/utils";
 import LightParagraph from "../../ParagraphText";
 import { avatarStyle } from "../../ResponsiveNav";
 import SeeMoreLink from "../../SeeMoreLink";
 import Username from "../../Username";
-import { usePaginatedRepresentatives } from "../../../hooks/useRepresentatives";
 import BusinessHubActivities from "./BusinessHubActivities";
 
 const TopServiceSuggestions = () => {
@@ -52,81 +48,48 @@ export function SuggestionList({
 }) {
   const { user: currentUser } = useAuth();
 
-  const queryKey = ["associatedUsers"];
+  // For "People Associated" (associated=true): fetch connections for the target user
+  // For "Suggested" (associated=false): fetch smart suggestions for current user
+  const userId = associated ? thisUser?.id : currentUser?.id;
+  const queryKey = associated
+    ? ["userConnections", userId]
+    : ["userSuggestions", currentUser?.id];
 
-  // const queryKey = [
-  //   associated ? "associatedUsers" : "suggestedUsers",
-  //   thisUser?.id,
-  // ];
-
-  const { data: paginatedData, isLoading: isRepsLoading } =
-    usePaginatedRepresentatives(
-      {
-        companyId,
-        // userId: userIdParam,
-      },
-      { enabled: associated && !!companyId }
-    );
-
-  const repsFirstPage = paginatedData?.pages?.[0]?.data;
-
-  const { data: associatedUsers = [], isLoading } = useQuery({
+  const { data: users = [], isLoading } = useQuery({
     queryKey,
-
-    // queryFn: () => getSuggestedUsersForCurrentUser(),
-    enabled: !associated && !!currentUser && (!!thisUser?.id || !!currentUser.id),
-    // enabled:
     queryFn: associated
-      ? () => getPeopleAssociatedForUser(thisUser, companyId)
+      ? () => getAssociatedUsersForUser(userId)
       : () => getSuggestedUsersForCurrentUser(),
-    // enabled: !!currentUser && !!thisUser?.id,
+    enabled: !!currentUser && (associated ? !!userId : true),
     keepPreviousData: true,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
-
-  useEffect(() => {
-    if (thisUser?.id) {
-      queryClient.invalidateQueries({ queryKey });
-    }
-  }, [thisUser?.id, queryClient]);
 
   return (
     <section>
       <ul className="space-y-2 divide-y divide-gray-100">
-        {isLoading || isRepsLoading ? (
+        {isLoading ? (
           Array.from({ length: 6 }, (_, index) => (
             <CircleTitleSubtitleSkeleton key={index} />
           ))
-        ) : (associated ? repsFirstPage?.length : associatedUsers?.length) <=
-          0 ? (
+        ) : users?.length <= 0 ? (
           <LightParagraph>
             {associated
-              ? "No users associated yet. Connect more to see user associated"
-              : "No suggested users yet"}
+              ? "No connections yet"
+              : "No suggestions available"}
           </LightParagraph>
-        ) : associated ? (
-          repsFirstPage.map(({ user }) => {
-            return (
-              <SuggestionListItem
-                key={user.id}
-                avatar={user.avatar}
-                hashtag={user.email}
-                id={user.id}
-                rep={true}
-                user={user}
-                full_name={user.full_name}
-              />
-            );
-          })
         ) : (
-          associatedUsers?.map((user) => {
+          users?.map((user) => {
             const {
               first_name,
               last_name,
+              full_name,
               avatar,
               email: hashtag,
               id,
-              rep,
-              domain,
+              connection_type,
+              is_mutual,
+              suggestion_reasons,
             } = user;
 
             return (
@@ -136,30 +99,45 @@ export function SuggestionList({
                 hashtag={hashtag}
                 user={user}
                 id={id}
-                rep={rep}
-                domain={domain}
-                full_name={`${first_name} ${last_name}`}
+                full_name={full_name || `${first_name || ''} ${last_name || ''}`.trim()}
+                connectionType={connection_type}
+                isMutual={is_mutual}
+                suggestionReasons={suggestion_reasons}
+                associated={associated}
               />
             );
           })
         )}
       </ul>
-      {hasSeeMore && associatedUsers?.length > 1 && (
+      {hasSeeMore && users?.length > 1 && (
         <SeeMoreLink url={viewMoreUrl} />
       )}
     </section>
   );
 }
 
+const REASON_LABELS = {
+  mutual_connection: "Mutual",
+  follows_you: "Follows you",
+  same_location: "Near you",
+};
+
 function SuggestionListItem({
   id,
   avatar,
   full_name,
   hashtag,
-  rep = false,
-  domain = false,
   user,
+  connectionType,
+  isMutual,
+  suggestionReasons,
+  associated = false,
 }) {
+  // Pick the most relevant badge to show
+  const badge = associated
+    ? (isMutual ? "Mutual" : connectionType === "following" ? "Following" : connectionType === "follower" ? "Follower" : null)
+    : (suggestionReasons?.length > 0 ? REASON_LABELS[suggestionReasons[0]] : null);
+
   return (
     <li className="flex items-center gap-2.5 pt-2" key={id}>
       <Avatar
@@ -171,9 +149,12 @@ function SuggestionListItem({
       <div>
         <div className="flex items-center gap-1">
           <Username user={user} />
-          {(rep || domain) && (
-            <Badge className="!text-[.6rem]">
-              {rep ? "Representative" : "Domain"}
+          {badge && (
+            <Badge
+              colorScheme={isMutual || suggestionReasons?.[0] === 'mutual_connection' ? "green" : suggestionReasons?.[0] === 'follows_you' ? "blue" : "gray"}
+              className="!text-[.6rem]"
+            >
+              {badge}
             </Badge>
           )}
         </div>
