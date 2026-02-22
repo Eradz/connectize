@@ -115,16 +115,19 @@ function CreatePost() {
 
       const newPost = await createPost(formData, selectedCompanyId);
 
-      if (newPost.id) {
+      if (newPost?.id) {
         setMessage("");
         setSelectedGif("");
         toast.success("Your post has been created");
         setRefetchInterval(1000);
         setTimeout(() => setRefetchInterval(false), 2000);
         setValidImages([]);
+      } else {
+        toast.error("Failed to create post. Please try again.");
       }
     } catch (error) {
       console.error("Post error: ", error);
+      toast.error("Something went wrong while creating your post.");
     } finally {
       setIsLoading(false);
     }
