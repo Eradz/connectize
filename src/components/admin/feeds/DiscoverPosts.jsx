@@ -263,6 +263,11 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
+
+  // Show edit/delete if user is the post author OR owns the company that posted
+  const isPostOwner = postItem?.user?.id === currentUser?.id || 
+    (postItem?.company?.id && currentUser?.companies?.includes(postItem.company.id));
+
   return (
     <motion.article
       initial={{ opacity: 0 }}
@@ -295,7 +300,7 @@ export const DiscoverPostItem = ({
           </section>
         </section>
 
-        {postItem?.user?.id === currentUser?.id && (
+        {isPostOwner && (
           <MoreOptions className="shrink-0 !max-w-[120px]">
             <div className="flex flex-col gap-2">
               <ButtonWithTooltipIcon

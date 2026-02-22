@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { createPost } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
+import { useGetCurrentCompany } from "../../../hooks";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
 import CustomErrorMessage from "../../CustomErrorMessage";
 import GifPicker from "../../GifPicker";
@@ -34,6 +35,7 @@ const isImageSize = (files) =>
 function CreatePost() {
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
+  const { data: companies = [] } = useGetCurrentCompany();
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -42,6 +44,14 @@ function CreatePost() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [selectedGif, setSelectedGif] = useState("");
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+
+  // Auto-select first company, or update when companies load
+  useEffect(() => {
+    if (companies.length > 0 && !selectedCompanyId) {
+      setSelectedCompanyId(companies[0].id);
+    }
+  }, [companies, selectedCompanyId]);
 
   const textareaRef = useRef(null);
 
@@ -97,10 +107,13 @@ function CreatePost() {
       setIsLoading(true);
       const formData = new FormData();
       formData.append("body", message);
+      if (selectedCompanyId) {
+        formData.append("company", selectedCompanyId);
+      }
       validImages.forEach((image) => formData.append("images", image));
       if (selectedGif) formData.append("gif", selectedGif);
 
-      const newPost = await createPost(formData);
+      const newPost = await createPost(formData, selectedCompanyId);
 
       if (newPost.id) {
         setMessage("");
@@ -145,6 +158,22 @@ function CreatePost() {
 
   return (
     <section className="bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
+      {companies.length > 1 && (
+        <div className="mb-4 flex items-center gap-2">
+          <label className="text-sm text-gray-500 shrink-0">Post as:</label>
+          <select
+            value={selectedCompanyId || ""}
+            onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
+            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-gold focus:border-gold outline-none max-w-xs"
+          >
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.company_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="size-full">
         <textarea
           type="text"
