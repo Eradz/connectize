@@ -16,6 +16,8 @@ import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
 import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, Trash2 } from "lucide-react";
 import ValuationsPanel from "../../components/dealRoom/ValuationsPanel";
+import { useAuth } from "../../context/userContext";
+import { getSession } from "../../lib/session";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -40,6 +42,9 @@ export default function DealRoomDetail() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const active = useMemo(() => currentSection(pathname), [pathname]);
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
 
   // Early validation - don't even render if ID is invalid
   if (!id || id === 'my-participations' || id === 'create' || !id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
@@ -137,7 +142,7 @@ export default function DealRoomDetail() {
           console.log('Direct API call successful:', dealRes);
         } catch (err) {
           console.warn('Direct deal access failed, trying from list:', err);
-          // Fallback: get from list endpoint
+          // Fallback: get from list endpoint (authenticated only)
           try {
             const listRes = await dealRoomService.getAll(1, 50);
             console.log('List API call result:', listRes);
@@ -147,47 +152,16 @@ export default function DealRoomDetail() {
               console.log('Found deal in list:', foundDeal);
               dealRes = { data: foundDeal };
             } else {
-              console.warn('Deal not found in list, trying direct fetch');
-              // Try direct fetch without authentication
-              const directResponse = await fetch(`http://localhost:8000/api/v1/deals/deal-rooms/?search=${id.slice(0, 8)}`);
-              if (directResponse.ok) {
-                const directData = await directResponse.json();
-                const directDeal = directData?.results?.find(d => d.id === id);
-                if (directDeal) {
-                  console.log('Found deal via direct fetch:', directDeal);
-                  dealRes = { data: directDeal };
-                } else {
-                  console.warn('Deal not found via direct fetch');
-                  dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-                }
-              } else {
-                console.warn('Direct fetch failed');
-                dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-              }
+              console.warn('Deal not found — user may not have access');
+              setError('Deal room not found or you do not have access.');
+              setLoading(false);
+              return;
             }
           } catch (listErr) {
-            console.warn('List API also failed, trying direct fetch:', listErr);
-            // Try direct fetch as backup
-            try {
-              const directResponse = await fetch(`http://localhost:8000/api/v1/deals/deal-rooms/?search=${id.slice(0, 8)}`);
-              if (directResponse.ok) {
-                const directData = await directResponse.json();
-                const directDeal = directData?.results?.find(d => d.id === id);
-                if (directDeal) {
-                  console.log('Found deal via direct fetch after list failed:', directDeal);
-                  dealRes = { data: directDeal };
-                } else {
-                  console.warn('Deal not found via direct fetch');
-                  dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-                }
-              } else {
-                console.warn('Direct fetch failed');
-                dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-              }
-            } catch (fetchErr) {
-              console.warn('Direct fetch also failed:', fetchErr);
-              dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-            }
+            console.warn('List API also failed:', listErr);
+            setError('Unable to load deal room. You may not have access.');
+            setLoading(false);
+            return;
           }
         }
         
@@ -418,10 +392,19 @@ export default function DealRoomDetail() {
             </div>
             <div className="flex space-x-2">
               <Link to={webRoutes.dealRooms} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">Back to Deals</Link>
-              <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-custom_yellow">Edit Deal Room</Link>
+              {userId && deal?.initiator && (
+                String(deal.initiator) === String(userId) ||
+                participants?.some(p => String(p.user) === String(userId) && p.permission_level === 'admin')
+              ) && (
+                <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-custom_yellow">Edit Deal Room</Link>
+              )}
             </div>
           </div>
-          {/* Enhanced Quick Actions and Stats */}
+          {/* Enhanced Quick Actions and Stats — only for participants with edit/admin access */}
+          {userId && deal?.initiator && (
+            String(deal.initiator) === String(userId) ||
+            participants?.some(p => String(p.user) === String(userId) && ['admin', 'edit'].includes(p.permission_level))
+          ) && (
           <div className="mt-4 flex flex-wrap gap-2">
             <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
               <Plus className="h-4 w-4 mr-2" />
@@ -463,6 +446,7 @@ export default function DealRoomDetail() {
               )}
             </div>
           </div>
+          )}
           <div className="mt-6 flex flex-wrap gap-2">
             {tabs.map((t) => (
               <Link
@@ -869,8 +853,12 @@ export default function DealRoomDetail() {
                                     Request Access
                                   </button>
                                 )}
-                                {/* Delete button - only show for non-temporary documents */}
-                                {!d._isTemporary && d.id && (
+                                {/* Delete button - only show for document owner or deal room admin */}
+                                {!d._isTemporary && d.id && userId && (
+                                  String(d.uploaded_by) === String(userId) ||
+                                  String(deal?.initiator) === String(userId) ||
+                                  participants?.some(p => String(p.user) === String(userId) && p.permission_level === 'admin')
+                                ) && (
                                   <button
                                     onClick={async () => {
                                       if (!window.confirm(`Are you sure you want to delete "${label}"? This action cannot be undone.`)) return;

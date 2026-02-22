@@ -62,32 +62,8 @@ const DealRooms = () => {
       
   setDealRooms(Array.isArray(rooms) ? rooms : []);
     } catch (error) {
-      console.error('❌ Failed to load deal rooms:', error);
-      console.error('❌ Error details:', error?.message, error?.stack);
-      
-      // Fallback: try direct fetch
-      try {
-        console.log('🔄 Trying direct API fallback...');
-        const directResponse = await fetch('http://localhost:8000/api/v1/deals/deal-rooms/', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (directResponse.ok) {
-          const fallbackData = await directResponse.json();
-          console.log('✅ Fallback API successful:', fallbackData);
-          const fallbackRooms = fallbackData?.results || fallbackData?.data || fallbackData || [];
-          setDealRooms(Array.isArray(fallbackRooms) ? fallbackRooms : []);
-        } else {
-          console.error('❌ Fallback API also failed:', directResponse.status, directResponse.statusText);
-          setDealRooms([]);
-        }
-      } catch (fallbackError) {
-        console.error('❌ Fallback API error:', fallbackError);
-        setDealRooms([]);
-      }
+      console.error('Failed to load deal rooms:', error);
+      setDealRooms([]);
     } finally {
       setLoading(false);
     }
