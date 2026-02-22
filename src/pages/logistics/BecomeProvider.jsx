@@ -9,6 +9,7 @@ import {
 import { logisticsAPI } from '../../api-services/logistics';
 import { getSession } from '../../lib/session';
 import { useAuth } from '../../context/userContext';
+import { useUserCompanies } from '../../hooks/useUserCompanies';
 import { webRoutes } from '../../lib/webRoutes';
 
 const SERVICE_TYPES = [
@@ -59,8 +60,8 @@ const BecomeProvider = () => {
 
   const [newRegion, setNewRegion] = useState('');
 
-  // Get user's companies
-  const userCompanies = currentUser?.companies || [];
+  // Fetch full company objects for the current user
+  const { companies: userCompanies } = useUserCompanies(currentUser?.id);
 
   useEffect(() => {
     checkExistingProvider();
@@ -438,7 +439,7 @@ const BecomeProvider = () => {
               id="company-select"
               value={selectedCompany?.id || ''}
               onChange={(e) => {
-                const company = userCompanies.find(c => c.id === e.target.value);
+                const company = userCompanies.find(c => String(c.id) === e.target.value);
                 setSelectedCompany(company || null);
               }}
               className="w-full max-w-md px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
