@@ -3,6 +3,7 @@ import EmojiPicker from "emoji-picker-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { createPost } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
@@ -36,6 +37,7 @@ function CreatePost() {
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
   const { data: companies = [] } = useGetCurrentCompany();
+  const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -118,10 +120,10 @@ function CreatePost() {
       if (newPost?.id) {
         setMessage("");
         setSelectedGif("");
-        toast.success("Your post has been created");
-        setRefetchInterval(1000);
-        setTimeout(() => setRefetchInterval(false), 2000);
         setValidImages([]);
+        toast.success("Your post has been created");
+        // Immediately invalidate posts cache so the new post appears right away
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
       } else {
         toast.error("Failed to create post. Please try again.");
       }
