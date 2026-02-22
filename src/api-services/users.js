@@ -41,138 +41,121 @@ export const getCurrentUser = async () => {
 export const updateCurrentUserInfo = async (values) => {
   const currentUser = await getCurrentUser();
 
+  if (!currentUser?.id) {
+    toast.error("Could not identify your account. Please log in again.");
+    return null;
+  }
+
   if (!values || !values.gender) {
     toast.info("Incomplete profile information");
-    return;
+    return null;
   }
 
   await getOrCreateGender(values.gender);
 
+  const hasFile = values.image instanceof File;
+
+  // Only send writable fields — spreading currentUser sends read-only fields
+  // (followers, followings, companies, etc.) that cause Django validation errors
+  const profileData = {};
+
+  // Helper: only add field if value is truthy or a valid boolean/number
+  const addField = (key, value) => {
+    if (value !== undefined && value !== null && value !== "") {
+      profileData[key] = value;
+    }
+  };
+
+  addField("first_name", values.first_name ? capitalizeFirst(values.first_name) : null);
+  addField("last_name", values.last_name ? capitalizeFirst(values.last_name) : null);
+  addField("gender", values.gender);
+  addField("date_of_birth", values.age);
+  addField("bio", values.bio);
+  addField("role", values.role);
+  addField("country", values.nationality);
+  addField("city", values.city || values.state);
+  addField("region", values.state);
+  addField("phone_number", values.phone_number);
+  addField("address", values.company_address);
+
+  // Set is_first_time_user based on whether essential fields are filled
+  profileData.is_first_time_user = !(
+    values.first_name &&
+    values.last_name &&
+    values.gender &&
+    values.age &&
+    values.role &&
+    values.nationality &&
+    values.state
+  );
+
+  console.log("[updateCurrentUserInfo] Sending PATCH with data:", profileData);
+
+  // Use FormData when uploading a file, otherwise send JSON
+  if (hasFile) {
+    const formData = new FormData();
+    Object.entries(profileData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+    formData.append("avatar", values.image);
+
+    return await makeApiRequest({
+      url: `api/users/${currentUser.id}/`,
+      contentType: "multipart/form-data",
+      method: "PATCH",
+      data: formData,
+    });
+  }
+
   return await makeApiRequest({
     url: `api/users/${currentUser.id}/`,
-    contentType: "multipart/form-data",
-    method: "PUT",
-    data: {
-      ...currentUser,
-      first_name: capitalizeFirst(values.first_name),
-      last_name: capitalizeFirst(values.last_name),
-      gender: values.gender,
-      date_of_birth: values.age,
-      bio: values.bio,
-      role: values.role,
-      is_first_time_user:
-        values.first_name &&
-        values.last_name &&
-        values.gender &&
-        values.age &&
-        values.role &&
-        values.nationality &&
-        values.state
-          ? false
-          : true,
-      country: values.nationality,
-      city: values.state,
-      region: values.state,
-      phone_number: values.phone_number,
-      address: values.company_address,
-      website_url: values.website_url,
-      social_media_url: values.social_media_url,
-      avatar: values.image instanceof File ? values.image : undefined,
-    },
+    method: "PATCH",
+    data: profileData,
   });
 };
 
 export const getAssociatedUsersForUser = async (userId) => {
-  // const currentUser = await getCurrentUser();
-
-  // const allUsers = await getAllUsers();
-
-  // const allUsersInLocation = allUsers.filter(
-  //   (user) =>
-  //     currentUser.id !== user.id &&
-  //     user.first_name &&
-  //     (user.city === currentUser.city ||
-  //       user.region === currentUser.region ||
-  //       user.country === currentUser.country ||
-  //       user)
-  // );
-
-  return [];
-  // return allUsersInLocation;
+  // Use the backend connections endpoint for real associated users
+  if (!userId) return [];
+  try {
+    const results = await makeApiRequest({
+      url: `api/users/${userId}/connections/?limit=10`,
+      method: "GET",
+    });
+    return Array.isArray(results) ? results : [];
+  } catch {
+    return [];
+  }
 };
+
 export const getSuggestedUsersForCurrentUser = async () => {
-  const currentUser = await getCurrentUser();
-
-  const allUsers = await getAllUsers();
-
-  const allUsersInLocation = allUsers.filter(
-    (user) =>
-      currentUser.id !== user.id &&
-      user.first_name &&
-      (user.city === currentUser.city ||
-        user.region === currentUser.region ||
-        user.country === currentUser.country ||
-        user)
-  );
-
-  return allUsersInLocation;
+  // Use the backend suggestions endpoint for smart recommendations
+  try {
+    const results = await makeApiRequest({
+      url: `api/users/suggestions/?limit=10`,
+      method: "GET",
+    });
+    return Array.isArray(results) ? results : [];
+  } catch {
+    return [];
+  }
 };
 
 export const getPeopleAssociatedForUser = async (thisUser, companyId) => {
   if (!thisUser) return [];
 
-  const nonProfessionalEmailDomains = new Set([
-    "gmail.com",
-    "yahoo.com",
-    "hotmail.com",
-    "aol.com",
-    "outlook.com",
-    "icloud.com",
-    "mail.com",
-    "zoho.com",
-    "admin.com",
-    "superadmin.com",
-  ]);
-  const [allUsers, representatives] = await Promise.all([
-    getAllUsers(),
-    getAllRepresentatives({ company_id: companyId }),
-  ]);
-
-  // Fetch representatives' associated users
-  const representativesAssociated = await Promise.all(
-    representatives.map(async (rep) => {
-      // if (rep.user === thisUser.id) {
-      //   const companyUser = await getCompanyByIdOrEmail(rep.company);
-      //   return companyUser?.[0]?.user || null;
-      // }
-
-      return getUserById(rep.user);
-    })
-  );
-
-  // Filter valid users & ensure uniqueness
-  const thisUserDomain = thisUser.email.split("@")[1].toLowerCase();
-  const allUsersAssociated = allUsers.filter(
-    ({ id, email, first_name, last_name }) => {
-      if (!first_name && !last_name) return false;
-      if (id === thisUser.id) return false;
-
-      const userDomain = email.split("@")[1].toLowerCase();
-      return (
-        userDomain === thisUserDomain &&
-        !nonProfessionalEmailDomains.has(userDomain)
-      );
-    }
-  );
-
-  const uniqueUsers = new Set(
-    [
-      ...representativesAssociated.map((ra) => ({ ...ra, rep: true })),
-      ...allUsersAssociated.map((du) => ({ ...du, domain: true })),
-    ].filter(Boolean)
-  );
-
-  return Array.from(uniqueUsers);
+  try {
+    // Fetch actual connections for this user from the backend
+    const results = await makeApiRequest({
+      url: `api/users/${thisUser.id}/connections/?limit=10`,
+      method: "GET",
+    });
+    return Array.isArray(results) ? results : [];
+  } catch {
+    return [];
+  }
 };
 
 // get and create user

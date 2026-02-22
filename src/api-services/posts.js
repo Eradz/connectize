@@ -104,17 +104,20 @@ export const getPostById = async (id) => {
   return post;
 };
 
-export const createPost = async (formData) => {
-  const companies = await getCompanyByIdOrEmail();
-  const company = companies?.[0];
+export const createPost = async (formData, companyId) => {
+  // If companyId is provided and already in formData, use it directly
+  // Otherwise fall back to fetching the user's first company
+  if (!companyId && !formData.get?.("company")) {
+    const companies = await getCompanyByIdOrEmail();
+    const company = companies?.[0];
 
-  formData.append("company", company?.id);
-
-  if (!company) {
-    toast.info(
-      "You have no company associated with your profile, please create one"
-    );
-    return;
+    if (!company) {
+      toast.info(
+        "You have no company associated with your profile, please create one"
+      );
+      return;
+    }
+    formData.append("company", company?.id);
   }
 
   const post = await makeApiRequest({

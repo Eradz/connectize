@@ -33,12 +33,12 @@ export default function NavbarDropdown() {
             />
           )}
           <DropDownOption
-            to="/products/listing"
+            to="/marketplace/create-listing?type=product"
             text="Add New Product"
             IconName={StarOutlined}
           />
           <DropDownOption
-            to="/services/add"
+            to="/marketplace/create-listing?type=service"
             text="Add New Services"
             IconName={BriefCaseIcon}
           />
