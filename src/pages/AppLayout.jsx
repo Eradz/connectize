@@ -23,7 +23,7 @@ const AppLayout = () => {
 
   return (
     <main className="bg-background w-full lg:w-[80rem] lg:mx-auto h-screen flex flex-col flex-1 overflow-x-hidden ">
-      <TrialBanner persistent={false} dismissibleDuration={180000} />
+      {/* <TrialBanner persistent={false} dismissibleDuration={180000} /> */}
       <Navbar />
       <section
         className={clsx(
