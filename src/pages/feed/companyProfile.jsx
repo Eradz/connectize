@@ -409,9 +409,9 @@ export const ManageRepresentativesLink = ({ main = false }) => {
 const ProductSidebar = React.memo(({ company }) => {
   const stats = useMemo(
     () => [
-      formatNumber(company?.products?.length || 0) + "k post",
-      formatNumber(company?.followers?.length || 0) + "M Connections",
-      formatNumber(company?.reviews?.length || 0) + " Reviews",
+      `${formatNumber(company?.posts_count || 0)} /Posts`,
+      `${formatNumber(company?.followers_count || 0)} /Followers`,
+      `${formatNumber(company?.reviews_count || company?.reviews?.length || 0)} /Reviews`,
     ],
     [company]
   );
