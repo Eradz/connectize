@@ -8,6 +8,7 @@ import {
   workforceEventService
 } from '../../api-services/oilgas';
 import { listingService } from '../../api-services/marketplace';
+import { subscriptionsAPI } from '../../api-services/subscriptions';
 import BusinessHubHeader from '../../components/admin/businesshub/BusinessHubHeader';
 import PlatformModules from '../../components/admin/businesshub/PlatformModules';
 import RecentActivities from '../../components/admin/businesshub/RecentActivities';
@@ -29,6 +30,7 @@ const PlatformDashboard = () => {
   },
   ads: { active: 0, impressions: 0, clicks: 0, spent: 0 }
   });
+  const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,7 +46,8 @@ const PlatformDashboard = () => {
         opportunitiesRes,
         complianceRes,
         adsSummaryRes,
-        marketplaceRes
+        marketplaceRes,
+        subscriptionRes
       ] = await Promise.all([
         dealRoomService.getAll(1, 5),
         workforceJobService.getAll(1, 5),
@@ -52,7 +55,8 @@ const PlatformDashboard = () => {
         aiOpportunityService.getOpportunities(),
         aiComplianceService.getComplianceAlerts(),
         workforceEventService.getAll(1, 5),
-        listingService.getListings({ page_size: 5 }).catch(() => ({ count: 0, results: [] }))
+        listingService.getListings({ page_size: 5 }).catch(() => ({ count: 0, results: [] })),
+        subscriptionsAPI.getCurrentUserSubscription().catch(() => null)
       ]);
 
       // Calculate total deal value
@@ -103,6 +107,12 @@ const PlatformDashboard = () => {
           data: adsSummaryRes?.results || []
         }
       });
+
+      // Handle subscription data
+      if (subscriptionRes) {
+        // The /current/ endpoint returns { subscription, usage, plan_features }
+        setSubscription(subscriptionRes.subscription || subscriptionRes);
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     } finally {
@@ -120,7 +130,7 @@ const PlatformDashboard = () => {
   return (
     <div className='px-6 md:px-0 lg:w-[968px]'>
       {/* Header */}
-      <BusinessHubHeader dashboardData={dashboardData} />
+      <BusinessHubHeader dashboardData={dashboardData} subscription={subscription} />
       
 
       <div className="">

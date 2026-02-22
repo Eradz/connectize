@@ -25,7 +25,7 @@ const TrendUpIcon = () => (
   </svg>
 );
 
-export default function BusinessHubHeader({dashboardData}) {
+export default function BusinessHubHeader({dashboardData, subscription}) {
   const formatCompactNumber = (num) => {
     if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
     if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
@@ -145,9 +145,15 @@ export default function BusinessHubHeader({dashboardData}) {
             </div>
             <p className="text-xs text-gray-500 mb-1">Subscription</p>
             <p className="text-2xl font-bold bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-transparent bg-clip-text mb-1">
-              Premium
+              {subscription?.plan?.name || subscription?.plan_name || 'Free'}
             </p>
-            <p className="text-xs text-gray-400">12 Months Plan</p>
+            <p className="text-xs text-gray-400">
+              {subscription?.plan?.billing_cycle
+                ? `${subscription.plan.billing_cycle === 'yearly' ? '12 Months' : 'Monthly'} Plan`
+                : subscription?.status === 'trialing'
+                  ? 'Trial'
+                  : 'No active plan'}
+            </p>
           </div>
         </div>
 
