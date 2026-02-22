@@ -20,10 +20,11 @@ export default function PhoneInput({
     inputValue = inputValue.replace(/[^\d\s\-\(\)\+]/g, '');
     
     // Create a synthetic event with the cleaned value
+    // Note: spread on DOM elements doesn't copy prototype properties like 'name',
+    // so we must explicitly include name for formik.handleChange to work
     const syntheticEvent = {
-      ...e,
       target: {
-        ...e.target,
+        name: name,
         value: inputValue,
       },
     };
