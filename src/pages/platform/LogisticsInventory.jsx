@@ -223,20 +223,14 @@ const LogisticsInventoryEnhanced = () => {
     try {
       setLoading(true);
       
-      // Recheck session before API call
       const currentSession = getSession();
       if (!currentSession) {
-        console.error('❌ No session available for API call');
         toast.error('Please log in to access inventory data');
         navigate('/auth/login');
         return;
       }
-      
-      console.log('🔍 Loading inventory data...');
-      console.log('🔑 Session user:', currentSession?.user);
-      console.log('🔑 User privileges:', { userIsStaff, session: currentSession?.user });
 
-      // Determine scope parameters - try both staff and regular user scopes
+      // Determine scope based on user privileges
       const isUserStaff = userIsStaff || 
         currentSession?.user?.is_staff === true || 
         currentSession?.user?.is_superuser === true ||
@@ -244,218 +238,44 @@ const LogisticsInventoryEnhanced = () => {
         currentSession?.is_superuser === true;
         
       const scopeParams = isUserStaff ? { scope: 'all' } : {};
-      console.log('🔧 Inventory API scope params:', scopeParams);
-      console.log('🔧 User staff check details:', {
-        userIsStaff,
-        isUserStaff,
-        sessionUserIsStaff: currentSession?.user?.is_staff,
-        sessionUserIsSuperuser: currentSession?.user?.is_superuser,
-        sessionIsStaff: currentSession?.is_staff,
-        sessionIsSuperuser: currentSession?.is_superuser,
-        localStorageStaff: localStorage.getItem('user_is_staff'),
-        localStorageAdmin: localStorage.getItem('user_is_admin'),
-        forceScope: localStorage.getItem('force_inventory_scope_all')
-      });
-      
-      // Try multiple API calls with different parameters as fallback
-      const fallbackParams = [
-        scopeParams, // Primary attempt with calculated scope
-        { scope: 'all' }, // Force scope=all for staff users
-        {} // Fallback to no scope (user's own data)
-      ];
 
-      // Test direct API call first to verify authentication
-      console.log('🧪 Testing direct API authentication...');
-      try {
-        const testResponse = await fetch('/api/v1/logistics/inventory-items/', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${currentSession.tokens.access}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log('🧪 Direct API test response:', testResponse.status, testResponse.statusText);
-        
-        if (!testResponse.ok) {
-          // Try to parse as JSON, but handle non-JSON responses gracefully
-          const contentType = testResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            try {
-              const errorData = await testResponse.json();
-              console.error('🧪 Direct API test failed:', errorData);
-            } catch (parseError) {
-              console.error('🧪 Direct API test failed (non-JSON response):', testResponse.status);
-            }
-          } else {
-            console.error('🧪 Direct API test failed (non-JSON response):', testResponse.status);
-          }
-          
-          if (testResponse.status === 401) {
-            toast.error('Authentication expired. Please log in again.');
-            navigate('/auth/login');
-            return;
-          }
-        } else {
-          // Try to parse as JSON, but handle non-JSON responses gracefully
-          const contentType = testResponse.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            try {
-              const testData = await testResponse.json();
-              console.log('🧪 Direct API test success:', testData);
-            } catch (parseError) {
-              console.log('🧪 Direct API test success (non-JSON response)');
-            }
-          } else {
-            console.log('🧪 Direct API test success (non-JSON response)');
-          }
-        }
-      } catch (directError) {
-        console.error('🧪 Direct API test error:', directError);
-      }
-
-      // Try multiple API calls with fallback mechanisms
-      let inventoryData = null;
-      let lastError = null;
-      
-      for (let i = 0; i < fallbackParams.length; i++) {
-        const params = fallbackParams[i];
-        console.log(`🔄 Attempting inventory API call ${i + 1}/${fallbackParams.length} with params:`, params);
-        
-        try {
-          const result = await Promise.resolve(logisticsAPI.getInventoryItems(params));
-          if (result && (result.results || result.data || Array.isArray(result))) {
-            inventoryData = { status: 'fulfilled', value: result };
-            console.log(`✅ Inventory API call ${i + 1} successful:`, result);
-            break;
-          } else {
-            console.warn(`⚠️ Inventory API call ${i + 1} returned empty result:`, result);
-          }
-        } catch (error) {
-          console.warn(`❌ Inventory API call ${i + 1} failed:`, error);
-          lastError = error;
-          if (i === fallbackParams.length - 1) {
-            inventoryData = { status: 'rejected', reason: error };
-          }
-        }
-      }
-      
-      // Load other data in parallel (keep this simple for now)
-      const [summaryData, categoriesData, alertsData] = await Promise.allSettled([
-        Promise.resolve({}), // getSummary not available in API yet
+      // Load inventory + supporting data in parallel
+      const [inventoryResult, categoriesResult] = await Promise.allSettled([
+        logisticsAPI.getInventoryItems(scopeParams),
         logisticsAPI.getInventoryCategories ? logisticsAPI.getInventoryCategories() : Promise.resolve([]),
-        Promise.resolve([])  // getLowStockAlerts not available in API yet
       ]);
 
-      console.log('📦 Inventory API response:', inventoryData);
-      console.log('📦 Inventory API full details:', JSON.stringify(inventoryData, null, 2));
-
-      // Handle inventory data with multiple fallback strategies
-      if (inventoryData && inventoryData.status === 'fulfilled' && inventoryData.value) {
-        console.log('🔍 Raw inventory data value:', inventoryData.value);
-        console.log('🔍 Data structure check:', {
-          hasData: !!inventoryData.value.data,
-          hasResults: !!inventoryData.value.results,
-          hasCount: !!inventoryData.value.count,
-          isArray: Array.isArray(inventoryData.value),
-          keys: Object.keys(inventoryData.value),
-          valueType: typeof inventoryData.value
-        });
+      // Handle inventory data
+      if (inventoryResult.status === 'fulfilled' && inventoryResult.value) {
+        const data = inventoryResult.value;
+        const items = Array.isArray(data) ? data
+          : Array.isArray(data.results) ? data.results
+          : Array.isArray(data.data?.results) ? data.data.results
+          : Array.isArray(data.data) ? data.data
+          : [];
         
-        // Try multiple strategies to extract the inventory array
-        let inventoryResults = [];
-        
-        // Strategy 1: Standard DRF paginated response
-        if (inventoryData.value.results && Array.isArray(inventoryData.value.results)) {
-          inventoryResults = inventoryData.value.results;
-          console.log('✅ Using strategy 1 (DRF paginated): results array');
-        }
-        // Strategy 2: Direct array response
-        else if (Array.isArray(inventoryData.value)) {
-          inventoryResults = inventoryData.value;
-          console.log('✅ Using strategy 2 (direct array): root array');
-        }
-        // Strategy 3: Nested data.results
-        else if (inventoryData.value.data && inventoryData.value.data.results && Array.isArray(inventoryData.value.data.results)) {
-          inventoryResults = inventoryData.value.data.results;
-          console.log('✅ Using strategy 3 (nested): data.results array');
-        }
-        // Strategy 4: Just data property
-        else if (inventoryData.value.data && Array.isArray(inventoryData.value.data)) {
-          inventoryResults = inventoryData.value.data;
-          console.log('✅ Using strategy 4 (data array): data property');
-        }
-        else {
-          console.warn('⚠️ Could not extract inventory results from response:', inventoryData.value);
-          inventoryResults = [];
-        }
-        
-        console.log('✅ Inventory data loaded:', inventoryResults.length, 'items');
-        if (inventoryResults.length > 0) {
-          console.log('🔍 First item sample:', inventoryResults[0]);
-          console.log('🔍 Item fields:', Object.keys(inventoryResults[0] || {}));
-        }
-        
-        setInventory(inventoryResults);
-        
-        if (inventoryResults.length === 0) {
-          console.warn('⚠️ No inventory items returned from API');
-          console.warn('⚠️ Full API response debug:', inventoryData.value);
-          
-          // Try one more direct API call as absolute fallback
-          console.log('🔄 Attempting direct fallback API call...');
-          try {
-            const directResponse = await fetch('/api/v1/logistics/inventory-items/', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${currentSession.tokens.access}`,
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (directResponse.ok) {
-              const directData = await directResponse.json();
-              console.log('🔄 Direct fallback API response:', directData);
-              const directResults = directData.results || directData || [];
-              if (directResults.length > 0) {
-                console.log('✅ Direct fallback successful, using direct results');
-                setInventory(directResults);
-              } else {
-                toast.info('No inventory items found for your account.');
-              }
-            } else {
-              console.error('❌ Direct fallback API failed:', directResponse.status);
-              toast.error('Unable to load inventory data. Please try refreshing the page.');
-            }
-          } catch (directError) {
-            console.error('❌ Direct fallback error:', directError);
-            toast.error('Network error loading inventory. Please check your connection.');
-          }
+        setInventory(items);
+        if (items.length === 0) {
+          toast.info('No inventory items found for your account.');
         }
       } else {
-        console.warn('❌ Inventory API failed:', inventoryData?.reason || 'Unknown error');
-        console.warn('❌ Full error details:', inventoryData);
-        toast.error(`Failed to load inventory: ${inventoryData?.reason?.message || lastError?.message || 'Unknown error'}`);
+        const errMsg = inventoryResult.reason?.message || 'Unknown error';
+        if (errMsg.includes('Authentication required') || inventoryResult.reason?.status === 401) {
+          toast.error('Authentication expired. Please log in again.');
+          navigate('/auth/login');
+          return;
+        }
+        toast.error(`Failed to load inventory: ${errMsg}`);
         setInventory([]);
       }
 
-      // Handle summary data
-      if (summaryData.status === 'fulfilled') {
-        setSummary(summaryData.value);
-      }
-
-      // Handle categories data
-      if (categoriesData.status === 'fulfilled') {
-        setCategories(categoriesData.value);
-      }
-
-      // Handle alerts data
-      if (alertsData.status === 'fulfilled') {
-        setLowStockAlerts(alertsData.value);
+      // Handle categories
+      if (categoriesResult.status === 'fulfilled') {
+        setCategories(categoriesResult.value || []);
       }
 
     } catch (error) {
-      console.error('❌ Error loading inventory:', error);
-      
+      console.error('Error loading inventory:', error);
       if (error.message?.includes('Authentication required')) {
         toast.error('Please log in to access inventory data');
         navigate('/auth/login');
