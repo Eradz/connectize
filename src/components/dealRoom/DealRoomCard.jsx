@@ -32,7 +32,7 @@ import { DealIcon } from '../../icon/deal';
             <div>
               <h3 className="font-semibold text-gray-900 text-lg">{deal.title}</h3>
               <p className="text-xs text-gray-500">
-                {deal.company_name || deal.company?.name || 'Unassigned company'}
+                {deal.company_name || deal.company?.name || deal.initiator_name || 'Personal Deal Room'}
               </p>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
                 {deal.deal_type?.replace('_', ' ')}
