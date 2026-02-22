@@ -70,7 +70,7 @@ import { DealIcon } from '../../icon/deal';
           <div className="flex items-center space-x-2 text-sm text-gray-500">
             <div className="flex items-center">
               <User className="w-4 h-4 mr-1" />
-              {deal.participants_count++ || 0}
+              {deal.participants_count || 0}
             </div>
             <div className="flex items-center">
               <FileText className="w-4 h-4 mr-1" />
