@@ -278,14 +278,20 @@ function EventsSection({ events = [] }) {
 
 // ─── Knowledge Hub Section ──────────────────────────────────────────────────
 function KnowledgeSection({ articles = [] }) {
+  // Deduplicate articles by title to avoid showing repeated entries
+  const uniqueArticles = articles.reduce((acc, article) => {
+    if (!acc.some((a) => a.title === article.title)) acc.push(article);
+    return acc;
+  }, []);
+
   return (
     <ActivitySection
       icon={BookOpen}
       title="Knowledge Hub"
       viewMoreUrl={webRoutes.knowledgeArticles}
-      isEmpty={articles.length === 0}
+      isEmpty={uniqueArticles.length === 0}
     >
-      {articles.slice(0, 4).map((article) => (
+      {uniqueArticles.slice(0, 4).map((article) => (
         <ActivityItem
           key={article.id || article.slug}
           to={webRoutes.knowledgeArticleDetail.replace(
