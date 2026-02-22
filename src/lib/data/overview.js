@@ -63,9 +63,9 @@ export const overviewFields = [
       },
       {
         name: phone_numberKey,
-        type: "number",
+        type: "tel",
         label: "Phone Number",
-        placeholder: "090000000101",
+        placeholder: "Phone number",
       },
       {
         name: personal_emailKey,
