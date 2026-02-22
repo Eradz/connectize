@@ -255,7 +255,8 @@ export async function makeApiRequest({
       headers,
       params,
       onUploadProgress,
-      timeout: 15000, // 15 second timeout to prevent hanging requests
+      // Longer timeout for file uploads (FormData), shorter for regular requests
+      timeout: isFormData ? 120000 : 15000,
     };
     
     // Add responseType if specified (for blob downloads, etc.)
