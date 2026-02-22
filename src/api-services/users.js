@@ -41,9 +41,14 @@ export const getCurrentUser = async () => {
 export const updateCurrentUserInfo = async (values) => {
   const currentUser = await getCurrentUser();
 
+  if (!currentUser?.id) {
+    toast.error("Could not identify your account. Please log in again.");
+    return null;
+  }
+
   if (!values || !values.gender) {
     toast.info("Incomplete profile information");
-    return;
+    return null;
   }
 
   await getOrCreateGender(values.gender);
@@ -52,29 +57,39 @@ export const updateCurrentUserInfo = async (values) => {
 
   // Only send writable fields — spreading currentUser sends read-only fields
   // (followers, followings, companies, etc.) that cause Django validation errors
-  const profileData = {
-    first_name: capitalizeFirst(values.first_name),
-    last_name: capitalizeFirst(values.last_name),
-    gender: values.gender,
-    date_of_birth: values.age,
-    bio: values.bio,
-    role: values.role,
-    is_first_time_user:
-      values.first_name &&
-      values.last_name &&
-      values.gender &&
-      values.age &&
-      values.role &&
-      values.nationality &&
-      values.state
-        ? false
-        : true,
-    country: values.nationality,
-    city: values.city || values.state,
-    region: values.state,
-    phone_number: values.phone_number,
-    address: values.company_address,
+  const profileData = {};
+
+  // Helper: only add field if value is truthy or a valid boolean/number
+  const addField = (key, value) => {
+    if (value !== undefined && value !== null && value !== "") {
+      profileData[key] = value;
+    }
   };
+
+  addField("first_name", values.first_name ? capitalizeFirst(values.first_name) : null);
+  addField("last_name", values.last_name ? capitalizeFirst(values.last_name) : null);
+  addField("gender", values.gender);
+  addField("date_of_birth", values.age);
+  addField("bio", values.bio);
+  addField("role", values.role);
+  addField("country", values.nationality);
+  addField("city", values.city || values.state);
+  addField("region", values.state);
+  addField("phone_number", values.phone_number);
+  addField("address", values.company_address);
+
+  // Set is_first_time_user based on whether essential fields are filled
+  profileData.is_first_time_user = !(
+    values.first_name &&
+    values.last_name &&
+    values.gender &&
+    values.age &&
+    values.role &&
+    values.nationality &&
+    values.state
+  );
+
+  console.log("[updateCurrentUserInfo] Sending PATCH with data:", profileData);
 
   // Use FormData when uploading a file, otherwise send JSON
   if (hasFile) {

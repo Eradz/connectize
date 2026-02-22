@@ -2,6 +2,7 @@ import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as Yup from "yup";
+import { useQueryClient } from "@tanstack/react-query";
 import { updateCurrentUserInfo } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
 import useRedirect from "../../hooks/useRedirect";
@@ -37,6 +38,7 @@ const SUPPORTED_FORMATS = [
 
 function Overview() {
   const { user: currentUser, forceFullySetUser } = useAuth();
+  const queryClient = useQueryClient();
 
   /**
    * @type {{uploadedProfileImage: File | null, setUploadedProfileImage}} ctx
@@ -120,19 +122,35 @@ function Overview() {
     const toastId = toast.loading("Updating your profile information");
     setLoading(true);
 
-    const response = await updateCurrentUserInfo(formik.values);
+    try {
+      const response = await updateCurrentUserInfo(formik.values);
 
-    if (response && response.id) {
-      forceFullySetUser(response);
-      Object.keys(formik.values).forEach((key) => localStorage.removeItem(key));
-      toast.success("User profile has been updated successfully", {
+      if (response && response.id) {
+        forceFullySetUser(response);
+
+        // Invalidate React Query cache so the profile page fetches fresh data
+        queryClient.invalidateQueries({ queryKey: ["users", currentUser?.id] });
+        queryClient.invalidateQueries({ queryKey: ["users", String(currentUser?.id)] });
+
+        Object.keys(formik.values).forEach((key) => localStorage.removeItem(key));
+        toast.success("User profile has been updated successfully", {
+          id: toastId,
+        });
+
+        return true;
+      }
+
+      // PATCH returned null/undefined — API error (makeApiRequest already shows toast.error)
+      toast.error("Failed to update profile. Please try again.", {
         id: toastId,
       });
-
-      return true;
+    } catch (error) {
+      console.error("[Overview] Profile update error:", error);
+      toast.error("Something went wrong while updating your profile.", {
+        id: toastId,
+      });
     }
 
-    toast.dismiss(toastId);
     setLoading(false);
     return false;
   };
