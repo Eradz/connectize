@@ -48,37 +48,56 @@ export const updateCurrentUserInfo = async (values) => {
 
   await getOrCreateGender(values.gender);
 
+  const hasFile = values.image instanceof File;
+
+  // Only send writable fields — spreading currentUser sends read-only fields
+  // (followers, followings, companies, etc.) that cause Django validation errors
+  const profileData = {
+    first_name: capitalizeFirst(values.first_name),
+    last_name: capitalizeFirst(values.last_name),
+    gender: values.gender,
+    date_of_birth: values.age,
+    bio: values.bio,
+    role: values.role,
+    is_first_time_user:
+      values.first_name &&
+      values.last_name &&
+      values.gender &&
+      values.age &&
+      values.role &&
+      values.nationality &&
+      values.state
+        ? false
+        : true,
+    country: values.nationality,
+    city: values.city || values.state,
+    region: values.state,
+    phone_number: values.phone_number,
+    address: values.company_address,
+  };
+
+  // Use FormData when uploading a file, otherwise send JSON
+  if (hasFile) {
+    const formData = new FormData();
+    Object.entries(profileData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value);
+      }
+    });
+    formData.append("avatar", values.image);
+
+    return await makeApiRequest({
+      url: `api/users/${currentUser.id}/`,
+      contentType: "multipart/form-data",
+      method: "PATCH",
+      data: formData,
+    });
+  }
+
   return await makeApiRequest({
     url: `api/users/${currentUser.id}/`,
-    contentType: "multipart/form-data",
-    method: "PUT",
-    data: {
-      ...currentUser,
-      first_name: capitalizeFirst(values.first_name),
-      last_name: capitalizeFirst(values.last_name),
-      gender: values.gender,
-      date_of_birth: values.age,
-      bio: values.bio,
-      role: values.role,
-      is_first_time_user:
-        values.first_name &&
-        values.last_name &&
-        values.gender &&
-        values.age &&
-        values.role &&
-        values.nationality &&
-        values.state
-          ? false
-          : true,
-      country: values.nationality,
-      city: values.state,
-      region: values.state,
-      phone_number: values.phone_number,
-      address: values.company_address,
-      website_url: values.website_url,
-      social_media_url: values.social_media_url,
-      avatar: values.image instanceof File ? values.image : undefined,
-    },
+    method: "PATCH",
+    data: profileData,
   });
 };
 
