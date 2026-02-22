@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { isValidElement } from "react";
 import clsx from "clsx";
 import {
   Briefcase,
@@ -108,10 +109,10 @@ function ActivitySection({ icon: Icon, title, viewMoreUrl, children, isEmpty }) 
     <div className="space-y-1">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          {typeof Icon === "function" ? (
-            <Icon className="w-4 h-4 text-gray-500" />
-          ) : (
+          {isValidElement(Icon) ? (
             Icon
+          ) : (
+            <Icon className="w-4 h-4 text-gray-500" />
           )}
           <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
             {title}
