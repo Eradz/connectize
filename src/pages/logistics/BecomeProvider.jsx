@@ -141,7 +141,7 @@ const BecomeProvider = () => {
   const validateStep = () => {
     switch (currentStep) {
       case 1:
-        if (userCompanies.length > 1 && !selectedCompany) {
+        if (!selectedCompany) {
           setError('Please select a company to register');
           return false;
         }
@@ -202,8 +202,8 @@ const BecomeProvider = () => {
         return;
       }
 
-      // Validate company selection for multi-company users
-      if (userCompanies.length > 1 && !selectedCompany) {
+      // Validate company selection
+      if (!selectedCompany) {
         setError('Please select a company to register');
         setLoading(false);
         return;
@@ -430,34 +430,27 @@ const BecomeProvider = () => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Register as Logistics Provider</h1>
-        {userCompanies.length > 1 ? (
-          <div className="mt-4">
-            <label htmlFor="company-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Select Company to Register
-            </label>
-            <select
-              id="company-select"
-              value={selectedCompany?.id || ''}
-              onChange={(e) => {
-                const company = userCompanies.find(c => String(c.id) === e.target.value);
-                setSelectedCompany(company || null);
-              }}
-              className="w-full max-w-md px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select a company...</option>
-              {userCompanies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.company_name}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : selectedCompany && (
-          <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-            <Building2 className="w-5 h-5" />
-            <span>Registering for <strong className="text-gray-900 dark:text-white">{selectedCompany.company_name}</strong></span>
-          </div>
-        )}
+        <div className="mt-4">
+          <label htmlFor="company-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Select Company to Register
+          </label>
+          <select
+            id="company-select"
+            value={selectedCompany?.id || ''}
+            onChange={(e) => {
+              const company = userCompanies.find(c => String(c.id) === e.target.value);
+              setSelectedCompany(company || null);
+            }}
+            className="w-full max-w-md px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select a company...</option>
+            {userCompanies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.company_name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex items-center justify-between mb-8 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
