@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import Sidebar from "../components/admin/markets/sidebar";
 import Navbar from "../components/userProfile/Navbar";
+import TrialBanner from "../components/TrialBanner";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
@@ -22,6 +23,7 @@ const AppLayout = () => {
 
   return (
     <main className="bg-background w-full lg:w-[80rem] lg:mx-auto h-screen flex flex-col flex-1 overflow-x-hidden ">
+      <TrialBanner persistent={false} dismissibleDuration={180000} />
       <Navbar />
       <section
         className={clsx(

@@ -474,20 +474,20 @@ const WorkforceEvents = () => {
               <h1 className="text-3xl font-bold text-gray-900">Industry Events</h1>
               <p className="text-gray-600 mt-1">Professional development, networking & training opportunities</p>
             </div>
-            <div className="flex space-x-3">
-              <Link
+            <div className="flex justify-end space-x-3">
+              {/* <Link
                 to={webRoutes.workforceMyBookmarks}
                 className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Bookmark className="w-4 h-4 mr-2" />
-                My Bookmarks
+                Bookmarks
               </Link>
               <Link
                 to={webRoutes.workforceMyEvents}
                 className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <CalendarCheck className="w-4 h-4 mr-2" />
-                My Events
+                Events
               </Link>
               <Link
                 to={webRoutes.workforceCompanyEarnings}
@@ -495,7 +495,7 @@ const WorkforceEvents = () => {
               >
                 <DollarSign className="w-4 h-4 mr-2" />
                 Earnings
-              </Link>
+              </Link> */}
               <Link
                 to={webRoutes.workforceEventCreate}
                 className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
@@ -509,7 +509,7 @@ const WorkforceEvents = () => {
           </div>
           
           {/* Mobile Quick Access Menu */}
-          <div className="md:hidden mb-4 flex gap-2 overflow-x-auto pb-2">
+          <div className=" mb-4 flex gap-2 overflow-x-auto pb-2">
             <Link
               to={webRoutes.workforceMyBookmarks}
               className="flex items-center px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
