@@ -159,19 +159,24 @@ function CreatePost() {
   return (
     <section className="bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
       {companies.length > 1 && (
-        <div className="mb-4 flex items-center gap-2">
-          <label className="text-sm text-gray-500 shrink-0">Post as:</label>
-          <select
-            value={selectedCompanyId || ""}
-            onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-gold focus:border-gold outline-none max-w-xs"
-          >
-            {companies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.company_name}
-              </option>
-            ))}
-          </select>
+        <div className="mb-3 flex items-center gap-2.5">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Post as:</span>
+          <div className="relative">
+            <select
+              value={selectedCompanyId || ""}
+              onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
+              className="appearance-none text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200/80 border border-gray-200 rounded-full pl-3.5 pr-8 py-1.5 cursor-pointer focus:ring-2 focus:ring-gold/40 focus:border-gold outline-none transition-all duration-200"
+            >
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.company_name}
+                </option>
+              ))}
+            </select>
+            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
       )}
       <div className="size-full">
