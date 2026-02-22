@@ -2,7 +2,6 @@ import { Avatar, Badge } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useEffect } from "react";
-import { getServices } from "../../../api-services/services";
 import {
   getAssociatedUsersForUser,
   getPeopleAssociatedForUser,
@@ -10,22 +9,17 @@ import {
 } from "../../../api-services/users";
 import { useAuth } from "../../../context/userContext";
 import { queryClient } from "../../../lib/utils";
-import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
 import { avatarStyle } from "../../ResponsiveNav";
 import SeeMoreLink from "../../SeeMoreLink";
 import Username from "../../Username";
-import { PostCard, PostCardSkeleton } from "./DiscoverPostTabs";
-import {
-  useGetServicesFirstPage,
-  usePageinatedServices,
-} from "../../../hooks/useServices";
 import { usePaginatedRepresentatives } from "../../../hooks/useRepresentatives";
+import BusinessHubActivities from "./BusinessHubActivities";
 
 const TopServiceSuggestions = () => {
   return (
     <section className="max-md:container !p-0 lg:p-4 h-fit w-full xl:w-[40%] flex items-start flex-col sm:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:right-0">
-      <TopServices />
+      <BusinessHubActivities />
 
       <Suggestions />
     </section>
@@ -33,46 +27,6 @@ const TopServiceSuggestions = () => {
 };
 
 export default TopServiceSuggestions;
-
-export function TopServices() {
-  const { data: services, isLoading } = useGetServicesFirstPage();
-  const service = services?.[0];
-
-  return (
-    <section className="w-full">
-      {isLoading ? (
-        <>
-          <div className="p-3 sm:p-4 lg:!px-2">
-            <div className="w-1/3 h-7 rounded-md skeleton" />
-          </div>
-          <PostCardSkeleton />
-        </>
-      ) : service ? (
-        <>
-          <div className="px-3 sm:px-4 py-2 lg:!px-2">
-            <HeadingText weight="semibold">Recent Service</HeadingText>
-          </div>
-
-          <PostCard
-            whole={service}
-            companyName={service?.company.company_name}
-            logo={service?.company?.logo}
-            summary={service?.description}
-            url={"/services/" + service?.id}
-            // slug={`services/${service?.company?.id}`}
-            title={service?.title}
-            verified={service?.featured}
-          />
-        </>
-      ) : (
-        <div className={clsx("bg-white rounded p-4 space-y-4 w-full h-fit")}>
-          <h2 className="text-xl font-bold">Recent Services</h2>
-          <LightParagraph>No recent services yet</LightParagraph>
-        </div>
-      )}
-    </section>
-  );
-}
 
 export function Suggestions({
   heading = "Suggested",

@@ -3,10 +3,15 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { dealRoomService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast as notify } from 'sonner';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 export default function DealRoomEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,6 +63,13 @@ export default function DealRoomEdit() {
       if (!dealData) {
         notify.error('Deal not found');
         navigate(webRoutes.dealRooms);
+        return;
+      }
+
+      // Check ownership — only the initiator can edit
+      if (userId && String(dealData.initiator) !== String(userId)) {
+        notify.error('You do not have permission to edit this deal room');
+        navigate(webRoutes.dealRooms + '/' + id);
         return;
       }
 

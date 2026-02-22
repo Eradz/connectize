@@ -11,10 +11,15 @@ import {
 } from 'lucide-react';
 import marketplaceApi from '../../api-services/marketplace';
 import { webRoutes } from '../../lib/webRoutes';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 const EditListing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -70,6 +75,14 @@ const EditListing = () => {
     try {
       setLoading(true);
       const listing = await marketplaceApi.getListingById(id);
+      
+      // Ownership check: only the seller can edit
+      const sellerId = listing.seller?.id || listing.seller_id || listing.seller;
+      if (userId && String(sellerId) !== String(userId)) {
+        setError('You do not have permission to edit this listing.');
+        setTimeout(() => navigate('/marketplace/my-listings'), 2000);
+        return;
+      }
       
       setFormData({
         title: listing.title || '',

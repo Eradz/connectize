@@ -111,68 +111,8 @@ export class DealRoomService extends CrudService {
     super("api/v1/deals/deal-rooms/");
   }
 
-  // Test if we can access the API without triggering login redirect
-  async testApiAccess() {
-    try {
-      // Use fetch directly to avoid makeApiRequest's login redirect
-      const response = await fetch(`${baseURL}/api/v1/deals/deal-rooms/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      return response.ok;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  // Enhanced getAll with optional no-auth fallback
-  async getAll(page, limit, status) {
-    try {
-      return await super.getAll(page, limit, status);
-    } catch (error) {
-      console.warn('Authenticated API call failed, trying direct fetch:', error);
-      // Fallback to direct fetch without authentication
-      try {
-        const response = await fetch(`http://localhost:8000/${this.basePath}/?page=${page || 1}&limit=${limit || 50}`);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Direct fetch successful:', data);
-          return data;
-        }
-        throw new Error('Direct fetch failed');
-      } catch (fetchError) {
-        console.error('Both authenticated and direct fetch failed:', fetchError);
-        throw error; // Re-throw original error
-      }
-    }
-  }
-
-  // Enhanced getById with fallback
-  async getById(id) {
-    try {
-      return await super.getById(id);
-    } catch (error) {
-      console.warn('Authenticated getById failed, trying direct fetch:', error);
-      // Fallback: get from list and find the item
-      try {
-        const response = await fetch(`http://localhost:8000/${this.basePath}/?search=${id.slice(0, 8)}`);
-        if (response.ok) {
-          const data = await response.json();
-          const foundItem = data?.results?.find(item => item.id === id);
-          if (foundItem) {
-            console.log('Found item via direct fetch:', foundItem);
-            return { data: foundItem };
-          }
-        }
-        throw new Error('Item not found via direct fetch');
-      } catch (fetchError) {
-        console.error('Both authenticated and direct fetch failed:', fetchError);
-        throw error;
-      }
-    }
-  }
+  // getAll and getById use the authenticated CrudService methods
+  // No unauthenticated fallbacks — all deal room access requires auth
 
   async getParticipantDealRoom(){
     try {

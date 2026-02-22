@@ -34,10 +34,7 @@ const LogisticsShipments = () => {
   const session = getSession();
   const userIsStaff = (
     session?.user?.is_staff === true ||
-    session?.user?.is_superuser === true ||
-    localStorage.getItem('user_is_staff') === 'true' ||
-    localStorage.getItem('user_is_admin') === 'true' ||
-    localStorage.getItem('force_inventory_scope_all') === '1'
+    session?.user?.is_superuser === true
   );
   
   const [loading, setLoading] = useState(true);

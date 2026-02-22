@@ -13,21 +13,12 @@ import { makeApiRequest } from '../lib/helpers/index';
 
 // Environment-safe base URL configuration
 const getBaseURL = () => {
-  // Vite environment variables
+  // Vite environment variables (primary source of truth)
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     return import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8000';
   }
   
-  // Fallback for browser environment
-  if (typeof window !== 'undefined' && window.location) {
-    const { protocol, hostname } = window.location;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:8000';
-    }
-    return `${protocol}//${hostname}:8000`;
-  }
-  
-  // Default fallback
+  // Default fallback for development only
   return 'http://localhost:8000';
 };
 

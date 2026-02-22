@@ -19,16 +19,13 @@ import { WarningIcon } from '../../components/ui/ModernIcon';
 const LogisticsInventoryEnhanced = () => {
   const navigate = useNavigate();
   
-  // Check session for user privileges
+  // Check session for user privileges (server-validated only)
   const session = getSession();
   const userIsStaff = (
     session?.user?.is_staff === true ||
     session?.user?.is_superuser === true ||
     session?.is_staff === true ||
-    session?.is_superuser === true ||
-    localStorage.getItem('user_is_staff') === 'true' ||
-    localStorage.getItem('user_is_admin') === 'true' ||
-    localStorage.getItem('force_inventory_scope_all') === '1'
+    session?.is_superuser === true
   );
   
   const [loading, setLoading] = useState(false);

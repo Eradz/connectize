@@ -8,10 +8,15 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsInventoryService } from '../../api-services/oilgas';
 import { toast } from 'sonner';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 export default function LogisticsInventoryEdit() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [specifications, setSpecifications] = useState([{ key: '', value: '' }]);
@@ -100,6 +105,14 @@ export default function LogisticsInventoryEdit() {
     try {
       setLoading(true);
       const data = await logisticsInventoryService.getById(id);
+      
+      // Ownership check
+      const ownerId = data.created_by || data.company?.profile || data.owner;
+      if (userId && ownerId && String(ownerId) !== String(userId)) {
+        toast.error('You do not have permission to edit this item.');
+        navigate(webRoutes.logisticsInventory);
+        return;
+      }
       
       setForm({
         ...data,

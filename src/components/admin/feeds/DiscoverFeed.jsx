@@ -5,7 +5,6 @@ import { useGetCurrentCompany } from "../../../hooks";
 import { CompanyUserType } from "../../../lib/helpers/types";
 import CreatePost from "./CreatePost";
 import DiscoverPosts from "./DiscoverPosts";
-import DiscoverPostTabs from "./DiscoverPostTabs";
 
 const DiscoverFeed = () => {
   const { user: currentUser, setUser } = useAuth();
@@ -40,7 +39,6 @@ const DiscoverFeed = () => {
           )}
       </section>
       {currentUser?.user_type === CompanyUserType && <CreatePost />}
-      <DiscoverPostTabs />
       <DiscoverPosts />
     </section>
   );

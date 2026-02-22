@@ -6,11 +6,16 @@ import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
 import { getCompanyByIdOrEmail } from '../../api-services/companies';
 import { StepContent, StepIndicator } from '../../components/workforce/WorkforceSteps';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 const WorkforceJobCreate = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const { id : updateId } = useParams();
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingCompanies, setLoadingCompanies] = useState(true);

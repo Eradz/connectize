@@ -24,10 +24,15 @@ import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import { toast } from 'sonner';
 import ProviderComparisonSystem from '../../components/logistics/ProviderComparisonSystem';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 const LogisticsShipmentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   const [loading, setLoading] = useState(true);
   const [shipment, setShipment] = useState(null);
   const [trackingHistory, setTrackingHistory] = useState([]);
@@ -830,20 +835,20 @@ const LogisticsShipmentDetail = () => {
                   </div>
                 </div>
 
-                {/* Comprehensive Provider Comparison System */}
-                <ProviderComparisonSystem
-                  shipmentRequest={shipment}
-                  onProviderSelected={(assignmentData) => {
-                    toast.success(`Provider ${assignmentData.provider_name} assigned successfully!`);
-                    // Reload shipment data to show updated assignment
-                    loadShipmentDetail();
-                  }}
-                  onSuccess={(successData) => {
-                    toast.success('Shipment successfully assigned to provider!');
-                    // Reload shipment data to show updated assignment
-                    loadShipmentDetail();
-                  }}
-                />
+                {/* Provider Comparison System — only for the shipment requester */}
+                {userId && shipment?.request?.requested_by && String(shipment.request.requested_by) === String(userId) && (
+                  <ProviderComparisonSystem
+                    shipmentRequest={shipment}
+                    onProviderSelected={(assignmentData) => {
+                      toast.success(`Provider ${assignmentData.provider_name} assigned successfully!`);
+                      loadShipmentDetail();
+                    }}
+                    onSuccess={(successData) => {
+                      toast.success('Shipment successfully assigned to provider!');
+                      loadShipmentDetail();
+                    }}
+                  />
+                )}
               </div>
             )}
 

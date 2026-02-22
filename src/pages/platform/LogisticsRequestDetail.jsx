@@ -505,32 +505,49 @@ const LogisticsRequestDetail = () => {
                 </div>
 
                 <p className="text-xs text-gray-600 mb-4">
-                  Only the request owner can view market overview or assign a provider. You can still submit a quote if bids are allowed
+                  {userId != null && String(request.requested_by) === String(userId)
+                    ? 'As the request owner, you can view market overview, compare providers, and assign a provider.'
+                    : 'You can submit a quote for this shipment request if bids are allowed.'}
                 </p>
 
-              {/* Comprehensive Provider Assignment System (for unassigned requests) */}
+              {/* Provider Assignment System — owner sees full comparison, non-owner sees quote form */}
             {(['draft', 'posted', 'quoted'].includes(request.status)) && !request.awarded_to && (
               <div className="bg-white rounded-xl shadow-sm border py-6 px-4">
-                <ProviderComparisonSystem
-                  shipmentRequest={request}
-                  onProviderSelected={(data) => {
-                    // If ProviderComparisonSystem triggers quote form open, handle it here
-                    if (data?.action === 'open-quote-form') {
-                      setShowQuoteModal(true);
-                      return;
-                    }
-                    // Otherwise treat as assignment success (legacy path)
-                    if (data?.provider_name) {
-                      toast.success(`Provider ${data.provider_name} assigned successfully!`);
+                {userId != null && String(request.requested_by) === String(userId) ? (
+                  <ProviderComparisonSystem
+                    shipmentRequest={request}
+                    onProviderSelected={(data) => {
+                      if (data?.action === 'open-quote-form') {
+                        setShowQuoteModal(true);
+                        return;
+                      }
+                      if (data?.provider_name) {
+                        toast.success(`Provider ${data.provider_name} assigned successfully!`);
+                        fetchRequestData();
+                      }
+                    }}
+                    onSuccess={(successData) => {
+                      toast.success('Request successfully assigned to provider!');
                       fetchRequestData();
-                    }
-                  }}
-                  onSuccess={(successData) => {
-                    toast.success('Request successfully assigned to provider!');
-                    // Reload request data to show updated assignment
-                    fetchRequestData();
-                  }}
-                />
+                    }}
+                  />
+                ) : (
+                  request.allow_bids ? (
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Submit a Quote</h3>
+                      <p className="text-sm text-gray-600 mb-4">Provide your quote for this shipment request</p>
+                      <button
+                        onClick={() => setShowQuoteModal(true)}
+                        className="inline-flex items-center px-6 py-3 rounded-lg bg-yellow-500 text-white font-medium hover:bg-yellow-600 transition"
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Submit Quote
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center">This request is not currently accepting bids.</p>
+                  )
+                )}
               </div>
             )}
                 {/* Shipment Summary */}
