@@ -1,8 +1,7 @@
 import axios from 'axios';
+import { getSession } from '../lib/session';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://connectizeapi.onrender.com/api'
-  : 'http://localhost:8000/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
@@ -13,9 +12,10 @@ const apiClient = axios.create({
   },
 });
 
-// Add auth token to requests
+// Add auth token to requests using session (not spoofable localStorage)
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
+  const session = getSession();
+  const token = session?.tokens?.access;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

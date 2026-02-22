@@ -5,10 +5,15 @@ import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
 import EnhancedShipmentRequestFlow from '../../components/logistics/EnhancedShipmentRequestFlow';
 import { toast } from 'sonner';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 const LogisticsRequestEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   const [requestData, setRequestData] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -25,6 +30,13 @@ const LogisticsRequestEdit = () => {
       const response = await logisticsAPI.getRequest(id);
       if (response) {
         const request = response;
+        // Ownership check
+        const requestedBy = request.requested_by?.id || request.requested_by;
+        if (userId && requestedBy && String(requestedBy) !== String(userId)) {
+          toast.error('You do not have permission to edit this request.');
+          navigate(webRoutes.logisticsRequests);
+          return;
+        }
         setRequestData(request);
       }
     } catch (error) {

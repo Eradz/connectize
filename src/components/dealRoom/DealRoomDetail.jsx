@@ -317,58 +317,20 @@ export default function DealRoomDetail() {
           dealRes = await dealRoomService.getById(id);
           console.log('Direct API call successful:', dealRes);
         } catch (err) {
-          console.warn('Direct deal access failed, trying from list:', err);
-          // Fallback: get from list endpoint
+          console.warn('Deal access failed, trying from list:', err);
+          // Fallback: get from list endpoint (authenticated)
           try {
             const listRes = await dealRoomService.getAll(1, 50);
-            console.log('List API call result:', listRes);
             const deals = listRes?.results || listRes?.data || listRes || [];
             const foundDeal = deals.find(d => d.id === id);
             if (foundDeal) {
-              console.log('Found deal in list:', foundDeal);
               dealRes = { data: foundDeal };
             } else {
-              console.warn('Deal not found in list, trying direct fetch');
-              // Try direct fetch without authentication
-              const directResponse = await fetch(`http://localhost:8000/api/v1/deals/deal-rooms/?search=${id.slice(0, 8)}`);
-              if (directResponse.ok) {
-                const directData = await directResponse.json();
-                const directDeal = directData?.results?.find(d => d.id === id);
-                if (directDeal) {
-                  console.log('Found deal via direct fetch:', directDeal);
-                  dealRes = { data: directDeal };
-                } else {
-                  console.warn('Deal not found via direct fetch');
-                  dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-                }
-              } else {
-                console.warn('Direct fetch failed');
-                dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-              }
-            }
-          } catch (listErr) {
-            console.warn('List API also failed, trying direct fetch:', listErr);
-            // Try direct fetch as backup
-            try {
-              const directResponse = await fetch(`http://localhost:8000/api/v1/deals/deal-rooms/?search=${id.slice(0, 8)}`);
-              if (directResponse.ok) {
-                const directData = await directResponse.json();
-                const directDeal = directData?.results?.find(d => d.id === id);
-                if (directDeal) {
-                  console.log('Found deal via direct fetch after list failed:', directDeal);
-                  dealRes = { data: directDeal };
-                } else {
-                  console.warn('Deal not found via direct fetch');
-                  dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-                }
-              } else {
-                console.warn('Direct fetch failed');
-                dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
-              }
-            } catch (fetchErr) {
-              console.warn('Direct fetch also failed:', fetchErr);
               dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
             }
+          } catch (listErr) {
+            console.warn('List API also failed:', listErr);
+            dealRes = { data: { id, title: `Deal Room #${id.slice(0, 8)} (unavailable)`, description: '' } };
           }
         }
         

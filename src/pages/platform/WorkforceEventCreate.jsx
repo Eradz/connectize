@@ -37,11 +37,16 @@ import {
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
+import { useAuth } from '../../context/userContext';
+import { getSession } from '../../lib/session';
 
 const WorkforceEventCreate = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // Get event ID from URL params for edit mode
   const isEditMode = Boolean(id);
+  const { user } = useAuth();
+  const session = getSession();
+  const userId = user?.id ?? session?.user?.id;
   
   const [loading, setLoading] = useState(false);
   const [loadingEvent, setLoadingEvent] = useState(false);
@@ -125,6 +130,14 @@ const WorkforceEventCreate = () => {
         try {
           const response = await workforceAPI.getEvent(id);
           const event = response.data;
+          
+          // Ownership check: only the organizer can edit
+          const organizerId = event.organizer?.id || event.organizer;
+          if (userId && String(organizerId) !== String(userId)) {
+            setError('You do not have permission to edit this event.');
+            setTimeout(() => navigate(webRoutes.workforceEvents || '/workforce/events'), 2000);
+            return;
+          }
           
           // Parse dates and times from the event data
           const startDateTime = new Date(event.start_date);
