@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { 
   ArrowLeft, Upload, X, Plus, Package, DollarSign, 
   Truck, Info, Loader2 
@@ -12,14 +12,16 @@ import { webRoutes } from "../../lib/webRoutes";
 
 export default function CreateListing() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [loadingInventory, setLoadingInventory] = useState(true);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [creationMode, setCreationMode] = useState("manual"); // "manual" or "inventory"
   
+  const initialType = searchParams.get("type");
   const [formData, setFormData] = useState({
-    listing_type: "product",
+    listing_type: ["product", "service"].includes(initialType) ? initialType : "product",
     title: "",
     description: "",
     condition: "new",
