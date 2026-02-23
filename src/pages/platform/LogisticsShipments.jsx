@@ -160,7 +160,6 @@ const LogisticsShipments = () => {
       
       if (list.length === 0) {
         console.warn('⚠️ No shipments returned from API');
-        toast.info('No shipments found. You may need staff privileges to view all data.');
       }
       
     } catch (error) {

@@ -148,20 +148,19 @@ const WorkforceJobCreate = () => {
   };
 
   const addQualification = () => {
-const qualification = currentQualification.trim();
+    const qualification = currentQualification.trim();
+    const qualificationArray = Array.isArray(formData.education_requirements_list) ? formData.education_requirements_list : [];
 
-const qualificationArray = Array.isArray(formData.education_requirements_list) ? formData.education_requirements_list : [];
-
-if (qualification && !qualificationArray.includes(qualification)) {
-  setFormData(prev => ({
-    ...prev,
-    education_requirements_list: [...qualificationArray, qualification]
-  }));
-  setCurrentQualification('');
-}
-return toast.info('Qualification already added!');
-};
-
+    if (!qualification) return;
+    if (qualificationArray.includes(qualification)) {
+      return toast.info('Qualification already added!');
+    }
+    setFormData(prev => ({
+      ...prev,
+      education_requirements_list: [...qualificationArray, qualification]
+    }));
+    setCurrentQualification('');
+  };
   const removeQualification = (q) => {
     setFormData(prev => ({
       ...prev,
@@ -237,24 +236,23 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
     }
   };
 
-if(currentPath.includes("update")) {
-  // If we're in update mode, fetch the job details
-  useEffect(() => {
-    const fetchJobDetails = async () => {
-      setLoading(true);
-      try {
-        const response = await workforceAPI.getJob(updateId);
-        setFormData(response.data);
-      } catch (err) {
-        const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to fetch job details';
-        toast.error(msg);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJobDetails();
-  }, [updateId]);
-}
+// If we're in update mode, fetch the job details
+  useEffect(() => {
+    if (!currentPath.includes("update")) return;
+    const fetchJobDetails = async () => {
+      setLoading(true);
+      try {
+        const response = await workforceAPI.getJob(updateId);
+        setFormData(response.data);
+      } catch (err) {
+        const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to fetch job details';
+        toast.error(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobDetails();
+  }, [updateId, currentPath]);
 
   return (
     <div className="min-h-screen ">

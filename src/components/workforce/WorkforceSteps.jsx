@@ -23,7 +23,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
     </div>
   );
 
- export  const StepContent = ({employmentTypes, currentStep, formData, handleTextChange, loadingCompanies, userCompanies, experienceLevels, departments, currentSkill, setCurrentSkill, addSkill, removeSkill, currentQualification, setCurrentQualification, addQualification, handleCheckboxChange, currencies, currentBenefit, setCurrentBenefit, addBenefit, removeBenefit}) => {
+ export  const StepContent = ({employmentTypes, currentStep, formData, handleTextChange, loadingCompanies, userCompanies, experienceLevels, departments, currentSkill, setCurrentSkill, addSkill, removeSkill, currentQualification, setCurrentQualification, addQualification, removeQualification, handleCheckboxChange, currencies, currentBenefit, setCurrentBenefit, addBenefit, removeBenefit}) => {
       switch (currentStep) {
         case 1:
           return (
