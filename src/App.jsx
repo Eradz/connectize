@@ -1,155 +1,165 @@
+import React, { lazy, Suspense } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import SEO from "./components/SEO";
-import { NotificationItem } from "./components/notifications";
-import Address from "./components/profile/address";
-import Bio from "./components/profile/bio";
-import Contact from "./components/profile/contact";
-import Home from "./components/profile/home";
-import ProfileLayout from "./components/profile/layout";
-import Overview from "./components/profile/overview";
-import Profile from "./components/profile/profile";
 import { webRoutes } from "./lib/webRoutes";
 import AppLayout from "./pages/AppLayout";
 import FeedLayout from "./pages/FeedLayout";
-import AuthLayout from "./pages/authentication/AuthLayout";
-import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
-import Login from "./pages/authentication/login";
-import ReactivationPage from "./pages/authentication/reactivation";
-import ResetPasswordPage from "./pages/authentication/reset-password";
-import Signup from "./pages/authentication/signup";
-import SuccessPage from "./pages/authentication/successpage";
-import VerifyAccount from "./pages/authentication/verify-account";
-import BookMark from "./pages/bookmark";
-import CompaniesPage from "./pages/companies";
-import CreateCompany from "./pages/company";
-import CompanyDocuments from "./pages/company/CompanyDocuments";
-import CompanyInformation from "./pages/company/CompanyInformation";
-import EditCompanyPage from "./pages/company/edit";
-import CompanyLayout from "./pages/company/layout";
-import CompanyProfile from "./pages/feed/companyProfile";
-import NewsFeed from "./pages/feed/newsFeed";
-import UserProfile from "./pages/feed/userProfile";
-import Analysis from "./pages/market/analysis";
-import Listing from "./pages/market/listing";
-import Market from "./pages/market/market";
-import Product from "./pages/market/product";
-import MessagesLayout from "./pages/messages/layout";
-import NotFound from "./pages/not-found";
-import SinglePostPage from "./pages/posts/singlePostPage";
-import RepresentativesPage from "./pages/representatives";
-import AcceptRepresentation from "./pages/representatives/AcceptRepresentation";
-import AssignRepresentative from "./pages/representatives/AssignRepresentative";
-import Search from "./pages/search";
-import Services from "./pages/service/service";
-import ServiceAdmin from "./pages/service/serviceAdmin";
-import ServiceOverView from "./pages/service/serviceOverview";
-import SettingsPage from "./pages/settings";
-import PrivacyPolicy from "./pages/terms&policies/policy";
-import TermsAndConditions from "./pages/terms&policies/terms";
-import TermsLayout from "./pages/terms&policies/termsLayout";
-
-// Comprehensive Admin CMS Implementation
-import ComprehensiveAdmin from "./pages/admin/ComprehensiveAdmin";
-
-// Oil & Gas Platform Components
-import PlatformLayout from "./pages/platform/PlatformLayout";
-import PlatformDashboard from "./pages/businesshub/BusinessHub";
-import DealRooms from "./components/dealRoom/DealRooms";
-import DealRoomCreate from "./components/dealRoom/DealRoomCreate";
-import DealRoomEdit from "./components/dealRoom/DealRoomEdit";
-
-// Enterprise Dashboard Components
-import EnterpriseApp from "./components/enterprise/EnterpriseApp";
-import WorkforceJobs from "./pages/platform/WorkforceJobs";
-import WorkforceJobCreate from "./pages/platform/WorkforceJobCreate";
-import WorkforceMyPostedJobs from "./pages/platform/WorkforceMyPostedJobs";
-import WorkforceSavedJobs from "./pages/platform/WorkforceSavedJobs";
-import WorkforceJobDetail from "./pages/platform/WorkforceJobDetail";
-import WorkforceProfessionals from "./pages/platform/WorkforceProfessionals";
-import WorkforceProfileCreate from "./pages/platform/WorkforceProfileCreate";
-import WorkforceProfileDetail from "./pages/platform/WorkforceProfileDetail";
-import WorkforceProfileEdit from "./pages/platform/WorkforceProfileEdit";
-import WorkforceApplications from "./pages/platform/WorkforceApplications";
-import WorkforceEvents from "./pages/platform/WorkforceEvents";
-import WorkforceEventDetail from "./pages/platform/WorkforceEventDetail";
-import WorkforceEventCreate from "./pages/platform/WorkforceEventCreate";
-import WorkforceMyEvents from "./pages/platform/WorkforceMyEvents";
-import WorkforceMyRegistrations from "./pages/platform/WorkforceMyRegistrations";
-import WorkforceMyBookmarks from "./pages/platform/WorkforceMyBookmarks";
-import CompanyEarnings from "./pages/platform/CompanyEarnings";
-import AIDashboard from "./pages/platform/AIDashboard";
-import DealRoomDetail from "./components/dealRoom/DealRoomDetail";
-import MyParticipations from "./pages/platform/MyParticipations";
-import AISubpage from "./pages/platform/AISubpage";
-import LogisticsDashboard from "./pages/platform/LogisticsDashboard";
-import LogisticsInventory from "./pages/platform/LogisticsInventory";
-import LogisticsInventoryForm from "./pages/platform/LogisticsInventoryForm";
-import LogisticsInventoryEdit from "./pages/platform/LogisticsInventoryEdit";
-import LogisticsInventoryDetailView from "./pages/platform/LogisticsInventoryDetailView";
-import LogisticsRequests from "./pages/platform/LogisticsRequests";
-import LogisticsRequestList from "./pages/platform/LogisticsRequestList";
-import LogisticsRequestDetail from "./pages/platform/LogisticsRequestDetail";
-import LogisticsRequestCreate from "./pages/platform/LogisticsRequestCreate";
-import LogisticsRequestEdit from "./pages/platform/LogisticsRequestEdit";
-import LogisticsShipments from "./pages/platform/LogisticsShipments";
-import LogisticsShipmentCreate from "./pages/platform/LogisticsShipmentCreate";
-import LogisticsShipmentDetail from "./pages/platform/LogisticsShipmentDetail";
-import LogisticsTracking from "./pages/platform/LogisticsTracking";
-import BecomeProvider from "./pages/logistics/BecomeProvider";
-import ProviderDashboard from "./pages/logistics/ProviderDashboard";
-import ProviderSettings from "./pages/logistics/ProviderSettings";
-import LogisticsTest from "./pages/test/LogisticsTest";
-import FeaturedAdsPage from "./pages/platform/FeaturedAds";
-import SubscriptionsPage from "./pages/platform/Subscriptions";
-import SubscriptionPlanDetail from "./pages/subscription/SubscriptionPlanDetail";
-
-// Enhanced Subscription System
-import SubscriptionRoutes from "./routes/SubscriptionRoutes";
-
-// Debug Components
-import SubscriptionDebug from "./debug/SubscriptionDebug";
-
-// Inventory Management Components
-import InventoryDashboard from "./pages/inventory/InventoryDashboard";
-import InventoryItems from "./pages/inventory/InventoryItems";
-import InventoryWarehouses from "./pages/inventory/InventoryWarehouses";
-import InventoryTransactions from "./pages/inventory/InventoryTransactions";
-import InventoryAlerts from "./pages/inventory/InventoryAlerts";
-import InventoryReports from "./pages/inventory/InventoryReports";
-
-// Knowledge Hub Components  
-import KnowledgeHubDashboard from "./pages/knowledge/KnowledgeHubDashboard";
-import KnowledgeArticles from "./pages/knowledge/KnowledgeArticles";
-import KnowledgeArticleDetail from "./pages/knowledge/KnowledgeArticleDetail";
-import KnowledgeForums from "./pages/knowledge/KnowledgeForums";
-import KnowledgeTopics from "./pages/knowledge/KnowledgeTopics";
-import KnowledgeCategories from "./pages/knowledge/KnowledgeCategories";
-import KnowledgeCategoryDetail from "./pages/knowledge/KnowledgeCategoryDetail";
-import KnowledgeTagDetail from "./pages/knowledge/KnowledgeTagDetail";
-import KnowledgeSearch from "./pages/knowledge/KnowledgeSearch";
-import KnowledgeArticleCreate from "./pages/knowledge/KnowledgeArticleCreate";
-import KnowledgeForumCreate from "./pages/knowledge/KnowledgeForumCreate";
-import KnowledgeForumDetail from "./pages/knowledge/KnowledgeForumDetail";
-import KnowledgeTopicCreate from "./pages/knowledge/KnowledgeTopicCreate";
-import KnowledgeTopicDetail from "./pages/knowledge/KnowledgeTopicDetail";
-import KnowledgeForumInvite from "./pages/knowledge/KnowledgeForumInvite";
-
-// Marketplace Components
-import Marketplace from "./pages/marketplace/Marketplace";
-import MarketplaceCart from "./pages/marketplace/Cart";
-import MarketplaceCheckout from "./pages/marketplace/Checkout";
-import MyListings from "./pages/marketplace/MyListings";
-import CreateListing from "./pages/marketplace/CreateListing";
-import MarketplaceListingDetail from "./pages/marketplace/ListingDetail";
-import EditListing from "./pages/marketplace/EditListing";
-import MarketplaceOrders from "./pages/marketplace/Orders";
-import OrderConfirmation from "./pages/marketplace/OrderConfirmation";
-import SellerOrders from "./pages/marketplace/SellerOrders";
-import SellerPayments from "./pages/marketplace/SellerPayments";
-
-// Global prefetch for instant loading
 import GlobalPrefetch from "./components/GlobalPrefetch";
-import LogisticsInventoryCreate from "./pages/platform/LogisticsInventoryCreate";
+
+// Lightweight loading fallback
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-8 h-8 border-3 border-gold border-t-transparent rounded-full animate-spin" />
+      <span className="text-sm text-gray-400">Loading...</span>
+    </div>
+  </div>
+);
+
+// Lazy-loaded page components
+const NotificationItem = lazy(() => import("./components/notifications").then(m => ({ default: m.NotificationItem })));
+const Address = lazy(() => import("./components/profile/address"));
+const Bio = lazy(() => import("./components/profile/bio"));
+const Contact = lazy(() => import("./components/profile/contact"));
+const Home = lazy(() => import("./components/profile/home"));
+const ProfileLayout = lazy(() => import("./components/profile/layout"));
+const Overview = lazy(() => import("./components/profile/overview"));
+const Profile = lazy(() => import("./components/profile/profile"));
+const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
+const ConfirmResetPassword = lazy(() => import("./pages/authentication/confirmPasswordReset"));
+const Login = lazy(() => import("./pages/authentication/login"));
+const ReactivationPage = lazy(() => import("./pages/authentication/reactivation"));
+const ResetPasswordPage = lazy(() => import("./pages/authentication/reset-password"));
+const Signup = lazy(() => import("./pages/authentication/signup"));
+const SuccessPage = lazy(() => import("./pages/authentication/successpage"));
+const VerifyAccount = lazy(() => import("./pages/authentication/verify-account"));
+const BookMark = lazy(() => import("./pages/bookmark"));
+const CompaniesPage = lazy(() => import("./pages/companies"));
+const CreateCompany = lazy(() => import("./pages/company"));
+const CompanyDocuments = lazy(() => import("./pages/company/CompanyDocuments"));
+const CompanyInformation = lazy(() => import("./pages/company/CompanyInformation"));
+const EditCompanyPage = lazy(() => import("./pages/company/edit"));
+const CompanyLayout = lazy(() => import("./pages/company/layout"));
+const CompanyProfile = lazy(() => import("./pages/feed/companyProfile"));
+const NewsFeed = lazy(() => import("./pages/feed/newsFeed"));
+const UserProfile = lazy(() => import("./pages/feed/userProfile"));
+const Analysis = lazy(() => import("./pages/market/analysis"));
+const Listing = lazy(() => import("./pages/market/listing"));
+const Market = lazy(() => import("./pages/market/market"));
+const Product = lazy(() => import("./pages/market/product"));
+const MessagesLayout = lazy(() => import("./pages/messages/layout"));
+const NotFound = lazy(() => import("./pages/not-found"));
+const SinglePostPage = lazy(() => import("./pages/posts/singlePostPage"));
+const RepresentativesPage = lazy(() => import("./pages/representatives"));
+const AcceptRepresentation = lazy(() => import("./pages/representatives/AcceptRepresentation"));
+const AssignRepresentative = lazy(() => import("./pages/representatives/AssignRepresentative"));
+const Search = lazy(() => import("./pages/search"));
+const Services = lazy(() => import("./pages/service/service"));
+const ServiceAdmin = lazy(() => import("./pages/service/serviceAdmin"));
+const ServiceOverView = lazy(() => import("./pages/service/serviceOverview"));
+const SettingsPage = lazy(() => import("./pages/settings"));
+const PrivacyPolicy = lazy(() => import("./pages/terms&policies/policy"));
+const TermsAndConditions = lazy(() => import("./pages/terms&policies/terms"));
+
+// Admin
+const ComprehensiveAdmin = lazy(() => import("./pages/admin/ComprehensiveAdmin"));
+
+// Platform
+const PlatformLayout = lazy(() => import("./pages/platform/PlatformLayout"));
+const PlatformDashboard = lazy(() => import("./pages/businesshub/BusinessHub"));
+const DealRooms = lazy(() => import("./components/dealRoom/DealRooms"));
+const DealRoomCreate = lazy(() => import("./components/dealRoom/DealRoomCreate"));
+const DealRoomEdit = lazy(() => import("./components/dealRoom/DealRoomEdit"));
+const DealRoomDetail = lazy(() => import("./components/dealRoom/DealRoomDetail"));
+const EnterpriseApp = lazy(() => import("./components/enterprise/EnterpriseApp"));
+
+// Workforce
+const WorkforceJobs = lazy(() => import("./pages/platform/WorkforceJobs"));
+const WorkforceJobCreate = lazy(() => import("./pages/platform/WorkforceJobCreate"));
+const WorkforceMyPostedJobs = lazy(() => import("./pages/platform/WorkforceMyPostedJobs"));
+const WorkforceSavedJobs = lazy(() => import("./pages/platform/WorkforceSavedJobs"));
+const WorkforceJobDetail = lazy(() => import("./pages/platform/WorkforceJobDetail"));
+const WorkforceProfessionals = lazy(() => import("./pages/platform/WorkforceProfessionals"));
+const WorkforceProfileCreate = lazy(() => import("./pages/platform/WorkforceProfileCreate"));
+const WorkforceProfileDetail = lazy(() => import("./pages/platform/WorkforceProfileDetail"));
+const WorkforceProfileEdit = lazy(() => import("./pages/platform/WorkforceProfileEdit"));
+const WorkforceApplications = lazy(() => import("./pages/platform/WorkforceApplications"));
+const WorkforceEvents = lazy(() => import("./pages/platform/WorkforceEvents"));
+const WorkforceEventDetail = lazy(() => import("./pages/platform/WorkforceEventDetail"));
+const WorkforceEventCreate = lazy(() => import("./pages/platform/WorkforceEventCreate"));
+const WorkforceMyEvents = lazy(() => import("./pages/platform/WorkforceMyEvents"));
+const WorkforceMyRegistrations = lazy(() => import("./pages/platform/WorkforceMyRegistrations"));
+const WorkforceMyBookmarks = lazy(() => import("./pages/platform/WorkforceMyBookmarks"));
+const CompanyEarnings = lazy(() => import("./pages/platform/CompanyEarnings"));
+const AIDashboard = lazy(() => import("./pages/platform/AIDashboard"));
+const MyParticipations = lazy(() => import("./pages/platform/MyParticipations"));
+const AISubpage = lazy(() => import("./pages/platform/AISubpage"));
+
+// Logistics
+const LogisticsDashboard = lazy(() => import("./pages/platform/LogisticsDashboard"));
+const LogisticsInventory = lazy(() => import("./pages/platform/LogisticsInventory"));
+const LogisticsInventoryForm = lazy(() => import("./pages/platform/LogisticsInventoryForm"));
+const LogisticsInventoryEdit = lazy(() => import("./pages/platform/LogisticsInventoryEdit"));
+const LogisticsInventoryDetailView = lazy(() => import("./pages/platform/LogisticsInventoryDetailView"));
+const LogisticsRequests = lazy(() => import("./pages/platform/LogisticsRequests"));
+const LogisticsRequestList = lazy(() => import("./pages/platform/LogisticsRequestList"));
+const LogisticsRequestDetail = lazy(() => import("./pages/platform/LogisticsRequestDetail"));
+const LogisticsRequestCreate = lazy(() => import("./pages/platform/LogisticsRequestCreate"));
+const LogisticsRequestEdit = lazy(() => import("./pages/platform/LogisticsRequestEdit"));
+const LogisticsShipments = lazy(() => import("./pages/platform/LogisticsShipments"));
+const LogisticsShipmentCreate = lazy(() => import("./pages/platform/LogisticsShipmentCreate"));
+const LogisticsShipmentDetail = lazy(() => import("./pages/platform/LogisticsShipmentDetail"));
+const LogisticsTracking = lazy(() => import("./pages/platform/LogisticsTracking"));
+const BecomeProvider = lazy(() => import("./pages/logistics/BecomeProvider"));
+const ProviderDashboard = lazy(() => import("./pages/logistics/ProviderDashboard"));
+const ProviderSettings = lazy(() => import("./pages/logistics/ProviderSettings"));
+const LogisticsTest = lazy(() => import("./pages/test/LogisticsTest"));
+const LogisticsInventoryCreate = lazy(() => import("./pages/platform/LogisticsInventoryCreate"));
+
+// Subscriptions & Ads
+const FeaturedAdsPage = lazy(() => import("./pages/platform/FeaturedAds"));
+const SubscriptionsPage = lazy(() => import("./pages/platform/Subscriptions"));
+const SubscriptionPlanDetail = lazy(() => import("./pages/subscription/SubscriptionPlanDetail"));
+const SubscriptionRoutes = lazy(() => import("./routes/SubscriptionRoutes"));
+const SubscriptionDebug = lazy(() => import("./debug/SubscriptionDebug"));
+
+// Inventory
+const InventoryDashboard = lazy(() => import("./pages/inventory/InventoryDashboard"));
+const InventoryItems = lazy(() => import("./pages/inventory/InventoryItems"));
+const InventoryWarehouses = lazy(() => import("./pages/inventory/InventoryWarehouses"));
+const InventoryTransactions = lazy(() => import("./pages/inventory/InventoryTransactions"));
+const InventoryAlerts = lazy(() => import("./pages/inventory/InventoryAlerts"));
+const InventoryReports = lazy(() => import("./pages/inventory/InventoryReports"));
+
+// Knowledge Hub
+const KnowledgeHubDashboard = lazy(() => import("./pages/knowledge/KnowledgeHubDashboard"));
+const KnowledgeArticles = lazy(() => import("./pages/knowledge/KnowledgeArticles"));
+const KnowledgeArticleDetail = lazy(() => import("./pages/knowledge/KnowledgeArticleDetail"));
+const KnowledgeForums = lazy(() => import("./pages/knowledge/KnowledgeForums"));
+const KnowledgeTopics = lazy(() => import("./pages/knowledge/KnowledgeTopics"));
+const KnowledgeCategories = lazy(() => import("./pages/knowledge/KnowledgeCategories"));
+const KnowledgeCategoryDetail = lazy(() => import("./pages/knowledge/KnowledgeCategoryDetail"));
+const KnowledgeTagDetail = lazy(() => import("./pages/knowledge/KnowledgeTagDetail"));
+const KnowledgeSearch = lazy(() => import("./pages/knowledge/KnowledgeSearch"));
+const KnowledgeArticleCreate = lazy(() => import("./pages/knowledge/KnowledgeArticleCreate"));
+const KnowledgeForumCreate = lazy(() => import("./pages/knowledge/KnowledgeForumCreate"));
+const KnowledgeForumDetail = lazy(() => import("./pages/knowledge/KnowledgeForumDetail"));
+const KnowledgeTopicCreate = lazy(() => import("./pages/knowledge/KnowledgeTopicCreate"));
+const KnowledgeTopicDetail = lazy(() => import("./pages/knowledge/KnowledgeTopicDetail"));
+const KnowledgeForumInvite = lazy(() => import("./pages/knowledge/KnowledgeForumInvite"));
+
+// Marketplace
+const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
+const MarketplaceCart = lazy(() => import("./pages/marketplace/Cart"));
+const MarketplaceCheckout = lazy(() => import("./pages/marketplace/Checkout"));
+const MyListings = lazy(() => import("./pages/marketplace/MyListings"));
+const CreateListing = lazy(() => import("./pages/marketplace/CreateListing"));
+const MarketplaceListingDetail = lazy(() => import("./pages/marketplace/ListingDetail"));
+const EditListing = lazy(() => import("./pages/marketplace/EditListing"));
+const MarketplaceOrders = lazy(() => import("./pages/marketplace/Orders"));
+const OrderConfirmation = lazy(() => import("./pages/marketplace/OrderConfirmation"));
+const SellerOrders = lazy(() => import("./pages/marketplace/SellerOrders"));
+const SellerPayments = lazy(() => import("./pages/marketplace/SellerPayments"));
 
 function App() {
   // Helper function to convert absolute paths to relative paths for nested routes
@@ -178,6 +188,7 @@ const removeLeadingSlash = (path) => {
       <SEO />
       {/* Prefetch key data in background after user logs in */}
       <GlobalPrefetch />
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Comprehensive Admin CMS System */}
         <Route path="/admin/*" element={<ComprehensiveAdmin />} />
@@ -527,6 +538,7 @@ const removeLeadingSlash = (path) => {
   {/* Catch all for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </div>
   );
 }
