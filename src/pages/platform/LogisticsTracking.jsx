@@ -33,6 +33,7 @@ const LogisticsTracking = () => {
   const [selectedMethod, setSelectedMethod] = useState('all');
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('all');
   const pollRef = useRef(null);
+  const hasLoadedOnce = useRef(false);
 
   // Normalize backend Shipment data into a flat tracking-card shape
   const normalizeShipment = (shipment) => {
@@ -97,9 +98,9 @@ const LogisticsTracking = () => {
     };
   };
 
-  const loadTrackingData = useCallback(async (showToast = false, isInitial = false) => {
+  const loadTrackingData = useCallback(async (showToast = false) => {
     try {
-      if (isInitial) setLoading(true);
+      if (!hasLoadedOnce.current) setLoading(true);
       const data = await logistics.getShipments();
       const results = data?.results || data || [];
       const normalized = Array.isArray(results) ? results.map(normalizeShipment) : [];
@@ -107,15 +108,16 @@ const LogisticsTracking = () => {
       if (showToast) toast.success('Tracking data refreshed');
     } catch (error) {
       console.error('Error loading shipments:', error);
-      if (isInitial) toast.error('Failed to load tracking data');
+      if (!hasLoadedOnce.current) toast.error('Failed to load tracking data');
     } finally {
-      if (isInitial) setLoading(false);
+      hasLoadedOnce.current = true;
+      setLoading(false);
     }
   }, []);
 
   // Initial load + polling
   useEffect(() => {
-    loadTrackingData(false, true);
+    loadTrackingData();
 
     // Auto-poll every 30s for live-ish updates (silent, no loading skeleton)
     pollRef.current = setInterval(() => {
@@ -386,7 +388,7 @@ const LogisticsTracking = () => {
 
         {/* Tracking Cards */}
         <div className="space-y-6">
-          {loading ? (
+          {loading && shipments.length === 0 ? (
             Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="bg-white rounded-xl shadow-sm border p-6 animate-pulse">
                 <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
