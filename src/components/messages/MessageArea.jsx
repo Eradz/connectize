@@ -39,7 +39,8 @@ function linkifyText(text) {
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gold hover:text-custom_yellow underline break-all font-medium"
+          className="!text-blue-600 hover:!text-blue-800 underline break-all font-semibold"
+          style={{ color: '#2563eb' }}
         >
           {part}
         </a>
