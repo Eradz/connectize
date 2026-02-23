@@ -254,7 +254,7 @@ export default function Marketplace() {
         keywords={seoData.keywords}
       />
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white border-b sticky top-0 z-[5]">
         <div className="container py-4">
           <div className="flex items-center justify-between gap-4">
             <HeadingText>Marketplace</HeadingText>
