@@ -97,9 +97,9 @@ const LogisticsTracking = () => {
     };
   };
 
-  const loadTrackingData = useCallback(async (showToast = false) => {
+  const loadTrackingData = useCallback(async (showToast = false, isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const data = await logistics.getShipments();
       const results = data?.results || data || [];
       const normalized = Array.isArray(results) ? results.map(normalizeShipment) : [];
@@ -107,17 +107,17 @@ const LogisticsTracking = () => {
       if (showToast) toast.success('Tracking data refreshed');
     } catch (error) {
       console.error('Error loading shipments:', error);
-      toast.error('Failed to load tracking data');
+      if (isInitial) toast.error('Failed to load tracking data');
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   }, []);
 
   // Initial load + polling
   useEffect(() => {
-    loadTrackingData();
+    loadTrackingData(false, true);
 
-    // Auto-poll every 30s for live-ish updates
+    // Auto-poll every 30s for live-ish updates (silent, no loading skeleton)
     pollRef.current = setInterval(() => {
       loadTrackingData();
     }, POLL_INTERVAL);
