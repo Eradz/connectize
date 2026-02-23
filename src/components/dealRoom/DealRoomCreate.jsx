@@ -723,7 +723,8 @@ const DealRoomCreate = () => {
               {currentStep < 4 ? (
                 <button
                   onClick={nextStep}
-                  className="flex items-center px-8 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all"
+                  disabled={companies.length === 0}
+                  className="flex items-center px-8 py-3 disabled:opacity-50 bg-yellow-400 text-gray-900 rounded-lg font-semibold hover:bg-yellow-500 transition-all"
                 >
                   Next <ChevronRight className="w-4 h-4 ml-2" />
                 </button>

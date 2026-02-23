@@ -1357,7 +1357,7 @@ export default function DealRoomDetail() {
                                     if (window.confirm('Remove this participant?')) {
                                       await dealRoomService.removeParticipant(id, p.id);
                                       setParticipants((prev) => prev.filter((x) => (x.id || x) !== p.id));
-                                      await dealRoomAPI.createActivities(id, { activity_type: 'participant_removed', description: `Participant removed`, actor: user.id, target_user: p.id });
+                                      // await dealRoomAPI.createActivities(id, { activity_type: 'participant_removed', description: `Participant removed`, actor: user.id, target_user: p.id });
                                       notify.success("Participant removed");
                                     }
                                   }}
@@ -1897,6 +1897,7 @@ export default function DealRoomDetail() {
               notify.error("Please select a user to invite");
               return;
             }
+            setSubmitting(true);
             
             try {
               const payload = { user: participantForm.userId, role: participantForm.role, permission_level: participantForm.permission_level,  deal_room: id };
@@ -1912,16 +1913,17 @@ export default function DealRoomDetail() {
                 if (apiParticipant && (apiParticipant.id || apiParticipant.user || apiParticipant.user_email)) {
                   apiSuccess = true;
                   console.log('✅ Successfully saved participant to database:', apiParticipant);
-                  // await dealRoomAPI.createActivities(id, { activity_type: 'participant_added', description: `New participant added to the deal`, actor: user.id, target_user: participantForm.userId });
                   notify.success("Participant invited and saved to database");
                    try {
-                  const res = await makeApiRequest({
-                    url: `api/v1/deals/participants/`,
-                    method: "GET",
-                    params: { deal_room: id },
-                  });
-                  const apiParticipants = res?.results || res?.data || res || [];
-                  setParticipants(apiParticipants);
+                     const res = await makeApiRequest({
+                       url: `api/v1/deals/participants/`,
+                       method: "GET",
+                       params: { deal_room: id },
+                      });
+                      const apiParticipants = res?.results || res?.data || res || [];
+                      setParticipants(apiParticipants);
+                      // await dealActivityService.addActivities(id, { activity_type: 'participant_added', description: `New participant added to the deal`, actor: user.id, target_user: participantForm.userId });
+                      setSubmitting(false);
                 } catch (refreshErr) {
                   // Fallback to appending if refresh fails
                   setParticipants((prev) => [...prev, apiParticipant]);
@@ -2061,9 +2063,10 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
+              disabled={submitting}
               className="px-4 py-2 bg-pale_yellow rounded hover:bg-gold"
             >
-              Send Invitation
+              {submitting ? 'Sending...' : 'Send Invitation'}
             </button>
           </div>
         </form>
