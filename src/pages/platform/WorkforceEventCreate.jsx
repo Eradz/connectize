@@ -57,6 +57,35 @@ const WorkforceEventCreate = () => {
   const [topicsInput, setTopicsInput] = useState(''); // Separate state for topics input
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [eventTypes, setEventTypes] = useState([]);
+
+  // Fetch admin-managed event types
+  useEffect(() => {
+    const fetchEventTypes = async () => {
+      try {
+        const res = await workforceAPI.getEventTypes();
+        const types = Array.isArray(res) ? res : res?.results || [];
+        setEventTypes(types.map(t => ({ value: t.name, label: t.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch event types:', err);
+        // Fallback
+        setEventTypes([
+          { value: 'conference', label: 'Conference' },
+          { value: 'workshop', label: 'Workshop' },
+          { value: 'seminar', label: 'Seminar' },
+          { value: 'networking', label: 'Networking Event' },
+          { value: 'training', label: 'Training Session' },
+          { value: 'webinar', label: 'Webinar' },
+          { value: 'exhibition', label: 'Exhibition' },
+          { value: 'job_fair', label: 'Job Fair' },
+          { value: 'panel', label: 'Panel Discussion' },
+          { value: 'expo', label: 'Expo / Exhibition' },
+          { value: 'summit', label: 'Summit' },
+        ]);
+      }
+    };
+    fetchEventTypes();
+  }, []);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -525,14 +554,9 @@ const WorkforceEventCreate = () => {
                         onChange={(e) => handleInputChange('event_type', e.target.value)}
                         className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-all duration-200 appearance-none font-medium"
                       >
-                        <option value="conference">Conference</option>
-                        <option value="workshop">Workshop</option>
-                        <option value="seminar">Seminar</option>
-                        <option value="networking">Networking Event</option>
-                        <option value="training">Training Session</option>
-                        <option value="panel">Panel Discussion</option>
-                        <option value="expo">Expo / Exhibition</option>
-                        <option value="summit">Summit</option>
+                        {eventTypes.map(type => (
+                          <option key={type.value} value={type.value}>{type.label}</option>
+                        ))}
                       </select>
                       <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                     </div>

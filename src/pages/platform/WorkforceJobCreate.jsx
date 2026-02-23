@@ -43,24 +43,42 @@ const WorkforceJobCreate = () => {
   const [currentSkill, setCurrentSkill] = useState('');
   const [currentQualification, setCurrentQualification] = useState('');
   const [currentBenefit, setCurrentBenefit] = useState('');
-  const employmentTypes = [
-    { value: 'full_time', label: 'Full-time' },
-    { value: 'part_time', label: 'Part-time' },
-    { value: 'contract', label: 'Contract' },
-    { value: 'temporary', label: 'Temporary' },
-    { value: 'internship', label: 'Internship' },
-    { value: 'consultant', label: 'Consultant' }
-  ];
+  const [employmentTypes, setEmploymentTypes] = useState([]);
+  const [experienceLevels, setExperienceLevels] = useState([]);
 
-  const experienceLevels = [
-    { value: 'entry', label: 'Entry Level (0-2 years)' },
-    { value: 'mid', label: 'Mid Level (3-5 years)' },
-    { value: 'senior', label: 'Senior Level (6-10 years)' },
-    { value: 'executive', label: 'Executive (10+ years)' }
-  ];
-
-  const departments = [
-    'Exploration & Production', 'Drilling Operations', 'Reservoir Engineering',
+  // Fetch admin-managed lookup data
+  useEffect(() => {
+    const fetchLookups = async () => {
+      try {
+        const [jobTypesRes, expLevelsRes] = await Promise.all([
+          workforceAPI.getJobTypes(),
+          workforceAPI.getExperienceLevels()
+        ]);
+        const jt = Array.isArray(jobTypesRes) ? jobTypesRes : jobTypesRes?.results || [];
+        const el = Array.isArray(expLevelsRes) ? expLevelsRes : expLevelsRes?.results || [];
+        setEmploymentTypes(jt.map(t => ({ value: t.name, label: t.display_name })));
+        setExperienceLevels(el.map(l => ({ value: l.name, label: l.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch lookup data:', err);
+        // Fallback to hardcoded values
+        setEmploymentTypes([
+          { value: 'full_time', label: 'Full-time' },
+          { value: 'part_time', label: 'Part-time' },
+          { value: 'contract', label: 'Contract' },
+          { value: 'temporary', label: 'Temporary' },
+          { value: 'internship', label: 'Internship' },
+          { value: 'consulting', label: 'Consulting' }
+        ]);
+        setExperienceLevels([
+          { value: 'entry', label: 'Entry Level' },
+          { value: 'mid', label: 'Mid Level' },
+          { value: 'senior', label: 'Senior Level' },
+          { value: 'executive', label: 'Executive' }
+        ]);
+      }
+    };
+    fetchLookups();
+  }, []);
     'Production Engineering', 'Health, Safety & Environment', 'Project Management',
     'Geology & Geophysics', 'Facilities Engineering', 'Operations & Maintenance',
     'Procurement & Supply Chain', 'Finance & Accounting', 'Human Resources',

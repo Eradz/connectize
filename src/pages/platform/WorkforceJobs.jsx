@@ -14,6 +14,7 @@ import { getSEOConfig } from '../../lib/seoConfig';
 import { webRoutes } from '../../lib/webRoutes';
 import { BriefCaseIcon } from '../../icon';
 import { workforceJobService } from '../../api-services/oilgas';
+import { workforceAPI } from '../../api-services/workforce';
 import { JobCard } from '../../components/workforce/JobCard';
 import { useSubscription } from '../../context/SubscriptionContext';
 import BackArrowButton from '../../components/BackArrowButton';
@@ -162,13 +163,39 @@ const WorkforceJobs = () => {
     { value: 'executive', label: 'Executive' }
   ];
 
+  // Fetch admin-managed lookup options
+  const [apiJobTypes, setApiJobTypes] = useState([]);
+  const [apiExperienceLevels, setApiExperienceLevels] = useState([]);
+
+  useEffect(() => {
+    const fetchLookups = async () => {
+      try {
+        const [jtRes, elRes] = await Promise.all([
+          workforceAPI.getJobTypes(),
+          workforceAPI.getExperienceLevels()
+        ]);
+        const jt = Array.isArray(jtRes) ? jtRes : jtRes?.results || [];
+        const el = Array.isArray(elRes) ? elRes : elRes?.results || [];
+        setApiJobTypes(jt.map(t => ({ value: t.name, label: t.display_name })));
+        setApiExperienceLevels(el.map(l => ({ value: l.name, label: l.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch lookup data:', err);
+      }
+    };
+    fetchLookups();
+  }, []);
+
   // Extract unique locations, job types, and experience levels from jobs
   const { uniqueLocations, uniqueJobTypes, uniqueExperienceLevels } = useMemo(() => {
+    // Prefer API-fetched lookups over hardcoded defaults
+    const fallbackJobTypes = apiJobTypes.length > 0 ? apiJobTypes : defaultJobTypes;
+    const fallbackExpLevels = apiExperienceLevels.length > 0 ? apiExperienceLevels : defaultExperienceLevels;
+
     if (!Array.isArray(jobs) || jobs.length === 0) {
       return {
         uniqueLocations: defaultLocations,
-        uniqueJobTypes: defaultJobTypes,
-        uniqueExperienceLevels: defaultExperienceLevels
+        uniqueJobTypes: fallbackJobTypes,
+        uniqueExperienceLevels: fallbackExpLevels
       };
     }
 
@@ -192,13 +219,13 @@ const WorkforceJobs = () => {
     const jobTypesArray = Array.from(jobTypes).sort();
     const experienceLevelsArray = Array.from(experienceLevels).sort();
 
-    // Use backend data if we have enough options, otherwise fall back to defaults
+    // Use backend data if we have enough options, otherwise fall back to API lookups or defaults
     return {
       uniqueLocations: locationsArray.length > 2 ? locationsArray : defaultLocations,
-      uniqueJobTypes: jobTypesArray.length > 1 ? jobTypesArray.map(type => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ') })) : defaultJobTypes,
-      uniqueExperienceLevels: experienceLevelsArray.length > 1 ? experienceLevelsArray.map(level => ({ value: level, label: level.charAt(0).toUpperCase() + level.slice(1).replace('_', ' ') })) : defaultExperienceLevels
+      uniqueJobTypes: jobTypesArray.length > 1 ? jobTypesArray.map(type => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ') })) : fallbackJobTypes,
+      uniqueExperienceLevels: experienceLevelsArray.length > 1 ? experienceLevelsArray.map(level => ({ value: level, label: level.charAt(0).toUpperCase() + level.slice(1).replace('_', ' ') })) : fallbackExpLevels
     };
-  }, [jobs]);
+  }, [jobs, apiJobTypes, apiExperienceLevels]);
 
   const loadJobs = async () => {
     try {

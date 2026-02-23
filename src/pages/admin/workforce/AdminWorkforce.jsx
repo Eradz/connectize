@@ -28,6 +28,41 @@ const AdminWorkforce = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedItems, setSelectedItems] = useState([]);
+  const [jobTypes, setJobTypes] = useState([]);
+  const [experienceLevels, setExperienceLevels] = useState([]);
+
+  // Fetch admin-managed lookup data
+  useEffect(() => {
+    const fetchLookups = async () => {
+      try {
+        const [jtRes, elRes] = await Promise.all([
+          workforce.getJobTypes(),
+          workforce.getExperienceLevels()
+        ]);
+        const jt = Array.isArray(jtRes) ? jtRes : jtRes?.results || [];
+        const el = Array.isArray(elRes) ? elRes : elRes?.results || [];
+        setJobTypes(jt.map(t => ({ value: t.name, label: t.display_name })));
+        setExperienceLevels(el.map(l => ({ value: l.name, label: l.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch lookup data:', err);
+        setJobTypes([
+          { value: 'full_time', label: 'Full-time' },
+          { value: 'part_time', label: 'Part-time' },
+          { value: 'contract', label: 'Contract' },
+          { value: 'temporary', label: 'Temporary' },
+          { value: 'internship', label: 'Internship' },
+          { value: 'consulting', label: 'Consulting' }
+        ]);
+        setExperienceLevels([
+          { value: 'entry', label: 'Entry Level' },
+          { value: 'mid', label: 'Mid Level' },
+          { value: 'senior', label: 'Senior Level' },
+          { value: 'executive', label: 'Executive' }
+        ]);
+      }
+    };
+    fetchLookups();
+  }, []);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   
@@ -1196,12 +1231,9 @@ const AdminWorkforce = () => {
                                   required
                                 >
                                   <option value="">Select Job Type</option>
-                                  <option value="full_time">Full-time</option>
-                                  <option value="part_time">Part-time</option>
-                                  <option value="contract">Contract</option>
-                                  <option value="temporary">Temporary</option>
-                                  <option value="internship">Internship</option>
-                                  <option value="consulting">Consulting</option>
+                                  {jobTypes.map(type => (
+                                    <option key={type.value} value={type.value}>{type.label}</option>
+                                  ))}
                                 </select>
                               </div>
                               <div>
@@ -1213,10 +1245,9 @@ const AdminWorkforce = () => {
                                   required
                                 >
                                   <option value="">Select Experience Level</option>
-                                  <option value="entry">Entry Level</option>
-                                  <option value="mid">Mid Level</option>
-                                  <option value="senior">Senior Level</option>
-                                  <option value="executive">Executive</option>
+                                  {experienceLevels.map(level => (
+                                    <option key={level.value} value={level.value}>{level.label}</option>
+                                  ))}
                                 </select>
                               </div>
                               <div>

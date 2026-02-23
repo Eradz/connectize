@@ -28,6 +28,32 @@ const AdminLogistics = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [cargoTypes, setCargoTypes] = useState([]);
+
+  // Fetch admin-managed cargo types
+  useEffect(() => {
+    const fetchCargoTypes = async () => {
+      try {
+        const res = await logisticsAPI.getCargoTypes();
+        const types = Array.isArray(res) ? res : res?.results || [];
+        setCargoTypes(types.map(t => ({ value: t.name, label: t.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch cargo types:', err);
+        setCargoTypes([
+          { value: 'general_cargo', label: 'General Cargo' },
+          { value: 'project_cargo', label: 'Project Cargo' },
+          { value: 'crude_oil', label: 'Crude Oil' },
+          { value: 'refined_products', label: 'Refined Products' },
+          { value: 'natural_gas', label: 'Natural Gas' },
+          { value: 'drilling_equipment', label: 'Drilling Equipment' },
+          { value: 'pipes', label: 'Pipes & Tubulars' },
+          { value: 'chemicals', label: 'Chemicals' },
+          { value: 'hazardous', label: 'Hazardous Materials' }
+        ]);
+      }
+    };
+    fetchCargoTypes();
+  }, []);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -1315,15 +1341,9 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  <option value="general_cargo">General Cargo</option>
-                  <option value="project_cargo">Project Cargo</option>
-                  <option value="crude_oil">Crude Oil</option>
-                  <option value="refined_products">Refined Products</option>
-                  <option value="natural_gas">Natural Gas</option>
-                  <option value="drilling_equipment">Drilling Equipment</option>
-                  <option value="pipes">Pipes & Tubulars</option>
-                  <option value="chemicals">Chemicals</option>
-                  <option value="hazardous">Hazardous Materials</option>
+                  {cargoTypes.map(type => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
                 </select>
               </div>
             </div>

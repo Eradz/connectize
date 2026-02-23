@@ -463,6 +463,12 @@ const logistics = {
     return response.data;
   },
 
+  // Cargo Types (admin-managed lookup)
+  getCargoTypes: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/cargo-types/', { params });
+    return response.data;
+  },
+
   // Aliases for backward compatibility
   getRequests: function(params) { return this.getShipmentRequests(params); },
   getRequest: function(id) { return this.getShipmentRequest(id); },

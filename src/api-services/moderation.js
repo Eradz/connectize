@@ -347,3 +347,19 @@ export const resetContentPreferences = async () => {
     throw error;
   }
 };
+
+/**
+ * Get admin-managed report types
+ */
+export const getReportTypes = async () => {
+  try {
+    const response = await makeApiRequest({
+      url: "api/report-types/",
+      method: "GET",
+    });
+    return response;
+  } catch (error) {
+    console.error("Failed to fetch report types:", error);
+    throw error;
+  }
+};
