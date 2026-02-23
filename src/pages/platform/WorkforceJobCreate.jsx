@@ -79,7 +79,7 @@ const WorkforceJobCreate = () => {
     };
     fetchLookups();
   }, []);
-    'Production Engineering', 'Health, Safety & Environment', 'Project Management',
+  const specializations = [    'Production Engineering', 'Health, Safety & Environment', 'Project Management',
     'Geology & Geophysics', 'Facilities Engineering', 'Operations & Maintenance',
     'Procurement & Supply Chain', 'Finance & Accounting', 'Human Resources',
     'Information Technology', 'Legal & Compliance', 'Business Development'
