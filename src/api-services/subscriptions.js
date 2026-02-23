@@ -71,8 +71,15 @@ const subscriptions = {
 
   // Current user subscription - matches backend /api/v1/subscriptions/current/
   getCurrentUserSubscription: async () => {
-    const response = await api.get('/api/v1/subscriptions/current/');
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/current/');
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) {
+        return { subscription: null, usage: null, plan_features: null };
+      }
+      throw e;
+    }
   },
 
   // Subscription Features
@@ -334,18 +341,35 @@ const subscriptions = {
   },
 
   getSubscriptionAnalytics: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/analytics/', { params });
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/analytics/', { params });
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) {
+        return { usage_trends: null, cost_optimization: null, forecasting: null };
+      }
+      throw e;
+    }
   },
 
   getRevenueAnalytics: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/revenue-analytics/', { params });
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/revenue-analytics/', { params });
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) return { data: [] };
+      throw e;
+    }
   },
 
   getChurnAnalytics: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/churn-analytics/', { params });
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/churn-analytics/', { params });
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) return { data: [] };
+      throw e;
+    }
   },
 
   // Subscription Management Actions
