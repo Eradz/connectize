@@ -22,6 +22,7 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsTrackingService } from '../../api-services/oilgas';
 import { toast } from 'sonner';
+import { logisticsAPI } from '../../api-services/logistics';
 
 const LogisticsTracking = () => {
   const navigate = useNavigate();
@@ -122,9 +123,9 @@ const LogisticsTracking = () => {
 
       return {
         id: `TRK${String(index + 1).padStart(6, '0')}`,
-        tracking_number: `TRK${Date.now().toString().slice(-6)}${index}`,
-        shipment_id: `SHP-${String(index + 1).padStart(3, '0')}`,
-        status,
+        shipment_tracking_number: `TRK${Date.now().toString().slice(-6)}${index}`,
+        shipment: `SHP-${String(index + 1).padStart(3, '0')}`,
+        event_type,
         shipping_method: method,
         origin,
         destination,
@@ -171,7 +172,13 @@ const LogisticsTracking = () => {
       
       try {
         const data = await logisticsTrackingService.getTrackingData();
-        setTrackingData(data);
+
+        const shipmentData = await Promise.all(data.results.map(async item => ({
+          ...item,
+          shipment: await logisticsAPI.getShipment(item.shipment)
+        })));
+        console.log('API call successful:', shipmentData);
+        setTrackingData(shipmentData);
       } catch (error) {
         // Use mock data for demo
         console.warn('API call failed, using mock data:', error.message);
@@ -188,8 +195,8 @@ const LogisticsTracking = () => {
   };
 
   // Filter tracking data
-  const filteredData = trackingData.filter(item => {
-    if (searchTerm && !item.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
+  const filteredData = trackingData?.filter(item => {
+    if (searchTerm && !item.shipment_tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
         !item.cargo_description.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !item.origin.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !item.destination.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -457,30 +464,30 @@ const LogisticsTracking = () => {
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
                     <div className="flex-1 mb-4 lg:mb-0">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{item.tracking_number}</h3>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                          {item.status.replace('_', ' ').toUpperCase()}
+                        <h3 className="text-lg font-semibold text-gray-900">{item.shipment_tracking_number}</h3>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.event_type)}`}>
+                          {item?.event_type?.replace('_', ' ').toUpperCase()}
                         </span>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(item.priority)}`}>
-                          {item.priority.toUpperCase()}
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(item?.priority)}`}>
+                          {item?.shipment?.request_details?.urgency?.toUpperCase()}
                         </span>
                       </div>
-                      <p className="text-gray-600 mb-1">{item.cargo_description}</p>
+                      <p className="text-gray-600 mb-1">{item?.description}</p>
                       <div className="flex items-center text-sm text-gray-500">
-                        {getMethodIcon(item.shipping_method)}
-                        <span className="ml-1 mr-4">{item.shipping_method.replace('_', ' ').toUpperCase()}</span>
-                        <span className="mr-4">{item.weight} tons</span>
-                        <span>{formatCurrency(item.value)}</span>
+                        {getMethodIcon(item?.shipping_method)}
+                        <span className="ml-1 mr-4">{item?.shipping_method?.replace('_', ' ').toUpperCase() || "Road"}</span>
+                        <span className="mr-4">{item?.shipment?.request_details?.weight} tons</span>
+                        <span>{formatCurrency(item?.shipment?.request_details?.budget_max)}</span>
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Days in Transit</p>
-                        <p className="text-lg font-semibold text-gray-900">{getDaysInTransit(item.ship_date)}</p>
+                        <p className="text-lg font-semibold text-gray-900">{getDaysInTransit(item?.shipment?.request_details?.pickup_date_requested)}</p>
                       </div>
                       <button
-                        onClick={() => navigate(`${webRoutes.logisticsShipments}/${item.shipment_id}`)}
+                        onClick={() => navigate(`${webRoutes.logisticsShipments}/${item?.shipment?.id}`)}
                         className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
                       >
                         <Eye className="w-4 h-4 mr-2" />
@@ -494,7 +501,7 @@ const LogisticsTracking = () => {
                       <p className="text-sm font-medium text-gray-700 mb-1">Origin</p>
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-1 text-green-600" />
-                        {item.origin}
+                        {item?.shipment?.request_details?.origin_address}
                       </div>
                     </div>
                     
@@ -502,7 +509,7 @@ const LogisticsTracking = () => {
                       <p className="text-sm font-medium text-gray-700 mb-1">Current Location</p>
                       <div className="flex items-center text-sm text-gray-600">
                         <Navigation className="w-4 h-4 mr-1 text-blue-600" />
-                        {item.current_location}
+                        {item?.shipment?.current_location === "" ? "Unknown" : item?.shipment?.current_location}
                       </div>
                     </div>
                     
@@ -510,7 +517,7 @@ const LogisticsTracking = () => {
                       <p className="text-sm font-medium text-gray-700 mb-1">Destination</p>
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-1 text-red-600" />
-                        {item.destination}
+                        {item?.shipment?.request_details?.destination_address}
                       </div>
                     </div>
                   </div>
@@ -519,16 +526,16 @@ const LogisticsTracking = () => {
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">Progress</span>
-                      <span className="text-sm text-gray-600">{item.progress_percentage}%</span>
+                      <span className="text-sm text-gray-600">{item?.progress_percentage}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full transition-all duration-300 ${
-                          item.status === 'delivered' ? 'bg-green-600' :
-                          item.status === 'delayed' || item.status === 'exception' ? 'bg-orange-600' :
+                          item?.status === 'delivered' ? 'bg-green-600' :
+                          item?.status === 'delayed' || item?.status === 'exception' ? 'bg-orange-600' :
                           'bg-blue-600'
                         }`}
-                        style={{ width: `${item.progress_percentage}%` }}
+                        style={{ width: `${item?.progress_percentage}%` }}
                       ></div>
                     </div>
                   </div>
@@ -536,44 +543,44 @@ const LogisticsTracking = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600">Ship Date</p>
-                      <p className="font-medium">{formatDate(item.ship_date)}</p>
+                      <p className="font-medium">{formatDate(item?.ship_date)}</p>
                     </div>
                     
                     <div>
                       <p className="text-gray-600">
-                        {item.status === 'delivered' ? 'Delivered' : 'Est. Delivery'}
+                        {item?.status === 'delivered' ? 'Delivered' : 'Est. Delivery'}
                       </p>
                       <p className="font-medium">
-                        {item.status === 'delivered' && item.actual_delivery ? 
-                          formatDate(item.actual_delivery) : 
-                          formatDate(item.estimated_delivery)
+                        {item?.status === 'delivered' && item?.actual_delivery ? 
+                          formatDate(item?.actual_delivery) : 
+                          formatDate(item?.estimated_delivery)
                         }
                       </p>
                     </div>
                     
                     <div>
                       <p className="text-gray-600">Carrier</p>
-                      <p className="font-medium">{item.carrier}</p>
+                      <p className="font-medium">{item?.carrier}</p>
                     </div>
                   </div>
 
-                  {item.estimated_delay > 0 && (
+                  {item?.estimated_delay > 0 && (
                     <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <div className="flex items-center">
                         <AlertCircle className="w-4 h-4 text-orange-600 mr-2" />
                         <p className="text-sm text-orange-700">
-                          Estimated delay: {item.estimated_delay} hours
+                          Estimated delay: {item?.estimated_delay} hours
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {item.next_milestone && item.status !== 'delivered' && (
+                  {item?.next_milestone && item?.status !== 'delivered' && (
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 text-blue-600 mr-2" />
                         <p className="text-sm text-blue-700">
-                          Next milestone: {item.next_milestone}
+                          Next milestone: {item?.next_milestone}
                         </p>
                       </div>
                     </div>
