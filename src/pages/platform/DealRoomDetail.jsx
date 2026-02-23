@@ -941,7 +941,10 @@ export default function DealRoomDetail() {
                                   Temporary
                                 </span>
                               )}
-                              {p.id && (
+                              {p.id && p.role !== 'owner' && userId && (
+                                String(deal?.initiator) === String(userId) ||
+                                participants?.some(pp => String(pp.user) === String(userId) && pp.permission_level === 'admin')
+                              ) && (
                                 <button
                                   onClick={async () => {
                                     if (window.confirm('Remove this participant?')) {
