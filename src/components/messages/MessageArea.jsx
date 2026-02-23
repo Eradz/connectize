@@ -28,23 +28,25 @@ import { LoadImageAttachment } from "./AttachmentLoader";
  */
 function linkifyText(text) {
   if (!text) return text;
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
-  return parts.map((part, i) =>
-    urlRegex.test(part) ? (
-      <a
-        key={i}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 hover:text-blue-800 underline break-all"
-      >
-        {part}
-      </a>
-    ) : (
-      part
-    )
-  );
+  const splitRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(splitRegex);
+  return parts.map((part, i) => {
+    // Use a fresh regex (no /g) to avoid lastIndex issues
+    if (/^https?:\/\/[^\s]+/.test(part)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gold hover:text-custom_yellow underline break-all font-medium"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
 }
 
 //
