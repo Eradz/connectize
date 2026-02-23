@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft,
@@ -10,7 +10,6 @@ import {
   AlertCircle,
   CheckCircle,
   Search,
-  Filter,
   RefreshCw,
   Eye,
   Plus,
@@ -20,203 +19,136 @@ import {
   Train
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { logisticsTrackingService } from '../../api-services/oilgas';
+import logistics from '../../api-services/logistics';
 import { toast } from 'sonner';
+
+const POLL_INTERVAL = 30000; // 30 seconds
 
 const LogisticsTracking = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [shipments, setShipments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedMethod, setSelectedMethod] = useState('all');
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('all');
+  const pollRef = useRef(null);
 
-  // Generate comprehensive mock tracking data
-  const generateMockTrackingData = () => {
-    const statuses = ['in_transit', 'delivered', 'delayed', 'pending_pickup', 'customs_clearance', 'exception'];
-    const methods = ['ocean_freight', 'air_freight', 'road_transport', 'rail_transport'];
-    const origins = ['Houston, TX', 'Aberdeen, UK', 'Singapore', 'Dubai, UAE', 'Rio de Janeiro, Brazil', 'Calgary, Canada'];
-    const destinations = ['North Sea Platform A', 'Gulf of Mexico Rig 7', 'Brazil Offshore Site', 'Norway Facility', 'Qatar Terminal', 'Angola Platform'];
-    const carriers = ['Global Marine Transport', 'Sky Cargo Express', 'Ocean Logistics Co', 'FastTrack Shipping', 'International Freight'];
+  // Normalize backend Shipment data into a flat tracking-card shape
+  const normalizeShipment = (shipment) => {
+    const req = shipment.request_details || {};
+    const status = shipment.status || 'preparing';
+    const shipDate = shipment.actual_pickup_date || req.pickup_date_requested || shipment.created_at;
+    const estDelivery = req.delivery_date_requested;
+    const actualDelivery = shipment.actual_delivery_date;
 
-    const shipments = Array.from({ length: 25 }, (_, index) => {
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
-      const method = methods[Math.floor(Math.random() * methods.length)];
-      const origin = origins[Math.floor(Math.random() * origins.length)];
-      const destination = destinations[Math.floor(Math.random() * destinations.length)];
-      const carrier = carriers[Math.floor(Math.random() * carriers.length)];
-      
-      const shipDate = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
-      const estimatedDelivery = new Date(shipDate.getTime() + (Math.random() * 21 + 3) * 24 * 60 * 60 * 1000);
-      const actualDelivery = status === 'delivered' ? 
-        new Date(shipDate.getTime() + (Math.random() * 18 + 3) * 24 * 60 * 60 * 1000) : null;
+    // Derive progress from status
+    let progress = 0;
+    switch (status) {
+      case 'delivered': progress = 100; break;
+      case 'at_destination': progress = 90; break;
+      case 'in_transit': progress = 50; break;
+      case 'picked_up': progress = 20; break;
+      case 'exception': progress = 30; break;
+      case 'preparing': default: progress = 5; break;
+    }
 
-      // Generate realistic tracking events
-      const events = [];
-      const baseTime = shipDate.getTime();
-      
-      events.push({
-        timestamp: new Date(baseTime).toISOString(),
-        location: origin,
-        description: 'Shipment picked up from origin',
-        status: 'pickup',
-        coordinates: { lat: 29.7604 + Math.random() * 10, lng: -95.3698 + Math.random() * 10 }
-      });
+    // Map cargo_type to a rough shipping method for icon display
+    const methodMap = {
+      'crude_oil': 'ocean_freight',
+      'refined_products': 'ocean_freight',
+      'natural_gas': 'ocean_freight',
+      'pipes': 'road_transport',
+      'drilling_equipment': 'road_transport',
+      'chemicals': 'road_transport',
+      'general_cargo': 'road_transport',
+      'project_cargo': 'ocean_freight',
+      'hazardous': 'road_transport',
+    };
 
-      if (method === 'ocean_freight') {
-        events.push({
-          timestamp: new Date(baseTime + 2 * 24 * 60 * 60 * 1000).toISOString(),
-          location: 'Port of Houston',
-          description: 'Container loaded onto vessel',
-          status: 'loaded',
-          coordinates: { lat: 29.7604, lng: -95.3698 }
-        });
-        
-        events.push({
-          timestamp: new Date(baseTime + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          location: 'Gulf of Mexico',
-          description: 'Vessel departed port',
-          status: 'departed',
-          coordinates: { lat: 28.5, lng: -90.0 }
-        });
-      }
+    // Map urgency to priority
+    const priorityMap = {
+      'emergency': 'urgent',
+      'urgent': 'high',
+      'standard': 'medium',
+    };
 
-      if (status === 'customs_clearance') {
-        events.push({
-          timestamp: new Date(baseTime + 5 * 24 * 60 * 60 * 1000).toISOString(),
-          location: 'International Port',
-          description: 'Shipment held for customs inspection',
-          status: 'customs',
-          coordinates: { lat: 25.2048, lng: 55.2708 }
-        });
-      }
-
-      if (status === 'in_transit') {
-        events.push({
-          timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
-          location: 'En Route',
-          description: 'Shipment in transit to destination',
-          status: 'in_transit',
-          coordinates: { lat: 30 + Math.random() * 20, lng: -80 + Math.random() * 40 }
-        });
-      }
-
-      if (status === 'delivered') {
-        events.push({
-          timestamp: actualDelivery.toISOString(),
-          location: destination,
-          description: 'Shipment delivered successfully',
-          status: 'delivered',
-          coordinates: { lat: 60 + Math.random() * 10, lng: 5 + Math.random() * 10 }
-        });
-      }
-
-      // Calculate progress percentage
-      let progress = 0;
-      if (status === 'delivered') progress = 100;
-      else if (status === 'in_transit') progress = 30 + Math.random() * 50;
-      else if (status === 'customs_clearance') progress = 60 + Math.random() * 20;
-      else if (status === 'delayed') progress = 20 + Math.random() * 40;
-      else if (status === 'pending_pickup') progress = 0;
-      else if (status === 'exception') progress = Math.random() * 80;
-
-      return {
-        id: `TRK${String(index + 1).padStart(6, '0')}`,
-        tracking_number: `TRK${Date.now().toString().slice(-6)}${index}`,
-        shipment_id: `SHP-${String(index + 1).padStart(3, '0')}`,
-        status,
-        shipping_method: method,
-        origin,
-        destination,
-        carrier,
-        ship_date: shipDate.toISOString(),
-        estimated_delivery: estimatedDelivery.toISOString(),
-        actual_delivery: actualDelivery?.toISOString() || null,
-        progress_percentage: Math.round(progress),
-        events: events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)),
-        cargo_description: [
-          'Drilling Equipment Package',
-          'Safety Supply Kit',
-          'Maintenance Tools Set',
-          'Technical Components',
-          'Emergency Supplies',
-          'Chemical Materials',
-          'Spare Parts Package',
-          'Instrumentation Kit'
-        ][Math.floor(Math.random() * 8)],
-        weight: (Math.random() * 50 + 5).toFixed(1),
-        value: Math.floor(Math.random() * 500000) + 50000,
-        priority: ['low', 'medium', 'high', 'urgent'][Math.floor(Math.random() * 4)],
-        service_type: ['standard', 'express', 'priority', 'next_day'][Math.floor(Math.random() * 4)],
-        current_location: events[events.length - 1]?.location || origin,
-        next_milestone: status === 'delivered' ? 'Completed' : [
-          'Port Arrival', 'Customs Clearance', 'Final Transit', 'Delivery'
-        ][Math.floor(Math.random() * 4)],
-        estimated_delay: status === 'delayed' ? Math.floor(Math.random() * 72) + 24 : 0
-      };
-    });
-
-    return shipments;
+    return {
+      id: shipment.id,
+      tracking_number: shipment.tracking_number || 'N/A',
+      shipment_id: shipment.id,
+      status,
+      shipping_method: methodMap[req.cargo_type] || 'road_transport',
+      origin: req.origin_address || 'N/A',
+      destination: req.destination_address || 'N/A',
+      carrier: shipment.provider_name || 'Unassigned',
+      ship_date: shipDate,
+      estimated_delivery: estDelivery,
+      actual_delivery: actualDelivery,
+      progress_percentage: progress,
+      cargo_description: req.title || req.cargo_type || 'Shipment',
+      weight: req.weight ? Number(req.weight).toFixed(1) : '0.0',
+      value: req.budget_max || req.budget_min || 0,
+      priority: priorityMap[req.urgency] || 'medium',
+      current_location: shipment.current_location || req.origin_address || 'Origin',
+      delays_count: shipment.delays_count || 0,
+      total_delay_hours: Number(shipment.total_delay_hours) || 0,
+      tracking_events_count: shipment.tracking_events_count || 0,
+    };
   };
 
-  const [trackingData, setTrackingData] = useState([]);
-
-  useEffect(() => {
-    loadTrackingData();
-  }, []);
-
-  const loadTrackingData = async () => {
+  const loadTrackingData = useCallback(async (showToast = false) => {
     try {
       setLoading(true);
-      
-      try {
-        const data = await logisticsTrackingService.getTrackingData();
-        setTrackingData(data);
-      } catch (error) {
-        // Use mock data for demo
-        console.warn('API call failed, using mock data:', error.message);
-        const mockData = generateMockTrackingData();
-        setTrackingData(mockData);
-      }
-      
+      const data = await logistics.getShipments();
+      const results = data?.results || data || [];
+      const normalized = Array.isArray(results) ? results.map(normalizeShipment) : [];
+      setShipments(normalized);
+      if (showToast) toast.success('Tracking data refreshed');
     } catch (error) {
+      console.error('Error loading shipments:', error);
       toast.error('Failed to load tracking data');
-      console.error('Error loading tracking data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Initial load + polling
+  useEffect(() => {
+    loadTrackingData();
+
+    // Auto-poll every 30s for live-ish updates
+    pollRef.current = setInterval(() => {
+      loadTrackingData();
+    }, POLL_INTERVAL);
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [loadTrackingData]);
 
   // Filter tracking data
-  const filteredData = trackingData.filter(item => {
-    if (searchTerm && !item.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !item.cargo_description.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !item.origin.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !item.destination.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
-    if (selectedStatus !== 'all' && item.status !== selectedStatus) {
-      return false;
-    }
-    if (selectedMethod !== 'all' && item.shipping_method !== selectedMethod) {
-      return false;
-    }
-    if (selectedTimeFrame !== 'all') {
-      const shipDate = new Date(item.ship_date);
-      const now = new Date();
-      const daysDiff = (now - shipDate) / (1000 * 60 * 60 * 24);
-      
-      switch (selectedTimeFrame) {
-        case 'last_7_days':
-          if (daysDiff > 7) return false;
-          break;
-        case 'last_30_days':
-          if (daysDiff > 30) return false;
-          break;
-        case 'last_90_days':
-          if (daysDiff > 90) return false;
-          break;
+  const filteredData = shipments.filter(item => {
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      if (
+        !item.tracking_number.toLowerCase().includes(term) &&
+        !item.cargo_description.toLowerCase().includes(term) &&
+        !item.origin.toLowerCase().includes(term) &&
+        !item.destination.toLowerCase().includes(term) &&
+        !item.carrier.toLowerCase().includes(term)
+      ) {
+        return false;
       }
+    }
+    if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
+    if (selectedMethod !== 'all' && item.shipping_method !== selectedMethod) return false;
+
+    if (selectedTimeFrame !== 'all' && item.ship_date) {
+      const daysDiff = (new Date() - new Date(item.ship_date)) / (1000 * 60 * 60 * 24);
+      if (selectedTimeFrame === 'last_7_days' && daysDiff > 7) return false;
+      if (selectedTimeFrame === 'last_30_days' && daysDiff > 30) return false;
+      if (selectedTimeFrame === 'last_90_days' && daysDiff > 90) return false;
     }
     return true;
   });
@@ -225,11 +157,23 @@ const LogisticsTracking = () => {
     switch (status) {
       case 'delivered': return 'text-green-600 bg-green-100';
       case 'in_transit': return 'text-blue-600 bg-blue-100';
-      case 'delayed': return 'text-orange-600 bg-orange-100';
-      case 'pending_pickup': return 'text-gray-600 bg-gray-100';
-      case 'customs_clearance': return 'text-purple-600 bg-purple-100';
+      case 'picked_up': return 'text-cyan-600 bg-cyan-100';
+      case 'at_destination': return 'text-emerald-600 bg-emerald-100';
       case 'exception': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'cancelled': return 'text-gray-600 bg-gray-100';
+      case 'preparing': default: return 'text-yellow-600 bg-yellow-100';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'delivered': return 'Delivered';
+      case 'in_transit': return 'In Transit';
+      case 'picked_up': return 'Picked Up';
+      case 'at_destination': return 'At Destination';
+      case 'exception': return 'Exception';
+      case 'cancelled': return 'Cancelled';
+      case 'preparing': default: return 'Preparing';
     }
   };
 
@@ -254,6 +198,7 @@ const LogisticsTracking = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -262,6 +207,7 @@ const LogisticsTracking = () => {
   };
 
   const formatCurrency = (amount) => {
+    if (!amount) return '—';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -271,39 +217,43 @@ const LogisticsTracking = () => {
   };
 
   const getDaysInTransit = (shipDate) => {
+    if (!shipDate) return 0;
     const days = Math.floor((new Date() - new Date(shipDate)) / (1000 * 60 * 60 * 24));
     return days > 0 ? days : 0;
   };
 
   // Calculate statistics
   const stats = {
-    totalShipments: trackingData.length,
-    inTransit: trackingData.filter(item => item.status === 'in_transit').length,
-    delivered: trackingData.filter(item => item.status === 'delivered').length,
-    delayed: trackingData.filter(item => item.status === 'delayed' || item.status === 'exception').length
+    totalShipments: shipments.length,
+    inTransit: shipments.filter(s => s.status === 'in_transit' || s.status === 'picked_up').length,
+    delivered: shipments.filter(s => s.status === 'delivered').length,
+    delayed: shipments.filter(s => s.status === 'exception' || s.total_delay_hours > 0).length,
   };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate(webRoutes.logistics)}
+                onClick={() => navigate(webRoutes.logisticsDashboard || '/logistics')}
                 className="p-2 rounded-lg hover:bg-gray-100"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Shipment Tracking</h1>
-                <p className="text-gray-600 mt-1">Real-time tracking of your cargo shipments</p>
+                <p className="text-gray-600 mt-1">
+                  Live tracking of your cargo shipments
+                  <span className="ml-2 text-xs text-gray-400">(auto-refreshes every 30s)</span>
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <button
-                onClick={loadTrackingData}
+                onClick={() => loadTrackingData(true)}
                 disabled={loading}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
@@ -311,8 +261,8 @@ const LogisticsTracking = () => {
                 Refresh
               </button>
               <button
-                onClick={() => navigate(webRoutes.logisticsShipmentCreate)}
-                className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
+                onClick={() => navigate(webRoutes.logisticsShipmentCreate || '/logistics/shipments/create')}
+                className="bg-gold hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Shipment
@@ -336,7 +286,6 @@ const LogisticsTracking = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -348,7 +297,6 @@ const LogisticsTracking = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -360,7 +308,6 @@ const LogisticsTracking = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -385,35 +332,34 @@ const LogisticsTracking = () => {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Tracking number, cargo..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Tracking number, cargo, carrier..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
               >
                 <option value="all">All Status</option>
+                <option value="preparing">Preparing</option>
+                <option value="picked_up">Picked Up</option>
                 <option value="in_transit">In Transit</option>
+                <option value="at_destination">At Destination</option>
                 <option value="delivered">Delivered</option>
-                <option value="delayed">Delayed</option>
-                <option value="pending_pickup">Pending Pickup</option>
-                <option value="customs_clearance">Customs Clearance</option>
                 <option value="exception">Exception</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Transport Method</label>
               <select
                 value={selectedMethod}
                 onChange={(e) => setSelectedMethod(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
               >
                 <option value="all">All Methods</option>
                 <option value="ocean_freight">Ocean Freight</option>
@@ -422,13 +368,12 @@ const LogisticsTracking = () => {
                 <option value="rail_transport">Rail Transport</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Time Frame</label>
               <select
                 value={selectedTimeFrame}
                 onChange={(e) => setSelectedTimeFrame(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
               >
                 <option value="all">All Time</option>
                 <option value="last_7_days">Last 7 Days</option>
@@ -442,7 +387,7 @@ const LogisticsTracking = () => {
         {/* Tracking Cards */}
         <div className="space-y-6">
           {loading ? (
-            Array.from({ length: 5 }).map((_, index) => (
+            Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="bg-white rounded-xl shadow-sm border p-6 animate-pulse">
                 <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
                 <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
@@ -450,41 +395,77 @@ const LogisticsTracking = () => {
                 <div className="h-2 bg-gray-200 rounded w-full"></div>
               </div>
             ))
+          ) : filteredData.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-xl shadow-sm border">
+              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                {shipments.length === 0 ? 'No Shipments Yet' : 'No Matching Shipments'}
+              </h3>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                {shipments.length === 0
+                  ? 'Create a shipment request to start tracking your cargo in real-time.'
+                  : "Try adjusting your search or filters to find what you're looking for."}
+              </p>
+              {shipments.length === 0 && (
+                <button
+                  onClick={() => navigate(webRoutes.logisticsRequestCreate || '/logistics/requests/create')}
+                  className="bg-gold hover:bg-custom_yellow text-white px-6 py-2.5 rounded-lg inline-flex items-center font-medium"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Shipment Request
+                </button>
+              )}
+            </div>
           ) : (
             filteredData.map((item) => (
               <div key={item.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
                 <div className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
                     <div className="flex-1 mb-4 lg:mb-0">
-                      <div className="flex items-center space-x-3 mb-2">
+                      <div className="flex items-center space-x-3 mb-2 flex-wrap gap-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">{item.tracking_number}</h3>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                          {item.status.replace('_', ' ').toUpperCase()}
+                          {getStatusLabel(item.status)}
                         </span>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(item.priority)}`}>
                           {item.priority.toUpperCase()}
                         </span>
+                        {item.tracking_events_count > 0 && (
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                            {item.tracking_events_count} events
+                          </span>
+                        )}
                       </div>
                       <p className="text-gray-600 mb-1">{item.cargo_description}</p>
-                      <div className="flex items-center text-sm text-gray-500">
-                        {getMethodIcon(item.shipping_method)}
-                        <span className="ml-1 mr-4">{item.shipping_method.replace('_', ' ').toUpperCase()}</span>
-                        <span className="mr-4">{item.weight} tons</span>
-                        <span>{formatCurrency(item.value)}</span>
+                      <div className="flex items-center text-sm text-gray-500 flex-wrap gap-2">
+                        <span className="flex items-center">
+                          {getMethodIcon(item.shipping_method)}
+                          <span className="ml-1">{item.shipping_method.replace(/_/g, ' ').toUpperCase()}</span>
+                        </span>
+                        <span>&middot;</span>
+                        <span>{item.weight} tons</span>
+                        {item.value > 0 && (
+                          <>
+                            <span>&middot;</span>
+                            <span>{formatCurrency(item.value)}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                     
                     <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Days in Transit</p>
-                        <p className="text-lg font-semibold text-gray-900">{getDaysInTransit(item.ship_date)}</p>
-                      </div>
+                      {item.status !== 'preparing' && (
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">Days in Transit</p>
+                          <p className="text-lg font-semibold text-gray-900">{getDaysInTransit(item.ship_date)}</p>
+                        </div>
+                      )}
                       <button
-                        onClick={() => navigate(`${webRoutes.logisticsShipments}/${item.shipment_id}`)}
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow"
+                        onClick={() => navigate(`/logistics/shipments/${item.shipment_id}`)}
+                        className="flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        View Details
+                        Details
                       </button>
                     </div>
                   </div>
@@ -492,25 +473,23 @@ const LogisticsTracking = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-1">Origin</p>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPin className="w-4 h-4 mr-1 text-green-600" />
-                        {item.origin}
+                      <div className="flex items-start text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1 mt-0.5 shrink-0 text-green-600" />
+                        <span className="line-clamp-2">{item.origin}</span>
                       </div>
                     </div>
-                    
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-1">Current Location</p>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Navigation className="w-4 h-4 mr-1 text-blue-600" />
-                        {item.current_location}
+                      <div className="flex items-start text-sm text-gray-600">
+                        <Navigation className="w-4 h-4 mr-1 mt-0.5 shrink-0 text-blue-600" />
+                        <span className="line-clamp-2">{item.current_location}</span>
                       </div>
                     </div>
-                    
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-1">Destination</p>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <MapPin className="w-4 h-4 mr-1 text-red-600" />
-                        {item.destination}
+                      <div className="flex items-start text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 mr-1 mt-0.5 shrink-0 text-red-600" />
+                        <span className="line-clamp-2">{item.destination}</span>
                       </div>
                     </div>
                   </div>
@@ -523,10 +502,10 @@ const LogisticsTracking = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${
+                        className={`h-2 rounded-full transition-all duration-500 ${
                           item.status === 'delivered' ? 'bg-green-600' :
-                          item.status === 'delayed' || item.status === 'exception' ? 'bg-orange-600' :
-                          'bg-blue-600'
+                          item.status === 'exception' ? 'bg-red-500' :
+                          'bg-gold'
                         }`}
                         style={{ width: `${item.progress_percentage}%` }}
                       ></div>
@@ -534,46 +513,35 @@ const LogisticsTracking = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-600">Ship Date</p>
-                      <p className="font-medium">{formatDate(item.ship_date)}</p>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-gray-600">Ship Date:</span>
+                      <span className="font-medium">{formatDate(item.ship_date)}</span>
                     </div>
-                    
-                    <div>
-                      <p className="text-gray-600">
-                        {item.status === 'delivered' ? 'Delivered' : 'Est. Delivery'}
-                      </p>
-                      <p className="font-medium">
-                        {item.status === 'delivered' && item.actual_delivery ? 
-                          formatDate(item.actual_delivery) : 
-                          formatDate(item.estimated_delivery)
-                        }
-                      </p>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-gray-600">
+                        {item.status === 'delivered' ? 'Delivered:' : 'Est. Delivery:'}
+                      </span>
+                      <span className="font-medium">
+                        {item.status === 'delivered' && item.actual_delivery
+                          ? formatDate(item.actual_delivery)
+                          : formatDate(item.estimated_delivery)}
+                      </span>
                     </div>
-                    
-                    <div>
-                      <p className="text-gray-600">Carrier</p>
-                      <p className="font-medium">{item.carrier}</p>
+                    <div className="flex items-center gap-1.5">
+                      <Truck className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-gray-600">Carrier:</span>
+                      <span className="font-medium">{item.carrier}</span>
                     </div>
                   </div>
 
-                  {item.estimated_delay > 0 && (
+                  {item.total_delay_hours > 0 && item.status !== 'delivered' && (
                     <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <div className="flex items-center">
-                        <AlertCircle className="w-4 h-4 text-orange-600 mr-2" />
+                        <AlertCircle className="w-4 h-4 text-orange-600 mr-2 shrink-0" />
                         <p className="text-sm text-orange-700">
-                          Estimated delay: {item.estimated_delay} hours
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {item.next_milestone && item.status !== 'delivered' && (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 text-blue-600 mr-2" />
-                        <p className="text-sm text-blue-700">
-                          Next milestone: {item.next_milestone}
+                          Delayed: {item.total_delay_hours} hours ({item.delays_count} incident{item.delays_count !== 1 ? 's' : ''})
                         </p>
                       </div>
                     </div>
@@ -584,11 +552,10 @@ const LogisticsTracking = () => {
           )}
         </div>
 
-        {filteredData.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No shipments found</p>
-            <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filters</p>
+        {/* Results count */}
+        {!loading && shipments.length > 0 && (
+          <div className="mt-6 text-center text-sm text-gray-500">
+            Showing {filteredData.length} of {shipments.length} shipment{shipments.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
