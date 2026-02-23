@@ -68,6 +68,12 @@ const NotificationPopOver = () => {
   const unreadCount = useNotificationsStore((s) =>
     typeof s.unreadCount === "function" ? s.unreadCount() : 0
   );
+  const fetchNotifications = useNotificationsStore((s) => s.fetchNotifications);
+
+  // Fetch notifications on mount so the badge shows immediately after reload
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   return (
     <div>
