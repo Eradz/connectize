@@ -1351,7 +1351,7 @@ export default function DealRoomDetail() {
                                   Temporary
                                 </span>
                               )}
-                              {p.id && (
+                              {canManageParticipants && p.id && p.role !== 'owner' && (
                                 <button
                                   onClick={async () => {
                                     if (window.confirm('Remove this participant?')) {
