@@ -44,6 +44,22 @@ const generalNotificationType = [
 
 const promotionsNotificationType = ["promotions", "announcement"];
 
+const businessHubNotificationType = [
+  "deal_room",
+  "deal_document",
+  "deal_milestone",
+  "job_application",
+  "event_update",
+  "marketplace",
+  "knowledge_hub",
+  "quote_accepted",
+  "quote_rejected",
+  "quote_received",
+  "new_shipment_request",
+  "shipment_status",
+  "warning",
+];
+
 const IndicatorBadge = ({ indicator, floating = false }) => {
   return (
     <>
@@ -108,7 +124,7 @@ export const NotificationItem = ({ isPopover = false }) => {
   // Only fetch notifications data, removed expensive useCompanies and useUsers hooks
   const isLoading = !notifications; // Simple loading check based on notifications state
 
-  const tabsHeader = ["General", "Promotions"];
+  const tabsHeader = ["General", "Promotions", "Business Hub"];
 
   const diffNotifications = isPopover
     ? notifications?.slice(0, 10)
@@ -126,6 +142,14 @@ export const NotificationItem = ({ isPopover = false }) => {
     () =>
       diffNotifications?.filter((notification) =>
         promotionsNotificationType.includes(notification.notification_type)
+      ),
+    [diffNotifications]
+  );
+
+  const businessHubNotifications = useMemo(
+    () =>
+      diffNotifications?.filter((notification) =>
+        businessHubNotificationType.includes(notification.notification_type)
       ),
     [diffNotifications]
   );
@@ -197,6 +221,12 @@ export const NotificationItem = ({ isPopover = false }) => {
                 key="promotions"
                 notifications={promotionsNotifications}
                 fallback="promotion"
+                isPopover={isPopover}
+              />,
+              <NotificationsArray
+                key="business-hub"
+                notifications={businessHubNotifications}
+                fallback="business hub"
                 isPopover={isPopover}
               />,
             ]}
