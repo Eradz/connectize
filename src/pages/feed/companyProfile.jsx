@@ -88,11 +88,13 @@ const CompanyProfile = React.memo(() => {
             };
       
       const loadDealRooms = async () => {
+          if (!company?.id) return;
           try {
             setLoading(true);
             const response = await dealRoomService.getAll(1, 4, {});
-            const rooms = (response?.results || response?.data || response).filter(room => room?.company == company.id) || [];
-            setDealRooms(Array.isArray(rooms) ? rooms : []);
+            const allRooms = response?.results || response?.data || response;
+            const rooms = Array.isArray(allRooms) ? allRooms.filter(room => room?.company == company.id) : [];
+            setDealRooms(rooms);
           } catch (error) {
             console.error('Failed to load deal rooms:', error);
             setDealRooms([]);
@@ -104,8 +106,11 @@ const CompanyProfile = React.memo(() => {
       useEffect(() => {
         loadMyRegistrations();
         loadCreatedJobs();
-        loadDealRooms();
       }, []);
+
+      useEffect(() => {
+        loadDealRooms();
+      }, [company?.id]);
 
   const headerProps = useMemo(
     () => ({
