@@ -401,7 +401,9 @@ export const ManageRepresentativesLink = ({ main = false }) => {
   return (
     <Link
       to="/co/representatives/manage"
+      className="bg-gold hover:bg-custom_yellow transition-colors text-sm font-medium py-2 px-4 rounded-full whitespace-nowrap"
     >
+      {main ? "Manage Representatives" : "Manage"}
     </Link>
   );
 };

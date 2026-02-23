@@ -259,6 +259,7 @@ const removeLeadingSlash = (path) => {
           {/* Company-specific routes with "co" prefix */}
           <Route path={removeLeadingSlash(webRoutes.bookmarks)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />
+          <Route path={removeLeadingSlash(webRoutes.assignRepresentative)} element={<AssignRepresentative />} />
           <Route path="co/:userId" element={<UserProfile />} />
           <Route path="co/:company" element={<CompanyProfile />} />
           <Route path="co/company/:company/edit" element={<EditCompanyPage />} />
