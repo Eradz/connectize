@@ -23,6 +23,30 @@ import TimeAgo from "../TimeAgo";
 import { VoiceNotePlayer } from "./MessageControl";
 import { LoadImageAttachment } from "./AttachmentLoader";
 
+/**
+ * Converts URLs in text to clickable links
+ */
+function linkifyText(text) {
+  if (!text) return text;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) =>
+    urlRegex.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:text-blue-800 underline break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  );
+}
+
 //
 
 const defaultEmptyMessages = [];
@@ -228,8 +252,8 @@ export default function MessageArea() {
                                   sender_info?.last_name || ""
                                 }`}
                           </h1>
-                          <p className="text-gray-700 hover:text-gray-900 transition-all duration-300">
-                            {message?.content.substring(0, readMoreLimit)}
+                          <p className="text-gray-700 hover:text-gray-900 transition-all duration-300 whitespace-pre-wrap break-words">
+                            {linkifyText(message?.content.substring(0, readMoreLimit))}
                             {message?.content.length > readMoreLimit && (
                               <>
                                 ...{" "}
