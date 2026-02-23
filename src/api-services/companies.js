@@ -38,7 +38,7 @@ export const getCompanyByIdOrEmail = async (id, ext) => {
     params = { id };
   } else {
     const currentUser = await getCurrentUser();
-    params = { profile: currentUser?.id };
+    params = { profile: currentUser?.email };
   }
 
   // if (ext) {
