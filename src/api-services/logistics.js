@@ -397,14 +397,14 @@ const logistics = {
   // Status update methods for requests
   approveRequest: async (id) => {
     const response = await api.patch(`/api/v1/logistics/requests/${id}/`, {
-      status: 'approved'
+      status: 'posted'
     });
     return response.data;
   },
 
   rejectRequest: async (id) => {
     const response = await api.patch(`/api/v1/logistics/requests/${id}/`, {
-      status: 'rejected'
+      status: 'cancelled'
     });
     return response.data;
   },
@@ -466,6 +466,18 @@ const logistics = {
   // Cargo Types (admin-managed lookup)
   getCargoTypes: async (params = {}) => {
     const response = await api.get('/api/v1/logistics/cargo-types/', { params });
+    return response.data;
+  },
+
+  // Award a quote on a shipment request
+  awardRequest: async (requestId, data) => {
+    const response = await api.post(`/api/v1/logistics/requests/${requestId}/award/`, data);
+    return response.data;
+  },
+
+  // Patch a shipment request (partial update)
+  patchRequest: async (requestId, data) => {
+    const response = await api.patch(`/api/v1/logistics/requests/${requestId}/`, data);
     return response.data;
   },
 
