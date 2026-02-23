@@ -9,6 +9,7 @@ import {
   Truck,
   ArrowRight,
   TrendingUp,
+  Handshake,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -21,7 +22,7 @@ import { listingService } from "../../../api-services/marketplace";
 import logistics from "../../../api-services/logistics";
 import { webRoutes } from "../../../lib/webRoutes";
 import LightParagraph from "../../ParagraphText";
-import { DealIcon } from "../../../icon/deal";
+// DealIcon replaced with Lucide Handshake for consistent icon sizing
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const formatCompactNumber = (num) => {
@@ -104,16 +105,18 @@ function useBusinessHubData() {
 
 // ─── Section Components ─────────────────────────────────────────────────────
 
-function ActivitySection({ icon: Icon, title, viewMoreUrl, children, isEmpty }) {
+function ActivitySection({ icon: Icon, iconBg, iconColor, title, viewMoreUrl, children, isEmpty }) {
   return (
-    <div className="space-y-1">
+    <div className="bg-white rounded-xl p-3 space-y-1">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          {isValidElement(Icon) ? (
-            Icon
-          ) : (
-            <Icon className="w-4 h-4 text-gray-500" />
-          )}
+          <div className={clsx("w-6 h-6 rounded-md flex items-center justify-center", iconBg || "bg-gray-100")}>
+            {isValidElement(Icon) ? (
+              Icon
+            ) : (
+              <Icon className={clsx("w-3.5 h-3.5", iconColor || "text-gray-600")} />
+            )}
+          </div>
           <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
             {title}
           </h3>
@@ -128,7 +131,7 @@ function ActivitySection({ icon: Icon, title, viewMoreUrl, children, isEmpty }) 
 
       <Link
         to={viewMoreUrl}
-        className="flex items-center justify-center gap-1 text-xs text-gray-400 hover:text-gray-800 transition-colors pt-1 pb-2 border-b border-gray-100"
+        className="flex items-center justify-center gap-1 text-xs text-gray-400 hover:text-gray-800 transition-colors pt-1 pb-1"
       >
         View more <ArrowRight className="w-3 h-3" />
       </Link>
@@ -154,7 +157,9 @@ function ActivityItem({ to, children, className }) {
 function DealRoomsSection({ deals = [] }) {
   return (
     <ActivitySection
-      icon={<DealIcon className="w-4 h-4" />}
+      icon={Handshake}
+      iconBg="bg-amber-50"
+      iconColor="text-amber-600"
       title="Deal Rooms"
       viewMoreUrl={webRoutes.dealRooms}
       isEmpty={deals.length === 0}
@@ -201,6 +206,8 @@ function JobsSection({ jobs = [] }) {
   return (
     <ActivitySection
       icon={Briefcase}
+      iconBg="bg-blue-50"
+      iconColor="text-blue-600"
       title="Jobs"
       viewMoreUrl={webRoutes.workforceJobs}
       isEmpty={jobs.length === 0}
@@ -235,6 +242,8 @@ function EventsSection({ events = [] }) {
   return (
     <ActivitySection
       icon={Calendar}
+      iconBg="bg-orange-50"
+      iconColor="text-orange-600"
       title="Events"
       viewMoreUrl={webRoutes.workforceEvents}
       isEmpty={events.length === 0}
@@ -287,6 +296,8 @@ function KnowledgeSection({ articles = [] }) {
   return (
     <ActivitySection
       icon={BookOpen}
+      iconBg="bg-purple-50"
+      iconColor="text-purple-600"
       title="Knowledge Hub"
       viewMoreUrl={webRoutes.knowledgeArticles}
       isEmpty={uniqueArticles.length === 0}
@@ -323,6 +334,8 @@ function MarketplaceSection({ listings = [] }) {
   return (
     <ActivitySection
       icon={ShoppingBag}
+      iconBg="bg-emerald-50"
+      iconColor="text-emerald-600"
       title="Marketplace"
       viewMoreUrl={webRoutes.marketplace}
       isEmpty={listings.length === 0}
@@ -358,6 +371,8 @@ function LogisticsSection({ requests = [] }) {
   return (
     <ActivitySection
       icon={Truck}
+      iconBg="bg-sky-50"
+      iconColor="text-sky-600"
       title="Logistics"
       viewMoreUrl={webRoutes.logisticsRequests}
       isEmpty={requests.length === 0}
@@ -430,7 +445,7 @@ export default function BusinessHubActivities() {
         <h2 className="text-sm font-bold text-gray-900">Business Hub</h2>
       </div>
 
-      <div className="bg-white rounded-xl p-3 space-y-3">
+      <div className="space-y-3">
         {isLoading ? (
           <ActivitySkeleton />
         ) : (
