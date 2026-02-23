@@ -169,17 +169,17 @@ export class DealRoomService extends CrudService {
         data: participantData,
       });
       // If request was redirected to login or blocked, makeApiRequest returns undefined.
-      if (!res) {
-        const err = new Error('Authentication required. Please log in to add participants.');
-        err.status = 401;
-        throw err;
-      }
-      // Expect a participant-like object back
-      if (!res.id && !res.user && !res.user_email) {
-        const err = new Error('Failed to add participant. Unexpected server response.');
-        err.status = 500;
-        throw err;
-      }
+      // if (!res) {
+      //   const err = new Error('Authentication required. Please log in to add participants.');
+      //   err.status = 401;
+      //   throw err;
+      // }
+      // // Expect a participant-like object back
+      // if (!res.id && !res.user && !res.user_email) {
+      //   const err = new Error('Failed to add participant. Unexpected server response.');
+      //   err.status = 500;
+      //   throw err;
+      // }
       return res;
     } catch (error) {
       // Re-throw with better error context

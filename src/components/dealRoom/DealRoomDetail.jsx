@@ -50,7 +50,7 @@ export default function DealRoomDetail() {
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const {user} = useAuth();
-
+  const [submitting, setSubmitting] = useState(false);
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1912,45 +1912,9 @@ export default function DealRoomDetail() {
                 if (apiParticipant && (apiParticipant.id || apiParticipant.user || apiParticipant.user_email)) {
                   apiSuccess = true;
                   console.log('✅ Successfully saved participant to database:', apiParticipant);
-                  await dealRoomAPI.createActivities(id, { activity_type: 'participant_added', description: `New participant added to the deal`, actor: user.id, target_user: participantForm.userId });
+                  // await dealRoomAPI.createActivities(id, { activity_type: 'participant_added', description: `New participant added to the deal`, actor: user.id, target_user: participantForm.userId });
                   notify.success("Participant invited and saved to database");
-                } else {
-                  throw new Error('Unexpected response when adding participant');
-                }
-              } catch (apiError) {
-                console.log('❌ Database save failed:', apiError);
-                console.log('Falling back to temporary storage...');
-                apiSuccess = false;
-              }
-              
-              // If API call fails, fall back to temporary storage
-              if (!apiSuccess) {
-                // Create mock participant for temporary display
-                const mockParticipant = {
-                  id: Date.now(), // Use timestamp to avoid ID conflicts
-                  user: {
-                    id: participantForm.userId,
-                    email: participantForm.userDisplay,
-                    first_name: participantForm.userDisplay.split('@')[0] || 'User',
-                    last_name: ''
-                  },
-                  user_name: participantForm.userDisplay,
-                  user_email: participantForm.userDisplay,
-                  email: participantForm.userDisplay,
-                  role: participantForm.role,
-                  permission_level: participantForm.permission_level,
-                  joined_at: new Date().toISOString(),
-                  is_active: true,
-                  _isTemporary: true // Flag to indicate this is temporary
-                };
-                
-                // Add to locally added participants for persistence across tab switches
-                setLocallyAddedParticipants(prev => [...prev, mockParticipant]);
-                setParticipants((prev) => [...prev, mockParticipant]);
-                notify.warning("Participant added temporarily (requires login to save to database)");
-              } else {
-                // Successfully saved to database: refresh from server to ensure counts/roles
-                try {
+                   try {
                   const res = await makeApiRequest({
                     url: `api/v1/deals/participants/`,
                     method: "GET",
@@ -1962,7 +1926,6 @@ export default function DealRoomDetail() {
                   // Fallback to appending if refresh fails
                   setParticipants((prev) => [...prev, apiParticipant]);
                 }
-              }
               
               // Reset form
               setParticipantForm({ userId: "", userDisplay: "", role: "observer", permission_level: "view" });
@@ -1970,6 +1933,44 @@ export default function DealRoomDetail() {
               setUserResults([]);
               setShowParticipantModal(false);
               
+                } else {
+                  throw new Error('Unexpected response when adding participant');
+                }
+              } catch (apiError) {
+                console.log('❌ Database save failed:', apiError);
+                console.log('Falling back to temporary storage...');
+                apiSuccess = false;
+              }
+              
+              // // If API call fails, fall back to temporary storage
+              // if (!apiSuccess) {
+              //   // Create mock participant for temporary display
+              //   const mockParticipant = {
+              //     id: Date.now(), // Use timestamp to avoid ID conflicts
+              //     user: {
+              //       id: participantForm.userId,
+              //       email: participantForm.userDisplay,
+              //       first_name: participantForm.userDisplay.split('@')[0] || 'User',
+              //       last_name: ''
+              //     },
+              //     user_name: participantForm.userDisplay,
+              //     user_email: participantForm.userDisplay,
+              //     email: participantForm.userDisplay,
+              //     role: participantForm.role,
+              //     permission_level: participantForm.permission_level,
+              //     joined_at: new Date().toISOString(),
+              //     is_active: true,
+              //     _isTemporary: true // Flag to indicate this is temporary
+              //   };
+                
+              //   // Add to locally added participants for persistence across tab switches
+              //   setLocallyAddedParticipants(prev => [...prev, mockParticipant]);
+              //   setParticipants((prev) => [...prev, mockParticipant]);
+              //   // notify.warning("Participant added temporarily (requires login to save to database)");
+              // } else {
+                //   // Successfully saved to database: refresh from server to ensure counts/roles
+              // }
+               
             } catch (error) {
               console.error('Participant invitation error:', error);
               notify.error((error?.status === 401 ? "Authentication required. Please log in." : "Failed to invite participant: ") + (error.message || "Unknown error"));
