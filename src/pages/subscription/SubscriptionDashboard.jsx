@@ -7,6 +7,7 @@ import subscriptionsApi from '../../api-services/subscriptions';
 import { useSubscription } from '../../context/SubscriptionContext';
 // import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
+import TrialBanner from '../../components/TrialBanner';
 
 // Card components
 const Card = ({ children, className = "", ...props }) => (
@@ -304,6 +305,10 @@ const SubscriptionDashboard = () => {
 
   return (
     <div className="min-h-screen  p-6">
+      <div className='mb-2'>
+      <TrialBanner persistent={true} />
+
+      </div>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-6">

@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import Sidebar from "../components/admin/markets/sidebar";
 import Navbar from "../components/userProfile/Navbar";
+import TrialBanner from "../components/TrialBanner";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
@@ -22,6 +23,7 @@ const AppLayout = () => {
 
   return (
     <main className="bg-background w-full lg:w-[80rem] lg:mx-auto h-screen flex flex-col flex-1 overflow-x-hidden ">
+      {/* <TrialBanner persistent={false} dismissibleDuration={180000} /> */}
       <Navbar />
       <section
         className={clsx(
@@ -43,7 +45,7 @@ const AppLayout = () => {
           )}
         >
           {/* Wrap Outlet to enforce full-width clamp */}
-            <div className="w-full xl:w-[968px] h-full mx-auto overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="w-full xl:w-[968px] h-full pb-14 lg:pb-0 mx-auto overflow-x-hidden overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Outlet />
           </div>
         </section>
