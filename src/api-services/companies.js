@@ -73,7 +73,7 @@ export const createCompany = async (data, resetForm) => {
 
   // await getOrCreateCompanySize(data.company_size);
 
-  if (!data.company_category === undefined || data.company_size === undefined) {
+  if (data.company_category === undefined || data.company_size === undefined) {
     toast.error("Incomplete data was provided");
     return;
   }

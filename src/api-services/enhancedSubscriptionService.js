@@ -3,7 +3,7 @@
  * Provides comprehensive subscription management with features, analytics, and billing
  */
 
-const API_BASE_URL = '/api/admin_permissions/api/v2';
+const API_BASE_URL = '/api/permissions/api/v2';
 
 class EnhancedSubscriptionService {
   
