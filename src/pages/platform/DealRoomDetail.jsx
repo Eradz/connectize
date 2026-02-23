@@ -840,13 +840,17 @@ export default function DealRoomDetail() {
                                     Download
                                   </button>
                                 )}
-                                {!d.access_granted && (
+                                {d.access_granted === false && (
                                   <button
                                     onClick={async () => {
-                                      const justification = window.prompt("Justification for access request", "Due diligence");
-                                      if (justification == null) return;
-                                      await dealDocumentService.requestAccess(d.id, justification);
-                                      notify.success("Access requested");
+                                      try {
+                                        const justification = window.prompt("Justification for access request", "Due diligence");
+                                        if (justification == null) return;
+                                        await dealDocumentService.requestAccess(d.id, justification);
+                                        notify.success("Access requested");
+                                      } catch (e) {
+                                        notify.error("Failed to request access: " + (e?.response?.data?.error || e.message || "Unknown error"));
+                                      }
                                     }}
                                     className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
                                   >
@@ -1178,6 +1182,11 @@ export default function DealRoomDetail() {
                 }
               } catch (apiError) {
                 console.log('❌ Database save failed:', apiError);
+                const httpStatus = apiError?.response?.status || apiError?.status;
+                if (httpStatus === 403) {
+                  notify.error("You don't have permission to add participants. Only admins can invite new members.");
+                  return;
+                }
                 console.log('Falling back to temporary storage...');
                 apiSuccess = false;
               }
