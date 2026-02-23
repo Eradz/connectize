@@ -3,7 +3,7 @@
  * Allows users to flag objectionable content for moderation
  * App Store Compliance Requirement
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -18,7 +18,7 @@ import {
   FormControl,
   FormLabel,
 } from "@chakra-ui/react";
-import { reportContent } from "../../api-services/moderation";
+import { reportContent, getReportTypes } from "../../api-services/moderation";
 
 const ReportModal = ({
   isOpen,
@@ -31,7 +31,7 @@ const ReportModal = ({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const reportTypes = [
+  const defaultReportTypes = [
     { value: "spam", label: "Spam or Misleading" },
     { value: "harassment", label: "Harassment or Bullying" },
     { value: "hate_speech", label: "Hate Speech" },
@@ -41,6 +41,24 @@ const ReportModal = ({
     { value: "inappropriate", label: "Inappropriate Content" },
     { value: "other", label: "Other" },
   ];
+  const [reportTypes, setReportTypes] = useState(defaultReportTypes);
+
+  // Fetch admin-managed report types
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const res = await getReportTypes();
+        const types = Array.isArray(res) ? res : res?.results || res?.data || [];
+        if (types.length > 0) {
+          setReportTypes(types.map(t => ({ value: t.name, label: t.display_name })));
+        }
+      } catch (err) {
+        console.error('Failed to fetch report types:', err);
+        // Keep default fallback
+      }
+    };
+    fetchTypes();
+  }, []);
 
   const handleSubmit = async () => {
     if (!description.trim()) {

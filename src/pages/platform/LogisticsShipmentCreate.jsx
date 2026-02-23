@@ -31,6 +31,32 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
+  const [cargoTypes, setCargoTypes] = useState([]);
+
+  // Fetch admin-managed cargo types
+  useEffect(() => {
+    const fetchCargoTypes = async () => {
+      try {
+        const res = await logisticsAPI.getCargoTypes();
+        const types = Array.isArray(res) ? res : res?.results || [];
+        setCargoTypes(types.map(t => ({ value: t.name, label: t.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch cargo types:', err);
+        setCargoTypes([
+          { value: 'crude_oil', label: 'Crude Oil' },
+          { value: 'refined_products', label: 'Refined Products' },
+          { value: 'natural_gas', label: 'Natural Gas' },
+          { value: 'drilling_equipment', label: 'Drilling Equipment' },
+          { value: 'pipes', label: 'Pipes & Tubulars' },
+          { value: 'chemicals', label: 'Chemicals' },
+          { value: 'general_cargo', label: 'General Cargo' },
+          { value: 'project_cargo', label: 'Project Cargo' },
+          { value: 'hazardous', label: 'Hazardous Materials' }
+        ]);
+      }
+    };
+    fetchCargoTypes();
+  }, []);
 
   const [formData, setFormData] = useState({
     // Shipment Basic Info
@@ -308,11 +334,11 @@ const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
         return `${dateStr}T00:00:00Z`;
       };
       
-      // Ensure cargo_type matches backend choices
-      const allowedCargoTypes = [
-        'crude_oil','refined_products','natural_gas','drilling_equipment',
-        'pipes','chemicals','general_cargo','project_cargo','hazardous'
-      ];
+      // Ensure cargo_type matches backend choices (use API-fetched types if available)
+      const allowedCargoTypes = cargoTypes.length > 0
+        ? cargoTypes.map(t => t.value)
+        : ['crude_oil','refined_products','natural_gas','drilling_equipment',
+           'pipes','chemicals','general_cargo','project_cargo','hazardous'];
       const normalizedCargoType = allowedCargoTypes.includes(formData.cargo_type)
         ? formData.cargo_type
         : 'general_cargo';
@@ -549,15 +575,9 @@ const renderStepIndicator = () => (
                       required
                     >
                       <option value="">Select cargo type</option>
-                      <option value="crude_oil">Crude Oil</option>
-                      <option value="refined_products">Refined Products</option>
-                      <option value="natural_gas">Natural Gas</option>
-                      <option value="drilling_equipment">Drilling Equipment</option>
-                      <option value="pipes">Pipes & Tubulars</option>
-                      <option value="chemicals">Chemicals</option>
-                      <option value="general_cargo">General Cargo</option>
-                      <option value="project_cargo">Project Cargo</option>
-                      <option value="hazardous">Hazardous Materials</option>
+                      {cargoTypes.map(type => (
+                        <option key={type.value} value={type.value}>{type.label}</option>
+                      ))}
                     </select>
                   </div>
 

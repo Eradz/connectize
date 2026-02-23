@@ -37,7 +37,6 @@ function Sidebar() {
         <CircleTitleSubtitleSkeleton />
       )}
       <NavigationSection />
-      {isMarketPages && <ProductCategory />}
     </nav>
   );
 }

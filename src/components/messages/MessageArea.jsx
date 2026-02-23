@@ -23,6 +23,33 @@ import TimeAgo from "../TimeAgo";
 import { VoiceNotePlayer } from "./MessageControl";
 import { LoadImageAttachment } from "./AttachmentLoader";
 
+/**
+ * Converts URLs in text to clickable links
+ */
+function linkifyText(text) {
+  if (!text) return text;
+  const splitRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(splitRegex);
+  return parts.map((part, i) => {
+    // Use a fresh regex (no /g) to avoid lastIndex issues
+    if (/^https?:\/\/[^\s]+/.test(part)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="!text-blue-600 hover:!text-blue-800 underline break-all font-semibold"
+          style={{ color: '#2563eb' }}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 //
 
 const defaultEmptyMessages = [];
@@ -200,11 +227,9 @@ export default function MessageArea() {
                         key={message?.id || index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        // className={clsx(
-                        //   "w-full p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2"
-                        // )}
                         className={clsx(
-                          "w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2  "
+                          "w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
+                          is_current_user && "ml-auto flex-row-reverse"
                         )}
                       >
                         <Link to={`/co/${sender_info?.id}`} className="h-fit">
@@ -217,7 +242,10 @@ export default function MessageArea() {
                         </Link>
                         <div
                           className={clsx(
-                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm bg-white rounded-md p-3 pt-1 flex flex-col"
+                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col",
+                            is_current_user
+                              ? "bg-white"
+                              : "bg-custom_yellow/30"
                           )}
                         >
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
@@ -227,8 +255,8 @@ export default function MessageArea() {
                                   sender_info?.last_name || ""
                                 }`}
                           </h1>
-                          <p className="text-gray-700 hover:text-gray-900 transition-all duration-300">
-                            {message?.content.substring(0, readMoreLimit)}
+                          <p className="text-gray-700 hover:text-gray-900 transition-all duration-300 whitespace-pre-wrap break-words">
+                            {linkifyText(message?.content.substring(0, readMoreLimit))}
                             {message?.content.length > readMoreLimit && (
                               <>
                                 ...{" "}

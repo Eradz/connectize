@@ -42,7 +42,7 @@ const Navbar = () => {
 
   return (
     <>
-      <Headroom>
+      <Headroom style={{ zIndex: 50 }}>
         <nav 
           className="w-full min-h-16 flex items-center bg-white z-[99999] ios-safe-top"
           style={{ 
@@ -53,7 +53,6 @@ const Navbar = () => {
           <section
             id="header-mobile-popover-container"
             className="sm:container max-xs:px-2 max-sm:px-4 w-full py-2 flex items-center justify-between !gap-2 lg:!gap-10 xl:!gap-14 shadow-sm"
-            style={{ overflowX: "hidden" }}
           >
             <div className={weirdFlex}>
               <Logo size="50px" />

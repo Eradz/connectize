@@ -182,6 +182,12 @@ const workforce = {
     return response.data;
   },
 
+  // Event Types
+  getEventTypes: async (params = {}) => {
+    const response = await api.get('/api/v1/workforce/event-types/', { params });
+    return response.data;
+  },
+
   // Contracts and Agreements
   getContracts: async (params = {}) => {
     const response = await api.get('/api/v1/workforce/contracts/', { params });

@@ -71,41 +71,24 @@ const subscriptions = {
 
   // Current user subscription - matches backend /api/v1/subscriptions/current/
   getCurrentUserSubscription: async () => {
-    const response = await api.get('/api/v1/subscriptions/current/');
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/current/');
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) {
+        return { subscription: null, usage: null, plan_features: null };
+      }
+      throw e;
+    }
   },
 
   // Subscription Features
   getSubscriptionFeatures: async (params = {}) => {
-    // Primary (intended) endpoint
+    // Primary: Permission system available features endpoint
     try {
-      const response = await api.get('/api/v1/subscriptions/features/', { params });
-      if (response?.data) return response.data;
-    } catch (e) {
-      // Suppress noisy 404 warnings; proceed to fallbacks silently for 404
-      if (e?.response?.status !== 404) {
-        console.warn('Primary subscription features endpoint error, attempting fallbacks:', e?.message);
-      }
-    }
-
-    // Fallback 1: Enhanced v2 endpoint (returns richer structure)
-    try {
-      const enhanced = await api.get('/api/v2/subscription/features/', { params });
-      if (enhanced?.data) {
-        // Normalize: expect features_by_category at root
-        if (enhanced.data.features_by_category) return enhanced.data;
-        if (enhanced.data.features) return { features_by_category: enhanced.data.features };
-      }
-    } catch (e2) {
-      console.warn('Enhanced v2 subscription features endpoint unavailable:', e2?.message);
-    }
-
-    // Fallback 2: Permission system available features endpoint (correct path)
-    try {
-      const available = await api.get('/api/permissions/features/available/');
+      const available = await api.get('/api/permissions/features/available/', { params });
       if (available?.data) {
         const rawCategories = available.data.features_by_category || {};
-        // Ensure each feature has a minimum_plan for filtering logic (fallback to required_plan or default trial)
         const normalizedCategories = Object.fromEntries(
           Object.entries(rawCategories).map(([cat, feats]) => [
             cat,
@@ -118,18 +101,31 @@ const subscriptions = {
         return {
           features_by_category: normalizedCategories,
           total_features: available.data.total_features,
-          source: 'permissions_available_normalized'
+          source: 'permissions_available'
         };
       }
-    } catch (e3) {
-      if (e3?.response?.status !== 404) {
-        console.warn('Permissions available features endpoint failed:', e3?.message);
+    } catch (e) {
+      if (e?.response?.status !== 404) {
+        console.warn('Permissions features endpoint error:', e?.message);
       }
     }
 
-    // Fallback 3: Enhanced features by category
+    // Fallback 1: Enhanced v2 subscription features
     try {
-      const byCat = await api.get('/api/v2/features/by-category/');
+      const enhanced = await api.get('/api/permissions/api/v2/subscription/features/', { params });
+      if (enhanced?.data) {
+        if (enhanced.data.features_by_category) return enhanced.data;
+        if (enhanced.data.features) return { features_by_category: enhanced.data.features };
+      }
+    } catch (e2) {
+      if (e2?.response?.status !== 404) {
+        console.warn('Enhanced v2 subscription features endpoint unavailable:', e2?.message);
+      }
+    }
+
+    // Fallback 2: Enhanced features by category
+    try {
+      const byCat = await api.get('/api/permissions/api/v2/features/by-category/', { params });
       if (byCat?.data) {
         const raw = byCat.data.features_by_category || byCat.data || {};
         const normalized = Object.fromEntries(
@@ -143,12 +139,12 @@ const subscriptions = {
         );
         return {
           features_by_category: normalized,
-          source: 'v2_features_by_category_normalized'
+          source: 'v2_features_by_category'
         };
       }
-    } catch (e4) {
-      if (e4?.response?.status !== 404) {
-        console.warn('Enhanced features by category endpoint failed:', e4?.message);
+    } catch (e3) {
+      if (e3?.response?.status !== 404) {
+        console.warn('Enhanced features by category endpoint failed:', e3?.message);
       }
     }
 
@@ -331,7 +327,7 @@ const subscriptions = {
   // Usage and Analytics
   getUsageAnalytics: async (params = {}) => {
     try {
-      const response = await api.get('/api/v1/subscriptions/usage-analytics/', { params });
+      const response = await api.get('/api/permissions/api/v2/subscription/analytics/', { params });
       // If response is null (404 handled by makeApiRequest), return fallback
       if (!response || !response.data) {
         return { usage: null, source: 'missing_endpoint' };
@@ -345,18 +341,35 @@ const subscriptions = {
   },
 
   getSubscriptionAnalytics: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/analytics/', { params });
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/analytics/', { params });
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) {
+        return { usage_trends: null, cost_optimization: null, forecasting: null };
+      }
+      throw e;
+    }
   },
 
   getRevenueAnalytics: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/revenue-analytics/', { params });
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/revenue-analytics/', { params });
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) return { data: [] };
+      throw e;
+    }
   },
 
   getChurnAnalytics: async (params = {}) => {
-    const response = await api.get('/api/v1/subscriptions/churn-analytics/', { params });
-    return response.data;
+    try {
+      const response = await api.get('/api/v1/subscriptions/churn-analytics/', { params });
+      return response.data;
+    } catch (e) {
+      if (e?.response?.status === 404 || e?.status === 404) return { data: [] };
+      throw e;
+    }
   },
 
   // Subscription Management Actions

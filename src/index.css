@@ -243,6 +243,38 @@ a {
   background-color: #f1c644 !important;
 }
 
+/* Post carousel swiper styles */
+.post-carousel .swiper-pagination {
+  bottom: 8px !important;
+}
+.post-carousel .swiper-pagination-bullet {
+  background-color: #fff;
+  opacity: 0.7;
+  width: 7px;
+  height: 7px;
+  transition: all 0.3s ease;
+}
+.post-carousel .swiper-pagination-bullet-active {
+  background-color: #3b82f6 !important;
+  opacity: 1;
+  width: 20px;
+  border-radius: 4px;
+}
+/* Dynamic slide container */
+.post-carousel .swiper-slide {
+  transition: height 0.3s ease;
+}
+.post-carousel .swiper-slide img {
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+}
+/* Hide default swiper navigation (we use custom arrows) */
+.post-carousel .swiper-button-next,
+.post-carousel .swiper-button-prev {
+  display: none !important;
+}
+
 .page-container {
   display: flex;
 }

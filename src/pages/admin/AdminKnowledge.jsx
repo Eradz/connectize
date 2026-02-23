@@ -56,6 +56,26 @@ const AdminKnowledge = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [articleTypes, setArticleTypes] = useState([]);
+
+  // Fetch admin-managed article types
+  useEffect(() => {
+    const fetchArticleTypes = async () => {
+      try {
+        const res = await knowledgeHub.getArticleTypes();
+        const data = res?.data || res;
+        const types = Array.isArray(data) ? data : data?.results || [];
+        setArticleTypes(types.map(t => ({ value: t.name, label: t.display_name })));
+      } catch (err) {
+        console.error('Failed to fetch article types:', err);
+        setArticleTypes([
+          { value: 'article', label: 'Article' },
+          { value: 'forum', label: 'Forum Discussion' }
+        ]);
+      }
+    };
+    fetchArticleTypes();
+  }, []);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -515,8 +535,9 @@ const AdminKnowledge = () => {
               <FormControl>
                 <FormLabel>Content Type</FormLabel>
                 <Select placeholder="Select content type">
-                  <option value="article">Article</option>
-                  <option value="forum">Forum Discussion</option>
+                  {articleTypes.map(type => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl>

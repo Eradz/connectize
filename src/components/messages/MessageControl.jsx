@@ -226,11 +226,15 @@ export default function MessageControl() {
       );
     };
     // scrollToBottom();
+  }, []);
+
+  // Auto-resize textarea as content changes
+  useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, []);
+  }, [message]);
 
   return (
     <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 md:bottom-4">
@@ -243,7 +247,7 @@ export default function MessageControl() {
           header="Attachment"
         />
       )}
-      <section className="flex items-center gap-2">
+      <section className="flex items-end gap-2">
         {showEmojiPicker && renderEmojiGifPickers}
         <ChooseAttachment handleFileChange={handleFileChange} />
         {audioURL ? (
@@ -257,11 +261,11 @@ export default function MessageControl() {
         ) : (
           <textarea
             ref={textareaRef}
-            type="text"
+            rows={1}
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="flex-1 text-sm border-0 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed scrollbar-hidden resize-none bg-transparent max-h-32 rounded-md transition-all duration-300 pt-3"
+            className="flex-1 text-sm border-0 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed scrollbar-hidden resize-none bg-transparent max-h-32 rounded-md transition-all duration-300 py-2"
             placeholder="Type a message here..."
             disabled={loading}
           />

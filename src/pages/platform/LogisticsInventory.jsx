@@ -255,9 +255,6 @@ const LogisticsInventoryEnhanced = () => {
           : [];
         
         setInventory(items);
-        if (items.length === 0) {
-          toast.info('No inventory items found for your account.');
-        }
       } else {
         const errMsg = inventoryResult.reason?.message || 'Unknown error';
         if (errMsg.includes('Authentication required') || inventoryResult.reason?.status === 401) {

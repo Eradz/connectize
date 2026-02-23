@@ -200,8 +200,12 @@ export const useMessagesStore = create((set, get) => ({
       // console.log("🔍 Room parts:", roomParts);
 
       if (roomParts.length === 3 && roomParts[0] === "room") {
-        const currentUserId = parseInt(roomParts[1]);
-        const recipientId = parseInt(roomParts[2]);
+        const id1 = parseInt(roomParts[1]);
+        const id2 = parseInt(roomParts[2]);
+        const actualCurrentUserId = getCurrentUserId();
+        // The recipient is whichever ID is NOT the current user
+        const recipientId = (id1 === actualCurrentUserId) ? id2 : id1;
+        const currentUserId = (id1 === actualCurrentUserId) ? id1 : id2;
         console.log(
           "🔍 Parsed IDs - current:",
           currentUserId,

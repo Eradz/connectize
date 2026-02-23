@@ -254,7 +254,7 @@ export default function Marketplace() {
         keywords={seoData.keywords}
       />
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white border-b sticky top-0 z-[5]">
         <div className="container py-4">
           <div className="flex items-center justify-between gap-4">
             <HeadingText>Marketplace</HeadingText>
@@ -290,40 +290,57 @@ export default function Marketplace() {
       </div>
       
       <div className="container py-6">
-        {/* Filters Toggle */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover:bg-gray-50"
-          >
-            <Filter size={18} />
-            Filters
-          </button>
-          
-          <div className="flex items-center gap-4">
-            <Link to="/marketplace/my-listings" className="text-sm text-primary hover:underline">
-              My Listings
-            </Link>
-            <Link to="/marketplace/orders" className="text-sm text-primary hover:underline">
-              My Orders
-            </Link>
+        {/* Type Toggle + Filters */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center justify-between">
+            {/* Type Toggle Buttons */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1">
+              {[
+                { value: '', label: 'All' },
+                { value: 'product', label: 'Products' },
+                { value: 'inventory', label: 'Inventory' },
+                { value: 'service', label: 'Services' },
+              ].map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => {
+                    setFilters(prev => ({ ...prev, listing_type: type.value }));
+                    // Auto-fetch on toggle
+                    setTimeout(() => fetchListings(), 0);
+                  }}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                    filters.listing_type === type.value
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {type.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover:bg-gray-50"
+              >
+                <Filter size={18} />
+                Filters
+              </button>
+              <Link to="/marketplace/my-listings" className="text-sm text-primary hover:underline hidden sm:block">
+                My Listings
+              </Link>
+              <Link to="/marketplace/orders" className="text-sm text-primary hover:underline hidden sm:block">
+                My Orders
+              </Link>
+            </div>
           </div>
         </div>
         
         {/* Filters Panel */}
         {showFilters && (
           <div className="bg-white p-4 rounded-lg shadow mb-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <select
-                value={filters.listing_type}
-                onChange={(e) => setFilters({...filters, listing_type: e.target.value})}
-                className="border rounded-lg px-3 py-2"
-              >
-                <option value="">All Types</option>
-                <option value="product">Products</option>
-                <option value="inventory">Inventory</option>
-                <option value="service">Services</option>
-              </select>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               
               <select
                 value={filters.condition}

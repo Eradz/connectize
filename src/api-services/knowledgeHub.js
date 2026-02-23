@@ -66,6 +66,9 @@ export const knowledgeHubAPI = {
   search: (query, params = {}) => api.get(`${KNOWLEDGE_BASE_URL}/search/`, { 
     params: { q: query, ...params } 
   }),
+
+  // Article Types (admin-managed lookup)
+  getArticleTypes: (params = {}) => api.get(`${KNOWLEDGE_BASE_URL}/article-types/`, { params }),
 };
 
 export default knowledgeHubAPI;

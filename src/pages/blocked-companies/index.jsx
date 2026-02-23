@@ -73,7 +73,7 @@ const BlockedCompaniesPage = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <Spinner size="xl" color="blue.500" />
+        <Spinner size="xl" color="yellow.500" />
       </div>
     );
   }
@@ -102,8 +102,8 @@ const BlockedCompaniesPage = () => {
           <LightParagraph className="text-gray-500 mb-6">
             You haven't blocked any companies yet. When you block a company, they'll appear here.
           </LightParagraph>
-          <Link to={webRoutes.home}>
-            <Button colorScheme="blue" variant="outline">
+          <Link to={webRoutes.companies}>
+            <Button colorScheme="yellow" variant="outline">
               Discover Companies
             </Button>
           </Link>
