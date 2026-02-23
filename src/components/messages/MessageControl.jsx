@@ -226,11 +226,15 @@ export default function MessageControl() {
       );
     };
     // scrollToBottom();
+  }, []);
+
+  // Auto-resize textarea as content changes
+  useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, []);
+  }, [message]);
 
   return (
     <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 md:bottom-4">
