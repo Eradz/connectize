@@ -288,7 +288,7 @@ if(currentPath.includes("update")) {
             loadingCompanies={loadingCompanies}
             userCompanies={userCompanies}
             experienceLevels={experienceLevels}
-            departments={departments}
+            departments={specializations}
             currentSkill={currentSkill}
             setCurrentSkill={setCurrentSkill}
             addSkill={addSkill}
