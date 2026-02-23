@@ -38,12 +38,13 @@ export function goToLogin() {
   ]);
 
   // Avoid redirecting back to login (or other auth pages) as the "next" target
-  const nextPath = Array.from(authPaths).some((p) => pathname.startsWith(p))
+  const search = window.location.search || "";
+  const fullPath = Array.from(authPaths).some((p) => pathname.startsWith(p))
     ? "/"
-    : pathname;
+    : pathname + search;
 
   const url =
-    nextPath && nextPath !== "/" ? `/login?next=${nextPath}` : "/login";
+    fullPath && fullPath !== "/" ? `/login?next=${encodeURIComponent(fullPath)}` : "/login";
   window.location.replace(url);
 }
 

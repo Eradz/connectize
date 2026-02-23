@@ -113,3 +113,16 @@ export const acceptRepRequest = async (id, data) => {
 
   return result;
 };
+
+export const resendRepInvitation = async (id) => {
+  const result = await makeApiRequest({
+    url: `api/representatives/${id}/resend-invitation/`,
+    method: "POST",
+  });
+
+  if (result?.success) {
+    toast.success("Invitation resent successfully");
+  }
+
+  return result;
+};
