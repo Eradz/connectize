@@ -468,35 +468,13 @@ const WorkforceEvents = () => {
       {/* Header */}
       <div className="pt-2 md:py-6 flex flex-col md:flex-row">
         <BackArrowButton  className={"w-fit"}/>
-        <div className="flex flex-col ">
-          <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col w-full">
+          <div className="flex justify-between items-center mb-6 ">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Industry Events</h1>
               <p className="text-gray-600 mt-1">Professional development, networking & training opportunities</p>
             </div>
-            <div className="flex justify-end space-x-3">
-              {/* <Link
-                to={webRoutes.workforceMyBookmarks}
-                className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Bookmark className="w-4 h-4 mr-2" />
-                Bookmarks
-              </Link>
-              <Link
-                to={webRoutes.workforceMyEvents}
-                className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <CalendarCheck className="w-4 h-4 mr-2" />
-                Events
-              </Link>
-              <Link
-                to={webRoutes.workforceCompanyEarnings}
-                className="hidden md:flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <DollarSign className="w-4 h-4 mr-2" />
-                Earnings
-              </Link> */}
-              <Link
+            <Link
                 to={webRoutes.workforceEventCreate}
                 className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
               >
@@ -505,7 +483,6 @@ const WorkforceEvents = () => {
                 Create Event
                 </p>
               </Link>
-            </div>
           </div>
           
           {/* Mobile Quick Access Menu */}

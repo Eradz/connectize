@@ -320,13 +320,14 @@ a {
           overflow-x: auto;
           overflow-y: hidden;
           -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
+          padding-bottom: 8px;
+          /* scrollbar-width: none; */
           scroll-behavior: smooth;
         }
 
-        .tabs-wrapper::-webkit-scrollbar {
+        /* .tabs-wrapper::-webkit-scrollbar {
           display: none;
-        }
+        } */
 /* ===================================
    React Quill Editor Custom Styles
    =================================== */
