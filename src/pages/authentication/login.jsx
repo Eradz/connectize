@@ -40,11 +40,14 @@ function Login() {
 
   const nextParam = searchParams.get("next");
 
+  // Decode the next parameter in case it was encoded (e.g. contains query params)
+  const decodedNext = nextParam ? decodeURIComponent(nextParam) : null;
+
   const navigateTo =
     user && user?.is_first_time_user
       ? "/profile"
-      : searchParams.has("next")
-        ? nextParam
+      : decodedNext
+        ? decodedNext
         : "/";
 
   const formValues = {

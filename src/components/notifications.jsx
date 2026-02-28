@@ -9,7 +9,7 @@ import {
 import { DeleteForever, RemoveCircle } from "@mui/icons-material";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { memo, useCallback, useEffect, useMemo } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   deleteAllNotifications,
@@ -23,26 +23,11 @@ import { useNotificationsStore } from "../stores/notificationsStore";
 import { useAuth } from "../context/userContext";
 import { ButtonWithTooltipIcon } from "./ButtonWithTooltipIcon";
 import CompanyName from "./company/CompanyName";
-import CustomTabs from "./custom/tabs";
 import { avatarStyle } from "./ResponsiveNav";
 import SeeMoreLink from "./SeeMoreLink";
 import { NotificationsSkeleton } from "./skeletons/notification";
 import TimeAgo from "./TimeAgo";
 // import { getNotificationsForUser } from "../hooks/usePolling";
-
-const generalNotificationType = [
-  "like",
-  "comment",
-  "reply",
-  "follow",
-  "bookmark",
-  "favorite",
-  "connection",
-  "representation",
-  "messaging",
-];
-
-const promotionsNotificationType = ["promotions", "announcement"];
 
 const IndicatorBadge = ({ indicator, floating = false }) => {
   return (
@@ -108,27 +93,9 @@ export const NotificationItem = ({ isPopover = false }) => {
   // Only fetch notifications data, removed expensive useCompanies and useUsers hooks
   const isLoading = !notifications; // Simple loading check based on notifications state
 
-  const tabsHeader = ["General", "Promotions"];
-
   const diffNotifications = isPopover
     ? notifications?.slice(0, 10)
     : notifications;
-
-  const generalNotifications = useMemo(
-    () =>
-      diffNotifications?.filter((notification) =>
-        generalNotificationType.includes(notification.notification_type)
-      ),
-    [diffNotifications]
-  );
-
-  const promotionsNotifications = useMemo(
-    () =>
-      diffNotifications?.filter((notification) =>
-        promotionsNotificationType.includes(notification.notification_type)
-      ),
-    [diffNotifications]
-  );
 
   const handleMarkAllAsRead = useCallback(async () => {
     markAllAsRead();
@@ -184,22 +151,10 @@ export const NotificationItem = ({ isPopover = false }) => {
             )}
           </header>
 
-          <CustomTabs
-            tabsHeading={tabsHeader}
-            tabsPanels={[
-              <NotificationsArray
-                key="general"
-                fallback="general"
-                notifications={generalNotifications}
-                isPopover={isPopover}
-              />,
-              <NotificationsArray
-                key="promotions"
-                notifications={promotionsNotifications}
-                fallback="promotion"
-                isPopover={isPopover}
-              />,
-            ]}
+          <NotificationsArray
+            notifications={diffNotifications}
+            fallback=""
+            isPopover={isPopover}
           />
 
           {isPopover && notifications?.length > 10 && (
@@ -222,7 +177,7 @@ const NotificationsArray = memo(
       >
         {notifications.length <= 0 ? (
           <p className="text-sm text-gray-400 text-center my-5">
-            No {fallback} notifications yet...
+            No notifications yet...
           </p>
         ) : (
           notifications?.map((notification, index) => {

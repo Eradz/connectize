@@ -630,7 +630,7 @@ const LogisticsHubDashboard = () => {
                     <div className="space-y-3">
                       {dashboardData.shipments.data.length > 0 ? (
                         dashboardData.shipments.data.slice(0, 3).map((shipment) => (
-                          <div key={shipment.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
+                          <Link key={shipment.id} to={webRoutes.logisticsShipmentDetail.replace(':id', shipment.id)} className="block bg-white border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
                                 <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -662,7 +662,7 @@ const LogisticsHubDashboard = () => {
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         ))
                       ) : (
                         <div className="bg-white border rounded-xl p-8 text-center">
@@ -691,7 +691,7 @@ const LogisticsHubDashboard = () => {
                     <div className="space-y-3">
                       {dashboardData.requests.data.length > 0 ? (
                         dashboardData.requests.data.slice(0, 3).map((request, index) => (
-                          <div key={request.id} className="bg-white border rounded-xl p-4 hover:shadow-sm transition-shadow">
+                          <Link key={request.id} to={webRoutes.logisticsRequestDetail.replace(':id', request.id)} className="block bg-white border rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
                             <div className="flex items-center space-x-3">
                               <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
                                 {getRequestIcon(index)}
@@ -710,7 +710,7 @@ const LogisticsHubDashboard = () => {
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         ))
                       ) : (
                         <div className="bg-white border rounded-xl p-8 text-center">
@@ -771,7 +771,7 @@ const LogisticsHubDashboard = () => {
                     <div className="space-y-2">
                       {dashboardData.inventory.data.length > 0 ? (
                         dashboardData.inventory.data.slice(0, 5).map((item) => (
-                          <div key={item.id} className="bg-white border rounded-lg p-3 hover:shadow-sm transition-shadow">
+                          <Link key={item.id} to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)} className="block bg-white border rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
                             <div className="flex items-start space-x-3">
                               <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <AlertTriangle className="w-4 h-4" />
@@ -785,7 +785,7 @@ const LogisticsHubDashboard = () => {
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         ))
                       ) : (
                         <div className="bg-white border rounded-lg p-6 text-center">

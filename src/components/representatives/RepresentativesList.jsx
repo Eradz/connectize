@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   cancelOrDeclineRepRequest,
   changeRepStatus,
+  resendRepInvitation,
 } from "../../api-services/representatives";
 import { capitalizeFirst } from "../../lib/utils";
 import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
@@ -119,6 +120,18 @@ const RepsTile = ({
               >
                 {invited ? "Remove representative" : "Cancel Request"}
               </Badge>
+              {!invited && (
+                <>
+                  {" "}&bull;{" "}
+                  <Badge
+                    className="!text-[.6rem] cursor-pointer"
+                    colorScheme="yellow"
+                    onClick={() => resendRepInvitation(id)}
+                  >
+                    Resend Invitation
+                  </Badge>
+                </>
+              )}
             </>
           </small>
         </div>

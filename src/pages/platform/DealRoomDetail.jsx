@@ -46,6 +46,17 @@ export default function DealRoomDetail() {
   const session = getSession();
   const userId = user?.id ?? session?.user?.id;
 
+  // Permission state from API
+  const [userPermissions, setUserPermissions] = useState({
+    permission_level: null,
+    roles: [],
+    can_view: false,
+    can_comment: false,
+    can_edit: false,
+    can_admin: false,
+    is_initiator: false,
+  });
+
   // Early validation - don't even render if ID is invalid
   if (!id || id === 'my-participations' || id === 'create' || !id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
     console.warn('Invalid deal ID detected, redirecting:', id);
@@ -102,6 +113,33 @@ export default function DealRoomDetail() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // Fetch permissions from API
+  useEffect(() => {
+    if (!id || !userId) return;
+    let cancelled = false;
+    async function fetchPerms() {
+      try {
+        const res = await makeApiRequest({
+          url: `api/v1/deals/deal-rooms/${id}/my_permissions/`,
+          method: "GET",
+        });
+        if (!cancelled && res) {
+          setUserPermissions(res);
+        }
+      } catch (err) {
+        console.warn('Could not fetch deal room permissions:', err);
+      }
+    }
+    fetchPerms();
+    return () => { cancelled = true; };
+  }, [id, userId]);
+
+  // Derived permission flags
+  const canEdit = userPermissions.can_edit || userPermissions.can_admin ||
+    (userId && deal?.initiator && String(deal.initiator) === String(userId));
+  const canAdmin = userPermissions.can_admin || userPermissions.is_initiator ||
+    (userId && deal?.initiator && String(deal.initiator) === String(userId));
 
   // Backend role and permission options
   const roleOptions = [
@@ -392,19 +430,13 @@ export default function DealRoomDetail() {
             </div>
             <div className="flex space-x-2">
               <Link to={webRoutes.dealRooms} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">Back to Deals</Link>
-              {userId && deal?.initiator && (
-                String(deal.initiator) === String(userId) ||
-                participants?.some(p => String(p.user) === String(userId) && p.permission_level === 'admin')
-              ) && (
+              {canAdmin && (
                 <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-custom_yellow">Edit Deal Room</Link>
               )}
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats — only for participants with edit/admin access */}
-          {userId && deal?.initiator && (
-            String(deal.initiator) === String(userId) ||
-            participants?.some(p => String(p.user) === String(userId) && ['admin', 'edit'].includes(p.permission_level))
-          ) && (
+          {canEdit && (
           <div className="mt-4 flex flex-wrap gap-2">
             <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="inline-flex items-center px-3 py-2 rounded-md border text-sm hover:bg-gray-50">
               <Plus className="h-4 w-4 mr-2" />
@@ -840,13 +872,17 @@ export default function DealRoomDetail() {
                                     Download
                                   </button>
                                 )}
-                                {!d.access_granted && (
+                                {d.access_granted === false && (
                                   <button
                                     onClick={async () => {
-                                      const justification = window.prompt("Justification for access request", "Due diligence");
-                                      if (justification == null) return;
-                                      await dealDocumentService.requestAccess(d.id, justification);
-                                      notify.success("Access requested");
+                                      try {
+                                        const justification = window.prompt("Justification for access request", "Due diligence");
+                                        if (justification == null) return;
+                                        await dealDocumentService.requestAccess(d.id, justification);
+                                        notify.success("Access requested");
+                                      } catch (e) {
+                                        notify.error("Failed to request access: " + (e?.response?.data?.error || e.message || "Unknown error"));
+                                      }
                                     }}
                                     className="px-3 py-1.5 rounded border text-sm hover:bg-gray-100"
                                   >
@@ -1178,6 +1214,11 @@ export default function DealRoomDetail() {
                 }
               } catch (apiError) {
                 console.log('❌ Database save failed:', apiError);
+                const httpStatus = apiError?.response?.status || apiError?.status;
+                if (httpStatus === 403) {
+                  notify.error("You don't have permission to add participants. Only admins can invite new members.");
+                  return;
+                }
                 console.log('Falling back to temporary storage...');
                 apiSuccess = false;
               }
