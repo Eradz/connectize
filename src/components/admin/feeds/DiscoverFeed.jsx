@@ -5,6 +5,7 @@ import { useGetCurrentCompany } from "../../../hooks";
 import { CompanyUserType } from "../../../lib/helpers/types";
 import CreatePost from "./CreatePost";
 import DiscoverPosts from "./DiscoverPosts";
+import { webRoutes } from "../../../lib/webRoutes";
 
 const DiscoverFeed = () => {
   const { user: currentUser, setUser } = useAuth();
@@ -21,14 +22,14 @@ const DiscoverFeed = () => {
       <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">
         <h1 className="text-2xl font-bold">Discover</h1>
         {currentUser &&
-          // currentUser?.user_type === CompanyUserType &&
+          currentUser?.user_type === CompanyUserType &&
           (currentUser?.is_first_time_user || companies.length < 1) && (
             <Link
               to={
                 currentUser?.is_first_time_user
                   ? "/update-profile"
                   : currentUser && currentUser?.user_type === CompanyUserType
-                  ? "create-company"
+                  ? webRoutes.createCompany
                   : ""
               }
               className="hover:!no-underline !underline !text-gray-400 hover:!text-black font-semibold text-sm"
@@ -39,7 +40,7 @@ const DiscoverFeed = () => {
             </Link>
           )}
       </section>
-      <CreatePost />
+      {currentUser?.user_type === CompanyUserType && <CreatePost />}
       <DiscoverPosts />
     </section>
   );

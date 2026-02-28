@@ -11,6 +11,7 @@ import { ImageSelect } from "../../components/form/customInput";
 import StepButton from "../../components/profile/StepButton";
 import { customFormikFieldValidator } from "../../lib/utils";
 import { FormikCtx } from "./context";
+import { webRoutes } from "../../lib/webRoutes";
 
 const FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export const SUPPORTED_FORMATS = [
@@ -146,7 +147,7 @@ const CompanyDocuments = () => {
         <StepButton
           doStepChange={doStepChange}
           stepDirection="back"
-          nextStep="company-information"
+          nextStep={webRoutes.companyInformation}
           stepText="Back"
         />
         <StepButton

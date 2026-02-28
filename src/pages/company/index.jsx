@@ -8,6 +8,7 @@ import SEO from "../../components/SEO";
 import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
 import { FormikCtx } from "./context";
+import { webRoutes } from "../../lib/webRoutes";
 
 export const validationSchema = Yup.object().shape({
   company_name: Yup.string().required("Company name cannot be empty"),
@@ -173,7 +174,7 @@ const CreateCompany = () => {
         <div></div>
         <StepButton
           doStepChange={doStepChange}
-          nextStep="company-information"
+          nextStep={webRoutes.companyInformation}
           stepText="Next"
         />
       </div>

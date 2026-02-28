@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import StepButton from "../../components/profile/StepButton";
 import { FormikCtx } from "./context";
+import { webRoutes } from "../../lib/webRoutes";
 
 export const validationSchema = Yup.object().shape({
   company_registration_no: Yup.string().required("Field cannot be empty"),
@@ -85,12 +86,12 @@ const CompanyInformation = () => {
         <StepButton
           doStepChange={doStepChange}
           stepDirection="back"
-          nextStep="create-company"
+          nextStep={webRoutes.createCompany}
           stepText="Back"
         />
         <StepButton
           doStepChange={doStepChange}
-          nextStep="company-documents"
+          nextStep={webRoutes.companyDocuments}
           stepText="Next"
         />
       </div>
