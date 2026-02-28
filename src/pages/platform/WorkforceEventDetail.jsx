@@ -583,11 +583,13 @@ const WorkforceEventDetail = () => {
           {/* Main Content */}
           <div className="md:bg-white space-y-8 px-4 py-6">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-gold via-yellow-500 to-yellow-600">
-              
-
-
-
+            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-gold via-yellow-500 to-yellow-600"
+            style={{
+              backgroundImage: `url(${event.image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+            >
               <div className="relative p-6 ">
                 <div className="flex flex-col md:flex-row md:gap-6 lg:gap-8 items-start">
                   {/* Event Info */}

@@ -21,7 +21,7 @@ const DiscoverFeed = () => {
       <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">
         <h1 className="text-2xl font-bold">Discover</h1>
         {currentUser &&
-          currentUser?.user_type === CompanyUserType &&
+          // currentUser?.user_type === CompanyUserType &&
           (currentUser?.is_first_time_user || companies.length < 1) && (
             <Link
               to={
@@ -39,7 +39,7 @@ const DiscoverFeed = () => {
             </Link>
           )}
       </section>
-      {currentUser?.user_type === CompanyUserType && <CreatePost />}
+      <CreatePost />
       <DiscoverPosts />
     </section>
   );
