@@ -135,8 +135,8 @@ export const editPost = async (id, body, postItem) => {
     url: `api/posts/${id}/`,
     method: "PUT",
     data: {
-      body,
       ...postItem,
+      body,
     },
   });
 
