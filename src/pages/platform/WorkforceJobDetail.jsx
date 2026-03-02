@@ -98,7 +98,14 @@ export default function WorkforceJobDetail() {
   return (
     <div className="min-h-screen">
       <div className='flex py-6'>
-        <BackArrowButton />
+        <Link
+          to= {webRoutes.workforceJobs}
+          className="flex gap-2 md:gap-0 w-fit md:w-[6%] bg-white p-2 h-[50%] hover:bg-gray-100 rounded-lg transition-colors mb-4 md:mr-4"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-700" />
+          <span className='md:hidden'>Back</span>
+        </Link>
         <div>
             <h1 className="text-3xl font-bold text-gray-900">Job details</h1>
             <p className="mt-2 text-gray-600">

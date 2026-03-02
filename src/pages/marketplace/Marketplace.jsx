@@ -140,8 +140,8 @@ export default function Marketplace() {
 
   const renderListingCard = (listing) => (
     <div
-      key={listing.id}
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+      key={listing.id} 
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col justify-between "
     >
       {/* Image */}
       <div className="relative h-48 bg-gray-100">
@@ -188,7 +188,7 @@ export default function Marketplace() {
       </div>
       
       {/* Content */}
-      <div className="p-4">
+      <div className="flex flex-col flex-grow justify-between p-4">
         <Link
           to={`/marketplace/listing/${listing.id}`}
           className="block hover:text-primary"
@@ -211,12 +211,12 @@ export default function Marketplace() {
         )}
         
         {/* Price */}
-        <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-lg font-bold text-primary">
+        <div className="flex flex-wrap items-baseline gap-2 mb-3">
+          <span className="text-sm md:text-lg font-bold text-primary">
             ${parseFloat(listing.price).toFixed(2)}
           </span>
           {listing.compare_at_price && (
-            <span className="text-sm text-gray-400 line-through">
+            <span className="text-xs md:text-sm text-gray-400 line-through">
               ${parseFloat(listing.compare_at_price).toFixed(2)}
             </span>
           )}
@@ -237,10 +237,10 @@ export default function Marketplace() {
             handleAddToCart(listing.id);
           }}
           disabled={!listing.is_in_stock}
-          className="w-full mt-3 py-2 px-4 bg-gold text-white rounded-lg text-sm font-medium hover:bg-gold/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full mt-3 py-2 md:spx-4 bg-gold text-white rounded-lg text-sm font-medium hover:bg-gold/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1 md:gap-2"
         >
           <ShoppingCart size={16} />
-          Add to Cart
+          <span className="text-sm md:text-base">Add to Cart</span>
         </button>
       </div>
     </div>
