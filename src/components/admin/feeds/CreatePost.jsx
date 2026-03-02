@@ -162,7 +162,7 @@ function CreatePost() {
   );
 
   return (
-    <section className="bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
+    <section className="hidden md:block bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
       {companies.length > 1 && (
         <div className="mb-2 flex items-center gap-1.5">
           <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Post as:</span>

@@ -16,6 +16,8 @@ import { NavigationSection } from "../NavigationSection";
 import { NotificationPopOver } from "../notifications";
 import { JoinedUserCompanyImages } from "../ResponsiveNav";
 import { webRoutes } from "../../lib/webRoutes";
+import { SearchOutlined} from "@ant-design/icons";
+import { SearchIcon } from "lucide-react";
 
 const Navbar = () => {
   const { user: currentUser } = useAuth();
@@ -60,8 +62,13 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-3 xs:gap-5 md:gap-7 shrink-0">
+              <span className="hidden md:flex">
               {currentUser?.user_type === CompanyUserType && <NavbarDropdown />}
+              </span>
               <div className="flex pt-2 gap-3 xs:gap-5 md:gap-7 shrink-0">
+              <Link to={webRoutes.search} className="md:hidden">
+                <SearchIcon className="font-bold" width={20} height={20} />
+              </Link>
                 <Link to={webRoutes.messages} className="md:hidden">
                   <Message width={20} height={20} />
                 </Link>

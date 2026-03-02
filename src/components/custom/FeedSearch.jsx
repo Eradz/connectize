@@ -20,7 +20,7 @@ function FeedSearch({ className }) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative hidden md:block">
       <SearchOutlined className="absolute top-1/2 -translate-y-1/2 left-2.5 size-3 text-gray-400" />
       <input
         type="search"

@@ -28,6 +28,7 @@ const Profile = lazy(() => import("./components/profile/profile"));
 const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
 const ConfirmResetPassword = lazy(() => import("./pages/authentication/confirmPasswordReset"));
 const Login = lazy(() => import("./pages/authentication/login"));
+const CreatePostPage = lazy(() => import("./pages/posts/CreatePostPage"));
 const ReactivationPage = lazy(() => import("./pages/authentication/reactivation"));
 const ResetPasswordPage = lazy(() => import("./pages/authentication/reset-password"));
 const Signup = lazy(() => import("./pages/authentication/signup"));
@@ -205,6 +206,7 @@ const removeLeadingSlash = (path) => {
           <Route path="" element={<FeedLayout />}>
             <Route path="posts/:id" element={<SinglePostPage />} />
           </Route>
+          <Route path={removeLeadingSlash(webRoutes.createPost)} element={<CreatePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.profile)} element={<Profile />} />
 
           {/* Profile Update Routes */}
