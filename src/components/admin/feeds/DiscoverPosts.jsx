@@ -263,6 +263,8 @@ export const DiscoverPostItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(postItem?.body);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isEditLoading, setIsEditLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   // Show edit/delete if user is the post author OR owns the company that posted
   const isPostOwner = postItem?.user?.id === currentUser?.id || 
@@ -316,11 +318,24 @@ export const DiscoverPostItem = ({
                 text="Delete post"
                 IconName={TrashIcon}
                 onClick={async () => {
-                  await deletePost(postItem?.id);
-                  setRefetchInterval(1000);
-                  setTimeout(() => setRefetchInterval(false), 2000);
+                  setIsDeleteLoading(true);
+                  try {
+                    await deletePost(postItem?.id);
+                    setRefetchInterval(1000);
+                    setTimeout(() => setRefetchInterval(false), 2000);
+                    toast.success("Post deleted successfully");
+                  } catch (error) {
+                    toast.error("Failed to delete post");
+                    console.error("Delete error:", error);
+                  } finally {
+                    setIsDeleteLoading(false);
+                  }
                 }}
-                className="!text-red-700 hover:!text-red-500"
+                disabled={isDeleteLoading}
+                className={clsx(
+                  "!text-red-700 hover:!text-red-500",
+                  isDeleteLoading && "opacity-50 cursor-not-allowed"
+                )}
               />
             </div>
           </MoreOptions>
@@ -360,24 +375,34 @@ export const DiscoverPostItem = ({
 
           <Button
             className="!bg-gold block mt-4 float-right !text-sm"
+            isLoading={isEditLoading}
+            disabled={isEditLoading}
             onClick={async () => {
               setErrorMessage(null);
               if (editMessage.length < 10) {
                 setErrorMessage("Please at least 10 character length of text");
                 return;
               }
-              const { id } = await editPost(
-                postItem?.id,
-                editMessage,
-                postItem
-              );
-              setRefetchInterval(1000);
-              setTimeout(() => setRefetchInterval(false), 2000);
-              setIsEditing(false);
-              if (id) toast.success("Post updated successfully");
+              setIsEditLoading(true);
+              try {
+                const { id } = await editPost(
+                  postItem?.id,
+                  editMessage,
+                  postItem
+                );
+                setRefetchInterval(1000);
+                setTimeout(() => setRefetchInterval(false), 2000);
+                setIsEditing(false);
+                if (id) toast.success("Post updated successfully");
+              } catch (error) {
+                toast.error("Failed to update post");
+                console.error("Edit error:", error);
+              } finally {
+                setIsEditLoading(false);
+              }
             }}
           >
-            Edit post
+            {isEditLoading ? "Updating..." : "Edit post"}
           </Button>
         </ReusableModal>
       </header>
@@ -483,7 +508,6 @@ const CommentSection = ({
   const [loading, setLoading] = useState(false);
   const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
-  console.log("CommentsData", commentsData)
   const handleComment = useCallback(async () => {
     if (comment.trim().length < 1) return;
 

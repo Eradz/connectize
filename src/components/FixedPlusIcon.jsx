@@ -7,9 +7,12 @@ import { BriefCaseIcon, CompanyIcon, UserGroup } from "../icon";
 import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase, Pencil, PencilIcon, X } from "lucide-react";
 import { webRoutes } from "../lib/webRoutes";
+import { CompanyUserType } from "../lib/helpers/types";
+import { useGetCurrentCompany } from "../hooks";
 
 export default function FixedPlusIcon() {
   const { user: currentUser } = useAuth();
+  const { data: companies = [], isLoading } = useGetCurrentCompany();
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
@@ -29,8 +32,8 @@ export default function FixedPlusIcon() {
         color: "bg-green-500"
     },
     {
-        to: webRoutes.representativeManage,
-        text: "Add Representatives",
+        to: currentUser?.user_type === CompanyUserType ? webRoutes.createCompany : webRoutes.representativeManage,
+        text: (currentUser?.user_type === CompanyUserType && companies?.length < 1) ? "Create Company" : "Manage Representatives",
         IconName: UserGroup,
         color: "bg-pink-500"
     },
