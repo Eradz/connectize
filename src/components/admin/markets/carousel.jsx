@@ -79,7 +79,7 @@ export const CreateNewLink = ({
   return (
     <>
       {url === "null" ? (
-        <div className={sharedClassName} onClick={onClick}>
+        <div className={sharedClassName.replace("fixed", "absolute")} onClick={onClick}>
           <ButtonWithTooltipIcon
             tip={text}
             IconName={PlusIcon}
