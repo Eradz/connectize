@@ -71,7 +71,7 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
     { label: "New Deal Room", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.dealRoomCreate }, 
     { label: "Post Opening Jobs", color: "bg-[#95EB99]", icon: "+", to: webRoutes.workforceJobCreate },
     { label: "Create Profile", color: "bg-[#B1C7FC]", icon: "+", to: webRoutes.workforceProfileCreate }, 
-    { label: "Get Verified", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.subscriptionDashboard }
+    // { label: "Get Verified", color: "bg-[#F4D19B]", icon: "+", to: webRoutes.subscriptionDashboard }
   ];
 
   return (
@@ -110,7 +110,9 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
               <Link
                 to={action.to}
                 key={index}
-                className={`${action.color} flex items-center justify-center md:gap-2 px-4 py-2 md:py-3 rounded-lg text-sm md:font-medium transition-colors hover:opacity-90`}
+                className={`${action.color} flex items-center justify-center md:gap-2 px-4 py-2 md:py-3 rounded-lg text-sm md:font-medium transition-colors hover:opacity-90
+                ${index === 2 ? "col-span-2": "col-span-1"}
+                `}
               >
                <Plus className="" />
                <p>{action.label}</p> 

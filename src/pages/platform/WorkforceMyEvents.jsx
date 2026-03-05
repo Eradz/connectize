@@ -188,8 +188,8 @@ const WorkforceMyEvents = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <div className="p-4 md:px-0">
         {/* Header */}
         <div className='flex flex-col md:flex-row'>
             <BackArrowButton className={"w-fit"} />
@@ -274,7 +274,7 @@ const WorkforceMyEvents = () => {
           </div>
         ) : (
           /* Events List */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:gap-2 gap-4">
             {filteredEvents.map((event) => {
               const eventStatus = getEventStatus(event);
               const StatusIcon = eventStatus.status === 'completed' ? CheckCircle : 
@@ -282,9 +282,9 @@ const WorkforceMyEvents = () => {
                                 eventStatus.status === 'cancelled' ? XCircle : Clock;
 
               return (
-                <div key={event.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
+                <div key={event.id} className="px-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full">
                   {/* Status Badge */}
-                  <div className="px-6 pt-4">
+                  <div className="pt-4">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
                       ${eventStatus.color === 'green' ? 'bg-emerald-100 text-emerald-700' :
                         eventStatus.color === 'blue' ? 'bg-blue-100 text-blue-700' :
@@ -295,7 +295,7 @@ const WorkforceMyEvents = () => {
                   </div>
 
                   {/* Card Content */}
-                  <div className="px-6 py-3 flex-1 flex flex-col">
+                  <div className="py-3 flex-1 flex flex-col">
                     {/* Title */}
                     <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2">
                       {event.title}
@@ -360,7 +360,7 @@ const WorkforceMyEvents = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="px-6 pb-4 pt-2 flex flex-col gap-2">
+                  <div className="pb-4 pt-2 flex flex-col gap-1">
                     <Link
                       to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
                       className="w-full flex items-center justify-center px-4 py-2 bg-amber-400 text-slate-900 font-semibold rounded-lg hover:bg-amber-500 transition-colors text-sm"
