@@ -26,14 +26,14 @@ export default function PlatformModules({dashboardData}) {
       bgColor: "bg-blue-50",
       to: webRoutes.workforceJobs
     },
-    // {
-    //   icon: <AIIcon/>,
-    //   title: "AI Services",
-    //   description: "Intelligent matching and market insights",
-    //   link: `${dashboardData.opportunities.count} opportunity`,
-    //   bgColor: "bg-purple-50",
-    //   to: webRoutes.aiDashboard
-    // },
+    {
+      icon: <AIIcon/>,
+      title: "Knowledge Hub",
+      description: "Access industrial articles and resources",
+      link: `View Resources`,
+      bgColor: "bg-purple-50",
+      to: webRoutes.knowledgeHub
+    },
     {
       icon: <LogisticIcon/>,
       title: "Logistics Hub",
@@ -65,7 +65,7 @@ export default function PlatformModules({dashboardData}) {
       link: "Manage plan",
       bgColor: "bg-indigo-50",
       to: webRoutes.subscriptionDashboard
-    }
+    },
   ];
 
   return (

@@ -244,7 +244,7 @@ const KnowledgeForumDetail = () => {
   const totalPages = Math.ceil(totalTopics / pageSize);
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen px-4 md:px-0">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -255,62 +255,62 @@ const KnowledgeForumDetail = () => {
             <ChevronRight className="w-4 h-4" />
             <span className="text-gray-900">{forum.name}</span>
           </div>
-          
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{forum.name}</h1>
-              <p className="text-gray-600 mb-4">{forum.description}</p>
+          <div className='flex flex-col'>
+            <div className="flex flex-col md:flex-row items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{forum.name}</h1>
+                <p className="text-gray-600 mb-4">{forum.description}</p>
+              </div>
               
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
-                <div className="flex items-center space-x-1">
-                  <MessageSquare className="w-4 h-4" />
-                  <span>{formatNumber(forum.topic_count)} topics</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{formatNumber(forum.post_count)} posts</span>
-                </div>
-                {forum.moderators && forum.moderators.length > 0 && (
-                  <div className="flex items-center space-x-1">
-                    <Users className="w-4 h-4" />
-                    <span>{forum.moderators.length} moderator{forum.moderators.length !== 1 ? 's' : ''}</span>
-                  </div>
+              <div className="flex items-center space-x-3">
+                {forum.is_moderator && (
+                  <button onClick={onTogglePrivacy} className="px-3 py-2 border rounded hover:bg-gray-50">
+                    {forum.is_public ? 'Make Private' : 'Make Public'}
+                  </button>
                 )}
-                <div className="flex items-center space-x-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>Created {formatDate(forum.created_at)}</span>
-                </div>
+                {forum.is_member ? (
+                  <button onClick={onLeave} className="px-3 py-2 border rounded hover:bg-gray-50">Leave Forum</button>
+                ) : forum.membership_status === 'pending' ? (
+                  <span className="px-3 py-2 text-gray-600">Request Pending</span>
+                ) : (
+                  <button onClick={onRequestJoin} className="px-3 py-2 border rounded hover:bg-gray-50">Request to Join</button>
+                )}
+                {(forum.is_public || forum.is_member) && (
+                  <Link
+                    to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
+                    className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>New Topic</span>
+                  </Link>
+                )}
               </div>
             </div>
-            
-            <div className="flex items-center space-x-3">
-              {forum.is_moderator && (
-                <button onClick={onTogglePrivacy} className="px-3 py-2 border rounded hover:bg-gray-50">
-                  {forum.is_public ? 'Make Private' : 'Make Public'}
-                </button>
+            <div className="flex flex-wrap items-center justify-between md:justify-normal space-y-2 md:space-y-0 md:py-0 py-2 md:space-x-6 text-sm text-gray-500">
+              <div className="flex items-center space-x-1">
+                <MessageSquare className="w-4 h-4" />
+                <span>{formatNumber(forum.topic_count)} topics</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <MessageCircle className="w-4 h-4" />
+                <span>{formatNumber(forum.post_count)} posts</span>
+              </div>
+              {forum.moderators && forum.moderators.length > 0 && (
+                <div className="flex items-center space-x-1">
+                  <Users className="w-4 h-4" />
+                  <span>{forum.moderators.length} moderator{forum.moderators.length !== 1 ? 's' : ''}</span>
+                </div>
               )}
-              {forum.is_member ? (
-                <button onClick={onLeave} className="px-3 py-2 border rounded hover:bg-gray-50">Leave Forum</button>
-              ) : forum.membership_status === 'pending' ? (
-                <span className="px-3 py-2 text-gray-600">Request Pending</span>
-              ) : (
-                <button onClick={onRequestJoin} className="px-3 py-2 border rounded hover:bg-gray-50">Request to Join</button>
-              )}
-              {(forum.is_public || forum.is_member) && (
-                <Link
-                  to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                  className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>New Topic</span>
-                </Link>
-              )}
+              <div className="flex items-center space-x-1">
+                <Calendar className="w-4 h-4" />
+                <span>Created {formatDate(forum.created_at)}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="py-8">
         {/* Search and Filters */}
         <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -458,55 +458,67 @@ const KnowledgeForumDetail = () => {
           ) : (
             <div className="divide-y divide-gray-200">
               {topics.map((topic) => (
-                <div key={topic.id} className="p-6 hover:bg-gray-50">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0">
+                <div key={topic.id} className="p-4 md:p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col md:flex-row md:items-start gap-4">
+                    {/* Avatar */}
+                    <div className="flex-shrink-0 hidden md:block">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <User className="w-5 h-5 text-gold" />
                       </div>
                     </div>
                     
+                    {/* Main Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
+                      {/* Title and Icons */}
+                      <div className="flex items-start gap-2 mb-2">
                         {topic.is_pinned && (
-                          <Pin className="w-4 h-4 text-yellow-500" />
+                          <Pin className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
                         )}
                         {topic.status === 'locked' && (
-                          <Lock className="w-4 h-4 text-red-500" />
+                          <Lock className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                         )}
                         <Link
                           to={webRoutes.knowledgeForumTopicDetail?.replace(':slug', topic.slug) || '#'}
-                          className="text-lg font-semibold text-gray-900 hover:text-gold line-clamp-2"
+                          className="text-base md:text-lg font-semibold text-gray-900 hover:text-gold break-words"
                         >
                           {topic.title}
                         </Link>
                       </div>
                       
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>By {topic.author?.first_name} {topic.author?.last_name}</span>
-                        <span>{formatDate(topic.created_at)}</span>
+                      {/* Author and Date */}
+                      <div className="flex flex-col gap-2 text-xs md:text-sm text-gray-500 mb-3">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="whitespace-nowrap">By {topic.author?.first_name} {topic.author?.last_name}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="whitespace-nowrap">{formatDate(topic.created_at)}</span>
+                        </div>
                         {topic.last_reply_at && topic.last_reply_at !== topic.created_at && (
-                          <>
-                            <span>•</span>
-                            <span>Last reply {formatDate(topic.last_reply_at)}</span>
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="text-gray-400">Last reply</span>
+                            <span className="whitespace-nowrap">{formatDate(topic.last_reply_at)}</span>
                             {topic.last_post_author && (
-                              <span>by {topic.last_post_author}</span>
+                              <span className="whitespace-nowrap">by {topic.last_post_author}</span>
                             )}
-                          </>
+                          </div>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex-shrink-0 text-right">
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center space-x-1">
+                    {/* Stats */}
+                    <div className="flex-shrink-0 grid grid-cols-2 md:flex md:flex-col gap-3 md:gap-0 md:text-right">
+                      <div className="flex md:flex-col md:items-end gap-2 text-xs md:text-sm text-gray-500">
+                        <div className="flex items-center gap-1 md:justify-end">
                           <Eye className="w-4 h-4" />
                           <span>{formatNumber(topic.views)}</span>
                         </div>
-                        <div className="flex items-center space-x-1">
+                        <div className="flex md:hidden text-gray-400">views</div>
+                      </div>
+                      <div className="flex md:flex-col md:items-end gap-2 text-xs md:text-sm text-gray-500">
+                        <div className="flex items-center gap-1 md:justify-end">
                           <MessageCircle className="w-4 h-4" />
                           <span>{formatNumber(topic.replies)}</span>
                         </div>
+                        <div className="flex md:hidden text-gray-400">replies</div>
                       </div>
                     </div>
                   </div>
@@ -517,21 +529,21 @@ const KnowledgeForumDetail = () => {
           
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="p-6 border-t bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
+            <div className="p-4 md:p-6 border-t bg-gray-50">
+              <div className="flex flex-col gap-4 md:gap-0 md:flex-row md:items-center md:justify-between">
+                <div className="text-xs md:text-sm text-gray-700 text-center md:text-left">
                   Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalTopics)} of {totalTopics} topics
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center justify-center md:justify-end gap-2">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                    className="px-2 md:px-3 py-1 border border-gray-300 rounded text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
                   >
                     Previous
                   </button>
                   
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     {[...Array(Math.min(5, totalPages))].map((_, i) => {
                       const pageNum = Math.max(1, currentPage - 2) + i;
                       if (pageNum > totalPages) return null;
@@ -540,7 +552,7 @@ const KnowledgeForumDetail = () => {
                         <button
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
-                          className={`px-3 py-1 text-sm rounded ${
+                          className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded ${
                             pageNum === currentPage
                               ? 'bg-gold text-white'
                               : 'border border-gray-300 hover:bg-gray-100'
@@ -555,7 +567,7 @@ const KnowledgeForumDetail = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                    className="px-2 md:px-3 py-1 border border-gray-300 rounded text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
                   >
                     Next
                   </button>

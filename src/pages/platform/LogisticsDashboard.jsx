@@ -657,7 +657,7 @@ const LogisticsHubDashboard = () => {
                                     <span>{shipment.request_details.destination_address}</span>
                                   </div>
                                   <p className="text-sm font-semibold text-gray-900 mt-1">
-                                    ${shipment.request_details.budget_max.toLocaleString()}.00
+                                    ${shipment.request_details.budget_max.toLocaleString()}
                                   </p>
                                 </div>
                               </div>

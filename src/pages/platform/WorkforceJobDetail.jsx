@@ -6,11 +6,12 @@ import { workforceJobService } from "../../api-services/oilgas";
 import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar, Eye, ClockFading } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
-import { workforceAPI } from "../../api-services/workforce";
+import workforce, { workforceAPI } from "../../api-services/workforce";
 import { formatSalary, getExperienceBadgeColor, JobCount } from "../../components/workforce/jobcardUtils";
 import { JobCard } from "../../components/workforce/JobCard";
 import BackArrowButton from "../../components/BackArrowButton";
 import DownloadButton from "../../components/DownloadButton";
+import { useAuth } from "../../context/userContext";
 
 export default function WorkforceJobDetail() {
   const { id } = useParams();
@@ -21,7 +22,7 @@ export default function WorkforceJobDetail() {
   const [saved, setSaved] = useState(false);
   const [similarJobs, setSimilarJobs] = useState([]);
   const [similarLoading, setSimilarLoading] = useState(false);
-
+  const {user} = useAuth()
   // Apply form state
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,6 +30,9 @@ export default function WorkforceJobDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [resume, setResume] = useState(null);
+  const [showApplicants, setShowApplicants] = useState(false);
+  const [applicants, setApplicants] = useState([]);
+  const [loadingApplicants, setLoadingApplicants] = useState(false);
   const isApply = pathname.endsWith("/apply");
   const navigate = useNavigate();
 
@@ -92,9 +96,32 @@ export default function WorkforceJobDetail() {
         if (isMounted) setSimilarLoading(false);
       }
     }
+    const loadApplicants = async () => {
+      try {
+        setLoadingApplicants(true);
+        const response = await workforce.getJobApplications();
+        const applicantsData = response?.data?.results || response?.data || [];
+        setApplicants(applicantsData);
+      } catch (err) {
+        console.error('Error loading applicants:', err);
+        setApplicants([]);
+        toast.error('Failed to load applicants');
+      } finally {
+        setLoadingApplicants(false);
+      }
+    };
     loadSimilar();
+    loadApplicants();
     return () => { isMounted = false; };
   }, [job]);
+
+
+  const handleShowApplicants = () => {
+    setShowApplicants(true);
+  };
+
+  const isJobPoster = user?.id === job?.posted_by || user?.id === job?.created_by;
+
   return (
     <div className="min-h-screen">
       <div className='flex py-6'>
@@ -308,18 +335,35 @@ export default function WorkforceJobDetail() {
 
               <div className="bg-white border rounded-xl p-4">
                 <div className="space-y-2">
-                  <b>Apply for this job</b>
-                  <div className="text-sm text-gray-500">
-                    Please Note: Application typically takes 2-3 minutes
-                  </div>
-                  <button
-                    onClick={() => setShowApplicationModal(true)}
-                    className=" bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors flex items-center justify-center"
-                  >
-                    <Send className="h-4 w-4 mr-1" />
-                    Apply Now
-                  </button>
-                  
+                  {isJobPoster ? (
+                    <>
+                      <b>Job Applicants</b>
+                      <div className="text-sm text-gray-500">
+                        View and manage applications for this job
+                      </div>
+                      <button
+                        onClick={handleShowApplicants}
+                        className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors flex items-center justify-center"
+                      >
+                        <Users className="h-4 w-4 mr-1" />
+                        View Applicants ({applicants.length})
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <b>Apply for this job</b>
+                      <div className="text-sm text-gray-500">
+                        Please Note: Application typically takes 2-3 minutes
+                      </div>
+                      <button
+                        onClick={() => setShowApplicationModal(true)}
+                        className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors flex items-center justify-center"
+                      >
+                        <Send className="h-4 w-4 mr-1" />
+                        Apply Now
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -475,6 +519,87 @@ export default function WorkforceJobDetail() {
           </div>
         </form>
       </Modal>
+
+      {/* Applicants Modal */}
+      {showApplicants && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Applicants for "{job?.title}"
+              </h3>
+              <button
+                onClick={() => {
+                  setShowApplicants(false);
+                  setApplicants([]);
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {loadingApplicants ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 mx-auto mb-3"></div>
+                  <p className="text-slate-600">Loading applicants...</p>
+                </div>
+              ) : applicants.length > 0 ? (
+                <div className="space-y-3">
+                  {applicants.map((applicant) => (
+                    <div key={applicant.id} className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-gradient-to-br from-gold to-amber-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          {(applicant.full_name || applicant.user?.first_name || 'A').charAt(0).toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-slate-900">{applicant.full_name || applicant.user?.full_name || 'Unknown'}</h4>
+                        <p className="text-sm text-slate-600">
+                          {applicant.email || applicant.user?.email || 'No email provided'}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Applied: {new Date(applicant.created_at).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </p>
+                        {applicant.cover_letter && (
+                          <p className="text-sm text-slate-600 mt-2 line-clamp-2 italic">
+                            "{applicant.cover_letter}"
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0">
+                        {applicant.resume && (
+                          <a
+                            href={applicant.resume}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                          >
+                            View Resume
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-600">No applications yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
