@@ -16,7 +16,6 @@ const useWebSocket = (url, params, opts) => {
   const session = getSession();
 
   useEffect(() => {
-    console.log("Reconneding");
     const wsBaseUrl =
       process.env.NODE_ENV === "development"
         ? baseURL.replace("http", "ws")
@@ -47,13 +46,9 @@ const useWebSocket = (url, params, opts) => {
     //
     wsRef.current = new WebSocket(wsUrl);
 
-    wsRef.current.onopen = () => {
-      console.log("WebSocket Connected to:", wsUrl);
-    };
+    wsRef.current.onopen = () => {};
 
-    wsRef.current.onclose = () => {
-      console.warn("WebSocket Connection Closed:", wsUrl);
-    };
+    wsRef.current.onclose = () => {};
 
     wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -70,15 +65,15 @@ const useWebSocket = (url, params, opts) => {
   }, [params, session?.tokens?.access, url]);
 
   const sendMessage = (message) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ message }));
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ message }));
     }
   };
 
   // Function to send a command (e.g., mark as read)
   const sendCommand = (commandObject) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(commandObject));
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(commandObject));
     }
   };
 

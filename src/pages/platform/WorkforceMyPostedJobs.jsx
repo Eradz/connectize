@@ -58,7 +58,7 @@ const WorkforceMyPostedJobs = () => {
         case 'title':
           return (a.title || '').localeCompare(b.title || '');
         case 'applications':
-          return (b.application_count || 0) - (a.application_count || 0);
+          return (b.applications_count || 0) - (a.applications_count || 0);
         case 'created_at':
         default:
           return new Date(b.created_at || 0) - new Date(a.created_at || 0);
@@ -181,7 +181,7 @@ const WorkforceMyPostedJobs = () => {
               </div>
               <div className="">
                 <p className="text-2xl font-bold text-gray-900">
-                  {jobs.reduce((sum, job) => sum + (job.application_count || 0), 0)}
+                  {jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0)}
                 </p>
                 <p className="text-sm font-medium text-gray-600">Total Applications</p>
               </div>
@@ -194,7 +194,7 @@ const WorkforceMyPostedJobs = () => {
               </div>
               <div className="">
                 <p className="text-2xl font-bold text-gray-900">
-                  {jobs.length > 0 ? Math.round(jobs.reduce((sum, job) => sum + (job.application_count || 0), 0) / jobs.length) : 0}
+                  {jobs.length > 0 ? Math.round(jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0) / jobs.length) : 0}
                 </p>
                 <p className="text-sm font-medium text-gray-600">Avg. Applications</p>
               </div>

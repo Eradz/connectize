@@ -16,14 +16,11 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); // Start with loading=true
 
-  console.log('[UserProvider] Render - user:', user ? 'exists' : 'null', 'loading:', loading);
-
   /**
    * @param {boolean} onlyFetchUser if there is already a user, just refetch the user's details without actually refreshing the token. It also does not set the loading state to true while fetching the user's details
    */
   const fetchCurrentUser = useCallback(
     async (onlyFetchUser = false) => {
-      console.log('[UserProvider] fetchCurrentUser called, onlyFetchUser:', onlyFetchUser);
       const isRefreshing = onlyFetchUser && !!user;
 
       // only reload if we are not trying to refresh
