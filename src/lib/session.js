@@ -35,8 +35,6 @@ export const setSession = (value, expiresInDays = 730) => { // 2 years - essenti
     // Store a very far future expiry time (essentially permanent)
     const expiryTime = new Date().getTime() + (expiresInDays * 24 * 60 * 60 * 1000);
     localStorage.setItem(AUTH_SESSION_STORAGE + '_expiry', expiryTime.toString());
-    
-    console.log('✅ Session stored successfully (long-term)');
   } catch (e) {
     console.error('Session storage failed:', e);
   }
@@ -58,7 +56,6 @@ export const getSession = () => {
       if (encryptedSession) {
         const expiryTime = localStorage.getItem(AUTH_SESSION_STORAGE + '_expiry');
         if (expiryTime && new Date().getTime() > parseInt(expiryTime)) {
-          console.log('📅 localStorage session expired');
           localStorage.removeItem(AUTH_SESSION_STORAGE);
           localStorage.removeItem(AUTH_SESSION_STORAGE + '_expiry');
           return null;
@@ -73,8 +70,6 @@ export const getSession = () => {
 
     const decryptedSession = decryptData(encryptedSession);
     const session = JSON.parse(decryptedSession);
-    
-    console.log('[getSession] Retrieved from:', source, 'hasTokens:', !!session?.tokens, 'hasAccess:', !!session?.tokens?.access);
 
     // Re-sync storage for cross-platform compatibility
     if (source === 'localStorage' && session) {
@@ -96,7 +91,6 @@ export const removeSession = () => {
     Cookies.remove(AUTH_SESSION_COOKIE);
     localStorage.removeItem(AUTH_SESSION_STORAGE);
     localStorage.removeItem(AUTH_SESSION_STORAGE + '_expiry');
-    console.log('🗑️ Session removed from all storage');
   } catch (e) {
     console.error('Session removal failed:', e);
   }

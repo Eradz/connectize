@@ -1,4 +1,6 @@
 // API Configuration and Utilities
+import { getSession } from './session';
+
 const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL as string) || (import.meta.env?.VITE_API_URL as string) || 'http://localhost:8000';
 
 export interface ApiResponse<T = any> {
@@ -24,7 +26,8 @@ class ApiClient {
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('token');
+    const session = getSession();
+    const token = session?.tokens?.access;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -309,7 +312,8 @@ export const apiUtils = {
   // Handle authentication errors
   handleAuthError(response: ApiResponse<any>): boolean {
     if (response.status === 401) {
-      localStorage.removeItem('token');
+      // Use the same session removal as the rest of the app
+      import('./session').then(({ removeSession }) => removeSession());
       window.location.href = '/login';
       return true;
     }
