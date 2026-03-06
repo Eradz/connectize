@@ -78,7 +78,7 @@ const webRoutes = {
   workforceMyBookmarks: "/events/my-bookmarks",
   workforceCompanyEarnings: "/events/earnings",
   workforceApplications: "/applications",
-  workforceApplicationsManage: "/applications/manage",
+  workforceApplicationsManage: "/jobs/:id/applications",
   workforceDashboard: "/workforce/dashboard",
 
    // Dashboard & Overview

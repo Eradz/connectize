@@ -84,6 +84,7 @@ const WorkforceProfileCreate = lazy(() => import("./pages/platform/WorkforceProf
 const WorkforceProfileDetail = lazy(() => import("./pages/platform/WorkforceProfileDetail"));
 const WorkforceProfileEdit = lazy(() => import("./pages/platform/WorkforceProfileEdit"));
 const WorkforceApplications = lazy(() => import("./pages/platform/WorkforceApplications"));
+const WorkforceJobApplications = lazy(() => import("./pages/platform/WorkforceJobApplications"));
 const WorkforceEvents = lazy(() => import("./pages/platform/WorkforceEvents"));
 const WorkforceEventDetail = lazy(() => import("./pages/platform/WorkforceEventDetail"));
 const WorkforceEventCreate = lazy(() => import("./pages/platform/WorkforceEventCreate"));
@@ -307,6 +308,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.workforceJobDetail)} element={<WorkforceJobDetail />} />
           <Route path={removeLeadingSlash(webRoutes.workforceJobApply)} element={<WorkforceJobDetail />} />
           <Route path={removeLeadingSlash(webRoutes.workforceMyPostedJobs)} element={<WorkforceMyPostedJobs />} />
+          <Route path={removeLeadingSlash(webRoutes.workforceApplicationsManage)} element={<WorkforceJobApplications />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfiles)} element={<WorkforceProfessionals />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfileCreate)} element={<WorkforceProfileCreate />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfileDetail)} element={<WorkforceProfileDetail />} />
@@ -385,6 +387,7 @@ const removeLeadingSlash = (path) => {
           <Route path={toRelativePath(webRoutes.workforceJobs)} element={<WorkforceJobs />} />
           <Route path={toRelativePath(webRoutes.workforceJobCreate)} element={<WorkforceJobCreate />} />
           <Route path={toRelativePath(webRoutes.workforceMyPostedJobs)} element={<WorkforceMyPostedJobs />} />
+          <Route path={toRelativePath(webRoutes.workforceApplicationsManage)} element={<WorkforceJobApplications />} />
           <Route path={toRelativePath(webRoutes.workforceSavedJobs)} element={<WorkforceSavedJobs />} />
           <Route path={toRelativePath(webRoutes.workforceJobDetail)} element={<WorkforceJobDetail />} />
           <Route path={toRelativePath(webRoutes.workforceJobApply)} element={<WorkforceJobDetail />} />
