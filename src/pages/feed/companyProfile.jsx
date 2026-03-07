@@ -156,6 +156,14 @@ const CompanyProfile = React.memo(() => {
     : baseSeoData.title;
   const seoDescription = company?.company_description || baseSeoData.description;
 
+   const stats = useMemo(
+    () => [
+      `${formatNumber(company?.posts_count || 0)} /Posts`,
+      `${formatNumber(company?.followers_count || 0)} /Followers`,
+      `${formatNumber(company?.reviews_count || company?.reviews?.length || 0)} /Reviews`,
+    ],
+    [company]
+  );
   return (
     <section className="rounded-md overflow-hidden w-full">
       <SEO 
@@ -164,8 +172,17 @@ const CompanyProfile = React.memo(() => {
         keywords={baseSeoData.keywords}
       />
       <Header {...headerProps} />
-
-      <section className="mt-12 md:mt-20 flex max-xl:flex-col items-start gap-2 relative sm:px-2">
+     {/* Stats */}
+      <div className="mt-12 mb-2 flex gap-2 overflow-x-auto scrollbar-hidden px-2">
+        {currentUser?.email === company?.profile &&
+          currentUser?.user_type === CompanyUserType && (
+            <ManageRepresentativesLink main />
+          )}
+        {stats.map((text, index) => (
+          <StatsText key={index} text={text} />
+        ))}
+      </div>
+      <section className=" flex max-xl:flex-col items-start gap-2 relative sm:px-2">
               <ProductSidebar company={company} />
           <ProfileSection className="max-xl:w-full grid grid-cols-1 gap-2 flex-1 pt-0">
           <div className="">
@@ -410,14 +427,6 @@ export const ManageRepresentativesLink = ({ main = false }) => {
 };
 
 const ProductSidebar = React.memo(({ company }) => {
-  const stats = useMemo(
-    () => [
-      `${formatNumber(company?.posts_count || 0)} /Posts`,
-      `${formatNumber(company?.followers_count || 0)} /Followers`,
-      `${formatNumber(company?.reviews_count || company?.reviews?.length || 0)} /Reviews`,
-    ],
-    [company]
-  );
 
   const { user: currentUser } = useAuth();
   const [showReportModal, setShowReportModal] = useState(false);
@@ -450,16 +459,6 @@ const ProductSidebar = React.memo(({ company }) => {
 
   return (
     <section className="space-y-4 max-lg:mb-4 w-full xl:max-w-[350px] 2xl:max-w-[400px] shrink-0">
-      {/* Stats */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hidden">
-        {currentUser?.email === company?.profile &&
-          currentUser?.user_type === CompanyUserType && (
-            <ManageRepresentativesLink main />
-          )}
-        {stats.map((text, index) => (
-          <StatsText key={index} text={text} />
-        ))}
-      </div>
 
       {/* Summary Section */}
       <div className="bg-white border rounded-lg p-4">
@@ -542,39 +541,6 @@ const ProductSidebar = React.memo(({ company }) => {
           </div> */}
         </div>
       </div>
-
-      {/* My Accounts Section */}
-
-{/* <div className="bg-white border rounded-lg p-4">
-  <h2 className="text-lg font-bold mb-4">My Accounts</h2>
-  <div className="space-y-3">
-    {myAccounts.map((account) => (
-      <div key={account.id} className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#9CA3AF"/>
-            </svg>
-          </div>
-          <div>
-            <div className="flex items-center gap-1">
-              <p className="text-sm font-semibold">{account.name}</p>
-              {account.verified && (
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M7 0L8.5 5.5L14 7L8.5 8.5L7 14L5.5 8.5L0 7L5.5 5.5L7 0Z" fill="#1DA1F2"/>
-                </svg>
-              )}
-            </div>
-            <p className="text-xs text-gray-500">{account.username}</p>
-          </div>
-        </div>
-        <button className="text-gray-400 hover:text-black">
-          <DotsHorizontalIcon />
-        </button>
-      </div>
-    ))}
-  </div>
-</div> */}
 
 {/* People Associated Section */}
 <ProfileSection title="People Associated" className="h-fit">

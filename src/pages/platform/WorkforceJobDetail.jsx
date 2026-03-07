@@ -296,13 +296,13 @@ export default function WorkforceJobDetail() {
               <div className={`w-[90%] flex justify-between items-center space-x-1 text-['12px'] text-gray-500`}>
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-1" />
-                  {job.applications_count || 0} applicants
+                  {job?.applications_count || 0} applicants
                           </div>
                           <span className="bg-gray-400 w-[1px] h-4"></span>
                           <div className="flex items-center">
                             <Eye className="w-4 h-4 mr-1" />
                             {/* <DealIcon className="w-6 h-6" fill={"#ffffff"}/> */}
-                            {job.views_count || 0} views
+                            {job?.views_count || 0} views
                           </div>
               </div>
               {/* {<JobDetails />} */}
@@ -311,24 +311,24 @@ export default function WorkforceJobDetail() {
                 
                           <div className="flex items-center text-sm text-gray-600">
                             <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{formatSalary(job.salary_min, job.salary_max, job.currency)}</span>
+                            <span>{formatSalary(job?.salary_min, job?.salary_max, job?.currency)}</span>
                           </div>
                 
                           <div className="flex items-center text-sm text-gray-600">
                             <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                            <span>{job.location}</span>
-                            {job.requires_relocation && (
+                            <span>{job?.location}</span>
+                            {job?.requires_relocation && (
                               <span className="ml-2 text-orange-600">(Relocation Required)</span>
                             )}
                           </div>
                           
                           
                 
-                          {job.application_deadline && (
+                          {job?.application_deadline && (
                             <div className="flex items-center text-sm text-gray-600">
                               {/* <Calendar className="w-4 h-4 mr-2 text-gray-400" /> */}
                               <ClockFading className="w-4 h-4 mr-2 text-gray-400" />
-                              <span>Exp: {new Date(job.application_deadline).toLocaleDateString()}</span>
+                              <span>Exp: {new Date(job?.application_deadline).toLocaleDateString()}</span>
                             </div>
                           )}
                         </div>
@@ -342,11 +342,12 @@ export default function WorkforceJobDetail() {
                         View and manage applications for this job
                       </div>
                       <button
-                        onClick={handleShowApplicants}
-                        className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-white p-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors flex items-center justify-center"
+                        onClick={()=>navigate(webRoutes.workforceApplicationsManage.replace(":id", job?.id))}
+                        disabled={job?.applications_count === 0}
+                        className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] disabled:opacity-50 disabled:cursor-not-allowed text-white p-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors flex items-center justify-center"
                       >
                         <Users className="h-4 w-4 mr-1" />
-                        View Applicants ({applicants.length})
+                        View Applicants ({job?.applications_count || 0})
                       </button>
                     </>
                   ) : (
@@ -380,7 +381,7 @@ export default function WorkforceJobDetail() {
                   </div>
                 ) : similarJobs.length > 0 ? (
                   <div className="grid grid-col-1 md:grid-cols-2 gap-4">
-                    {similarJobs.map(job => <JobCard key={job.id} job={job}  />)}
+                    {similarJobs.map(job => <JobCard key={job?.id} job={job}  />)}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 px-4 bg-gray-50 rounded-lg border border-gray-200">

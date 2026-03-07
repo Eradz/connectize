@@ -197,13 +197,6 @@ return(
               <p className="text-[#FF0000] hidden md:flex">Delete</p>
             </button>
             <Link
-              to={webRoutes.workforceApplicationsManage.replace(':id', job.id)}
-              className="flex font-medium bg-blue-50 text-blue-700 p-2 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-                <Users className="w-4 h-4 md:mr-1" />
-                <p className="hidden md:flex">Applicants</p>
-            </Link>
-            <Link
               to={webRoutes.workforceJobDetail.replace(':id', job.id)}
               className="flex font-medium bg-pale_yellow p-2 rounded-lg"
             >
