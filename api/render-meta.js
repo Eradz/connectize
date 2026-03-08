@@ -8,7 +8,22 @@ const __dirname = path.dirname(__filename);
 const SITE_URL = "https://connectize.co";
 const API_ORIGIN = (process.env.VITE_API_BASE_URL || "https://about.connectize.co").replace(/\/$/, "");
 const DEFAULT_IMAGE = `${SITE_URL}/seo/default-image.png`;
-const TEMPLATE_PATH = path.join(__dirname, "..", "index.html");
+const TEMPLATE_CANDIDATES = [
+  path.join(__dirname, "..", "build", "client", "index.html"),
+  path.join(__dirname, "..", "index.html"),
+];
+
+async function readTemplateHtml() {
+  for (const candidate of TEMPLATE_CANDIDATES) {
+    try {
+      return await fs.readFile(candidate, "utf8");
+    } catch {
+      // Try the next candidate.
+    }
+  }
+
+  throw new Error("Unable to locate a usable index.html template");
+}
 
 function escapeHtml(value = "") {
   return String(value)
@@ -205,7 +220,7 @@ export default async function handler(req, res) {
 
   try {
     const [template, meta] = await Promise.all([
-      fs.readFile(TEMPLATE_PATH, "utf8"),
+      readTemplateHtml(),
       buildMetaForPath(requestPath),
     ]);
 
@@ -216,7 +231,7 @@ export default async function handler(req, res) {
     return res.status(200).send(html);
   } catch (error) {
     console.error("[render-meta] falling back to default HTML", error);
-    const template = await fs.readFile(TEMPLATE_PATH, "utf8");
+    const template = await readTemplateHtml();
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     return res.status(200).send(template);
   }
