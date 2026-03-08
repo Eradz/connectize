@@ -1,4 +1,0 @@
-source "https://rubygems.org"
-
-# Pin to a stable CocoaPods to avoid Ruby 3.4 IO timeout issues
-gem "cocoapods", "~> 1.15", ">= 1.15.2"
