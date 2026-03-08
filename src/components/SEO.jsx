@@ -15,7 +15,14 @@ export function createSEO({
   url,
   type = "website",
 }) {
-  const ogImage = image || "/seo/" + (relativeImagePath || "default-image.png");
+  const BASE_URL =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_FRONTEND_URL) ||
+    (typeof window !== "undefined" ? window.location.origin : "https://connectize.co");
+  const ogImage = image
+    ? image.startsWith("http")
+      ? image
+      : `${BASE_URL}${image}`
+    : `${BASE_URL}/seo/${relativeImagePath || "default-image.png"}`;
 
   //     <meta name="description" content={description} />
   // <meta name="keywords" content={keywords} />
