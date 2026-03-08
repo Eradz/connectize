@@ -21,10 +21,8 @@ export const authenticationService = async ({
    // Handle different response structures
     const payload = response?.results || response?.data || response;
     const success = Boolean(response?.success ?? payload?.success ?? true);
-    console.log(`✅ Authentication ${type} response:`, { success, hasTokens: !!(payload?.tokens) });
     if (type === "login") {
       const tokens = payload?.tokens;
-      console.log('🔑 Setting session with tokens:', { hasAccess: !!(tokens?.access), hasRefresh: !!(tokens?.refresh) });
       if (tokens?.access && tokens?.refresh) {
         // Clear any stale cached tokens before setting new session
         clearTokenCache();
@@ -40,7 +38,7 @@ export const authenticationService = async ({
     }
     return success;
   } catch (error) {
-    console.error("❌ Auth submission error:", error);
+    console.error("Auth submission error:", error);
     return false;
   }
 };

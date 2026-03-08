@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Product Listing | Connectize Marketplace",
+    description: "Browse and list products and equipment for the oil and gas industry on Connectize Marketplace.",
+  keywords: "product listing, marketplace, oil and gas equipment, industry supplies",
+  });
+
 import React from "react";
 import NewListing from "../../components/admin/listing/newListing";
 import { useAuth } from "../../context/userContext";

@@ -6,6 +6,11 @@ import Button from '../../components/ui/Button';
 import Toggle from '../../components/ui/Toggle';
 import Checkbox from '../../components/ui/Checkbox';
 import { SettingsIcon, EmailIcon, SecurityIcon, LinkIcon, ToolIcon, ErrorIcon, CheckIcon, RefreshIcon } from "../../components/ui/ModernIcon";
+import { getSession } from '../../lib/session';
+
+const rawBase = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 'http://127.0.0.1:8000';
+const baseRoot = rawBase.replace(/\/+$/, '');
+const apiBase = baseRoot.endsWith('/api') ? baseRoot : `${baseRoot}/api`;
 
 // System Settings & Configuration Component
 const AdminSystemSettings = () => {
@@ -115,12 +120,14 @@ const AdminSystemSettings = () => {
   const saveSettings = async (category) => {
     setSaveStatus('saving');
     try {
+      const session = getSession();
+      const accessToken = session?.tokens?.access;
       // In production, this would make an API call to save settings
-      const result = await fetch(`http://127.0.0.1:8000/api/admin/settings/${category}/`, {
+      const result = await fetch(`${apiBase}/admin/settings/${category}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token') || localStorage.getItem('token')}`
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify(settings[category])
       });
@@ -130,12 +137,10 @@ const AdminSystemSettings = () => {
         setTimeout(() => setSaveStatus(''), 3000);
       } else {
         // Simulate successful save for demo
-        console.log(`Settings saved for ${category}:`, settings[category]);
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus(''), 3000);
       }
     } catch (error) {
-      console.log('Demo mode: Settings saved locally', settings[category]);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(''), 3000);
     }

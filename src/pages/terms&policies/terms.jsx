@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Terms & Conditions | Connectize",
+    description: "Read the Connectize Terms and Conditions governing the use of our oil and gas professional networking platform.",
+  keywords: "terms and conditions, legal, terms of service, Connectize",
+  });
+
 import React, { useState } from "react";
 import SideNavigation from "./components/SideNavigation";
 import Content from "./components/Content";

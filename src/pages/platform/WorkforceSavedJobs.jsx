@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Saved Jobs | Connectize",
+    description: "View your saved job listings on Connectize and apply when you are ready.",
+  keywords: "saved jobs, bookmarked jobs, job search, Connectize",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 

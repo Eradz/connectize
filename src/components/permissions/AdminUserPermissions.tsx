@@ -1,5 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { usePermissions } from '../../context/PermissionContext';
+import { getSession } from '../../lib/session';
+
+const getAuthHeaders = (includeJson = false): Record<string, string> => {
+  const session = getSession();
+  const token = session?.tokens?.access;
+  const headers: Record<string, string> = {};
+
+  if (includeJson) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+};
 
 interface User {
   id: string;
@@ -51,7 +68,7 @@ export const AdminUserPermissions: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/users/', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -65,7 +82,7 @@ export const AdminUserPermissions: React.FC = () => {
   const fetchFeatures = async () => {
     try {
       const response = await fetch('/api/permissions/features/available/', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -85,7 +102,7 @@ export const AdminUserPermissions: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/permissions/admin/user-permissions/${userId}/`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -102,10 +119,7 @@ export const AdminUserPermissions: React.FC = () => {
     try {
       const response = await fetch('/api/permissions/admin/grant-user-permission/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({
           user_id: userId,
           feature_code: featureCode,
@@ -129,10 +143,7 @@ export const AdminUserPermissions: React.FC = () => {
     try {
       const response = await fetch('/api/permissions/admin/revoke-user-permission/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: getAuthHeaders(true),
         body: JSON.stringify({
           user_id: userId,
           feature_code: featureCode,

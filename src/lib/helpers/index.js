@@ -68,7 +68,6 @@ let retries = 0;
 
 // Clear token cache - call this after login or when session changes
 export function clearTokenCache() {
-  console.log("🧹 Clearing token cache");
   accessToken = null;
   accessTokenExpiry = null;
   isRefreshing = false;
@@ -152,22 +151,17 @@ export async function refreshToken() {
 let hasNotifiedOffline = false;
 
 export async function getAuthorizationHeader() {
-  console.log('[getAuthorizationHeader] Called, cached accessToken:', accessToken ? 'exists' : 'null');
-  
   // Use cached token (no expiration check - tokens are long-lived)
   if (accessToken) {
-    console.log('[getAuthorizationHeader] Using cached token');
     return { Authorization: "Bearer " + accessToken };
   }
 
   // Try to use access token from session first (avoids unnecessary refresh right after login)
   try {
     const session = getSession();
-    console.log('[getAuthorizationHeader] Session:', session ? 'exists' : 'null', 'tokens:', session?.tokens ? 'exists' : 'null');
 
     const tokenFromSession = session?.tokens?.access;
     if (tokenFromSession) {
-      console.log('[getAuthorizationHeader] Using token from session, length:', tokenFromSession.length);
       // Fresh token from session, update cache
       accessToken = tokenFromSession;
       // No expiration - tokens are managed by the backend
@@ -177,7 +171,6 @@ export async function getAuthorizationHeader() {
     
     // Try refresh if we have a refresh token
     if (session?.tokens?.refresh) {
-      console.log('[getAuthorizationHeader] Attempting token refresh');
       const refreshedToken = await refreshToken();
       if (refreshedToken?.Authorization) {
         return refreshedToken;
@@ -185,11 +178,9 @@ export async function getAuthorizationHeader() {
     }
   } catch (e) {
     // Ignore and fallback
-    console.debug("Session token retrieval failed:", e);
   }
 
   // No valid auth header available - this is normal for unauthenticated users
-  console.log('[getAuthorizationHeader] No valid token available');
   return null;
 }
 
@@ -217,11 +208,8 @@ export async function makeApiRequest({
       ? url
       : buildUrl(baseURL, url);
 
-  console.log('[makeApiRequest] Starting request:', { url, method, type, requestUrl, responseType });
-
   try {
     const authorization = await getAuthorizationHeader();
-    console.log('[makeApiRequest] Authorization header:', authorization ? 'Bearer token (length: ' + authorization?.Authorization?.length + ')' : 'null');
 
     if (
       (!authorization || !authorization.Authorization) &&
@@ -246,8 +234,6 @@ export async function makeApiRequest({
     if (!isFormData && contentType) {
       headers["Content-Type"] = contentType;
     }
-    
-    console.log('[makeApiRequest] Final headers:', { hasAuth: !!headers.Authorization, contentType: headers['Content-Type'] });
 
     const axiosConfig = {
       url: requestUrl,
@@ -274,7 +260,6 @@ export async function makeApiRequest({
       
       // For blob responses, return the entire response object
       if (responseType === 'blob') {
-        console.log('[makeApiRequest] Blob response received, size:', response.data?.size);
         return response;
       }
       
@@ -286,14 +271,6 @@ export async function makeApiRequest({
         !url.includes("notification")
       ) {
         toast.success(responseMessage);
-      }
-      // Only log successful responses for debugging if needed
-      if (method !== "GET") {
-        console.log("API request successful:", {
-          url,
-          status: response.status,
-          hasData: !!response.data,
-        });
       }
       return response.data;
     }

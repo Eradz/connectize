@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Inventory Management | Connectize",
+    description: "Manage your inventory, track stock levels, and receive alerts across warehouses on Connectize.",
+  keywords: "inventory management, warehouse, stock tracking, supply management, oil and gas",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {

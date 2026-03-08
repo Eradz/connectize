@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Listing Details | Connectize Marketplace",
+    description: "View detailed information, pricing, and seller details for this Connectize Marketplace listing.",
+  keywords: "listing, marketplace, product details, oil and gas equipment, buy sell",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -36,7 +45,7 @@ const ListingDetail = () => {
   // Check if user is logged in
   const isLoggedIn = () => {
     const session = getSession();
-    return session?.tokens?.access || localStorage.getItem('access_token');
+    return Boolean(session?.tokens?.access);
   };
 
   useEffect(() => {

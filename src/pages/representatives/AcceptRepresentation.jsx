@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Accept Representation | Connectize",
+    description: "Accept or manage a company representation request on Connectize.",
+  keywords: "accept representation, company representative, Connectize",
+  });
+
 import React from "react";
 import {
   acceptRepRequest,

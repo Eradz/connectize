@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Find Professionals | Connectize",
+    description: "Search and connect with talented oil and gas professionals. Browse engineers, technicians, and specialists on Connectize.",
+  keywords: "professionals, oil and gas talent, energy workers, find engineers, recruiting",
+  });
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 

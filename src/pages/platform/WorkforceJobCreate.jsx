@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Post a Job | Connectize",
+    description: "Post a job opening to attract qualified oil and gas professionals on Connectize.",
+  keywords: "post job, job listing, oil and gas recruitment, hire, Connectize",
+  });
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react'; // X imported here

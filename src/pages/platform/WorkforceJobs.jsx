@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Job Marketplace | Connectize - Oil & Gas Careers",
+    description: "Browse hundreds of job opportunities in the oil and gas industry. Find your next role as an engineer, technician, or executive.",
+  keywords: "oil and gas jobs, energy careers, petroleum jobs, engineering jobs, upstream midstream downstream",
+  });
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 

@@ -1,3 +1,12 @@
+import { createSEO } from "./SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Notifications | Connectize",
+    description: "Stay updated with the latest notifications, alerts, and activity on your Connectize network.",
+  keywords: "notifications, alerts, activity, Connectize",
+  });
+
 import {
   Avatar,
   Badge,

@@ -1,3 +1,12 @@
+import { createSEO } from "../SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Profile Overview | Connectize",
+    description: "Review and complete your Connectize professional profile to stand out in the oil and gas industry.",
+  keywords: "profile overview, professional summary, Connectize",
+  });
+
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";

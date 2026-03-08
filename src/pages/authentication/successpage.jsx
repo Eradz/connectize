@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Success | Connectize",
+    description: "Action completed successfully. Continue to your Connectize professional network.",
+  keywords: "success, Connectize",
+  });
+
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";

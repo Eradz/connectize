@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "My Listings | Connectize Marketplace",
+    description: "Manage your product and service listings on Connectize Marketplace.",
+  keywords: "my listings, seller listings, manage products, Connectize marketplace",
+  });
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 

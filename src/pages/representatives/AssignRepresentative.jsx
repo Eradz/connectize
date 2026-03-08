@@ -12,7 +12,15 @@ import { RepresentativesList } from "../../components/representatives/Representa
 import { UserList } from "../../components/representatives/UserList";
 import { UserSearchInput } from "../../components/representatives/UserSearchInput";
 import Restricted from "../../components/Restricted";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Assign Representative | Connectize",
+    description: "Manage and assign company representatives on Connectize to expand your business network.",
+  keywords: "assign representative, company management, delegates, Connectize",
+  });
+
 import { useCustomQuery } from "../../context/queryContext";
 import { useAuth } from "../../context/userContext";
 import { UserType } from "../../lib/helpers/types";

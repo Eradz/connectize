@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Shopping Cart | Connectize Marketplace",
+    description: "Review your selected items and proceed to checkout on Connectize Marketplace.",
+  keywords: "shopping cart, checkout, marketplace, Connectize",
+  });
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ShoppingBag, Truck } from "lucide-react";

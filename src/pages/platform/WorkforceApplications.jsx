@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "My Applications | Connectize",
+    description: "Track your job applications, interview invitations, and hiring status on Connectize.",
+  keywords: "job applications, application tracking, interview, career, Connectize",
+  });
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 

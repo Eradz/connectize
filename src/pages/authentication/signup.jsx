@@ -8,7 +8,15 @@ import CheckAgreement from "../../components/form/checkAgreement";
 import HeadingText from "../../components/HeadingText";
 import { SUCCESS_TYPE_KEY } from "../../lib/data/authentication";
 import { REGISTER_EMAIL_KEY } from "../../lib/helpers";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Sign Up | Connectize - Join the Oil & Gas Community",
+    description: "Create your Connectize account and connect with thousands of oil and gas professionals. Network, collaborate, and grow your energy sector career.",
+  keywords: "signup, register, oil and gas, energy jobs, professional network, join Connectize",
+  });
+
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()

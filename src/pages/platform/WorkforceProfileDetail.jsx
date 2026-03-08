@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Professional Profile | Connectize",
+    description: "View detailed professional profile, skills, and experience of an oil and gas industry expert on Connectize.",
+  keywords: "professional profile, oil and gas expert, skills, experience, Connectize",
+  });
+
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';

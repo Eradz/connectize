@@ -1,5 +1,13 @@
 import React from 'react';
 import { usePermissions, useFeatureAccess, useSubscriptionAccess } from '../../context/PermissionContext';
+import { getSession } from '../../lib/session';
+
+const getAuthHeaders = (): Record<string, string> => {
+  const session = getSession();
+  const token = session?.tokens?.access;
+
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 interface PermissionStatusProps {
   className?: string;
@@ -312,9 +320,7 @@ export const UsageStats: React.FC<UsageStatsProps> = ({
       try {
         const response = await fetch('/api/permissions/user/usage-stats/', {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
+          headers: getAuthHeaders(),
         });
 
         if (response.ok) {

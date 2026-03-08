@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Heart, Search, Filter, Star, ChevronRight, Truck, Store } from "lucide-react";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Marketplace | Connectize - Buy & Sell Energy Services",
+    description: "Browse and trade oil and gas products, equipment, and services on Connectize Marketplace. Connect with vetted suppliers.",
+  keywords: "marketplace, oil and gas products, equipment, services, energy suppliers",
+  });
+
 import { getSEOConfig } from "../../lib/seoConfig";
 import { listingService, cartService, wishlistService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";

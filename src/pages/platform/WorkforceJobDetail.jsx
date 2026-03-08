@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Job Details | Connectize",
+    description: "View job details, requirements, and apply to oil and gas positions on Connectize.",
+  keywords: "job details, oil and gas job, energy career, apply, Connectize",
+  });
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";

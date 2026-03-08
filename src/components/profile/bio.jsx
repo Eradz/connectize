@@ -1,3 +1,12 @@
+import { createSEO } from "../SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Update Bio | Connectize",
+    description: "Edit and update your professional bio and summary on Connectize.",
+  keywords: "update bio, professional summary, profile, Connectize",
+  });
+
 import { useFormik } from "formik";
 import { useEffect } from "react";
 import * as Yup from "yup";

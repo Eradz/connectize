@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Company Documents | Connectize",
+    description: "Upload and manage your company verification documents on Connectize.",
+  keywords: "company documents, verification, business documents, Connectize",
+  });
+
 import { useFormik } from "formik";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";

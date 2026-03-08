@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Orders | Connectize Marketplace",
+    description: "View your purchase history and manage your orders on Connectize Marketplace.",
+  keywords: "orders, purchase history, marketplace orders, Connectize",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 

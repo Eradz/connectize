@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Forum | Knowledge Hub - Connectize",
+    description: "Join the discussion on this oil and gas industry forum topic on Connectize.",
+  keywords: "forum, discussion, oil and gas topic, community, Connectize",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {

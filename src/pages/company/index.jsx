@@ -4,7 +4,15 @@ import { useContext, useEffect } from "react";
 import * as Yup from "yup";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Create Company | Connectize",
+    description: "Set up your company profile on Connectize to connect with oil and gas professionals, post jobs, and showcase your services.",
+  keywords: "create company, company profile, oil and gas company, register business, Connectize",
+  });
+
 import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
 import { FormikCtx } from "./context";

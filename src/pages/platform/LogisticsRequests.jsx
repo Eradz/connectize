@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Logistics Requests | Connectize",
+    description: "Browse and manage logistics service requests for oil and gas shipments and transport on Connectize.",
+  keywords: "logistics requests, shipping requests, freight, oil and gas transport",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 

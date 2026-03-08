@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getSession } from '../../lib/session';
 
 interface Feature {
   feature_code: string;
@@ -40,6 +41,22 @@ const ACCESS_LEVELS = [
   'enterprise',
 ];
 
+const getAuthHeaders = (includeJson = false): Record<string, string> => {
+  const session = getSession();
+  const token = session?.tokens?.access;
+  const headers: Record<string, string> = {};
+
+  if (includeJson) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
 const PLAN_TYPES = [
   'free',
   'basic',
@@ -71,8 +88,16 @@ export const AdminFeatureManagement: React.FC = () => {
   const fetchFeatures = async () => {
     setIsLoading(true);
     try {
+      const session = getSession();
+      const token = session?.tokens?.access;
+      const headers: Record<string, string> = {};
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/permissions/admin/features/', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers,
       });
       
       if (response.ok) {
@@ -115,10 +140,7 @@ export const AdminFeatureManagement: React.FC = () => {
     try {
       const response = await fetch('/api/permissions/admin/features/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: getAuthHeaders(true),
         body: JSON.stringify(formData),
       });
 
@@ -141,10 +163,7 @@ export const AdminFeatureManagement: React.FC = () => {
     try {
       const response = await fetch(`/api/permissions/admin/features/${featureCode}/`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: getAuthHeaders(true),
         body: JSON.stringify(formData),
       });
 
@@ -172,7 +191,7 @@ export const AdminFeatureManagement: React.FC = () => {
     try {
       const response = await fetch(`/api/permissions/admin/features/${featureCode}/`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
 
       if (response.ok) {
