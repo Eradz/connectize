@@ -22,6 +22,26 @@
       "destination": "/.well-known/$1"
     },
     {
+      "source": "/posts/(.*)",
+      "destination": "/api/render-meta?path=/posts/$1"
+    },
+    {
+      "source": "/products/(.*)",
+      "destination": "/api/render-meta?path=/products/$1"
+    },
+    {
+      "source": "/services/(.*)",
+      "destination": "/api/render-meta?path=/services/$1"
+    },
+    {
+      "source": "/company/(.*)",
+      "destination": "/api/render-meta?path=/company/$1"
+    },
+    {
+      "source": "/co/(.*)",
+      "destination": "/api/render-meta?path=/co/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
