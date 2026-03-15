@@ -108,7 +108,7 @@ const CompanyDocuments = () => {
         localStorage.removeItem(value);
       }
       toast.dismiss(toastId);
-      navigate(`/${newCompany.company_name}`);
+      navigate(`/${newCompany.slug || newCompany.company_name}`);
       setNewCompanyName(newCompany.company_name);
       return true;
     }
