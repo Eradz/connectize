@@ -490,7 +490,10 @@ const logistics = {
   deleteLogisticsRequest: function(id) { return this.deleteShipmentRequest(id); },
   getLogisticsRequests: function(params) { return this.getShipmentRequests(params); },
   updateShipmentStatus: function(id, data) { return this.updateShipment(id, data); },
-  adjustStock: function(id, data) { return this.updateInventoryItem(id, data); },
+  adjustStock: async function(id, data) {
+    const response = await api.post(`/api/v1/logistics/inventory-items/${id}/adjust_stock/`, data);
+    return response.data;
+  },
   getTrackingById: function(id) { return this.getShipmentTrackingById(id); },
   awardToProvider: function(requestId, data) { return this.assignProvider(requestId, data.provider_id || data.provider_name, data.service_code); },
 };

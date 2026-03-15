@@ -174,7 +174,7 @@ const loadItemData = async () => {
 
       await logisticsAPI.adjustStock(id, {
         quantity,
-        reason: adjustmentData.reason,
+        movement_type: adjustmentData.reason,
         notes: adjustmentData.notes
       });
 

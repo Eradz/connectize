@@ -164,7 +164,7 @@ const CreateCompany = () => {
       <SEO
         title="Create a Company | Connectize"
         description="Create a company profile on Connectize, the leading social platform for the oil and gas industry. Showcase your business, connect with professionals, attract investors, and collaborate on industry projects. Build your network and grow your brand today!"
-        relativeImagePath="create-company.png"
+        relativeImagePath="company-profile.png"
       />
       <div>
         <HeadingText>Provide information about your company</HeadingText>

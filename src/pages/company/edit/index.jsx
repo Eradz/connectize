@@ -13,7 +13,7 @@ export const meta = () =>
     title: "Edit your Company Information | Connectize",
     description:
       "Edit your company profile on Connectize, the leading social platform for the oil and gas industry. Showcase your business, connect with professionals, attract investors, and collaborate on industry projects. Build your network and grow your brand today!",
-    relativeImagePath: "create-company.png",
+    relativeImagePath: "company-profile.png",
   });
 function EditCompanyPage() {
   const { company: companyName } = useParams();
@@ -35,7 +35,7 @@ function EditCompanyPage() {
       <SEO
         title="Edit your Company Information | Connectize"
         description="Edit your company profile on Connectize, the leading social platform for the oil and gas industry. Showcase your business, connect with professionals, attract investors, and collaborate on industry projects. Build your network and grow your brand today!"
-        relativeImagePath="create-company.png"
+        relativeImagePath="company-profile.png"
       />
 
       <HeadingText>Edit Company Information</HeadingText>
