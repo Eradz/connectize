@@ -79,10 +79,7 @@ export const createCompany = async (data, resetForm) => {
   }
 
   // console.log("form data", data);
-  const registration_date = (data.company_registration_date || "")
-    .split("-")
-    .reverse()
-    .join("-");
+  const registration_date = data.company_registration_date || null;
   const company = await makeApiRequest({
     url: `api/companies/`,
     method: "POST",
@@ -93,7 +90,7 @@ export const createCompany = async (data, resetForm) => {
       tag_line: data.company_tagline,
       company_size: data.company_size,
       email: data.company_email,
-      office_address: data.office_address,
+      office_address: data.company_address,
       country: data.country,
       state: data.city,
       city: data.city,

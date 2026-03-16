@@ -104,13 +104,12 @@ const CompanyDocuments = () => {
     });
 
     if (newCompany) {
-      for (let value in formik.values) {
-        localStorage.removeItem(value);
-      }
+      for (let key in formiks.indexFormik.values) localStorage.removeItem(key);
+      for (let key in formiks.companyInfoFormik.values) localStorage.removeItem(key);
+      for (let key in formik.values) localStorage.removeItem(key);
       toast.dismiss(toastId);
       navigate(`/${newCompany.slug || newCompany.company_name}`);
-      setNewCompanyName(newCompany.company_name);
-      return true;
+      return false; // Return false to prevent StepButton from overriding navigation
     }
     toast.dismiss(toastId);
     return false;
