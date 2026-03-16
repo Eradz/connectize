@@ -223,6 +223,13 @@ const removeLeadingSlash = (path) => {
             <Route path="information" element={<CompanyInformation />} />
           </Route>
 
+          {/* Company creation routes matching webRoutes paths */}
+          <Route element={<CompanyLayout />}>
+            <Route path={removeLeadingSlash(webRoutes.createCompany)} element={<CreateCompany />} />
+            <Route path={removeLeadingSlash(webRoutes.companyDocuments)} element={<CompanyDocuments />} />
+            <Route path={removeLeadingSlash(webRoutes.companyInformation)} element={<CompanyInformation />} />
+          </Route>
+
           <Route path={removeLeadingSlash(webRoutes.analysis)} element={<Analysis />} />
           <Route path={removeLeadingSlash(webRoutes.bookmark)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.companies)} element={<CompaniesPage />} />
@@ -497,6 +504,13 @@ const removeLeadingSlash = (path) => {
             <Route path="create" element={<CreateCompany />} />
             <Route path="documents" element={<CompanyDocuments />} />
             <Route path="information" element={<CompanyInformation />} />
+          </Route>
+
+          {/* Company creation routes matching webRoutes paths */}
+          <Route element={<CompanyLayout />}>
+            <Route path="create-company" element={<CreateCompany />} />
+            <Route path="company-documents" element={<CompanyDocuments />} />
+            <Route path="company-information" element={<CompanyInformation />} />
           </Route>
 
           <Route path="analysis" element={<Analysis />} />
