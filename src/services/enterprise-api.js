@@ -176,6 +176,7 @@ class EnterpriseSubscriptionService {
 class EnterpriseAdvertisingService {
   constructor() {
     this.baseURL = `${BASE_URL}/api/v1`;
+    this.campaignsUrl = '/api/v1/featured-ads/campaigns/';
   }
   // All requests go through makeApiRequest which attaches Authorization and refreshes tokens
 
@@ -240,20 +241,20 @@ class EnterpriseAdvertisingService {
     const { status = 'all', page = 1, limit = 20, ...rest } = filters || {};
     const params = { page, limit, ...rest };
     if (status !== 'all') params.status = status;
-    const data = await makeApiRequest({ url: `/api/v1/featured-ads/`, method: 'GET', params });
+    const data = await makeApiRequest({ url: this.campaignsUrl, method: 'GET', params });
     return { success: true, campaigns: Array.isArray(data) ? data : (data?.results || []) };
   }
 
   // Campaign Creation
   async createCampaign(campaignData) {
-  const data = await makeApiRequest({ url: `/api/v1/featured-ads/`, method: 'POST', data: campaignData });
+  const data = await makeApiRequest({ url: this.campaignsUrl, method: 'POST', data: campaignData });
   return { success: true, campaign: data };
   }
 
   // Dashboard Metrics
   async getDashboardMetrics(period = '30d') {
   // Backend returns summary; normalize to UI shape
-  const data = await makeApiRequest({ url: `/api/v1/featured-ads/summary/`, method: 'GET', params: { period } });
+  const data = await makeApiRequest({ url: `${this.campaignsUrl}summary/`, method: 'GET', params: { period } });
   const base = data || {};
   const normalized = {
     ...base,
@@ -267,18 +268,18 @@ class EnterpriseAdvertisingService {
 
   // Campaign Analytics
   async getCampaignAnalytics(campaignId, period = '7d') {
-  const data = await makeApiRequest({ url: `/api/v1/featured-ads/${campaignId}/analytics/`, method: 'GET', params: { period } });
+  const data = await makeApiRequest({ url: `${this.campaignsUrl}${campaignId}/analytics/`, method: 'GET', params: { period } });
   return { success: true, analytics: data };
   }
 
   // Campaign Management Actions
   async updateCampaignStatus(campaignId, status) {
-  const data = await makeApiRequest({ url: `/api/v1/featured-ads/${campaignId}/`, method: 'PATCH', data: { status } });
+  const data = await makeApiRequest({ url: `${this.campaignsUrl}${campaignId}/`, method: 'PATCH', data: { status } });
   return { success: true, campaign: data };
   }
 
   async updateCampaignBid(campaignId, bidData) {
-    const data = await makeApiRequest({ url: `/api/v1/featured-ads/${campaignId}/`, method: 'PATCH', data: bidData });
+    const data = await makeApiRequest({ url: `${this.campaignsUrl}${campaignId}/`, method: 'PATCH', data: bidData });
     return { success: true, campaign: data };
   }
 }

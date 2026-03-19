@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "AI Services | Connectize - Intelligent Solutions",
+    description: "Leverage AI-powered tools for deal matching, opportunity discovery, and business intelligence in the oil and gas industry.",
+  keywords: "artificial intelligence, AI analytics, deal matching, machine learning, oil and gas AI",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 

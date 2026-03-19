@@ -1,3 +1,12 @@
+import { createSEO } from "../SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Update Contact Info | Connectize",
+    description: "Manage your contact information on your Connectize professional profile.",
+  keywords: "update contact, phone, email, profile settings, Connectize",
+  });
+
 import React, { useEffect } from "react";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";

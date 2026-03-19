@@ -41,6 +41,79 @@ import AdminLogistics from './logistics/AdminLogistics';
 import AdminKnowledge from './knowledge/AdminKnowledge';
 import AdminSubscriptions from './subscriptions/AdminSubscriptions';
 import AdminAuth from './AdminAuth';
+import { getSession, setSession, removeSession } from '../../lib/session';
+
+const ADMIN_SESSION_PERSIST_DAYS = 730;
+const ADMIN_SESSION_TEMP_DAYS = 1 / 3;
+
+const clearLegacyAdminTokens = () => {
+  [
+    'admin_token',
+    'token',
+    'authToken',
+    'access',
+    'refresh',
+    'refresh_token',
+  ].forEach((key) => {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  });
+};
+
+const getLegacyAdminTokens = () => {
+  const access = localStorage.getItem('access') || sessionStorage.getItem('access');
+  const refresh =
+    localStorage.getItem('refresh') ||
+    localStorage.getItem('refresh_token') ||
+    sessionStorage.getItem('refresh') ||
+    sessionStorage.getItem('refresh_token');
+
+  if (!access && !refresh) {
+    return null;
+  }
+
+  return {
+    access: access || null,
+    refresh: refresh || null,
+  };
+};
+
+const persistAuthSession = ({ session, tokens = {}, user, remember }) => {
+  const nextSession = {
+    ...(session || {}),
+    ...(user ? { user } : {}),
+    tokens: {
+      ...(session?.tokens || {}),
+      ...tokens,
+    },
+    session_persistence: remember ? 'persistent' : 'temporary',
+  };
+
+  setSession(
+    nextSession,
+    remember ? ADMIN_SESSION_PERSIST_DAYS : ADMIN_SESSION_TEMP_DAYS
+  );
+  clearLegacyAdminTokens();
+  return nextSession;
+};
+
+const getAuthSession = () => {
+  const session = getSession();
+  if (session?.tokens?.access || session?.tokens?.refresh) {
+    return session;
+  }
+
+  const legacyTokens = getLegacyAdminTokens();
+  if (!legacyTokens) {
+    return session;
+  }
+
+  return persistAuthSession({
+    session,
+    tokens: legacyTokens,
+    remember: true,
+  });
+};
 
 // Enhanced API Helper with comprehensive error handling and live data support
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -63,9 +136,8 @@ const makeApiRequest = async (endpoint, options = {}) => {
     retries: 3,
   };
 
-  // Enhanced token handling for live API integration
-  const accessToken = localStorage.getItem('access') || sessionStorage.getItem('access');
-  const initialToken = accessToken; // do not fallback to legacy tokens to avoid stale auth
+  const session = getAuthSession();
+  const initialToken = session?.tokens?.access;
 
   // Determine public auth endpoints where we should NOT attach Authorization
   const publicAuthPaths = ['/auth/login/', '/auth/refresh-token/', '/auth/verify-token/', '/auth/register/'];
@@ -92,12 +164,10 @@ const makeApiRequest = async (endpoint, options = {}) => {
   // Helper: refresh JWT access token using refresh token
   const refreshAccessToken = async () => {
     try {
-      const refreshLS = localStorage.getItem('refresh') || localStorage.getItem('refresh_token');
-      const refreshSS = sessionStorage.getItem('refresh') || sessionStorage.getItem('refresh_token');
-      const refresh = refreshLS || refreshSS;
+      const currentSession = getAuthSession();
+      const refresh = currentSession?.tokens?.refresh;
       if (!refresh) return null;
-      const storage = refreshLS ? localStorage : sessionStorage;
-  const res = await fetch(`${apiBase}/auth/refresh-token/`, {
+      const res = await fetch(`${apiBase}/auth/refresh-token/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refresh })
@@ -115,11 +185,14 @@ const makeApiRequest = async (endpoint, options = {}) => {
       const tokens = pick(data);
       const newAccess = tokens.access;
       if (newAccess) {
-        storage.setItem('access', newAccess);
-        if (tokens.refresh) {
-          storage.setItem('refresh', tokens.refresh);
-          storage.setItem('refresh_token', tokens.refresh);
-        }
+        persistAuthSession({
+          session: currentSession,
+          tokens: {
+            access: newAccess,
+            refresh: tokens.refresh || refresh,
+          },
+          remember: currentSession?.session_persistence !== 'temporary',
+        });
         return newAccess;
       }
       return null;
@@ -224,7 +297,8 @@ const AuthProvider = ({ children }) => {
 
     const checkAuth = async () => {
       try {
-        const access = localStorage.getItem('access') || sessionStorage.getItem('access');
+        const session = getAuthSession();
+        const access = session?.tokens?.access;
         if (access) {
           // Verify JWT access token
           const verify = await makeApiRequest('/auth/verify-token/', {
@@ -241,6 +315,11 @@ const AuthProvider = ({ children }) => {
             // Load user permissions (protected endpoint, Authorization is attached)
             const perms = await makeApiRequest('/auth/permissions/', { timeout: 5000, retries: 0 });
             if (me.success) {
+              persistAuthSession({
+                session,
+                user: me.data,
+                remember: session?.session_persistence !== 'temporary',
+              });
               setUser(me.data);
               const basePerms = ['analytics.view', 'settings.view'];
               const adminPerms = me.data?.is_staff || me.data?.is_superuser ? ['admin'] : [];
@@ -264,7 +343,6 @@ const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } catch (error) {
-        console.log('Auth check failed:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -277,19 +355,8 @@ const AuthProvider = ({ children }) => {
 
   // Define logout before using it in effects to avoid TDZ errors
   const logout = useCallback(() => {
-    // Clear from both local and session storage
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('token');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
-    localStorage.removeItem('refresh_token');
-    sessionStorage.removeItem('admin_token');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('authToken');
-    sessionStorage.removeItem('access');
-    sessionStorage.removeItem('refresh');
-    sessionStorage.removeItem('refresh_token');
+    removeSession();
+    clearLegacyAdminTokens();
     setUser(null);
     setPermissions([]);
     setSessionExpiry(null);
@@ -324,17 +391,7 @@ const AuthProvider = ({ children }) => {
       if (!result.success) {
         return { success: false, error: result.error || 'Login failed' };
       }
-
-      // Purge any stale tokens before storing new ones
-      ['localStorage', 'sessionStorage'].forEach((storeName) => {
-        const store = storeName === 'localStorage' ? localStorage : sessionStorage;
-        store.removeItem('admin_token');
-        store.removeItem('token');
-        store.removeItem('authToken');
-        store.removeItem('access');
-        store.removeItem('refresh');
-        store.removeItem('refresh_token');
-      });
+      clearLegacyAdminTokens();
 
       // Support multiple response shapes
       const d = result.data || {};
@@ -359,16 +416,10 @@ const AuthProvider = ({ children }) => {
         return {};
       };
       const tokens = extract(d);
-      const storage = credentials.remember ? localStorage : sessionStorage;
       // Guard: tokens must exist
       if (!tokens.access || !tokens.refresh) {
         return { success: false, error: 'Invalid token response from server' };
       }
-
-      // Persist tokens (no legacy keys)
-      storage.setItem('access', tokens.access);
-      storage.setItem('refresh', tokens.refresh);
-      storage.setItem('refresh_token', tokens.refresh);
 
       // Load user profile and permissions
       const authHeaders = { Authorization: `Bearer ${tokens.access}` };
@@ -378,16 +429,17 @@ const AuthProvider = ({ children }) => {
       ]);
 
       if (!me.success) {
-        // Tokens invalid; clear and fail
-        ['localStorage', 'sessionStorage'].forEach((storeName) => {
-          const store = storeName === 'localStorage' ? localStorage : sessionStorage;
-          store.removeItem('access');
-          store.removeItem('refresh');
-          store.removeItem('refresh_token');
-        });
+        removeSession();
+        clearLegacyAdminTokens();
         return { success: false, error: me.error || 'Unable to load profile' };
       }
 
+      persistAuthSession({
+        session: getAuthSession(),
+        tokens,
+        user: me.data,
+        remember: !!credentials.remember,
+      });
       setUser(me.data);
       const basePerms = ['analytics.view', 'settings.view'];
       const adminPerms = me.data?.is_staff || me.data?.is_superuser ? ['admin'] : [];

@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Logistics Hub | Connectize - Shipping & Supply Chain",
+    description: "Manage logistics, shipments, and supply chain operations for the oil and gas industry on Connectize.",
+  keywords: "logistics, supply chain, shipping, oil and gas transportation, freight",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -46,11 +55,6 @@ const LogisticsHubDashboard = () => {
   // Check session for user privileges
     const session = getSession();
       const [searchQuery, setSearchQuery] = useState('');
-    console.log('🔍 Session check in LogisticsDashboard:', {
-      hasSession: !!session,
-      user: session?.user,
-      tokens: session?.tokens ? 'present' : 'missing'
-    });
     
     const userIsStaff = (
       session?.user?.is_staff === true ||
@@ -78,7 +82,6 @@ const LogisticsHubDashboard = () => {
     useEffect(() => {
       const session = getSession();
       if (!session?.tokens?.access) {
-        console.warn('❌ No authentication session found, redirecting to login');
         window.location.href = '/login';
         return;
       }
@@ -97,13 +100,8 @@ const LogisticsHubDashboard = () => {
     const loadDashboardData = async () => {
       try {
         setLoading(true);
-        
-        // Also check localStorage for any legacy tokens (for debugging)
-        const accessToken = localStorage.getItem('access');
-        const refreshToken = localStorage.getItem('refresh');
-        
+
         if (!session?.tokens?.access) {
-          console.error('❌ No valid authentication session found');
           throw new Error('Authentication required. Please log in.');
         }
         
@@ -260,11 +258,6 @@ const LogisticsHubDashboard = () => {
         
         // Check if it's an authentication error
         if (error.response?.status === 401 || error.message?.includes('Authentication required')) {
-          console.log('🔐 Authentication error detected - user needs to login');
-          console.log('🔑 Current tokens:', {
-            access: localStorage.getItem('access') ? 'present' : 'missing',
-            refresh: localStorage.getItem('refresh') ? 'present' : 'missing'
-          });
           // The makeApiRequest will already redirect to login, but we can add additional handling here
           return; // Don't set empty data if redirecting to login
         }

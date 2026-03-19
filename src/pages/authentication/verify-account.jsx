@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Verify Account | Connectize",
+    description: "Verify your Connectize account to unlock all features and start connecting with energy industry professionals.",
+  keywords: "verify account, email verification, Connectize account",
+  });
+
 import { useEffect } from "react";
 import * as Yup from "yup";
 import Form from "../../components/form";

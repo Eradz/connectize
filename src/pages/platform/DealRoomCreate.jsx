@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Create Deal Room | Connectize",
+    description: "Create a new secure deal room for your oil and gas business transaction on Connectize.",
+  keywords: "create deal room, new deal, oil and gas transaction, Connectize",
+  });
+
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 

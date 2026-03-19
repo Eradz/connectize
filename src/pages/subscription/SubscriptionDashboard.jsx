@@ -101,7 +101,6 @@ const SubscriptionDashboard = () => {
     loadDashboardData();
   }, []);
 
-  console.log("usage:", dashboardData.usage);
   // Get usage data with fallbacks - EXACT SAME
   const getUsageData = () => {
     const usage = dashboardData.usage || {};
@@ -168,101 +167,101 @@ const SubscriptionDashboard = () => {
   };
 
   // Format plan data - EXACT SAME
-  const getFormattedPlans = () => {
-    if (dashboardData.plans.length === 0) {
-      return [
-        {
-          name: 'Starter',
-          price: '$29.99',
-          plan_type: 'starter',
-          color: '#212529',
-          textColor: 'text-white',
-          buttonColor: 'bg-white text-gray-800',
-          features: [
-            'All sessions access',
-            'Summit materials',
-            'Tea & lunch breaks',
-            'Gala dinner',
-            'Visa assistance'
-          ]
-        },
-        {
-          name: 'Professional',
-          price: '$99.99',
-          plan_type: 'professional',
-          color: '#FFDB76',
-          textColor: 'text-gray-800',
-          buttonColor: 'bg-gray-800 text-white',
-          features: [
-            'Economy flight',
-            '5 nights in standard room',
-            'All-access summit entry',
-            'Meals + Gala',
-            'Shuttle transport',
-            'Visa assistance'
-          ]
-        },
-        {
-          name: 'Enterprise',
-          price: '$299.99',
-          plan_type: 'enterprise',
-          color: '#FFDB76',
-          textColor: 'text-gray-800',
-          buttonColor: 'bg-gray-800 text-white',
-          features: [
-            'Full-Scale Solution for Large Enterprises',
-            'Admin functions: 2 features',
-            'all services: 2 features',
-            'analytic: 1 feature',
-            'Transport (airport + daily)',
-            'Visa assistance'
-          ]
-        }
-      ];
-    }
+  // const getFormattedPlans = () => {
+  //   if (dashboardData.plans.length === 0) {
+  //     return [
+  //       {
+  //         name: 'Starter',
+  //         price: '$29.99',
+  //         plan_type: 'starter',
+  //         color: '#212529',
+  //         textColor: 'text-white',
+  //         buttonColor: 'bg-white text-gray-800',
+  //         features: [
+  //           'All sessions access',
+  //           'Summit materials',
+  //           'Tea & lunch breaks',
+  //           'Gala dinner',
+  //           'Visa assistance'
+  //         ]
+  //       },
+  //       {
+  //         name: 'Professional',
+  //         price: '$99.99',
+  //         plan_type: 'professional',
+  //         color: '#FFDB76',
+  //         textColor: 'text-gray-800',
+  //         buttonColor: 'bg-gray-800 text-white',
+  //         features: [
+  //           'Economy flight',
+  //           '5 nights in standard room',
+  //           'All-access summit entry',
+  //           'Meals + Gala',
+  //           'Shuttle transport',
+  //           'Visa assistance'
+  //         ]
+  //       },
+  //       {
+  //         name: 'Enterprise',
+  //         price: '$299.99',
+  //         plan_type: 'enterprise',
+  //         color: '#FFDB76',
+  //         textColor: 'text-gray-800',
+  //         buttonColor: 'bg-gray-800 text-white',
+  //         features: [
+  //           'Full-Scale Solution for Large Enterprises',
+  //           'Admin functions: 2 features',
+  //           'all services: 2 features',
+  //           'analytic: 1 feature',
+  //           'Transport (airport + daily)',
+  //           'Visa assistance'
+  //         ]
+  //       }
+  //     ];
+  //   }
 
-    return dashboardData.plans.map(plan => {
-      const planType = plan.plan_type?.toLowerCase();
-      let color, textColor, buttonColor;
+  //   return dashboardData.plans.map(plan => {
+  //     const planType = plan.plan_type?.toLowerCase();
+  //     let color, textColor, buttonColor;
 
-      if (planType === 'starter' || planType === 'trial') {
-        color = '#212529';
-        textColor = 'text-white';
-        buttonColor = 'bg-white text-gray-800';
-      } else if (planType === 'professional') {
-        color = '#FFDB76';
-        textColor = 'text-gray-800';
-        buttonColor = 'bg-gray-800 text-white';
-      } else {
-        color = '#FFDB76';
-        textColor = 'text-gray-800';
-        buttonColor = 'bg-gray-800 text-white';
-      }
+  //     if (planType === 'starter' || planType === 'trial') {
+  //       color = '#212529';
+  //       textColor = 'text-white';
+  //       buttonColor = 'bg-white text-gray-800';
+  //     } else if (planType === 'professional') {
+  //       color = '#FFDB76';
+  //       textColor = 'text-gray-800';
+  //       buttonColor = 'bg-gray-800 text-white';
+  //     } else {
+  //       color = '#FFDB76';
+  //       textColor = 'text-gray-800';
+  //       buttonColor = 'bg-gray-800 text-white';
+  //     }
 
-      // Extract features from plan
-      const features = [];
-      if (plan.max_projects) features.push(`${plan.max_projects} Projects`);
-      if (plan.max_storage_gb) features.push(`${plan.max_storage_gb}GB Storage`);
-      if (plan.max_team_members) features.push(`${plan.max_team_members} Team Members`);
-      if (plan.ai_insights_enabled) features.push('AI Insights');
-      if (plan.priority_support) features.push('Priority Support');
-      if (plan.api_access_enabled) features.push('API Access');
+  //     // Extract features from plan
+  //     const features = [];
+  //     if (plan.max_projects) features.push(`${plan.max_projects} Projects`);
+  //     if (plan.max_storage_gb) features.push(`${plan.max_storage_gb}GB Storage`);
+  //     if (plan.max_team_members) features.push(`${plan.max_team_members} Team Members`);
+  //     if (plan.ai_insights_enabled) features.push('AI Insights');
+  //     if (plan.priority_support) features.push('Priority Support');
+  //     if (plan.api_access_enabled) features.push('API Access');
 
-      return {
-        ...plan,
-        price: `$${plan.price}`,
-        color,
-        textColor,
-        buttonColor,
-        features: features.length > 0 ? features : [
-          'Basic features',
-          'Standard support',
-          'Cloud storage',
-          'Team collaboration'
-        ]
-      };
-    });
-  };
+  //     return {
+  //       ...plan,
+  //       price: `$${plan.price}`,
+  //       color,
+  //       textColor,
+  //       buttonColor,
+  //       features: features.length > 0 ? features : [
+  //         'Basic features',
+  //         'Standard support',
+  //         'Cloud storage',
+  //         'Team collaboration'
+  //       ]
+  //     };
+  //   });
+  // };
 
   // CHANGED: Navigation instead of alert
   const handleChoosePackage = (plan) => {
@@ -283,7 +282,7 @@ const SubscriptionDashboard = () => {
 
   const usageData = getUsageData();
   const summaryItems = getSummaryItems();
-  const plans = getFormattedPlans();
+  // const plans = getFormattedPlans();
   const currentPlan = dashboardData.currentSubscription?.plan;
 
   if (loading) {
@@ -490,10 +489,11 @@ const SubscriptionDashboard = () => {
         <div className="bg-white rounded-xl p-8 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Available Plan</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((plan, index) => {
-              const isCurrentPlan = isCurrentUserPlan(plan);
-              return (
+          {dashboardData.plans && dashboardData.plans.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {dashboardData.plans.map((plan, index) => {
+                const isCurrentPlan = isCurrentUserPlan(plan);
+                return (
                 <div
                   key={plan.id || index}
                   className={`rounded-2xl p-6 shadow-md flex flex-col justify-between border-2 ${isCurrentPlan ? 'border-green-500' : 'border-transparent'}`}
@@ -519,7 +519,7 @@ const SubscriptionDashboard = () => {
                       }}
                     />
                     <ul className="space-y-2.5 mt-6">
-                      {plan.feature_highlights.map((feature, featureIndex) => (
+                      {plan?.feature_highlights?.map((feature, featureIndex) => (
                         <li key={featureIndex} className="flex items-start gap-2">
                           <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
                           <span className={`text-sm ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
@@ -545,7 +545,24 @@ const SubscriptionDashboard = () => {
                 </div>
               );
             })}
-          </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4-4v6.586a1 1 0 01-.293.707l-2.414 2.414a1 1 0 01-.707.293H5a1 1 0 01-1-1v-10.586a1 1 0 01.293-.707l6.414-6.414A1 1 0 008 5.414V4z" />
+              </svg>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Plans Available</h3>
+              <p className="text-gray-600 text-center max-w-sm mb-6">
+                There are currently no subscription plans available.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 bg-gold text-white rounded-lg font-medium hover:bg-amber-600 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

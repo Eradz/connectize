@@ -9,16 +9,12 @@ import {
   messageUser,
 } from "../api-services/messaging";
 import { getUserById } from "../api-services/users";
+import { getSession } from "../lib/session";
 import { toast } from "sonner";
 
 function getCurrentUserId() {
-  try {
-    const session = JSON.parse(localStorage.getItem("session"));
-    return session?.user?.id;
-  } catch (e) {
-    console.warn("Failed to parse session from localStorage:", e);
-    return undefined;
-  }
+  const session = getSession();
+  return session?.user?.id || session?.id;
 }
 
 /**
@@ -418,8 +414,7 @@ export const useMessagesStore = create((set, get) => ({
 
   updateLastMessages: (newMessage) => {
     set((state) => {
-      const currentUserId = JSON.parse(localStorage.getItem("session"))?.user
-        ?.id;
+      const currentUserId = getCurrentUserId();
       const existingIndex = state.lastMessages.findIndex(
         (m) => m.room_name === newMessage.room_name
       );

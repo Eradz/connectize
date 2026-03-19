@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Privacy Policy | Connectize",
+    description: "Read the Connectize Privacy Policy to understand how we collect, use, and protect your personal data.",
+  keywords: "privacy policy, data protection, GDPR, Connectize",
+  });
+
 import React, { useState } from "react";
 import Content from "./components/Content";
 import SideNavigation from "./components/SideNavigation";

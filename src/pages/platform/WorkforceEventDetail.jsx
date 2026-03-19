@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Event Details | Connectize",
+    description: "View details, speakers, and registration information for this oil and gas industry event.",
+  keywords: "event details, oil and gas conference, industry event, register, Connectize",
+  });
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 

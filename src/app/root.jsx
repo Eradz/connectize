@@ -37,8 +37,8 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export const meta = createSEO({
-  title: "Welcome to connectize",
+export const meta = () => createSEO({
+  title: "Connectize - The Social Hub for Oil & Gas",
   description:
     "Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors. Network, collaborate on projects, share insights, and explore job opportunities in the energy sector. Join today!",
 });
@@ -74,12 +74,24 @@ export function Layout({ children }) {
           content="social media, connect, chat, share, friends, networking, oil and gas networking, energy professionals, oil and gas social platform, energy industry collaboration, oil and gas jobs, upstream, midstream, downstream, energy sector networking, oil and gas suppliers, industry insights, oil and gas investments"
         />
         <link rel="apple-touch-icon" href="/icons/icon-192.webp" />
-
         <link rel="manifest" href="/manifest.json" />
 
-        {/* <link rel="canonical" href={currentUrl} /> */}
-
-        {/* <title>Welcome to connectize</title> */}
+        {/* Static OG/Twitter tags baked into HTML for social crawlers (which don't run JS) */}
+        <title>Connectize - The Social Hub for Oil &amp; Gas</title>
+        <meta property="og:site_name" content="Connectize" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Connectize - The Social Hub for Oil &amp; Gas" />
+        <meta property="og:description" content="Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors. Network, collaborate on projects, share insights, and explore job opportunities in the energy sector. Join today!" />
+        <meta property="og:image" content="https://connectize.co/seo/default-image.png" />
+        <meta property="og:image:alt" content="Connectize - The Social Hub for Oil &amp; Gas" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:url" content="https://connectize.co" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@connectize" />
+        <meta name="twitter:title" content="Connectize - The Social Hub for Oil &amp; Gas" />
+        <meta name="twitter:description" content="Connectize is the leading social platform for the oil and gas industry, connecting professionals, engineers, suppliers, and investors." />
+        <meta name="twitter:image" content="https://connectize.co/seo/default-image.png" />
 
         <Meta />
         <Links />

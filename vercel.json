@@ -22,6 +22,62 @@
       "destination": "/.well-known/$1"
     },
     {
+      "source": "/posts/(.*)",
+      "destination": "/api/render-meta?path=/posts/$1"
+    },
+    {
+      "source": "/products/(.*)",
+      "destination": "/api/render-meta?path=/products/$1"
+    },
+    {
+      "source": "/services/(.*)",
+      "destination": "/api/render-meta?path=/services/$1"
+    },
+    {
+      "source": "/company/(.*)",
+      "destination": "/api/render-meta?path=/company/$1"
+    },
+    {
+      "source": "/co/(.*)",
+      "destination": "/api/render-meta?path=/co/$1"
+    },
+    {
+      "source": "/knowledge/articles/(.*)",
+      "destination": "/api/render-meta?path=/knowledge/articles/$1"
+    },
+    {
+      "source": "/knowledge/forums/(.*)",
+      "destination": "/api/render-meta?path=/knowledge/forums/$1"
+    },
+    {
+      "source": "/knowledge/topics/(.*)",
+      "destination": "/api/render-meta?path=/knowledge/topics/$1"
+    },
+    {
+      "source": "/knowledge/categories/(.*)",
+      "destination": "/api/render-meta?path=/knowledge/categories/$1"
+    },
+    {
+      "source": "/knowledge/tags/(.*)",
+      "destination": "/api/render-meta?path=/knowledge/tags/$1"
+    },
+    {
+      "source": "/jobs/(.*)",
+      "destination": "/api/render-meta?path=/jobs/$1"
+    },
+    {
+      "source": "/professionals/(.*)",
+      "destination": "/api/render-meta?path=/professionals/$1"
+    },
+    {
+      "source": "/events/(.*)",
+      "destination": "/api/render-meta?path=/events/$1"
+    },
+    {
+      "source": "/marketplace/listing/(.*)",
+      "destination": "/api/render-meta?path=/marketplace/listing/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

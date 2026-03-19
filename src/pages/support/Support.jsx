@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Support | Connectize",
+    description: "Get help and support for Connectize. Browse FAQs, contact our team, and resolve any platform issues.",
+  keywords: "support, help center, contact, FAQ, Connectize help",
+  });
+
 import React from 'react'
 import * as Yup from "yup";
 import { useFormik } from "formik";

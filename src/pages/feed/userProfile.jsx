@@ -15,7 +15,15 @@ import { CreateNewLink } from "../../components/admin/markets/carousel";
 import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
 import LightParagraph from "../../components/ParagraphText";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Professional Profile | Connectize",
+    description: "Connect and collaborate with oil and gas industry professionals on Connectize.",
+  keywords: "oil and gas professional, energy industry expert, professional profile, networking",
+  });
+
 import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import UserProfileHeadings from "../../components/userProfile/user-profile-heading";

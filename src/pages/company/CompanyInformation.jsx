@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Company Information | Connectize",
+    description: "Enter and manage your company information and details on Connectize.",
+  keywords: "company information, business profile, oil and gas company, Connectize",
+  });
+
 import React, { useContext, useEffect } from "react";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";

@@ -1,3 +1,12 @@
+import { createSEO } from "../SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "My Profile | Connectize",
+    description: "View and manage your Connectize professional profile in the oil and gas industry.",
+  keywords: "professional profile, my profile, oil and gas, Connectize",
+  });
+
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../logo";

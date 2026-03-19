@@ -16,19 +16,9 @@ marketplaceApi.interceptors.request.use((config) => {
   // Get fresh session on each request
   const session = getSession();
   const token = session?.tokens?.access;
-  
-  console.log('[marketplaceApi] Auth debug:', {
-    url: config.url,
-    hasSession: !!session,
-    hasTokens: !!session?.tokens,
-    hasAccess: !!token,
-    tokenPreview: token ? token.substring(0, 20) + '...' : null
-  });
-  
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    console.warn('[marketplaceApi] No auth token available for request:', config.url);
   }
   
   return config;
@@ -468,10 +458,16 @@ export default {
   
   // Get inventory items for listing creation
   getInventoryItems: async () => {
+    const session = getSession();
+    const token = session?.tokens?.access;
+    const headers = {};
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const response = await axios.get(`${API_BASE_URL}/api/inventory/items/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
+      headers,
     });
     return response.data;
   },

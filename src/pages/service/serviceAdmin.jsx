@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Manage Services | Connectize",
+    description: "Add and manage your professional services on Connectize to reach oil and gas industry clients.",
+  keywords: "add service, manage services, oil and gas providers, service management",
+  });
+
 import React from 'react'
 import ServiceAdminMain from '../../components/admin/services/serviceAdminMain'
 import { useAuth } from "../../context/userContext";

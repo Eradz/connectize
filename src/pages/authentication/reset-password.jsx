@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Reset Password | Connectize",
+    description: "Reset your Connectize password securely to regain access to your account and professional network.",
+  keywords: "reset password, forgot password, account recovery, Connectize",
+  });
+
 import { useEffect } from "react";
 import * as Yup from "yup";
 import Form from "../../components/form";

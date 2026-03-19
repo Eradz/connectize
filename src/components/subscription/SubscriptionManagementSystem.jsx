@@ -528,68 +528,91 @@ const SubscriptionManagementSystem = () => {
               <p className="text-gray-600">Select The Perfect Plan For Your Business Needs</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Starter Plan */}
-              {availablePlans.map((plan, index) => {
-                const isCurrentPlan = isCurrentUserPlan(plan);
-                
-                return (
-                  <div
-                    key={plan.id || index}
-                    className={`rounded-2xl p-6 shadow-md flex flex-col justify-between relative ${isCurrentPlan ? 'border-2 border-green-500' : ''}`}
-                    style={{
-                        backgroundColor: isCurrentPlan ? 'black' : '#FFDB76',
-                        color: isCurrentPlan ? '#FFFFFF' : '#343A40',
-                        borderColor: isCurrentPlan ? '#FFFFFF' : '#343A40'
-                      }}
-                  >
-                    {/* Current Plan Badge */}
-                    {isCurrentPlan && (
-                      <div className="absolute top-0 right-4">
-                        <Badge 
-                          className="bg-green-500 text-white text-xs font-semibold"
-                        >
-                          Current Plan
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    <div className="mb-6">
-                      <h3 className={`text-lg font-bold mb-3 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                      <div className="mb-2">
-                        <span className={`text-3xl font-bold ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{getCurrencySymbol(plan.currency || 'USD')}{plan.price}</span>
-                        <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
-                      </div>
-                      <div 
-                        className="w-20 h-0.5"
-                        style={{ 
-                          backgroundColor: isCurrentPlan ? '#EF4444' : '#343A40'
-                        }}
-                      />
-                      <ul className="space-y-2.5 mt-6">
-                        {plan.feature_highlights && plan.feature_highlights.map((feature, featureIndex) => (
-                          <li key={featureIndex} className="flex items-start gap-2">
-                            <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
-                            <span className={`text-sm ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                      <Link
-                        to={webRoutes.subscriptionPlanDetail.replace(":planId", `${plan.id}`)}
-                        className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-center hover:opacity-80"
-                        style={{
-                          backgroundColor: isCurrentPlan ? 'transparent' : '#FFDB76',
+            {availablePlans && availablePlans.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Starter Plan */}
+                {availablePlans.map((plan, index) => {
+                  const isCurrentPlan = isCurrentUserPlan(plan);
+                  
+                  return (
+                    <div
+                      key={plan.id || index}
+                      className={`rounded-2xl p-6 shadow-md flex flex-col justify-between relative ${isCurrentPlan ? 'border-2 border-green-500' : ''}`}
+                      style={{
+                          backgroundColor: isCurrentPlan ? 'black' : '#FFDB76',
                           color: isCurrentPlan ? '#FFFFFF' : '#343A40',
                           borderColor: isCurrentPlan ? '#FFFFFF' : '#343A40'
                         }}
-                      >
-                        {isCurrentPlan ? 'Manage Plan' : 'Choose package'}
-                      </Link>
-                  </div>
-                );
-              })}
-            </div>
+                    >
+                      {/* Current Plan Badge */}
+                      {isCurrentPlan && (
+                        <div className="absolute top-0 right-4">
+                          <Badge 
+                            className="bg-green-500 text-white text-xs font-semibold"
+                          >
+                            Current Plan
+                          </Badge>
+                        </div>
+                      )}
+                      
+                      <div className="mb-6">
+                        <h3 className={`text-lg font-bold mb-3 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
+                        <div className="mb-2">
+                          <span className={`text-3xl font-bold ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{getCurrencySymbol(plan.currency || 'USD')}{plan.price}</span>
+                          <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
+                        </div>
+                        <div 
+                          className="w-20 h-0.5"
+                          style={{ 
+                            backgroundColor: isCurrentPlan ? '#EF4444' : '#343A40'
+                          }}
+                        />
+                        <ul className="space-y-2.5 mt-6">
+                          {plan.feature_highlights && plan.feature_highlights.map((feature, featureIndex) => (
+                            <li key={featureIndex} className="flex items-start gap-2">
+                              <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`} strokeWidth={2.5} />
+                              <span className={`text-sm ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                        <Link
+                          to={webRoutes.subscriptionPlanDetail.replace(":planId", `${plan.id}`)}
+                          className="w-full py-3 rounded-lg font-semibold transition-all border-2 text-center hover:opacity-80"
+                          style={{
+                            backgroundColor: isCurrentPlan ? 'transparent' : '#FFDB76',
+                            color: isCurrentPlan ? '#FFFFFF' : '#343A40',
+                            borderColor: isCurrentPlan ? '#FFFFFF' : '#343A40'
+                          }}
+                        >
+                          {isCurrentPlan ? 'Manage Plan' : 'Choose package'}
+                        </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div className="w-16 h-16 mb-4 flex items-center justify-center">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M32 8C18.75 8 8 18.75 8 32C8 45.25 18.75 56 32 56C45.25 56 56 45.25 56 32C56 18.75 45.25 8 32 8ZM32 52C21.46 52 12 42.54 12 32C12 21.46 21.46 12 32 12C42.54 12 52 21.46 52 32C52 42.54 42.54 52 32 52Z" fill="#D1D5DB"/>
+                    <path d="M32 18C30.34 18 29 19.34 29 21V32C29 33.66 30.34 35 32 35C33.66 35 35 33.66 35 32V21C35 19.34 33.66 18 32 18Z" fill="#D1D5DB"/>
+                    <path d="M32 38C30.34 38 29 39.34 29 41C29 42.66 30.34 44 32 44C33.66 44 35 42.66 35 41C35 39.34 33.66 38 32 38Z" fill="#D1D5DB"/>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Plans Available</h3>
+                <p className="text-gray-600 text-center max-w-sm mb-6">
+                  There are currently no subscription plans available.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-2 rounded-lg font-medium text-white transition-colors hover:opacity-90"
+                  style={{ backgroundColor: '#F59E0B' }}
+                >
+                  Refresh Page
+                </button>
+              </div>
+            )}
           </div>
         )}
 

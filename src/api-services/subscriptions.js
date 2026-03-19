@@ -57,8 +57,8 @@ const subscriptions = {
   },
 
   cancelUserSubscription: async (id, reason = '') => {
-    const response = await api.patch(`/api/v1/subscriptions/${id}/`, {
-      status: 'cancelled',
+    const response = await api.post('/api/v1/subscriptions/cancel/', {
+      cancel_immediately: false,
       cancellation_reason: reason
     });
     return response.data;
@@ -406,7 +406,7 @@ const subscriptions = {
   },
 
   resumeSubscription: async (subscriptionId) => {
-    const response = await api.post(`/api/v1/subscriptions/user-subscriptions/${subscriptionId}/resume/`);
+    const response = await api.post(`/api/v1/subscriptions/reactivate/`);
     return response.data;
   },
 

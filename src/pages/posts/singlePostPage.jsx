@@ -1,3 +1,11 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Post | Connectize",
+    description: "Read and engage with the latest industry posts, insights, and discussions on Connectize.",
+  });
+
 import { Button } from "@chakra-ui/react";
 import { ArrowBackIos } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";

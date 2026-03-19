@@ -1,4 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { getSession } from '../../lib/session';
+
+const getAuthHeaders = (): Record<string, string> => {
+  const session = getSession();
+  const token = session?.tokens?.access;
+
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 interface PermissionStats {
   total_users: number;
@@ -80,10 +88,10 @@ export const PermissionAnalytics: React.FC = () => {
     try {
       const [statsResponse, metricsResponse] = await Promise.all([
         fetch('/api/permissions/admin/analytics/stats/', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          headers: getAuthHeaders(),
         }),
         fetch(`/api/permissions/admin/analytics/usage/?timeframe=${timeframe}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          headers: getAuthHeaders(),
         }),
       ]);
 

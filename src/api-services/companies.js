@@ -79,15 +79,10 @@ export const createCompany = async (data, resetForm) => {
   }
 
   // console.log("form data", data);
-  const registration_date = (data.company_registration_date || "")
-    .split("-")
-    .reverse()
-    .join("-");
+  const registration_date = data.company_registration_date || null;
   const company = await makeApiRequest({
     url: `api/companies/`,
     method: "POST",
-    // logo: data.logo,
-    // banner: data.banner,
     data: {
       company_name: data.company_name,
       organization_type: data.company_category,
@@ -95,11 +90,10 @@ export const createCompany = async (data, resetForm) => {
       tag_line: data.company_tagline,
       company_size: data.company_size,
       email: data.company_email,
-      office_address: data.office_address,
+      office_address: data.company_address,
       country: data.country,
       state: data.city,
       city: data.city,
-      slug: data.company_name.toString().replaceAll(" ", "-"),
       website: data.company_website,
       registration_number: data.company_registration_no,
       registration_date,
@@ -107,15 +101,23 @@ export const createCompany = async (data, resetForm) => {
     },
   });
 
-  const document = await createCompanyDocument({
-    type: data.document_type,
-    document: data.company_document,
-    company: company?.company_name,
-  });
-
-  if (!document || !company) {
+  if (!company) {
     return;
   }
+
+  // Upload document if provided, but don't block company creation
+  if (data.document_type && data.company_document) {
+    try {
+      await createCompanyDocument({
+        type: data.document_type,
+        document: data.company_document,
+        company: company?.company_name,
+      });
+    } catch (e) {
+      console.error("Document upload failed:", e);
+    }
+  }
+
   resetForm?.();
   toast.success(company?.company_name + " was created successfully");
 

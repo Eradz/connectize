@@ -1,3 +1,12 @@
+import { createSEO } from "../SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Update Address | Connectize",
+    description: "Update your location and address details on your Connectize professional profile.",
+  keywords: "update address, location, profile settings, Connectize",
+  });
+
 import React, { useEffect } from "react";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";

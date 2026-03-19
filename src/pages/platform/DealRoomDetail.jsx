@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Deal Room | Connectize",
+    description: "View and manage an oil and gas business deal room. Track progress, share documents, and collaborate with participants.",
+  keywords: "deal room, deal management, oil and gas business, collaboration, Connectize",
+  });
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";

@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "My Deal Participations | Connectize",
+    description: "View all the deal rooms you are participating in on Connectize.",
+  keywords: "deal participations, my deals, business deals, Connectize",
+  });
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';

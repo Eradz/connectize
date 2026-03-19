@@ -21,7 +21,15 @@ import {
   FileText,
   Layers,
 } from "lucide-react";
-import SEO from "../../components/SEO";
+import SEO, { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Search | Connectize",
+    description: "Search for professionals, companies, jobs, products, and services across the Connectize oil and gas network.",
+  keywords: "search, find professionals, oil and gas companies, energy jobs, industry search",
+  });
+
 import { getSEOConfig } from "../../lib/seoConfig";
 import { getSearchResults } from "../../api-services/search";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";

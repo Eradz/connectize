@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Deal Rooms | Connectize - Oil & Gas Transactions",
+    description: "Create and manage secure deal rooms for oil and gas business negotiations. Collaborate, share documents, and track deal progress.",
+  keywords: "deal rooms, oil and gas deals, business transactions, collaboration, negotiations",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 

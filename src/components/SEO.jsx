@@ -15,7 +15,14 @@ export function createSEO({
   url,
   type = "website",
 }) {
-  const ogImage = image || "/seo/" + (relativeImagePath || "default-image.png");
+  const BASE_URL =
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_FRONTEND_URL) ||
+    (typeof window !== "undefined" ? window.location.origin : "https://connectize.co");
+  const ogImage = image
+    ? image.startsWith("http")
+      ? image
+      : `${BASE_URL}${image}`
+    : `${BASE_URL}/seo/${relativeImagePath || "default-image.png"}`;
 
   //     <meta name="description" content={description} />
   // <meta name="keywords" content={keywords} />
@@ -39,44 +46,28 @@ export function createSEO({
     },
 
     // Open Graph Meta Tags
-    {
-      property: "og:type",
-      content: type,
-    },
-    {
-      property: "og:title",
-      content: title,
-    },
-    {
-      property: "og:description",
-      content: description,
-    },
-    {
-      property: "og:image",
-      content: ogImage,
-    },
-    {
-      property: "og:url",
-      content: url,
-    },
+    { property: "og:type", content: type },
+    { property: "og:site_name", content: "Connectize" },
+    { property: "og:locale", content: "en_US" },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:image", content: ogImage },
+    { property: "og:image:alt", content: title },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    ...(url ? [{ property: "og:url", content: url }] : []),
 
     // Twitter Card Meta Tags
-    {
-      property: "twitter:card",
-      content: "summary_large_image",
-    },
-    {
-      property: "twitter:title",
-      content: title,
-    },
-    {
-      property: "twitter:description",
-      content: description,
-    },
-    {
-      property: "twitter:image",
-      content: ogImage,
-    },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:site", content: "@connectize" },
+    { name: "twitter:creator", content: "@connectize" },
+    { name: "twitter:title", content: title },
+    { name: "twitter:description", content: description },
+    { name: "twitter:image", content: ogImage },
+    { name: "twitter:image:alt", content: title },
+
+    // Canonical URL
+    ...(url ? [{ tagName: "link", rel: "canonical", href: url }] : []),
   ];
 }
 

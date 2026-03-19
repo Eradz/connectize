@@ -1,3 +1,12 @@
+import { createSEO } from "../../components/SEO";
+
+export const meta = () =>
+  createSEO({
+    title: "Orders | Connectize Marketplace",
+    description: "View your purchase history and manage your orders on Connectize Marketplace.",
+  keywords: "orders, purchase history, marketplace orders, Connectize",
+  });
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -120,7 +129,7 @@ const Orders = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold"></div>
       </div>
     );
   }
@@ -208,7 +217,7 @@ const Orders = () => {
               <button
                 onClick={submitReview}
                 disabled={!reviewData.comment.trim() || submittingReview}
-                className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="w-full py-3 bg-gold text-white rounded-lg font-semibold hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {submittingReview ? 'Submitting...' : 'Submit Review'}
               </button>
@@ -225,7 +234,7 @@ const Orders = () => {
         </div>
         <Link
           to="/marketplace"
-          className="text-blue-600 hover:underline flex items-center gap-1"
+          className="text-gold hover:underline flex items-center gap-1"
         >
           Continue Shopping
           <ChevronRight size={18} />
@@ -247,7 +256,7 @@ const Orders = () => {
             onClick={() => setStatusFilter(tab.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
               statusFilter === tab.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-gold text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -268,7 +277,7 @@ const Orders = () => {
           </p>
           <Link
             to="/marketplace"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-white rounded-xl font-semibold hover:bg-custom_yellow transition"
           >
             Start Shopping
           </Link>
@@ -343,7 +352,7 @@ const Orders = () => {
                         {order.status === 'delivered' && !item.review && (
                           <button
                             onClick={() => openReviewModal(item)}
-                            className="mt-1 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                            className="mt-1 text-sm text-gold hover:text-blue-800 flex items-center gap-1"
                           >
                             <MessageSquare size={14} />
                             Write a Review
@@ -384,7 +393,7 @@ const Orders = () => {
                   </div>
                   <div className="flex gap-3">
                     {order.status === 'shipped' && order.tracking_number && (
-                      <button className="text-blue-600 hover:underline text-sm">
+                      <button className="text-gold hover:underline text-sm">
                         Track Package
                       </button>
                     )}

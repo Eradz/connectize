@@ -262,7 +262,7 @@ const SellerOrders = () => {
           </Link>
           <Link
             to="/marketplace/my-listings"
-            className="text-blue-600 hover:underline flex items-center gap-1"
+            className="text-gold hover:underline flex items-center gap-1"
           >
             Manage Listings
             <ChevronRight size={18} />
@@ -311,7 +311,7 @@ const SellerOrders = () => {
             onClick={() => setStatusFilter(tab.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
               statusFilter === tab.value
-                ? 'bg-blue-600 text-white'
+                ? 'bg-gold text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
