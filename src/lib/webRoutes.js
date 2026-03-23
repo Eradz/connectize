@@ -252,6 +252,15 @@ const webRoutes = {
   dealRoomActivities: "/deals/:id/activities",
   dealRoomValuations: "/deals/:id/valuations",
   dealRoomReports: "/deals/:id/reports",
+
+  // Bidding System
+  bidding: "/bidding",
+  biddingCreate: "/bidding/create",
+  biddingEdit: "/bidding/:id/edit",
+  biddingDetail: "/bidding/:id",
+  biddingSubmit: "/bidding/:id/submit",
+  biddingEvaluate: "/bidding/:id/evaluate",
+  biddingTemplates: "/bidding/templates",
 };
 
 export { webRoutes };

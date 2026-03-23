@@ -3,6 +3,7 @@ import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import SEO from "./components/SEO";
 import { webRoutes } from "./lib/webRoutes";
 import AppLayout from "./pages/AppLayout";
+import BiddingProjectDetail from "./pages/bidding/BiddingProjectDetail";
 import FeedLayout from "./pages/FeedLayout";
 import GlobalPrefetch from "./components/GlobalPrefetch";
 
@@ -151,6 +152,13 @@ const KnowledgeForumDetail = lazy(() => import("./pages/knowledge/KnowledgeForum
 const KnowledgeTopicCreate = lazy(() => import("./pages/knowledge/KnowledgeTopicCreate"));
 const KnowledgeTopicDetail = lazy(() => import("./pages/knowledge/KnowledgeTopicDetail"));
 const KnowledgeForumInvite = lazy(() => import("./pages/knowledge/KnowledgeForumInvite"));
+
+// Bidding
+const BiddingProjects = lazy(() => import("./pages/bidding/BiddingProjects"));
+const CreateBiddingProject = lazy(() => import("./pages/bidding/CreateBiddingProject"));
+const SubmitBid = lazy(() => import("./pages/bidding/SubmitBid"));
+const EvaluationPanel = lazy(() => import("./pages/bidding/EvaluationPanel"));
+const BiddingTemplates = lazy(() => import("./pages/bidding/BiddingTemplates"));
 
 // Marketplace
 const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
@@ -312,6 +320,15 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.dealRoomValuations)} element={<DealRoomDetail />} />
           <Route path={removeLeadingSlash(webRoutes.dealRoomReports)} element={<DealRoomDetail />} />
           <Route path={removeLeadingSlash(webRoutes.myParticipations)} element={<MyParticipations />} />
+          
+          {/* Bidding */}
+          <Route path={removeLeadingSlash(webRoutes.bidding)} element={<BiddingProjects />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingCreate)} element={<CreateBiddingProject />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingEdit)} element={<CreateBiddingProject />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingDetail)} element={<BiddingProjectDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingSubmit)} element={<SubmitBid />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingEvaluate)} element={<EvaluationPanel />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingTemplates)} element={<BiddingTemplates />} />
           
           {/* Workforce */}
           <Route path={removeLeadingSlash(webRoutes.workforceJobs)} element={<WorkforceJobs />} />
