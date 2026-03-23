@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
@@ -35,6 +35,36 @@ import {
   Pencil,
 } from "lucide-react";
 
+class BiddingDetailErrorBoundary extends Component {
+  state = { hasError: false, error: null };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error("BiddingDetail render crash:", error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="text-center py-20 bg-white rounded-xl border border-red-200">
+            <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+            <p className="text-red-600 font-medium mb-1">Something went wrong</p>
+            <p className="text-sm text-gray-500 mb-4">{this.state.error?.message}</p>
+            <button
+              className="px-4 py-2 bg-[#242424] hover:bg-[#373737] text-white rounded-lg text-sm"
+              onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const STATUS_LABELS = {
   draft: { label: "Draft", color: "bg-gray-100 text-gray-700", icon: FileText },
   published: { label: "Published", color: "bg-blue-100 text-blue-700", icon: Eye },
@@ -54,6 +84,34 @@ const TABS = [
   { key: "clarifications", label: "Q&A", icon: MessageSquare },
   { key: "activity", label: "Activity", icon: Clock },
 ];
+
+function unwrapApiPayload(response) {
+  if (response == null) return null;
+
+  let payload = response;
+  if (payload && typeof payload === "object" && "data" in payload) {
+    payload = payload.data;
+  }
+  if (
+    payload &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    "data" in payload &&
+    !("id" in payload) &&
+    !("results" in payload)
+  ) {
+    payload = payload.data;
+  }
+
+  return payload ?? null;
+}
+
+function unwrapApiList(response) {
+  const payload = unwrapApiPayload(response);
+  if (Array.isArray(payload?.results)) return payload.results;
+  if (Array.isArray(payload)) return payload;
+  return [];
+}
 
 function StatusBadge({ status }) {
   const config = STATUS_LABELS[status] || { label: status, color: "bg-gray-100" };
@@ -753,7 +811,7 @@ function ActivityTab({ activities }) {
   );
 }
 
-export default function BiddingProjectDetail() {
+function BiddingProjectDetailInner() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
@@ -767,15 +825,24 @@ export default function BiddingProjectDetail() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
   const [selectedBidForAward, setSelectedBidForAward] = useState(null);
+  const [error, setError] = useState(null);
 
   const fetchProject = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await biddingAPI.getProject(id);
-      setProject(res?.data || res);
-    } catch {
-      toast.error("Failed to load project");
-      navigate(webRoutes.bidding);
+      const projectData = unwrapApiPayload(res);
+      if (!projectData) {
+        setError("Project not found or failed to load.");
+        setProject(null);
+        return;
+      }
+      setProject(projectData);
+    } catch (err) {
+      console.error("fetchProject error:", err);
+      setError("Failed to load project. Please try again.");
+      setProject(null);
     } finally {
       setLoading(false);
     }
@@ -784,36 +851,46 @@ export default function BiddingProjectDetail() {
   const fetchBids = async () => {
     try {
       const res = await biddingAPI.getBids({ project: id });
-      setBids((res?.data || res)?.results || res?.data || []);
-    } catch {}
+      setBids(unwrapApiList(res));
+    } catch {
+      setBids([]);
+    }
   };
 
   const fetchStages = async () => {
     try {
       const res = await biddingAPI.getProjectStages(id);
-      setStages((res?.data || res)?.results || res?.data || []);
-    } catch {}
+      setStages(unwrapApiList(res));
+    } catch {
+      setStages([]);
+    }
   };
 
   const fetchClarifications = async () => {
     try {
       const res = await biddingAPI.getClarifications(id);
-      setClarifications((res?.data || res)?.results || res?.data || []);
-    } catch {}
+      setClarifications(unwrapApiList(res));
+    } catch {
+      setClarifications([]);
+    }
   };
 
   const fetchActivity = async () => {
     try {
       const res = await biddingAPI.getProjectActivity(id);
-      setActivities((res?.data || res)?.results || res?.data || []);
-    } catch {}
+      setActivities(unwrapApiList(res));
+    } catch {
+      setActivities([]);
+    }
   };
 
   const fetchDocuments = async () => {
     try {
       const res = await biddingAPI.getDocuments({ bid_project: id });
-      setDocuments((res?.data || res)?.results || res?.data || []);
-    } catch {}
+      setDocuments(unwrapApiList(res));
+    } catch {
+      setDocuments([]);
+    }
   };
 
   useEffect(() => {
@@ -910,7 +987,31 @@ export default function BiddingProjectDetail() {
     );
   }
 
-  if (!project) return null;
+  if (!project) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <button
+          onClick={() => navigate(webRoutes.bidding)}
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Projects
+        </button>
+        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+          <AlertTriangle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-600 font-medium mb-1">{error || "Project not found"}</p>
+          <p className="text-sm text-gray-400 mb-4">The project may have been removed or you may not have access.</p>
+          <Button
+            className="bg-dark hover:bg-mid_grey text-white"
+            size="sm"
+            onClick={() => { setError(null); fetchProject(); }}
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const ownerActions = project.is_owner
     ? [
@@ -1128,5 +1229,13 @@ export default function BiddingProjectDetail() {
         </Modal>
       )}
     </div>
+  );
+}
+
+export default function BiddingProjectDetail() {
+  return (
+    <BiddingDetailErrorBoundary>
+      <BiddingProjectDetailInner />
+    </BiddingDetailErrorBoundary>
   );
 }

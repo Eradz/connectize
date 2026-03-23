@@ -151,6 +151,30 @@ export default function BiddingProjects() {
   const [showFilters, setShowFilters] = useState(false);
   const [stats, setStats] = useState({ total: 0, open: 0, myProjects: 0 });
 
+  // Fetch stats from multiple queries for accuracy (stable across tab switches)
+  const fetchStats = async () => {
+    try {
+      const [allRes, openRes, myRes] = await Promise.all([
+        biddingAPI.getProjects({}),
+        biddingAPI.getProjects({ status: 'published,submission_open' }),
+        biddingAPI.getProjects({ role: 'buyer' }),
+      ]);
+      const allData = allRes?.data || allRes;
+      const allList = allData.results || allData || [];
+      const openData = openRes?.data || openRes;
+      const openList = openData.results || openData || [];
+      const myData = myRes?.data || myRes;
+      const myList = myData.results || myData || [];
+      setStats({
+        total: allData.count ?? allList.length,
+        open: openData.count ?? openList.length,
+        myProjects: myData.count ?? myList.length,
+      });
+    } catch {
+      // stats fetch failure is non-critical
+    }
+  };
+
   const fetchProjects = async () => {
     try {
       setLoading(true);
@@ -162,21 +186,16 @@ export default function BiddingProjects() {
       const res = await biddingAPI.getProjects(params);
       const data = res?.data || res;
       setProjects(data.results || data || []);
-      setStats({
-        total: data.count || (data.results || data || []).length,
-        open: (data.results || data || []).filter(
-          (p) => p.status === "submission_open"
-        ).length,
-        myProjects: (data.results || data || []).filter(
-          (p) => p.is_owner
-        ).length,
-      });
     } catch (err) {
       toast.error("Failed to load bid projects");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     fetchProjects();
@@ -235,7 +254,7 @@ export default function BiddingProjects() {
       <div className="flex items-center gap-1 mb-6 overflow-x-auto bg-white rounded-lg border border-gray-200 p-1">
         {[
           { label: "All Projects", role: "", status: "" },
-          { label: "Open for Bidding", role: "", status: "submission_open" },
+          { label: "Open for Bidding", role: "", status: "published,submission_open" },
           { label: "My Projects", role: "buyer", status: "" },
           { label: "My Bids", role: "bidder", status: "" },
         ].map((preset) => {

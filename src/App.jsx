@@ -3,6 +3,7 @@ import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import SEO from "./components/SEO";
 import { webRoutes } from "./lib/webRoutes";
 import AppLayout from "./pages/AppLayout";
+import BiddingProjectDetail from "./pages/bidding/BiddingProjectDetail";
 import FeedLayout from "./pages/FeedLayout";
 import GlobalPrefetch from "./components/GlobalPrefetch";
 
@@ -151,7 +152,6 @@ const KnowledgeForumInvite = lazy(() => import("./pages/knowledge/KnowledgeForum
 
 // Bidding
 const BiddingProjects = lazy(() => import("./pages/bidding/BiddingProjects"));
-const BiddingProjectDetail = lazy(() => import("./pages/bidding/BiddingProjectDetail"));
 const CreateBiddingProject = lazy(() => import("./pages/bidding/CreateBiddingProject"));
 const SubmitBid = lazy(() => import("./pages/bidding/SubmitBid"));
 const EvaluationPanel = lazy(() => import("./pages/bidding/EvaluationPanel"));
