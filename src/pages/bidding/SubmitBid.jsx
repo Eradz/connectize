@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
+import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
-import { Input, Select, Textarea } from "../../components/ui/Input";
-import Skeleton from "../../components/ui/Skeleton";
+import Input, { Select, Textarea } from "../../components/ui/Input";
+import { Skeleton } from "../../components/ui/Skeleton";
 import {
   ArrowLeft,
   Send,
@@ -15,10 +16,14 @@ import {
   Trash2,
   Upload,
   AlertTriangle,
+  Save,
 } from "lucide-react";
 
 export default function SubmitBid() {
-  const { projectId } = useParams();
+  const { id: projectId } = useParams();
+  const [searchParams] = useSearchParams();
+  const editBidId = searchParams.get("bid");
+  const isEditMode = !!editBidId;
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,10 +41,30 @@ export default function SubmitBid() {
     { item: "", amount: "" },
   ]);
   const [documents, setDocuments] = useState([]);
+  const [userCompanies, setUserCompanies] = useState([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
 
   useEffect(() => {
     fetchProject();
+    fetchUserCompanies();
   }, [projectId]);
+
+  const fetchUserCompanies = async () => {
+    try {
+      setLoadingCompanies(true);
+      const companies = await getCompanyByIdOrEmail();
+      if (Array.isArray(companies)) {
+        setUserCompanies(companies);
+        if (companies.length === 1 && !form.bidder_company) {
+          setForm((prev) => ({ ...prev, bidder_company: companies[0].id }));
+        }
+      }
+    } catch {
+      console.error("Failed to load companies");
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
 
   const fetchProject = async () => {
     try {
@@ -47,6 +72,31 @@ export default function SubmitBid() {
       const data = res?.data || res;
       setProject(data);
       setForm((prev) => ({ ...prev, currency: data.currency || "USD" }));
+
+      // If editing an existing bid, load its data
+      if (editBidId) {
+        try {
+          const bidRes = await biddingAPI.getBid(editBidId);
+          const bid = bidRes?.data || bidRes;
+          setForm({
+            total_price: bid.total_price || "",
+            currency: bid.currency || data.currency || "USD",
+            technical_proposal: bid.technical_proposal || "",
+            bidder_company: bid.bidder_company || "",
+            custom_responses: bid.custom_responses || {},
+          });
+          if (bid.price_breakdown && Object.keys(bid.price_breakdown).length > 0) {
+            setPriceBreakdown(
+              Object.entries(bid.price_breakdown).map(([item, amount]) => ({
+                item,
+                amount: String(amount),
+              }))
+            );
+          }
+        } catch {
+          toast.error("Failed to load bid data");
+        }
+      }
     } catch {
       toast.error("Failed to load project");
       navigate(webRoutes.bidding);
@@ -64,6 +114,13 @@ export default function SubmitBid() {
       ...prev,
       custom_responses: { ...prev.custom_responses, [key]: value },
     }));
+  };
+
+  const handleCustomFileUpload = (key, file) => {
+    if (!file) return;
+    // Store the file name as the response value; actual upload handled with documents
+    setDocuments((prev) => [...prev, file]);
+    handleCustomResponse(key, file.name);
   };
 
   // Price breakdown management
@@ -104,6 +161,27 @@ export default function SubmitBid() {
       return;
     }
 
+    // Validate required custom specification fields
+    const specFields = project.specifications?.custom_fields || [];
+    for (const field of specFields) {
+      if (field.required && !form.custom_responses[field.key]) {
+        toast.error(`${field.label || field.key} is required`);
+        return;
+      }
+    }
+
+    // Coerce typed values before submission
+    const coercedResponses = { ...form.custom_responses };
+    for (const field of specFields) {
+      const val = coercedResponses[field.key];
+      if (val === undefined || val === "") continue;
+      if (field.type === "number") {
+        coercedResponses[field.key] = Number(val);
+      } else if (field.type === "boolean") {
+        coercedResponses[field.key] = val === "true";
+      }
+    }
+
     setSubmitting(true);
     try {
       const payload = {
@@ -112,7 +190,7 @@ export default function SubmitBid() {
         total_price: form.total_price,
         currency: form.currency,
         technical_proposal: form.technical_proposal,
-        custom_responses: form.custom_responses,
+        custom_responses: coercedResponses,
         price_breakdown: priceBreakdown
           .filter((item) => item.item && item.amount)
           .reduce((acc, item) => {
@@ -121,10 +199,18 @@ export default function SubmitBid() {
           }, {}),
       };
 
-      const res = await biddingAPI.submitBid(payload);
-      const bid = res?.data || res;
+      let bid;
+      if (isEditMode) {
+        const res = await biddingAPI.updateBid(editBidId, payload);
+        bid = res?.data || res;
+        toast.success("Bid updated successfully!");
+      } else {
+        const res = await biddingAPI.submitBid(payload);
+        bid = res?.data || res;
+        toast.success("Bid submitted successfully!");
+      }
 
-      // Upload documents
+      // Upload new documents
       for (const file of documents) {
         try {
           await biddingAPI.uploadDocument({
@@ -137,8 +223,7 @@ export default function SubmitBid() {
         }
       }
 
-      toast.success("Bid submitted successfully!");
-      navigate(webRoutes.biddingProjectDetail.replace(":id", projectId));
+      navigate(webRoutes.biddingDetail.replace(":id", projectId));
     } catch (err) {
       const data = err?.response?.data || err;
       if (typeof data === "object" && !Array.isArray(data)) {
@@ -164,13 +249,13 @@ export default function SubmitBid() {
 
   if (!project) return null;
 
-  const customFields = project.custom_fields_schema || [];
+  const customFields = project.specifications?.custom_fields || [];
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
       <button
         onClick={() =>
-          navigate(webRoutes.biddingProjectDetail.replace(":id", projectId))
+          navigate(webRoutes.biddingDetail.replace(":id", projectId))
         }
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"
       >
@@ -178,7 +263,9 @@ export default function SubmitBid() {
         Back to Project
       </button>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Submit Bid</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">
+        {isEditMode ? "Edit Bid" : "Submit Bid"}
+      </h1>
       <p className="text-sm text-gray-500 mb-6">
         {project.title} · {project.reference_number}
       </p>
@@ -202,11 +289,27 @@ export default function SubmitBid() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Your Company *
             </label>
-            <Input
-              value={form.bidder_company}
-              onChange={(e) => handleChange("bidder_company", e.target.value)}
-              placeholder="Select your company"
-            />
+            {loadingCompanies ? (
+              <div className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-400 text-sm">
+                Loading companies...
+              </div>
+            ) : userCompanies.length === 0 ? (
+              <div className="w-full px-3 py-2.5 border border-red-200 rounded-lg bg-red-50 text-red-600 text-sm">
+                No companies found. You need a company to submit a bid.
+              </div>
+            ) : (
+              <Select
+                value={form.bidder_company}
+                onChange={(e) => handleChange("bidder_company", e.target.value)}
+              >
+                <option value="">Select your company</option>
+                {userCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.company_name}
+                  </option>
+                ))}
+              </Select>
+            )}
           </div>
         </section>
 
@@ -321,7 +424,7 @@ export default function SubmitBid() {
           />
         </section>
 
-        {/* Custom Response Fields (from project's custom_fields_schema) */}
+        {/* Custom Response Fields (from project specifications) */}
         {customFields.length > 0 && (
           <section className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -383,6 +486,22 @@ export default function SubmitBid() {
                           }
                         />
                         No
+                      </label>
+                    </div>
+                  ) : field.type === "file" ? (
+                    <div>
+                      <label className="flex items-center gap-2 p-3 border-2 border-dashed border-gray-200 rounded-lg hover:border-[#F1C644] transition cursor-pointer">
+                        <Upload className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-500">
+                          {form.custom_responses[field.key] || "Click to upload file"}
+                        </span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) =>
+                            handleCustomFileUpload(field.key, e.target.files?.[0])
+                          }
+                        />
                       </label>
                     </div>
                   ) : (
@@ -453,7 +572,7 @@ export default function SubmitBid() {
             type="button"
             onClick={() =>
               navigate(
-                webRoutes.biddingProjectDetail.replace(":id", projectId)
+                webRoutes.biddingDetail.replace(":id", projectId)
               )
             }
           >
@@ -463,10 +582,13 @@ export default function SubmitBid() {
             variant="primary"
             type="submit"
             loading={submitting}
-            disabled={project.status !== "submission_open"}
+            disabled={!isEditMode && project.status !== "submission_open"}
           >
-            <Send className="w-4 h-4 mr-1" />
-            Submit Bid
+            {isEditMode ? (
+              <><Save className="w-4 h-4 mr-1" /> Save Changes</>
+            ) : (
+              <><Send className="w-4 h-4 mr-1" /> Submit Bid</>
+            )}
           </Button>
         </div>
       </form>

@@ -12,10 +12,10 @@ export const biddingAPI = {
 
   // Project Actions
   publishProject: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/publish/`),
-  openSubmission: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/open_submission/`),
-  closeSubmission: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/close_submission/`),
-  startEvaluation: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/start_evaluation/`),
-  advanceStage: (id, data = {}) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/advance_stage/`, data),
+  openSubmission: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/open-submission/`),
+  closeSubmission: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/close-submission/`),
+  startEvaluation: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/start-evaluation/`),
+  advanceStage: (id, data = {}) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/advance-stage/`, data),
   awardProject: (id, data) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/award/`, data),
   cancelProject: (id, data = {}) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/cancel/`, data),
 
@@ -23,13 +23,13 @@ export const biddingAPI = {
   getProjectStages: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/stages/`),
   getProjectActivity: (id, params = {}) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/activity/`, { params }),
   getScoreboard: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/scoreboard/`),
-  calculateScores: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/calculate_scores/`),
-  shortlistBids: (id, data) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/shortlist_bids/`, data),
+  calculateScores: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/calculate-scores/`),
+  shortlistBids: (id, data) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/shortlist-bids/`, data),
 
   // Project Clarifications
   getClarifications: (id, params = {}) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/clarifications/`, { params }),
   askClarification: (id, data) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/clarifications/`, data),
-  answerClarification: (id, data) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/answer_clarification/`, data),
+  answerClarification: (projectId, { clarification_id, answer }) => api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/clarifications/${clarification_id}/answer/`, { answer }),
 
   // Project Invitations
   getInvitations: (id, params = {}) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/invitations/`, { params }),
@@ -78,9 +78,7 @@ export const biddingAPI = {
         formData.append(key, data[key]);
       }
     });
-    return api.post(`${BIDDING_BASE_URL}/bid-documents/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    return api.post(`${BIDDING_BASE_URL}/bid-documents/`, formData);
   },
   deleteDocument: (id) => api.delete(`${BIDDING_BASE_URL}/bid-documents/${id}/`),
 

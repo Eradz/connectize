@@ -5,7 +5,7 @@ import { biddingAPI } from "../../api-services/bidding";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
-import Skeleton from "../../components/ui/Skeleton";
+import { Skeleton } from "../../components/ui/Skeleton";
 import {
   ArrowLeft,
   Clock,
@@ -28,6 +28,11 @@ import {
   Plus,
   Download,
   Star,
+  Upload,
+  Trash2,
+  Activity,
+  User,
+  Pencil,
 } from "lucide-react";
 
 const STATUS_LABELS = {
@@ -72,7 +77,7 @@ function OverviewTab({ project }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h4 className="font-semibold text-gray-900 mb-3">Specifications</h4>
+          <h4 className="font-semibold text-gray-900 mb-3">Project Info</h4>
           <dl className="space-y-3">
             <div className="flex justify-between text-sm">
               <dt className="text-gray-500">Project Type</dt>
@@ -138,17 +143,55 @@ function OverviewTab({ project }) {
         </div>
       </div>
 
-      {/* Custom form fields rendered from template */}
-      {project.custom_fields && Object.keys(project.custom_fields).length > 0 && (
+      {/* Custom form fields rendered from specifications */}
+      {project.specifications && Object.keys(project.specifications).length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h4 className="font-semibold text-gray-900 mb-3">Custom Fields</h4>
-          <dl className="space-y-3">
-            {Object.entries(project.custom_fields).map(([key, value]) => (
-              <div key={key} className="flex justify-between text-sm">
-                <dt className="text-gray-500 capitalize">{key.replace(/_/g, " ")}</dt>
-                <dd className="font-medium">{String(value)}</dd>
+          <h4 className="font-semibold text-gray-900 mb-3">Specifications</h4>
+
+          {/* Custom field definitions */}
+          {Array.isArray(project.specifications.custom_fields) &&
+            project.specifications.custom_fields.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                  Required Fields
+                </p>
+                <div className="space-y-2">
+                  {project.specifications.custom_fields.map((field, i) => (
+                    <div
+                      key={field.key || i}
+                      className="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-2"
+                    >
+                      <span className="text-gray-700 font-medium">
+                        {field.label || field.key}
+                        {field.required && (
+                          <span className="text-red-400 ml-0.5">*</span>
+                        )}
+                      </span>
+                      <span className="text-xs text-gray-500 capitalize">
+                        {field.type || "text"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
+
+          {/* Other specification key-value pairs */}
+          <dl className="space-y-3">
+            {Object.entries(project.specifications)
+              .filter(([key]) => key !== "custom_fields")
+              .map(([key, value]) => (
+                <div key={key} className="flex justify-between text-sm">
+                  <dt className="text-gray-500 capitalize">{key.replace(/_/g, " ")}</dt>
+                  <dd className="font-medium">
+                    {typeof value === "object" && value !== null
+                      ? JSON.stringify(value)
+                      : Array.isArray(value)
+                      ? value.join(", ")
+                      : String(value)}
+                  </dd>
+                </div>
+              ))}
           </dl>
         </div>
       )}
@@ -170,7 +213,7 @@ function BidsTab({ project, bids, onRefresh }) {
             variant="primary"
             size="sm"
             onClick={() =>
-              navigate(webRoutes.biddingSubmitBid.replace(":projectId", project.id))
+              navigate(webRoutes.biddingSubmit.replace(":id", project.id))
             }
           >
             <Send className="w-4 h-4 mr-1" />
@@ -190,7 +233,7 @@ function BidsTab({ project, bids, onRefresh }) {
             <div
               key={bid.id}
               className="bg-white rounded-xl border border-gray-200 p-4 hover:border-[#F1C644]/40 transition cursor-pointer"
-              onClick={() => navigate(webRoutes.biddingBidDetail.replace(":id", bid.id))}
+              onClick={() => navigate(webRoutes.biddingDetail.replace(":id", project.id))}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -222,6 +265,28 @@ function BidsTab({ project, bids, onRefresh }) {
                   {bid.technical_proposal.replace(/<[^>]+>/g, "").slice(0, 200)}
                 </p>
               )}
+              {/* Custom specification responses */}
+              {bid.custom_responses && Object.keys(bid.custom_responses).length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(() => {
+                    const fieldDefs = project.specifications?.custom_fields || [];
+                    const fieldMap = Object.fromEntries(fieldDefs.map(f => [f.key, f]));
+                    return Object.entries(bid.custom_responses).map(([key, val]) => {
+                      const def = fieldMap[key];
+                      const label = def?.label || key.replace(/_/g, " ");
+                      let display = val;
+                      if (typeof val === "boolean") display = val ? "Yes" : "No";
+                      else if (val === "true") display = "Yes";
+                      else if (val === "false") display = "No";
+                      return (
+                        <span key={key} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                          <span className="font-medium text-gray-700">{label}:</span> {String(display)}
+                        </span>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
               {bid.weighted_score !== null && (
                 <div className="flex items-center gap-1 mt-2">
                   <Star className="w-3.5 h-3.5 text-[#F1C644]" />
@@ -229,6 +294,22 @@ function BidsTab({ project, bids, onRefresh }) {
                   {bid.rank && (
                     <span className="text-xs text-gray-500 ml-2">Rank #{bid.rank}</span>
                   )}
+                </div>
+              )}
+              {bid.status === "draft" && (
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(
+                        `${webRoutes.biddingSubmit.replace(":id", project.id)}?bid=${bid.id}`
+                      );
+                    }}
+                    className="flex items-center gap-1 text-xs font-medium text-[#F1C644] hover:text-[#d4ad3a] transition"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Edit Draft
+                  </button>
                 </div>
               )}
             </div>
@@ -240,67 +321,133 @@ function BidsTab({ project, bids, onRefresh }) {
 }
 
 function StagesTab({ stages }) {
+  const total = stages.length;
+  const completed = stages.filter((s) => s.status === "completed").length;
+  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Workflow Stages</h3>
-      {stages.length === 0 ? (
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Workflow Stages</h3>
+        {total > 0 && (
+          <span className="text-sm text-gray-500">
+            {completed}/{total} completed
+          </span>
+        )}
+      </div>
+
+      {total === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <BarChart3 className="w-10 h-10 text-gray-300 mx-auto mb-2" />
           <p className="text-gray-500">No stages defined</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {stages.map((stage, index) => (
-            <div
-              key={stage.id}
-              className={`bg-white rounded-xl border p-4 ${
-                stage.status === "active"
-                  ? "border-[#F1C644] ring-1 ring-[#F1C644]/20"
-                  : stage.status === "completed"
-                  ? "border-green-200 bg-green-50/30"
-                  : "border-gray-200"
-              }`}
-            >
-              <div className="flex items-center gap-3">
+        <>
+          {/* Progress bar */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    stage.status === "active"
-                      ? "bg-[#F1C644] text-gray-900"
-                      : stage.status === "completed"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-200 text-gray-600"
+                  className="h-full bg-dark rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                {progress}%
+              </span>
+            </div>
+            {/* Stage dots */}
+            <div className="flex items-center justify-between">
+              {stages.map((stage, i) => (
+                <div key={stage.id} className="flex flex-col items-center" style={{ flex: 1 }}>
+                  <div
+                    className={`w-3 h-3 rounded-full border-2 transition-all ${
+                      stage.status === "completed"
+                        ? "bg-dark border-dark"
+                        : stage.status === "active"
+                        ? "bg-gold border-gold ring-4 ring-gold/20"
+                        : "bg-white border-light_grey"
+                    }`}
+                    title={stage.name}
+                  />
+                  {total <= 10 && (
+                    <span className="text-[10px] text-custom_grey mt-1 text-center leading-tight max-w-[60px] truncate">
+                      {stage.name}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stage cards */}
+          <div className="space-y-2">
+            {stages.map((stage, index) => {
+              const isActive = stage.status === "active";
+              const isDone = stage.status === "completed";
+
+              return (
+                <div
+                  key={stage.id}
+                  className={`bg-white rounded-xl border p-4 transition-all ${
+                    isActive
+                      ? "border-gold shadow-sm"
+                      : "border-gray-200"
                   }`}
                 >
-                  {stage.status === "completed" ? "✓" : index + 1}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium text-gray-900">{stage.name}</h4>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full capitalize ${
-                        stage.status === "active"
-                          ? "bg-[#F1C644]/20 text-[#b8952e]"
-                          : stage.status === "completed"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                        isDone
+                          ? "bg-dark text-white"
+                          : isActive
+                          ? "bg-gold text-dark"
+                          : "bg-gray-100 text-custom_grey border-2 border-light_grey"
                       }`}
                     >
-                      {stage.status}
-                    </span>
+                      {isDone ? "✓" : index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-medium text-dark">{stage.name}</h4>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full capitalize ${
+                            isDone
+                              ? "bg-gray-100 text-dark"
+                              : isActive
+                              ? "bg-gold/10 text-mid_grey"
+                              : "bg-gray-100 text-custom_grey"
+                          }`}
+                        >
+                          {stage.status || "pending"}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full capitalize bg-gray-50 text-custom_grey">
+                          {stage.stage_type?.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                      {stage.notes && (
+                        <p className="text-xs text-custom_grey mt-0.5 truncate">{stage.notes}</p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0 text-xs text-custom_grey space-y-0.5">
+                      {stage.deadline && (
+                        <div>Due: {new Date(stage.deadline).toLocaleDateString()}</div>
+                      )}
+                      {stage.started_at && (
+                        <div>Started: {new Date(stage.started_at).toLocaleDateString()}</div>
+                      )}
+                      {stage.completed_at && (
+                        <div className="font-medium text-dark">
+                          Done: {new Date(stage.completed_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 capitalize">
-                    {stage.stage_type?.replace(/_/g, " ")}
-                  </p>
                 </div>
-                {stage.deadline && (
-                  <span className="text-xs text-gray-500">
-                    Due: {new Date(stage.deadline).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
@@ -342,7 +489,7 @@ function ClarificationsTab({ project, clarifications, onAsk, onAnswer }) {
               />
               Private (only visible to project owner)
             </label>
-            <Button variant="primary" size="sm" type="submit">
+            <Button size="sm" type="submit" className="bg-dark hover:bg-mid_grey text-white">
               Submit Question
             </Button>
           </div>
@@ -396,9 +543,8 @@ function AnswerForm({ clarificationId, onAnswer }) {
         rows={2}
       />
       <Button
-        variant="primary"
         size="xs"
-        className="mt-1"
+        className="mt-1 bg-dark hover:bg-mid_grey text-white"
         onClick={() => {
           if (answer.trim()) {
             onAnswer({ clarification_id: clarificationId, answer });
@@ -412,7 +558,150 @@ function AnswerForm({ clarificationId, onAnswer }) {
   );
 }
 
+function DocumentsTab({ project, documents, onUpload, onDelete }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      await onUpload({
+        file,
+        project: project.id,
+        document_type: "other",
+        title: file.name,
+      });
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">
+          Documents ({documents.length})
+        </h3>
+        {project.is_owner && (
+          <label className="cursor-pointer">
+            <Button variant="outline" size="sm" as="span" loading={uploading}>
+              <Upload className="w-4 h-4 mr-1" />
+              Upload
+            </Button>
+            <input
+              type="file"
+              className="hidden"
+              onChange={handleUpload}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.png,.jpg,.jpeg"
+            />
+          </label>
+        )}
+      </div>
+
+      {/* Required documents checklist */}
+      {project.required_documents && project.required_documents.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Required Documents</h4>
+          <div className="space-y-1.5">
+            {project.required_documents.map((doc, i) => {
+              const uploaded = documents.some(
+                (d) => d.document_type === doc || d.title?.toLowerCase().includes(doc.toLowerCase())
+              );
+              return (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  {uploaded ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                  )}
+                  <span className={uploaded ? "text-gray-700" : "text-gray-500"}>{doc}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {documents.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+          <FileText className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+          <p className="text-gray-500">No documents uploaded yet</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {documents.map((doc) => (
+            <div
+              key={doc.id}
+              className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3"
+            >
+              <FileText className="w-5 h-5 text-gray-400 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {doc.title || doc.file?.split("/").pop() || "Document"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {doc.document_type?.replace(/_/g, " ")}
+                  {doc.uploaded_at && ` · ${new Date(doc.uploaded_at).toLocaleDateString()}`}
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {doc.file && (
+                  <a
+                    href={doc.file}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 text-gray-400 hover:text-blue-600 transition"
+                  >
+                    <Download className="w-4 h-4" />
+                  </a>
+                )}
+                {project.is_owner && (
+                  <button
+                    onClick={() => onDelete(doc.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ActivityTab({ activities }) {
+  const getEventIcon = (eventType) => {
+    const map = {
+      created: FileText,
+      published: Eye,
+      submission_opened: Send,
+      submission_closed: Clock,
+      bid_submitted: Gavel,
+      bid_withdrawn: XCircle,
+      evaluation_started: BarChart3,
+      stage_advanced: BarChart3,
+      awarded: Award,
+      cancelled: XCircle,
+      clarification_asked: MessageSquare,
+      clarification_answered: MessageSquare,
+      score_calculated: Star,
+    };
+    return map[eventType] || Activity;
+  };
+
+  const getEventColor = (eventType) => {
+    if (["awarded", "completed"].includes(eventType)) return "bg-green-500";
+    if (["cancelled", "bid_withdrawn"].includes(eventType)) return "bg-red-400";
+    if (["bid_submitted"].includes(eventType)) return "bg-blue-500";
+    if (["evaluation_started", "score_calculated"].includes(eventType)) return "bg-purple-500";
+    return "bg-[#F1C644]";
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Activity Log</h3>
@@ -425,17 +714,38 @@ function ActivityTab({ activities }) {
         <div className="relative">
           <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
           <div className="space-y-4">
-            {activities.map((act) => (
-              <div key={act.id} className="relative pl-10">
-                <div className="absolute left-2.5 w-3 h-3 bg-[#F1C644] rounded-full border-2 border-white" />
-                <div className="bg-white rounded-lg border border-gray-200 p-3">
-                  <p className="text-sm text-gray-900">{act.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {act.actor_name} · {new Date(act.timestamp).toLocaleString()}
-                  </p>
+            {activities.map((act) => {
+              const IconComp = getEventIcon(act.event_type);
+              const dotColor = getEventColor(act.event_type);
+              return (
+                <div key={act.id} className="relative pl-10">
+                  <div
+                    className={`absolute left-2 w-5 h-5 rounded-full flex items-center justify-center ${dotColor}`}
+                  >
+                    <IconComp className="w-3 h-3 text-white" />
+                  </div>
+                  <div className="bg-white rounded-lg border border-gray-200 p-3">
+                    <p className="text-sm text-gray-900">{act.description}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {act.actor_name && (
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-600">
+                          <User className="w-3 h-3" />
+                          {act.actor_name}
+                        </span>
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {new Date(act.timestamp).toLocaleString()}
+                      </span>
+                      {act.event_type && (
+                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded capitalize">
+                          {act.event_type.replace(/_/g, " ")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -453,6 +763,7 @@ export default function BiddingProjectDetail() {
   const [stages, setStages] = useState([]);
   const [clarifications, setClarifications] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
   const [selectedBidForAward, setSelectedBidForAward] = useState(null);
@@ -498,12 +809,20 @@ export default function BiddingProjectDetail() {
     } catch {}
   };
 
+  const fetchDocuments = async () => {
+    try {
+      const res = await biddingAPI.getDocuments({ bid_project: id });
+      setDocuments((res?.data || res)?.results || res?.data || []);
+    } catch {}
+  };
+
   useEffect(() => {
     fetchProject();
     fetchBids();
     fetchStages();
     fetchClarifications();
     fetchActivity();
+    fetchDocuments();
   }, [id]);
 
   const performAction = async (action, data = {}) => {
@@ -515,7 +834,10 @@ export default function BiddingProjectDetail() {
       fetchStages();
       fetchActivity();
     } catch (err) {
-      toast.error(err?.error || err?.detail || "Action failed");
+      const errData = err?.response?.data;
+      const message = errData?.detail || errData?.error || (typeof errData === "string" ? errData : null) || "Action failed";
+      toast.error(message);
+      console.error("Action error:", err?.response?.status, errData);
     } finally {
       setActionLoading(false);
     }
@@ -538,6 +860,26 @@ export default function BiddingProjectDetail() {
       fetchClarifications();
     } catch {
       toast.error("Failed to submit answer");
+    }
+  };
+
+  const handleUploadDocument = async (data) => {
+    try {
+      await biddingAPI.uploadDocument(data);
+      toast.success("Document uploaded");
+      fetchDocuments();
+    } catch {
+      toast.error("Failed to upload document");
+    }
+  };
+
+  const handleDeleteDocument = async (docId) => {
+    try {
+      await biddingAPI.deleteDocument(docId);
+      toast.success("Document deleted");
+      fetchDocuments();
+    } catch {
+      toast.error("Failed to delete document");
     }
   };
 
@@ -573,14 +915,19 @@ export default function BiddingProjectDetail() {
   const ownerActions = project.is_owner
     ? [
         project.status === "draft" && {
+          label: "Edit Draft",
+          action: () => navigate(webRoutes.biddingEdit.replace(":id", project.id)),
+          variant: "outline",
+        },
+        project.status === "draft" && {
           label: "Publish",
           action: () => performAction(biddingAPI.publishProject),
-          variant: "primary",
+          className: "bg-dark hover:bg-mid_grey text-white",
         },
         project.status === "published" && {
           label: "Open Submissions",
           action: () => performAction(biddingAPI.openSubmission),
-          variant: "primary",
+          className: "bg-dark hover:bg-mid_grey text-white",
         },
         project.status === "submission_open" && {
           label: "Close Submissions",
@@ -590,7 +937,7 @@ export default function BiddingProjectDetail() {
         project.status === "submission_closed" && {
           label: "Start Evaluation",
           action: () => performAction(biddingAPI.startEvaluation),
-          variant: "primary",
+          className: "bg-dark hover:bg-mid_grey text-white",
         },
         project.status === "under_evaluation" && {
           label: "Calculate Scores",
@@ -600,12 +947,12 @@ export default function BiddingProjectDetail() {
         project.status === "under_evaluation" && {
           label: "Award",
           action: () => setShowAwardModal(true),
-          variant: "primary",
+          className: "bg-gold hover:bg-[#E0B533] text-dark",
         },
         !["awarded", "completed", "cancelled"].includes(project.status) && {
           label: "Cancel",
           action: () => performAction(biddingAPI.cancelProject),
-          variant: "danger",
+          className: "bg-red-600 hover:bg-red-700 text-white",
         },
       ].filter(Boolean)
     : [];
@@ -631,21 +978,46 @@ export default function BiddingProjectDetail() {
             {project.reference_number} · {project.company_name}
           </p>
         </div>
-        {ownerActions.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {ownerActions.map((a, i) => (
-              <Button
-                key={i}
-                variant={a.variant || "outline"}
-                size="sm"
-                onClick={a.action}
-                loading={actionLoading}
-              >
-                {a.label}
-              </Button>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {ownerActions.map((a, i) => (
+            <Button
+              key={i}
+              variant={a.variant || "ghost"}
+              size="sm"
+              onClick={a.action}
+              loading={actionLoading}
+              className={a.className || ""}
+            >
+              {a.label}
+            </Button>
+          ))}
+          {/* Non-owner: Submit Bid button for open projects */}
+          {!project.is_owner && project.status === "submission_open" && (
+            <Button
+              size="sm"
+              className="bg-gold hover:bg-[#E0B533] text-dark"
+              onClick={() =>
+                navigate(webRoutes.biddingSubmit.replace(":id", project.id))
+              }
+            >
+              <Send className="w-4 h-4 mr-1" />
+              Submit Bid
+            </Button>
+          )}
+          {/* Owner: Evaluate link */}
+          {project.is_owner && project.status === "under_evaluation" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                navigate(webRoutes.biddingEvaluate.replace(":id", project.id))
+              }
+            >
+              <BarChart3 className="w-4 h-4 mr-1" />
+              Evaluate Bids
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -679,6 +1051,14 @@ export default function BiddingProjectDetail() {
         <BidsTab project={project} bids={bids} onRefresh={fetchBids} />
       )}
       {activeTab === "stages" && <StagesTab stages={stages} />}
+      {activeTab === "documents" && (
+        <DocumentsTab
+          project={project}
+          documents={documents}
+          onUpload={handleUploadDocument}
+          onDelete={handleDeleteDocument}
+        />
+      )}
       {activeTab === "clarifications" && (
         <ClarificationsTab
           project={project}

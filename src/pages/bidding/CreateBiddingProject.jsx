@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
+import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
-import { Input, Select, Textarea } from "../../components/ui/Input";
+import Input, { Select, Textarea } from "../../components/ui/Input";
 import {
   ArrowLeft,
   Plus,
@@ -40,10 +41,16 @@ const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"];
 
 export default function CreateBiddingProject() {
   const navigate = useNavigate();
+  const { id: editId } = useParams();
+  const isEditMode = !!editId;
   const [loading, setLoading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [loadingProject, setLoadingProject] = useState(!!editId);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [userCompanies, setUserCompanies] = useState([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
 
   const [form, setForm] = useState({
     title: "",
@@ -57,8 +64,6 @@ export default function CreateBiddingProject() {
     budget_max: "",
     submission_deadline: "",
     expected_award_date: "",
-    country: "",
-    delivery_location: "",
     company: "",
     workflow_template: "",
     terms_and_conditions: "",
@@ -70,7 +75,61 @@ export default function CreateBiddingProject() {
 
   useEffect(() => {
     fetchTemplates();
+    fetchUserCompanies();
+    if (editId) fetchProject();
   }, []);
+
+  const fetchUserCompanies = async () => {
+    try {
+      setLoadingCompanies(true);
+      const companies = await getCompanyByIdOrEmail();
+      if (Array.isArray(companies)) {
+        setUserCompanies(companies);
+        // Auto-select if user has only one company and no company set yet
+        if (companies.length === 1 && !form.company) {
+          setForm((prev) => ({ ...prev, company: companies[0].id }));
+        }
+      }
+    } catch {
+      console.error("Failed to load companies");
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
+
+  const fetchProject = async () => {
+    try {
+      setLoadingProject(true);
+      const res = await biddingAPI.getProject(editId);
+      const p = res?.data || res;
+      setForm({
+        title: p.title || "",
+        description: p.description || "",
+        project_type: p.project_type || "rfp",
+        category: p.category || "",
+        visibility: p.visibility || "public",
+        bid_mode: p.bid_mode || "sealed",
+        currency: p.currency || "USD",
+        budget_min: p.budget_min || "",
+        budget_max: p.budget_max || "",
+        submission_deadline: p.submission_deadline ? p.submission_deadline.slice(0, 16) : "",
+        expected_award_date: p.expected_award_date || "",
+        company: p.company || "",
+        workflow_template: p.workflow_template || "",
+        terms_and_conditions: p.terms_and_conditions || "",
+        custom_fields: p.custom_fields || {},
+      });
+      if (p.specifications?.custom_fields && Array.isArray(p.specifications.custom_fields)) {
+        setCustomFieldDefs(p.specifications.custom_fields);
+      }
+      if (p.terms_and_conditions) setShowAdvanced(true);
+    } catch {
+      toast.error("Failed to load project");
+      navigate(webRoutes.bidding);
+    } finally {
+      setLoadingProject(false);
+    }
+  };
 
   const fetchTemplates = async () => {
     try {
@@ -90,9 +149,9 @@ export default function CreateBiddingProject() {
         bid_mode: template.bid_mode || prev.bid_mode,
         project_type: template.default_project_type || prev.project_type,
       }));
-      // If template has custom_fields schema, load it
-      if (template.custom_fields_schema && Array.isArray(template.custom_fields_schema)) {
-        setCustomFieldDefs(template.custom_fields_schema);
+      // If template has specifications with custom fields, load them
+      if (template.specifications?.custom_fields && Array.isArray(template.specifications.custom_fields)) {
+        setCustomFieldDefs(template.specifications.custom_fields);
       }
     }
   };
@@ -150,11 +209,14 @@ export default function CreateBiddingProject() {
     setLoading(true);
     try {
       const payload = { ...form };
-      // Include custom field definitions in the project
+      // Include custom field definitions in specifications
       if (customFieldDefs.length > 0) {
-        payload.custom_fields_schema = customFieldDefs.filter(
-          (f) => f.key && f.label
-        );
+        payload.specifications = {
+          ...payload.specifications,
+          custom_fields: customFieldDefs.filter(
+            (f) => f.key && f.label
+          ),
+        };
       }
       // Remove empty optional fields
       if (!payload.budget_min) delete payload.budget_min;
@@ -162,12 +224,21 @@ export default function CreateBiddingProject() {
       if (!payload.workflow_template) delete payload.workflow_template;
       if (!payload.expected_award_date) delete payload.expected_award_date;
 
-      const res = await biddingAPI.createProject(payload);
-      const newProject = res?.data || res;
-      toast.success("Project created as draft");
-      navigate(
-        webRoutes.biddingProjectDetail.replace(":id", newProject.id)
-      );
+      if (isEditMode) {
+        await biddingAPI.updateProject(editId, payload);
+        if (publishing) {
+          await biddingAPI.publishProject(editId);
+          toast.success("Project published");
+        } else {
+          toast.success("Project updated");
+        }
+        navigate(webRoutes.biddingDetail.replace(":id", editId));
+      } else {
+        const res = await biddingAPI.createProject(payload);
+        const newProject = res?.data || res;
+        toast.success("Project created as draft");
+        navigate(webRoutes.biddingDetail.replace(":id", newProject.id));
+      }
     } catch (err) {
       const data = err?.response?.data || err;
       if (typeof data === "object") {
@@ -179,8 +250,17 @@ export default function CreateBiddingProject() {
       }
     } finally {
       setLoading(false);
+      setPublishing(false);
     }
   };
+
+  if (loadingProject) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#F1C644]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
@@ -193,10 +273,12 @@ export default function CreateBiddingProject() {
       </button>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-1">
-        Create Bid Project
+        {isEditMode ? "Edit Bid Project" : "Create Bid Project"}
       </h1>
       <p className="text-sm text-gray-500 mb-6">
-        Set up a new procurement project. It will be created as a draft.
+        {isEditMode
+          ? "Update your draft project details."
+          : "Set up a new procurement project. It will be created as a draft."}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -397,49 +479,39 @@ export default function CreateBiddingProject() {
           </div>
         </section>
 
-        {/* Location & Company */}
+        {/* Company */}
         <section className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Location & Company
+            Company
           </h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Country
-                </label>
-                <Input
-                  value={form.country}
-                  onChange={(e) => handleChange("country", e.target.value)}
-                  placeholder="e.g. Nigeria"
-                />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Company *
+            </label>
+            {loadingCompanies ? (
+              <div className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-400 text-sm">
+                Loading companies...
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delivery Location
-                </label>
-                <Input
-                  value={form.delivery_location}
-                  onChange={(e) =>
-                    handleChange("delivery_location", e.target.value)
-                  }
-                  placeholder="e.g. Lagos, Nigeria"
-                />
+            ) : userCompanies.length === 0 ? (
+              <div className="w-full px-3 py-2.5 border border-red-200 rounded-lg bg-red-50 text-red-600 text-sm">
+                No companies found. You need a company to create a project.
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company *
-              </label>
-              <Input
+            ) : (
+              <Select
                 value={form.company}
                 onChange={(e) => handleChange("company", e.target.value)}
-                placeholder="Company ID (linked to your company)"
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                Select the company publishing this project
-              </p>
-            </div>
+              >
+                <option value="">Select a company</option>
+                {userCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.company_name}
+                  </option>
+                ))}
+              </Select>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              Select the company publishing this project
+            </p>
           </div>
         </section>
 
@@ -590,9 +662,28 @@ export default function CreateBiddingProject() {
           >
             Cancel
           </Button>
-          <Button variant="primary" type="submit" loading={loading}>
-            Create Draft Project
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="submit"
+              loading={loading && !publishing}
+              className="bg-[#F1C644] hover:bg-[#E0B533] text-gray-900 font-medium px-6"
+            >
+              {isEditMode ? "Save Changes" : "Create Draft Project"}
+            </Button>
+            {isEditMode && (
+              <Button
+                type="button"
+                loading={loading && publishing}
+                className="bg-dark hover:bg-mid_grey text-white font-medium px-6"
+                onClick={() => {
+                  setPublishing(true);
+                  document.querySelector("form").requestSubmit();
+                }}
+              >
+                Publish
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </div>

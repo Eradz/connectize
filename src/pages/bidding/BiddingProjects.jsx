@@ -5,8 +5,8 @@ import { biddingAPI } from "../../api-services/bidding";
 import { webRoutes } from "../../lib/webRoutes";
 import HeadingText from "../../components/HeadingText";
 import Button from "../../components/ui/Button";
-import { Input, Select } from "../../components/ui/Input";
-import Skeleton from "../../components/ui/Skeleton";
+import Input, { Select } from "../../components/ui/Input";
+import { Skeleton } from "../../components/ui/Skeleton";
 import {
   Search,
   Plus,
@@ -223,12 +223,41 @@ export default function BiddingProjects() {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate(webRoutes.biddingCreateProject)}
+            onClick={() => navigate(webRoutes.biddingCreate)}
           >
             <Plus className="w-4 h-4 mr-1" />
             New Project
           </Button>
         </div>
+      </div>
+
+      {/* Quick Filter Tabs — primary discovery for bidders */}
+      <div className="flex items-center gap-1 mb-6 overflow-x-auto bg-white rounded-lg border border-gray-200 p-1">
+        {[
+          { label: "All Projects", role: "", status: "" },
+          { label: "Open for Bidding", role: "", status: "submission_open" },
+          { label: "My Projects", role: "buyer", status: "" },
+          { label: "My Bids", role: "bidder", status: "" },
+        ].map((preset) => {
+          const isActive =
+            filters.role === preset.role &&
+            filters.status === preset.status;
+          return (
+            <button
+              key={preset.label}
+              onClick={() =>
+                setFilters({ ...filters, role: preset.role, status: preset.status })
+              }
+              className={`px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition ${
+                isActive
+                  ? "bg-[#F1C644] text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Stats Cards */}
@@ -244,7 +273,10 @@ export default function BiddingProjects() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div
+          className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:border-green-300 transition"
+          onClick={() => setFilters({ ...filters, role: "", status: "submission_open" })}
+        >
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-50 rounded-lg">
               <Gavel className="w-5 h-5 text-green-600" />
@@ -366,7 +398,7 @@ export default function BiddingProjects() {
             variant="primary"
             size="sm"
             className="mt-4"
-            onClick={() => navigate(webRoutes.biddingCreateProject)}
+            onClick={() => navigate(webRoutes.biddingCreate)}
           >
             <Plus className="w-4 h-4 mr-1" />
             Create Project
@@ -380,7 +412,7 @@ export default function BiddingProjects() {
               project={project}
               onClick={() =>
                 navigate(
-                  webRoutes.biddingProjectDetail.replace(":id", project.id)
+                  webRoutes.biddingDetail.replace(":id", project.id)
                 )
               }
             />

@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
 import Button from "../../components/ui/Button";
-import { Input, Textarea, Select } from "../../components/ui/Input";
-import Skeleton from "../../components/ui/Skeleton";
+import Input, { Textarea, Select } from "../../components/ui/Input";
+import { Skeleton } from "../../components/ui/Skeleton";
 import {
   ArrowLeft,
   Star,

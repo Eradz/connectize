@@ -27,6 +27,7 @@ import LogisticIcon from "../icon/LogisticIcon";
 import CreditCardIcon from "../icon/CreditCardIcon";
 import OpenBookIcon from "../icon/OpenBookIcon";
 import StoreIcon from "../icon/StoreIcon";
+import GavelIcon from "../icon/GavelIcon";
 import { webRoutes } from "../lib/webRoutes";
 
 // Icon mapping for dynamic icons
@@ -42,7 +43,8 @@ const iconMap = {
   BookOpen,
   CreditCard,
   Shield,
-  Building2
+  Building2,
+  GavelIcon
 };
 
 export function NavigationSection({ hasHeader, isSmallNavigation = false }) {

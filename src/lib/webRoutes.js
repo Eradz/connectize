@@ -254,6 +254,7 @@ const webRoutes = {
   // Bidding System
   bidding: "/bidding",
   biddingCreate: "/bidding/create",
+  biddingEdit: "/bidding/:id/edit",
   biddingDetail: "/bidding/:id",
   biddingSubmit: "/bidding/:id/submit",
   biddingEvaluate: "/bidding/:id/evaluate",

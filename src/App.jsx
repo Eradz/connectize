@@ -318,6 +318,7 @@ const removeLeadingSlash = (path) => {
           {/* Bidding */}
           <Route path={removeLeadingSlash(webRoutes.bidding)} element={<BiddingProjects />} />
           <Route path={removeLeadingSlash(webRoutes.biddingCreate)} element={<CreateBiddingProject />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingEdit)} element={<CreateBiddingProject />} />
           <Route path={removeLeadingSlash(webRoutes.biddingDetail)} element={<BiddingProjectDetail />} />
           <Route path={removeLeadingSlash(webRoutes.biddingSubmit)} element={<SubmitBid />} />
           <Route path={removeLeadingSlash(webRoutes.biddingEvaluate)} element={<EvaluationPanel />} />

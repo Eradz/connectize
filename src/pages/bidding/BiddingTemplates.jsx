@@ -4,9 +4,9 @@ import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
-import { Input, Select, Textarea } from "../../components/ui/Input";
+import Input, { Select, Textarea } from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
-import Skeleton from "../../components/ui/Skeleton";
+import { Skeleton } from "../../components/ui/Skeleton";
 import {
   ArrowLeft,
   Plus,
@@ -322,12 +322,7 @@ export default function BiddingTemplates() {
           duration_days: 7,
           auto_advance: false,
           description: "",
-          criteria: [
-            { name: "Technical Score", weight: 40, scoring_method: "numeric", max_score: 100 },
-            { name: "Price Score", weight: 30, scoring_method: "numeric", max_score: 100 },
-            { name: "Experience", weight: 20, scoring_method: "numeric", max_score: 100 },
-            { name: "Compliance", weight: 10, scoring_method: "pass_fail", max_score: 1 },
-          ],
+          criteria: [],
         },
         {
           name: "Award",
