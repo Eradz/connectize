@@ -10,6 +10,7 @@ import HeadingText from "../../components/HeadingText";
 import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 import LightParagraph from "../../components/ParagraphText";
+import SSOLoginSection from "../../components/sso/SSOLoginSection";
 // import "../../index.css";
 
 export const meta = () =>
@@ -147,6 +148,8 @@ function Login() {
           Sign Up
         </Link>
       </p>
+
+      <SSOLoginSection />
     </section>
   );
 }

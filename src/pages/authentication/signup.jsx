@@ -9,6 +9,7 @@ import HeadingText from "../../components/HeadingText";
 import { SUCCESS_TYPE_KEY } from "../../lib/data/authentication";
 import { REGISTER_EMAIL_KEY } from "../../lib/helpers";
 import SEO, { createSEO } from "../../components/SEO";
+import SSOLoginSection from "../../components/sso/SSOLoginSection";
 
 export const meta = () =>
   createSEO({
@@ -137,6 +138,8 @@ function Signup() {
           Login
         </Link>
       </p>
+
+      <SSOLoginSection />
     </section>
   );
 }

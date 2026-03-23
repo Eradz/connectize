@@ -261,6 +261,10 @@ const webRoutes = {
   biddingSubmit: "/bidding/:id/submit",
   biddingEvaluate: "/bidding/:id/evaluate",
   biddingTemplates: "/bidding/templates",
+
+  // SSO Callbacks
+  ssoLinkedInCallback: "/sso/linkedin/callback",
+  ssoEnterpriseCallback: "/sso/enterprise/callback",
 };
 
 export { webRoutes };

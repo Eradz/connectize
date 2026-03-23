@@ -7,6 +7,10 @@ import BiddingProjectDetail from "./pages/bidding/BiddingProjectDetail";
 import FeedLayout from "./pages/FeedLayout";
 import GlobalPrefetch from "./components/GlobalPrefetch";
 
+// SSO callback components
+const LinkedInCallback = lazy(() => import("./components/sso/LinkedInLoginButton").then(m => ({ default: m.LinkedInCallback })));
+const EnterpriseSSOCallback = lazy(() => import("./components/sso/EnterpriseSSOButton").then(m => ({ default: m.EnterpriseSSOCallback })));
+
 // Lightweight loading fallback
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen bg-background">
@@ -569,6 +573,10 @@ const removeLeadingSlash = (path) => {
 
         {/* Misc Pages */}
   <Route path="/success" element={<SuccessPage />} />
+
+  {/* SSO Callback Routes */}
+  <Route path={webRoutes.ssoLinkedInCallback} element={<LinkedInCallback />} />
+  <Route path={webRoutes.ssoEnterpriseCallback} element={<EnterpriseSSOCallback />} />
   {/* Keep original terms routes for compatibility */}
   <Route path={webRoutes.termsAndConditions} element={<TermsAndConditions />} />
   <Route path={webRoutes.privacyPolicy} element={<PrivacyPolicy />} />
