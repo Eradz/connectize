@@ -149,6 +149,14 @@ const KnowledgeTopicCreate = lazy(() => import("./pages/knowledge/KnowledgeTopic
 const KnowledgeTopicDetail = lazy(() => import("./pages/knowledge/KnowledgeTopicDetail"));
 const KnowledgeForumInvite = lazy(() => import("./pages/knowledge/KnowledgeForumInvite"));
 
+// Bidding
+const BiddingProjects = lazy(() => import("./pages/bidding/BiddingProjects"));
+const BiddingProjectDetail = lazy(() => import("./pages/bidding/BiddingProjectDetail"));
+const CreateBiddingProject = lazy(() => import("./pages/bidding/CreateBiddingProject"));
+const SubmitBid = lazy(() => import("./pages/bidding/SubmitBid"));
+const EvaluationPanel = lazy(() => import("./pages/bidding/EvaluationPanel"));
+const BiddingTemplates = lazy(() => import("./pages/bidding/BiddingTemplates"));
+
 // Marketplace
 const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
 const MarketplaceCart = lazy(() => import("./pages/marketplace/Cart"));
@@ -306,6 +314,14 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.dealRoomValuations)} element={<DealRoomDetail />} />
           <Route path={removeLeadingSlash(webRoutes.dealRoomReports)} element={<DealRoomDetail />} />
           <Route path={removeLeadingSlash(webRoutes.myParticipations)} element={<MyParticipations />} />
+          
+          {/* Bidding */}
+          <Route path={removeLeadingSlash(webRoutes.bidding)} element={<BiddingProjects />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingCreate)} element={<CreateBiddingProject />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingDetail)} element={<BiddingProjectDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingSubmit)} element={<SubmitBid />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingEvaluate)} element={<EvaluationPanel />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingTemplates)} element={<BiddingTemplates />} />
           
           {/* Workforce */}
           <Route path={removeLeadingSlash(webRoutes.workforceJobs)} element={<WorkforceJobs />} />

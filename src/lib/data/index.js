@@ -147,6 +147,17 @@ export const hubNavItems = [
     ]
   },
   {
+    name: "Bidding",
+    to: webRoutes.bidding,
+    icon: "GavelIcon",
+    description: "Procurement & bidding workflows",
+    subItems: [
+      { name: "All Projects", to: webRoutes.bidding },
+      { name: "Create Project", to: webRoutes.biddingCreate },
+      { name: "Workflow Templates", to: webRoutes.biddingTemplates }
+    ]
+  },
+  {
     name: "Logistics Hub",
     to: webRoutes.logisticsDashboard,
     icon: "LogisticIcon",
