@@ -255,7 +255,7 @@ const NotificationTile = memo(({ notification, index }) => {
         />
         <Link
           to={
-            notification?.link.replace("/room", "/?room_name=room")
+            (notification?.link || "#").replace("/room", "/?room_name=room")
             // .replace("/representatives", "/co/representatives")
           }
           onClick={handleMarkAsRead}
