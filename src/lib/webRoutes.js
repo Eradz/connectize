@@ -21,6 +21,7 @@ const webRoutes = {
   companyInformation: "/company/information",
   companyDocuments: "/company/documents",
   dashboard: "/dashboard",
+  enterpriseSSOSetup: "/co/settings/enterprise-sso",
   feed: "/",
   feedLayout: "/feed",
   home: "/update-profile",

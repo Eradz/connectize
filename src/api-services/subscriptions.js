@@ -327,7 +327,7 @@ const subscriptions = {
   // Usage and Analytics
   getUsageAnalytics: async (params = {}) => {
     try {
-      const response = await api.get('/api/permissions/api/v2/subscription/analytics/', { params });
+        const response = await api.get('/api/v1/subscriptions/usage/', { params });
       // If response is null (404 handled by makeApiRequest), return fallback
       if (!response || !response.data) {
         return { usage: null, source: 'missing_endpoint' };

@@ -106,7 +106,7 @@ function Login() {
       name: "password",
       type: "password",
       label: "Password",
-      placeholder: "Enter a 8 digit password",
+      placeholder: "At least 8 characters",
       validate: true,
     },
   ];

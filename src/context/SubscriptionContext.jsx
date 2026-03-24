@@ -24,10 +24,8 @@ export const SubscriptionProvider = ({ children }) => {
   const [billingHistory, setBillingHistory] = useState([]);
   const [enhancedFeatures, setEnhancedFeatures] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  console.log('[SubscriptionProvider] Render - currentSubscription:', currentSubscription?.plan?.name || 'null', 'loading:', loading);
 
   /**
    * Safe extract function to handle various API response structures
@@ -125,9 +123,6 @@ export const SubscriptionProvider = ({ children }) => {
     // Only fetch subscription data if user is authenticated and user loading is complete
     if (user && !userLoading) {
       fetchAllData();
-    } else if (!user && !userLoading) {
-      // User is not authenticated, set loading to false
-      setLoading(false);
     }
   }, [user, userLoading, fetchAllData]);
 

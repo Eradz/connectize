@@ -11,7 +11,7 @@ export const getSSOProviders = async () => {
     const response = await makeApiRequest({
       url: "api/auth/sso/providers/",
       method: "GET",
-      type: "sso-providers",
+      type: "public",
     });
     return response?.results || response?.data || null;
   } catch {
@@ -36,15 +36,15 @@ const handleSSOLoginResponse = (response) => {
 };
 
 /**
- * POST Google credential to backend for verification and JWT issuance.
+ * POST Google access_token to backend for verification and JWT issuance.
  */
-export const googleSSOLogin = async (credential) => {
+export const googleSSOLogin = async (accessToken) => {
   try {
     const response = await makeApiRequest({
       url: "api/auth/sso/google/",
       method: "POST",
-      data: { credential },
-      type: "sso-google",
+      data: { access_token: accessToken },
+      type: "public",
     });
     return handleSSOLoginResponse(response);
   } catch {
@@ -61,7 +61,7 @@ export const appleSSOLogin = async ({ id_token, code, first_name, last_name }) =
       url: "api/auth/sso/apple/",
       method: "POST",
       data: { id_token, code, first_name, last_name },
-      type: "sso-apple",
+      type: "public",
     });
     return handleSSOLoginResponse(response);
   } catch {
@@ -78,7 +78,7 @@ export const linkedinSSOLogin = async ({ code, redirect_uri }) => {
       url: "api/auth/sso/linkedin/",
       method: "POST",
       data: { code, redirect_uri },
-      type: "sso-linkedin",
+      type: "public",
     });
     return handleSSOLoginResponse(response);
   } catch {
@@ -95,7 +95,7 @@ export const checkSSODomain = async (email) => {
       url: "api/auth/sso/check-domain/",
       method: "POST",
       data: { email },
-      type: "sso-check-domain",
+      type: "public",
     });
     return response?.results || response?.data || null;
   } catch {
@@ -112,10 +112,78 @@ export const enterpriseSSOCallback = async ({ config_id, code, redirect_uri }) =
       url: "api/auth/sso/enterprise/callback/",
       method: "POST",
       data: { config_id, code, redirect_uri },
-      type: "sso-enterprise",
+      type: "public",
     });
-    return handleSSOLoginResponse(response);
-  } catch {
-    return false;
+    return {
+      success: handleSSOLoginResponse(response),
+      message: response?.message || response?.results?.message || null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error?.response?.data?.errors?.[0]?.message ||
+        error?.response?.data?.detail ||
+        "Company SSO sign-in failed.",
+    };
   }
+};
+
+export const getEnterpriseSSOConfigs = async () => {
+  const response = await makeApiRequest({
+    url: "api/auth/sso/enterprise/configs/",
+    method: "GET",
+  });
+
+  return response?.results || response?.data || [];
+};
+
+export const createEnterpriseSSOConfig = async (data) => {
+  return await makeApiRequest({
+    url: "api/auth/sso/enterprise/configs/",
+    method: "POST",
+    data,
+  });
+};
+
+export const updateEnterpriseSSOConfig = async (configId, data) => {
+  return await makeApiRequest({
+    url: `api/auth/sso/enterprise/configs/${configId}/`,
+    method: "PATCH",
+    data,
+  });
+};
+
+export const deleteEnterpriseSSOConfig = async (configId) => {
+  return await makeApiRequest({
+    url: `api/auth/sso/enterprise/configs/${configId}/`,
+    method: "DELETE",
+  });
+};
+
+export const getEnterpriseDomainVerificationStatus = async (configId) => {
+  const response = await makeApiRequest({
+    url: `api/auth/sso/enterprise/configs/${configId}/domain-verification/`,
+    method: "GET",
+  });
+
+  return response?.results || response?.data || null;
+};
+
+export const verifyEnterpriseDomains = async (configId) => {
+  const response = await makeApiRequest({
+    url: `api/auth/sso/enterprise/configs/${configId}/domain-verification/`,
+    method: "POST",
+  });
+
+  return response?.results || response?.data || null;
+};
+
+export const regenerateEnterpriseDomainToken = async (configId) => {
+  const response = await makeApiRequest({
+    url: `api/auth/sso/enterprise/configs/${configId}/domain-verification/reset/`,
+    method: "POST",
+  });
+
+  return response?.results || response?.data || null;
 };

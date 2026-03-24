@@ -1,5 +1,6 @@
 import { Button, Input, useDisclosure, Switch, Spinner } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { deactivateAccount, deleteAccount } from "../../api-services/authentication";
 import { 
@@ -15,6 +16,7 @@ import LightParagraph from "../../components/ParagraphText";
 import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
 import { goToLogin } from "../../lib/helpers";
+import { webRoutes } from "../../lib/webRoutes";
 import ChangePassword from "./components/ChangePassword";
 
 export const meta = () =>
@@ -23,6 +25,7 @@ export const meta = () =>
   });
 
 const SettingsPage = () => {
+  const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { 
     isOpen: isDeleteOpen, 
@@ -128,6 +131,31 @@ const SettingsPage = () => {
     setLoading(false);
   };
 
+  const loadEnterpriseConfigs = async () => {
+    try {
+      setEnterpriseLoading(true);
+      const configs = await getEnterpriseSSOConfigs();
+      setEnterpriseConfigs(Array.isArray(configs) ? configs : []);
+      const configList = Array.isArray(configs) ? configs : [];
+      await Promise.all(configList.map(async (config) => {
+        try {
+          const status = await getEnterpriseDomainVerificationStatus(config.id);
+          setVerificationStatusByConfig((current) => ({
+            ...current,
+            [config.id]: status,
+          }));
+        } catch (error) {
+          console.error("Failed to load verification status:", error);
+        }
+      }));
+    } catch (error) {
+      console.error("Failed to load enterprise SSO configs:", error);
+      toast.error("Failed to load enterprise SSO settings.");
+    } finally {
+      setEnterpriseLoading(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!user?.email) {
       goToLogin();
@@ -165,16 +193,18 @@ const SettingsPage = () => {
           <h2 className="text-lg font-medium">Profile Information</h2>
           <section className="gap-2 lg:gap-4 flex max-lg:flex-col pointer-events-none">
             <Input
-              value={user?.first_name}
+              value={user?.first_name ?? ""}
               placeholder="First name"
               className="mt-2"
+               readOnly
             />
             <Input
-              value={user?.last_name}
+              value={user?.last_name ?? ""}
               placeholder="Last name"
               className="mt-2"
+               readOnly
             />
-            <Input value={user?.email} placeholder="Email" className="mt-2" />
+              <Input value={user?.email ?? ""} placeholder="Email" className="mt-2" readOnly />
           </section>
         </section>
 
@@ -306,6 +336,27 @@ const SettingsPage = () => {
               </div>
             </div>
           )}
+        </section>
+
+        <section className="border-t pt-6 space-y-4">
+          <div className="flex items-start justify-between gap-4 max-md:flex-col">
+            <div>
+              <h2 className="text-lg font-medium mb-2">Enterprise SSO</h2>
+              <LightParagraph>
+                Manage company SSO providers, DNS verification, employee approvals, and enforcement from a dedicated admin page.
+              </LightParagraph>
+              <p className="text-sm text-gray-600 mt-2">
+                Company admins can configure providers, verify domains, activate SSO, and approve pending employee access there.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(webRoutes.enterpriseSSOSetup)}
+            >
+              Open Enterprise SSO Admin
+            </Button>
+          </div>
         </section>
 
         {/* Account Management Section */}

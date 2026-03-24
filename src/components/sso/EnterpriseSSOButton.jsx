@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { checkSSODomain, enterpriseSSOCallback } from "../../api-services/sso";
 import { getCurrentUser } from "../../api-services/users";
 import { useAuth } from "../../context/userContext";
@@ -7,33 +8,70 @@ import { useAuth } from "../../context/userContext";
 export default function EnterpriseSSOButton({ onSSODetected }) {
   const [email, setEmail] = useState("");
   const [checking, setChecking] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const handleCheck = async () => {
-    if (!email.includes("@")) return;
+    if (!email.includes("@")) {
+      toast.error("Enter a valid work email address.");
+      return;
+    }
     setChecking(true);
 
     const result = await checkSSODomain(email);
     setChecking(false);
 
-    if (result?.sso_available) {
+    if (result?.sso_available || result?.sso_required) {
       onSSODetected?.(result);
+    } else {
+      toast.error("No enterprise SSO configured for this email domain.");
     }
   };
 
-  return (
-    <div className="space-y-2">
+  if (!expanded) {
+    return (
       <button
         type="button"
-        onClick={handleCheck}
-        disabled={checking || !email.includes("@")}
-        className="flex items-center justify-center gap-2 w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+        onClick={() => setExpanded(true)}
+        className="flex items-center justify-center gap-2 w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0110 0v4" />
         </svg>
-        {checking ? "Checking..." : "Sign in with Company SSO"}
+        Sign in with Company SSO
       </button>
+    );
+  }
+
+  return (
+    <div className="space-y-2 rounded-md border border-gray-300 p-3">
+      <p className="text-sm text-gray-600">Enter your work email to sign in with your company&apos;s SSO:</p>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleCheck()}
+        placeholder="you@company.com"
+        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        autoFocus
+      />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={handleCheck}
+          disabled={checking || !email.includes("@")}
+          className="flex-1 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+        >
+          {checking ? "Checking..." : "Continue with SSO"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setExpanded(false)}
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }
@@ -70,41 +108,50 @@ export function EnterpriseSSOCallback() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
   const [searchParams] = useSearchParams();
+  const hasRun = useRef(false);
 
   const code = searchParams.get("code");
   const stateParam = searchParams.get("state");
 
-  let config_id = null;
-  try {
-    const parsed = JSON.parse(stateParam || "{}");
-    config_id = parsed.config_id;
-  } catch {
-    navigate("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
 
-  if (!code || !config_id) {
-    navigate("/login");
-    return null;
-  }
-
-  (async () => {
-    sessionStorage.removeItem("enterprise_sso_state");
-    const redirectUri = `${window.location.origin}/sso/enterprise/callback`;
-    const success = await enterpriseSSOCallback({
-      config_id,
-      code,
-      redirect_uri: redirectUri,
-    });
-
-    if (success) {
-      const userData = await getCurrentUser();
-      setUser(userData);
-      navigate(userData?.is_first_time_user ? "/profile" : "/");
-    } else {
+    let config_id = null;
+    try {
+      const parsed = JSON.parse(stateParam || "{}");
+      config_id = parsed.config_id;
+    } catch {
       navigate("/login");
+      return;
     }
-  })();
+
+    if (!code || !config_id) {
+      navigate("/login");
+      return;
+    }
+
+    (async () => {
+      sessionStorage.removeItem("enterprise_sso_state");
+      const redirectUri = `${window.location.origin}/sso/enterprise/callback`;
+      const result = await enterpriseSSOCallback({
+        config_id,
+        code,
+        redirect_uri: redirectUri,
+      });
+
+      if (result.success) {
+        const userData = await getCurrentUser();
+        setUser(userData);
+        navigate(userData?.is_first_time_user ? "/profile" : "/");
+      } else {
+        if (result.message) {
+          toast.error(result.message);
+        }
+        navigate("/login");
+      }
+    })();
+  }, [code, stateParam, navigate, setUser]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

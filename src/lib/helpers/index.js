@@ -268,7 +268,8 @@ export async function makeApiRequest({
       if (
         response.data.success &&
         responseMessage &&
-        !url.includes("notification")
+        !url.includes("notification") &&
+        !url.includes("sso/providers")
       ) {
         toast.success(responseMessage);
       }

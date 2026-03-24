@@ -11,6 +11,7 @@ import { useState } from "react";
 import ReactQuill from "react-quill";
 import { ImageIcon } from "../../icon";
 import FormikErrorResponse from "./formError";
+import { Eye, EyeOff } from "lucide-react";
 
 import { motion } from "framer-motion";
 import "react-quill/dist/quill.snow.css";
@@ -59,21 +60,17 @@ export default function CustomInput({
         id={name}
         name={name}
       />
-      {type === "password" && isPassword ? (
-        <span
-          className="absolute top-5 right-3 cursor-pointer text-xs"
+      {type === "password" && (
+        <button
+          type="button"
+          className="absolute top-1/2 right-3 -translate-y-1/2 mt-1 cursor-pointer text-gray-400 hover:text-gray-600 transition-colors"
           onClick={handlePasswordVisibility}
+          tabIndex={-1}
+          aria-label={isPassword ? "Show password" : "Hide password"}
         >
-          Show
-        </span>
-      ) : type === "password" && !isPassword ? (
-        <span
-          className="absolute top-5 right-3 cursor-pointer text-xs"
-          onClick={handlePasswordVisibility}
-        >
-          Hide
-        </span>
-      ) : null}
+          {isPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+        </button>
+      )}
     </div>
   );
 }

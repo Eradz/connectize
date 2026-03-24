@@ -71,6 +71,7 @@ export default [
 
     //
     route(webRoutes.settings, "../pages/settings/index.jsx"),
+    route(webRoutes.enterpriseSSOSetup, "../pages/settings/EnterpriseSSOSetup.jsx"),
     route(webRoutes.userProfile, "../pages/feed/userProfile.jsx"),
     route(webRoutes.support, "../pages/support/Support.jsx"),
 

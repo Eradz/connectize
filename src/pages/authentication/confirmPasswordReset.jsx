@@ -22,9 +22,10 @@ import {
 
 const validationSchema = Yup.object().shape({
   password: Yup.string()
+    .min(8, "Password should be at least 8 characters long")
     .matches(
-      /^[a-zA-Z0-9!#$%^&*()]+$/,
-      "Only letters, numbers and some specific punctuations allowed."
+      /^[a-zA-Z0-9@!#$%^&*()_+|~=`{}[\]:";'<>?,./-]+$/,
+      "Only alphanumeric characters and special characters allowed."
     )
     .required("Fill in your password"),
   confirmPassword: Yup.string()
@@ -80,7 +81,7 @@ function ConfirmResetPassword() {
       name: "password",
       type: "password",
       label: "Password",
-      placeholder: "Enter a 8 digit password",
+      placeholder: "At least 8 characters",
       validate:true,
     },
     {

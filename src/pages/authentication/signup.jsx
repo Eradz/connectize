@@ -6,7 +6,6 @@ import { authenticationService } from "../../api-services/authentication";
 import Form from "../../components/form";
 import CheckAgreement from "../../components/form/checkAgreement";
 import HeadingText from "../../components/HeadingText";
-import { SUCCESS_TYPE_KEY } from "../../lib/data/authentication";
 import { REGISTER_EMAIL_KEY } from "../../lib/helpers";
 import SEO, { createSEO } from "../../components/SEO";
 import SSOLoginSection from "../../components/sso/SSOLoginSection";
@@ -73,9 +72,8 @@ function Signup() {
       });
 
       if (success) {
-        localStorage.setItem(SUCCESS_TYPE_KEY, REGISTER_EMAIL_KEY);
         localStorage.setItem(REGISTER_EMAIL_KEY, email);
-        navigate("/success");
+        navigate("/verify-account");
       }
     },
   });
@@ -99,7 +97,7 @@ function Signup() {
       name: "password",
       type: "password",
       label: "Password",
-      placeholder: "At least 8 digit",
+      placeholder: "At least 8 characters",
       validate: true,
     },
     {

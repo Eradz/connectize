@@ -16,7 +16,7 @@ function Logo({
     <Link
       to={url}
       className={clsx(
-        "w-fit shrink-0 block transition-all duration-500",
+        "w-fit shrink-0 block",
         className
       )}
       onClick={() => toggleNav(false)}

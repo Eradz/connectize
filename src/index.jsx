@@ -31,21 +31,32 @@ if (import.meta.env.DEV) {
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
+const appTree = (
+  <BrowserRouter>
+    <MyProvider>
+      <App />
+    </MyProvider>
+    <Toaster
+      position="top-center"
+      closeButton
+      duration={5000}
+      pauseWhenPageIsHidden
+    />
+  </BrowserRouter>
+);
+
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <MyProvider>
-        <App />
-      </MyProvider>
-      <Toaster
-        position="top-center"
-        closeButton
-        duration={5000}
-        pauseWhenPageIsHidden
-      />
-    </BrowserRouter>
-    <Analytics />
-  </React.StrictMode>
+  import.meta.env.DEV ? (
+    <>
+      {appTree}
+    </>
+  ) : (
+    <React.StrictMode>
+      {appTree}
+      <Analytics />
+    </React.StrictMode>
+  )
 );
 
 // registerSW({ immediate: true });

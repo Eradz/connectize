@@ -10,20 +10,17 @@ import EnterpriseSSOButton, { startEnterpriseSSOFlow } from "./EnterpriseSSOButt
  */
 export default function SSOLoginSection() {
   const [providers, setProviders] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getSSOProviders().then(setProviders);
+    getSSOProviders()
+      .then(setProviders)
+      .catch(() => setProviders({}))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (!providers) return null;
-
-  const hasAnyProvider =
-    providers.google?.enabled ||
-    providers.linkedin?.enabled ||
-    providers.enterprise_sso;
-
-  if (!hasAnyProvider) return null;
+  if (loading) return null;
 
   const handleSSODetected = (ssoConfig) => {
     if (ssoConfig.sso_required || ssoConfig.sso_available) {
@@ -43,23 +40,21 @@ export default function SSOLoginSection() {
       </div>
 
       <div className="space-y-2">
-        {providers.google?.enabled && (
+        {providers?.google?.enabled && (
           <GoogleLoginButton
             clientId={providers.google.client_id}
             onError={setError}
           />
         )}
 
-        {providers.linkedin?.enabled && (
+        {providers?.linkedin?.enabled && (
           <LinkedInLoginButton
             clientId={providers.linkedin.client_id}
             onError={setError}
           />
         )}
 
-        {providers.enterprise_sso && (
-          <EnterpriseSSOButton onSSODetected={handleSSODetected} />
-        )}
+        <EnterpriseSSOButton onSSODetected={handleSSODetected} />
       </div>
 
       {error && (

@@ -6,6 +6,13 @@ import AppLayout from "./pages/AppLayout";
 import BiddingProjectDetail from "./pages/bidding/BiddingProjectDetail";
 import FeedLayout from "./pages/FeedLayout";
 import GlobalPrefetch from "./components/GlobalPrefetch";
+import AuthLayout from "./pages/authentication/AuthLayout";
+import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
+import Login from "./pages/authentication/login";
+import ReactivationPage from "./pages/authentication/reactivation";
+import ResetPasswordPage from "./pages/authentication/reset-password";
+import Signup from "./pages/authentication/signup";
+import VerifyAccount from "./pages/authentication/verify-account";
 
 // SSO callback components
 const LinkedInCallback = lazy(() => import("./components/sso/LinkedInLoginButton").then(m => ({ default: m.LinkedInCallback })));
@@ -30,15 +37,8 @@ const Home = lazy(() => import("./components/profile/home"));
 const ProfileLayout = lazy(() => import("./components/profile/layout"));
 const Overview = lazy(() => import("./components/profile/overview"));
 const Profile = lazy(() => import("./components/profile/profile"));
-const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
-const ConfirmResetPassword = lazy(() => import("./pages/authentication/confirmPasswordReset"));
-const Login = lazy(() => import("./pages/authentication/login"));
 const CreatePostPage = lazy(() => import("./pages/posts/CreatePostPage"));
-const ReactivationPage = lazy(() => import("./pages/authentication/reactivation"));
-const ResetPasswordPage = lazy(() => import("./pages/authentication/reset-password"));
-const Signup = lazy(() => import("./pages/authentication/signup"));
 const SuccessPage = lazy(() => import("./pages/authentication/successpage"));
-const VerifyAccount = lazy(() => import("./pages/authentication/verify-account"));
 const BookMark = lazy(() => import("./pages/bookmark"));
 const BlockedUsersPage = lazy(() => import("./pages/blocked-users/index"));
 const BlockedCompaniesPage = lazy(() => import("./pages/blocked-companies/index"));
@@ -66,6 +66,7 @@ const Services = lazy(() => import("./pages/service/service"));
 const ServiceAdmin = lazy(() => import("./pages/service/serviceAdmin"));
 const ServiceOverView = lazy(() => import("./pages/service/serviceOverview"));
 const SettingsPage = lazy(() => import("./pages/settings"));
+const EnterpriseSSOSetupPage = lazy(() => import("./pages/settings/EnterpriseSSOSetup"));
 const PrivacyPolicy = lazy(() => import("./pages/terms&policies/policy"));
 const TermsAndConditions = lazy(() => import("./pages/terms&policies/terms"));
 
@@ -278,6 +279,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.servicesAdd)} element={<ServiceAdmin />} />
           <Route path={removeLeadingSlash(webRoutes.servicesDetail)} element={<ServiceOverView />} />
           <Route path={removeLeadingSlash(webRoutes.settings)} element={<SettingsPage />} />
+          <Route path={removeLeadingSlash(webRoutes.enterpriseSSOSetup)} element={<EnterpriseSSOSetupPage />} />
           <Route path={removeLeadingSlash(webRoutes.userProfile)} element={<UserProfile />} />
           
           {/* Company-specific routes with "co" prefix */}
@@ -558,6 +560,7 @@ const removeLeadingSlash = (path) => {
           <Route path="services/add" element={<ServiceAdmin />} />
           <Route path="services/:id" element={<ServiceOverView />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings/enterprise-sso" element={<EnterpriseSSOSetupPage />} />
           <Route path="user/:userId" element={<UserProfile />} />
         </Route>
 

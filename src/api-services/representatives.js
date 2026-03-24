@@ -126,3 +126,33 @@ export const resendRepInvitation = async (id) => {
 
   return result;
 };
+
+export const getPendingSSORepresentatives = async (companyId) => {
+  const response = await makeApiRequest({
+    url: "api/representatives/pending-sso/",
+    method: "GET",
+    params: companyId ? { company_id: companyId } : undefined,
+  });
+
+  return response?.results || response?.data || response || [];
+};
+
+export const approveSSORepresentative = async (id) => {
+  const result = await makeApiRequest({
+    url: `api/representatives/${id}/approve-sso/`,
+    method: "POST",
+  });
+
+  toast.success("SSO employee approved successfully");
+  return result;
+};
+
+export const rejectSSORepresentative = async (id) => {
+  const result = await makeApiRequest({
+    url: `api/representatives/${id}/reject-sso/`,
+    method: "POST",
+  });
+
+  toast.success("SSO employee rejected successfully");
+  return result;
+};
