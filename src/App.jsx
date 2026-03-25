@@ -164,6 +164,10 @@ const CreateBiddingProject = lazy(() => import("./pages/bidding/CreateBiddingPro
 const SubmitBid = lazy(() => import("./pages/bidding/SubmitBid"));
 const EvaluationPanel = lazy(() => import("./pages/bidding/EvaluationPanel"));
 const BiddingTemplates = lazy(() => import("./pages/bidding/BiddingTemplates"));
+const ComplianceVault = lazy(() => import("./pages/bidding/ComplianceVault"));
+const PrequalificationSchemes = lazy(() => import("./pages/bidding/PrequalificationSchemes"));
+const PrequalificationReview = lazy(() => import("./pages/bidding/PrequalificationReview"));
+const SupplierScorecard = lazy(() => import("./pages/bidding/SupplierScorecard"));
 
 // Marketplace
 const Marketplace = lazy(() => import("./pages/marketplace/Marketplace"));
@@ -335,6 +339,10 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.biddingSubmit)} element={<SubmitBid />} />
           <Route path={removeLeadingSlash(webRoutes.biddingEvaluate)} element={<EvaluationPanel />} />
           <Route path={removeLeadingSlash(webRoutes.biddingTemplates)} element={<BiddingTemplates />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingCompliance)} element={<ComplianceVault />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingPrequalification)} element={<PrequalificationSchemes />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingPrequalificationReview)} element={<PrequalificationReview />} />
+          <Route path={removeLeadingSlash(webRoutes.supplierScorecard)} element={<SupplierScorecard />} />
           
           {/* Workforce */}
           <Route path={removeLeadingSlash(webRoutes.workforceJobs)} element={<WorkforceJobs />} />

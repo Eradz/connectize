@@ -20,21 +20,16 @@ import {
 const PROJECT_TYPES = [
   { value: "rfp", label: "Request for Proposal (RFP)" },
   { value: "rfq", label: "Request for Quotation (RFQ)" },
-  { value: "tender", label: "Tender" },
-  { value: "auction", label: "Auction" },
-  { value: "expression_of_interest", label: "Expression of Interest (EOI)" },
+  { value: "itb", label: "Invitation to Bid (ITB)" },
+  { value: "eoi", label: "Expression of Interest (EOI)" },
+  { value: "rfi", label: "Request for Information (RFI)" },
+  { value: "reverse_auction", label: "Reverse Auction" },
 ];
 
 const VISIBILITY_OPTIONS = [
   { value: "public", label: "Public — visible to all companies" },
   { value: "invited", label: "Invited only — only invited companies can bid" },
-  { value: "private", label: "Private — hidden, share via link" },
-];
-
-const BID_MODES = [
-  { value: "open", label: "Open — bidders can see other bids" },
-  { value: "sealed", label: "Sealed — bids hidden until deadline" },
-  { value: "reverse_auction", label: "Reverse auction — lowest price wins" },
+  { value: "prequalified", label: "Prequalified — only qualified suppliers can bid" },
 ];
 
 const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"];
@@ -51,6 +46,9 @@ export default function CreateBiddingProject() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [userCompanies, setUserCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
+  const [prequalSchemes, setPrequalSchemes] = useState([]);
+  const [envelopeConfig, setEnvelopeConfig] = useState([]);
+  const [requiredDocuments, setRequiredDocuments] = useState([]);
 
   const [form, setForm] = useState({
     title: "",
@@ -58,7 +56,6 @@ export default function CreateBiddingProject() {
     project_type: "rfp",
     category: "",
     visibility: "public",
-    bid_mode: "sealed",
     currency: "USD",
     budget_min: "",
     budget_max: "",
@@ -68,6 +65,10 @@ export default function CreateBiddingProject() {
     workflow_template: "",
     terms_and_conditions: "",
     custom_fields: {},
+    required_prequalification_scheme_id: "",
+    local_content_weight: "",
+    local_content_minimum: "",
+    allow_bid_amendments: true,
   });
 
   // Custom fields that the user defines for their project
@@ -76,6 +77,7 @@ export default function CreateBiddingProject() {
   useEffect(() => {
     fetchTemplates();
     fetchUserCompanies();
+    fetchPrequalSchemes();
     if (editId) fetchProject();
   }, []);
 
@@ -97,6 +99,15 @@ export default function CreateBiddingProject() {
     }
   };
 
+  const fetchPrequalSchemes = async () => {
+    try {
+      const res = await biddingAPI.getPrequalificationSchemes({ active: true });
+      setPrequalSchemes(res.data?.results || res.data || []);
+    } catch {
+      // non-critical
+    }
+  };
+
   const fetchProject = async () => {
     try {
       setLoadingProject(true);
@@ -108,7 +119,6 @@ export default function CreateBiddingProject() {
         project_type: p.project_type || "rfp",
         category: p.category || "",
         visibility: p.visibility || "public",
-        bid_mode: p.bid_mode || "sealed",
         currency: p.currency || "USD",
         budget_min: p.budget_min || "",
         budget_max: p.budget_max || "",
@@ -118,11 +128,19 @@ export default function CreateBiddingProject() {
         workflow_template: p.workflow_template || "",
         terms_and_conditions: p.terms_and_conditions || "",
         custom_fields: p.custom_fields || {},
+        required_prequalification_scheme_id: p.required_prequalification_scheme?.id || p.required_prequalification_scheme_id || "",
+        allow_bid_amendments: p.allow_bid_amendments !== false,
       });
       if (p.specifications?.custom_fields && Array.isArray(p.specifications.custom_fields)) {
         setCustomFieldDefs(p.specifications.custom_fields);
       }
+      if (Array.isArray(p.required_documents)) {
+        setRequiredDocuments(p.required_documents.map((doc) => ({ label: doc })));
+      }
       if (p.terms_and_conditions) setShowAdvanced(true);
+      if (Array.isArray(p.envelope_configuration) && p.envelope_configuration.length > 0) {
+        setEnvelopeConfig(p.envelope_configuration);
+      }
     } catch {
       toast.error("Failed to load project");
       navigate(webRoutes.bidding);
@@ -146,7 +164,6 @@ export default function CreateBiddingProject() {
       setForm((prev) => ({
         ...prev,
         workflow_template: template.id,
-        bid_mode: template.bid_mode || prev.bid_mode,
         project_type: template.default_project_type || prev.project_type,
       }));
       // If template has specifications with custom fields, load them
@@ -194,6 +211,22 @@ export default function CreateBiddingProject() {
     setCustomFieldDefs((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const addRequiredDocument = () => {
+    setRequiredDocuments((prev) => [...prev, { label: "" }]);
+  };
+
+  const updateRequiredDocument = (index, value) => {
+    setRequiredDocuments((prev) => {
+      const updated = [...prev];
+      updated[index] = { label: value };
+      return updated;
+    });
+  };
+
+  const removeRequiredDocument = (index) => {
+    setRequiredDocuments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -218,11 +251,16 @@ export default function CreateBiddingProject() {
           ),
         };
       }
+      payload.required_documents = requiredDocuments
+        .map((doc) => doc.label.trim())
+        .filter(Boolean);
       // Remove empty optional fields
       if (!payload.budget_min) delete payload.budget_min;
       if (!payload.budget_max) delete payload.budget_max;
       if (!payload.workflow_template) delete payload.workflow_template;
       if (!payload.expected_award_date) delete payload.expected_award_date;
+      if (!payload.required_prequalification_scheme_id) payload.required_prequalification_scheme_id = null;
+      payload.envelope_configuration = envelopeConfig.filter(e => e.type);
 
       if (isEditMode) {
         await biddingAPI.updateProject(editId, payload);
@@ -389,20 +427,20 @@ export default function CreateBiddingProject() {
                   ))}
                 </Select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bid Mode
+              <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3">
+                <input
+                  type="checkbox"
+                  id="allow_bid_amendments"
+                  checked={form.allow_bid_amendments}
+                  onChange={(e) => handleChange("allow_bid_amendments", e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-gold focus:ring-gold"
+                />
+                <label htmlFor="allow_bid_amendments" className="cursor-pointer">
+                  <p className="text-sm font-medium text-gray-900">Allow Bid Amendments</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Bidders can edit their submission while the project is open
+                  </p>
                 </label>
-                <Select
-                  value={form.bid_mode}
-                  onChange={(e) => handleChange("bid_mode", e.target.value)}
-                >
-                  {BID_MODES.map(({ value, label }) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </Select>
               </div>
             </div>
 
@@ -477,6 +515,63 @@ export default function CreateBiddingProject() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Required Documents */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Required Bid Documents
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Define the document checklist every bidder must provide before final submission.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={addRequiredDocument}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add Document
+            </Button>
+          </div>
+
+          {requiredDocuments.length === 0 ? (
+            <div className="text-center py-8 border border-dashed border-gray-200 rounded-lg">
+              <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No required documents defined</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Add items like Technical proposal, Commercial schedule, or HSE certificate.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {requiredDocuments.map((doc, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100"
+                >
+                  <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                  <Input
+                    value={doc.label}
+                    onChange={(e) => updateRequiredDocument(index, e.target.value)}
+                    placeholder="e.g. Technical proposal"
+                    className="flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeRequiredDocument(index)}
+                    className="text-gray-400 hover:text-red-500 p-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Company */}
@@ -653,6 +748,157 @@ export default function CreateBiddingProject() {
           )}
         </section>
 
+        {/* Prequalification */}
+        {prequalSchemes.length > 0 && (
+          <section className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Prequalification Requirement
+            </h2>
+            <p className="text-sm text-gray-500 mb-3">
+              Require suppliers to be prequalified before they can bid.
+            </p>
+            <Select
+              value={form.required_prequalification_scheme_id}
+              onChange={(e) =>
+                handleChange("required_prequalification_scheme_id", e.target.value)
+              }
+            >
+              <option value="">None — any supplier can bid</option>
+              {prequalSchemes.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.industry_category?.replace(/_/g, " ")})
+                </option>
+              ))}
+            </Select>
+          </section>
+        )}
+
+        {/* Multi-Envelope Configuration */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            Multi-Envelope Evaluation
+          </h2>
+          <p className="text-sm text-gray-500 mb-3">
+            Split bids into sealed envelopes evaluated sequentially (e.g. Technical then Commercial).
+          </p>
+          {envelopeConfig.map((env, idx) => {
+            const presetTypes = ["technical", "commercial", "hse", "financial"];
+            const isCustom = env.type && !presetTypes.includes(env.type);
+            const selectValue = isCustom ? "__custom__" : env.type;
+            return (
+              <div key={idx} className="flex items-center gap-2 mb-2">
+                <select
+                  value={selectValue}
+                  onChange={(e) => {
+                    const updated = [...envelopeConfig];
+                    if (e.target.value === "__custom__") {
+                      updated[idx] = { ...updated[idx], type: "" };
+                    } else {
+                      updated[idx] = { ...updated[idx], type: e.target.value };
+                    }
+                    setEnvelopeConfig(updated);
+                  }}
+                  className={`${isCustom ? "w-32" : "flex-1"} min-w-0 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#F1C644] appearance-none`}
+                >
+                  <option value="">Select type</option>
+                  <option value="technical">Technical</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="hse">HSE</option>
+                  <option value="financial">Financial</option>
+                  <option value="__custom__">Other (Custom)</option>
+                </select>
+                {(selectValue === "__custom__") && (
+                  <input
+                    type="text"
+                    placeholder="Custom type name"
+                    value={env.type}
+                    onChange={(e) => {
+                      const updated = [...envelopeConfig];
+                      updated[idx] = { ...updated[idx], type: e.target.value.toLowerCase().replace(/\s+/g, '_') };
+                      setEnvelopeConfig(updated);
+                    }}
+                    className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#F1C644]"
+                  />
+                )}
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Weight %"
+                  value={env.weight || ""}
+                  onChange={(e) => {
+                    const updated = [...envelopeConfig];
+                    updated[idx] = { ...updated[idx], weight: parseInt(e.target.value) || 0 };
+                    setEnvelopeConfig(updated);
+                  }}
+                  className="!w-28"
+                />
+                <button
+                  type="button"
+                  onClick={() => setEnvelopeConfig(envelopeConfig.filter((_, i) => i !== idx))}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() =>
+              setEnvelopeConfig([
+                ...envelopeConfig,
+                { type: "", order: envelopeConfig.length + 1, weight: 0 },
+              ])
+            }
+            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-2"
+          >
+            <Plus size={14} /> Add Envelope
+          </button>
+        </section>
+
+        {/* Local Content (NCDMB) */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">
+            Local Content (NCDMB)
+          </h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Nigerian local content requirements for evaluation scoring.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                LC Weight in Evaluation (%)
+              </label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={form.local_content_weight || ""}
+                onChange={(e) => handleChange("local_content_weight", e.target.value)}
+                placeholder="0"
+              />
+              <p className="text-xs text-gray-400 mt-1">0 = LC not used in scoring</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Minimum LC Threshold (%)
+              </label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={form.local_content_minimum || ""}
+                onChange={(e) => handleChange("local_content_minimum", e.target.value)}
+                placeholder="0"
+              />
+              <p className="text-xs text-gray-400 mt-1">Bids below this are non-compliant</p>
+            </div>
+          </div>
+        </section>
+
         {/* Submit */}
         <div className="flex items-center justify-between pt-4">
           <Button
@@ -673,8 +919,9 @@ export default function CreateBiddingProject() {
             {isEditMode && (
               <Button
                 type="button"
+                variant="primary"
                 loading={loading && publishing}
-                className="bg-dark hover:bg-mid_grey text-white font-medium px-6"
+                className="font-medium px-6"
                 onClick={() => {
                   setPublishing(true);
                   document.querySelector("form").requestSubmit();

@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Logo from "../../components/logo";
 import { getSession } from "../../lib/session";
 
@@ -79,39 +80,26 @@ function AuthLayout({ redirectUrl = "/" }) {
         </section>
 
         <section className="max-lg:hidden !w-[48%] shrink-0">
-          <div className="flex h-full min-h-[640px] w-full items-center justify-center rounded-[32px] bg-[radial-gradient(circle_at_top,_rgba(212,175,55,0.28),_transparent_38%),linear-gradient(160deg,_#111827_0%,_#1f2937_45%,_#0f172a_100%)] p-10 text-white shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
-            <div className="max-w-md space-y-8">
-              <div className="space-y-4">
-                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
+          <div className="flex flex-col h-full min-h-[640px] w-full items-center justify-center rounded-[32px] p-10">
+            <div className="w-full max-w-md flex items-center justify-center">
+              <DotLottieReact
+                src="/lottie/authentication.lottie"
+                loop
+                autoplay
+                className="w-full max-w-sm"
+              />
+            </div>
+            <div className="max-w-md space-y-4 mt-6">
+              <div className="space-y-3 text-center">
+                <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
                   Connectize Access
                 </span>
-                <h2 className="text-4xl font-bold leading-tight">
+                <h2 className="text-3xl font-bold leading-tight text-gray-900">
                   Secure access for transactions, vendors, and enterprise teams.
                 </h2>
-                <p className="text-sm leading-7 text-white/75">
+                <p className="text-sm leading-7 text-gray-500">
                   Sign in once to manage procurement, logistics, marketplace activity, and company collaboration from a single workspace.
                 </p>
-              </div>
-
-              <div className="grid gap-4">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
-                    Trusted Workflow
-                  </p>
-                  <p className="mt-2 text-lg font-semibold">
-                    Company-ready onboarding with secure account recovery and SSO support.
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-2xl border border-white/10 bg-black/15 p-5">
-                    <p className="text-3xl font-bold text-gold">24/7</p>
-                    <p className="mt-2 text-sm text-white/70">Access to bids, listings, and deal rooms.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/15 p-5">
-                    <p className="text-3xl font-bold text-gold">1 Hub</p>
-                    <p className="mt-2 text-sm text-white/70">One place for buyers, suppliers, and logistics teams.</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

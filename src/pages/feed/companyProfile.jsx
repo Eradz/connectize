@@ -121,6 +121,15 @@ const CompanyProfile = React.memo(() => {
     [company]
   );
 
+  const stats = useMemo(
+    () => [
+      `${formatNumber(company?.posts_count || 0)} /Posts`,
+      `${formatNumber(company?.followers_count || 0)} /Followers`,
+      `${formatNumber(company?.reviews_count || company?.reviews?.length || 0)} /Reviews`,
+    ],
+    [company]
+  );
+
   if (isLoading)
     return <PageLoading text="Getting profile ready..." hasLogo={false} />;
 
@@ -156,14 +165,6 @@ const CompanyProfile = React.memo(() => {
     : baseSeoData.title;
   const seoDescription = company?.company_description || baseSeoData.description;
 
-   const stats = useMemo(
-    () => [
-      `${formatNumber(company?.posts_count || 0)} /Posts`,
-      `${formatNumber(company?.followers_count || 0)} /Followers`,
-      `${formatNumber(company?.reviews_count || company?.reviews?.length || 0)} /Reviews`,
-    ],
-    [company]
-  );
   return (
     <section className="rounded-md overflow-hidden w-full">
       <SEO 

@@ -1,8 +1,4 @@
 @import "tailwindcss/utilities";
-html,
-* {
-  background-color: red;
-}
 
  @layer utilities {
     .no-scrollbar::-webkit-scrollbar {

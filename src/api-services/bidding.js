@@ -64,7 +64,10 @@ export const biddingAPI = {
   deleteStage: (templateId, stageId) => api.delete(`${BIDDING_BASE_URL}/templates/${templateId}/stages/${stageId}/`),
 
   // Stage Criteria
-  getStageCriteria: (stageId) => api.get(`${BIDDING_BASE_URL}/stages/${stageId}/criteria/`),
+  getStageCriteria: (stageId, envelopeType) => {
+    const params = envelopeType != null ? { envelope_type: envelopeType } : {};
+    return api.get(`${BIDDING_BASE_URL}/stages/${stageId}/criteria/`, { params });
+  },
   createCriterion: (stageId, data) => api.post(`${BIDDING_BASE_URL}/stages/${stageId}/criteria/`, data),
   updateCriterion: (stageId, criterionId, data) => api.patch(`${BIDDING_BASE_URL}/stages/${stageId}/criteria/${criterionId}/`, data),
   deleteCriterion: (stageId, criterionId) => api.delete(`${BIDDING_BASE_URL}/stages/${stageId}/criteria/${criterionId}/`),
@@ -88,7 +91,100 @@ export const biddingAPI = {
 
   // ==================== APPROVALS ====================
   getApprovals: (params = {}) => api.get(`${BIDDING_BASE_URL}/bid-approvals/`, { params }),
+  createApproval: (data) => api.post(`${BIDDING_BASE_URL}/bid-approvals/`, data),
   submitApproval: (id, data) => api.patch(`${BIDDING_BASE_URL}/bid-approvals/${id}/`, data),
+
+  // ==================== COMPLIANCE VAULT ====================
+  getComplianceCategories: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/compliance-categories/`, { params }),
+  createComplianceCategory: (data) =>
+    api.post(`${BIDDING_BASE_URL}/compliance-categories/`, data),
+  getComplianceRequirements: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/compliance-requirements/`, { params }),
+  createComplianceRequirement: (data) =>
+    api.post(`${BIDDING_BASE_URL}/compliance-requirements/`, data),
+  getComplianceDocuments: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/compliance-documents/`, { params }),
+  uploadComplianceDocument: (data) =>
+    api.post(`${BIDDING_BASE_URL}/compliance-documents/`, data),
+  updateComplianceDocument: (id, data) =>
+    api.patch(`${BIDDING_BASE_URL}/compliance-documents/${id}/`, data),
+  verifyComplianceDocument: (id) =>
+    api.post(`${BIDDING_BASE_URL}/compliance-documents/${id}/verify/`),
+  rejectComplianceDocument: (id, reason) =>
+    api.post(`${BIDDING_BASE_URL}/compliance-documents/${id}/reject/`, { reason }),
+  getComplianceStatus: (companyId, params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/compliance-status/${companyId}/`, { params }),
+
+  // ==================== PREQUALIFICATION ====================
+  getPrequalificationSchemes: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/prequalification-schemes/`, { params }),
+  getPrequalificationScheme: (id) =>
+    api.get(`${BIDDING_BASE_URL}/prequalification-schemes/${id}/`),
+  createPrequalificationScheme: (data) =>
+    api.post(`${BIDDING_BASE_URL}/prequalification-schemes/`, data),
+  updatePrequalificationScheme: (id, data) =>
+    api.patch(`${BIDDING_BASE_URL}/prequalification-schemes/${id}/`, data),
+  deletePrequalificationScheme: (id) =>
+    api.delete(`${BIDDING_BASE_URL}/prequalification-schemes/${id}/`),
+  applyForPrequalification: (schemeId, data) =>
+    api.post(`${BIDDING_BASE_URL}/prequalification-schemes/${schemeId}/apply/`, data),
+  getQualifiedSuppliers: (schemeId) =>
+    api.get(`${BIDDING_BASE_URL}/prequalification-schemes/${schemeId}/qualified_suppliers/`),
+  getPrequalificationApplications: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/prequalification-applications/`, { params }),
+  reviewPrequalification: (applicationId, data) =>
+    api.post(`${BIDDING_BASE_URL}/prequalification-applications/${applicationId}/review/`, data),
+
+  // ==================== COMPLIANCE REVIEW (Project Owner) ====================
+  getComplianceReview: (projectId, params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/bid-projects/${projectId}/compliance-review/`, { params }),
+
+  // ==================== MULTI-ENVELOPE ====================
+  openEnvelope: (projectId, envelopeType) =>
+    api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/open-envelope/`, { envelope_type: envelopeType }),
+  calculateMultiEnvelopeScores: (projectId) =>
+    api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/calculate-multi-envelope-scores/`),
+
+  // ==================== TENDER ADDENDA & VERSIONING ====================
+  getAddenda: (projectId) =>
+    api.get(`${BIDDING_BASE_URL}/bid-projects/${projectId}/addenda/`),
+  issueAddendum: (projectId, data) =>
+    api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/addenda/`, data),
+  acknowledgeAddendum: (projectId, addendumNumber, data = {}) =>
+    api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/addenda/${addendumNumber}/acknowledge/`, data),
+  getProjectVersions: (projectId) =>
+    api.get(`${BIDDING_BASE_URL}/bid-projects/${projectId}/versions/`),
+
+  // ==================== LOCAL CONTENT (NCDMB) ====================
+  getLocalContentCategories: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/local-content-categories/`, { params }),
+  createLocalContentCategory: (data) =>
+    api.post(`${BIDDING_BASE_URL}/local-content-categories/`, data),
+  updateLocalContentCategory: (id, data) =>
+    api.patch(`${BIDDING_BASE_URL}/local-content-categories/${id}/`, data),
+  getLocalContentDeclarations: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/local-content-declarations/`, { params }),
+  submitLocalContentDeclaration: (data) =>
+    api.post(`${BIDDING_BASE_URL}/local-content-declarations/`, data),
+  updateLocalContentDeclaration: (id, data) =>
+    api.patch(`${BIDDING_BASE_URL}/local-content-declarations/${id}/`, data),
+  getLocalContentScorecard: (bidId) =>
+    api.get(`${BIDDING_BASE_URL}/local-content-scorecard/${bidId}/`),
+
+  // ==================== SUPPLIER PERFORMANCE SCORECARD ====================
+  getPerformanceMetrics: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/performance-metrics/`, { params }),
+  createPerformanceMetric: (data) =>
+    api.post(`${BIDDING_BASE_URL}/performance-metrics/`, data),
+  getPerformanceReviews: (params = {}) =>
+    api.get(`${BIDDING_BASE_URL}/performance-reviews/`, { params }),
+  createPerformanceReview: (data) =>
+    api.post(`${BIDDING_BASE_URL}/performance-reviews/`, data),
+  updatePerformanceReview: (id, data) =>
+    api.patch(`${BIDDING_BASE_URL}/performance-reviews/${id}/`, data),
+  getSupplierPerformanceScore: (companyId) =>
+    api.get(`${BIDDING_BASE_URL}/supplier-performance/${companyId}/`),
 };
 
 export default biddingAPI;

@@ -154,6 +154,8 @@ export const hubNavItems = [
     subItems: [
       { name: "All Projects", to: webRoutes.bidding },
       { name: "Create Project", to: webRoutes.biddingCreate },
+      { name: "Compliance Vault", to: webRoutes.biddingCompliance },
+      { name: "Prequalification", to: webRoutes.biddingPrequalification },
       { name: "Workflow Templates", to: webRoutes.biddingTemplates }
     ]
   },
