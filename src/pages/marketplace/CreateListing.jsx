@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { listingService } from "../../api-services/marketplace";
 import { logisticsAPI } from "../../api-services/logistics";
+import { getProductCategories } from "../../api-services/products";
+import { getServiceCategories } from "../../api-services/services";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 import { webRoutes } from "../../lib/webRoutes";
@@ -18,6 +20,9 @@ export default function CreateListing() {
   const [loadingInventory, setLoadingInventory] = useState(true);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [creationMode, setCreationMode] = useState("manual"); // "manual" or "inventory"
+  const [productCategories, setProductCategories] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   
   const initialType = searchParams.get("type");
   const [formData, setFormData] = useState({
@@ -25,6 +30,8 @@ export default function CreateListing() {
     title: "",
     description: "",
     condition: "new",
+    product_category: "",
+    service_category: "",
     price: "",
     compare_at_price: "",
     quantity_available: "",
@@ -44,7 +51,23 @@ export default function CreateListing() {
 
   useEffect(() => {
     fetchInventoryItems();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const [prodCats, servCats] = await Promise.all([
+        getProductCategories(),
+        getServiceCategories(),
+      ]);
+      setProductCategories(prodCats || []);
+      setServiceCategories(servCats || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const fetchInventoryItems = async () => {
     try {
@@ -130,6 +153,15 @@ export default function CreateListing() {
       toast.error("Please enter available quantity");
       return;
     }
+    
+    if ((formData.listing_type === "product" || formData.listing_type === "inventory") && !formData.product_category) {
+      toast.error("Please select a product category");
+      return;
+    }
+    if (formData.listing_type === "service" && !formData.service_category) {
+      toast.error("Please select a service category");
+      return;
+    }
 
     setLoading(true);
 
@@ -153,7 +185,7 @@ export default function CreateListing() {
         });
       } else {
         // Create manual listing
-        listing = await listingService.createListing({
+        const listingData = {
           ...formData,
           price: parseFloat(formData.price),
           compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
@@ -162,7 +194,10 @@ export default function CreateListing() {
           max_order_quantity: formData.max_order_quantity ? parseInt(formData.max_order_quantity) : null,
           shipping_cost: formData.shipping_cost ? parseFloat(formData.shipping_cost) : null,
           estimated_delivery_days: formData.estimated_delivery_days ? parseInt(formData.estimated_delivery_days) : null,
-        });
+          product_category: formData.product_category || null,
+          service_category: formData.service_category || null,
+        };
+        listing = await listingService.createListing(listingData);
       }
 
       // Upload images
@@ -342,6 +377,49 @@ export default function CreateListing() {
                   <option value="refurbished">Refurbished</option>
                 </select>
               </div>
+
+              {/* Category Selection */}
+              {(formData.listing_type === "product" || formData.listing_type === "inventory") && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product Category *
+                  </label>
+                  <select
+                    value={formData.product_category}
+                    onChange={(e) => handleInputChange('product_category', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {productCategories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {formData.listing_type === "service" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Service Category *
+                  </label>
+                  <select
+                    value={formData.service_category}
+                    onChange={(e) => handleInputChange('service_category', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {serviceCategories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
