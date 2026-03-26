@@ -30,16 +30,18 @@ export default function SearchableSelect({
   const containerRef = useRef(null);
   const inputRef = useRef(null);
 
-  const selectedOption = options.find(
+  const safeOptions = options.filter((o) => o != null && o.id != null);
+
+  const selectedOption = safeOptions.find(
     (o) => String(o.id) === String(value)
   );
 
-  const filtered = options.filter((o) =>
-    o.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = safeOptions.filter((o) =>
+    o.name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const exactMatch = options.some(
-    (o) => o.name.toLowerCase() === search.toLowerCase()
+  const exactMatch = safeOptions.some(
+    (o) => o.name?.toLowerCase() === search.toLowerCase()
   );
 
   // Close on outside click
