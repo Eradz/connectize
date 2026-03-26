@@ -122,6 +122,14 @@ export const getOrCreateServiceCategories = async (name) => {
   return newCategory;
 };
 
+export const createServiceCategory = async (name) => {
+  return await makeApiRequest({
+    url: `api/service-categories/`,
+    method: "POST",
+    data: { name },
+  });
+};
+
 export const bookmarkService = async (serviceId, data, hasBookmarked) => {
   if (hasBookmarked) {
     await makeApiRequest({

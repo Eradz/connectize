@@ -143,6 +143,7 @@ const webRoutes = {
   inventoryDashboard: "/inventory",
   inventoryItems: "/inventory/items",
   inventoryWarehouses: "/inventory/warehouses",
+  inventoryWarehouseCreate: "/inventory/warehouses/create",
   inventoryTransactions: "/inventory/transactions",
   inventoryAlerts: "/inventory/alerts",
   inventoryReports: "/inventory/reports",

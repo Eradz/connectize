@@ -152,6 +152,14 @@ export const getOrCreateProductCategories = async (name) => {
   return newCategory;
 };
 
+export const createProductCategory = async (name) => {
+  return await makeApiRequest({
+    url: `api/product-categories/`,
+    method: "POST",
+    data: { name },
+  });
+};
+
 export const bookmarkProduct = async (productId, data, hasBookmarked) => {
   console.log(data.company);
   if (hasBookmarked) {

@@ -6,9 +6,10 @@ import {
 } from "lucide-react";
 import { listingService } from "../../api-services/marketplace";
 import { logisticsAPI } from "../../api-services/logistics";
-import { getProductCategories } from "../../api-services/products";
-import { getServiceCategories } from "../../api-services/services";
+import { getProductCategories, createProductCategory } from "../../api-services/products";
+import { getServiceCategories, createServiceCategory } from "../../api-services/services";
 import HeadingText from "../../components/HeadingText";
+import SearchableSelect from "../../components/SearchableSelect";
 import { toast } from "sonner";
 import { webRoutes } from "../../lib/webRoutes";
 
@@ -67,6 +68,20 @@ export default function CreateListing() {
     } finally {
       setLoadingCategories(false);
     }
+  };
+
+  const handleCreateProductCategory = async (name) => {
+    const newCat = await createProductCategory(name);
+    setProductCategories((prev) => [...prev, newCat]);
+    toast.success(`Category "${name}" created`);
+    return newCat;
+  };
+
+  const handleCreateServiceCategory = async (name) => {
+    const newCat = await createServiceCategory(name);
+    setServiceCategories((prev) => [...prev, newCat]);
+    toast.success(`Category "${name}" created`);
+    return newCat;
   };
 
   const fetchInventoryItems = async () => {
@@ -380,45 +395,29 @@ export default function CreateListing() {
 
               {/* Category Selection */}
               {(formData.listing_type === "product" || formData.listing_type === "inventory") && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Category *
-                  </label>
-                  <select
-                    value={formData.product_category}
-                    onChange={(e) => handleInputChange('product_category', e.target.value)}
-                    className="w-full border rounded-lg px-4 py-2"
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {productCategories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableSelect
+                  label="Product Category"
+                  options={productCategories}
+                  value={formData.product_category}
+                  onChange={(val) => handleInputChange('product_category', val)}
+                  onCreateNew={handleCreateProductCategory}
+                  placeholder="Search or create a category..."
+                  required
+                  loading={loadingCategories}
+                />
               )}
 
               {formData.listing_type === "service" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service Category *
-                  </label>
-                  <select
-                    value={formData.service_category}
-                    onChange={(e) => handleInputChange('service_category', e.target.value)}
-                    className="w-full border rounded-lg px-4 py-2"
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {serviceCategories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SearchableSelect
+                  label="Service Category"
+                  options={serviceCategories}
+                  value={formData.service_category}
+                  onChange={(val) => handleInputChange('service_category', val)}
+                  onCreateNew={handleCreateServiceCategory}
+                  placeholder="Search or create a category..."
+                  required
+                  loading={loadingCategories}
+                />
               )}
             </div>
           </div>
