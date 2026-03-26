@@ -111,14 +111,14 @@ export async function refreshToken() {
         refresh: session.tokens.refresh,
       });
 
-      // Validate response
-      if (!data?.access || !data?.refresh) {
+      // Validate response - server returns new access token (refresh stays the same)
+      if (!data?.access) {
         throw new Error("Invalid refresh response format");
       }
 
       const newTokens = {
         access: data.access,
-        refresh: data.refresh,
+        refresh: data.refresh || session.tokens.refresh,
       };
 
       // Only update session if no new login occurred while we were refreshing
