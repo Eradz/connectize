@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
@@ -10,11 +10,15 @@ import {
   Warehouse,
   MapPin,
   Package,
-  Users
+  Users,
+  ArrowLeft
 } from 'lucide-react';
-import { InventoryWarehouseService } from '../../api-services/oilgas';
+import { inventoryWarehouseService } from '../../api-services/inventory';
+import { webRoutes } from '../../lib/webRoutes';
+import { toast } from 'sonner';
 
 const InventoryWarehouses = () => {
+  const navigate = useNavigate();
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,7 +30,7 @@ const InventoryWarehouses = () => {
   const loadWarehouses = async () => {
     try {
       setLoading(true);
-      const response = await InventoryWarehouseService.getAll();
+      const response = await inventoryWarehouseService.getAll();
       setWarehouses(response.results || []);
     } catch (error) {
       console.error('Error loading warehouses:', error);
@@ -35,9 +39,20 @@ const InventoryWarehouses = () => {
     }
   };
 
+  const handleDelete = async (warehouseId) => {
+    if (!confirm('Are you sure you want to delete this warehouse?')) return;
+    try {
+      await inventoryWarehouseService.delete(warehouseId);
+      toast.success('Warehouse deleted');
+      loadWarehouses();
+    } catch (error) {
+      toast.error('Failed to delete warehouse');
+    }
+  };
+
   const filteredWarehouses = warehouses.filter(warehouse => 
-    warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    warehouse.location.toLowerCase().includes(searchTerm.toLowerCase())
+    (warehouse.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (warehouse.city || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -53,6 +68,13 @@ const InventoryWarehouses = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
+          <button
+            onClick={() => navigate(webRoutes.logisticsInventory || '/logistics/inventory')}
+            className="flex items-center p-2 rounded-lg bg-pale_yellow hover:bg-gold mb-4"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <span className="ml-1">Back</span>
+          </button>
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Warehouses</h1>
@@ -118,7 +140,7 @@ const InventoryWarehouses = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Locations</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {new Set(warehouses.map(w => w.location)).size}
+                  {new Set(warehouses.map(w => w.city)).size}
                 </p>
               </div>
             </div>
@@ -132,7 +154,7 @@ const InventoryWarehouses = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Capacity</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {warehouses.reduce((sum, w) => sum + (w.capacity || 0), 0).toLocaleString()}
+                  {warehouses.reduce((sum, w) => sum + (parseFloat(w.total_capacity) || 0), 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -151,7 +173,7 @@ const InventoryWarehouses = () => {
                     </div>
                     <div className="ml-3">
                       <h3 className="text-lg font-medium text-gray-900">{warehouse.name}</h3>
-                      <p className="text-sm text-gray-500">{warehouse.code}</p>
+                      <p className="text-sm text-gray-500 capitalize">{warehouse.warehouse_type?.replace('_', ' ')}</p>
                     </div>
                   </div>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -166,25 +188,25 @@ const InventoryWarehouses = () => {
                 <div className="space-y-3">
                   <div className="flex items-center text-sm text-gray-600">
                     <MapPin className="h-4 w-4 mr-2" />
-                    <span>{warehouse.location}</span>
+                    <span>{warehouse.city}, {warehouse.country}</span>
                   </div>
                   
                   <div className="flex items-center text-sm text-gray-600">
                     <Package className="h-4 w-4 mr-2" />
-                    <span>Capacity: {warehouse.capacity?.toLocaleString() || 'N/A'}</span>
+                    <span>Capacity: {parseFloat(warehouse.total_capacity)?.toLocaleString() || 'N/A'} m³</span>
                   </div>
 
-                  {warehouse.manager && (
+                  {warehouse.climate_controlled && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Users className="h-4 w-4 mr-2" />
-                      <span>Manager: {warehouse.manager}</span>
+                      <Filter className="h-4 w-4 mr-2" />
+                      <span>Climate Controlled</span>
                     </div>
                   )}
                 </div>
 
-                {warehouse.description && (
+                {warehouse.address && (
                   <p className="mt-4 text-sm text-gray-600 line-clamp-2">
-                    {warehouse.description}
+                    {warehouse.address}
                   </p>
                 )}
 
@@ -209,6 +231,7 @@ const InventoryWarehouses = () => {
                       <Edit className="h-4 w-4" />
                     </Link>
                     <button 
+                      onClick={() => handleDelete(warehouse.id)}
                       className="text-red-600 hover:text-red-900 p-1"
                       title="Delete"
                     >

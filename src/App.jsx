@@ -138,6 +138,7 @@ const InventoryDashboard = lazy(() => import("./pages/inventory/InventoryDashboa
 const InventoryItems = lazy(() => import("./pages/inventory/InventoryItems"));
 const InventoryWarehouses = lazy(() => import("./pages/inventory/InventoryWarehouses"));
 const CreateWarehouse = lazy(() => import("./pages/inventory/CreateWarehouse"));
+const WarehouseDetail = lazy(() => import("./pages/inventory/WarehouseDetail"));
 const InventoryTransactions = lazy(() => import("./pages/inventory/InventoryTransactions"));
 const InventoryAlerts = lazy(() => import("./pages/inventory/InventoryAlerts"));
 const InventoryReports = lazy(() => import("./pages/inventory/InventoryReports"));
@@ -399,6 +400,8 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.inventoryItems)} element={<InventoryItems />} />
           <Route path={removeLeadingSlash(webRoutes.inventoryWarehouses)} element={<InventoryWarehouses />} />
           <Route path={removeLeadingSlash(webRoutes.inventoryWarehouseCreate)} element={<CreateWarehouse />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryWarehouseDetail)} element={<WarehouseDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.inventoryWarehouseEdit)} element={<CreateWarehouse />} />
           <Route path={removeLeadingSlash(webRoutes.inventoryTransactions)} element={<InventoryTransactions />} />
           <Route path={removeLeadingSlash(webRoutes.inventoryAlerts)} element={<InventoryAlerts />} />
           <Route path={removeLeadingSlash(webRoutes.inventoryReports)} element={<InventoryReports />} />
@@ -494,6 +497,8 @@ const removeLeadingSlash = (path) => {
           <Route path={toRelativePath(webRoutes.inventoryDashboard)} element={<InventoryDashboard />} />
           <Route path={toRelativePath(webRoutes.inventoryWarehouses)} element={<InventoryWarehouses />} />
           <Route path={toRelativePath(webRoutes.inventoryWarehouseCreate)} element={<CreateWarehouse />} />
+          <Route path={toRelativePath(webRoutes.inventoryWarehouseDetail)} element={<WarehouseDetail />} />
+          <Route path={toRelativePath(webRoutes.inventoryWarehouseEdit)} element={<CreateWarehouse />} />
           <Route path={toRelativePath(webRoutes.inventoryItems)} element={<InventoryItems />} />
           <Route path={toRelativePath(webRoutes.inventoryTransactions)} element={<InventoryTransactions />} />
           <Route path={toRelativePath(webRoutes.inventoryReports)} element={<InventoryReports />} />

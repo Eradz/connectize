@@ -1,47 +1,30 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Warehouse, Plus, X } from "lucide-react";
-import { inventoryWarehouseService } from "../../api-services/inventory";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Loader2, Warehouse, Plus, X, Save } from "lucide-react";
+import { inventoryWarehouseService, warehouseOptionService } from "../../api-services/inventory";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 import { webRoutes } from "../../lib/webRoutes";
 
-const WAREHOUSE_TYPES = [
-  { value: "general", label: "General Purpose" },
-  { value: "hazmat", label: "Hazardous Materials" },
-  { value: "refrigerated", label: "Refrigerated" },
-  { value: "bulk_liquid", label: "Bulk Liquid" },
-  { value: "equipment", label: "Equipment Storage" },
-  { value: "offshore", label: "Offshore Platform" },
-];
-
-const SECURITY_OPTIONS = [
-  "24/7 CCTV",
-  "Armed Guards",
-  "Biometric Access",
-  "Fire Suppression",
-  "Perimeter Fencing",
-  "Alarm System",
-  "Access Logging",
-];
-
-const CERTIFICATION_OPTIONS = [
-  "ISO 9001",
-  "ISO 14001",
-  "OHSAS 18001",
-  "Bonded Warehouse",
-  "GDP Certified",
-  "IATA Certified",
-  "TAPA Certified",
-  "C-TPAT Certified",
-];
-
 export default function CreateWarehouse() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Dynamic options from API
+  const [warehouseTypes, setWarehouseTypes] = useState([]);
+  const [securityOptions, setSecurityOptions] = useState([]);
+  const [certificationOptions, setCertificationOptions] = useState([]);
+
+  // Inline add inputs
+  const [newSecurityFeature, setNewSecurityFeature] = useState("");
+  const [newCertification, setNewCertification] = useState("");
+
   const [formData, setFormData] = useState({
     name: "",
-    warehouse_type: "general",
+    warehouse_type: "",
     address: "",
     city: "",
     country: "",
@@ -55,6 +38,64 @@ export default function CreateWarehouse() {
     is_active: true,
   });
 
+  useEffect(() => {
+    loadOptions();
+    if (isEdit) {
+      loadWarehouse();
+    }
+  }, [id]);
+
+  const loadOptions = async () => {
+    try {
+      const [types, security, certs] = await Promise.all([
+        warehouseOptionService.getByCategory("warehouse_type"),
+        warehouseOptionService.getByCategory("security_feature"),
+        warehouseOptionService.getByCategory("certification"),
+      ]);
+      setWarehouseTypes(Array.isArray(types) ? types : types?.results || []);
+      setSecurityOptions(Array.isArray(security) ? security : security?.results || []);
+      setCertificationOptions(Array.isArray(certs) ? certs : certs?.results || []);
+      // Set default warehouse_type if not editing
+      if (!isEdit) {
+        const typeList = Array.isArray(types) ? types : types?.results || [];
+        if (typeList.length > 0) {
+          setFormData((prev) => ({ ...prev, warehouse_type: prev.warehouse_type || typeList[0].value }));
+        }
+      }
+    } catch (error) {
+      console.error("Error loading options:", error);
+      toast.error("Failed to load warehouse options");
+    } finally {
+      if (!isEdit) setInitialLoading(false);
+    }
+  };
+
+  const loadWarehouse = async () => {
+    try {
+      const data = await inventoryWarehouseService.getById(id);
+      setFormData({
+        name: data.name || "",
+        warehouse_type: data.warehouse_type || "",
+        address: data.address || "",
+        city: data.city || "",
+        country: data.country || "",
+        total_capacity: data.total_capacity?.toString() || "",
+        available_capacity: data.available_capacity?.toString() || "",
+        climate_controlled: data.climate_controlled || false,
+        security_features: data.security_features || [],
+        certifications: data.certifications || [],
+        contact_email: data.contact_email || "",
+        contact_phone: data.contact_phone || "",
+        is_active: data.is_active ?? true,
+      });
+    } catch (error) {
+      console.error("Error loading warehouse:", error);
+      toast.error("Failed to load warehouse");
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -65,6 +106,33 @@ export default function CreateWarehouse() {
       handleInputChange(field, arr.filter((i) => i !== item));
     } else {
       handleInputChange(field, [...arr, item]);
+    }
+  };
+
+  const addCustomOption = async (category, inputValue, setInputValue) => {
+    const label = inputValue.trim();
+    if (!label) return;
+
+    const value = label.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+    const targetField = category === "security_feature" ? "security_features" : "certifications";
+    const setOptions = category === "security_feature" ? setSecurityOptions : setCertificationOptions;
+
+    try {
+      const created = await warehouseOptionService.create({ category, value, label });
+      setOptions((prev) => [...prev, created]);
+      handleInputChange(targetField, [...formData[targetField], created.label]);
+      setInputValue("");
+      toast.success(`Added "${label}"`);
+    } catch (error) {
+      // If duplicate, just toggle it on
+      if (error.response?.status === 400) {
+        if (!formData[targetField].includes(label)) {
+          handleInputChange(targetField, [...formData[targetField], label]);
+        }
+        setInputValue("");
+      } else {
+        toast.error("Failed to add option");
+      }
     }
   };
 
@@ -110,8 +178,10 @@ export default function CreateWarehouse() {
           : parseFloat(formData.total_capacity),
       };
 
-      await inventoryWarehouseService.create(payload);
-      toast.success("Warehouse created successfully!");
+      await (isEdit
+        ? inventoryWarehouseService.update(id, payload)
+        : inventoryWarehouseService.create(payload));
+      toast.success(isEdit ? "Warehouse updated successfully!" : "Warehouse created successfully!");
       navigate(webRoutes.inventoryWarehouses);
     } catch (error) {
       console.error("Error creating warehouse:", error);
@@ -120,12 +190,20 @@ export default function CreateWarehouse() {
         error.response?.data?.error ||
         (typeof error.response?.data === "object"
           ? Object.values(error.response.data).flat().join(", ")
-          : "Failed to create warehouse");
+          : "Failed to save warehouse");
       toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <section className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-gold" size={32} />
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen bg-background">
@@ -138,7 +216,7 @@ export default function CreateWarehouse() {
           >
             <ArrowLeft size={20} />
           </Link>
-          <HeadingText>Create Warehouse</HeadingText>
+          <HeadingText>{isEdit ? 'Edit Warehouse' : 'Create Warehouse'}</HeadingText>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -174,7 +252,8 @@ export default function CreateWarehouse() {
                   }
                   className="w-full border rounded-lg px-4 py-2"
                 >
-                  {WAREHOUSE_TYPES.map((t) => (
+                  <option value="">Select type...</option>
+                  {warehouseTypes.map((t) => (
                     <option key={t.value} value={t.value}>
                       {t.label}
                     </option>
@@ -292,20 +371,39 @@ export default function CreateWarehouse() {
           <div className="bg-white rounded-lg p-6">
             <h3 className="font-semibold mb-4">Security Features</h3>
             <div className="flex flex-wrap gap-2">
-              {SECURITY_OPTIONS.map((feat) => (
+              {securityOptions.map((feat) => (
                 <button
-                  key={feat}
+                  key={feat.value}
                   type="button"
-                  onClick={() => toggleArrayItem("security_features", feat)}
+                  onClick={() => toggleArrayItem("security_features", feat.label)}
                   className={`px-3 py-1.5 rounded-full text-sm border transition ${
-                    formData.security_features.includes(feat)
+                    formData.security_features.includes(feat.label)
                       ? "bg-gold text-white border-gold"
                       : "bg-white text-gray-700 border-gray-300 hover:border-gold"
                   }`}
                 >
-                  {feat}
+                  {feat.label}
                 </button>
               ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <input
+                type="text"
+                value={newSecurityFeature}
+                onChange={(e) => setNewSecurityFeature(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); addCustomOption("security_feature", newSecurityFeature, setNewSecurityFeature); }
+                }}
+                className="flex-1 border rounded-lg px-3 py-1.5 text-sm"
+                placeholder="Add custom security feature..."
+              />
+              <button
+                type="button"
+                onClick={() => addCustomOption("security_feature", newSecurityFeature, setNewSecurityFeature)}
+                className="px-3 py-1.5 bg-gray-100 rounded-lg text-sm hover:bg-gray-200 flex items-center gap-1"
+              >
+                <Plus size={14} /> Add
+              </button>
             </div>
           </div>
 
@@ -313,20 +411,39 @@ export default function CreateWarehouse() {
           <div className="bg-white rounded-lg p-6">
             <h3 className="font-semibold mb-4">Certifications</h3>
             <div className="flex flex-wrap gap-2">
-              {CERTIFICATION_OPTIONS.map((cert) => (
+              {certificationOptions.map((cert) => (
                 <button
-                  key={cert}
+                  key={cert.value}
                   type="button"
-                  onClick={() => toggleArrayItem("certifications", cert)}
+                  onClick={() => toggleArrayItem("certifications", cert.label)}
                   className={`px-3 py-1.5 rounded-full text-sm border transition ${
-                    formData.certifications.includes(cert)
+                    formData.certifications.includes(cert.label)
                       ? "bg-gold text-white border-gold"
                       : "bg-white text-gray-700 border-gray-300 hover:border-gold"
                   }`}
                 >
-                  {cert}
+                  {cert.label}
                 </button>
               ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <input
+                type="text"
+                value={newCertification}
+                onChange={(e) => setNewCertification(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); addCustomOption("certification", newCertification, setNewCertification); }
+                }}
+                className="flex-1 border rounded-lg px-3 py-1.5 text-sm"
+                placeholder="Add custom certification..."
+              />
+              <button
+                type="button"
+                onClick={() => addCustomOption("certification", newCertification, setNewCertification)}
+                className="px-3 py-1.5 bg-gray-100 rounded-lg text-sm hover:bg-gray-200 flex items-center gap-1"
+              >
+                <Plus size={14} /> Add
+              </button>
             </div>
           </div>
 
@@ -393,16 +510,16 @@ export default function CreateWarehouse() {
                   type="submit"
                   disabled={loading}
                   className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-gold/90 disabled:bg-gray-300 flex items-center gap-2"
-                >
+                >         
                   {loading ? (
                     <>
                       <Loader2 className="animate-spin" size={20} />
-                      Creating...
+                      {isEdit ? 'Saving...' : 'Creating...'}
                     </>
                   ) : (
                     <>
-                      <Plus size={20} />
-                      Create Warehouse
+                      {isEdit ? <Save size={20} /> : <Plus size={20} />}
+                      {isEdit ? 'Save Changes' : 'Create Warehouse'}
                     </>
                   )}
                 </button>
