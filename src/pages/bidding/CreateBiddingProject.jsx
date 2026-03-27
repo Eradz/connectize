@@ -474,7 +474,7 @@ export default function CreateBiddingProject() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Budget
+                  Min Budget <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <Input
                   type="number"
@@ -487,7 +487,7 @@ export default function CreateBiddingProject() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Budget
+                  Max Budget <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <Input
                   type="number"
@@ -515,7 +515,7 @@ export default function CreateBiddingProject() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Expected Award Date
+                  Expected Award Date <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <Input
                   type="date"

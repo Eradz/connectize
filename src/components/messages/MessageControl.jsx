@@ -128,7 +128,7 @@ export default function MessageControl() {
           }-${new Date().getTime()}.webm`
         );
       }
-      if (validImages) {
+      if (validImages && validImages.length > 0) {
         if (message.trim().length < 1)
           formData.append("content", "Sent with attachment");
         validImages.forEach((image) => {
