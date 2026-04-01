@@ -116,7 +116,28 @@ function DiscoverPosts({
         </LightParagraph>
       ) : finalArray?.length < 1 ? (
         <LightParagraph>
-          {isSearch ? "No post found in search" : ""}
+          {isSearch ? "No post found in search" : 
+        <div className="flex flex-col items-center justify-center py-16 px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="w-16 h-16 mb-4 flex items-center justify-center">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="8" y="16" width="48" height="36" rx="4" stroke="#D1D5DB" strokeWidth="2" fill="none"/>
+                <circle cx="24" cy="28" r="4" fill="#D1D5DB"/>
+                <path d="M8 44L24 28L40 40L56 24" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Posts Yet</h3>
+            <p className="text-gray-600 text-center max-w-sm mb-6">
+              There are no posts to display. Start sharing your thoughts to get the conversation going!
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 rounded-lg font-medium text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: '#FFD700' }}
+            >
+              Refresh Feed
+            </button>
+          </div>
+        }
         </LightParagraph>
       ) : (
         <>
@@ -142,7 +163,7 @@ function DiscoverPosts({
           )}
           
           {/* End of posts message */}
-          {!hasNextPage && !isSearch && finalArray.length > 0 && (
+          {!hasNextPage && !isSearch && finalArray?.length > 0 && (
             <div className="text-center py-6">
               <LightParagraph className="text-gray-500">
                 You've reached the end! No more posts to load.
@@ -181,7 +202,7 @@ export const DiscoverPostItem = ({
     isFetched: commentsFetched,
   } = useGetPostComments(
     { postId: postItem.id },
-    {
+    { 
       // Start fetching in background when comments section is shown AND there are more comments
       enabled: showCommentSection && hasMoreComments,
       staleTime: 30000, // Cache for 30 seconds

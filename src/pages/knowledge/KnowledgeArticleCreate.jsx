@@ -1,16 +1,46 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { knowledgeArticleService } from '../../api-services/oilgas';
+import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 
 const KnowledgeArticleCreate = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ title: '', excerpt: '', content: '' });
+  const [form, setForm] = useState({ 
+    title: '', 
+    excerpt: '', 
+    content: '',
+    category: '',
+    status: 'Draft',
+    article_type: '',
+    tags: '',
+    featured_image: null
+  });
+  const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const response = await knowledgeCategoryService.getAll();
+        const categoriesData = response?.data?.results || response?.results || response?.data || [];
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   // Quill editor configuration with comprehensive toolbar
   const modules = useMemo(() => ({
@@ -44,8 +74,12 @@ const KnowledgeArticleCreate = () => {
   ];
 
   const onChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, files } = e.target;
+    if (type === 'file') {
+      setForm((prev) => ({ ...prev, [name]: files?.[0] || null }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const onContentChange = (value) => {
@@ -124,6 +158,95 @@ const KnowledgeArticleCreate = () => {
                 rows={3}
                 placeholder="short summary (optional)"
               />
+            </div>
+
+            {/* Category Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Category</label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white"
+                disabled={loadingCategories}
+              >
+                <option value="">Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              {loadingCategories && (
+                <p className="mt-1 text-xs text-gray-500">Loading categories...</p>
+              )}
+            </div>
+
+            {/* Status Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Status</label>
+              <select
+                name="status"
+                value={form.status}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white"
+              >
+                <option value="daft">Draft</option>
+                <option value="under_review">Under Review</option>
+                <option value="Published">Published</option>
+                <option value="Archived">Archived</option>
+              </select>
+            </div>
+
+            {/* Article Type Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Article Type</label>
+              <select
+                name="article_type"
+                value={form.article_type}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white"
+              >
+                <option value="">Select an article type</option>
+                <option value="News">News</option>
+                <option value="Insight">Insight</option>
+                <option value="Analysis">Analysis</option>
+                <option value="Tutorial">Tutorial</option>
+                <option value="Opinion">Opinion</option>
+              </select>
+            </div>
+
+            {/* Tags Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Tags (Optional)</label>
+              <input
+                type="text"
+                name="tags"
+                value={form.tags}
+                onChange={onChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="Enter tags separated by commas (e.g., oil, gas, energy)"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Separate multiple tags with commas for better discoverability
+              </p>
+            </div>
+
+            {/* Featured Image Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Featured Image</label>
+              <input
+                type="file"
+                name="featured_image"
+                onChange={onChange}
+                accept="image/*"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              />
+              {form.featured_image && (
+                <p className="mt-1 text-xs text-gray-600">
+                  Selected: {form.featured_image.name}
+                </p>
+              )}
             </div>
             
             <div>
