@@ -9,6 +9,7 @@ export const meta = () =>
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/userContext';
 import { 
   Plus, 
   Search, 
@@ -23,18 +24,21 @@ import {
   BookOpen,
   TrendingUp,
   Calendar,
-  ChevronDown
+  ChevronDown,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 
 const KnowledgeArticles = () => {
+  const { user: currentUser } = useAuth();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [categories, setCategories] = useState([]);
+  const [deletingId, setDeletingId] = useState(null);
   useEffect(() => {
     loadArticles();
   }, []);
@@ -160,6 +164,24 @@ const KnowledgeArticles = () => {
       if (error.name !== 'AbortError') {
         console.error('Error sharing article:', error);
         toast.error('Failed to share article');
+      }
+    }
+  };
+
+  const handleDelete = async (articleSlug, articleTitle) => {
+    if (window.confirm(`Are you sure you want to delete "${articleTitle}"? This action cannot be undone.`)) {
+      setDeletingId(articleSlug);
+      try {
+        await knowledgeArticleService.delete(articleSlug);
+        setArticles(prevArticles => 
+          prevArticles.filter(article => article.slug !== articleSlug)
+        );
+        toast.success('Article deleted successfully');
+      } catch (error) {
+        console.error('Error deleting article:', error);
+        toast.error('Failed to delete article');
+      } finally {
+        setDeletingId(null);
       }
     }
   };
@@ -325,15 +347,39 @@ const KnowledgeArticles = () => {
             {filteredArticles.map((article) => (
               <div key={article.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div className="p-6">
+                  {/* Header with status and action buttons */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`inline-flex capitalize items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(article.status)}`}>
-                      {article.status}
-                    </span>
-                    
-                    {article.is_featured && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Featured
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex capitalize items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(article.status)}`}>
+                        {article.status}
                       </span>
+                      
+                      {article.is_featured && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Show edit/delete buttons only if current user is the author */}
+                    {currentUser?.id === article.author?.id && (
+                      <div className="flex items-center gap-1">
+                        <Link
+                          to={`/knowledge/articles/${article.slug}/edit`}
+                          className="p-1.5 hover:bg-blue-50 text-blue-600 rounded transition-colors"
+                          title="Edit article"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(article.slug, article.title)}
+                          disabled={deletingId === article.slug}
+                          className="p-1.5 hover:bg-red-50 text-red-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Delete article"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
 
@@ -358,7 +404,7 @@ const KnowledgeArticles = () => {
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                    <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-4">
                       <button
                         onClick={() => handleLike(article.slug, article.likes || 0, article.is_liked)}
                         className={`flex items-center space-x-1 transition-colors ${
@@ -550,10 +596,32 @@ const KnowledgeArticles = () => {
           ) : (
             filteredArticles.map((article) => (
               <div key={article.id} className="bg-white rounded-xl p-4 border border-gray-200">
-                <div className="flex items-center mb-3">
+                {/* Header with status and action buttons */}
+                <div className="flex items-center justify-between mb-3">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
                     Public
                   </span>
+                  
+                  {/* Show edit/delete buttons only if current user is the author */}
+                  {currentUser?.id === article.author?.id && (
+                    <div className="flex items-center gap-1">
+                      <Link
+                        to={`/knowledge/articles/${article.slug}/edit`}
+                        className="p-1.5 hover:bg-blue-50 text-blue-600 rounded transition-colors"
+                        title="Edit article"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(article.slug, article.title)}
+                        disabled={deletingId === article.slug}
+                        className="p-1.5 hover:bg-red-50 text-red-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete article"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <h3 className="text-base font-semibold text-gray-900 mb-2">
@@ -603,9 +671,9 @@ const KnowledgeArticles = () => {
                   
                   <Link
                     to={`/knowledge/articles/${article.slug}`}
-                    className="px-4 py-2 bg-[#F1C644] text-gray-900 text-xs font-medium rounded-lg"
+                    className="px-3 py-1.5 bg-[#F1C644] text-gray-900 text-xs font-medium rounded"
                   >
-                    Read More
+                    Read
                   </Link>
                 </div>
               </div>

@@ -154,6 +154,7 @@ const KnowledgeCategoryDetail = lazy(() => import("./pages/knowledge/KnowledgeCa
 const KnowledgeTagDetail = lazy(() => import("./pages/knowledge/KnowledgeTagDetail"));
 const KnowledgeSearch = lazy(() => import("./pages/knowledge/KnowledgeSearch"));
 const KnowledgeArticleCreate = lazy(() => import("./pages/knowledge/KnowledgeArticleCreate"));
+const KnowledgeArticleEdit = lazy(() => import("./pages/knowledge/KnowledgeArticleEdit"));
 const KnowledgeForumCreate = lazy(() => import("./pages/knowledge/KnowledgeForumCreate"));
 const KnowledgeForumDetail = lazy(() => import("./pages/knowledge/KnowledgeForumDetail"));
 const KnowledgeTopicCreate = lazy(() => import("./pages/knowledge/KnowledgeTopicCreate"));
@@ -304,6 +305,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.knowledgeArticles)} element={<KnowledgeArticles />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeArticleDetail)} element={<KnowledgeArticleDetail />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeArticleCreate)} element={<KnowledgeArticleCreate />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeArticleEdit)} element={<KnowledgeArticleEdit />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForums)} element={<KnowledgeForums />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumCreate)} element={<KnowledgeForumCreate />} />
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
