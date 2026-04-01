@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsInventoryService } from '../../api-services/oilgas';
+import { inventoryWarehouseService } from '../../api-services/inventory';
 import { toast } from 'sonner';
 
 const LogisticsInventoryForm = () => {
@@ -16,6 +17,7 @@ const LogisticsInventoryForm = () => {
   
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [warehouses, setWarehouses] = useState([]);
   const [specifications, setSpecifications] = useState([{ key: '', value: '' }]);
   const [formData, setFormData] = useState({
     name: '',
@@ -98,7 +100,17 @@ const LogisticsInventoryForm = () => {
     if (isEdit) {
       loadInventoryItem();
     }
+    loadWarehouses();
   }, [id, isEdit]);
+
+  const loadWarehouses = async () => {
+    try {
+      const response = await inventoryWarehouseService.getAll();
+      setWarehouses(response.results || response || []);
+    } catch (error) {
+      console.error('Error loading warehouses:', error);
+    }
+  };
 
   const loadInventoryItem = async () => {
     try {
@@ -445,32 +457,25 @@ const LogisticsInventoryForm = () => {
                 </label>
                 <div className="relative">
                   <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
+                  <select
                     name="warehouse"
                     value={formData.warehouse}
                     onChange={handleInputChange}
-                    placeholder="e.g., Houston Main"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
-                  />
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent appearance-none bg-white"
+                  >
+                    <option value="">Select a warehouse</option>
+                    {warehouses.map(wh => (
+                      <option key={wh.id} value={wh.name}>{wh.name} — {wh.city}</option>
+                    ))}
+                  </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location/Bay
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Bay 3-A"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(webRoutes.inventoryWarehouseCreate)}
+                  className="mt-1 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Create new warehouse
+                </button>
               </div>
 
               <div>

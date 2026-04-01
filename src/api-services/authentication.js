@@ -1,5 +1,5 @@
 import { makeApiRequest, REGISTER_EMAIL_KEY, clearTokenCache } from "../lib/helpers";
-import { setSession } from "../lib/session";
+import { removeSession, setSession } from "../lib/session";
 import { queryClient } from "../lib/utils";
 
 export const authenticationService = async ({
@@ -10,6 +10,15 @@ export const authenticationService = async ({
   resetForm,
 }) => {
   try {
+    if (type === "login") {
+      // Immediately invalidate any in-flight refresh requests and clear
+      // stale session data BEFORE the login API call.  This prevents the
+      // UserProvider's background refreshToken() from racing with the new
+      // login and accidentally wiping the fresh tokens.
+      clearTokenCache();
+      removeSession();
+    }
+
     const response = await makeApiRequest({
       url: `api/auth/${url}/`,
       method,

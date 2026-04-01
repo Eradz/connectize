@@ -63,6 +63,9 @@ let isRefreshing = false;
 let refreshPromise = null;
 let accessToken = null;
 let accessTokenExpiry = null;
+// Session version counter — incremented on login so stale refresh promises
+// that resolve after a new login don't accidentally wipe the fresh session.
+let sessionVersion = 0;
 
 let retries = 0;
 
@@ -72,6 +75,7 @@ export function clearTokenCache() {
   accessTokenExpiry = null;
   isRefreshing = false;
   refreshPromise = null;
+  sessionVersion++;
 }
 
 export async function refreshToken() {
@@ -97,6 +101,9 @@ export async function refreshToken() {
   }
 
   isRefreshing = true;
+  // Capture the session version so we can detect if a new login happened
+  // while this refresh request was in-flight.
+  const versionAtStart = sessionVersion;
 
   try {
     refreshPromise = (async () => {
@@ -104,23 +111,26 @@ export async function refreshToken() {
         refresh: session.tokens.refresh,
       });
 
-      // Validate response
-      if (!data?.access || !data?.refresh) {
+      // Validate response - server returns new access token (refresh stays the same)
+      if (!data?.access) {
         throw new Error("Invalid refresh response format");
       }
 
       const newTokens = {
         access: data.access,
-        refresh: data.refresh,
+        refresh: data.refresh || session.tokens.refresh,
       };
 
-      setSession({
-        ...session,
-        tokens: newTokens,
-      });
+      // Only update session if no new login occurred while we were refreshing
+      if (versionAtStart === sessionVersion) {
+        setSession({
+          ...session,
+          tokens: newTokens,
+        });
 
-      accessToken = newTokens.access;
-      accessTokenExpiry = null; // No expiration - tokens are long-lived
+        accessToken = newTokens.access;
+        accessTokenExpiry = null; // No expiration - tokens are long-lived
+      }
 
       return "Bearer " + newTokens.access;
     })();
@@ -128,6 +138,12 @@ export async function refreshToken() {
     const authorizationHeader = await refreshPromise;
     return { Authorization: authorizationHeader };
   } catch (error) {
+    // A new login happened while this refresh was in-flight — the 401 is
+    // expected (old token was invalidated) so silently ignore it.
+    if (versionAtStart !== sessionVersion) {
+      return undefined;
+    }
+
     console.error("Token refresh failed:", error);
 
     // If refresh fails, clear session and redirect to login
@@ -143,8 +159,11 @@ export async function refreshToken() {
 
     return undefined;
   } finally {
-    isRefreshing = false;
-    refreshPromise = null;
+    // Only reset mutex if this is still the current refresh cycle
+    if (versionAtStart === sessionVersion) {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
   }
 }
 

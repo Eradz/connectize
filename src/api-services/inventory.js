@@ -7,6 +7,19 @@ export class InventoryWarehouseService extends CrudService {
   }
 }
 
+export class WarehouseOptionService extends CrudService {
+  constructor() {
+    super("api/v1/inventory/warehouse-options/");
+  }
+
+  async getByCategory(category) {
+    return makeApiRequest({
+      url: `${this.basePath}?category=${encodeURIComponent(category)}`,
+      method: "GET",
+    });
+  }
+}
+
 export class InventoryCategoryService extends CrudService {
   constructor() {
     super("api/v1/inventory/categories/");
@@ -77,6 +90,7 @@ export class InventoryReportService extends CrudService {
 }
 
 export const inventoryWarehouseService = new InventoryWarehouseService();
+export const warehouseOptionService = new WarehouseOptionService();
 export const inventoryCategoryService = new InventoryCategoryService();
 export const inventoryItemService = new InventoryItemService();
 export const inventoryTransactionService = new InventoryTransactionService();

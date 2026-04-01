@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
+import { inventoryWarehouseService } from '../../api-services/inventory';
 import { toast } from 'sonner';
 import { getSession } from '../../lib/session';
 import { WarningIcon } from '../../components/ui/ModernIcon';
@@ -42,6 +43,7 @@ const LogisticsInventoryEnhanced = () => {
   const [summary, setSummary] = useState(null);
   const [categories, setCategories] = useState([]);
   const [lowStockAlerts, setLowStockAlerts] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
   const [fieldChoices, setFieldChoices] = useState({
     categories: [],
     statuses: [],
@@ -310,7 +312,17 @@ const LogisticsInventoryEnhanced = () => {
     // Load field choices and inventory data
     loadFieldChoices();
     loadInventoryData();
+    loadWarehouses();
   }, []);
+
+  const loadWarehouses = async () => {
+    try {
+      const response = await inventoryWarehouseService.getAll();
+      setWarehouses(response.results || response || []);
+    } catch (error) {
+      console.error('Error loading warehouses:', error);
+    }
+  };
 
   const generateMockInventoryData = () => {
     const mockItems = [
@@ -486,6 +498,13 @@ const LogisticsInventoryEnhanced = () => {
               </div>
               <div className="flex lg:items-center gap-3 w-full lg:w-max">
               <button
+                onClick={() => navigate(webRoutes.inventoryWarehouseCreate)}
+                className="w-[50%] lg:w-fit justify-center bg-white border border-gray-300 hover:bg-gray-50 px-0 lg:px-4 py-2 rounded-lg flex items-center text-sm"
+              >
+                <Building className="w-4 h-4 mr-2" />
+                Add Warehouse
+              </button>
+              <button
                 onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
                 className="w-[50%] lg:w-fit justify-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
               >
@@ -648,9 +667,14 @@ const LogisticsInventoryEnhanced = () => {
                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="all">All Warehouses</option>
-                        {[...new Set(inventory.map(item => item.warehouse).filter(Boolean))].map(warehouse => (
-                          <option key={warehouse} value={warehouse}>{warehouse}</option>
+                        {warehouses.map(wh => (
+                          <option key={wh.id} value={wh.name}>{wh.name} — {wh.city}</option>
                         ))}
+                        {[...new Set(inventory.map(item => item.warehouse).filter(Boolean))]
+                          .filter(w => !warehouses.some(wh => wh.name === w))
+                          .map(warehouse => (
+                            <option key={warehouse} value={warehouse}>{warehouse}</option>
+                          ))}
                       </select>
                     </div>
 

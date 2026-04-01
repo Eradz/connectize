@@ -238,6 +238,14 @@ export default function CreateBiddingProject() {
       toast.error("Please select a company");
       return;
     }
+    if (!form.description.trim()) {
+      toast.error("Project description is required");
+      return;
+    }
+    if (!form.submission_deadline) {
+      toast.error("Submission deadline is required");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -274,6 +282,10 @@ export default function CreateBiddingProject() {
       } else {
         const res = await biddingAPI.createProject(payload);
         const newProject = res?.data || res;
+        if (!newProject?.id) {
+          // Creation failed (400 validation, etc.) — makeApiRequest already showed a toast
+          return;
+        }
         toast.success("Project created as draft");
         navigate(webRoutes.biddingDetail.replace(":id", newProject.id));
       }
@@ -462,7 +474,7 @@ export default function CreateBiddingProject() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Budget
+                  Min Budget <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <Input
                   type="number"
@@ -475,7 +487,7 @@ export default function CreateBiddingProject() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Budget
+                  Max Budget <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <Input
                   type="number"
@@ -503,7 +515,7 @@ export default function CreateBiddingProject() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Expected Award Date
+                  Expected Award Date <span className="text-gray-400 font-normal">(Optional)</span>
                 </label>
                 <Input
                   type="date"
