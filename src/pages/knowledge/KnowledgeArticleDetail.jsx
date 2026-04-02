@@ -222,7 +222,7 @@ const KnowledgeArticleDetail = () => {
                   <div className="flex items-center space-x-1">
                     <Clock className="h-5 w-5" />
                     <span className="text-sm">
-                      {Math.ceil(article.content?.trim().split(/\s+/).length / 250) || 1} min read
+                      {Math.ceil(article.content?.trim().split(/\s+/).length / 200) || 1} min read
                     </span>
                   </div>
                 </div>
