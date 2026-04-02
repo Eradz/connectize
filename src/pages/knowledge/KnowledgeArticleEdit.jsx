@@ -4,7 +4,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
-import { ArrowLeft, ChevronRight, Loader } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Loader, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const KnowledgeArticleEdit = () => {
@@ -18,9 +18,10 @@ const KnowledgeArticleEdit = () => {
     category: '',
     status: 'draft',
     article_type: '',
-    tags: '',
+    tags: [],
     featured_image: null
   });
+  const [currentTag, setCurrentTag] = useState(''); 
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -108,6 +109,21 @@ const KnowledgeArticleEdit = () => {
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const addTag = () => {
+    if (currentTag && !form.tags.includes(currentTag)) {
+      setForm((prev) => ({ ...prev, tags: [...prev.tags, currentTag] }));
+      setCurrentTag('');
+    }
+  };
+
+  const onTagChange = (e) => {
+    setCurrentTag(e.target.value);
+  };
+
+  const removeTag = (tag) => {
+    setForm((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }));
   };
 
   const onContentChange = (value) => {
@@ -271,29 +287,56 @@ const KnowledgeArticleEdit = () => {
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white"
               >
                 <option value="">Select an article type</option>
-                <option value="News">News</option>
-                <option value="Insight">Insight</option>
-                <option value="Analysis">Analysis</option>
-                <option value="Tutorial">Tutorial</option>
-                <option value="Opinion">Opinion</option>
+                <option value="news">News</option>
+                <option value="insight">Insight</option>
+                <option value="analysis">Analysis</option>
+                <option value="tutorial">Tutorial</option>
+                <option value="opinion">Opinion</option>
               </select>
             </div>
 
             {/* Tags Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Tags (Optional)</label>
-              <input
-                type="text"
-                name="tags"
-                value={form.tags}
-                onChange={onChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="Enter tags separated by commas (e.g., oil, gas, energy)"
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Separate multiple tags with commas for better discoverability
-              </p>
-            </div>
+              <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">Tags (Optional)</label>
+                  <div className="flex space-x-2 mb-2">
+                    <input
+                      type="text"
+                      value={currentTag}
+                      onChange={(e) => setCurrentTag(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Add a required skill (e.g., Drilling Operations)"
+                    />
+                    <button
+                      type="button"
+                      onClick={addTag}
+                      className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {
+                    Array.isArray(form?.tags) && form.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {form?.tags?.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-2 hover:text-gold"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                    )
+                  }
+                </div>
 
             {/* Featured Image Field */}
             <div>
