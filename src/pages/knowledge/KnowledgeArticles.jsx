@@ -39,6 +39,8 @@ const KnowledgeArticles = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [categories, setCategories] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState(null);
   useEffect(() => {
     loadArticles();
   }, []);
@@ -168,22 +170,35 @@ const KnowledgeArticles = () => {
     }
   };
 
-  const handleDelete = async (articleSlug, articleTitle) => {
-    if (window.confirm(`Are you sure you want to delete "${articleTitle}"? This action cannot be undone.`)) {
-      setDeletingId(articleSlug);
-      try {
-        await knowledgeArticleService.delete(articleSlug);
-        setArticles(prevArticles => 
-          prevArticles.filter(article => article.slug !== articleSlug)
-        );
-        toast.success('Article deleted successfully');
-      } catch (error) {
-        console.error('Error deleting article:', error);
-        toast.error('Failed to delete article');
-      } finally {
-        setDeletingId(null);
-      }
+  // Open modal to confirm delete
+  const openDeleteModal = (article) => {
+    setArticleToDelete(article);
+    setShowDeleteModal(true);
+  };
+
+  // Actually delete after confirmation
+  const handleDelete = async () => {
+    if (!articleToDelete) return;
+    setDeletingId(articleToDelete.slug);
+    try {
+      await knowledgeArticleService.delete(articleToDelete.slug);
+      setArticles(prevArticles => 
+        prevArticles.filter(article => article.slug !== articleToDelete.slug)
+      );
+      toast.success('Article deleted successfully');
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      toast.error('Failed to delete article');
+    } finally {
+      setDeletingId(null);
+      setShowDeleteModal(false);
+      setArticleToDelete(null);
     }
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setArticleToDelete(null);
   };
 
   const filteredArticles = articles.filter(article => {
@@ -372,7 +387,7 @@ const KnowledgeArticles = () => {
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => handleDelete(article.slug, article.title)}
+                          onClick={() => openDeleteModal(article)}
                           disabled={deletingId === article.slug}
                           className="p-1.5 hover:bg-red-50 text-red-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Delete article"
@@ -387,8 +402,8 @@ const KnowledgeArticles = () => {
                     {article.title}
                   </h3>
                   
-                  <p className="text-gray-600 text-sm mb-4">
-                    {article.excerpt || article.content?.substring(0, 150) + '...'}
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {article.excerpt || article.content?.substring(0, 50) + '...'}
                   </p>
 
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
@@ -571,12 +586,6 @@ const KnowledgeArticles = () => {
                     {c.name}
                   </option>
                 ))}
-                {/*<option value="market_analysis">Market Analysis</option>
-                <option value="technology">Technology</option>
-                <option value="regulations">Regulations</option>
-                <option value="sustainability">Sustainability</option>
-                <option value="exploration">Exploration</option>
-                <option value="production">Production</option> */}
               </select>
               <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
@@ -613,13 +622,14 @@ const KnowledgeArticles = () => {
                         <Edit className="h-3 w-3" />
                       </Link>
                       <button
-                        onClick={() => handleDelete(article.slug, article.title)}
+                        onClick={() => openDeleteModal(article)}
                         disabled={deletingId === article.slug}
                         className="p-1.5 hover:bg-red-50 text-red-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Delete article"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
+  
                     </div>
                   )}
                 </div>
@@ -681,6 +691,43 @@ const KnowledgeArticles = () => {
           )}
         </div>
       </div>
+      {/* Floating Delete Confirmation Modal */}
+  {showDeleteModal && articleToDelete && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+      <div className="relative w-full max-w-sm">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-7 animate-fadeInScale" style={{minWidth: '340px'}}>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Article</h3>
+          <p className="text-gray-700 mb-4">Are you sure you want to delete <span className="font-bold">"{articleToDelete.title}"</span>? This action cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              onClick={closeDeleteModal}
+              className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm"
+              disabled={deletingId === articleToDelete.slug}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-sm disabled:opacity-50"
+              disabled={deletingId === articleToDelete.slug}
+            >
+              {deletingId === articleToDelete.slug ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Floating modal animation */}
+      <style>{`
+        @keyframes fadeInScale {
+          0% { opacity: 0; transform: scale(0.95) translate(-50%, -48%); }
+          100% { opacity: 1; transform: scale(1) translate(-50%, -50%); }
+        }
+        .animate-fadeInScale {
+          animation: fadeInScale 0.22s cubic-bezier(.4,0,.2,1);
+        }
+      `}</style>
+    </div>
+  )}
     </div>
   );
 };

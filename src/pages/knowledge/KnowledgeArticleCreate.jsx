@@ -91,7 +91,20 @@ const KnowledgeArticleCreate = () => {
     setSaving(true);
     setError(null);
     try {
-      const created = await knowledgeArticleService.create(form);
+      let payload = form;
+      // If there's a file, use FormData
+      if (form.featured_image instanceof File) {
+        const formData = new FormData();
+        Object.entries(form).forEach(([key, value]) => {
+          if (key === 'featured_image') {
+            if (value) formData.append('featured_image', value);
+          } else {
+            formData.append(key, value);
+          }
+        });
+        payload = formData;
+      }
+      const created = await knowledgeArticleService.create(payload);
       const article = created?.data || created;
       if (article?.slug) {
         navigate(webRoutes.knowledgeArticleDetail.replace(':slug', article.slug));
