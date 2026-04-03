@@ -268,7 +268,7 @@ const CompanyProfile = React.memo(() => {
             </Link>
 
             <Link
-              to={webRoutes.businessHub}
+              to={webRoutes.dashboard}
               className="bg-white border border-gray-300 hover:bg-gray-50 px-3 md:px-4 py-2.5 rounded-xl text-sm font-medium"
             >
               visit Business hub

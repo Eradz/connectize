@@ -656,7 +656,7 @@ export default function UserProfile() {
         </svg>
         Logistics
       </Link>
-      <Link to={webRoutes.businessHub} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm ">
+      <Link to={webRoutes.dashboard} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm ">
         visit Business hub
       </Link>
     </div>
