@@ -221,7 +221,7 @@ const LogisticsHubDashboard = () => {
         const costSavings = totalValue * 0.15; // Estimated 15% savings
         const activeRoutes = shipments.filter(s => ['in_transit', 'picked_up', 'preparing'].includes(s.status)).length;
         
-        const monthlyGrowth = 8.5; // This would come from analytics service
+        const monthlyGrowth = 0; // This would come from analytics service
   
     const newData = {
           shipments: {
@@ -241,7 +241,7 @@ const LogisticsHubDashboard = () => {
             onTimeDelivery: parseFloat(onTimeDelivery),
             costSavings,
             activeRoutes,
-            monthlyGrowth: 8.5, // This would come from analytics service
+            monthlyGrowth: 0, // This would come from analytics service
             totalValue
           }
     };
@@ -475,7 +475,7 @@ const LogisticsHubDashboard = () => {
               { key: 'shipments', label: 'Shipments', icon: Ship },
               { key: 'requests', label: 'Shipments Request', icon: FileText },
               { key: 'inventory', label: 'Inventory', icon: Package },
-              { key: 'tracking', label: 'Live Tracking', icon: MapPin }
+              // { key: 'tracking', label: 'Live Tracking', icon: MapPin }
             ].map((tab) => (
               <button
                 key={tab.key}
