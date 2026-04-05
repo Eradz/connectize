@@ -27,7 +27,7 @@ export default function NavbarDropdown() {
         <section className="flex flex-col divide-y p-1">
           {currentUser?.companies?.length < 1 && (
             <DropDownOption
-              to="/create-company"
+              to="/company/create"
               text="Create a Company"
               IconName={CompanyIcon}
             />
