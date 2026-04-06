@@ -20,6 +20,7 @@ import { CompanyUserType } from "../../lib/helpers/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getAllCompanies } from "../../api-services/companies";
 import { useMemo } from "react";
+import { webRoutes } from "../../lib/webRoutes";
 
 export const meta = () =>
   createSEO({
@@ -136,7 +137,7 @@ export default function CompaniesPage() {
       <section className="space-y-6 px-2 md:px-0 text-center py-10">
         <LightParagraph>No companies found.</LightParagraph>
         {currentUser && currentUser?.user_type === CompanyUserType && (
-          <Link to="/create-company">
+          <Link to={webRoutes.createCompany}>
             <PrimaryButton>Create Company</PrimaryButton>
           </Link>
         )}
@@ -156,7 +157,7 @@ export default function CompaniesPage() {
         {currentUser &&
           currentUser?.companies.length < 1 &&
           currentUser?.user_type === CompanyUserType && (
-            <Link to="/create-company">
+            <Link to={webRoutes.createCompany}>
               <Button className="!text-xs !rounded-full hover:!bg-gold transition-colors duration-300">
                 Create Company
               </Button>

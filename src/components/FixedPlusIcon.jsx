@@ -18,7 +18,7 @@ export default function FixedPlusIcon() {
   const menuItems = [
     ...(currentUser?.companies?.length < 1 
       ? [{
-          to: "/create-company",
+          to: webRoutes.createCompany,
           text: "Create a Company",
           IconName: CompanyIcon,
           color: "bg-purple-500"

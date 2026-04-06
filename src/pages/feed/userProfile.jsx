@@ -270,7 +270,7 @@ export default function UserProfile() {
         {currentUser &&
           currentUser?.companies?.length < 1 &&
           currentUser?.user_type === CompanyUserType && (
-            <CreateNewLink text="Create company" url="/create-company" />
+            <CreateNewLink text="Create company" url={webRoutes.createCompany} />
           )}
 
         <section className="flex max-lg:flex-col gap-y-4 gap-x-3 w-full">
