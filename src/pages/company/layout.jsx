@@ -52,7 +52,7 @@ const CompanyLayout = () => {
   });
 
   return (
-    <section className="h-screen overflow-y-auto w-full max-w-screen-md flex justify-center bg-white rounded-md p-6">
+    <section className="h-screen overflow-y-auto w-full flex justify-center bg-white rounded-md p-6">
       {currentUser?.user_type === UserType ? (
         <Restricted fallback="creating a company" />
       ) : companies.length >= 1 ? (
