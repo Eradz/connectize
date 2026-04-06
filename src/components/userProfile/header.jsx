@@ -47,7 +47,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
 
   const isCurrentUserById = Number(currentUser?.id) === Number(paramsId);
   const isCurrentUserByCompany =
-    currentCompany?.[0]?.company_name?.toLowerCase() ===
+    currentCompany?.[0]?.slug?.toLowerCase() ===
     paramsCompany?.toLowerCase();
 
   const isCurrentUser = isCurrentUserByCompany || isCurrentUserById;
