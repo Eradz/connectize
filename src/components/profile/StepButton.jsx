@@ -18,13 +18,13 @@ function StepButton({
       disabled={disabled}
       onClick={async () => {
         if (stepDirection === "back") {
-           const back = nextStep.includes("company") ? `/${nextStep}` : `/${webRoutes.profileUpdate.slice(1)}/${nextStep}`; 
+           const back = nextStep.includes("company") ? `${nextStep}` : `/${webRoutes.profileUpdate.slice(1)}/${nextStep}`; 
           navigate(back);
           return;
         }
 
         const canMove = await doStepChange();
-        const next = nextStep.includes("company") ? `/${nextStep}` : `/${webRoutes.profileUpdate.slice(1)}/${nextStep}`; 
+        const next = nextStep.includes("company") ? `${nextStep}` : `/${webRoutes.profileUpdate.slice(1)}/${nextStep}`; 
         if (canMove) navigate(next);
       }}
       className={clsx(
