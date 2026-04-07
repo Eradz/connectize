@@ -237,6 +237,8 @@ export const CompaniesArray = ({
   // });
 
   //
+  console.log("companyArray:", companyArray);
+  console.log("currentUser:", currentUser);
   return searchLoading ? (
     <PageLoading hasLogo={false} text="Getting companies" />
   ) : companyArray?.length < 1 ? (
@@ -319,18 +321,19 @@ export const CompaniesArray = ({
                   }))}
                 />
               )}
-              {currentUser?.email !== company?.profile ? (
-                <ConnectButton
+              {currentUser?.email === company?.profile ? (
+                <Link to={`/${company?.slug}`}>
+                    <PrimaryButton>View Profile</PrimaryButton>
+                  </Link>
+              ) : (
+                  <ConnectButton
                   id={Number(company?.id)}
                   slug={company?.slug}
                   type="company"
                   data={company}
                 />
-              ) : (
-                <Link to={`/${company?.slug}`}>
-                  <PrimaryButton>View Profile</PrimaryButton>
-                </Link>
-              )}
+                ) 
+              }
             </div>
           </motion.div>
         );

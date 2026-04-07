@@ -18,7 +18,7 @@ export default function ConnectButton({
   const currentCompany = data ? data : fetchedCompany?.[0];
 
   const [hasConnected, setHasConnected] = useState(
-    () => !currentCompany?.isFollowedByUser || false
+    () => currentUser?.company_followings?.includes(id) || false
   );
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function ConnectButton({
 
       setHasConnected(!!isInFollowingList);
     } else {
-      setHasConnected(!!currentCompany?.isFollowedByUser);
+      setHasConnected(currentUser?.company_followings?.includes(id) || false);
       // const followingList = currentCompany?.followers
       //   ?.flatMap((follower) => [
       //     follower.company_follower.id,
@@ -61,7 +61,7 @@ export default function ConnectButton({
 
   return (
     <PrimaryButton onClick={handleConnect} disabled={isLoading}>
-      {hasConnected ? "Unlink" : "Connect"}
+      {hasConnected ? "Unfollow" : "Follow"}
     </PrimaryButton>
   );
 }
