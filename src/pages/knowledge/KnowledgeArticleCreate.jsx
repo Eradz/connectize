@@ -6,17 +6,26 @@ import { knowledgeArticleService, knowledgeCategoryService } from '../../api-ser
 import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 
+const LOCAL_DRAFT_KEY = 'knowledge_article_draft';
 const KnowledgeArticleCreate = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ 
-    title: '', 
-    excerpt: '', 
-    content: '',
-    category: '',
-    status: 'draft',
-    article_type: '',
-    tags: '',
-    featured_image: null
+  const [form, setForm] = useState(() => {
+    // Try to restore draft from localStorage
+    const draft = localStorage.getItem(LOCAL_DRAFT_KEY);
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        // Don't restore featured_image file object
+        return { ...parsed, featured_image: null };
+      } catch {
+        return {
+          title: '', excerpt: '', content: '', category: '', status: 'draft', article_type: '', tags: '', featured_image: null
+        };
+      }
+    }
+    return {
+      title: '', excerpt: '', content: '', category: '', status: 'draft', article_type: '', tags: '', featured_image: null
+    };
   });
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -73,17 +82,35 @@ const KnowledgeArticleCreate = () => {
     'link', 'image', 'video'
   ];
 
+  // Save draft to localStorage on every change (except file)
+  const saveDraft = (nextForm) => {
+    const { featured_image, ...rest } = nextForm;
+    localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(rest));
+  };
+
   const onChange = (e) => {
     const { name, value, type, files } = e.target;
     if (type === 'file') {
-      setForm((prev) => ({ ...prev, [name]: files?.[0] || null }));
+      setForm((prev) => {
+        const next = { ...prev, [name]: files?.[0] || null };
+        saveDraft(next);
+        return next;
+      });
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setForm((prev) => {
+        const next = { ...prev, [name]: value };
+        saveDraft(next);
+        return next;
+      });
     }
   };
 
   const onContentChange = (value) => {
-    setForm((prev) => ({ ...prev, content: value }));
+    setForm((prev) => {
+      const next = { ...prev, content: value };
+      saveDraft(next);
+      return next;
+    });
   };
 
   const onSubmit = async (e) => {
@@ -108,8 +135,6 @@ const KnowledgeArticleCreate = () => {
       const article = created?.data || created;
       if (article?.slug) {
         navigate(webRoutes.knowledgeArticleDetail.replace(':slug', article.slug));
-      } else {
-        navigate(webRoutes.knowledgeArticles);
       }
     } catch (err) {
       setError('Failed to create article. Please check required fields or login.');
