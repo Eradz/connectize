@@ -11,6 +11,7 @@ import { getServiceCategories, createServiceCategory } from "../../api-services/
 import HeadingText from "../../components/HeadingText";
 import SearchableSelect from "../../components/SearchableSelect";
 import { toast } from "sonner";
+import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
 
 export default function CreateListing() {
@@ -24,7 +25,8 @@ export default function CreateListing() {
   const [productCategories, setProductCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  
+  const {user} = useAuth()
+  console.log("user", user)
   const initialType = searchParams.get("type");
   const [formData, setFormData] = useState({
     listing_type: ["product", "service"].includes(initialType) ? initialType : "product",
@@ -45,6 +47,7 @@ export default function CreateListing() {
     shipping_from_location: "",
     status: "draft",
     tags: [],
+    seller_company: user?.companies[0] || ''
   });
 
   const [tagInput, setTagInput] = useState("");
@@ -202,6 +205,7 @@ export default function CreateListing() {
         // Create manual listing
         const listingData = {
           ...formData,
+          seller_company: user.companies[0],
           price: parseFloat(formData.price),
           compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
           quantity_available: parseInt(formData.quantity_available),
