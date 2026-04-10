@@ -65,8 +65,6 @@ const KnowledgeForumCreate = () => {
       const forum = created?.data || created;
       if (forum?.slug) {
         navigate(webRoutes.knowledgeForumDetail.replace(':slug', forum.slug));
-      } else {
-        navigate(webRoutes.knowledgeForums);
       }
     } catch (err) {
       setError('Failed to create forum. Please check required fields or login.');
