@@ -134,6 +134,7 @@ const KnowledgeArticleCreate = () => {
       const created = await knowledgeArticleService.create(payload);
       const article = created?.data || created;
       if (article?.slug) {
+        localStorage.removeItem(LOCAL_DRAFT_KEY)
         navigate(webRoutes.knowledgeArticleDetail.replace(':slug', article.slug));
       }
     } catch (err) {
