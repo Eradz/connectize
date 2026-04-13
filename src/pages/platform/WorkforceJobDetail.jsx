@@ -433,13 +433,17 @@ export default function WorkforceJobDetail() {
               formData.append("cover_letter", coverLetter);
               if (resume) formData.append("resume", resume);
               
-              await workforceJobService.applyToJob(id, formData);
-              setFullName("");
-              setEmail("");
-              setCoverLetter("");
-              setResume(null);
-              setShowApplicationModal(false);
-              toast.success("Application submitted successfully!");
+              const response = await workforceJobService.applyToJob(id, formData);
+
+              if(response !== null){
+                setFullName("");
+                setEmail("");
+                setCoverLetter("");
+                setResume(null);
+                setShowApplicationModal(false);
+                toast.success("Application submitted successfully!");
+                navigate(webRoutes.workforceJobDetail.replace(":id", id));
+              }
             } catch (e) {
               toast.error("Failed to submit application");
             } finally {

@@ -28,7 +28,7 @@ const LogisticsInventoryForm = () => {
     reorder_point: 0,
     maximum_stock: 0,
     minimum_stock: 0,
-    unit: 'pieces',
+    unit: 'pcs',
     unit_cost: 0,
     status: 'available',
     condition: 'new',
@@ -185,18 +185,23 @@ const LogisticsInventoryForm = () => {
       };
 
       if (isEdit) {
-        await logisticsInventoryService.update(id, payload);
+        const response = await logisticsInventoryService.update(id, payload);
+        if (response?.error) throw response;
         toast.success('Inventory item updated successfully');
       } else {
-        await logisticsInventoryService.create(payload);
+        const response = await logisticsInventoryService.create(payload);
+        console.log(response)
+        if (response?.error) throw response;
         toast.success('Inventory item created successfully');
       }
-
-      navigate(webRoutes.logisticsInventory);
     } catch (error) {
-      toast.error(isEdit ? 'Failed to update item' : 'Failed to create item');
-      console.error('Error saving item:', error);
-    } finally {
+        if (Object.keys(error).length > 0) {
+          Object.values(error).forEach(message => toast.error(message));
+        } else {
+          toast.error('Failed to load inventory item');
+        }
+        console.error('Error loading item:', error);
+        }finally {
       setSaving(false);
     }
   };
