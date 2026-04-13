@@ -1,3 +1,4 @@
+
 import { createSEO } from "../../components/SEO";
 
 export const meta = () =>
@@ -41,23 +42,56 @@ const KnowledgeArticles = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [articleToDelete, setArticleToDelete] = useState(null);
+  // Pagination state
+  const [nextPageUrl, setNextPageUrl] = useState(null);
+  const [totalCount, setTotalCount] = useState(0);
   useEffect(() => {
     loadArticles();
   }, []);
-
+  // Load more articles (pagination)
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadMoreArticles = async () => {
+    if (!nextPageUrl) return;
+    setLoadingMore(true);
+    try {
+      // Use knowledgeArticleService.getAll with page param if possible, else fetch nextPageUrl directly
+      // We'll fetch nextPageUrl directly for simplicity
+      const response = await fetch(nextPageUrl, {
+        credentials: 'include',
+      });
+      const data = await response.json();
+      const newArticles = (data?.results || data?.data || data || []).map(article => ({
+        ...article,
+        is_liked: article.is_liked_by_user || false
+      }));
+      setArticles(prev => [...prev, ...newArticles]);
+      setNextPageUrl(data?.next || null);
+      setTotalCount(data?.count || 0);
+    } catch (error) {
+      toast.error('Failed to load more articles');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
   const loadArticles = async () => {
     try {
       setLoading(true);
-  const [response, categoriesRes] = await Promise.all([knowledgeArticleService.getAll(), knowledgeCategoryService.getAll(),]);
-      
+      const [response, categoriesRes] = await Promise.all([
+        knowledgeArticleService.getAll(),
+        knowledgeCategoryService.getAll(),
+      ]);
+
+      setTotalCount(response?.count || 0);
       // Map is_liked_by_user to is_liked for consistency
       const articlesData = (response?.results || response?.data || response || []).map(article => ({
         ...article,
         is_liked: article.is_liked_by_user || false
       }));
-      
-  setArticles(articlesData);
-  setCategories(categoriesRes?.results || categoriesRes?.data || categoriesRes || []);
+
+      setArticles(articlesData);
+      setCategories(categoriesRes?.results || categoriesRes?.data || categoriesRes || []);
+      setNextPageUrl(response?.next || null);
+      setTotalCount(response?.count || articlesData.length);
     } catch (error) {
       console.error('Error loading articles:', error);
     } finally {
@@ -265,7 +299,7 @@ const KnowledgeArticles = () => {
                 <div className="p-2 bg-[#FFF1C6] rounded-lg mb-3">
                   <BookOpen className="h-6 w-6 text-gray-700" />
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{articles.length}</p>
+                <p className="text-3xl font-bold text-gray-900 mb-1">{totalCount}</p>
                 <p className="text-sm font-medium text-gray-600">Total Articles</p>
               </div>
             </div>
@@ -362,21 +396,19 @@ const KnowledgeArticles = () => {
             {filteredArticles.map((article) => (
               <div key={article.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div className="p-6">
+                  {/* ...existing code for article card... */}
                   {/* Header with status and action buttons */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className={`inline-flex capitalize items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(article.status)}`}>
                         {article.status}
                       </span>
-                      
                       {article.is_featured && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           Featured
                         </span>
                       )}
                     </div>
-                    
-                    {/* Show edit/delete buttons only if current user is the author */}
                     {currentUser?.id === article.author?.id && (
                       <div className="flex items-center gap-1">
                         <Link
@@ -397,29 +429,24 @@ const KnowledgeArticles = () => {
                       </div>
                     )}
                   </div>
-
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {article.title}
                   </h3>
-                  
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                     {article.excerpt || article.content?.substring(0, 50) + '...'}
                   </p>
-
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                     <div className="flex items-center">
                       <User className="h-4 w-4 mr-1" />
                       <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
                     </div>
-                    
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
                       <span>{new Date(article.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-
                   <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4">
                       <button
                         onClick={() => handleLike(article.slug, article.likes || 0, article.is_liked)}
                         className={`flex items-center space-x-1 transition-colors ${
@@ -431,7 +458,6 @@ const KnowledgeArticles = () => {
                         <Heart className={`h-4 w-4 ${article.is_liked ? 'fill-current' : ''}`} />
                         <span className="text-sm">{article.likes || 0}</span>
                       </button>
-                      
                       <button
                         onClick={() => handleShare(article)}
                         className="flex items-center space-x-1 text-gray-500 hover:text-blue-500 transition-colors"
@@ -439,13 +465,11 @@ const KnowledgeArticles = () => {
                         <Share2 className="h-4 w-4" />
                         <span className="text-sm">{article.shares || 0}</span>
                       </button>
-                      
                       <div className="flex items-center space-x-1 text-gray-500">
                         <Eye className="h-4 w-4" />
                         <span className="text-sm">{article.views || 0}</span>
                       </div>
                     </div>
-                    
                     <Link
                       to={`/knowledge/articles/${article.slug}`}
                       className="px-4 py-2 bg-[#F1C644] hover:bg-[#E0B533] text-gray-900 text-sm font-medium rounded-lg transition-colors"
@@ -457,6 +481,18 @@ const KnowledgeArticles = () => {
               </div>
             ))}
           </div>
+          {/* Load More Button (desktop) */}
+          {nextPageUrl && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={loadMoreArticles}
+                disabled={loadingMore}
+                className="px-6 py-2 bg-custom_yellow text-white rounded-lg font-semibold hover:bg-gold disabled:opacity-60"
+              >
+                {loadingMore ? 'Loading...' : 'Load More Articles'}
+              </button>
+            </div>
+          )}
 
           {filteredArticles.length === 0 && (
             <div className="text-center py-12">
@@ -603,91 +639,98 @@ const KnowledgeArticles = () => {
               </p>
             </div>
           ) : (
-            filteredArticles.map((article) => (
-              <div key={article.id} className="bg-white rounded-xl p-4 border border-gray-200">
-                {/* Header with status and action buttons */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
-                    Public
-                  </span>
-                  
-                  {/* Show edit/delete buttons only if current user is the author */}
-                  {currentUser?.id === article.author?.id && (
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to={`/knowledge/articles/${article.slug}/edit`}
-                        className="p-1.5 hover:bg-blue-50 text-blue-600 rounded transition-colors"
-                        title="Edit article"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Link>
+            <>
+              {filteredArticles.map((article) => (
+                <div key={article.id} className="bg-white rounded-xl p-4 border border-gray-200">
+                  {/* ...existing code for mobile article card... */}
+                  {/* Header with status and action buttons */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
+                      Public
+                    </span>
+                    {currentUser?.id === article.author?.id && (
+                      <div className="flex items-center gap-1">
+                        <Link
+                          to={`/knowledge/articles/${article.slug}/edit`}
+                          className="p-1.5 hover:bg-blue-50 text-blue-600 rounded transition-colors"
+                          title="Edit article"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Link>
+                        <button
+                          onClick={() => openDeleteModal(article)}
+                          disabled={deletingId === article.slug}
+                          className="p-1.5 hover:bg-red-50 text-red-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Delete article"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">
+                    {article.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    {article.excerpt || article.content?.substring(0, 100) + '...'}
+                  </p>
+                  <div className="flex flex-col gap-2 mb-4">
+                    <div className="flex items-center text-xs text-gray-500">
+                      <User className="h-4 w-4 mr-1.5" />
+                      <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Calendar className="h-4 w-4 mr-1.5" />
+                      <span>{new Date(article.created_at).toLocaleDateString('en-GB')}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
                       <button
-                        onClick={() => openDeleteModal(article)}
-                        disabled={deletingId === article.slug}
-                        className="p-1.5 hover:bg-red-50 text-red-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete article"
+                        onClick={() => handleLike(article.slug, article.likes || 0, article.is_liked)}
+                        className={`flex items-center gap-1 transition-colors ${
+                          article.is_liked 
+                            ? 'text-red-500' 
+                            : 'text-gray-500'
+                        }`}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Heart className={`h-4 w-4 ${article.is_liked ? 'fill-current' : ''}`} />
+                        <span>{article.likes || 0}</span>
                       </button>
-  
+                      <button
+                        onClick={() => handleShare(article)}
+                        className="flex items-center gap-1"
+                      >
+                        <Share2 className="h-4 w-4" />
+                        <span>{article.shares || 0}</span>
+                      </button>
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-4 w-4" />
+                        <span>{article.views || 0}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
-
-                <h3 className="text-base font-semibold text-gray-900 mb-2">
-                  {article.title}
-                </h3>
-                
-                <p className="text-sm text-gray-600 mb-4">
-                  {article.excerpt || article.content?.substring(0, 100) + '...'}
-                </p>
-
-                <div className="flex flex-col gap-2 mb-4">
-                  <div className="flex items-center text-xs text-gray-500">
-                    <User className="h-4 w-4 mr-1.5" />
-                    <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Calendar className="h-4 w-4 mr-1.5" />
-                    <span>{new Date(article.created_at).toLocaleDateString('en-GB')}</span>
+                    <Link
+                      to={`/knowledge/articles/${article.slug}`}
+                      className="px-3 py-1.5 bg-[#F1C644] text-gray-900 text-xs font-medium rounded"
+                    >
+                      Read
+                    </Link>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <button
-                      onClick={() => handleLike(article.slug, article.likes || 0, article.is_liked)}
-                      className={`flex items-center gap-1 transition-colors ${
-                        article.is_liked 
-                          ? 'text-red-500' 
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      <Heart className={`h-4 w-4 ${article.is_liked ? 'fill-current' : ''}`} />
-                      <span>{article.likes || 0}</span>
-                    </button>
-                    <button
-                      onClick={() => handleShare(article)}
-                      className="flex items-center gap-1"
-                    >
-                      <Share2 className="h-4 w-4" />
-                      <span>{article.shares || 0}</span>
-                    </button>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{article.views || 0}</span>
-                    </div>
-                  </div>
-                  
-                  <Link
-                    to={`/knowledge/articles/${article.slug}`}
-                    className="px-3 py-1.5 bg-[#F1C644] text-gray-900 text-xs font-medium rounded"
+              ))}
+              {/* Load More Button (mobile) */}
+              {nextPageUrl && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={loadMoreArticles}
+                    disabled={loadingMore}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
                   >
-                    Read
-                  </Link>
+                    {loadingMore ? 'Loading...' : 'Load More Articles'}
+                  </button>
                 </div>
-              </div>
-            ))
+              )}
+            </>
           )}
         </div>
       </div>
