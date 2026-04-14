@@ -245,17 +245,17 @@ const webRoutes = {
 
   // Oil & Gas Platform Routes
   // Deal Management
-  dealRooms: "/deals",
-  myParticipations: "/deals/my-participations",
-  dealRoomDetail: "/deals/:id",
-  dealRoomCreate: "/deals/create",
-  dealRoomEdit: "/deals/:id/edit",
-  dealRoomDocuments: "/deals/:id/documents",
-  dealRoomParticipants: "/deals/:id/participants",
-  dealRoomMilestones: "/deals/:id/milestones",
-  dealRoomActivities: "/deals/:id/activities",
-  dealRoomValuations: "/deals/:id/valuations",
-  dealRoomReports: "/deals/:id/reports",
+  dealRooms: "/deal-rooms",
+  myParticipations: "/deal-rooms/my-participations",
+  dealRoomDetail: "/deal-rooms/:id",
+  dealRoomCreate: "/deal-rooms/create",
+  dealRoomEdit: "/deal-rooms/:id/edit",
+  dealRoomDocuments: "/deal-rooms/:id/documents",
+  dealRoomParticipants: "/deal-rooms/:id/participants",
+  dealRoomMilestones: "/deal-rooms/:id/milestones",
+  dealRoomActivities: "/deal-rooms/:id/activities",
+  dealRoomValuations: "/deal-rooms/:id/valuations",
+  dealRoomReports: "/deal-rooms/:id/reports",
 
   // Bidding System
   bidding: "/bidding",
