@@ -1822,7 +1822,7 @@ export default function DealRoomDetail() {
                   ))}
                 </div>
               )}
-              {!userSearching && userResults.length === 0 && (
+              {(!userSearching && userResults.length === 0 && userSearch.length < 0) && (
                 <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
               )}
             </div>
