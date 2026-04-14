@@ -32,6 +32,7 @@ const WorkforceJobCreate = () => {
   const currentPath = location.pathname;
   const [formData, setFormData] = useState({
     title: '',
+    department: '',
     company_id: '',
     description: '',
     employment_type: 'full_time',
@@ -216,6 +217,7 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
     try {
       const jobData = {
         title: formData.title,
+        department: formData.department,
         description: formData.description,
         company: parseInt(formData.company_id),
         job_type: formData.employment_type,
@@ -229,14 +231,14 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
         benefits_list: formData.benefits_list,
         education_requirements_list: formData.education_requirements_list,
         application_deadline: formData.application_deadline || null,
-        status: 'active'
+        status: 'active', 
+        required_skills_list: formData.required_skills_list
       };
 
       const response = currentPath.includes("update") ? await workforceAPI.updateJob(updateId, jobData) : await workforceAPI.createJob(jobData);
       const jobId = response?.data?.id || response?.id;
-
-      toast.success('Job posted successfully!');
-      navigate(jobId ? webRoutes.workforceJobDetail.replace(':id', jobId) : webRoutes.workforceJobs);
+      response && ( toast.success('Job posted successfully!'),
+      navigate(jobId ? webRoutes.workforceJobDetail.replace(':id', jobId) : webRoutes.workforceJobs))
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to publish job';
       toast.error(msg);
@@ -252,7 +254,13 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
       setLoading(true);
       try {
         const response = await workforceAPI.getJob(updateId);
-        setFormData(response.data);
+        setFormData({ ...response.data, 
+          employment_type: response?.data?.job_type,
+          is_remote: !!response?.data?.remote_allowed,
+          requires_relocation: !!response?.data?.travel_required,
+          salary_min: response?.data?.salary_min ? parseFloat(response?.data?.salary_min) : null,
+          salary_max: response?.data?.salary_max ? parseFloat(response?.data?.salary_max) : null,
+        });
       } catch (err) {
         const msg = err.response?.data?.message || err.response?.data?.detail || 'Failed to fetch job details';
         toast.error(msg);

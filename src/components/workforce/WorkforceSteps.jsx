@@ -155,7 +155,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Skills & Qualifications</h3>
                 
                 <div className="space-y-6">
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Department *
                     </label>
@@ -170,7 +170,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
                         <option key={dept} value={dept}>{dept}</option>
                       ))}
                     </select>
-                  </div>
+                  </div> */}
   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -351,7 +351,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      benefits_list
+                      Benefits List
                     </label>
                     <div className="flex space-x-2 mb-2">
                       <input
@@ -396,7 +396,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
                     <input
                       type="date"
                       name="application_deadline"
-                      value={formData.application_deadline}
+                      value={formData.application_deadline?.split('T')[0]}
                       onChange={handleTextChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       min={new Date().toISOString().split('T')[0]}
