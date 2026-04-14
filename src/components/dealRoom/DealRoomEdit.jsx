@@ -60,17 +60,14 @@ export default function DealRoomEdit() {
   ];
 
   const dealTypes = [
-    { value: 'exploration_rights', label: 'Exploration Rights' },
-    { value: 'production_sharing', label: 'Production Sharing' },
-    { value: 'joint_venture', label: 'Joint Venture' },
-    { value: 'acquisition', label: 'Acquisition' },
-    { value: 'merger', label: 'Merger' },
-    { value: 'divestiture', label: 'Divestiture' },
-    { value: 'farm_in', label: 'Farm-in' },
-    { value: 'farm_out', label: 'Farm-out' },
-    { value: 'service_contract', label: 'Service Contract' },
-    { value: 'equipment_lease', label: 'Equipment Lease' },
-    { value: 'other', label: 'Other' }
+    { value: 'acquisition', label: 'Acquisition',},
+    { value: 'joint_venture', label: 'Joint Venture',},
+    { value: 'service_contract', label: 'Service Contract',},
+    { value: 'equipment_lease', label: 'Equipment Lease',},
+    { value: 'exploration_rights', label: 'Exploration Rights',},
+    { value: 'drilling_contract', label: 'Drilling Contract',},
+    { value: 'supply_agreement', label: 'Supply Agreement',},
+    { value: 'other', label: 'Other',},
   ];
 
   const currencies = ['USD', 'EUR', 'GBP', 'NGN', 'ZAR', 'CAD', 'AUD'];
