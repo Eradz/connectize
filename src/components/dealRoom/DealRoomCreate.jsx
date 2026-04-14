@@ -467,7 +467,9 @@ const DealRoomCreate = () => {
     { value: 'service_contract', label: 'Service Contract', description: 'Drilling, construction and technical services' },
     { value: 'equipment_lease', label: 'Equipment Lease', description: 'Leasing of heavy machinery for operations' },
     { value: 'exploration_rights', label: 'Exploration Rights', description: 'Purchase of rights for drilling' },
-    { value: 'production_sharing', label: 'Production Sharing', description: 'Agreement to share production output' }
+    { value: 'drilling_contract', label: 'Drilling Contract', description: 'Agreement for drilling operations' },
+    { value: 'supply_agreement', label: 'Supply Agreement', description: 'Agreement for supplying goods or services' },
+    { value: 'other', label: 'Other', description: 'Other deal types' },
   ];
   const securityTypes = [
     { id: "is_confidential", value: 'confidential', label: 'Confidential', description: 'Mark as Confidential to restrict access and require special permission' },
