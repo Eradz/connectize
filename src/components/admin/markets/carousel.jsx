@@ -75,7 +75,7 @@ export const CreateNewLink = ({
   onClick,
 }) => {
   const sharedClassName =
-    "p-3 rounded-md flex items-center gap-2 bg-black hover:opacity-50 hover:scale-100 scale-90 fixed bottom-16 right-5 z-[999999] animate-pulse";
+    "p-3 rounded-md flex items-center gap-2 bg-black hover:opacity-50 hover:scale-100 scale-90 fixed bottom-36 md:bottom-16 right-5 z-[999999] animate-pulse";
   return (
     <>
       {url === "null" ? (
