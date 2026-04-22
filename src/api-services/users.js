@@ -15,6 +15,22 @@ export const getAllUsers = async () => {
   return results?.filter((user) => user?.first_name && user?.last_name);
 };
 
+export const searchUsers = async (query) => {
+  const normalizedQuery = query?.trim?.();
+
+  if (!normalizedQuery) {
+    return [];
+  }
+
+  const response = await makeApiRequest({
+    url: `api/users/`,
+    method: "GET",
+    params: { search: normalizedQuery },
+  });
+
+  return response?.results?.filter((user) => user?.id) || [];
+};
+
 export const getUserById = async (id) => {
   const results = await makeApiRequest({
     url: `api/users/${id}`,
