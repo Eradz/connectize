@@ -301,19 +301,11 @@ const WorkforceEventDetail = () => {
   };
 
   const getEventStatus = (event) => {
-    if (!event || !event.start_date) return { status: 'upcoming', label: 'Upcoming', color: 'blue' };
-
-    const now = new Date();
-    const start = new Date(event.start_date);
-    const end = event.end_date ? new Date(event.end_date) : null;
-
-    if (start > now) {
-      return { status: 'upcoming', label: 'Upcoming', color: 'gold' };
-    } else if (end && now <= end) {
-      return { status: 'ongoing', label: 'Ongoing', color: 'gold' };
-    } else {
-      return { status: 'completed', label: 'Completed', color: 'gray' };
-    }
+    const s = event?.event_status;
+    if (s === 'ongoing') return { status: 'ongoing', label: 'Live', color: 'green' };
+    if (s === 'past') return { status: 'completed', label: 'Completed', color: 'gray' };
+    if (s === 'cancelled') return { status: 'cancelled', label: 'Cancelled', color: 'red' };
+    return { status: 'upcoming', label: 'Upcoming', color: 'gold' };
   };
 
   const formatDate = (dateString) => {
@@ -1098,38 +1090,42 @@ const WorkforceEventDetail = () => {
 
               <div className="">
                 <div className="space-y-4 mb-6 lg:mb-8">
-                  <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-2 font-medium text-gray-600">
-                      <User2 className="w-6 h-6 " />
-                      Registered:
-                      </span>
-                    <div className="text-right text-gray-600">
-                      <span className="text-xl font-medium ">{event.attendees_count || 0}</span>
-                      {event.max_attendees && (
-                        <span className=" text-base lg:text-lg">/{event.max_attendees}</span>
-                      )}
-                    </div>
-                  </div>
+                  {event.attendees_count != null && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-2 font-medium text-gray-600">
+                          <User2 className="w-6 h-6 " />
+                          Registrants:
+                        </span>
+                        <div className="text-right text-gray-600">
+                          <span className="text-xl font-medium ">{event.attendees_count}</span>
+                          {event.max_attendees && (
+                            <span className=" text-base lg:text-lg">/{event.max_attendees}</span>
+                          )}
+                        </div>
+                      </div>
 
                       {event.max_attendees && (
                         <div className="w-full bg-gray-100 rounded-full h-[7px] shadow-inner">
-                          <div 
+                          <div
                             className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] h-[7px] rounded-full transition-all duration-500 shadow-sm"
-                            style={{ 
-                              width: `${Math.min((event.attendees_count || 0) / event.max_attendees * 100, 100)}%` 
+                            style={{
+                              width: `${Math.min(event.attendees_count / event.max_attendees * 100, 100)}%`
                             }}
                           ></div>
                         </div>
                       )}
-  
+
                       {event.max_attendees && (
                         <div className="flex justify-between items-center">
                           <span className=" font-medium text-gray-600">Available spots:</span>
                           <span className="font-bold  text-lg">
-                            {Math.max(event.max_attendees - (event.attendees_count || 0), 0)}
+                            {Math.max(event.max_attendees - event.attendees_count, 0)}
                           </span>
                         </div>
                       )}
+                    </>
+                  )}
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-gray-600">Event Type:</span>
                     <span className="font-semibold capitalize bg-gray-100 text-gray-600 rounded-full px-2 py-1">{event.event_type || 'Workshop'}</span>
@@ -1217,7 +1213,7 @@ const WorkforceEventDetail = () => {
                       </div>
                     ) : myRegistration ? (
                       // User is fully registered (confirmed)
-                      <div className="p-4 lg:p-6 bg-gradient-to-br from-pale_yellow to-yellow-50 rounded-xl lg:rounded-2xl border border-gold/30 shadow-lg">
+                      <div className="p-4 lg:p-6 bg-gradient-to-br from-pale_yellow to-yellow-50 rounded-xl lg:rounded-2xl border border-gold/30 shadow-lg space-y-4">
                         <div className="text-center">
                           <div className="w-12 h-12 lg:w-16 lg:h-16 bg-white/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
                             <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-gold" />
@@ -1230,6 +1226,24 @@ const WorkforceEventDetail = () => {
                             Registered on {new Date(myRegistration.registered_at || myRegistration.created_at).toLocaleDateString()}
                           </p>
                         </div>
+                        {/* Meeting link — shown when API returns it (confirmed registrant) */}
+                        {event.is_virtual && event.meeting_link && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                            <p className="text-sm font-semibold text-green-800 flex items-center gap-2">
+                              <span>🔗</span> {event.virtual_platform || 'Virtual Meeting'} Link
+                            </p>
+                            <a
+                              href={event.meeting_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              Join Meeting
+                            </a>
+                            <p className="text-xs text-green-700 break-all">{event.meeting_link}</p>
+                          </div>
+                        )}
                         {/* Share and Bookmark buttons */}
                         <div className="flex gap-2 pt-3 border-t border-gold/20">
                           <button
@@ -1244,8 +1258,8 @@ const WorkforceEventDetail = () => {
                             type="button"
                             onClick={handleBookmark}
                             className={`flex items-center justify-center rounded-lg transition-colors duration-200 px-4 py-2.5 ${
-                              isBookmarked 
-                                ? 'bg-gold/30 border border-gold/40' 
+                              isBookmarked
+                                ? 'bg-gold/30 border border-gold/40'
                                 : 'bg-white/60 hover:bg-white border border-gold/20'
                             }`}
                           >
@@ -1260,7 +1274,7 @@ const WorkforceEventDetail = () => {
                             <button
                               type="button"
                               onClick={handleRegister}
-                              disabled={isRegistering || (event.max_attendees && event.attendees_count >= event.max_attendees)}
+                              disabled={isRegistering || (event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees)}
                               className="w-[50%] bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] 
                                       disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 p-2 
                                       flex items-center justify-center text-sm shadow-md"
@@ -1301,7 +1315,7 @@ const WorkforceEventDetail = () => {
                         </div>
                     )}
 
-                    {event.max_attendees && event.attendees_count >= event.max_attendees && (
+                    {event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees && (
                       <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl lg:rounded-2xl border border-amber-200 shadow-lg">
                         <p className="text-amber-800 font-bold text-base lg:text-lg">Event is Full</p>
                         <p className="text-amber-700 mt-2">Join waitlist for updates</p>
@@ -1385,20 +1399,23 @@ const WorkforceEventDetail = () => {
                               <div className="w-12 h-12 lg:w-16 lg:h-16 bg-green-200/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
                                 <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-green-600" />
                               </div>
-                              <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Live!</h3>
+                              <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Happening Now</h3>
                               <p className="text-green-700 mb-4 text-sm">
                                 You're registered. Join the event now!
                               </p>
                               {event.is_virtual && event.meeting_link && (
-                                <a 
-                                  href={event.meeting_link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
-                                >
-                                  <ExternalLink className="w-4 h-4" />
-                                  Join Now
-                                </a>
+                                <>
+                                  <a
+                                    href={event.meeting_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                    Join Now
+                                  </a>
+                                  <p className="text-xs text-green-700 mt-2 break-all">{event.meeting_link}</p>
+                                </>
                               )}
                             </div>
                           </div>
@@ -1406,7 +1423,7 @@ const WorkforceEventDetail = () => {
                           // User is not registered - show register button
                           <div className="p-4 lg:p-6 bg-gradient-to-br from-pale_yellow to-yellow-50 rounded-xl lg:rounded-2xl border border-gold/30 shadow-lg">
                             <div className="text-center">
-                              <p className="text-yellow-800 font-bold mb-2">🔴 Event is Live!</p>
+                              <p className="text-yellow-800 font-bold mb-2">🔴 Event is Happening Now</p>
                               <p className="text-yellow-700 text-sm mb-4">Registration still open - join now!</p>
                               
                               {!event.is_free && event.ticket_price && (
@@ -1420,7 +1437,7 @@ const WorkforceEventDetail = () => {
                               <button
                                 type="button"
                                 onClick={handleRegister}
-                                disabled={isRegistering || (event.max_attendees && event.attendees_count >= event.max_attendees)}
+                                disabled={isRegistering || (event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees)}
                                 className="w-full bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white font-semibold py-3 px-6 rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
                               >
                                 {isRegistering ? (
