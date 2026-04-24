@@ -191,7 +191,7 @@ function VerifyAccount() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
-              className="mt-1 w-full bg-background py-2.5 px-3 rounded-md border text-sm focus:outline-none focus:border-gold"
+              className="mt-1 w-full bg-background py-2.5 px-3 rounded-md border text-base md:text-sm focus:outline-none focus:border-gold"
               required
             />
           </div>

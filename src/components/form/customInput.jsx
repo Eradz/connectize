@@ -21,7 +21,7 @@ import { MarkdownComponent } from "../MarkDownComponent";
 import clsx from "clsx";
 
 export const inputClassNames =
-  "relative mt-2 !w-full !bg-background py-2.5 px-3 rounded-md placeholder:text-sm !text-sm transition-all duration-300 !z-0";
+  "relative mt-2 !w-full !bg-background py-2.5 px-3 rounded-md placeholder:text-sm !text-base md:!text-sm transition-all duration-300 !z-0";
 
 export default function CustomInput({
   type,
@@ -266,7 +266,7 @@ export const CustomSelect = ({
       formik.handleChange(e);
     }}
     value={isLoading ? loadingText || "Loading..." : formik.values[`${name}`]}
-    className="!w-full !bg-background px-3 !text-sm mt-2 border-gray-100"
+    className="!w-full !bg-background px-3 !text-base md:!text-sm mt-2 border-gray-100"
   >
     {options?.map((option, index) => (
       <option key={index} value={option}>
