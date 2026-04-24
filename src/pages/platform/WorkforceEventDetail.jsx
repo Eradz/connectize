@@ -584,91 +584,111 @@ const WorkforceEventDetail = () => {
           {/* Main Content */}
           <div className="md:bg-white space-y-8 px-4 py-6">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-gold via-yellow-500 to-yellow-600"
-            style={{
-              backgroundImage: `url(${event.image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-            >
-              <div className="relative p-6 ">
+            <div className="rounded-2xl lg:rounded-3xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+              {/* Event Flier — displayed as a proper image, never behind text */}
+              {event.image && (
+                <div className="w-full bg-gray-100" style={{ aspectRatio: '16/7', maxHeight: '380px' }}>
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Event Info — always on a clean background */}
+              <div className={`p-5 lg:p-8 ${!event.image ? 'bg-gradient-to-br from-gold via-yellow-500 to-yellow-600' : 'bg-white'}`}>
                 <div className="flex flex-col md:flex-row md:gap-6 lg:gap-8 items-start">
-                  {/* Event Info */}
-                  <div className="w-full md:w-[55%]">
-                    <div className="flex flex-wrap items-center gap-2 lg:gap-3 mb-4 lg:mb-6">
-                      <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
-                        <StatusIcon className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                  {/* Title + Badges */}
+                  <div className="w-full md:w-[58%]">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                        event.image
+                          ? 'bg-pale_yellow text-yellow-800 border-gold/30'
+                          : 'bg-white/20 text-white border-white/30 backdrop-blur-sm'
+                      }`}>
+                        <StatusIcon className="w-3 h-3 mr-1.5" />
                         {eventStatus.label}
                       </span>
-
-
                       {event.is_free && (
-                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white text-yellow-800">
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${
+                          event.image ? 'bg-green-100 text-green-800' : 'bg-white text-yellow-800'
+                        }`}>
                           Free Event
                         </span>
                       )}
                       {!event.is_free && event.ticket_price && (
-                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white text-yellow-800">
-                          <DollarSign className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${
+                          event.image ? 'bg-gray-100 text-gray-700' : 'bg-white text-yellow-800'
+                        }`}>
+                          <DollarSign className="w-3 h-3 mr-1" />
                           ${event.ticket_price} {event.currency !== 'USD' && event.currency}
                         </span>
                       )}
                       {daysUntil && (
-                        <span className="inline-flex items-center px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30">
-                          <Clock className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                          event.image
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : 'bg-white/20 text-white border-white/30 backdrop-blur-sm'
+                        }`}>
+                          <Clock className="w-3 h-3 mr-1.5" />
                           {daysUntil}
                         </span>
                       )}
                     </div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-4 lg:mb-6 leading-tight">{event.title}</h1>
-                    <p className="text-base lg:text-xl text-white leading-relaxed mb-6 lg:mb-8">{event.description}</p>
+                    <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 leading-tight ${event.image ? 'text-gray-900' : 'text-white'}`}>
+                      {event.title}
+                    </h1>
+                    <p className={`text-sm lg:text-base leading-relaxed ${event.image ? 'text-gray-600' : 'text-white'}`}>
+                      {event.description}
+                    </p>
                   </div>
 
                   {/* Quick Details Card */}
-                  <div className="mx-auto w-full md:w-[40%] bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl p-4 lg:p-6 border border-white/20">
-                    <h3 className="text-base lg:text-lg font-bold text-white mb-4 lg:mb-6">Event Details</h3>
-                    <div className="space-y-3 lg:space-y-4">
-                      <div className='flex gap-2'>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs lg:text-sm font-semibold  text-white border border-white capitalize">
-                          <Globe className='w-4 h-4 mr-1'/>
+                  <div className={`mt-4 md:mt-0 mx-auto w-full md:w-[38%] rounded-xl lg:rounded-2xl p-4 lg:p-5 border ${
+                    event.image
+                      ? 'bg-gray-50 border-gray-200'
+                      : 'bg-white/10 backdrop-blur-md border-white/20'
+                  }`}>
+                    <h3 className={`text-sm font-bold mb-3 ${event.image ? 'text-gray-900' : 'text-white'}`}>Event Details</h3>
+                    <div className="space-y-2.5">
+                      <div className="flex gap-2 flex-wrap">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold capitalize border ${
+                          event.image ? 'text-gray-700 border-gray-300 bg-white' : 'text-white border-white'
+                        }`}>
+                          <Globe className="w-3 h-3 mr-1" />
                           {event.is_virtual ? 'Virtual' : 'In-Person'}
                         </span>
-                        <span className="inline-flex items-center px-2 py-1  rounded-full text-xs lg:text-sm font-semibold  text-white border border-white capitalize">
-                        <Globe className='w-4 h-4 mr-1'/>
-                        {event.event_type}
-                      </span>
-
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold capitalize border ${
+                          event.image ? 'text-gray-700 border-gray-300 bg-white' : 'text-white border-white'
+                        }`}>
+                          {event.event_type}
+                        </span>
                       </div>
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <Building className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        <p className="text-xs lg:text-sm font-semibold text-white">
-                            {event.organizer_name || "Connectize"}
+                      <div className="flex items-center space-x-2">
+                        <Building className={`w-4 h-4 flex-shrink-0 ${event.image ? 'text-gray-500' : 'text-white'}`} />
+                        <p className={`text-xs font-semibold truncate ${event.image ? 'text-gray-700' : 'text-white'}`}>
+                          {event.organizer_name || 'Connectize'}
                         </p>
                       </div>
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <Calendar className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                          <p className="text-xs lg:text-sm font-semibold text-white">{formatDate(event.start_date)}</p>
+                      <div className="flex items-center space-x-2">
+                        <Calendar className={`w-4 h-4 flex-shrink-0 ${event.image ? 'text-gray-500' : 'text-white'}`} />
+                        <p className={`text-xs font-semibold ${event.image ? 'text-gray-700' : 'text-white'}`}>
+                          {formatDate(event.start_date)}
+                        </p>
                       </div>
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <ClockCheck className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                         <p className="text-xs lg:text-sm font-semibold text-white">
-                            {formatTime(event.start_date)}
-                            {event.end_date && ` - ${formatTime(event.end_date)}`}
-                          </p>
+                      <div className="flex items-center space-x-2">
+                        <ClockCheck className={`w-4 h-4 flex-shrink-0 ${event.image ? 'text-gray-500' : 'text-white'}`} />
+                        <p className={`text-xs font-semibold ${event.image ? 'text-gray-700' : 'text-white'}`}>
+                          {formatTime(event.start_date)}
+                          {event.end_date && ` - ${formatTime(event.end_date)}`}
+                        </p>
                       </div>
-                      <div className="flex items-start space-x-3 lg:space-x-4">
-                        <MapPin className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                        <div>
-                          <p className="text-xs lg:text-sm font-semibold text-white">
-                            {event.is_virtual ? 'Virtual Event' : (event.venue_name || 'Venue TBA')}
-                          </p>
-                          {/* <p className="text-xs lg:text-sm ">
-                            {event.is_virtual ? 
-                              (event.virtual_platform || 'Online Platform') :
-                              (event.city || 'Location details pending')
-                            }
-                          </p> */}
-                        </div>
+                      <div className="flex items-center space-x-2">
+                        <MapPin className={`w-4 h-4 flex-shrink-0 ${event.image ? 'text-gray-500' : 'text-white'}`} />
+                        <p className={`text-xs font-semibold ${event.image ? 'text-gray-700' : 'text-white'}`}>
+                          {event.is_virtual ? 'Virtual Event' : (event.venue_name || 'Venue TBA')}
+                        </p>
                       </div>
                     </div>
                   </div>
