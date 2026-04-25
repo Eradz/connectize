@@ -914,8 +914,8 @@ const WorkforceEventDetail = () => {
                 </div>
                   {/* Sidebar */}
           <div className="space-y-6 md:w-[35%] ">
-             {/* Event Participants Section - conditional visibility */}
-                  <div className="">
+             {/* Event Participants Section - organizer only */}
+                  {isEventCreator && <div className="">
                     <div className="overflow-hidden">
                         <div className="flex flex-col">
                           <div className="flex justify-between">
@@ -1258,7 +1258,7 @@ const WorkforceEventDetail = () => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div>}
             {/* Organizer Start Event Section */}
             {isEventCreator && eventStatus.status === 'upcoming' && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
