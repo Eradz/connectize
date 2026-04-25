@@ -718,6 +718,27 @@ a {
   line-height: 1.5;
 }
 
+/* Text alignment utilities */
+.prose-center,
+.prose .text-center {
+  text-align: center;
+}
+
+.prose-left,
+.prose .text-left {
+  text-align: left;
+}
+
+.prose-right,
+.prose .text-right {
+  text-align: right;
+}
+
+.prose-justify,
+.prose .text-justify {
+  text-align: justify;
+}
+
 /* Max-width utility */
 .max-w-none {
   max-width: none;

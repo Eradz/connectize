@@ -45,8 +45,9 @@ const KnowledgeArticleDetail = () => {
       setLoading(true);
       const response = await knowledgeArticleService.getById(slug);
       const articleData = response?.data || response;
+      console.log("Article:", articleData);
       setArticle(articleData);
-      setLiked(!!articleData.is_liked_by_user);
+      setLiked(!!articleData?.is_liked_by_user || false);
     } catch (error) {
       console.error('Error loading article:', error);
       toast.error('Article not found');
