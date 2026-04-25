@@ -15,6 +15,8 @@ import {
   ChevronUp,
   FileText,
   Settings,
+  Upload,
+  Paperclip,
 } from "lucide-react";
 
 const PROJECT_TYPES = [
@@ -49,6 +51,8 @@ export default function CreateBiddingProject() {
   const [prequalSchemes, setPrequalSchemes] = useState([]);
   const [envelopeConfig, setEnvelopeConfig] = useState([]);
   const [requiredDocuments, setRequiredDocuments] = useState([]);
+  const [projectDocuments, setProjectDocuments] = useState([]);
+  // Each entry: { file: File, title: string, document_type: string }
 
   const [form, setForm] = useState({
     title: "",
@@ -227,6 +231,46 @@ export default function CreateBiddingProject() {
     setRequiredDocuments((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Project document file attachments
+  const addProjectDocument = (files) => {
+    const newDocs = Array.from(files).map((file) => ({
+      file,
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      document_type: "other",
+    }));
+    setProjectDocuments((prev) => [...prev, ...newDocs]);
+  };
+
+  const updateProjectDocument = (index, field, value) => {
+    setProjectDocuments((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  const removeProjectDocument = (index) => {
+    setProjectDocuments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadProjectDocuments = async (projectId) => {
+    if (projectDocuments.length === 0) return;
+    const results = await Promise.allSettled(
+      projectDocuments.map((doc) =>
+        biddingAPI.uploadDocument({
+          project: projectId,
+          title: doc.title,
+          document_type: doc.document_type,
+          file: doc.file,
+        })
+      )
+    );
+    const failed = results.filter((r) => r.status === "rejected").length;
+    if (failed > 0) {
+      toast.warning(`${failed} of ${projectDocuments.length} document(s) failed to upload. You can upload them from the project details page.`);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -286,6 +330,8 @@ export default function CreateBiddingProject() {
           // Creation failed (400 validation, etc.) — makeApiRequest already showed a toast
           return;
         }
+        // Upload attached documents
+        await uploadProjectDocuments(newProject.id);
         toast.success("Project created as draft");
         navigate(webRoutes.biddingDetail.replace(":id", newProject.id));
       }
@@ -580,6 +626,87 @@ export default function CreateBiddingProject() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Project Documents (ITT/RFP Attachments) */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Project Documents
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Attach ITT, RFP, scope of work, or other tender documents for bidders to download.
+              </p>
+            </div>
+            <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+              <Upload className="w-4 h-4" />
+              Upload Files
+              <input
+                type="file"
+                className="hidden"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.jpg,.jpeg,.png"
+                onChange={(e) => {
+                  if (e.target.files?.length) addProjectDocument(e.target.files);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+
+          {projectDocuments.length === 0 ? (
+            <div className="text-center py-8 border border-dashed border-gray-200 rounded-lg">
+              <Paperclip className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No documents attached</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Upload scope documents, drawings, specifications, or tender packages for bidders.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {projectDocuments.map((doc, index) => (
+                <div
+                  key={index}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Paperclip className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="text-sm text-gray-600 truncate flex-1">{doc.file.name}</span>
+                    <span className="text-xs text-gray-400 shrink-0">
+                      {(doc.file.size / 1024).toFixed(0)} KB
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeProjectDocument(index)}
+                      className="text-gray-400 hover:text-red-500 p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <Input
+                      value={doc.title}
+                      onChange={(e) => updateProjectDocument(index, "title", e.target.value)}
+                      placeholder="Document title"
+                    />
+                    <Select
+                      value={doc.document_type}
+                      onChange={(e) => updateProjectDocument(index, "document_type", e.target.value)}
+                    >
+                      <option value="technical">Technical Proposal / Scope</option>
+                      <option value="commercial">Commercial / Pricing</option>
+                      <option value="hse">HSE Documentation</option>
+                      <option value="financial">Financial Statement</option>
+                      <option value="certificate">Certificate / License</option>
+                      <option value="reference">Reference / Past Performance</option>
+                      <option value="other">Other</option>
+                    </Select>
+                  </div>
                 </div>
               ))}
             </div>

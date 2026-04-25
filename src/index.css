@@ -86,6 +86,14 @@
     position: relative;
     overflow-x: hidden;
     width: 100%;
+    min-height: 100%;
+  }
+
+  /* iOS zooms focused inputs below 16px, which can shove auth screens sideways. */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
   
   #app-safe-wrapper {
@@ -120,10 +128,10 @@
     -webkit-transform: translateX(0) !important;
   }
   
-  /* Ensure body stays fixed when keyboard appears */
+  /* Keep the page stable while the keyboard resizes the WebView */
   body.keyboard-open {
-    position: fixed !important;
-    width: 100% !important;
+    position: relative !important;
+    min-height: 100% !important;
     overflow-x: hidden !important;
   }
 }
@@ -184,20 +192,19 @@ html, body {
   max-width: 100vw;
   margin: 0;
   padding: 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  min-height: 100%;
   background-color: #ffffff;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* Make the app wrapper scrollable since body is fixed */
+/* Keep app scrolling inside the safe wrapper for consistent mobile behavior */
 #app-safe-wrapper {
   overflow-y: auto;
   overflow-x: hidden;
-  height: 100vh;
-  height: 100dvh; /* Use dvh for better mobile support */
+  min-height: 100vh;
+  min-height: 100dvh; /* Use dvh for better mobile support */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 body {
@@ -217,6 +224,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #f7f7f7 !important;
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow-y: auto;
 }
 

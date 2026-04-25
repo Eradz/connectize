@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
   },
 
   ios: {
-    contentInset: "automatic",
+    contentInset: "never",
     scrollEnabled: true,
   },
 
@@ -37,7 +37,7 @@ const config: CapacitorConfig = {
       style: "light", // Light status bar for dark text
     },
     Keyboard: {
-      resize: "body",
+      resize: "native",
       style: "light",
       resizeOnFullScreen: true,
     },

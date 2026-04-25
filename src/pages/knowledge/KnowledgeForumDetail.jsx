@@ -25,7 +25,8 @@ import {
   User
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
-import { knowledgeForumService, knowledgeForumTopicService } from '../../api-services/oilgas';
+import { knowledgeForumService } from '../../api-services/oilgas';
+import { searchUsers } from '../../api-services/users';
 import { toast } from 'sonner';
 
 const KnowledgeForumDetail = () => {
@@ -45,6 +46,10 @@ const KnowledgeForumDetail = () => {
   const [requests, setRequests] = useState([]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
+  const [memberSearchTerm, setMemberSearchTerm] = useState('');
+  const [memberSearchResults, setMemberSearchResults] = useState([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+  const [addingUserId, setAddingUserId] = useState(null);
   
   const pageSize = 20;
 
@@ -54,6 +59,57 @@ const KnowledgeForumDetail = () => {
       loadTopics();
     }
   }, [slug, currentPage, sortBy]);
+
+  useEffect(() => {
+    if (!forum?.is_moderator) return;
+
+    const query = memberSearchTerm.trim();
+    if (query.length < 2) {
+      setMemberSearchResults([]);
+      setUserSearchLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setUserSearchLoading(true);
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const existingMemberIds = new Set(
+          members.map((member) => member.user?.id).filter(Boolean)
+        );
+        const pendingInviteEmails = new Set(
+          invites.map((invite) => invite.email?.toLowerCase()).filter(Boolean)
+        );
+        const results = await searchUsers(query);
+
+        if (cancelled) return;
+
+        setMemberSearchResults(
+          results.filter((user) => {
+            if (!user?.id) return false;
+            if (existingMemberIds.has(user.id)) return false;
+            if (pendingInviteEmails.has(user.email?.toLowerCase?.())) return false;
+            return true;
+          })
+        );
+      } catch (error) {
+        console.error('Error searching users:', error);
+        if (!cancelled) {
+          setMemberSearchResults([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setUserSearchLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [forum?.is_moderator, invites, memberSearchTerm, members]);
 
   const loadForum = async () => {
     try {
@@ -155,6 +211,25 @@ const KnowledgeForumDetail = () => {
       toast.success('Invitation sent');
     } catch (e) {
       toast.error('Failed to send invite');
+    }
+  };
+
+  const onAddPlatformMember = async (user) => {
+    if (!user?.id) return;
+
+    try {
+      setAddingUserId(user.id);
+      await knowledgeForumService.addMember(slug, user.id);
+      const membersRes = await knowledgeForumService.getMembers(slug);
+      setMembers(membersRes?.results || membersRes?.data?.results || []);
+      setMemberSearchResults((prev) => prev.filter((candidate) => candidate.id !== user.id));
+      setMemberSearchTerm('');
+      toast.success(`${user.first_name || 'User'} added to the forum`);
+    } catch (error) {
+      console.error('Error adding platform member:', error);
+      toast.error('Failed to add member');
+    } finally {
+      setAddingUserId(null);
     }
   };
 
@@ -365,9 +440,71 @@ const KnowledgeForumDetail = () => {
                 <h3 className="text-lg font-semibold">Invite Members</h3>
               </div>
               <form onSubmit={onInvite} className="p-6 space-y-3">
-                <input value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="Email address" className="w-full border rounded px-3 py-2" />
-                <textarea value={inviteMessage} onChange={e=>setInviteMessage(e.target.value)} placeholder="Optional message" className="w-full border rounded px-3 py-2" />
-                <button type="submit" className="bg-gold text-white px-4 py-2 rounded">Send Invite</button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Add existing Connectize users
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      value={memberSearchTerm}
+                      onChange={(e) => setMemberSearchTerm(e.target.value)}
+                      placeholder="Search by name or email"
+                      className="w-full border rounded pl-10 pr-3 py-2"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Search platform users and add them directly to this forum.
+                  </p>
+                </div>
+
+                {memberSearchTerm.trim().length > 0 && (
+                  <div className="border rounded-lg divide-y max-h-64 overflow-y-auto">
+                    {userSearchLoading ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">Searching users...</div>
+                    ) : memberSearchResults.length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        No eligible platform users found.
+                      </div>
+                    ) : (
+                      memberSearchResults.map((user) => (
+                        <div key={user.id} className="px-4 py-3 flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900 truncate">
+                              {[user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || 'Connectize user'}
+                            </div>
+                            <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => onAddPlatformMember(user)}
+                            disabled={addingUserId === user.id}
+                            className="shrink-0 bg-gold text-white px-3 py-2 rounded text-sm disabled:opacity-60"
+                          >
+                            {addingUserId === user.id ? 'Adding...' : 'Add Member'}
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                <div className="border-t pt-3 space-y-3">
+                  <h4 className="text-sm font-medium text-gray-700">Invite by email</h4>
+                  <input
+                    value={inviteEmail}
+                    onChange={e=>setInviteEmail(e.target.value)}
+                    placeholder="Email address"
+                    className="w-full border rounded px-3 py-2"
+                  />
+                  <textarea
+                    value={inviteMessage}
+                    onChange={e=>setInviteMessage(e.target.value)}
+                    placeholder="Optional message"
+                    className="w-full border rounded px-3 py-2"
+                  />
+                  <button type="submit" className="bg-gold text-white px-4 py-2 rounded">Send Invite</button>
+                </div>
               </form>
               <div className="p-6 border-t">
                 <h4 className="font-medium mb-2">Pending Invites</h4>

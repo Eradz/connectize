@@ -10,33 +10,6 @@ import { frontendUrl } from "../lib/helpers";
 import { createSEO } from "../components/SEO";
 import { useEffect, useRef } from "react";
 
-// Keyboard handling for iOS
-if (typeof window !== 'undefined') {
-  // Listen for keyboard events
-  window.addEventListener('keyboardWillShow', () => {
-    document.body.classList.add('keyboard-open');
-  });
-  
-  window.addEventListener('keyboardWillHide', () => {
-    document.body.classList.remove('keyboard-open');
-  });
-  
-  // Fallback: detect when input is focused
-  document.addEventListener('focusin', (e) => {
-    if (e.target.matches('input, textarea, select')) {
-      document.body.classList.add('keyboard-open');
-    }
-  });
-  
-  document.addEventListener('focusout', (e) => {
-    if (e.target.matches('input, textarea, select')) {
-      setTimeout(() => {
-        document.body.classList.remove('keyboard-open');
-      }, 100);
-    }
-  });
-}
-
 export const meta = () => createSEO({
   title: "Connectize - The Social Hub for Oil & Gas",
   description:
@@ -52,7 +25,7 @@ export function Layout({ children }) {
       <head>
         <meta charSet="utf-8" />
         <link rel="icon" href="/favicon.png" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="theme-color" content="#F7F7F7 " />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
