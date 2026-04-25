@@ -1621,28 +1621,60 @@ const WorkforceEventDetail = () => {
                             </div>
                           </div>
                         ) : myRegistration ? (
-                          // User is registered - show Join Now
-                          <div className="p-4 lg:p-6 bg-gradient-to-br from-green-100 to-emerald-50 rounded-xl lg:rounded-2xl border border-green-300 shadow-lg">
+                          // User is registered
+                          <div className={`p-4 lg:p-6 rounded-xl lg:rounded-2xl border shadow-lg bg-gradient-to-br ${
+                            myRegistration.status === 'confirmed' || myRegistration.status === 'attended'
+                              ? 'from-green-100 to-emerald-50 border-green-300'
+                              : 'from-yellow-50 to-amber-50 border-yellow-300'
+                          }`}>
                             <div className="text-center">
-                              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-green-200/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
-                                <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-green-600" />
+                              <div className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 ${
+                                myRegistration.status === 'confirmed' || myRegistration.status === 'attended'
+                                  ? 'bg-green-200/50'
+                                  : 'bg-yellow-200/50'
+                              }`}>
+                                <UserCheck className={`w-6 h-6 lg:w-8 lg:h-8 ${
+                                  myRegistration.status === 'confirmed' || myRegistration.status === 'attended'
+                                    ? 'text-green-600'
+                                    : 'text-yellow-600'
+                                }`} />
                               </div>
-                              <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Happening Now</h3>
-                              <p className="text-green-700 mb-4 text-sm">
-                                You're registered. Join the event now!
-                              </p>
-                              {event.is_virtual && event.meeting_link && (
+                              {myRegistration.status === 'confirmed' || myRegistration.status === 'attended' ? (
                                 <>
-                                  <a
-                                    href={event.meeting_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
-                                  >
-                                    <ExternalLink className="w-4 h-4" />
-                                    Join Now
-                                  </a>
-                                  <p className="text-xs text-green-700 mt-2 break-all">{event.meeting_link}</p>
+                                  <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Happening Now</h3>
+                                  <p className="text-green-700 mb-4 text-sm">You're registered. Join the event now!</p>
+                                  {event.is_virtual && event.meeting_link ? (
+                                    <>
+                                      <a
+                                        href={event.meeting_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
+                                      >
+                                        <ExternalLink className="w-4 h-4" />
+                                        Join Now
+                                      </a>
+                                      <p className="text-xs text-green-700 mt-2 break-all">{event.meeting_link}</p>
+                                    </>
+                                  ) : event.is_virtual ? (
+                                    <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                                      No meeting link has been set by the organizer yet.
+                                    </p>
+                                  ) : (
+                                    <p className="text-sm text-green-700">
+                                      In-person event — see the venue details above.
+                                    </p>
+                                  )}
+                                </>
+                              ) : myRegistration.status === 'waitlisted' ? (
+                                <>
+                                  <h3 className="text-lg font-bold text-yellow-900 mb-2">You're on the Waitlist</h3>
+                                  <p className="text-yellow-700 text-sm">You'll be notified if a spot opens up.</p>
+                                </>
+                              ) : (
+                                <>
+                                  <h3 className="text-lg font-bold text-yellow-900 mb-2">Registration Pending Approval</h3>
+                                  <p className="text-yellow-700 text-sm">The organizer will review your registration. You'll get access once confirmed.</p>
                                 </>
                               )}
                             </div>
