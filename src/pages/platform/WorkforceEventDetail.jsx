@@ -1291,21 +1291,29 @@ const WorkforceEventDetail = () => {
             )}
 
             {/* Organizer Live Controls */}
-            {isEventCreator && eventStatus.status === 'ongoing' && event.is_virtual && event.meeting_link && (
+            {isEventCreator && eventStatus.status === 'ongoing' && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
                   <h3 className="font-semibold text-green-900">Event is Live</h3>
                 </div>
-                <a
-                  href={event.meeting_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Join as Host
-                </a>
+                {event.is_virtual && event.meeting_link ? (
+                  <a
+                    href={event.meeting_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Join as Host
+                  </a>
+                ) : event.is_virtual ? (
+                  <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                    No meeting link set. Edit the event to add one.
+                  </p>
+                ) : (
+                  <p className="text-sm text-green-700">In-person event — see venue details above.</p>
+                )}
               </div>
             )}
 
@@ -1373,7 +1381,7 @@ const WorkforceEventDetail = () => {
                   </div>
                 </div>
 
-                {eventStatus.status === 'upcoming' && (
+                {!isEventCreator && eventStatus.status === 'upcoming' && (
                   <div className="space-y-3">
                     
                     {myRegistration && myRegistration.status === 'pending_payment' ? (
@@ -1555,7 +1563,7 @@ const WorkforceEventDetail = () => {
                     )}
                   </div>
                 )}
-                {eventStatus.status === 'ongoing' && (
+                {!isEventCreator && eventStatus.status === 'ongoing' && (
                   <div className="space-y-3">
                     {/* Check if registration is still open */}
                     {(!event.registration_deadline || new Date(event.registration_deadline) > new Date()) ? (
@@ -1729,7 +1737,7 @@ const WorkforceEventDetail = () => {
                     )}
                   </div>
                 )}
-                {eventStatus.status === 'completed' && (
+                {!isEventCreator && eventStatus.status === 'completed' && (
                   <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <p className="text-gray-700 font-medium">Event Completed</p>
                     <p className="text-gray-600 text-sm mt-1">Thank you for your interest</p>
