@@ -331,9 +331,13 @@ const WorkforceEventDetail = () => {
   const getEventStatus = (event) => {
     const s = event?.event_status;
     if (s === 'cancelled') return { status: 'cancelled', label: 'Cancelled', color: 'red' };
-    // Always trust the local clock for end_date — backend manually_started flag can be stale
-    if (event?.end_date && new Date(event.end_date) < new Date()) {
-      return { status: 'completed', label: 'Completed', color: 'gray' };
+    if (event?.end_date) {
+      const endDate = new Date(event.end_date);
+      const now = new Date();
+      console.debug('[EventStatus] end_date:', event.end_date, '| parsed:', endDate, '| now:', now, '| isPast:', endDate < now, '| event_status:', s);
+      if (endDate < now) {
+        return { status: 'completed', label: 'Completed', color: 'gray' };
+      }
     }
     if (s === 'ongoing') return { status: 'ongoing', label: 'Live', color: 'green' };
     if (s === 'past') return { status: 'completed', label: 'Completed', color: 'gray' };
