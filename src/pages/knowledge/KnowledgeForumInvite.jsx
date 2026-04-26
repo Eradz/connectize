@@ -21,11 +21,13 @@ const KnowledgeForumInvite = () => {
         if (action === 'accept') {
           await knowledgeForumService.acceptInvite(token);
           setMessage('Invitation accepted.');
-          toast.success('Invitation accepted');
+          navigate(webRoutes.knowledgeForums);
+          // toast.success('Invitation accepted');
         } else {
           await knowledgeForumService.declineInvite(token);
           setMessage('Invitation declined.');
-          toast.info('Invitation declined');
+          navigate(webRoutes.knowledgeForums);
+          // toast.info('Invitation declined');
         }
         setStatus('success');
       } catch (e) {
@@ -43,7 +45,8 @@ const KnowledgeForumInvite = () => {
       await knowledgeForumService.acceptInvite(token);
       setStatus('success');
       setMessage('Invitation accepted.');
-      toast.success('Invitation accepted');
+      navigate(webRoutes.knowledgeForums);
+      // toast.success('Invitation accepted');
     } catch (e) {
       setStatus('error');
       setMessage('Unable to accept the invitation.');
@@ -57,7 +60,8 @@ const KnowledgeForumInvite = () => {
       await knowledgeForumService.declineInvite(token);
       setStatus('success');
       setMessage('Invitation declined.');
-      toast.info('Invitation declined');
+      navigate(webRoutes.knowledgeForums);
+      // toast.info('Invitation declined');
     } catch (e) {
       setStatus('error');
       setMessage('Unable to decline the invitation.');
