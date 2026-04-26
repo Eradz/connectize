@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { knowledgeForumService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
@@ -11,11 +11,16 @@ const KnowledgeForumInvite = () => {
   const action = (searchParams.get('action') || '').toLowerCase();
   const [status, setStatus] = useState('idle'); // idle | working | success | error
   const [message, setMessage] = useState('');
+  const processedActionRef = useRef(null);
 
   useEffect(() => {
     const autoAct = async () => {
       if (!token) return;
       if (action !== 'accept' && action !== 'decline') return;
+      const actionKey = `${token}:${action}`;
+      if (processedActionRef.current === actionKey) return;
+      processedActionRef.current = actionKey;
+
       setStatus('working');
       try {
         if (action === 'accept') {
@@ -38,6 +43,8 @@ const KnowledgeForumInvite = () => {
   }, [token, action]);
 
   const handleAccept = async () => {
+    if (!token || status === 'working' || status === 'success') return;
+
     setStatus('working');
     try {
       await knowledgeForumService.acceptInvite(token);
@@ -52,6 +59,8 @@ const KnowledgeForumInvite = () => {
   };
 
   const handleDecline = async () => {
+    if (!token || status === 'working' || status === 'success') return;
+
     setStatus('working');
     try {
       await knowledgeForumService.declineInvite(token);
@@ -84,20 +93,24 @@ const KnowledgeForumInvite = () => {
             )}
 
             <div className="mt-4 flex items-center gap-3">
-              <button
-                onClick={handleAccept}
-                disabled={!token || status === 'working'}
-                className="px-4 py-2 rounded bg-green-600 text-white disabled:opacity-50"
-              >
-                Accept
-              </button>
-              <button
-                onClick={handleDecline}
-                disabled={!token || status === 'working'}
-                className="px-4 py-2 rounded bg-red-600 text-white disabled:opacity-50"
-              >
-                Decline
-              </button>
+              {status !== 'success' && (
+                <>
+                  <button
+                    onClick={handleAccept}
+                    disabled={!token || status === 'working'}
+                    className="px-4 py-2 rounded bg-green-600 text-white disabled:opacity-50"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={handleDecline}
+                    disabled={!token || status === 'working'}
+                    className="px-4 py-2 rounded bg-red-600 text-white disabled:opacity-50"
+                  >
+                    Decline
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => navigate(webRoutes.knowledgeForums)}
                 className="px-4 py-2 rounded border"
