@@ -313,6 +313,8 @@ export const DiscoverPostItem = ({
             <CompanyName
               name={postItem?.company?.slug || postItem?.user?.full_name}
               verified={postItem?.company?.verify}
+              company={!!postItem?.company?.slug}
+              userId={postItem?.user?.id}
             />
             <small className="text-gray-400 lowercase shrink-0">
               <Link to={`/co/${postItem?.user?.id}`}>
