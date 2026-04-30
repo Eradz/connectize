@@ -18,6 +18,7 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 import workforce from '../../../api-services/workforce';
+import { webRoutes } from '../../../lib/webRoutes';
 
 const AdminWorkforce = () => {
   const [activeTab, setActiveTab] = useState('jobs'); // 'jobs', 'profiles', 'applications'
@@ -517,7 +518,7 @@ const AdminWorkforce = () => {
               <td className="px-6 py-4">
                 <div className="flex space-x-2">
                   <Link
-                    to={`/jobs/${job.id}`}
+                    to={webRoutes.workforceJobDetail.replace(":id",job.id)}
                     className="text-blue-600 hover:text-blue-700"
                     title="View Job"
                   >

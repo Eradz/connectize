@@ -185,7 +185,7 @@ const PlatformNavigation = ({ children }) => {
       name: 'Workforce',
       href: webRoutes.workforceJobs,
       icon: Users,
-      current: location.pathname.startsWith('/jobs') || 
+      current: location.pathname.startsWith('/workforce/jobs') || 
                location.pathname.startsWith('/professionals') || 
                location.pathname.startsWith('/events') || 
                location.pathname.startsWith('/applications'),
