@@ -389,53 +389,6 @@ const WorkforceEvents = () => {
     setSearchTerm('');
   };
 
-  // Derive a status label from backend fields
-  const getEventStatus = (event) => {
-    if (!event) return 'unknown';
-    if (event.is_cancelled) return 'cancelled';
-    const now = new Date();
-    const start = event.start_date ? new Date(event.start_date) : null;
-    const end = event.end_date ? new Date(event.end_date) : null;
-    // Sold out when max_attendees present and reached
-    if (event.max_attendees && event.attendees_count >= event.max_attendees) return 'sold_out';
-    if (start && start > now) return 'upcoming';
-    if (start && end && now >= start && now <= end) return 'open';
-    return 'past';
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'upcoming': return 'bg-blue-100 text-blue-800';
-      case 'open': return 'bg-green-100 text-green-800';
-      case 'sold_out': return 'bg-orange-100 text-orange-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'past': return 'bg-gray-200 text-gray-700';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getTypeIcon = (isVirtual, _eventType) => {
-    if (isVirtual) return <Globe className="w-4 h-4" />;
-    return <MapPin className="w-4 h-4" />;
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getAvailableSpots = (event) => {
-    if (!event) return 0;
-    const cap = event.max_attendees ?? null;
-    const reg = event.attendees_count ?? 0;
-    return cap ? Math.max(cap - reg, 0) : 0;
-  };
-
   const scrollToId = (id) => {
   const element = document.getElementById(id);
   if (element) {

@@ -79,7 +79,6 @@ const UpcomingEvents = ({filteredEvents}) => {
         if (start && end && now >= start && now <= end) return 'open';
         return 'past';
       };
-    console.log(filteredEvents);
       const getStatusColor = (status) => {
         switch (status) {
           case 'upcoming': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400]  text-white';
@@ -89,11 +88,6 @@ const UpcomingEvents = ({filteredEvents}) => {
           case 'past': return 'bg-gray-200 text-gray-700';
           default: return 'bg-gray-100 text-gray-800';
         }
-      };
-    
-      const getTypeIcon = (isVirtual, _eventType) => {
-        if (isVirtual) return <Globe className="w-4 h-4 text-[#FFC000]" />;
-        return <MapPin className="w-4 h-4" />;
       };
         const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -105,12 +99,30 @@ const UpcomingEvents = ({filteredEvents}) => {
     });
   };
 
-  // const getAvailableSpots = (event) => {
-  //   if (!event) return 0;
-  //   const cap = event.max_attendees ?? null;
-  //   const reg = event.attendees_count ?? 0;
-  //   return cap ? Math.max(cap - reg, 0) : 0;
-  // };
+     const getTopicsDisplay = (topics) => {
+    let newTopics;
+  if (!topics) return []
+  
+  // Handle case where topics might be a string
+  if (typeof topics === 'string') {
+    try {
+      topics = JSON.parse(topics)
+    } catch {
+      return []
+    }
+  }
+  
+  if (!Array.isArray(topics) || topics.length === 0) return []
+  
+  if (topics.length === 1 && typeof topics[0] === 'string' && topics[0].startsWith('[')) {
+    try {
+      console.log(JSON.parse(topics[0]))
+      return newTopics = JSON.parse(topics[0])
+    } catch {
+      return []
+    }
+  }
+}
   const getLongestString = (themes) => {
     if (!themes || !Array.isArray(themes)) return [];
     // Filter out empty strings, "[]", and invalid values
@@ -213,7 +225,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                           <div className='flex gap-4'>
                             <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
                             <div className="flex flex-wrap gap-1 mb-4">
-                                {getLongestString(event.topics.slice(0, 3)).map((t, i) => (
+                                {getLongestString(getTopicsDisplay(event.topics)?.slice(0, 3)).map((t, i) => (
                                 <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
                                 ))}
                             </div>
@@ -333,7 +345,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                                             <div className='flex gap-4'>
                                               <h4 className="font-semibold text-gray-900 mb-2">Theme:</h4>
                                               <div className="flex flex-wrap gap-1 mb-4">
-                                                  {getLongestString(event.topics.slice(0, 3)).map((t, i) => (
+                                                  {getLongestString(getTopicsDisplay(event.topics)?.slice(0, 3)).map((t, i) => (
                                                   <span key={i} className="bg-gray-100 text-gray-700 text-[10px] px-2 py-1 rounded-full">{t}</span>
                                                   ))}
                                               </div>
