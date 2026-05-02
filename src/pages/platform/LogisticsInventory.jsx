@@ -496,17 +496,17 @@ const LogisticsInventoryEnhanced = () => {
                 <p className="text-gray-600 mt-1">Oil & Gas equipment and supplies tracking</p>
                 {/* Debug session indicator removed as requested */}
               </div>
-              <div className="flex lg:items-center gap-3 w-full lg:w-max">
+              <div className="flex flex-wrap mt-2 md:mt-0 lg:items-center justify-between md:gap-3 w-full lg:w-max">
               <button
                 onClick={() => navigate(webRoutes.inventoryWarehouseCreate)}
-                className="w-[50%] lg:w-fit justify-center bg-white border border-gray-300 hover:bg-gray-50 px-0 lg:px-4 py-2 rounded-lg flex items-center text-sm"
+                className="w-[50%] md:w-[50%] lg:w-fit justify-center bg-white border border-gray-300 hover:bg-gray-50 px-0 lg:px-4 py-2 rounded-lg flex items-center text-sm"
               >
                 <Building className="w-4 h-4 mr-2" />
                 Add Warehouse
               </button>
               <button
                 onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-                className="w-[50%] lg:w-fit justify-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
+                className="w-[45%] md:w-[50%] lg:w-fit justify-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Item
@@ -514,7 +514,7 @@ const LogisticsInventoryEnhanced = () => {
               <button 
                   onClick={handleExport}
                   disabled={loading || filteredInventory.length === 0}
-                  className="w-[50%] lg:w-fit justify-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full md:w-[50%] lg:w-fit mt-2 md:mt-0 justify-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
                 >
                   {/* <Download className="w-4 h-4 mr-2" /> */}
