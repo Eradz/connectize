@@ -13,7 +13,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react'; // X imp
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
-import { getCompanyByIdOrEmail } from '../../api-services/companies';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 import { StepContent, StepIndicator } from '../../components/workforce/WorkforceSteps';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
@@ -102,11 +102,11 @@ const WorkforceJobCreate = () => {
     const fetchUserCompanies = async () => {
       try {
         setLoadingCompanies(true);
-        const response = await getCompanyByIdOrEmail();
-        if (response && Array.isArray(response)) {
-          setUserCompanies(response);
-          if (response.length > 0) {
-            setFormData(prev => ({ ...prev, company_id: response[0].id }));
+        const companies = await getMyActionableCompanies('company_manage_jobs');
+        if (Array.isArray(companies)) {
+          setUserCompanies(companies);
+          if (companies.length > 0) {
+            setFormData(prev => ({ ...prev, company_id: companies[0].id }));
           }
         }
       } catch (error) {

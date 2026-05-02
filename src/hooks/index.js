@@ -4,6 +4,7 @@ import {
   getCompanyByIdOrEmail,
   getSingleCompany,
 } from "../api-services/companies";
+import { getMyActionableCompanies } from "../api-services/representatives";
 import { getMessagesForUser } from "../api-services/messaging";
 import { getPosts } from "../api-services/posts";
 import { getAllUsers, getUserById } from "../api-services/users";
@@ -36,6 +37,16 @@ export const useUsers = () => {
     queryKey: ["users"],
     queryFn: getAllUsers,
     enabled: !!currentUser,
+  });
+};
+
+export const useGetActionableCompanies = (permission = 'company_post') => {
+  const { user: currentUser } = useAuth();
+  return useQuery({
+    queryKey: ["actionableCompanies", permission],
+    queryFn: () => getMyActionableCompanies(permission),
+    enabled: !!currentUser,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
