@@ -5,6 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { useGetActionableCompanies } from '../../hooks';
 
 const LOCAL_DRAFT_KEY = 'knowledge_article_draft';
 const KnowledgeArticleCreate = () => {
@@ -31,6 +32,8 @@ const KnowledgeArticleCreate = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
+  const { data: actionableCompanies = [] } = useGetActionableCompanies('company_publish_knowledge');
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -119,7 +122,6 @@ const KnowledgeArticleCreate = () => {
     setError(null);
     try {
       let payload = form;
-      // If there's a file, use FormData
       if (form.featured_image instanceof File) {
         const formData = new FormData();
         Object.entries(form).forEach(([key, value]) => {
@@ -129,7 +131,10 @@ const KnowledgeArticleCreate = () => {
             formData.append(key, value);
           }
         });
+        if (selectedCompanyId) formData.append('company_id', selectedCompanyId);
         payload = formData;
+      } else if (selectedCompanyId) {
+        payload = { ...form, company_id: selectedCompanyId };
       }
       const created = await knowledgeArticleService.create(payload);
       const article = created?.data || created;
@@ -254,6 +259,22 @@ const KnowledgeArticleCreate = () => {
                 <option value="opinion">Opinion</option>
               </select>
             </div>
+
+            {actionableCompanies.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Publish on behalf of</label>
+                <select
+                  value={selectedCompanyId}
+                  onChange={(e) => setSelectedCompanyId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white"
+                >
+                  <option value="">Myself</option>
+                  {actionableCompanies.map((c) => (
+                    <option key={c.id} value={c.id}>{c.company_name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Tags Field */}
             <div>
