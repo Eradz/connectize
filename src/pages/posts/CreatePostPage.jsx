@@ -8,7 +8,7 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import { createPost } from "../../api-services/posts";
 import { useCustomQuery } from "../../context/queryContext";
 import { useAuth } from "../../context/userContext";
-import { useGetCurrentCompany } from "../../hooks";
+import { useGetActionableCompanies } from "../../hooks";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../icon";
 import CustomErrorMessage from "../../components/CustomErrorMessage";
 import GifPicker from "../../components/GifPicker";
@@ -40,7 +40,7 @@ function CreatePostPage() {
   const navigate = useNavigate();
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
-  const { data: companies = [] } = useGetCurrentCompany();
+  const { data: companies = [] } = useGetActionableCompanies('company_post');
   const queryClient = useQueryClient();
   const seoData = getSEOConfig("createPost");
 

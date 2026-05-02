@@ -21,7 +21,8 @@ import {
   User2,
   Plus,
   CreditCard,
-  Loader2
+  Loader2,
+  Play
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { workforceAPI } from '../../api-services/workforce';
@@ -53,7 +54,11 @@ const WorkforceEventDetail = () => {
   const [participantsPerPage] = useState(10);
   const [isEventCreator, setIsEventCreator] = useState(false);
   const [myRegistration, setMyRegistration] = useState(null);
-  
+  const [showStartModal, setShowStartModal] = useState(false);
+  const [isStartingEvent, setIsStartingEvent] = useState(false);
+  const [countdown, setCountdown] = useState(null);
+  const [updatingRegistrationId, setUpdatingRegistrationId] = useState(null);
+
   // Ref to track if registration has been checked for this event
   const registrationCheckedRef = useRef(null);
 
@@ -132,8 +137,8 @@ const WorkforceEventDetail = () => {
       // Mark as checked for this combination
       registrationCheckedRef.current = checkKey;
       
-      // Check if user is the creator (check organizer field - created_by doesn't exist)
-      const isCreator = event.organizer === user.id;
+      // Use backend-supplied is_organizer flag when available; fall back to id comparison
+      const isCreator = event.is_organizer === true || event.organizer === user.id;
       setIsEventCreator(isCreator);
 
       // Get user's registration for this event
@@ -167,6 +172,29 @@ const WorkforceEventDetail = () => {
       loadParticipants();
     }
   }, [isEventCreator]);
+
+  // Live countdown timer for upcoming events
+  useEffect(() => {
+    if (!event?.start_date) return;
+    const status = getEventStatus(event);
+    if (status.status !== 'upcoming') return;
+
+    const tick = () => {
+      const now = new Date();
+      const start = new Date(event.start_date);
+      const diff = start - now;
+      if (diff <= 0) { setCountdown(null); return; }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      setCountdown({ days, hours, minutes, seconds, isStartingSoon: diff <= 30 * 60 * 1000 });
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [event?.start_date, event?.event_status]);
 
   const loadParticipants = async () => {
     try {
@@ -302,9 +330,17 @@ const WorkforceEventDetail = () => {
 
   const getEventStatus = (event) => {
     const s = event?.event_status;
+    if (s === 'cancelled') return { status: 'cancelled', label: 'Cancelled', color: 'red' };
+    if (event?.end_date) {
+      const endDate = new Date(event.end_date);
+      const now = new Date();
+      console.debug('[EventStatus] end_date:', event.end_date, '| parsed:', endDate, '| now:', now, '| isPast:', endDate < now, '| event_status:', s);
+      if (endDate < now) {
+        return { status: 'completed', label: 'Completed', color: 'gray' };
+      }
+    }
     if (s === 'ongoing') return { status: 'ongoing', label: 'Live', color: 'green' };
     if (s === 'past') return { status: 'completed', label: 'Completed', color: 'gray' };
-    if (s === 'cancelled') return { status: 'cancelled', label: 'Cancelled', color: 'red' };
     return { status: 'upcoming', label: 'Upcoming', color: 'gold' };
   };
 
@@ -422,6 +458,31 @@ const WorkforceEventDetail = () => {
       // Revert on error
       setIsBookmarked(!newBookmarkState);
       console.error('Failed to bookmark event:', error);
+    }
+  };
+
+  const handleStartEvent = async () => {
+    try {
+      setIsStartingEvent(true);
+      await workforceAPI.startEvent(id);
+      setShowStartModal(false);
+      await loadEventDetail();
+    } catch (err) {
+      console.error('Error starting event:', err);
+    } finally {
+      setIsStartingEvent(false);
+    }
+  };
+
+  const handleUpdateRegistration = async (registrationId, status) => {
+    try {
+      setUpdatingRegistrationId(registrationId);
+      await workforceAPI.updateEventRegistration(id, registrationId, { status });
+      await loadParticipants();
+    } catch (err) {
+      console.error('Error updating registration:', err);
+    } finally {
+      setUpdatingRegistrationId(null);
     }
   };
 
@@ -696,6 +757,44 @@ const WorkforceEventDetail = () => {
               </div>
             </div>
 
+            {/* Countdown Timer — upcoming events only */}
+            {countdown && (
+              <div className={`rounded-xl border p-4 flex flex-col sm:flex-row items-center justify-between gap-4 ${
+                countdown.isStartingSoon
+                  ? 'bg-red-50 border-red-200'
+                  : 'bg-pale_yellow/60 border-gold/30'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <Clock className={`w-5 h-5 ${countdown.isStartingSoon ? 'text-red-600' : 'text-gold'}`} />
+                  <span className={`font-semibold text-sm ${countdown.isStartingSoon ? 'text-red-700' : 'text-yellow-800'}`}>
+                    {countdown.isStartingSoon ? 'Starting Soon!' : 'Event starts in'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  {countdown.days > 0 && (
+                    <div className="text-center">
+                      <p className={`text-2xl font-bold ${countdown.isStartingSoon ? 'text-red-700' : 'text-yellow-900'}`}>{String(countdown.days).padStart(2, '0')}</p>
+                      <p className="text-xs text-gray-500">days</p>
+                    </div>
+                  )}
+                  <div className="text-center">
+                    <p className={`text-2xl font-bold ${countdown.isStartingSoon ? 'text-red-700' : 'text-yellow-900'}`}>{String(countdown.hours).padStart(2, '0')}</p>
+                    <p className="text-xs text-gray-500">hrs</p>
+                  </div>
+                  <span className={`text-2xl font-bold ${countdown.isStartingSoon ? 'text-red-500' : 'text-gold'}`}>:</span>
+                  <div className="text-center">
+                    <p className={`text-2xl font-bold ${countdown.isStartingSoon ? 'text-red-700' : 'text-yellow-900'}`}>{String(countdown.minutes).padStart(2, '0')}</p>
+                    <p className="text-xs text-gray-500">min</p>
+                  </div>
+                  <span className={`text-2xl font-bold ${countdown.isStartingSoon ? 'text-red-500' : 'text-gold'}`}>:</span>
+                  <div className="text-center">
+                    <p className={`text-2xl font-bold ${countdown.isStartingSoon ? 'text-red-700' : 'text-yellow-900'}`}>{String(countdown.seconds).padStart(2, '0')}</p>
+                    <p className="text-xs text-gray-500">sec</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className='flex flex-col md:flex-row md:pl-4 gap-6 md:gap-4 '>
                 <div className='md:w-[65%] space-y-6 '>
                   {/* Organizer Spotlight */}
@@ -823,8 +922,8 @@ const WorkforceEventDetail = () => {
                 </div>
                   {/* Sidebar */}
           <div className="space-y-6 md:w-[35%] ">
-             {/* Event Participants Section - conditional visibility */}
-                  <div className="">
+             {/* Event Participants Section - organizer only */}
+                  {isEventCreator && <div className="">
                     <div className="overflow-hidden">
                         <div className="flex flex-col">
                           <div className="flex justify-between">
@@ -940,6 +1039,7 @@ const WorkforceEventDetail = () => {
                                       <th className="text-left py-4 px-6 font-bold ">Contact</th>
                                       <th className="text-left py-4 px-6 font-bold ">Status</th>
                                       <th className="text-left py-4 px-6 font-bold ">Registered</th>
+                                      {isEventCreator && <th className="text-left py-4 px-6 font-bold ">Actions</th>}
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gold/20">
@@ -992,6 +1092,42 @@ const WorkforceEventDetail = () => {
                                             })}
                                           </p>
                                         </td>
+                                        {isEventCreator && (
+                                          <td className="py-4 px-6">
+                                            <div className="flex items-center gap-1.5">
+                                              {participant.status !== 'confirmed' && (
+                                                <button
+                                                  type="button"
+                                                  disabled={updatingRegistrationId === participant.id}
+                                                  onClick={() => handleUpdateRegistration(participant.id, 'confirmed')}
+                                                  className="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 border border-green-200 rounded-md hover:bg-green-200 disabled:opacity-50 transition-colors"
+                                                >
+                                                  {updatingRegistrationId === participant.id ? '...' : 'Confirm'}
+                                                </button>
+                                              )}
+                                              {participant.status !== 'waitlisted' && (
+                                                <button
+                                                  type="button"
+                                                  disabled={updatingRegistrationId === participant.id}
+                                                  onClick={() => handleUpdateRegistration(participant.id, 'waitlisted')}
+                                                  className="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200 rounded-md hover:bg-yellow-200 disabled:opacity-50 transition-colors"
+                                                >
+                                                  Waitlist
+                                                </button>
+                                              )}
+                                              {participant.status !== 'cancelled' && (
+                                                <button
+                                                  type="button"
+                                                  disabled={updatingRegistrationId === participant.id}
+                                                  onClick={() => handleUpdateRegistration(participant.id, 'cancelled')}
+                                                  className="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 border border-red-200 rounded-md hover:bg-red-200 disabled:opacity-50 transition-colors"
+                                                >
+                                                  Decline
+                                                </button>
+                                              )}
+                                            </div>
+                                          </td>
+                                        )}
                                       </tr>
                                     ))}
                                   </tbody>
@@ -1042,6 +1178,40 @@ const WorkforceEventDetail = () => {
                                         </p>
                                       </div>
                                     </div>
+                                    {isEventCreator && (
+                                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gold/20">
+                                        {participant.status !== 'confirmed' && (
+                                          <button
+                                            type="button"
+                                            disabled={updatingRegistrationId === participant.id}
+                                            onClick={() => handleUpdateRegistration(participant.id, 'confirmed')}
+                                            className="flex-1 py-1.5 text-xs font-semibold bg-green-100 text-green-800 border border-green-200 rounded-md hover:bg-green-200 disabled:opacity-50 transition-colors"
+                                          >
+                                            {updatingRegistrationId === participant.id ? '...' : 'Confirm'}
+                                          </button>
+                                        )}
+                                        {participant.status !== 'waitlisted' && (
+                                          <button
+                                            type="button"
+                                            disabled={updatingRegistrationId === participant.id}
+                                            onClick={() => handleUpdateRegistration(participant.id, 'waitlisted')}
+                                            className="flex-1 py-1.5 text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200 rounded-md hover:bg-yellow-200 disabled:opacity-50 transition-colors"
+                                          >
+                                            Waitlist
+                                          </button>
+                                        )}
+                                        {participant.status !== 'cancelled' && (
+                                          <button
+                                            type="button"
+                                            disabled={updatingRegistrationId === participant.id}
+                                            onClick={() => handleUpdateRegistration(participant.id, 'cancelled')}
+                                            className="flex-1 py-1.5 text-xs font-semibold bg-red-100 text-red-800 border border-red-200 rounded-md hover:bg-red-200 disabled:opacity-50 transition-colors"
+                                          >
+                                            Decline
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
@@ -1096,7 +1266,57 @@ const WorkforceEventDetail = () => {
                         </div>
                       )}
                     </div>
+                  </div>}
+            {/* Organizer Start Event Section */}
+            {isEventCreator && eventStatus.status === 'upcoming' && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Play className="w-4 h-4 text-green-700" />
                   </div>
+                  <h3 className="font-semibold text-green-900">Organizer Controls</h3>
+                </div>
+                <p className="text-sm text-green-700">
+                  Start the event early to open the meeting link for confirmed participants right now.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowStartModal(true)}
+                  className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
+                >
+                  <Play className="w-4 h-4" />
+                  Start Event Now
+                </button>
+              </div>
+            )}
+
+            {/* Organizer Live Controls */}
+            {isEventCreator && eventStatus.status === 'ongoing' && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                  <h3 className="font-semibold text-green-900">Event is Live</h3>
+                </div>
+                {event.is_virtual && event.meeting_link ? (
+                  <a
+                    href={event.meeting_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Join as Host
+                  </a>
+                ) : event.is_virtual ? (
+                  <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                    No meeting link set. Edit the event to add one.
+                  </p>
+                ) : (
+                  <p className="text-sm text-green-700">In-person event — see venue details above.</p>
+                )}
+              </div>
+            )}
+
             {/* Registration Card */}
             <div className="space-y-2 md:border border-gray-200 md:px-2 py-0 md:py-6">
                 <div className="mb-4">
@@ -1110,7 +1330,7 @@ const WorkforceEventDetail = () => {
 
               <div className="">
                 <div className="space-y-4 mb-6 lg:mb-8">
-                  {event.attendees_count != null && (
+                  {isEventCreator && event.attendees_count != null && (
                     <>
                       <div className="flex justify-between items-center">
                         <span className="flex items-center gap-2 font-medium text-gray-600">
@@ -1161,7 +1381,7 @@ const WorkforceEventDetail = () => {
                   </div>
                 </div>
 
-                {eventStatus.status === 'upcoming' && (
+                {!isEventCreator && eventStatus.status === 'upcoming' && (
                   <div className="space-y-3">
                     
                     {myRegistration && myRegistration.status === 'pending_payment' ? (
@@ -1246,11 +1466,11 @@ const WorkforceEventDetail = () => {
                             Registered on {new Date(myRegistration.registered_at || myRegistration.created_at).toLocaleDateString()}
                           </p>
                         </div>
-                        {/* Meeting link — shown when API returns it (confirmed registrant) */}
+                        {/* Meeting link — backend returns this 30 min before start or when manually started */}
                         {event.is_virtual && event.meeting_link && (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
                             <p className="text-sm font-semibold text-green-800 flex items-center gap-2">
-                              <span>🔗</span> {event.virtual_platform || 'Virtual Meeting'} Link
+                              <span>🔗</span> {event.virtual_platform || 'Virtual Meeting'} Link Ready
                             </p>
                             <a
                               href={event.meeting_link}
@@ -1259,7 +1479,7 @@ const WorkforceEventDetail = () => {
                               className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
                             >
                               <ExternalLink className="w-4 h-4" />
-                              Join Meeting
+                              Join Now
                             </a>
                             <p className="text-xs text-green-700 break-all">{event.meeting_link}</p>
                           </div>
@@ -1335,7 +1555,7 @@ const WorkforceEventDetail = () => {
                         </div>
                     )}
 
-                    {event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees && (
+                    {isEventCreator && event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees && (
                       <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl lg:rounded-2xl border border-amber-200 shadow-lg">
                         <p className="text-amber-800 font-bold text-base lg:text-lg">Event is Full</p>
                         <p className="text-amber-700 mt-2">Join waitlist for updates</p>
@@ -1343,7 +1563,7 @@ const WorkforceEventDetail = () => {
                     )}
                   </div>
                 )}
-                {eventStatus.status === 'ongoing' && (
+                {!isEventCreator && eventStatus.status === 'ongoing' && (
                   <div className="space-y-3">
                     {/* Check if registration is still open */}
                     {(!event.registration_deadline || new Date(event.registration_deadline) > new Date()) ? (
@@ -1413,28 +1633,60 @@ const WorkforceEventDetail = () => {
                             </div>
                           </div>
                         ) : myRegistration ? (
-                          // User is registered - show Join Now
-                          <div className="p-4 lg:p-6 bg-gradient-to-br from-green-100 to-emerald-50 rounded-xl lg:rounded-2xl border border-green-300 shadow-lg">
+                          // User is registered
+                          <div className={`p-4 lg:p-6 rounded-xl lg:rounded-2xl border shadow-lg bg-gradient-to-br ${
+                            myRegistration.status === 'confirmed' || myRegistration.status === 'attended'
+                              ? 'from-green-100 to-emerald-50 border-green-300'
+                              : 'from-yellow-50 to-amber-50 border-yellow-300'
+                          }`}>
                             <div className="text-center">
-                              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-green-200/50 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
-                                <UserCheck className="w-6 h-6 lg:w-8 lg:h-8 text-green-600" />
+                              <div className={`w-12 h-12 lg:w-16 lg:h-16 rounded-xl lg:rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4 ${
+                                myRegistration.status === 'confirmed' || myRegistration.status === 'attended'
+                                  ? 'bg-green-200/50'
+                                  : 'bg-yellow-200/50'
+                              }`}>
+                                <UserCheck className={`w-6 h-6 lg:w-8 lg:h-8 ${
+                                  myRegistration.status === 'confirmed' || myRegistration.status === 'attended'
+                                    ? 'text-green-600'
+                                    : 'text-yellow-600'
+                                }`} />
                               </div>
-                              <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Happening Now</h3>
-                              <p className="text-green-700 mb-4 text-sm">
-                                You're registered. Join the event now!
-                              </p>
-                              {event.is_virtual && event.meeting_link && (
+                              {myRegistration.status === 'confirmed' || myRegistration.status === 'attended' ? (
                                 <>
-                                  <a
-                                    href={event.meeting_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
-                                  >
-                                    <ExternalLink className="w-4 h-4" />
-                                    Join Now
-                                  </a>
-                                  <p className="text-xs text-green-700 mt-2 break-all">{event.meeting_link}</p>
+                                  <h3 className="text-lg lg:text-xl font-bold text-green-900 mb-2">Event is Happening Now</h3>
+                                  <p className="text-green-700 mb-4 text-sm">You're registered. Join the event now!</p>
+                                  {event.is_virtual && event.meeting_link ? (
+                                    <>
+                                      <a
+                                        href={event.meeting_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 gap-2 shadow-md"
+                                      >
+                                        <ExternalLink className="w-4 h-4" />
+                                        Join Now
+                                      </a>
+                                      <p className="text-xs text-green-700 mt-2 break-all">{event.meeting_link}</p>
+                                    </>
+                                  ) : event.is_virtual ? (
+                                    <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+                                      No meeting link has been set by the organizer yet.
+                                    </p>
+                                  ) : (
+                                    <p className="text-sm text-green-700">
+                                      In-person event — see the venue details above.
+                                    </p>
+                                  )}
+                                </>
+                              ) : myRegistration.status === 'waitlisted' ? (
+                                <>
+                                  <h3 className="text-lg font-bold text-yellow-900 mb-2">You're on the Waitlist</h3>
+                                  <p className="text-yellow-700 text-sm">You'll be notified if a spot opens up.</p>
+                                </>
+                              ) : (
+                                <>
+                                  <h3 className="text-lg font-bold text-yellow-900 mb-2">Registration Pending Approval</h3>
+                                  <p className="text-yellow-700 text-sm">The organizer will review your registration. You'll get access once confirmed.</p>
                                 </>
                               )}
                             </div>
@@ -1485,7 +1737,7 @@ const WorkforceEventDetail = () => {
                     )}
                   </div>
                 )}
-                {eventStatus.status === 'completed' && (
+                {!isEventCreator && eventStatus.status === 'completed' && (
                   <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <p className="text-gray-700 font-medium">Event Completed</p>
                     <p className="text-gray-600 text-sm mt-1">Thank you for your interest</p>
@@ -1533,6 +1785,46 @@ const WorkforceEventDetail = () => {
       </div>
 
   </div>
+
+      {/* Start Event Confirmation Modal */}
+      {showStartModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center">
+                <Play className="w-8 h-8 text-green-700" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">Start Event Now?</h3>
+                <p className="text-gray-600 text-sm">
+                  This will mark the event as live and immediately make the meeting link available to all confirmed participants.
+                </p>
+              </div>
+              <div className="flex gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => setShowStartModal(false)}
+                  className="flex-1 py-2.5 px-4 border border-gray-200 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartEvent}
+                  disabled={isStartingEvent}
+                  className="flex-1 py-2.5 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isStartingEvent ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Starting...</>
+                  ) : (
+                    <><Play className="w-4 h-4" /> Start Now</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Share Modal */}
       {showShareModal && (

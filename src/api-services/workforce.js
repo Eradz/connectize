@@ -401,6 +401,11 @@ const workforce = {
     return response;
   },
 
+  startEvent: async (id) => {
+    const response = await api.post(`/api/v1/workforce/events/${id}/start/`);
+    return response;
+  },
+
   getMyBookmarkedEvents: async () => {
     const response = await api.get('/api/v1/workforce/events/my_bookmarks/');
     return response;

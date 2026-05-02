@@ -137,6 +137,15 @@ export const getPendingSSORepresentatives = async (companyId) => {
   return response?.results || response?.data || response || [];
 };
 
+export const getMyActionableCompanies = async (permission = 'company_post') => {
+  const result = await makeApiRequest({
+    url: 'api/representatives/my-actionable-companies/',
+    method: 'GET',
+    params: { permission },
+  });
+  return Array.isArray(result) ? result : [];
+};
+
 export const approveSSORepresentative = async (id) => {
   const result = await makeApiRequest({
     url: `api/representatives/${id}/approve-sso/`,

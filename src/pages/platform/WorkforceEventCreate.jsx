@@ -36,6 +36,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
@@ -117,23 +118,14 @@ const WorkforceEventCreate = () => {
     is_published: true // Default to published for new events
   });
 
-  // Load user's companies when component mounts
+  // Load user's actionable companies (owned + represented with company_manage_events permission)
   useEffect(() => {
     const loadMyCompanies = async () => {
       setLoadingCompanies(true);
       setCompaniesError(null);
       try {
-        const response = await workforceAPI.getMyCompanies();
-        
-        // Handle different response formats
-        let companies = [];
-        if (response.data) {
-          companies = response.data.results || response.data || [];
-        } else if (Array.isArray(response)) {
-          companies = response;
-        }
-        
-        setMyCompanies(companies);
+        const companies = await getMyActionableCompanies('company_manage_events');
+        setMyCompanies(Array.isArray(companies) ? companies : []);
         
         if (companies.length === 0) {
           setCompaniesError('No companies found associated with your account.');
