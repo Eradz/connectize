@@ -13,6 +13,7 @@ import SearchableSelect from "../../components/SearchableSelect";
 import { toast } from "sonner";
 import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
+import { useGetActionableCompanies } from "../../hooks";
 
 export default function CreateListing() {
   const navigate = useNavigate();
@@ -25,8 +26,8 @@ export default function CreateListing() {
   const [productCategories, setProductCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const {user} = useAuth()
-  console.log("user", user)
+  const {user} = useAuth();
+  const { data: actionableCompanies = [] } = useGetActionableCompanies('company_manage_products');
   const initialType = searchParams.get("type");
   const [formData, setFormData] = useState({
     listing_type: ["product", "service"].includes(initialType) ? initialType : "product",
@@ -47,7 +48,7 @@ export default function CreateListing() {
     shipping_from_location: "",
     status: "draft",
     tags: [],
-    seller_company: user?.companies[0] || ''
+    seller_company_id: ''
   });
 
   const [tagInput, setTagInput] = useState("");
@@ -205,7 +206,7 @@ export default function CreateListing() {
         // Create manual listing
         const listingData = {
           ...formData,
-          seller_company: user.companies[0],
+          seller_company_id: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
           price: parseFloat(formData.price),
           compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
           quantity_available: parseInt(formData.quantity_available),
@@ -337,6 +338,23 @@ export default function CreateListing() {
             <h3 className="font-semibold mb-4">Basic Information</h3>
             
             <div className="space-y-4">
+              {actionableCompanies.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    List on behalf of
+                  </label>
+                  <select
+                    value={formData.seller_company_id}
+                    onChange={(e) => handleInputChange('seller_company_id', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                  >
+                    {actionableCompanies.map((company) => (
+                      <option key={company.id} value={company.id}>{company.company_name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Listing Type
