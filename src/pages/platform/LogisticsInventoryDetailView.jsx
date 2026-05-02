@@ -534,10 +534,8 @@ const handleDelete = async () => {
                   movements.slice(0, 5).map((movement) => (
                     <div key={movement.id} className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
                       <div>
-                        <p className="text-xs font-medium text-gray-900">
-                          {movement.type === 'receipt' ? 'Received' : 
-                           movement.type === 'issue' ? 'Issued' :
-                           movement.type === 'adjustment' ? 'Adjusted' : movement.type}
+                        <p className="text-xs font-medium text-gray-900 uppercase">
+                          {movement.movement_type.replace("_", " ")}
                         </p>
                         <p className="text-xs text-gray-500">{formatDate(movement.date)}</p>
                         {movement.reference && (
