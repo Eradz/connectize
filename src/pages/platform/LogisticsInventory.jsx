@@ -728,16 +728,14 @@ const LogisticsInventoryEnhanced = () => {
                     const StatusIcon = stockIndicator.icon;
                     
                     return (
-                      <div key={item.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-                        <div className="p-6">
+                      <div key={item.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow ">
+                        <div className="p-6 ">
                           {/* Header with Title and Edit Button */}
-                          <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start justify-between mb-4 truncate">
                             <div className="flex-1 pr-3">
                               <h3 className="text-base font-bold text-gray-900">{item.name}</h3>
                               <p className="text-xs text-gray-500 mt-1">SKU: {item.sku}</p>
-                              {item.description && (
-                                <p className="text-xs text-gray-600 mt-2 line-clamp-1">{item.description}</p>
-                              )}
+                                <div className="text-xs text-gray-600 mt-2 truncate ">{item.description}</div>
                             </div>
                             <button
                               onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', item.id))}
@@ -749,7 +747,7 @@ const LogisticsInventoryEnhanced = () => {
                           </div>
 
                           {/* Two Column Info Layout */}
-                          <div className="grid grid-cols-2 gap-4 mb-4 pr-[30%]">
+                          <div className="grid grid-cols-2 gap-4 mb-4 pr-[30%] ">
                             {/* Top Row */}
                             <div className='flex justify-between col-span-2'>
                               <div className="mb-4">
