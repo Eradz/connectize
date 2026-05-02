@@ -217,7 +217,7 @@ const KnowledgeTopicCreate = () => {
 
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t rounded-b-lg">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-2">
               <div className="text-sm text-gray-500">
                 <p>By posting, you agree to follow the forum guidelines.</p>
               </div>
@@ -233,7 +233,7 @@ const KnowledgeTopicCreate = () => {
                 <button
                   type="submit"
                   disabled={saving || !form.title.trim() || !form.content.trim()}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  className="px-6 py-2 bg-gold rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                   <Save className="w-4 h-4" />
                   <span>{saving ? 'Creating...' : 'Create Topic'}</span>
