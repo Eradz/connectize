@@ -88,61 +88,6 @@ const SubscriptionManagementSystem = () => {
     navigate(`?tab=${tab}`, { replace: true });
   };
 
-    // Get plan color based on type
-  // const getPlanColor = (planType) => {
-  //   const colorMap = {
-  //     'trial': 'bg-gray-100 text-gray-800 border-gray-300',
-  //     'starter': 'bg-blue-100 text-blue-800 border-blue-300',
-  //     'professional': 'bg-purple-100 text-purple-800 border-purple-300',
-  //     'enterprise': 'bg-orange-100 text-orange-800 border-orange-300',
-  //     'custom': 'bg-red-100 text-red-800 border-red-300'
-  //   };
-  //   return colorMap[planType?.toLowerCase()] || 'bg-gray-100 text-gray-800 border-gray-300';
-  // };
-
-  // Format usage percentage color
-  // const getUsageColor = (percentage) => {
-  //   if (percentage >= 90) return 'text-red-600';
-  //   if (percentage >= 75) return 'text-yellow-600';
-  //   return 'text-green-600';
-  // };
-
-  // Get category icon
-  // const getCategoryIcon = (category) => {
-  //   const iconMap = {
-  //     'Social Media': TrendingUp,
-  //     'Analytics': BarChart3,
-  //     'AI Services': Sparkles,
-  //     'Enterprise Tools': Shield,
-  //     'Team Management': Users,
-  //     'Admin & Support': Settings
-  //   };
-  //   return iconMap[category] || CheckCircle;
-  // };
-
-  // Handle plan upgrade
-  // const handlePlanUpgrade = async (planId) => {
-  //   try {
-  //     if (!currentSubscription?.id) {
-  //       console.error('No current subscription found');
-  //       return;
-  //     }
-
-  //     const response = await subscriptionsAPI.upgradeSubscription(currentSubscription.id, {
-  //       target_plan_id: planId
-  //     });
-
-  //     if (response.data) {
-  //       // Refresh data after upgrade
-  //       await fetchAllData();
-  //       alert('Plan upgraded successfully!');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error upgrading plan:', error);
-  //     alert('Failed to upgrade plan. Please try again.');
-  //   }
-  // };
-
   // Calculate total features count
   const totalFeatures = Object.values(features).reduce((total, categoryFeatures) => 
     total + (Array.isArray(categoryFeatures) ? categoryFeatures.length : 0), 0
@@ -150,7 +95,6 @@ const SubscriptionManagementSystem = () => {
 
   // Calculate categories count
   const categoriesCount = Object.keys(features).length;
-  console.log('Current Subscription :', currentSubscription);
   if (loading) {
     return (
       <div className="min-h-screen  flex items-center justify-center">

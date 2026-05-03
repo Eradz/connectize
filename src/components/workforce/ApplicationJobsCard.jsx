@@ -6,6 +6,7 @@ import { formatDate, formatSalary, getJobTypeIcon, getStatusBackgroundColor, get
 import ApplicationActionModal from './ApplicationActionModal'
 import { useState } from 'react'
 import { workforceService } from '../../api-services/oilgas'
+import { webRoutes } from '../../lib/webRoutes'
 
 const ApplicationJobsCard = ({job, setApplications, profile}) => {
     const [selectedApplication, setSelectedApplication] = useState(null);
@@ -86,7 +87,7 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
                             <h3 className="font-semibold text-gray-900 text-lg">{job.job_title || job.title }</h3>
                     </div>
             
-                <Link to={`/jobs/${job?.job_posting}`} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
+                <Link to={webRoutes.workforceJobDetail.replace(":id", job?.job_posting)} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
                     <BookText className="w-5 h-5" />
                     <p className="text-sm md:flex hidden">View Details</p>
                 </Link>
@@ -100,17 +101,17 @@ const ApplicationJobsCard = ({job, setApplications, profile}) => {
                     <div className='flex flex-col md:flex-row md:items-center gap-2'>
                     <div className="flex items-center text-sm text-gray-600">
                         <CalendarDays className="w-4 h-4 mr-2 " />
-                        <span>Date Applied: {formatDate(job.submitted_at)}</span>
+                        <span>Date Applied: {formatDate(job?.submitted_at)}</span>
                     </div>
     
                     <div className="flex items-center text-sm text-gray-600">
                         <ClockCheck className="w-4 h-4 mr-2 " />
-                        <span>{`Reviewed At: ${formatDate(job.reviewed_at)}`}</span>
+                        <span>{`Reviewed At: ${formatDate(job?.reviewed_at)}`}</span>
                     </div>
                     </div>
-                    <div className={`flex mt-2 md:mt-0 w-fit text-xs items-center ${getStatusBackgroundColor(job.status)} p-[0.5px] rounded-full`}>
+                    <div className={`flex mt-2 md:mt-0 w-fit text-xs items-center ${getStatusBackgroundColor(job?.status)} p-[0.5px] rounded-full`}>
                     <span className={`bg-white font-medium px-3 py-2 capitalize rounded-full `}>
-                        <div className={`${getStatusColor(job.status)} bg-clip-text`}>
+                        <div className={`${getStatusColor(job?.status)} bg-clip-text`}>
                         {job.status}
                         </div>
                         </span>

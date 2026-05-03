@@ -496,17 +496,17 @@ const LogisticsInventoryEnhanced = () => {
                 <p className="text-gray-600 mt-1">Oil & Gas equipment and supplies tracking</p>
                 {/* Debug session indicator removed as requested */}
               </div>
-              <div className="flex lg:items-center gap-3 w-full lg:w-max">
+              <div className="flex flex-wrap mt-2 md:mt-0 lg:items-center justify-between md:gap-3 w-full lg:w-max">
               <button
                 onClick={() => navigate(webRoutes.inventoryWarehouseCreate)}
-                className="w-[50%] lg:w-fit justify-center bg-white border border-gray-300 hover:bg-gray-50 px-0 lg:px-4 py-2 rounded-lg flex items-center text-sm"
+                className="w-[50%] md:w-[50%] lg:w-fit justify-center bg-white border border-gray-300 hover:bg-gray-50 px-0 lg:px-4 py-2 rounded-lg flex items-center text-sm"
               >
                 <Building className="w-4 h-4 mr-2" />
                 Add Warehouse
               </button>
               <button
                 onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-                className="w-[50%] lg:w-fit justify-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
+                className="w-[45%] md:w-[50%] lg:w-fit justify-center bg-gold hover:bg-custom_yellow px-0 lg:px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Item
@@ -514,7 +514,7 @@ const LogisticsInventoryEnhanced = () => {
               <button 
                   onClick={handleExport}
                   disabled={loading || filteredInventory.length === 0}
-                  className="w-[50%] lg:w-fit justify-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full md:w-[50%] lg:w-fit mt-2 md:mt-0 justify-center flex items-center px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   title={filteredInventory.length === 0 ? 'No items to export' : 'Export to CSV'}
                 >
                   {/* <Download className="w-4 h-4 mr-2" /> */}
@@ -728,16 +728,14 @@ const LogisticsInventoryEnhanced = () => {
                     const StatusIcon = stockIndicator.icon;
                     
                     return (
-                      <div key={item.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-                        <div className="p-6">
+                      <div key={item.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow ">
+                        <div className="p-6 ">
                           {/* Header with Title and Edit Button */}
-                          <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start justify-between mb-4 truncate">
                             <div className="flex-1 pr-3">
                               <h3 className="text-base font-bold text-gray-900">{item.name}</h3>
                               <p className="text-xs text-gray-500 mt-1">SKU: {item.sku}</p>
-                              {item.description && (
-                                <p className="text-xs text-gray-600 mt-2 line-clamp-1">{item.description}</p>
-                              )}
+                                <div className="text-xs text-gray-600 mt-2 truncate ">{item.description}</div>
                             </div>
                             <button
                               onClick={() => navigate(webRoutes.logisticsInventoryEdit.replace(':id', item.id))}
@@ -749,7 +747,7 @@ const LogisticsInventoryEnhanced = () => {
                           </div>
 
                           {/* Two Column Info Layout */}
-                          <div className="grid grid-cols-2 gap-4 mb-4 pr-[30%]">
+                          <div className="grid grid-cols-2 gap-4 mb-4 pr-[30%] ">
                             {/* Top Row */}
                             <div className='flex justify-between col-span-2'>
                               <div className="mb-4">

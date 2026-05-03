@@ -303,16 +303,18 @@ export const DiscoverPostItem = ({
       <header className="flex justify-between mb-2 gap-5 xs:gap-6 w-full overflow-hidden">
         <section className="flex xs:items-center gap-2">
           <Avatar
-            name={postItem?.company?.company_name}
+            name={postItem?.company?.company_name || postItem?.user?.first_name}
             size="sm"
-            src={postItem?.company?.logo || "images/default-company-logo.png"}
+            src={postItem?.company?.logo || postItem?.user?.avatar || "images/default-company-logo.png"}
             className={avatarStyle}
           />
 
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
             <CompanyName
-              name={postItem?.company?.slug}
+              name={postItem?.company?.slug || postItem?.user?.full_name}
               verified={postItem?.company?.verify}
+              company={!!postItem?.company?.slug}
+              userId={postItem?.user?.id}
             />
             <small className="text-gray-400 lowercase shrink-0">
               <Link to={`/co/${postItem?.user?.id}`}>

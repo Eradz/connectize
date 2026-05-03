@@ -13,6 +13,7 @@ import ReactivationPage from "./pages/authentication/reactivation";
 import ResetPasswordPage from "./pages/authentication/reset-password";
 import Signup from "./pages/authentication/signup";
 import VerifyAccount from "./pages/authentication/verify-account";
+import ScrollTop from "./utils/ScrollTop";
 
 // SSO callback components
 const LinkedInCallback = lazy(() => import("./components/sso/LinkedInLoginButton").then(m => ({ default: m.LinkedInCallback })));
@@ -212,6 +213,7 @@ const removeLeadingSlash = (path) => {
       <SEO />
       {/* Prefetch key data in background after user logs in */}
       <GlobalPrefetch />
+      <ScrollTop/>
       <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Comprehensive Admin CMS System */}

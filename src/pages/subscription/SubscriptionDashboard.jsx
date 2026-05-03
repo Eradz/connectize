@@ -166,106 +166,8 @@ const SubscriptionDashboard = () => {
     ];
   };
 
-  // Format plan data - EXACT SAME
-  // const getFormattedPlans = () => {
-  //   if (dashboardData.plans.length === 0) {
-  //     return [
-  //       {
-  //         name: 'Starter',
-  //         price: '$29.99',
-  //         plan_type: 'starter',
-  //         color: '#212529',
-  //         textColor: 'text-white',
-  //         buttonColor: 'bg-white text-gray-800',
-  //         features: [
-  //           'All sessions access',
-  //           'Summit materials',
-  //           'Tea & lunch breaks',
-  //           'Gala dinner',
-  //           'Visa assistance'
-  //         ]
-  //       },
-  //       {
-  //         name: 'Professional',
-  //         price: '$99.99',
-  //         plan_type: 'professional',
-  //         color: '#FFDB76',
-  //         textColor: 'text-gray-800',
-  //         buttonColor: 'bg-gray-800 text-white',
-  //         features: [
-  //           'Economy flight',
-  //           '5 nights in standard room',
-  //           'All-access summit entry',
-  //           'Meals + Gala',
-  //           'Shuttle transport',
-  //           'Visa assistance'
-  //         ]
-  //       },
-  //       {
-  //         name: 'Enterprise',
-  //         price: '$299.99',
-  //         plan_type: 'enterprise',
-  //         color: '#FFDB76',
-  //         textColor: 'text-gray-800',
-  //         buttonColor: 'bg-gray-800 text-white',
-  //         features: [
-  //           'Full-Scale Solution for Large Enterprises',
-  //           'Admin functions: 2 features',
-  //           'all services: 2 features',
-  //           'analytic: 1 feature',
-  //           'Transport (airport + daily)',
-  //           'Visa assistance'
-  //         ]
-  //       }
-  //     ];
-  //   }
-
-  //   return dashboardData.plans.map(plan => {
-  //     const planType = plan.plan_type?.toLowerCase();
-  //     let color, textColor, buttonColor;
-
-  //     if (planType === 'starter' || planType === 'trial') {
-  //       color = '#212529';
-  //       textColor = 'text-white';
-  //       buttonColor = 'bg-white text-gray-800';
-  //     } else if (planType === 'professional') {
-  //       color = '#FFDB76';
-  //       textColor = 'text-gray-800';
-  //       buttonColor = 'bg-gray-800 text-white';
-  //     } else {
-  //       color = '#FFDB76';
-  //       textColor = 'text-gray-800';
-  //       buttonColor = 'bg-gray-800 text-white';
-  //     }
-
-  //     // Extract features from plan
-  //     const features = [];
-  //     if (plan.max_projects) features.push(`${plan.max_projects} Projects`);
-  //     if (plan.max_storage_gb) features.push(`${plan.max_storage_gb}GB Storage`);
-  //     if (plan.max_team_members) features.push(`${plan.max_team_members} Team Members`);
-  //     if (plan.ai_insights_enabled) features.push('AI Insights');
-  //     if (plan.priority_support) features.push('Priority Support');
-  //     if (plan.api_access_enabled) features.push('API Access');
-
-  //     return {
-  //       ...plan,
-  //       price: `$${plan.price}`,
-  //       color,
-  //       textColor,
-  //       buttonColor,
-  //       features: features.length > 0 ? features : [
-  //         'Basic features',
-  //         'Standard support',
-  //         'Cloud storage',
-  //         'Team collaboration'
-  //       ]
-  //     };
-  //   });
-  // };
-
   // CHANGED: Navigation instead of alert
   const handleChoosePackage = (plan) => {
-    console.log('Choosing package:', plan);
     
     if (!plan || !plan.id) {
       console.error('❌ No plan ID available');
@@ -284,6 +186,7 @@ const SubscriptionDashboard = () => {
   const summaryItems = getSummaryItems();
   // const plans = getFormattedPlans();
   const currentPlan = dashboardData.currentSubscription?.plan;
+  
 
   if (loading) {
     return (
@@ -315,68 +218,16 @@ const SubscriptionDashboard = () => {
             <h1 className="text-2xl font-bold text-gray-900">Subscription Dashboard</h1>
             <p className="text-gray-500 text-sm mt-1">Manage your subscription plans and features</p>
           </div>
-          <Link
-            to={webRoutes.subscriptionManagement}
-            className="px-6 py-2 text-center rounded-full font-medium transition-colors text-gray-800 hover:opacity-90"
-            style={{ backgroundColor: '#FFE7A4' }}
-          >
-            Manage Subscription
-          </Link>
+          {
+            !!currentPlan && 
+              <Link
+              to={webRoutes.subscriptionManagement}
+              className="px-6 py-2 text-center rounded-full font-medium transition-colors text-gray-800 hover:opacity-90 bg-[#FFE7A4]"
+            >
+              Manage Subscription
+            </Link>
+          }
         </div>
-
-        {/* Tabs */}
-        {/* <div className="flex gap-3 mb-6">
-          <button
-            onClick={() => setActiveTab('manage')}
-            className="px-6 py-2 rounded-full font-medium transition-colors text-gray-800"
-            style={{ 
-              backgroundColor: activeTab === 'manage' ? '#FFE7A4' : '#ffffff',
-              color: activeTab === 'manage' ? '#1f2937' : '#6b7280'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== 'manage') e.target.style.backgroundColor = '#f3f4f6';
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== 'manage') e.target.style.backgroundColor = '#ffffff';
-            }}
-          >
-            Manage Subscription
-          </button>
-          <Link
-            to={webRoutes.subscriptionManagement + '?tab=billing'}
-            onClick={() => setActiveTab('billing')}
-            className="px-6 py-2 rounded-full font-medium transition-colors"
-            style={{ 
-              backgroundColor: activeTab === 'billing' ? '#FFE7A4' : '#ffffff',
-              color: activeTab === 'billing' ? '#1f2937' : '#6b7280'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== 'billing') e.target.style.backgroundColor = '#f3f4f6';
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== 'billing') e.target.style.backgroundColor = '#ffffff';
-            }}
-          >
-            View Billing
-          </Link>
-          <Link
-            to={webRoutes.subscriptionManagement + '?tab=dashboard'}
-            onClick={() => setActiveTab('analytics')}
-            className="px-6 py-2 rounded-full font-medium transition-colors"
-            style={{ 
-              backgroundColor: activeTab === 'analytics' ? '#FFE7A4' : '#ffffff',
-              color: activeTab === 'analytics' ? '#1f2937' : '#6b7280'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== 'analytics') e.target.style.backgroundColor = '#f3f4f6';
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== 'analytics') e.target.style.backgroundColor = '#ffffff';
-            }}
-          >
-            Usage Analytics
-          </Link>
-        </div> */}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

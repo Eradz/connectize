@@ -520,7 +520,7 @@ const WorkforceApplications = () => {
                                         <h3 className="font-semibold text-gray-900 text-lg">{job.job_title}</h3>
                                 </div>
                            
-                            <Link to={`/jobs/${job?.job_posting}`} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
+                            <Link to={webRoutes.workforceEventDetail.replace(":id", job?.job_posting)} className="p-2 bg-pale_yellow flex rounded-lg gap-2 items-start">
                                 <BookText className="w-5 h-5" />
                                 <p className="text-sm md:flex hidden">View Details</p>
                             </Link>

@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import React from 'react'
 
   const getTopicsDisplay = (topics) => {
+    let newTopics;
   if (!topics) return []
   
   // Handle case where topics might be a string
@@ -25,6 +26,7 @@ import React from 'react'
   if (topics.length === 1 && typeof topics[0] === 'string' && topics[0].startsWith('[')) {
     try {
       topics = JSON.parse(topics[0])
+      return newTopics = JSON.parse(topics[0])
     } catch {
       return []
     }
@@ -96,19 +98,6 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
     });
   };
 
-
-  const getTabCount = (tab) => {
-    switch (tab) {
-      case 'ongoing':
-        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) > Date.now()).length;
-      case 'upcoming':
-        return events.filter(event => new Date(event.start_date) > Date.now()).length;
-      case 'recent':
-        return events.filter(event => new Date(event.start_date) < Date.now() && new Date(event.end_date) < Date.now()).length;
-      default:
-        return 0;
-    }
-  };
   return (
             <div className="p-2 py-4 mb-8">
               

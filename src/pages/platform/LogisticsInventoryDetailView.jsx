@@ -32,7 +32,7 @@ const LogisticsInventoryDetailView = () => {
   const [movements, setMovements] = useState([]);
   const [showAdjustStock, setShowAdjustStock] = useState(false);
   const [adjustmentData, setAdjustmentData] = useState({
-    quantity: 0,
+    quantity: item?.current_stock || 0,
     type: 'add',
     reason: '',
     notes: ''
@@ -99,6 +99,7 @@ const loadItemData = async () => {
     }
 
     setItem(itemRes);
+    setAdjustmentData(prev => ({ ...prev, quantity: itemRes.current_stock }))
 
     // Movements can be empty but must be real
     const movementList =
@@ -117,19 +118,6 @@ const loadItemData = async () => {
     setLoading(false);
   }
 };
-
-
-  
-
-  const getStatusColor = (status) => {
-    const statusConfig = statusOptions.find(s => s.value === status);
-    return statusConfig?.color || 'text-gray-600 bg-gray-100';
-  };
-
-  const getConditionColor = (condition) => {
-    const conditionConfig = conditionOptions.find(c => c.value === condition);
-    return conditionConfig?.color || 'text-gray-600 bg-gray-100';
-  };
 
   const getStockStatusIndicator = (item) => {
     if (item.current_stock === 0) {
@@ -172,17 +160,18 @@ const loadItemData = async () => {
         ? Math.abs(adjustmentData.quantity)
         : -Math.abs(adjustmentData.quantity);
 
-      await logisticsAPI.adjustStock(id, {
+      const response = await logisticsAPI.adjustStock(id, {
         quantity,
         movement_type: adjustmentData.reason,
         notes: adjustmentData.notes
       });
-
+      if(response){ 
       toast.success('Stock adjusted successfully');
       setShowAdjustStock(false);
       setAdjustmentData({ quantity: 0, type: 'add', reason: '', notes: '' });
       
       await loadItemData();
+      }
     } catch (error) {
       toast.error('Failed to adjust stock');
       console.error('Error adjusting stock:', error);
@@ -545,10 +534,8 @@ const handleDelete = async () => {
                   movements.slice(0, 5).map((movement) => (
                     <div key={movement.id} className="flex justify-between items-start py-2 border-b border-gray-100 last:border-b-0">
                       <div>
-                        <p className="text-xs font-medium text-gray-900">
-                          {movement.type === 'receipt' ? 'Received' : 
-                           movement.type === 'issue' ? 'Issued' :
-                           movement.type === 'adjustment' ? 'Adjusted' : movement.type}
+                        <p className="text-xs font-medium text-gray-900 uppercase">
+                          {movement.movement_type.replace("_", " ")}
                         </p>
                         <p className="text-xs text-gray-500">{formatDate(movement.date)}</p>
                         {movement.reference && (
@@ -613,12 +600,15 @@ const handleDelete = async () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                   >
                     <option value="">Select reason</option>
-                    <option value="inventory_count">Physical Inventory Count</option>
-                    <option value="damaged_goods">Damaged Goods</option>
-                    <option value="theft_loss">Theft/Loss</option>
-                    <option value="found_items">Found Items</option>
-                    <option value="correction">Data Correction</option>
-                    <option value="other">Other</option>
+                    <option value="cycle_count">Cycle Count</option>
+                    <option value="damage">Damaged Goods</option>
+                    <option value="theft">Theft/Loss</option>
+                    <option value="disposal">Disposal</option>
+                    <option value="receipt">Rceipt</option>
+                    <option value="issue">Issue</option>
+                    <option value="transfer">Transfer</option>
+                    <option value="adjustment">Adjustment</option>
+                    <option value="return">return</option>
                   </select>
                 </div>
 
