@@ -104,7 +104,17 @@ export const getPostById = async (id) => {
   return post;
 };
 
-export const createPost = async (formData, companyId) => {
+export const getPostUploadStatus = async (uploadId) => {
+  if (!uploadId) return null;
+
+  return await makeApiRequest({
+    url: `api/posts/upload-status/`,
+    method: "GET",
+    params: { upload_id: uploadId },
+  });
+};
+
+export const createPost = async (formData, companyId, options = {}) => {
   // If companyId is provided and already in formData, use it directly
   // Otherwise fall back to fetching the user's first company
   if (!companyId && !formData.get?.("company")) {
@@ -125,6 +135,7 @@ export const createPost = async (formData, companyId) => {
     method: "POST",
     data: formData,
     contentType: "multipart/form-data",
+    onUploadProgress: options.onUploadProgress,
   });
 
   return post;

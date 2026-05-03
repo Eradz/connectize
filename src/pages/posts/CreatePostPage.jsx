@@ -5,8 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, AlertCircle } from "lucide-react";
-import { createPost } from "../../api-services/posts";
-import { useCustomQuery } from "../../context/queryContext";
+import { createPost, getPostUploadStatus } from "../../api-services/posts";
 import { useAuth } from "../../context/userContext";
 import { useGetActionableCompanies } from "../../hooks";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../icon";
@@ -36,9 +35,25 @@ const isImageSize = (files) =>
     ? files.every((file) => file.size <= imageSize)
     : files.size <= imageSize;
 
+const createUploadId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `post-upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const progressLabel = {
+  preparing: "Preparing post",
+  uploading: "Uploading to server",
+  waiting: "Waiting for backend",
+  processing: "Processing on backend",
+  saving_images: "Saving images",
+  complete: "Post created",
+  failed: "Upload failed",
+};
+
 function CreatePostPage() {
   const navigate = useNavigate();
-  const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
   const { data: companies = [] } = useGetActionableCompanies('company_post');
   const queryClient = useQueryClient();
@@ -52,6 +67,12 @@ function CreatePostPage() {
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [selectedGif, setSelectedGif] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState({
+    visible: false,
+    percent: 0,
+    stage: "preparing",
+    detail: "",
+  });
 
   // Auto-select first company, or update when companies load
   useEffect(() => {
@@ -114,17 +135,80 @@ function CreatePostPage() {
       return;
     }
 
+    let shouldPoll = false;
+    let pollInterval;
+
     try {
       setIsLoading(true);
+      const uploadId = createUploadId();
       const formData = new FormData();
       formData.append("body", message);
+      formData.append("upload_id", uploadId);
       if (selectedCompanyId) {
         formData.append("company", selectedCompanyId);
       }
       validImages.forEach((image) => formData.append("images", image));
       if (selectedGif) formData.append("gif", selectedGif);
 
-      const newPost = await createPost(formData, selectedCompanyId);
+      setUploadProgress({
+        visible: true,
+        percent: 5,
+        stage: "preparing",
+        detail: "Preparing your post",
+      });
+
+      shouldPoll = true;
+      const pollBackendStatus = async () => {
+        if (!shouldPoll) return;
+        try {
+          const status = await getPostUploadStatus(uploadId);
+          if (!status) return;
+          setUploadProgress((previous) => ({
+            visible: true,
+            percent: Math.max(previous.percent, status.percent || previous.percent),
+            stage: status.stage || previous.stage,
+            detail: status.detail || previous.detail,
+          }));
+        } catch (statusError) {
+          console.debug("Post upload status check failed", statusError);
+        }
+      };
+
+      pollInterval = window.setInterval(pollBackendStatus, 700);
+
+      const newPost = await createPost(formData, selectedCompanyId, {
+        onUploadProgress: (event) => {
+          const total = event.total || 0;
+          if (!total) {
+            setUploadProgress((previous) => ({
+              ...previous,
+              visible: true,
+              stage: "uploading",
+              detail: "Uploading to server",
+            }));
+            return;
+          }
+
+          const uploadPercent = Math.round((event.loaded / total) * 85);
+          setUploadProgress((previous) => ({
+            visible: true,
+            percent: Math.max(previous.percent, Math.min(uploadPercent, 85)),
+            stage: event.loaded >= total ? "processing" : "uploading",
+            detail: event.loaded >= total
+              ? "Upload complete. Waiting for backend to finish..."
+              : "Uploading to server",
+          }));
+        },
+      });
+
+      shouldPoll = false;
+      window.clearInterval(pollInterval);
+      setUploadProgress({
+        visible: true,
+        percent: 100,
+        stage: "complete",
+        detail: "Post created",
+      });
 
       if (newPost?.id) {
         setMessage("");
@@ -139,10 +223,29 @@ function CreatePostPage() {
         toast.error("Failed to create post. Please try again.");
       }
     } catch (error) {
+      shouldPoll = false;
+      if (pollInterval) window.clearInterval(pollInterval);
       console.error("Post error: ", error);
+      setUploadProgress((previous) => ({
+        ...previous,
+        visible: true,
+        percent: 100,
+        stage: "failed",
+        detail: "Something went wrong while creating your post.",
+      }));
       toast.error("Something went wrong while creating your post.");
     } finally {
+      shouldPoll = false;
+      if (pollInterval) window.clearInterval(pollInterval);
       setIsLoading(false);
+      window.setTimeout(() => {
+        setUploadProgress({
+          visible: false,
+          percent: 0,
+          stage: "preparing",
+          detail: "",
+        });
+      }, 1400);
     }
   }, [currentUser, message, validImages, selectedGif, selectedCompanyId, navigate, queryClient]);
 
@@ -278,6 +381,36 @@ function CreatePostPage() {
                 alt="Selected GIF"
                 className="max-w-xs h-auto rounded-lg hover:shadow transition-all duration-300"
               />
+            </div>
+          )}
+
+          {uploadProgress.visible && (
+            <div
+              className="mt-4 rounded-md border border-gold/30 bg-gold/5 px-3 py-3"
+              role="status"
+              aria-live="polite"
+            >
+              <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+                <span className="font-semibold text-gray-800">
+                  {progressLabel[uploadProgress.stage] || "Uploading post"}
+                </span>
+                <span className="tabular-nums font-semibold text-gold">
+                  {Math.min(100, Math.max(0, Math.round(uploadProgress.percent)))}%
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    uploadProgress.stage === "failed" ? "bg-red-500" : "bg-gold"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, Math.max(4, Math.round(uploadProgress.percent)))}%`,
+                  }}
+                />
+              </div>
+              <p className="mt-2 text-[11px] text-gray-500">
+                {uploadProgress.detail || "Keeping this open until the backend finishes."}
+              </p>
             </div>
           )}
 
