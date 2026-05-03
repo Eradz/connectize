@@ -93,12 +93,6 @@ function CreatePost() {
     detail: "",
   });
 
-  // Auto-select first company, or update when companies load
-  useEffect(() => {
-    if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
-    }
-  }, [companies, selectedCompanyId]);
 
   const textareaRef = useRef(null);
 
@@ -290,23 +284,24 @@ function CreatePost() {
 
   return (
     <section className="hidden md:block bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
-      {companies.length > 0 && (
-        <div className="mb-2 flex items-center gap-1.5">
-          <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Post as:</span>
-          <select
-            value={selectedCompanyId || ""}
-            onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
-            className="text-xs font-medium text-gray-600 bg-transparent hover:text-gray-900 border-none outline-none cursor-pointer p-0 pr-4 appearance-none"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}
-          >
-            {companies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.company_name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="mb-2 flex items-center gap-1.5">
+        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Post as:</span>
+        <select
+          value={selectedCompanyId ?? ""}
+          onChange={(e) => setSelectedCompanyId(e.target.value ? Number(e.target.value) : null)}
+          className="text-xs font-medium text-gray-600 bg-transparent hover:text-gray-900 border-none outline-none cursor-pointer p-0 pr-4 appearance-none"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}
+        >
+          <option value="">
+            {[currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(" ") || "Personal"}
+          </option>
+          {companies.map((company) => (
+            <option key={company.id} value={company.id}>
+              {company.company_name}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="size-full">
         <textarea
           type="text"
