@@ -1,6 +1,5 @@
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
-import { getCompanyByIdOrEmail } from "./companies";
 
 /**
  * Get all posts (Discover feed) - all published posts
@@ -116,21 +115,6 @@ export const getPostUploadStatus = async (uploadId) => {
 };
 
 export const createPost = async (formData, companyId, options = {}) => {
-  // If companyId is provided and already in formData, use it directly
-  // Otherwise fall back to fetching the user's first company
-  if (!companyId && !formData.get?.("company")) {
-    const companies = await getCompanyByIdOrEmail();
-    const company = companies?.[0];
-
-    if (!company) {
-      toast.info(
-        "You have no company associated with your profile, please create one"
-      );
-      return;
-    }
-    formData.append("company", company?.id);
-  }
-
   const post = await makeApiRequest({
     url: `api/posts/`,
     method: "POST",
