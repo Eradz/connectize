@@ -165,3 +165,22 @@ export const rejectSSORepresentative = async (id) => {
   toast.success("SSO employee rejected successfully");
   return result;
 };
+
+export const getAvailableRepresentativePermissions = async () => {
+  const result = await makeApiRequest({
+    url: "api/representatives/available-permissions/",
+    method: "GET",
+  });
+  return Array.isArray(result) ? result : [];
+};
+
+export const updateRepresentativePermissions = async (id, permissions) => {
+  const result = await makeApiRequest({
+    url: `api/representatives/${id}/update-permissions/`,
+    method: "PATCH",
+    data: { permissions },
+  });
+
+  toast.success("Permissions updated");
+  return result;
+};
