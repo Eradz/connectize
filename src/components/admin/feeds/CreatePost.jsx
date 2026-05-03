@@ -42,11 +42,35 @@ const createUploadId = () => {
 const progressLabel = {
   preparing: "Preparing post",
   uploading: "Uploading to server",
-  waiting: "Waiting for backend",
-  processing: "Processing on backend",
+  waiting: "Waiting for upload",
+  processing: "Processing post",
   saving_images: "Saving images",
   complete: "Post created",
   failed: "Upload failed",
+};
+
+const prependPostToFeedCache = (queryClient, post) => {
+  if (!post?.id) return;
+
+  queryClient.setQueriesData({ queryKey: ["posts"] }, (oldData) => {
+    if (!oldData?.pages) return oldData;
+
+    return {
+      ...oldData,
+      pages: oldData.pages.map((page, pageIndex) => {
+        const pagePosts = page?.posts || page?.results;
+        if (!Array.isArray(pagePosts)) return page;
+        if (pagePosts.some((item) => item?.id === post.id)) return page;
+        if (pageIndex !== 0) return page;
+
+        return {
+          ...page,
+          posts: page.posts ? [post, ...page.posts] : page.posts,
+          results: page.results ? [post, ...page.results] : page.results,
+        };
+      }),
+    };
+  });
 };
 
 function CreatePost() {
@@ -186,7 +210,7 @@ function CreatePost() {
             percent: Math.max(previous.percent, Math.min(uploadPercent, 85)),
             stage: event.loaded >= total ? "processing" : "uploading",
             detail: event.loaded >= total
-              ? "Upload complete. Waiting for backend to finish..."
+              ? "Upload complete. Finalizing post..."
               : "Uploading to server",
           }));
         },
@@ -206,7 +230,7 @@ function CreatePost() {
         setSelectedGif("");
         setValidImages([]);
         toast.success("Your post has been created");
-        // Immediately invalidate posts cache so the new post appears right away
+        prependPostToFeedCache(queryClient, newPost);
         queryClient.invalidateQueries({ queryKey: ["posts"] });
       } else {
         toast.error("Failed to create post. Please try again.");
@@ -353,7 +377,7 @@ function CreatePost() {
             />
           </div>
           <p className="mt-2 text-[11px] text-gray-500">
-            {uploadProgress.detail || "Keeping this open until the backend finishes."}
+            {uploadProgress.detail || "Keeping this open until your post is ready."}
           </p>
         </div>
       )}

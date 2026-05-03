@@ -6,8 +6,9 @@ import { getCompanyByIdOrEmail } from "./companies";
  * Get all posts (Discover feed) - all published posts
  */
 export const getPosts = async (page = 1, pageSize = 10) => {
+  const cacheBust = Date.now();
   const response = await makeApiRequest({
-    url: `api/posts/?page=${page}&page_size=${pageSize}`,
+    url: `api/posts/?page=${page}&page_size=${pageSize}&_=${cacheBust}`,
     method: "GET",
   });
 
