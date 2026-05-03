@@ -121,6 +121,7 @@ export default function AssignRepresentative() {
         role: category?.type,
         category: category?.id,
         invited: reps?.invited,
+        permissions: reps?.permissions || [],
       };
     });
   }, [cachedReps, userMap, categoryMap, companies]);

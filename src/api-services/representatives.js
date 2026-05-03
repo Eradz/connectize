@@ -36,6 +36,7 @@ export const assignRepresentative = async (rep) => {
       user: rep.user.id,
       company: rep.company.id,
       category,
+      permissions: Array.isArray(rep.permissions) ? rep.permissions : [],
       slug: `${rep.user.first_name}_${rep.role.replaceAll(" ", "_")}_${
         rep.company.id
       }_${rep.user.id}`,
