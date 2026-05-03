@@ -92,6 +92,7 @@ const RepsTile = ({
       company: company?.id,
       status: !isChecked,
       category,
+      permissions,
     });
   };
 

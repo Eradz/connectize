@@ -85,6 +85,7 @@ export const changeRepStatus = async (id, repData) => {
       company: repData.company,
       category: repData.category,
       status: repData.status,
+      ...(Array.isArray(repData.permissions) && { permissions: repData.permissions }),
     },
   });
 
