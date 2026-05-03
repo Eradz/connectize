@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { createPost, getPostUploadStatus } from "../../../api-services/posts";
 import { useAuth } from "../../../context/userContext";
-import { useGetCurrentCompany } from "../../../hooks";
+import { useGetActionableCompanies } from "../../../hooks";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
 import CustomErrorMessage from "../../CustomErrorMessage";
 import GifPicker from "../../GifPicker";
@@ -75,7 +75,7 @@ const prependPostToFeedCache = (queryClient, post) => {
 
 function CreatePost() {
   const { user: currentUser } = useAuth();
-  const { data: companies = [] } = useGetCurrentCompany();
+  const { data: companies = [] } = useGetActionableCompanies('company_post');
   const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -290,7 +290,7 @@ function CreatePost() {
 
   return (
     <section className="hidden md:block bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
-      {companies.length > 1 && (
+      {companies.length > 0 && (
         <div className="mb-2 flex items-center gap-1.5">
           <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Post as:</span>
           <select

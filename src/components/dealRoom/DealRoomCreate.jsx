@@ -16,7 +16,7 @@ import {
   Tag
 } from 'lucide-react';
 import dealRoomAPI from '../../api-services/dealRoom';
-import { getCompanyByIdOrEmail } from '../../api-services/companies';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
@@ -498,7 +498,7 @@ const DealRoomCreate = () => {
     let cancelled = false;
     const fetchCompanies = async () => {
       try {
-        const result = await getCompanyByIdOrEmail(null);
+        const result = await getMyActionableCompanies();
         if (!cancelled && Array.isArray(result)) {
           setCompanies(result);
         }
