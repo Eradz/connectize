@@ -68,6 +68,7 @@ export default function UserProfileHeadings({
             id={id}
             setCachedConnections={setCachedConnections}
             first_name={first_name}
+            slug={id}
           />
           <BlockUserButton
             userId={id}
