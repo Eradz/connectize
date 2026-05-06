@@ -4,10 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { createPost } from "../../../api-services/posts";
-import { useCustomQuery } from "../../../context/queryContext";
+import { createPost, getPostUploadStatus } from "../../../api-services/posts";
 import { useAuth } from "../../../context/userContext";
-import { useGetCurrentCompany } from "../../../hooks";
+import { useGetActionableCompanies } from "../../../hooks";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
 import CustomErrorMessage from "../../CustomErrorMessage";
 import GifPicker from "../../GifPicker";
@@ -33,10 +32,50 @@ const isImageSize = (files) =>
     ? files.every((file) => file.size <= imageSize)
     : files.size <= imageSize;
 
+const createUploadId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `post-upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const progressLabel = {
+  preparing: "Preparing post",
+  uploading: "Uploading to server",
+  waiting: "Waiting for upload",
+  processing: "Processing post",
+  saving_images: "Saving images",
+  complete: "Post created",
+  failed: "Upload failed",
+};
+
+const prependPostToFeedCache = (queryClient, post) => {
+  if (!post?.id) return;
+
+  queryClient.setQueriesData({ queryKey: ["posts"] }, (oldData) => {
+    if (!oldData?.pages) return oldData;
+
+    return {
+      ...oldData,
+      pages: oldData.pages.map((page, pageIndex) => {
+        const pagePosts = page?.posts || page?.results;
+        if (!Array.isArray(pagePosts)) return page;
+        if (pagePosts.some((item) => item?.id === post.id)) return page;
+        if (pageIndex !== 0) return page;
+
+        return {
+          ...page,
+          posts: page.posts ? [post, ...page.posts] : page.posts,
+          results: page.results ? [post, ...page.results] : page.results,
+        };
+      }),
+    };
+  });
+};
+
 function CreatePost() {
-  const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
-  const { data: companies = [] } = useGetCurrentCompany();
+  const { data: companies = [] } = useGetActionableCompanies('company_post');
   const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -47,13 +86,13 @@ function CreatePost() {
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [selectedGif, setSelectedGif] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState({
+    visible: false,
+    percent: 0,
+    stage: "preparing",
+    detail: "",
+  });
 
-  // Auto-select first company, or update when companies load
-  useEffect(() => {
-    if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
-    }
-  }, [companies, selectedCompanyId]);
 
   const textareaRef = useRef(null);
 
@@ -105,35 +144,117 @@ function CreatePost() {
       return;
     }
 
+    let shouldPoll = false;
+    let pollInterval;
+
     try {
       setIsLoading(true);
+      const uploadId = createUploadId();
       const formData = new FormData();
       formData.append("body", message);
+      formData.append("upload_id", uploadId);
       if (selectedCompanyId) {
         formData.append("company", selectedCompanyId);
       }
       validImages.forEach((image) => formData.append("images", image));
       if (selectedGif) formData.append("gif", selectedGif);
 
-      const newPost = await createPost(formData, selectedCompanyId);
+      setUploadProgress({
+        visible: true,
+        percent: 5,
+        stage: "preparing",
+        detail: "Preparing your post",
+      });
+
+      shouldPoll = true;
+      const pollBackendStatus = async () => {
+        if (!shouldPoll) return;
+        try {
+          const status = await getPostUploadStatus(uploadId);
+          if (!status) return;
+          setUploadProgress((previous) => ({
+            visible: true,
+            percent: Math.max(previous.percent, status.percent || previous.percent),
+            stage: status.stage || previous.stage,
+            detail: status.detail || previous.detail,
+          }));
+        } catch (statusError) {
+          console.debug("Post upload status check failed", statusError);
+        }
+      };
+
+      pollInterval = window.setInterval(pollBackendStatus, 700);
+
+      const newPost = await createPost(formData, selectedCompanyId, {
+        onUploadProgress: (event) => {
+          const total = event.total || 0;
+          if (!total) {
+            setUploadProgress((previous) => ({
+              ...previous,
+              visible: true,
+              stage: "uploading",
+              detail: "Uploading to server",
+            }));
+            return;
+          }
+
+          const uploadPercent = Math.round((event.loaded / total) * 85);
+          setUploadProgress((previous) => ({
+            visible: true,
+            percent: Math.max(previous.percent, Math.min(uploadPercent, 85)),
+            stage: event.loaded >= total ? "processing" : "uploading",
+            detail: event.loaded >= total
+              ? "Upload complete. Finalizing post..."
+              : "Uploading to server",
+          }));
+        },
+      });
+
+      shouldPoll = false;
+      window.clearInterval(pollInterval);
+      setUploadProgress({
+        visible: true,
+        percent: 100,
+        stage: "complete",
+        detail: "Post created",
+      });
 
       if (newPost?.id) {
         setMessage("");
         setSelectedGif("");
         setValidImages([]);
         toast.success("Your post has been created");
-        // Immediately invalidate posts cache so the new post appears right away
+        prependPostToFeedCache(queryClient, newPost);
         queryClient.invalidateQueries({ queryKey: ["posts"] });
       } else {
         toast.error("Failed to create post. Please try again.");
       }
     } catch (error) {
+      shouldPoll = false;
+      if (pollInterval) window.clearInterval(pollInterval);
       console.error("Post error: ", error);
+      setUploadProgress((previous) => ({
+        ...previous,
+        visible: true,
+        percent: 100,
+        stage: "failed",
+        detail: "Something went wrong while creating your post.",
+      }));
       toast.error("Something went wrong while creating your post.");
     } finally {
+      shouldPoll = false;
+      if (pollInterval) window.clearInterval(pollInterval);
       setIsLoading(false);
+      window.setTimeout(() => {
+        setUploadProgress({
+          visible: false,
+          percent: 0,
+          stage: "preparing",
+          detail: "",
+        });
+      }, 1400);
     }
-  }, [currentUser, message, validImages, selectedGif, setRefetchInterval]);
+  }, [currentUser, message, validImages, selectedGif, selectedCompanyId, queryClient]);
 
   const renderEmojiGifPickers = useMemo(
     () => (
@@ -163,23 +284,24 @@ function CreatePost() {
 
   return (
     <section className="hidden md:block bg-white px-4 xs:px-6 md:px-6 py-8 sm:container sm:rounded border-b-[4px] border-gold relative">
-      {companies.length > 1 && (
-        <div className="mb-2 flex items-center gap-1.5">
-          <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Post as:</span>
-          <select
-            value={selectedCompanyId || ""}
-            onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
-            className="text-xs font-medium text-gray-600 bg-transparent hover:text-gray-900 border-none outline-none cursor-pointer p-0 pr-4 appearance-none"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}
-          >
-            {companies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.company_name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="mb-2 flex items-center gap-1.5">
+        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Post as:</span>
+        <select
+          value={selectedCompanyId ?? ""}
+          onChange={(e) => setSelectedCompanyId(e.target.value ? Number(e.target.value) : null)}
+          className="text-xs font-medium text-gray-600 bg-transparent hover:text-gray-900 border-none outline-none cursor-pointer p-0 pr-4 appearance-none"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}
+        >
+          <option value="">
+            {[currentUser?.first_name, currentUser?.last_name].filter(Boolean).join(" ") || "Personal"}
+          </option>
+          {companies.map((company) => (
+            <option key={company.id} value={company.id}>
+              {company.company_name}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="size-full">
         <textarea
           type="text"
@@ -222,6 +344,36 @@ function CreatePost() {
             alt="Selected GIF"
             className="w-16 h-auto rounded-lg hover:shadow transition-all duration-300"
           />
+        </div>
+      )}
+
+      {uploadProgress.visible && (
+        <div
+          className="mt-4 rounded-md border border-gold/30 bg-gold/5 px-3 py-3"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+            <span className="font-semibold text-gray-800">
+              {progressLabel[uploadProgress.stage] || "Uploading post"}
+            </span>
+            <span className="tabular-nums font-semibold text-gold">
+              {Math.min(100, Math.max(0, Math.round(uploadProgress.percent)))}%
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                uploadProgress.stage === "failed" ? "bg-red-500" : "bg-gold"
+              }`}
+              style={{
+                width: `${Math.min(100, Math.max(4, Math.round(uploadProgress.percent)))}%`,
+              }}
+            />
+          </div>
+          <p className="mt-2 text-[11px] text-gray-500">
+            {uploadProgress.detail || "Keeping this open until your post is ready."}
+          </p>
         </div>
       )}
 

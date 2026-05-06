@@ -42,7 +42,7 @@ export const UserList = ({ isLoading, filteredUsers, setCachedReps }) => (
                 </small>
               </div>
             </div>
-            <RepRoleInput user={user} setCachedReps={setCachedReps} />
+            <RepRoleInput user={user} />
           </motion.section>
         ))
       )}

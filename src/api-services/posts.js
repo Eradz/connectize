@@ -1,13 +1,13 @@
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
-import { getCompanyByIdOrEmail } from "./companies";
 
 /**
  * Get all posts (Discover feed) - all published posts
  */
 export const getPosts = async (page = 1, pageSize = 10) => {
+  const cacheBust = Date.now();
   const response = await makeApiRequest({
-    url: `api/posts/?page=${page}&page_size=${pageSize}`,
+    url: `api/posts/?page=${page}&page_size=${pageSize}&_=${cacheBust}`,
     method: "GET",
   });
 
@@ -104,27 +104,23 @@ export const getPostById = async (id) => {
   return post;
 };
 
-export const createPost = async (formData, companyId) => {
-  // If companyId is provided and already in formData, use it directly
-  // Otherwise fall back to fetching the user's first company
-  if (!companyId && !formData.get?.("company")) {
-    const companies = await getCompanyByIdOrEmail();
-    const company = companies?.[0];
+export const getPostUploadStatus = async (uploadId) => {
+  if (!uploadId) return null;
 
-    if (!company) {
-      toast.info(
-        "You have no company associated with your profile, please create one"
-      );
-      return;
-    }
-    formData.append("company", company?.id);
-  }
+  return await makeApiRequest({
+    url: `api/posts/upload-status/`,
+    method: "GET",
+    params: { upload_id: uploadId },
+  });
+};
 
+export const createPost = async (formData, companyId, options = {}) => {
   const post = await makeApiRequest({
     url: `api/posts/`,
     method: "POST",
     data: formData,
     contentType: "multipart/form-data",
+    onUploadProgress: options.onUploadProgress,
   });
 
   return post;

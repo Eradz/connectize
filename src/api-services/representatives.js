@@ -36,6 +36,7 @@ export const assignRepresentative = async (rep) => {
       user: rep.user.id,
       company: rep.company.id,
       category,
+      permissions: Array.isArray(rep.permissions) ? rep.permissions : [],
       slug: `${rep.user.first_name}_${rep.role.replaceAll(" ", "_")}_${
         rep.company.id
       }_${rep.user.id}`,
@@ -84,6 +85,7 @@ export const changeRepStatus = async (id, repData) => {
       company: repData.company,
       category: repData.category,
       status: repData.status,
+      ...(Array.isArray(repData.permissions) && { permissions: repData.permissions }),
     },
   });
 
@@ -163,5 +165,24 @@ export const rejectSSORepresentative = async (id) => {
   });
 
   toast.success("SSO employee rejected successfully");
+  return result;
+};
+
+export const getAvailableRepresentativePermissions = async () => {
+  const result = await makeApiRequest({
+    url: "api/representatives/available-permissions/",
+    method: "GET",
+  });
+  return Array.isArray(result) ? result : [];
+};
+
+export const updateRepresentativePermissions = async (id, permissions) => {
+  const result = await makeApiRequest({
+    url: `api/representatives/${id}/update-permissions/`,
+    method: "PATCH",
+    data: { permissions },
+  });
+
+  toast.success("Permissions updated");
   return result;
 };
