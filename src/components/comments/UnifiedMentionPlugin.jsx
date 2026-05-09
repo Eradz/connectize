@@ -177,16 +177,13 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
 
   const updateResults = useCallback(
     (query) => {
-      if (!query) {
-        setResults([]);
-        return;
-      }
-
       const lowerQuery = query.toLowerCase();
 
       // Search users
       const matchedUsers = users
         .filter((user) => {
+          if (!lowerQuery) return true;
+
           const fullName = user.full_name?.toLowerCase() || '';
           const firstName = user.first_name?.toLowerCase() || '';
           const lastName = user.last_name?.toLowerCase() || '';
@@ -207,6 +204,8 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
       // Search companies
       const matchedCompanies = companies
         .filter((company) => {
+          if (!lowerQuery) return true;
+
           const name = company.company_name?.toLowerCase() || '';
           const slug = company.slug?.toLowerCase() || '';
           const tagline = company.tag_line?.toLowerCase() || '';

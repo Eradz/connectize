@@ -6,11 +6,14 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { createPost, getPostUploadStatus } from "../../../api-services/posts";
 import { useAuth } from "../../../context/userContext";
+import { useCompanySearch } from "../../../hooks/useCompanySearch";
 import { useGetActionableCompanies } from "../../../hooks";
+import { useUserSearch } from "../../../hooks/useUserSearch";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../../icon";
 import CustomErrorMessage from "../../CustomErrorMessage";
 import GifPicker from "../../GifPicker";
 import ValidImages from "../../ValidImages";
+import MentionTextarea from "../../comments/MentionTextarea";
 import { largeFileText, unSupportedText } from "../listing/newListing";
 
 const imageTypes = [
@@ -76,6 +79,8 @@ const prependPostToFeedCache = (queryClient, post) => {
 function CreatePost() {
   const { user: currentUser } = useAuth();
   const { data: companies = [] } = useGetActionableCompanies('company_post');
+  const { users: mentionUsers = [] } = useUserSearch();
+  const { companies: mentionCompanies = [] } = useCompanySearch();
   const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -121,6 +126,28 @@ function CreatePost() {
     setSelectedGif(gifUrl);
     setShowGifPicker(false);
   }, []);
+
+  const resizeTextarea = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  }, []);
+
+  const handleMessageChange = useCallback(
+    (nextValue) => {
+      if (nextValue.trim().length >= 10) {
+        setErrorMessage(null);
+      } else if (nextValue.trim().length < 10) {
+        setErrorMessage("Post message must be at least 10 characters long");
+      }
+
+      setMessage(nextValue);
+      window.requestAnimationFrame(resizeTextarea);
+    },
+    [resizeTextarea]
+  );
 
   const handleCreatePost = useCallback(async () => {
     if (currentUser?.is_first_time_user) {
@@ -303,27 +330,14 @@ function CreatePost() {
         </select>
       </div>
       <div className="size-full">
-        <textarea
+        <MentionTextarea
           type="text"
           ref={textareaRef}
           value={message}
+          users={mentionUsers}
+          companies={mentionCompanies}
           style={{ lineHeight: "1.2" }}
-          onChange={(e) => {
-            const textarea = textareaRef.current;
-            if (!textarea) return;
-            if (message.trim().length >= 10) {
-              setErrorMessage(null);
-            } else if (message.trim().length < 10) {
-              setErrorMessage(
-                "Post message must be at least 10 characters long"
-              );
-            }
-            setMessage(e.target.value);
-
-            // Auto-resize logic
-            textarea.style.height = "auto";
-            textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
-          }}
+          onValueChange={handleMessageChange}
           minLength={10}
           placeholder="What's happening?"
           className="w-full border-b border-gray-300 bg-transparent outline-none text-base resize-none transition-all duration-300 scrollbar-hidden placeholder:text-xl bg-red-60"

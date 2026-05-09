@@ -11,7 +11,6 @@ import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import ReactQuill from "react-quill";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -25,7 +24,9 @@ import {
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
+import { useCompanySearch } from "../../../hooks/useCompanySearch";
 import { usePollPosts } from "../../../hooks/usePolling";
+import { useUserSearch } from "../../../hooks/useUserSearch";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber } from "../../../lib/utils";
 import CompanyName from "../../company/CompanyName";
@@ -45,6 +46,7 @@ import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import CommentThread from "../../comments/CommentThread";
+import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import { webRoutes } from "../../../lib/webRoutes";
 
 function DiscoverPosts({
@@ -516,6 +518,13 @@ export const DiscoverPostItem = ({
  * Comment section with instant display - uses preview_comments from post data
  * Background prefetching loads more comments while user views preview
  */
+const createEmptyCommentContent = () => ({
+  text: "",
+  plainText: "",
+  mentions: [],
+  companyMentions: [],
+});
+
 const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
@@ -528,29 +537,52 @@ const CommentSection = ({
   refetchComments,
   showAllComments = false,
 }) => {
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState(createEmptyCommentContent);
+  const [commentEditorKey, setCommentEditorKey] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { setRefetchInterval } = useCustomQuery();
   const queryClient = useQueryClient();
+  const { users: mentionUsers = [] } = useUserSearch({ enabled: showCommentSection });
+  const { companies: mentionCompanies = [] } = useCompanySearch({ enabled: showCommentSection });
   const handleComment = useCallback(async () => {
-    if (comment.trim().length < 1) return;
+    if (!comment.plainText?.trim()) return;
 
     setLoading(true);
     try {
       // Fixed: pass comment text, not the postItem object
-      const newComment = await commentOnPost(postItem.id, comment);
+      const newComment = await commentOnPost(
+        postItem.id,
+        comment.text,
+        comment.mentions || [],
+        comment.companyMentions || []
+      );
       
       // Comment created successfully
       toast.success("Comment has been added");
-      setComment("");
+      setComment(createEmptyCommentContent());
+      setCommentEditorKey((key) => key + 1);
 
       // Update cache if possible
       if (newComment?.id) {
         queryClient.setQueryData(
-          ["comments", { postId: postItem.id }],
+          ["comments", postItem.id, 1],
           (oldComments) => {
-            if (!oldComments) return [newComment];
-            return [...oldComments, newComment];
+            if (!oldComments) {
+              return {
+                results: [newComment],
+                count: 1,
+                next: null,
+                previous: null,
+                hasMore: false,
+              };
+            }
+
+            if (Array.isArray(oldComments)) return [newComment, ...oldComments];
+
+            return {
+              ...oldComments,
+              results: [newComment, ...(oldComments.results || [])],
+              count: (oldComments.count || 0) + 1,
+            };
           }
         );
       }
@@ -608,7 +640,10 @@ const CommentSection = ({
   }, [refetchComments]);
 
   useEffect(() => {
-    if (!showCommentSection) setComment("");
+    if (!showCommentSection) {
+      setComment(createEmptyCommentContent());
+      setCommentEditorKey((key) => key + 1);
+    }
   }, [showCommentSection]);
 
   return (
@@ -626,18 +661,18 @@ const CommentSection = ({
         />
       </div>
 
-      <div className="mb-4 border-b pb-4 relative">
-        <ReactQuill
-          value={comment}
-          onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
-          theme="snow"
+      <div className="mb-4 border-b pb-4">
+        <LexicalCommentEditor
+          key={commentEditorKey}
+          onChange={setComment}
           placeholder="Type your comment here"
-          // style={{ height: "200px" }}
+          users={mentionUsers}
+          companies={mentionCompanies}
         />
         <button
-          className="absolute bottom-5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
+          className="mt-2 ml-auto block bg-gold disabled:skeleton hover:bg-custom_yellow text-xs px-3 py-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
           onClick={handleComment}
-          disabled={loading || comment.trim().length < 1}
+          disabled={loading || !comment.plainText?.trim()}
         >
           {loading ? "Commenting..." : "Comment"}
         </button>
@@ -656,8 +691,8 @@ const CommentSection = ({
             onReply={handleReplyToComment}
             onLike={handleLikeComment}
             onLikeReply={handleLikeReply}
-            users={[]}
-            companies={[]}
+            users={mentionUsers}
+            companies={mentionCompanies}
             level={0}
           />
         ))

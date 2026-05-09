@@ -7,11 +7,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { createPost, getPostUploadStatus } from "../../api-services/posts";
 import { useAuth } from "../../context/userContext";
+import { useCompanySearch } from "../../hooks/useCompanySearch";
 import { useGetActionableCompanies } from "../../hooks";
+import { useUserSearch } from "../../hooks/useUserSearch";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../icon";
 import CustomErrorMessage from "../../components/CustomErrorMessage";
 import GifPicker from "../../components/GifPicker";
 import ValidImages from "../../components/ValidImages";
+import MentionTextarea from "../../components/comments/MentionTextarea";
 import { largeFileText, unSupportedText } from "../../components/admin/listing/newListing";
 import SEO from "../../components/SEO";
 import { getSEOConfig } from "../../lib/seoConfig";
@@ -80,6 +83,8 @@ function CreatePostPage() {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { data: companies = [] } = useGetActionableCompanies('company_post');
+  const { users: mentionUsers = [] } = useUserSearch();
+  const { companies: mentionCompanies = [] } = useCompanySearch();
   const queryClient = useQueryClient();
   const seoData = getSEOConfig("createPost");
 
@@ -145,6 +150,26 @@ function CreatePostPage() {
     setSelectedGif(gifUrl);
     setShowGifPicker(false);
   }, []);
+
+  const resizeTextarea = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 300)}px`;
+  }, []);
+
+  const handleMessageChange = useCallback(
+    (nextValue) => {
+      if (nextValue.trim().length >= 10) {
+        setErrorMessage(null);
+      }
+
+      setMessage(nextValue);
+      window.requestAnimationFrame(resizeTextarea);
+    },
+    [resizeTextarea]
+  );
 
   const handleCreatePost = useCallback(async () => {
     if (message.trim().length < 10) {
@@ -363,21 +388,12 @@ function CreatePostPage() {
 
           {/* Textarea */}
           <div className="mb-4">
-            <textarea
+            <MentionTextarea
               ref={textareaRef}
               value={message}
-              onChange={(e) => {
-                const textarea = textareaRef.current;
-                if (!textarea) return;
-                if (message.trim().length >= 10) {
-                  setErrorMessage(null);
-                }
-                setMessage(e.target.value);
-
-                // Auto-resize logic
-                textarea.style.height = "auto";
-                textarea.style.height = `${Math.min(textarea.scrollHeight, 300)}px`;
-              }}
+              users={mentionUsers}
+              companies={mentionCompanies}
+              onValueChange={handleMessageChange}
               placeholder="What's happening in your world?"
               minLength={10}
               style={{ lineHeight: "1.5" }}
