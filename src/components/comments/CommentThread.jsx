@@ -112,6 +112,8 @@ const CommentThread = memo(({
           <MarkdownComponent
             markdownContent={comment.content}
             className="text-sm text-gray-700 mb-2"
+            mentionUsers={users}
+            mentionCompanies={companies}
           />
 
           {/* Comment Actions */}

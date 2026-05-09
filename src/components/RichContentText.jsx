@@ -6,18 +6,119 @@ import { Link } from "react-router-dom";
 
 const tokenPattern = /(^|[\s([{*_~])([#@])([A-Za-z0-9_][A-Za-z0-9_-]*)/g;
 
-const getTokenUrl = (symbol, value) => {
-  const query = symbol === "#" ? value : `${symbol}${value}`;
+const normalizeMentionToken = (value = "") =>
+  String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const slugifyMentionValue = (value = "") =>
+  normalizeMentionToken(String(value).replace(/[_\s]+/g, "-"));
+
+const toMentionTitle = (value = "") =>
+  String(value)
+    .replace(/[-_]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+
+const getUserDisplayName = (user = {}) => {
+  const fullName =
+    user.full_name ||
+    [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
+
+  return fullName || user.username || user.email?.split("@")[0] || "User";
+};
+
+const getCompanyDisplayName = (company = {}) =>
+  company.company_name || company.name || company.slug || "Company";
+
+const getUserMentionKeys = (user = {}) => {
+  const displayName = getUserDisplayName(user);
+  const keys = [
+    user.username,
+    user.email?.split("@")[0],
+    user.first_name,
+    user.last_name,
+    displayName,
+    slugifyMentionValue(displayName),
+  ];
+
+  return keys.filter(Boolean).map((key) => normalizeMentionToken(key));
+};
+
+const getCompanyMentionKeys = (company = {}) => {
+  const displayName = getCompanyDisplayName(company);
+  const keys = [
+    company.slug,
+    company.company_name,
+    company.name,
+    displayName,
+    slugifyMentionValue(displayName),
+  ];
+
+  return keys.filter(Boolean).map((key) => normalizeMentionToken(key));
+};
+
+const matchesMentionToken = (token, keys = []) => {
+  const normalized = normalizeMentionToken(token);
+  return keys.some((key) => key === normalized);
+};
+
+const resolveMentionTarget = (token, mentionUsers = [], mentionCompanies = []) => {
+  const user = mentionUsers.find((item) =>
+    matchesMentionToken(token, getUserMentionKeys(item))
+  );
+
+  if (user?.id) {
+    return {
+      label: getUserDisplayName(user),
+      url: `/co/${user.id}`,
+      type: "user",
+    };
+  }
+
+  const company = mentionCompanies.find((item) =>
+    matchesMentionToken(token, getCompanyMentionKeys(item))
+  );
+
+  const companyTarget = company?.slug || company?.company_name || company?.name;
+  if (companyTarget) {
+    return {
+      label: getCompanyDisplayName(company),
+      url: `/${encodeURIComponent(companyTarget)}`,
+      type: "company",
+    };
+  }
+
+  return null;
+};
+
+const getTokenTarget = (symbol, value, mentionUsers = [], mentionCompanies = []) => {
+  if (symbol === "@") {
+    const mentionTarget = resolveMentionTarget(value, mentionUsers, mentionCompanies);
+    if (mentionTarget) return mentionTarget;
+
+    return {
+      label: toMentionTitle(value),
+      url: `/search?search_query=${encodeURIComponent(`@${value}`)}`,
+      type: "mention",
+    };
+  }
+
+  const query = value;
   return `/search?search_query=${encodeURIComponent(query)}`;
 };
 
 const getTokenClassName = (symbol) =>
   clsx("font-semibold transition-colors", {
-    "!text-gold hover:!text-custom_yellow": symbol === "#",
-    "!text-blue-600 hover:!text-blue-700": symbol === "@",
+    "!text-gold hover:!text-custom_yellow": symbol === "#" || symbol === "@",
   });
 
-const renderInlineText = (text) => {
+const renderInlineText = (text, mentionUsers = [], mentionCompanies = []) => {
   const value = String(text);
   const output = [];
   let lastIndex = 0;
@@ -34,14 +135,24 @@ const renderInlineText = (text) => {
 
     if (prefix) output.push(prefix);
 
+    const tokenTarget = getTokenTarget(
+      symbol,
+      tokenValue,
+      mentionUsers,
+      mentionCompanies
+    );
+    const tokenLabel =
+      symbol === "#"
+        ? `${symbol}${tokenValue}`
+        : tokenTarget.label;
+
     output.push(
       <Link
         key={`${symbol}${tokenValue}-${tokenStart}`}
-        to={getTokenUrl(symbol, tokenValue)}
+        to={typeof tokenTarget === "string" ? tokenTarget : tokenTarget.url}
         className={getTokenClassName(symbol)}
       >
-        {symbol}
-        {tokenValue}
+        {tokenLabel}
       </Link>
     );
 
@@ -55,10 +166,10 @@ const renderInlineText = (text) => {
   return output.length ? output : value;
 };
 
-const renderInlineChildren = (children) =>
+const renderInlineChildren = (children, mentionUsers = [], mentionCompanies = []) =>
   React.Children.map(children, (child) => {
     if (typeof child === "string" || typeof child === "number") {
-      return renderInlineText(child);
+      return renderInlineText(child, mentionUsers, mentionCompanies);
     }
 
     return child;
@@ -86,7 +197,7 @@ const MarkdownLink = ({ children, href = "", ...props }) => {
   );
 };
 
-const markdownOptions = {
+const createMarkdownOptions = (mentionUsers = [], mentionCompanies = []) => ({
   overrides: {
     a: {
       component: MarkdownLink,
@@ -94,56 +205,58 @@ const markdownOptions = {
     p: {
       component: ({ children, ...props }) => (
         <p {...props} className="mb-1 last:mb-0 whitespace-pre-wrap">
-          {renderInlineChildren(children)}
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
     },
     strong: {
       component: ({ children, ...props }) => (
         <strong {...props} className="font-semibold text-inherit">
-          {renderInlineChildren(children)}
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </strong>
       ),
     },
     em: {
       component: ({ children, ...props }) => (
         <em {...props} className="italic text-inherit">
-          {renderInlineChildren(children)}
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </em>
       ),
     },
     h1: {
       component: ({ children, ...props }) => (
         <p {...props} className="mb-1 text-lg font-semibold text-inherit">
-          {renderInlineChildren(children)}
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
     },
     h2: {
       component: ({ children, ...props }) => (
         <p {...props} className="mb-1 text-base font-semibold text-inherit">
-          {renderInlineChildren(children)}
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
     },
     h3: {
       component: ({ children, ...props }) => (
         <p {...props} className="mb-1 font-semibold text-inherit">
-          {renderInlineChildren(children)}
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
     },
     li: {
       component: ({ children, ...props }) => (
-        <li {...props}>{renderInlineChildren(children)}</li>
+        <li {...props}>
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
+        </li>
       ),
     },
   },
-};
+});
 
 const hasHtml = (value) => /<\/?[a-z][\s\S]*>/i.test(value);
 
-const linkifyHtml = (html) => {
+const linkifyHtml = (html, mentionUsers = [], mentionCompanies = []) => {
   const sanitizedHtml = DOMPurify.sanitize(html);
 
   if (typeof document === "undefined" || typeof window === "undefined") {
@@ -187,10 +300,19 @@ const linkifyHtml = (html) => {
 
       if (prefix) fragment.append(document.createTextNode(prefix));
 
+      const tokenTarget = getTokenTarget(
+        symbol,
+        tokenValue,
+        mentionUsers,
+        mentionCompanies
+      );
       const anchor = document.createElement("a");
-      anchor.href = getTokenUrl(symbol, tokenValue);
+      anchor.href = typeof tokenTarget === "string" ? tokenTarget : tokenTarget.url;
       anchor.className = getTokenClassName(symbol);
-      anchor.textContent = `${symbol}${tokenValue}`;
+      anchor.textContent =
+        symbol === "#"
+          ? `${symbol}${tokenValue}`
+          : tokenTarget.label;
       fragment.append(anchor);
 
       lastIndex = match.index + fullMatch.length;
@@ -206,17 +328,26 @@ const linkifyHtml = (html) => {
   return template.innerHTML;
 };
 
-export default function RichContentText({ content = "", className }) {
+export default function RichContentText({
+  content = "",
+  className,
+  mentionUsers = [],
+  mentionCompanies = [],
+}) {
   const rawContent = typeof content === "string" ? content : String(content ?? "");
   const trimmedContent = rawContent.trimStart();
   const isHtml = hasHtml(trimmedContent);
   const safeHtml = useMemo(
-    () => (isHtml ? linkifyHtml(trimmedContent) : ""),
-    [isHtml, trimmedContent]
+    () => (isHtml ? linkifyHtml(trimmedContent, mentionUsers, mentionCompanies) : ""),
+    [isHtml, mentionCompanies, mentionUsers, trimmedContent]
   );
   const safeMarkdown = useMemo(
     () => (!isHtml ? DOMPurify.sanitize(trimmedContent) : ""),
     [isHtml, trimmedContent]
+  );
+  const markdownOptions = useMemo(
+    () => createMarkdownOptions(mentionUsers, mentionCompanies),
+    [mentionCompanies, mentionUsers]
   );
 
   if (!trimmedContent) return null;

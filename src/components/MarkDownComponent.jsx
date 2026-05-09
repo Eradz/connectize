@@ -9,6 +9,8 @@ export const MarkdownComponent = ({
   markdownTitle = "",
   isDescription = false,
   className,
+  mentionUsers = [],
+  mentionCompanies = [],
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const content =
@@ -38,6 +40,8 @@ export const MarkdownComponent = ({
         isDescription={isDescription}
         markdownContent={content}
         className={className}
+        mentionUsers={mentionUsers}
+        mentionCompanies={mentionCompanies}
       />
       {isDescription && content.length >= 80 && (
         <button
@@ -56,6 +60,8 @@ export const MarkdownComponent = ({
       >
         <RenderGrayTextMarkdown
           markdownContent={content}
+          mentionUsers={mentionUsers}
+          mentionCompanies={mentionCompanies}
         />
       </ReusableModal>
     </section>
@@ -66,10 +72,14 @@ function RenderGrayTextMarkdown({
   isDescription,
   className,
   markdownContent,
+  mentionUsers = [],
+  mentionCompanies = [],
 }) {
   return (
     <RichContentText
       content={markdownContent}
+      mentionUsers={mentionUsers}
+      mentionCompanies={mentionCompanies}
       className={clsx(
         "remove-br text-sm space-y-1 !leading-tight max-md:prose-sm prose-p:text-sm prose-p:text-gray-600 prose-a:text-gold prose-a:no-underline prose-a:transition-colors prose-a:duration-200 prose-a:hover:text-gold prose-img:rounded-lg prose-img:max-w-full !text-dark",
         {

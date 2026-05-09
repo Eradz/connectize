@@ -15,6 +15,8 @@ import {
   DiscoverPostItem,
   DiscoverPostSkeleton,
 } from "../../components/admin/feeds/DiscoverPosts";
+import { useCompanySearch } from "../../hooks/useCompanySearch";
+import { useUserSearch } from "../../hooks/useUserSearch";
 import LightParagraph from "../../components/ParagraphText";
 
 function SinglePostPage() {
@@ -27,6 +29,8 @@ function SinglePostPage() {
     cacheTime: 600000,
     enabled: !!id, // Only run query if id exists
   });
+  const { users: mentionUsers = [] } = useUserSearch({ enabled: !!postItem });
+  const { companies: mentionCompanies = [] } = useCompanySearch({ enabled: !!postItem });
 
   if (isLoading) return <DiscoverPostSkeleton />;
   if (isError || !postItem) return <LightParagraph>No post found</LightParagraph>;
@@ -45,6 +49,8 @@ function SinglePostPage() {
         postItem={postItem}
         hasImage={postItem.images?.length > 0}
         isSinglePost
+        mentionUsers={mentionUsers}
+        mentionCompanies={mentionCompanies}
       />
     </section>
   );

@@ -22,6 +22,30 @@ function onError(error) {
   console.error(error);
 }
 
+const normalizeMentionToken = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const getUserDisplayName = (user) => {
+  const fullName =
+    user?.full_name ||
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
+
+  return fullName || user?.username || user?.email?.split("@")[0] || "";
+};
+
+const getCompanyDisplayName = (company) =>
+  company?.company_name || company?.name || company?.slug || "";
+
+const mentionMatches = (mentionText, values) => {
+  const token = normalizeMentionToken(mentionText);
+  return values.filter(Boolean).some((value) => normalizeMentionToken(value) === token);
+};
+
 export default function LexicalCommentEditor({ 
   onChange, 
   placeholder = "Write a comment...",
@@ -61,14 +85,27 @@ export default function LexicalCommentEditor({
       while ((match = mentionRegex.exec(textContent)) !== null) {
         const mentionText = match[1];
         
-        // Check if it's a user or company mention
-        const isUser = users.some(u => u.username === mentionText);
-        const isCompany = companies.some(c => c.slug === mentionText);
+        // Check if it's a user or company mention and send backend IDs.
+        const user = users.find((item) =>
+          mentionMatches(mentionText, [
+            item?.username,
+            item?.email?.split("@")[0],
+            getUserDisplayName(item),
+          ])
+        );
+        const company = companies.find((item) =>
+          mentionMatches(mentionText, [
+            item?.slug,
+            item?.company_name,
+            item?.name,
+            getCompanyDisplayName(item),
+          ])
+        );
         
-        if (isUser) {
-          userMentions.push(mentionText);
-        } else if (isCompany) {
-          companyMentions.push(mentionText);
+        if (user?.id) {
+          userMentions.push(Number(user.id));
+        } else if (company?.id) {
+          companyMentions.push(Number(company.id));
         }
       }
       
@@ -76,9 +113,9 @@ export default function LexicalCommentEditor({
         text: htmlContent,
         plainText: textContent,
         html: htmlContent,
-        mentions: userMentions, // Keep backward compatible
-        userMentions,
-        companyMentions,
+        mentions: Array.from(new Set(userMentions)).filter(Number.isFinite), // Keep backward compatible
+        userMentions: Array.from(new Set(userMentions)).filter(Number.isFinite),
+        companyMentions: Array.from(new Set(companyMentions)).filter(Number.isFinite),
         editorState: JSON.stringify(editorState.toJSON()),
       });
     });

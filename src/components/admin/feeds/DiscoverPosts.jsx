@@ -10,7 +10,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -81,6 +81,8 @@ function DiscoverPosts({
       )
     : posts?.pages?.flatMap(page => page.posts);
   const postLoading = isSearch ? searchLoading : isLoading;
+  const { users: mentionUsers = [] } = useUserSearch({ enabled: !postLoading });
+  const { companies: mentionCompanies = [] } = useCompanySearch({ enabled: !postLoading });
 
    // Infinite scroll observer
   useEffect(() => {
@@ -153,6 +155,8 @@ function DiscoverPosts({
                 hasImage={post?.images?.length > 0}
                 key={post?.id || index}
                 postItem={post}
+                mentionUsers={mentionUsers}
+                mentionCompanies={mentionCompanies}
               />
             </div>
           ))}
@@ -185,6 +189,8 @@ export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
   isSinglePost = false,
+  mentionUsers = [],
+  mentionCompanies = [],
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
   
@@ -293,6 +299,14 @@ export const DiscoverPostItem = ({
   // Show edit/delete if user is the post author OR owns the company that posted
   const isPostOwner = postItem?.user?.id === currentUser?.id || 
     (postItem?.company?.id && currentUser?.companies?.includes(postItem.company.id));
+  const postMentionUsers = useMemo(
+    () => [postItem?.user, ...(mentionUsers || [])].filter(Boolean),
+    [mentionUsers, postItem?.user]
+  );
+  const postMentionCompanies = useMemo(
+    () => [postItem?.company, ...(mentionCompanies || [])].filter(Boolean),
+    [mentionCompanies, postItem?.company]
+  );
 
   return (
     <motion.article
@@ -437,6 +451,8 @@ export const DiscoverPostItem = ({
         text={postItem?.body}
         postId={postItem?.id}
         isSinglePost={isSinglePost}
+        mentionUsers={postMentionUsers}
+        mentionCompanies={postMentionCompanies}
       />
 
       {hasImage && <PostImageCollage images={postItem.images} />}
@@ -503,6 +519,8 @@ export const DiscoverPostItem = ({
         setShowCommentSection={setShowCommentSection}
         commentsData={comments}
         postItem={postItem}
+        mentionUsers={postMentionUsers}
+        mentionCompanies={postMentionCompanies}
         refetchComments={refetchComments}
         isLoadingMore={isLoadingMoreComments && !moreCommentsReady}
         hasMoreComments={hasMoreComments && !showAllComments}
@@ -534,6 +552,8 @@ const CommentSection = ({
   onLoadMore,
   moreCommentsReady = false,
   postItem,
+  mentionUsers: initialMentionUsers = [],
+  mentionCompanies: initialMentionCompanies = [],
   refetchComments,
   showAllComments = false,
 }) => {
@@ -541,8 +561,16 @@ const CommentSection = ({
   const [commentEditorKey, setCommentEditorKey] = useState(0);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
-  const { users: mentionUsers = [] } = useUserSearch({ enabled: showCommentSection });
-  const { companies: mentionCompanies = [] } = useCompanySearch({ enabled: showCommentSection });
+  const { users: liveMentionUsers = [] } = useUserSearch({ enabled: showCommentSection });
+  const { companies: liveMentionCompanies = [] } = useCompanySearch({ enabled: showCommentSection });
+  const mentionUsers = useMemo(
+    () => [...(initialMentionUsers || []), ...(liveMentionUsers || [])].filter(Boolean),
+    [initialMentionUsers, liveMentionUsers]
+  );
+  const mentionCompanies = useMemo(
+    () => [...(initialMentionCompanies || []), ...(liveMentionCompanies || [])].filter(Boolean),
+    [initialMentionCompanies, liveMentionCompanies]
+  );
   const handleComment = useCallback(async () => {
     if (!comment.plainText?.trim()) return;
 

@@ -18,6 +18,7 @@ import MentionTextarea from "../../components/comments/MentionTextarea";
 import { largeFileText, unSupportedText } from "../../components/admin/listing/newListing";
 import SEO from "../../components/SEO";
 import { getSEOConfig } from "../../lib/seoConfig";
+import { appendMentionIdsToFormData, extractMentionIdsFromText } from "../../utils/mentionPayload";
 
 const imageTypes = [
   "image/jpeg",
@@ -184,8 +185,10 @@ function CreatePostPage() {
       setIsLoading(true);
       const uploadId = createUploadId();
       const formData = new FormData();
+      const mentionPayload = extractMentionIdsFromText(message, mentionUsers, mentionCompanies);
       formData.append("body", message);
       formData.append("upload_id", uploadId);
+      appendMentionIdsToFormData(formData, mentionPayload);
       if (selectedCompanyId) {
         formData.append("company", selectedCompanyId);
       }
@@ -289,7 +292,17 @@ function CreatePostPage() {
         });
       }, 1400);
     }
-  }, [currentUser, message, validImages, selectedGif, selectedCompanyId, navigate, queryClient]);
+  }, [
+    currentUser,
+    message,
+    mentionCompanies,
+    mentionUsers,
+    validImages,
+    selectedGif,
+    selectedCompanyId,
+    navigate,
+    queryClient,
+  ]);
 
   const renderEmojiGifPickers = useMemo(
     () => (
