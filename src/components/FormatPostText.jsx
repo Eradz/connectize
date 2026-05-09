@@ -1,9 +1,8 @@
 import DOMPurify from "dompurify";
 import Markdown from "markdown-to-jsx";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LightParagraph from "./ParagraphText";
-import { webRoutes } from "../lib/webRoutes";
 
 const CustomLink = ({ children, ...props }) => (
   <a
@@ -67,7 +66,7 @@ const CustomHashTag = ({ children, ...props }) => {
 };
 
 const FormatPostText = ({ text, isSinglePost = false, postId }) => {
-  const navigate = useNavigate();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const options = {
     overrides: {
@@ -98,17 +97,41 @@ const FormatPostText = ({ text, isSinglePost = false, postId }) => {
   const sanitizedText = DOMPurify.sanitize(
     typeof text === "string" ? text : String(text)
   );
+  const shouldCollapse =
+    !isSinglePost &&
+    (sanitizedText.length > 260 ||
+      sanitizedText.split(/\r?\n/).filter(Boolean).length > 4);
+  const isCollapsed = shouldCollapse && !isExpanded;
 
   return (
-    <LightParagraph asDiv={true}>
+    <LightParagraph
+      asDiv={true}
+      balance={false}
+      className="!max-w-none lg:!max-w-none w-full text-left !text-black"
+    >
       {isSinglePost ? (
         <Markdown options={options}>{sanitizedText}</Markdown>
       ) : (
-        <div
-          className="line-clamp-5 cursor-pointer"
-          onClick={() => navigate(webRoutes.singlePost.replace(":id", postId))}
-        >
-          <Markdown options={options}>{sanitizedText}</Markdown>
+        <div className="w-full">
+          <div
+            className={`relative w-full overflow-hidden ${
+              isCollapsed ? "max-h-[7.5rem]" : ""
+            }`}
+          >
+            <Markdown options={options}>{sanitizedText}</Markdown>
+            {isCollapsed && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-white/0" />
+            )}
+          </div>
+          {shouldCollapse && (
+            <button
+              type="button"
+              className="mt-1 text-sm font-semibold text-gold hover:text-custom_yellow transition-colors"
+              onClick={() => setIsExpanded((expanded) => !expanded)}
+            >
+              {isExpanded ? "View less" : "View more"}
+            </button>
+          )}
         </div>
       )}
     </LightParagraph>

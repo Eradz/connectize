@@ -84,11 +84,11 @@ const PostImageCollage = ({ images }) => {
   if (images.length === 1) {
     return (
       <>
-        <section className="mt-3 rounded-lg overflow-hidden">
+        <section className="mt-3 w-full rounded-lg overflow-hidden">
           <img
             src={getImageSrc(images[0])}
             alt="Post image"
-            className="w-full object-contain bg-gray-100 dark:bg-gray-800 cursor-pointer rounded-lg"
+            className="block w-full object-contain bg-gray-100 dark:bg-gray-800 cursor-pointer rounded-lg"
             style={{ maxHeight: "560px" }}
             onClick={() => openModal(images[0])}
           />
@@ -105,7 +105,7 @@ const PostImageCollage = ({ images }) => {
   // Multiple images — horizontal swipeable carousel with arrows
   return (
     <>
-      <section className="post-carousel group mt-3 relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <section className="post-carousel group mt-3 relative w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
         {/* Slide counter badge */}
         <div className="absolute top-3 right-3 z-10 bg-black/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm select-none pointer-events-none">
           {activeIndex + 1} / {images.length}

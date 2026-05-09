@@ -105,7 +105,7 @@ function DiscoverPosts({
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName]);
   
   return (
-    <section className="space-y-1.5 md:space-y-6 mt-6">
+    <section className="w-full space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
         Array.from({ length: 5 }, (_, index) => (
           <DiscoverPostSkeleton key={index} />
@@ -145,6 +145,7 @@ function DiscoverPosts({
             <div
               key={post.id}
               ref={index === finalArray.length - 1 ? lastPostRef : null}
+              className="w-full"
             >
               <DiscoverPostItem
                 hasImage={post?.images?.length > 0}
@@ -296,7 +297,7 @@ export const DiscoverPostItem = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className={clsx(
-        "py-4 px-4 xs:px-6 md:px-3 bg-white rounded-md transition-colors duration-300"
+        "w-full max-w-none py-4 px-4 xs:px-6 bg-white rounded-md transition-colors duration-300"
       )}
     >
       {isSinglePost && <SEO title={postTitle} description={postItem?.body} />}
