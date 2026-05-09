@@ -98,13 +98,6 @@ function CreatePostPage() {
     detail: "",
   });
 
-  // Auto-select first company, or update when companies load
-  useEffect(() => {
-    if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
-    }
-  }, [companies, selectedCompanyId]);
-
   const textareaRef = useRef(null);
 
   // Check if user has completed profile on mount
@@ -344,25 +337,29 @@ function CreatePostPage() {
           </div>
 
           {/* Company Selector */}
-          {companies.length > 0 && (
-            <div className="mb-4 pb-4 border-b border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Post as:
-              </label>
-              <select
-                value={selectedCompanyId || ""}
-                onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
-              >
-                <option value="">Select a company</option>
-                {companies.map((company) => (
-                  <option key={company.id} value={company.id}>
-                    {company.company_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="mb-4 pb-4 border-b border-gray-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Post as:
+            </label>
+            <select
+              value={selectedCompanyId ?? ""}
+              onChange={(e) =>
+                setSelectedCompanyId(e.target.value ? Number(e.target.value) : null)
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
+            >
+              <option value="">
+                {[currentUser?.first_name, currentUser?.last_name]
+                  .filter(Boolean)
+                  .join(" ") || "Personal"}
+              </option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.company_name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Textarea */}
           <div className="mb-4">

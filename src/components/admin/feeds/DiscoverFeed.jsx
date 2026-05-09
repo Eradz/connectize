@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/userContext";
-import { useGetCurrentCompany } from "../../../hooks";
+import { useGetActionableCompanies, useGetCurrentCompany } from "../../../hooks";
 import { CompanyUserType } from "../../../lib/helpers/types";
 import CreatePost from "./CreatePost";
 import DiscoverPosts from "./DiscoverPosts";
@@ -10,13 +10,16 @@ import { webRoutes } from "../../../lib/webRoutes";
 const DiscoverFeed = () => {
   const { user: currentUser, setUser } = useAuth();
 
-  const { data: companies = [], isLoading } = useGetCurrentCompany();
+  const { data: companies = [] } = useGetCurrentCompany();
+  const { data: actionableCompanies = [] } =
+    useGetActionableCompanies("company_post");
+  const canCreatePost =
+    currentUser?.user_type === CompanyUserType || actionableCompanies.length > 0;
 
   useEffect(() => {
     setUser(currentUser);
   }, [currentUser, setUser]);
 
-  console.log("Current User:", currentUser);
   return (
     <section className="">
       <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">
@@ -40,7 +43,7 @@ const DiscoverFeed = () => {
             </Link>
           )}
       </section>
-      {currentUser?.user_type === CompanyUserType && <CreatePost />}
+      {canCreatePost && <CreatePost />}
       <DiscoverPosts />
     </section>
   );

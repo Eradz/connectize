@@ -95,7 +95,6 @@ export default function UserProfile() {
         setLoading(true);
         const response = await workforceAPI.getEvents();
         setCreatedEvents((response.data.results || response.data || response.results)?.filter(event => event?.organizer == userId) || []);
-        console.log("created events",createdEvents)
         setError(null);
       } catch (err) {
         console.error('Error loading created events:', err);
@@ -154,10 +153,8 @@ export default function UserProfile() {
       const loadParticipatingDealRooms = async () => {
         try {
           setLoading(true);
-          console.log("Loading participating deals...");
           const response = await dealRoomService.getParticipantDealRoom();
           const data = response.data?.results || response.data || response.results || [];
-          console.log("participating deals", data.filter(deal => deal?.user == userId));
           // setParticipatingDeals(Array.isArray(data) ? data.filter(deal => deal?.user == userId) : []);
           setParticipatingDeals(data || []);
         } catch (error) {
@@ -178,7 +175,6 @@ export default function UserProfile() {
     refetchOnWindowFocus: false,
   });
 
-  console.log("Created Deals",createdDeals.length)
   const headerProps = useMemo(
     () => ({
       banner: paramUser?.banner || "",
