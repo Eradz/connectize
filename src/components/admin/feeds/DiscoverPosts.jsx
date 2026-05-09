@@ -573,7 +573,7 @@ const CommentSection = ({
         commentId,
         replyData.text,
         replyData.mentions || [],
-        [],
+        replyData.companyMentions || [],
         replyData.parentReplyId || null
       );
       refetchComments();

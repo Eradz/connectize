@@ -22,7 +22,12 @@ const CommentThread = memo(({
   level = 0 
 }) => {
   const [showReplyInput, setShowReplyInput] = useState(false);
-  const [replyContent, setReplyContent] = useState({ text: '', mentions: [] });
+  const [replyContent, setReplyContent] = useState({
+    text: '',
+    plainText: '',
+    mentions: [],
+    companyMentions: [],
+  });
   const [isReplying, setIsReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [liked, setLiked] = useState(() => !!comment.isLikedByUser);
@@ -36,7 +41,7 @@ const CommentThread = memo(({
   const canReply = true; // Always allow replies
 
   const handleReplySubmit = async () => {
-    if (!replyContent.text.trim()) return;
+    if (!replyContent.plainText?.trim()) return;
     
     setIsReplying(true);
     try {
@@ -48,7 +53,7 @@ const CommentThread = memo(({
       };
       
       await onReply(comment.comment_id || comment.id, replyDataWithParent);
-      setReplyContent({ text: '', mentions: [] });
+      setReplyContent({ text: '', plainText: '', mentions: [], companyMentions: [] });
       setShowReplyInput(false);
     } catch (error) {
       console.error('Failed to post reply:', error);
@@ -167,7 +172,7 @@ const CommentThread = memo(({
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={handleReplySubmit}
-                  disabled={isReplying || !replyContent.text.trim()}
+                  disabled={isReplying || !replyContent.plainText?.trim()}
                   className="px-4 py-1.5 bg-gold hover:bg-custom_yellow disabled:bg-gray-300 text-sm font-medium rounded transition-colors disabled:cursor-not-allowed"
                 >
                   {isReplying ? 'Replying...' : 'Reply'}
@@ -175,7 +180,7 @@ const CommentThread = memo(({
                 <button
                   onClick={() => {
                     setShowReplyInput(false);
-                    setReplyContent({ text: '', mentions: [] });
+                    setReplyContent({ text: '', plainText: '', mentions: [], companyMentions: [] });
                   }}
                   className="px-4 py-1.5 border border-gray-300 hover:bg-gray-50 text-sm font-medium rounded transition-colors"
                 >

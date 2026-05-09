@@ -5,6 +5,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+import { $generateHtmlFromNodes } from '@lexical/html';
 import ToolbarPlugin from './ToolbarPlugin';
 import UnifiedMentionPlugin, { MentionNode } from './UnifiedMentionPlugin';
 
@@ -48,6 +49,7 @@ export default function LexicalCommentEditor({
     editorState.read(() => {
       const root = $getRoot();
       const textContent = root.getTextContent();
+      const htmlContent = $generateHtmlFromNodes(editor, null);
       
       // Extract user and company mentions separately
       const userMentions = [];
@@ -71,8 +73,9 @@ export default function LexicalCommentEditor({
       }
       
       onChange({
-        text: textContent,
-        html: root.__cachedText,
+        text: htmlContent,
+        plainText: textContent,
+        html: htmlContent,
         mentions: userMentions, // Keep backward compatible
         userMentions,
         companyMentions,
