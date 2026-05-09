@@ -273,6 +273,11 @@ const linkifyHtml = (html, mentionUsers = [], mentionCompanies = []) => {
   const template = document.createElement("template");
   template.innerHTML = sanitizedHtml;
 
+  template.content.querySelectorAll(".mention-node").forEach((element) => {
+    element.removeAttribute("style");
+    element.classList.remove("mention-node");
+  });
+
   const walker = document.createTreeWalker(
     template.content,
     window.NodeFilter.SHOW_TEXT

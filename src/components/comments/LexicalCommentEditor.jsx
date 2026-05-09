@@ -4,7 +4,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+import { $getRoot, $createParagraphNode, $createTextNode, $nodesOfType } from 'lexical';
 import { $generateHtmlFromNodes } from '@lexical/html';
 import ToolbarPlugin from './ToolbarPlugin';
 import UnifiedMentionPlugin, { MentionNode } from './UnifiedMentionPlugin';
@@ -76,8 +76,19 @@ export default function LexicalCommentEditor({
       const htmlContent = $generateHtmlFromNodes(editor, null);
       
       // Extract user and company mentions separately
-      const userMentions = [];
-      const companyMentions = [];
+      const userMentions = new Set();
+      const companyMentions = new Set();
+
+      $nodesOfType(MentionNode).forEach((mentionNode) => {
+        const mentionId = Number(mentionNode.getMentionId?.());
+        if (!Number.isFinite(mentionId)) return;
+
+        if (mentionNode.getMentionType?.() === "company") {
+          companyMentions.add(mentionId);
+        } else {
+          userMentions.add(mentionId);
+        }
+      });
       
       // Parse the editor state to find MentionNodes
       const mentionRegex = /@(\w+[-\w]*)/g;
@@ -103,9 +114,9 @@ export default function LexicalCommentEditor({
         );
         
         if (user?.id) {
-          userMentions.push(Number(user.id));
+          userMentions.add(Number(user.id));
         } else if (company?.id) {
-          companyMentions.push(Number(company.id));
+          companyMentions.add(Number(company.id));
         }
       }
       
@@ -113,9 +124,9 @@ export default function LexicalCommentEditor({
         text: htmlContent,
         plainText: textContent,
         html: htmlContent,
-        mentions: Array.from(new Set(userMentions)).filter(Number.isFinite), // Keep backward compatible
-        userMentions: Array.from(new Set(userMentions)).filter(Number.isFinite),
-        companyMentions: Array.from(new Set(companyMentions)).filter(Number.isFinite),
+        mentions: Array.from(userMentions).filter(Number.isFinite), // Keep backward compatible
+        userMentions: Array.from(userMentions).filter(Number.isFinite),
+        companyMentions: Array.from(companyMentions).filter(Number.isFinite),
         editorState: JSON.stringify(editorState.toJSON()),
       });
     });

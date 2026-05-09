@@ -4,6 +4,40 @@ import clsx from "clsx";
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { avatarStyle } from "../ResponsiveNav";
 
+const normalizeToken = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const getUserDisplayName = (user = {}) => {
+  const fullName =
+    user.full_name ||
+    [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
+
+  return fullName || user.username || user.email?.split("@")[0] || "";
+};
+
+const getCompanyDisplayName = (company = {}) =>
+  company.company_name || company.name || company.slug || "";
+
+const getUserMentionToken = (user = {}) =>
+  normalizeToken(
+    user.username ||
+      getUserDisplayName(user) ||
+      user.email?.split("@")[0] ||
+      (user.id ? `user-${user.id}` : "")
+  );
+
+const getCompanyMentionToken = (company = {}) =>
+  normalizeToken(
+    company.slug ||
+      getCompanyDisplayName(company) ||
+      (company.id ? `company-${company.id}` : "")
+  );
+
 const getMentionTrigger = (value, cursorPosition) => {
   if (typeof cursorPosition !== "number") return null;
 
@@ -89,16 +123,18 @@ const MentionSuggestion = ({ item, onSelect }) => (
     {item.type === "user" ? (
       <>
         <Avatar
-          name={item.full_name || item.email}
+          name={getUserDisplayName(item) || item.email}
           src={item.avatar}
           size="sm"
           className={avatarStyle}
         />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium text-gray-900">
-            {item.full_name || `${item.first_name || ""} ${item.last_name || ""}`.trim() || item.email}
+            {getUserDisplayName(item) || item.email || "User"}
           </div>
-          <div className="truncate text-xs text-blue-600">@{item.username} • User</div>
+          <div className="truncate text-xs text-blue-600">
+            @{getUserMentionToken(item)} • User
+          </div>
         </div>
         <UserIcon className="h-4 w-4 flex-shrink-0 text-blue-500" />
       </>
@@ -112,9 +148,11 @@ const MentionSuggestion = ({ item, onSelect }) => (
         />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium text-gray-900">
-            {item.company_name}
+            {getCompanyDisplayName(item) || "Company"}
           </div>
-          <div className="truncate text-xs text-green-600">@{item.slug} • Company</div>
+          <div className="truncate text-xs text-green-600">
+            @{getCompanyMentionToken(item)} • Company
+          </div>
         </div>
         <BuildingOffice2Icon className="h-4 w-4 flex-shrink-0 text-green-500" />
       </>
@@ -187,7 +225,10 @@ const MentionTextarea = forwardRef(
     const handleSelect = (item) => {
       if (!trigger) return;
 
-      const mentionName = item.type === "user" ? item.username : item.slug;
+      const mentionName =
+        item.type === "user"
+          ? getUserMentionToken(item)
+          : getCompanyMentionToken(item);
       const nextValue = `${value.slice(0, trigger.start)}@${mentionName} ${value.slice(trigger.end)}`;
       const nextCursorPosition = trigger.start + mentionName.length + 2;
 
