@@ -202,6 +202,13 @@ const createMarkdownOptions = (mentionUsers = [], mentionCompanies = []) => ({
     a: {
       component: MarkdownLink,
     },
+    span: {
+      component: ({ children, ...props }) => (
+        <span {...props}>
+          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
+        </span>
+      ),
+    },
     p: {
       component: ({ children, ...props }) => (
         <p {...props} className="mb-1 last:mb-0 whitespace-pre-wrap">
