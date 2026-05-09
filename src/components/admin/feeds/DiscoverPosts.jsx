@@ -626,6 +626,23 @@ const CommentSection = ({
         />
       </div>
 
+      <div className="mb-4 border-b pb-4 relative">
+        <ReactQuill
+          value={comment}
+          onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
+          theme="snow"
+          placeholder="Type your comment here"
+          // style={{ height: "200px" }}
+        />
+        <button
+          className="absolute bottom-5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
+          onClick={handleComment}
+          disabled={loading || comment.trim().length < 1}
+        >
+          {loading ? "Commenting..." : "Comment"}
+        </button>
+      </div>
+
       {/* Instant display - no loading for initial comments */}
       {(commentsData?.length === 0 && !isLoadingMore) ? (
         <p className="text-gray-500 text-sm py-2">No comments yet. Be the first to comment!</p>
@@ -678,23 +695,6 @@ const CommentSection = ({
           )}
         </>
       )}
-
-      <div className="mt-4 border-t pt-4 relative">
-        <ReactQuill
-          value={comment}
-          onChange={(value) => setComment(value === "<p><br></p>" ? "" : value)}
-          theme="snow"
-          placeholder="Type your comment here"
-          // style={{ height: "200px" }}
-        />
-        <button
-          className="absolute bottom-1.5 right-2 bg-gold disabled:skeleton hover:bg-custom_yellow text-xs p-2 active:scale-95 disabled:active:scale-100 transition-all duration-300 rounded disabled:cursor-not-allowed"
-          onClick={handleComment}
-          disabled={loading || comment.trim().length < 1}
-        >
-          {loading ? "Commenting..." : "Comment"}
-        </button>
-      </div>
     </section>
   );
 };
