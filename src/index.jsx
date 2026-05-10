@@ -48,14 +48,16 @@ const isChunkLoadError = (reason) => {
 };
 
 window.addEventListener("vite:preloadError", (event) => {
-  event.preventDefault();
-  reloadForStaleAsset();
+  if (reloadForStaleAsset()) {
+    event.preventDefault();
+  }
 });
 
 window.addEventListener("unhandledrejection", (event) => {
   if (!isChunkLoadError(event.reason)) return;
-  event.preventDefault();
-  reloadForStaleAsset();
+  if (reloadForStaleAsset()) {
+    event.preventDefault();
+  }
 });
 
 class RootErrorBoundary extends React.Component {
@@ -64,8 +66,8 @@ class RootErrorBoundary extends React.Component {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, isChunkError: isChunkLoadError(error) };
   }
 
   componentDidCatch(error) {
@@ -80,12 +82,19 @@ class RootErrorBoundary extends React.Component {
       return this.props.children;
     }
 
+    const title = this.state.isChunkError
+      ? "Unable to load the latest app version"
+      : "Unable to load this page";
+    const message = this.state.isChunkError
+      ? "The app received an outdated page asset. Refresh to load the latest version."
+      : "Something went wrong while opening this page. Refresh to try again.";
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f7f7f7] px-6">
         <div className="w-full max-w-md rounded-lg bg-white p-6 text-center shadow-sm">
-          <h1 className="text-xl font-semibold text-gray-900">Unable to load this page</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
           <p className="mt-2 text-sm text-gray-600">
-            The app received an outdated page asset. Refresh to load the latest version.
+            {message}
           </p>
           <button
             type="button"
