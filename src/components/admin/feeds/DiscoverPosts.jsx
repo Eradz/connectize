@@ -715,6 +715,8 @@ const CommentSection = ({
           userCompanies={commentAsCompanies}
           selectedType={commentAsType}
           selectedCompanyId={commentAsCompanyId}
+          label="Comment as:"
+          idPrefix={`post-${postItem.id}-comment-as`}
           onSelectionChange={(type, companyId) => {
             setCommentAsType(type);
             setCommentAsCompanyId(companyId);

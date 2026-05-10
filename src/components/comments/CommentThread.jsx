@@ -209,6 +209,8 @@ const CommentThread = memo(({
                 userCompanies={commentAsCompanies}
                 selectedType={replyAsType}
                 selectedCompanyId={replyAsCompanyId}
+                label="Reply as:"
+                idPrefix={`comment-${comment.id}-reply-as-${level}`}
                 onSelectionChange={(type, companyId) => {
                   setReplyAsType(type);
                   setReplyAsCompanyId(companyId);
