@@ -178,7 +178,7 @@ export const commentOnPost = async (id, comment, mentions = [], companyMentions 
   return result;
 };
 
-export const replyToComment = async (commentId, content, mentions = [], companyMentions = [], parentReplyId = null) => {
+export const replyToComment = async (commentId, content, mentions = [], companyMentions = [], parentReplyId = null, replyAsCompanyId = null) => {
   const result = await makeApiRequest({
     url: `api/comments/${commentId}/reply/`,
     method: "POST",
@@ -186,7 +186,8 @@ export const replyToComment = async (commentId, content, mentions = [], companyM
       content,
       mentions,
       company_mentions: companyMentions,
-      parent_reply_id: parentReplyId  // NEW: For nested replies
+      parent_reply_id: parentReplyId,  // NEW: For nested replies
+      company_id: replyAsCompanyId,
     },
   });
 

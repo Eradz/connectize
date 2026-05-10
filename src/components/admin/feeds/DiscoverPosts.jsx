@@ -25,6 +25,7 @@ import {
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
 import { useCompanySearch } from "../../../hooks/useCompanySearch";
+import { useGetActionableCompanies } from "../../../hooks";
 import { usePollPosts } from "../../../hooks/usePolling";
 import { useUserSearch } from "../../../hooks/useUserSearch";
 import { Heart } from "../../../icon";
@@ -47,6 +48,7 @@ import { useGetPostComments } from "../../../hooks/useComments";
 import { useQueryClient } from "@tanstack/react-query";
 import CommentThread from "../../comments/CommentThread";
 import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
+import CommentAsSelector from "../../comments/CommentAsSelector";
 import { webRoutes } from "../../../lib/webRoutes";
 
 function DiscoverPosts({
@@ -559,8 +561,12 @@ const CommentSection = ({
 }) => {
   const [comment, setComment] = useState(createEmptyCommentContent);
   const [commentEditorKey, setCommentEditorKey] = useState(0);
+  const [commentAsType, setCommentAsType] = useState("user");
+  const [commentAsCompanyId, setCommentAsCompanyId] = useState(null);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuth();
+  const { data: commentAsCompanies = [] } = useGetActionableCompanies("company_post");
   const { users: liveMentionUsers = [] } = useUserSearch({ enabled: showCommentSection });
   const { companies: liveMentionCompanies = [] } = useCompanySearch({ enabled: showCommentSection });
   const mentionUsers = useMemo(
@@ -571,6 +577,18 @@ const CommentSection = ({
     () => [...(initialMentionCompanies || []), ...(liveMentionCompanies || [])].filter(Boolean),
     [initialMentionCompanies, liveMentionCompanies]
   );
+  const selectedCompanyId = commentAsType === "company" ? commentAsCompanyId : null;
+
+  useEffect(() => {
+    if (
+      commentAsCompanyId &&
+      !(commentAsCompanies || []).some((company) => company.id === commentAsCompanyId)
+    ) {
+      setCommentAsType("user");
+      setCommentAsCompanyId(null);
+    }
+  }, [commentAsCompanies, commentAsCompanyId]);
+
   const handleComment = useCallback(async () => {
     if (!comment.plainText?.trim()) return;
 
@@ -581,7 +599,8 @@ const CommentSection = ({
         postItem.id,
         comment.text,
         comment.mentions || [],
-        comment.companyMentions || []
+        comment.companyMentions || [],
+        selectedCompanyId
       );
       
       // Comment created successfully
@@ -625,7 +644,7 @@ const CommentSection = ({
     } finally {
       setLoading(false);
     }
-  }, [comment, postItem, queryClient, refetchComments]);
+  }, [comment, postItem, queryClient, refetchComments, selectedCompanyId]);
 
   const handleReplyToComment = useCallback(async (commentId, replyData) => {
     try {
@@ -634,7 +653,8 @@ const CommentSection = ({
         replyData.text,
         replyData.mentions || [],
         replyData.companyMentions || [],
-        replyData.parentReplyId || null
+        replyData.parentReplyId || null,
+        replyData.commentAsCompanyId || null
       );
       refetchComments();
       toast.success("Reply posted successfully");
@@ -690,6 +710,16 @@ const CommentSection = ({
       </div>
 
       <div className="mb-4 border-b pb-4">
+        <CommentAsSelector
+          user={currentUser}
+          userCompanies={commentAsCompanies}
+          selectedType={commentAsType}
+          selectedCompanyId={commentAsCompanyId}
+          onSelectionChange={(type, companyId) => {
+            setCommentAsType(type);
+            setCommentAsCompanyId(companyId);
+          }}
+        />
         <LexicalCommentEditor
           key={commentEditorKey}
           onChange={setComment}
@@ -715,12 +745,13 @@ const CommentSection = ({
             key={comment.id}
             comment={comment}
             postUserId={postItem.user?.id}
-            currentUser={null}
+            currentUser={currentUser}
             onReply={handleReplyToComment}
             onLike={handleLikeComment}
             onLikeReply={handleLikeReply}
             users={mentionUsers}
             companies={mentionCompanies}
+            commentAsCompanies={commentAsCompanies}
             level={0}
           />
         ))

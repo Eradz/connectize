@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useEffect, useMemo, useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronUpIcon } from '@radix-ui/react-icons';
@@ -9,6 +9,7 @@ import TimeAgo from '../TimeAgo';
 import { MarkdownComponent } from '../MarkDownComponent';
 import { avatarStyle } from '../ResponsiveNav';
 import LexicalCommentEditor from './LexicalCommentEditor';
+import CommentAsSelector from './CommentAsSelector';
 
 const CommentThread = memo(({ 
   comment, 
@@ -19,6 +20,7 @@ const CommentThread = memo(({
   onLikeReply,
   users = [],
   companies = [],
+  commentAsCompanies = [],
   level = 0 
 }) => {
   const [showReplyInput, setShowReplyInput] = useState(false);
@@ -28,17 +30,53 @@ const CommentThread = memo(({
     mentions: [],
     companyMentions: [],
   });
+  const [replyAsType, setReplyAsType] = useState('user');
+  const [replyAsCompanyId, setReplyAsCompanyId] = useState(null);
   const [isReplying, setIsReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [liked, setLiked] = useState(() => !!comment.isLikedByUser);
 
-  const isAuthor = comment.user?.id === postUserId;
+  const authorUser = comment.user;
+  const authorCompany = comment.company;
+  const isCompanyAuthor = !!(
+    authorCompany &&
+    typeof authorCompany === 'object' &&
+    (authorCompany.company_name || authorCompany.name)
+  );
+  const authorName = isCompanyAuthor
+    ? authorCompany.company_name || authorCompany.name
+    : `${authorUser?.first_name || ''} ${authorUser?.last_name || ''}`.trim() ||
+      authorUser?.username ||
+      authorUser?.email?.split('@')[0] ||
+      'User';
+  const authorAvatar = isCompanyAuthor
+    ? authorCompany.logo || authorCompany.image
+    : authorUser?.avatar || authorUser?.profile_picture;
+  const authorHref = isCompanyAuthor
+    ? `/${authorCompany.slug || authorCompany.company_name || authorCompany.name}`
+    : `/co/${authorUser?.id}`;
+  const createdAt = comment.commented_at || comment.replied_at || comment.created_at;
+
+  const isAuthor = !isCompanyAuthor && authorUser?.id === postUserId;
   const hasReplies = comment.replies && comment.replies.length > 0;
   const isNested = level > 0;
   const isReply = level > 0; // Replies are nested comments
+  const selectedReplyCompanyId = replyAsType === 'company' ? replyAsCompanyId : null;
   
   // Infinite reply depth now supported with parent_reply field
   const canReply = true; // Always allow replies
+
+  useEffect(() => {
+    if (
+      replyAsCompanyId &&
+      !(commentAsCompanies || []).some((company) => company.id === replyAsCompanyId)
+    ) {
+      setReplyAsType('user');
+      setReplyAsCompanyId(null);
+    }
+  }, [commentAsCompanies, replyAsCompanyId]);
+
+  const replyPlaceholder = useMemo(() => `Reply to ${authorName}...`, [authorName]);
 
   const handleReplySubmit = async () => {
     if (!replyContent.plainText?.trim()) return;
@@ -49,7 +87,8 @@ const CommentThread = memo(({
       // The comment ID is always the root comment
       const replyDataWithParent = {
         ...replyContent,
-        parentReplyId: isReply ? comment.id : null
+        parentReplyId: isReply ? comment.id : null,
+        commentAsCompanyId: selectedReplyCompanyId,
       };
       
       await onReply(comment.comment_id || comment.id, replyDataWithParent);
@@ -83,11 +122,11 @@ const CommentThread = memo(({
     })}>
       <div className="flex gap-2">
         {/* Avatar */}
-        <Link to={`/co/${comment.user?.id}`}>
+        <Link to={authorHref}>
           <Avatar
-            name={`${comment.user?.first_name} ${comment.user?.last_name}`}
+            name={authorName}
             className={avatarStyle}
-            src={comment.user?.avatar}
+            src={authorAvatar}
             size={isNested ? 'sm' : 'md'}
           />
         </Link>
@@ -95,8 +134,8 @@ const CommentThread = memo(({
         <div className="flex-1">
           {/* Comment Header */}
           <div className="flex items-center gap-2 mb-1">
-            <Link to={`/co/${comment.user?.id}`} className="font-bold text-sm hover:underline">
-              {comment.user?.first_name} {comment.user?.last_name}
+            <Link to={authorHref} className="font-bold text-sm hover:underline">
+              {authorName}
             </Link>
             {isAuthor && (
               <span className="text-xs text-gray-500 font-medium px-1.5 py-0.5 bg-gray-100 rounded">
@@ -104,7 +143,7 @@ const CommentThread = memo(({
               </span>
             )}
             <span className="text-gray-400 text-xs">
-              • <TimeAgo time={comment.commented_at} />
+              • <TimeAgo time={createdAt} />
             </span>
           </div>
 
@@ -165,9 +204,19 @@ const CommentThread = memo(({
           {/* Reply Input */}
           {showReplyInput && (
             <div className="mt-3">
+              <CommentAsSelector
+                user={currentUser}
+                userCompanies={commentAsCompanies}
+                selectedType={replyAsType}
+                selectedCompanyId={replyAsCompanyId}
+                onSelectionChange={(type, companyId) => {
+                  setReplyAsType(type);
+                  setReplyAsCompanyId(companyId);
+                }}
+              />
               <LexicalCommentEditor
                 onChange={setReplyContent}
-                placeholder={`Reply to ${comment.user?.first_name}...`}
+                placeholder={replyPlaceholder}
                 users={users}
                 companies={companies}
               />
@@ -206,6 +255,7 @@ const CommentThread = memo(({
                   onLikeReply={onLikeReply}
                   users={users}
                   companies={companies}
+                  commentAsCompanies={commentAsCompanies}
                   level={level + 1}
                 />
               ))}
