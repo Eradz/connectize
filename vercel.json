@@ -22,6 +22,10 @@
       "destination": "/.well-known/$1"
     },
     {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
       "source": "/posts/(.*)",
       "destination": "/api/render-meta?path=/posts/$1"
     },
