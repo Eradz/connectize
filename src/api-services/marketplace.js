@@ -51,6 +51,12 @@ export const listingService = {
     return response.data;
   },
 
+  // Get a company's marketplace storefront listings
+  getStoreProfile: async (companyId, params = {}) => {
+    const response = await marketplaceApi.get(`/listings/store/${companyId}/`, { params });
+    return response.data;
+  },
+
   // Get my listings (seller view)
   getMyListings: async (params = {}) => {
     const response = await marketplaceApi.get("/listings/my_listings/", { params });

@@ -52,7 +52,7 @@ function DisplayAllProducts({ companyId, category }) {
                 <ProductListCard
                   key={product.id}
                   id={product.id}
-                  image={product?.images?.[0].image}
+                  image={product?.images?.[0]?.image}
                   title={product.title}
                   subtitle={product.category}
                   companyName={product?.company?.company_name || ""}
@@ -107,7 +107,7 @@ function DisplayNewlyListedProducts({ companyId, category }) {
           return (
             <ProductListCard
               key={product.id}
-              image={product?.images?.[0].image}
+              image={product?.images?.[0]?.image}
               id={product.id}
               title={product.title}
               subtitle={product.category}
@@ -129,10 +129,13 @@ export const ProductListCard = ({
   title,
   subtitle,
   id,
+  to,
   isSummary = false,
   companyName,
   company,
 }) => {
+  const href = to || `/products/${id}`;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -145,19 +148,30 @@ export const ProductListCard = ({
         }
       )}
     >
-      <Link to={"/products/" + id} className="w-full">
-        <img
-          src={image}
-          className={clsx("w-full h-[300px] rounded-lg object-cover", {
-            "md:h-[200px]": isSummary,
-          })}
-          alt={title || "Product"}
-        />
+      <Link to={href} className="w-full">
+        {image ? (
+          <img
+            src={image}
+            className={clsx("w-full h-[300px] rounded-lg object-cover", {
+              "md:h-[200px]": isSummary,
+            })}
+            alt={title || "Product"}
+          />
+        ) : (
+          <div
+            className={clsx(
+              "w-full h-[300px] rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center text-sm",
+              { "md:h-[200px]": isSummary }
+            )}
+          >
+            No image
+          </div>
+        )}
       </Link>
       <div className="flex sm:flex-col items-start justify-between gap-4 sm:!gap-2 w-full">
         <div>
           <Link
-            to={`/products/${id}`}
+            to={href}
             className="font-bold text-xl sm:text-lg capitalize line-clamp-1"
           >
             {title}
