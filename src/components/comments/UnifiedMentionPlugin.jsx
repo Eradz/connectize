@@ -7,42 +7,95 @@ import { avatarStyle } from '../ResponsiveNav';
 import { BuildingOffice2Icon, UserIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
+const normalizeToken = (value) =>
+  String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/^@/, '')
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+const getUserDisplayName = (user = {}) => {
+  const fullName =
+    user.full_name ||
+    [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+
+  return fullName || user.username || user.email?.split('@')[0] || '';
+};
+
+const getCompanyDisplayName = (company = {}) =>
+  company.company_name || company.name || company.slug || '';
+
+const getUserMentionToken = (user = {}) =>
+  normalizeToken(
+    user.username ||
+      getUserDisplayName(user) ||
+      user.email?.split('@')[0] ||
+      (user.id ? `user-${user.id}` : '')
+  );
+
+const getCompanyMentionToken = (company = {}) =>
+  normalizeToken(
+    company.slug ||
+      getCompanyDisplayName(company) ||
+      (company.id ? `company-${company.id}` : '')
+  );
+
 // Custom Mention Node for both users and companies
 export class MentionNode extends TextNode {
   __mention;
   __mentionType; // 'user' or 'company'
+  __mentionId;
+  __mentionLabel;
 
   static getType() {
     return 'mention';
   }
 
   static clone(node) {
-    return new MentionNode(node.__mention, node.__mentionType, node.__text, node.__key);
+    return new MentionNode(
+      node.__mention,
+      node.__mentionType,
+      node.__text,
+      node.__key,
+      node.__mentionId,
+      node.__mentionLabel
+    );
   }
 
-  constructor(mentionName, mentionType = 'user', text, key) {
+  constructor(
+    mentionName,
+    mentionType = 'user',
+    text,
+    key,
+    mentionId = null,
+    mentionLabel = ''
+  ) {
     super(text ?? `@${mentionName}`, key);
     this.__mention = mentionName;
     this.__mentionType = mentionType;
+    this.__mentionId = mentionId;
+    this.__mentionLabel = mentionLabel;
   }
 
   createDOM(config) {
     const dom = super.createDOM(config);
     dom.className = 'mention-node';
-    
-    // Different colors for user vs company mentions
-    if (this.__mentionType === 'company') {
-      dom.style.color = '#059669'; // Green for companies
-      dom.style.backgroundColor = '#d1fae5'; // Light green bg
-    } else {
-      dom.style.color = '#1d4ed8'; // Blue for users
-      dom.style.backgroundColor = '#dbeafe'; // Light blue bg
-    }
-    
+    dom.style.color = '#D4AF37';
     dom.style.fontWeight = '600';
-    dom.style.padding = '2px 4px';
-    dom.style.borderRadius = '4px';
     return dom;
+  }
+
+  getMention() {
+    return this.__mention;
+  }
+
+  getMentionType() {
+    return this.__mentionType;
+  }
+
+  getMentionId() {
+    return this.__mentionId;
   }
 
   exportJSON() {
@@ -50,6 +103,8 @@ export class MentionNode extends TextNode {
       ...super.exportJSON(),
       mention: this.__mention,
       mentionType: this.__mentionType,
+      mentionId: this.__mentionId,
+      mentionLabel: this.__mentionLabel,
       type: 'mention',
       version: 1,
     };
@@ -58,7 +113,11 @@ export class MentionNode extends TextNode {
   static importJSON(serializedNode) {
     const node = $createMentionNode(
       serializedNode.mention,
-      serializedNode.mentionType
+      serializedNode.mentionType,
+      {
+        id: serializedNode.mentionId,
+        label: serializedNode.mentionLabel,
+      }
     );
     node.setTextContent(serializedNode.text);
     node.setFormat(serializedNode.format);
@@ -69,8 +128,15 @@ export class MentionNode extends TextNode {
   }
 }
 
-export function $createMentionNode(mentionName, mentionType = 'user') {
-  return new MentionNode(mentionName, mentionType);
+export function $createMentionNode(mentionName, mentionType = 'user', options = {}) {
+  return new MentionNode(
+    mentionName,
+    mentionType,
+    options.text,
+    undefined,
+    options.id,
+    options.label
+  );
 }
 
 export function $isMentionNode(node) {
@@ -120,17 +186,17 @@ const UnifiedMentionTypeahead = ({
           {item.type === 'user' ? (
             <>
               <Avatar
-                name={item.full_name || item.email}
+                name={getUserDisplayName(item) || item.email}
                 src={item.avatar}
                 size="sm"
                 className={avatarStyle}
               />
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm truncate text-gray-900">
-                  {item.full_name || `${item.first_name} ${item.last_name}`}
+                  {getUserDisplayName(item) || 'User'}
                 </div>
                 <div className="text-xs text-blue-600 truncate">
-                  @{item.username} • User
+                  @{getUserMentionToken(item)} • User
                 </div>
               </div>
               <UserIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
@@ -145,10 +211,10 @@ const UnifiedMentionTypeahead = ({
               />
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm truncate text-gray-900">
-                  {item.company_name}
+                  {getCompanyDisplayName(item) || 'Company'}
                 </div>
                 <div className="text-xs text-green-600 truncate">
-                  @{item.slug} • Company
+                  @{getCompanyMentionToken(item)} • Company
                 </div>
               </div>
               <BuildingOffice2Icon className="w-4 h-4 text-green-500 flex-shrink-0" />
@@ -177,16 +243,13 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
 
   const updateResults = useCallback(
     (query) => {
-      if (!query) {
-        setResults([]);
-        return;
-      }
-
       const lowerQuery = query.toLowerCase();
 
       // Search users
       const matchedUsers = users
         .filter((user) => {
+          if (!lowerQuery) return true;
+
           const fullName = user.full_name?.toLowerCase() || '';
           const firstName = user.first_name?.toLowerCase() || '';
           const lastName = user.last_name?.toLowerCase() || '';
@@ -207,6 +270,8 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
       // Search companies
       const matchedCompanies = companies
         .filter((company) => {
+          if (!lowerQuery) return true;
+
           const name = company.company_name?.toLowerCase() || '';
           const slug = company.slug?.toLowerCase() || '';
           const tagline = company.tag_line?.toLowerCase() || '';
@@ -304,13 +369,21 @@ export default function UnifiedMentionPlugin({ users = [], companies = [] }) {
           const afterCursor = text.slice(cursorPosition);
 
           // Determine mention name and type
-          const mentionName = item.type === 'user' 
-            ? item.username 
-            : item.slug;
+          const mentionName =
+            item.type === 'user'
+              ? getUserMentionToken(item)
+              : getCompanyMentionToken(item);
           const mentionType = item.type;
+          const mentionLabel =
+            item.type === 'user'
+              ? getUserDisplayName(item)
+              : getCompanyDisplayName(item);
 
           // Create mention node
-          const mentionNode = $createMentionNode(mentionName, mentionType);
+          const mentionNode = $createMentionNode(mentionName, mentionType, {
+            id: item.id,
+            label: mentionLabel,
+          });
           const spaceNode = $createTextNode(' ');
 
           // Replace text

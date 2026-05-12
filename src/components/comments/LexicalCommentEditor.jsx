@@ -4,7 +4,8 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
-import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+import { $getRoot, $createParagraphNode, $createTextNode, $nodesOfType } from 'lexical';
+import { $generateHtmlFromNodes } from '@lexical/html';
 import ToolbarPlugin from './ToolbarPlugin';
 import UnifiedMentionPlugin, { MentionNode } from './UnifiedMentionPlugin';
 
@@ -20,6 +21,30 @@ const theme = {
 function onError(error) {
   console.error(error);
 }
+
+const normalizeMentionToken = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/^@/, "")
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const getUserDisplayName = (user) => {
+  const fullName =
+    user?.full_name ||
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
+
+  return fullName || user?.username || user?.email?.split("@")[0] || "";
+};
+
+const getCompanyDisplayName = (company) =>
+  company?.company_name || company?.name || company?.slug || "";
+
+const mentionMatches = (mentionText, values) => {
+  const token = normalizeMentionToken(mentionText);
+  return values.filter(Boolean).some((value) => normalizeMentionToken(value) === token);
+};
 
 export default function LexicalCommentEditor({ 
   onChange, 
@@ -48,10 +73,22 @@ export default function LexicalCommentEditor({
     editorState.read(() => {
       const root = $getRoot();
       const textContent = root.getTextContent();
+      const htmlContent = $generateHtmlFromNodes(editor, null);
       
       // Extract user and company mentions separately
-      const userMentions = [];
-      const companyMentions = [];
+      const userMentions = new Set();
+      const companyMentions = new Set();
+
+      $nodesOfType(MentionNode).forEach((mentionNode) => {
+        const mentionId = Number(mentionNode.getMentionId?.());
+        if (!Number.isFinite(mentionId)) return;
+
+        if (mentionNode.getMentionType?.() === "company") {
+          companyMentions.add(mentionId);
+        } else {
+          userMentions.add(mentionId);
+        }
+      });
       
       // Parse the editor state to find MentionNodes
       const mentionRegex = /@(\w+[-\w]*)/g;
@@ -59,23 +96,37 @@ export default function LexicalCommentEditor({
       while ((match = mentionRegex.exec(textContent)) !== null) {
         const mentionText = match[1];
         
-        // Check if it's a user or company mention
-        const isUser = users.some(u => u.username === mentionText);
-        const isCompany = companies.some(c => c.slug === mentionText);
+        // Check if it's a user or company mention and send backend IDs.
+        const user = users.find((item) =>
+          mentionMatches(mentionText, [
+            item?.username,
+            item?.email?.split("@")[0],
+            getUserDisplayName(item),
+          ])
+        );
+        const company = companies.find((item) =>
+          mentionMatches(mentionText, [
+            item?.slug,
+            item?.company_name,
+            item?.name,
+            getCompanyDisplayName(item),
+          ])
+        );
         
-        if (isUser) {
-          userMentions.push(mentionText);
-        } else if (isCompany) {
-          companyMentions.push(mentionText);
+        if (user?.id) {
+          userMentions.add(Number(user.id));
+        } else if (company?.id) {
+          companyMentions.add(Number(company.id));
         }
       }
       
       onChange({
-        text: textContent,
-        html: root.__cachedText,
-        mentions: userMentions, // Keep backward compatible
-        userMentions,
-        companyMentions,
+        text: htmlContent,
+        plainText: textContent,
+        html: htmlContent,
+        mentions: Array.from(userMentions).filter(Number.isFinite), // Keep backward compatible
+        userMentions: Array.from(userMentions).filter(Number.isFinite),
+        companyMentions: Array.from(companyMentions).filter(Number.isFinite),
         editorState: JSON.stringify(editorState.toJSON()),
       });
     });

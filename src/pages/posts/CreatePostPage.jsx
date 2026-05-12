@@ -7,14 +7,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { createPost, getPostUploadStatus } from "../../api-services/posts";
 import { useAuth } from "../../context/userContext";
+import { useCompanySearch } from "../../hooks/useCompanySearch";
 import { useGetActionableCompanies } from "../../hooks";
+import { useUserSearch } from "../../hooks/useUserSearch";
 import { AlignmentIcon, GalleryIcon, GifIcon, SmileIcon } from "../../icon";
 import CustomErrorMessage from "../../components/CustomErrorMessage";
 import GifPicker from "../../components/GifPicker";
 import ValidImages from "../../components/ValidImages";
+import MentionTextarea from "../../components/comments/MentionTextarea";
 import { largeFileText, unSupportedText } from "../../components/admin/listing/newListing";
 import SEO from "../../components/SEO";
 import { getSEOConfig } from "../../lib/seoConfig";
+import { appendMentionIdsToFormData, extractMentionIdsFromText } from "../../utils/mentionPayload";
 
 const imageTypes = [
   "image/jpeg",
@@ -80,6 +84,8 @@ function CreatePostPage() {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { data: companies = [] } = useGetActionableCompanies('company_post');
+  const { users: mentionUsers = [] } = useUserSearch();
+  const { companies: mentionCompanies = [] } = useCompanySearch();
   const queryClient = useQueryClient();
   const seoData = getSEOConfig("createPost");
 
@@ -97,13 +103,6 @@ function CreatePostPage() {
     stage: "preparing",
     detail: "",
   });
-
-  // Auto-select first company, or update when companies load
-  useEffect(() => {
-    if (companies.length > 0 && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id);
-    }
-  }, [companies, selectedCompanyId]);
 
   const textareaRef = useRef(null);
 
@@ -153,6 +152,26 @@ function CreatePostPage() {
     setShowGifPicker(false);
   }, []);
 
+  const resizeTextarea = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 300)}px`;
+  }, []);
+
+  const handleMessageChange = useCallback(
+    (nextValue) => {
+      if (nextValue.trim().length >= 10) {
+        setErrorMessage(null);
+      }
+
+      setMessage(nextValue);
+      window.requestAnimationFrame(resizeTextarea);
+    },
+    [resizeTextarea]
+  );
+
   const handleCreatePost = useCallback(async () => {
     if (message.trim().length < 10) {
       setErrorMessage("Post message must be at least 10 characters long");
@@ -166,8 +185,10 @@ function CreatePostPage() {
       setIsLoading(true);
       const uploadId = createUploadId();
       const formData = new FormData();
+      const mentionPayload = extractMentionIdsFromText(message, mentionUsers, mentionCompanies);
       formData.append("body", message);
       formData.append("upload_id", uploadId);
+      appendMentionIdsToFormData(formData, mentionPayload);
       if (selectedCompanyId) {
         formData.append("company", selectedCompanyId);
       }
@@ -271,7 +292,17 @@ function CreatePostPage() {
         });
       }, 1400);
     }
-  }, [currentUser, message, validImages, selectedGif, selectedCompanyId, navigate, queryClient]);
+  }, [
+    currentUser,
+    message,
+    mentionCompanies,
+    mentionUsers,
+    validImages,
+    selectedGif,
+    selectedCompanyId,
+    navigate,
+    queryClient,
+  ]);
 
   const renderEmojiGifPickers = useMemo(
     () => (
@@ -344,43 +375,38 @@ function CreatePostPage() {
           </div>
 
           {/* Company Selector */}
-          {companies.length > 0 && (
-            <div className="mb-4 pb-4 border-b border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Post as:
-              </label>
-              <select
-                value={selectedCompanyId || ""}
-                onChange={(e) => setSelectedCompanyId(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
-              >
-                <option value="">Select a company</option>
-                {companies.map((company) => (
-                  <option key={company.id} value={company.id}>
-                    {company.company_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="mb-4 pb-4 border-b border-gray-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Post as:
+            </label>
+            <select
+              value={selectedCompanyId ?? ""}
+              onChange={(e) =>
+                setSelectedCompanyId(e.target.value ? Number(e.target.value) : null)
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent text-sm"
+            >
+              <option value="">
+                {[currentUser?.first_name, currentUser?.last_name]
+                  .filter(Boolean)
+                  .join(" ") || "Personal"}
+              </option>
+              {companies.map((company) => (
+                <option key={company.id} value={company.id}>
+                  {company.company_name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Textarea */}
           <div className="mb-4">
-            <textarea
+            <MentionTextarea
               ref={textareaRef}
               value={message}
-              onChange={(e) => {
-                const textarea = textareaRef.current;
-                if (!textarea) return;
-                if (message.trim().length >= 10) {
-                  setErrorMessage(null);
-                }
-                setMessage(e.target.value);
-
-                // Auto-resize logic
-                textarea.style.height = "auto";
-                textarea.style.height = `${Math.min(textarea.scrollHeight, 300)}px`;
-              }}
+              users={mentionUsers}
+              companies={mentionCompanies}
+              onValueChange={handleMessageChange}
               placeholder="What's happening in your world?"
               minLength={10}
               style={{ lineHeight: "1.5" }}

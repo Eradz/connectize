@@ -29,6 +29,7 @@ import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard"
 import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
 import { Briefcase, Calendar, FileText } from "lucide-react";
 import { dealRoomService } from "../../api-services/oilgas";
+import { listingService } from "../../api-services/marketplace";
 import CreatePost from "../../components/admin/feeds/CreatePost";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
 import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
@@ -42,6 +43,55 @@ export const meta = () =>
     title: "Connectize Companies",
   });
 
+const normalizeStoreListings = (storeData) => {
+  const listings =
+    storeData?.listings?.results ||
+    storeData?.listings ||
+    storeData?.results ||
+    storeData?.data ||
+    [];
+  return Array.isArray(listings) ? listings.filter(Boolean) : [];
+};
+
+const isServiceListing = (listing) =>
+  String(listing?.listing_type || listing?.type || "").toLowerCase() === "service";
+
+const getListingImage = (listing) => {
+  const images = Array.isArray(listing?.images) ? listing.images : [];
+  const primaryImage = images.find((image) => image?.is_primary) || images[0];
+  return (
+    primaryImage?.image ||
+    primaryImage?.url ||
+    primaryImage?.image_url ||
+    listing?.image ||
+    listing?.image_url ||
+    listing?.thumbnail ||
+    ""
+  );
+};
+
+const getListingSummary = (listing) =>
+  listing?.short_description ||
+  listing?.description ||
+  listing?.sub_title ||
+  listing?.subtitle ||
+  listing?.category_name ||
+  listing?.category ||
+  "";
+
+const getListingCompanyName = (listing) =>
+  listing?.seller_company_name ||
+  listing?.company?.company_name ||
+  listing?.seller?.company_name ||
+  "";
+
+const EmptyMarketplaceTab = ({ title, description }) => (
+  <div className="py-12 text-center">
+    <h3 className="text-gray-900 font-medium mb-2">{title}</h3>
+    <p className="text-gray-500 text-sm">{description}</p>
+  </div>
+);
+
 const CompanyProfile = React.memo(() => {
   const baseSeoData = getSEOConfig("companyProfile");
   const { company: companyName } = useParams();
@@ -54,6 +104,7 @@ const CompanyProfile = React.memo(() => {
   const [registrations, setRegistrations] = useState([]);
   const [applications, setApplications] = useState([]);
   const [dealRooms, setDealRooms] = useState([]);
+  const [marketplaceListings, setMarketplaceListings] = useState([]);
 
   const loadMyRegistrations = async () => {
     try {
@@ -103,14 +154,43 @@ const CompanyProfile = React.memo(() => {
           }
         };
 
-      useEffect(() => {
-        loadMyRegistrations();
-        loadCreatedJobs();
-      }, []);
+  useEffect(() => {
+    loadMyRegistrations();
+    loadCreatedJobs();
+  }, []);
 
-      useEffect(() => {
-        loadDealRooms();
-      }, [company?.id]);
+  useEffect(() => {
+    loadDealRooms();
+  }, [company?.id]);
+
+  useEffect(() => {
+    const loadCompanyMarketplaceListings = async () => {
+      if (!company?.id) {
+        setMarketplaceListings([]);
+        return;
+      }
+
+      try {
+        const storeData = await listingService.getStoreProfile(company.id, { page_size: 100 });
+        setMarketplaceListings(normalizeStoreListings(storeData));
+      } catch (error) {
+        console.error("Failed to load company marketplace listings:", error);
+        setMarketplaceListings([]);
+      }
+    };
+
+    loadCompanyMarketplaceListings();
+  }, [company?.id]);
+
+  const marketplaceServices = useMemo(
+    () => marketplaceListings.filter(isServiceListing),
+    [marketplaceListings]
+  );
+
+  const marketplaceProducts = useMemo(
+    () => marketplaceListings.filter((listing) => !isServiceListing(listing)),
+    [marketplaceListings]
+  );
 
   const headerProps = useMemo(
     () => ({
@@ -339,56 +419,68 @@ const CompanyProfile = React.memo(() => {
                 </section>)}
             {activeTab === "Services" && (
               <div className="">
+                {marketplaceServices.length ? (
                   <div className="grid gap-x-3 gap-y-4">
-                    {company?.services?.map((service, index) => (
+                    {marketplaceServices.map((service) => (
                       <PostCard
-                        key={index}
-                        //  image={product?.images?.[0].image}
-                        companyName={service?.company?.company_name}
-                        verified={service?.companyInfo?.verified}
-                        logo={service?.company?.logo}
+                        key={service.id}
+                        companyName={getListingCompanyName(service)}
+                        verified={service?.company?.verified || service?.seller_company_verified}
+                        logo={service?.company?.logo || service?.seller_company_logo}
                         title={service?.title}
-                        summary={service?.sub_title}
-                        url={`/services/${service?.id}`}
-                        slug={service?.company?.slug}
+                        summary={getListingSummary(service)}
+                        url={`/marketplace/listing/${service?.id}`}
+                        slug={service?.company?.slug || company?.slug}
                         whole={service}
                         isService
                       />
                     ))}
                   </div>
-            
-                  {company?.services?.length ? (
-                    <div className="mt-6 flex justify-center">
-                      <Link
-                        to={`/market?s=services&company=${company.id}---${company.slug}`}
-                      >
-                        <PrimaryButton>View more services</PrimaryButton>
-                      </Link>
-                    </div>
-                  ) : null}
-                </div>)}
+                ) : (
+                  <EmptyMarketplaceTab
+                    title="No Marketplace Services"
+                    description="This company has not listed any marketplace services yet."
+                  />
+                )}
+
+                {marketplaceServices.length ? (
+                  <div className="mt-6 flex justify-center">
+                    <Link to={webRoutes.marketplace}>
+                      <PrimaryButton>View more services</PrimaryButton>
+                    </Link>
+                  </div>
+                ) : null}
+              </div>)}
           {activeTab === "Products" && (
             <div className="">
-                  <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
-                    {company?.products?.map((product, index) => (
-                      <ProductListCard
-                        key={index}
-                        id={product.id}
-                        image={product?.images?.[0].image}
-                        title={product.title}
-                        subtitle={product.company?.company_name}
-                        isSummary
-                      />
-                    ))}
-                  </div>
-                  {company?.products?.length ? (
-                    <div className="mt-6 flex justify-center">
-                      <Link to={`/market?company=${company.id}---${company.slug}`}>
-                        <PrimaryButton>View more products</PrimaryButton>
-                      </Link>
-                    </div>
-                  ) : null}
+              {marketplaceProducts.length ? (
+                <div className="p-2 grid gap-x-3 gap-y-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+                  {marketplaceProducts.map((product) => (
+                    <ProductListCard
+                      key={product.id}
+                      id={product.id}
+                      to={`/marketplace/listing/${product.id}`}
+                      image={getListingImage(product)}
+                      title={product.title}
+                      subtitle={getListingCompanyName(product)}
+                      isSummary
+                    />
+                  ))}
                 </div>
+              ) : (
+                <EmptyMarketplaceTab
+                  title="No Marketplace Products"
+                  description="This company has not listed any marketplace products yet."
+                />
+              )}
+              {marketplaceProducts.length ? (
+                <div className="mt-6 flex justify-center">
+                  <Link to={webRoutes.marketplace}>
+                    <PrimaryButton>View more products</PrimaryButton>
+                  </Link>
+                </div>
+              ) : null}
+            </div>
           )}
             {activeTab === "Deal Room" && (dealRooms.length > 0 ? (
                 <div >

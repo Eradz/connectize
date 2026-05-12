@@ -7,24 +7,26 @@ import { useAuth } from '../context/userContext';
  * Fetches and caches company list for autocomplete
  * Only fetches when user is authenticated
  */
-export const useCompanySearch = () => {
+export const useCompanySearch = ({ enabled = true } = {}) => {
   const [companies, setCompanies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user, loading: authLoading } = useAuth();
 
   const fetchCompanies = useCallback(async () => {
-    // Debug logging
-    console.log('[useCompanySearch] fetchCompanies called, user:', user ? 'authenticated' : 'null', 'authLoading:', authLoading);
-    
-    // Don't fetch if auth is still loading or user is not authenticated
-    if (authLoading || !user) {
-      console.log('[useCompanySearch] Skipping fetch - authLoading:', authLoading, 'user:', user ? 'exists' : 'null');
+    if (!enabled) {
       setCompanies([]);
+      setIsLoading(false);
       return;
     }
 
-    console.log('[useCompanySearch] User authenticated, fetching companies...');
+    // Don't fetch if auth is still loading or user is not authenticated
+    if (authLoading || !user) {
+      setCompanies([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     
@@ -53,7 +55,7 @@ export const useCompanySearch = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, authLoading]);
+  }, [enabled, user, authLoading]);
 
   useEffect(() => {
     fetchCompanies();

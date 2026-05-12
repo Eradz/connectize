@@ -78,7 +78,7 @@
       "destination": "/api/render-meta?path=/marketplace/listing/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ]
