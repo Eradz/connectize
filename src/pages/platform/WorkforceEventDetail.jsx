@@ -1467,22 +1467,29 @@ const WorkforceEventDetail = () => {
                           </p>
                         </div>
                         {/* Meeting link — backend returns this 30 min before start or when manually started */}
-                        {event.is_virtual && event.meeting_link && (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
-                            <p className="text-sm font-semibold text-green-800 flex items-center gap-2">
-                              <span>🔗</span> {event.virtual_platform || 'Virtual Meeting'} Link Ready
-                            </p>
-                            <a
-                              href={event.meeting_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Join Now
-                            </a>
-                            <p className="text-xs text-green-700 break-all">{event.meeting_link}</p>
-                          </div>
+                        {event.is_virtual && (
+                          event.meeting_link ? (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                              <p className="text-sm font-semibold text-green-800 flex items-center gap-2">
+                                <span>🔗</span> {event.virtual_platform || 'Virtual Meeting'} Link Ready
+                              </p>
+                              <a
+                                href={event.meeting_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors duration-200"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                                Join Now
+                              </a>
+                              <p className="text-xs text-green-700 break-all">{event.meeting_link}</p>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-start gap-2 text-sm text-gray-600">
+                              <span>🔒</span>
+                              <span>Meeting link will appear here 1 hour before the event starts.</span>
+                            </div>
+                          )
                         )}
                         {/* Share and Bookmark buttons */}
                         <div className="flex gap-2 pt-3 border-t border-gold/20">
