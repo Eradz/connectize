@@ -278,6 +278,7 @@ export const CompaniesArray = ({
                   name={company?.company_name}
                   verified={company?.verify}
                   size="md"
+                  company={true}
                 />
                 {company?.organization_type && (
                   <div className="flex mb-1 md:items-center">
