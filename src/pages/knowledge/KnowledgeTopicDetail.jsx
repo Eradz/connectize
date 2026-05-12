@@ -109,6 +109,7 @@ const KnowledgeTopicDetail = () => {
 
   const handleLikeTopic = async () => {
     try {
+      setTopicLiked(!topicLiked);
       const response = await knowledgeForumTopicService.like(slug);
       const data = response?.data || response;
       
@@ -158,6 +159,15 @@ const KnowledgeTopicDetail = () => {
 
   const handleLikePost = async (postId) => {
     try {
+      setLikedPosts(prev => {
+        const newLikedPosts = new Set(prev);
+        if (!likedPosts.has(postId)) {
+          newLikedPosts.add(postId);
+        } else {
+          newLikedPosts.delete(postId);
+        }
+        return newLikedPosts;
+      });
       const response = await knowledgeForumPostService.like(postId);
       const data = response?.data || response;
       
