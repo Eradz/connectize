@@ -21,10 +21,17 @@ export default function SideNavigation({
   return (
     <div className="relative shrink-0 overflow-hidden">
       <button
-        className="md:hidden p-2 sticky top-0"
+        type="button"
+        aria-label={isOpen ? "Close sections" : "Open sections"}
+        className="md:hidden sticky top-0 inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
         onClick={() => setIsOpen(!isOpen)}
       >
-        ☰
+        <span aria-hidden="true" className="inline-flex flex-col gap-[3px]">
+          <span className="block w-4 h-[2px] bg-current rounded-sm" />
+          <span className="block w-4 h-[2px] bg-current rounded-sm" />
+          <span className="block w-4 h-[2px] bg-current rounded-sm" />
+        </span>
+        <span>Sections</span>
       </button>
       <nav
         className={`md:w-full md:h-full pr-4 md:border-r sticky left-0 top-0 ${
