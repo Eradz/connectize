@@ -8,7 +8,7 @@ export default function TermsLayout() {
       <header className="container max-w-screen-md py-2 md:py-4">
         <Logo />
       </header>
-      <section className="container max-w-screen-md p-4 bg-white rounded-md flex gap-4">
+      <section className="container max-w-screen-md p-4 bg-white rounded-md flex flex-col md:flex-row gap-4">
         <Outlet />
       </section>
     </main>

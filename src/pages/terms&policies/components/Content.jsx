@@ -4,11 +4,11 @@ import LightParagraph from "../../../components/ParagraphText";
 
 export default function Content({ array = [] }) {
   return (
-    <section className="w-3/4">
+    <section className="w-full md:w-3/4 min-w-0">
       {array.map((item, index) => {
         return (
           <section key={index} className="mb-8 space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800">{item.title}</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800">{item.title}</h2>
             <p className="text-xs text-gray-500">
               Last Updated: {item.lastUpdated}
             </p>
