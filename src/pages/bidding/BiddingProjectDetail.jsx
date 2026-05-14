@@ -379,7 +379,11 @@ function BidsTab({ project, bids, onRefresh }) {
         <h3 className="text-lg font-semibold">
           Bids ({bids.length})
         </h3>
-        {!project.is_owner && ["submission_open"].includes(project.status) && (() => {
+        {(() => {
+          const isExpired =
+            project.submission_deadline &&
+            new Date(project.submission_deadline) < new Date();
+          if (project.is_owner || project.status !== "submission_open" || isExpired) return null;
           const myBid = bids.find(b => b.status !== "draft");
           const myDraft = bids.find(b => b.status === "draft");
           if (myBid && project.allow_bid_amendments !== false) return (
@@ -2389,7 +2393,16 @@ function BiddingProjectDetailInner() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-bold text-gray-900">{project.title}</h1>
-            <StatusBadge status={project.status} />
+            {(() => {
+              const isExpired =
+                project.submission_deadline &&
+                new Date(project.submission_deadline) < new Date();
+              const displayStatus =
+                isExpired && project.status === "submission_open"
+                  ? "submission_closed"
+                  : project.status;
+              return <StatusBadge status={displayStatus} />;
+            })()}
           </div>
           <p className="text-sm text-gray-500">
             {project.reference_number} · {project.company_name}
@@ -2409,7 +2422,11 @@ function BiddingProjectDetailInner() {
             </Button>
           ))}
           {/* Non-owner: Submit / Edit Bid button for open projects */}
-          {!project.is_owner && project.status === "submission_open" && (() => {
+          {(() => {
+            const isExpired =
+              project.submission_deadline &&
+              new Date(project.submission_deadline) < new Date();
+            if (project.is_owner || project.status !== "submission_open" || isExpired) return null;
             const myBid = bids.find(b => b.status !== "draft");
             const myDraft = bids.find(b => b.status === "draft");
             if (myBid && project.allow_bid_amendments !== false) return (
