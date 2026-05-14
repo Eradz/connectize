@@ -6,6 +6,7 @@ export const biddingAPI = {
   // ==================== BID PROJECTS ====================
   getProjects: (params = {}) => api.get(`${BIDDING_BASE_URL}/bid-projects/`, { params }),
   getProject: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/`),
+  getAccessibleCompanies: () => api.get(`${BIDDING_BASE_URL}/bid-projects/accessible-companies/`),
   createProject: (data) => api.post(`${BIDDING_BASE_URL}/bid-projects/`, data),
   updateProject: (id, data) => api.patch(`${BIDDING_BASE_URL}/bid-projects/${id}/`, data),
   deleteProject: (id) => api.delete(`${BIDDING_BASE_URL}/bid-projects/${id}/`),

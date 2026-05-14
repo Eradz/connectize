@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
-import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Input, { Select, Textarea } from "../../components/ui/Input";
@@ -88,13 +87,13 @@ export default function CreateBiddingProject() {
   const fetchUserCompanies = async () => {
     try {
       setLoadingCompanies(true);
-      const companies = await getCompanyByIdOrEmail();
-      if (Array.isArray(companies)) {
-        setUserCompanies(companies);
-        // Auto-select if user has only one company and no company set yet
-        if (companies.length === 1 && !form.company) {
-          setForm((prev) => ({ ...prev, company: companies[0].id }));
-        }
+      // Use bidding-specific endpoint so representatives (not just owners) are included
+      const res = await biddingAPI.getAccessibleCompanies();
+      const companies = Array.isArray(res?.data) ? res.data : res?.data?.results || [];
+      setUserCompanies(companies);
+      // Auto-select if user has only one company and no company set yet
+      if (companies.length === 1 && !form.company) {
+        setForm((prev) => ({ ...prev, company: companies[0].id }));
       }
     } catch {
       console.error("Failed to load companies");
