@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
 import { useGetActionableCompanies } from "../../hooks";
+import { getMyActionableCompanies } from "../../api-services/representatives";
 
 export default function CreateListing() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function CreateListing() {
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [creationMode, setCreationMode] = useState("manual"); // "manual" or "inventory"
   const [productCategories, setProductCategories] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const {user} = useAuth();
@@ -57,8 +59,19 @@ export default function CreateListing() {
   useEffect(() => {
     fetchInventoryItems();
     fetchCategories();
+    fetchCompanies();
   }, []);
 
+    const fetchCompanies = async () => {
+        try {
+          const result = await getMyActionableCompanies();
+          if (!cancelled && Array.isArray(result)) {
+            setCompanies(result);
+          }
+        } catch (err) {
+          console.error('Failed to fetch user companies:', err);
+        }
+      };
   const fetchCategories = async () => {
     try {
       const [prodCats, servCats] = await Promise.all([
@@ -531,6 +544,29 @@ export default function CreateListing() {
               </div>
             </div>
           </div>
+
+          {/* Company */}
+            <div className="bg-white rounded-lg p-6">
+              <label className="block font-semibold text-gray-700 mb-4">Company</label>
+              {companies.length === 0 ? (
+                <div className="p-3 rounded-lg border border-yellow-200 bg-yellow-50 text-sm text-yellow-800">
+                  You don’t have a company yet. Create a company first to create market listings.
+                </div>
+              ) : (
+                <select
+                  value={formData.seller_company_id || ''}
+                  onChange={(e) => handleInputChange('seller_company_id', e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all bg-white"
+                >
+                  <option value="">Select a company</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name || company.company_name || company.title || `Company #${company.id}`}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
 
           {/* Inventory */}
           <div className="bg-white rounded-lg p-6">
