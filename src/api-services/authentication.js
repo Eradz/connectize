@@ -29,7 +29,7 @@ export const authenticationService = async ({
 
    // Handle different response structures
     const payload = response?.results || response?.data || response;
-    const success = Boolean(response?.success ?? payload?.success ?? true);
+    const success = Boolean(response?.success ?? payload?.success ?? false);
     if (type === "login") {
       const tokens = payload?.tokens;
       if (tokens?.access && tokens?.refresh) {
