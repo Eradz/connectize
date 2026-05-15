@@ -61,7 +61,8 @@ function ProjectCard({ project, onClick, onApply }) {
     ? new Date(project.submission_deadline)
     : null;
   const isExpired = deadline && deadline < new Date();
-  const canApply = !project.is_owner && project.status === "submission_open";
+  const canApply =
+    !project.is_owner && project.status === "submission_open" && !isExpired;
 
   return (
     <div
@@ -75,7 +76,7 @@ function ProjectCard({ project, onClick, onApply }) {
           </h3>
           <p className="text-xs text-gray-500 mt-0.5">{project.reference_number}</p>
         </div>
-        <StatusBadge status={project.status} />
+        <StatusBadge status={isExpired && project.status === "submission_open" ? "submission_closed" : project.status} />
       </div>
 
       <p className="text-sm text-gray-600 line-clamp-2 mb-3">
