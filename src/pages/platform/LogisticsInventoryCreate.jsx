@@ -8,6 +8,7 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsInventoryService } from '../../api-services/oilgas';
 import { inventoryWarehouseService } from '../../api-services/inventory';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 import { toast } from 'sonner';
 
 const LogisticsInventoryForm = () => {
@@ -19,6 +20,8 @@ const LogisticsInventoryForm = () => {
   const [saving, setSaving] = useState(false);
   const [warehouses, setWarehouses] = useState([]);
   const [specifications, setSpecifications] = useState([{ key: '', value: '' }]);
+  const [availableCompanies, setAvailableCompanies] = useState([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -103,6 +106,19 @@ const LogisticsInventoryForm = () => {
     loadWarehouses();
   }, [id, isEdit]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await getMyActionableCompanies('company_manage_inventory');
+        if (!cancelled) setAvailableCompanies(Array.isArray(list) ? list : []);
+      } catch {
+        if (!cancelled) setAvailableCompanies([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const loadWarehouses = async () => {
     try {
       const response = await inventoryWarehouseService.getAll();
@@ -122,6 +138,9 @@ const LogisticsInventoryForm = () => {
         purchase_date: data.purchase_date ? data.purchase_date.split('T')[0] : '',
         warranty_expiry: data.warranty_expiry ? data.warranty_expiry.split('T')[0] : ''
       });
+      if (data.company) {
+        setSelectedCompanyId(String(data.company));
+      }
 
       // Load specifications
       if (data.specifications && typeof data.specifications === 'object') {
@@ -181,6 +200,7 @@ const LogisticsInventoryForm = () => {
 
       const payload = {
         ...formData,
+        company: selectedCompanyId || null,
         specifications: specs
       };
 
@@ -248,6 +268,24 @@ const LogisticsInventoryForm = () => {
               <Package className="w-5 h-5 mr-2 text-gold" />
               Basic Information
             </h3>
+
+            {availableCompanies.length > 0 && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Create on behalf of company (optional)
+                </label>
+                <select
+                  value={selectedCompanyId}
+                  onChange={(e) => setSelectedCompanyId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                >
+                  <option value="">Personal (no company)</option>
+                  {availableCompanies.map((c) => (
+                    <option key={c.id} value={c.id}>{c.company_name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
