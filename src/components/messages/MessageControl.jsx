@@ -237,7 +237,7 @@ export default function MessageControl() {
   }, [message]);
 
   return (
-    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-14 md:bottom-4">
+    <section className="bg-white p-1 px-4 rounded-md flex flex-col gap-2 transition-all duration-300 sticky bottom-10 md:bottom-4">
       {/* <button onClick={() => scrollToBottom()}>Bottom</button> */}
       {/* valid images */}
       {validImages && (

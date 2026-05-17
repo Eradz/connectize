@@ -65,7 +65,6 @@ export default function MessagesPage() {
         tabsPanels={[<MessagesList />, <Favorites />]}
       /> */}
 
-      {!room_name && (
         <>
           <CreateNewLink
             text="Start new chat"
@@ -120,7 +119,6 @@ export default function MessagesPage() {
             )}
           </ReusableModal>
         </>
-      )}
     </>
   );
 }
