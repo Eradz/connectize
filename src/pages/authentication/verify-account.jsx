@@ -200,7 +200,7 @@ function VerifyAccount() {
         {/* 6-digit code inputs */}
         <div>
           <label className="font-medium text-sm">Verification Code</label>
-          <div className="flex gap-2 sm:gap-3 mt-2 justify-center">
+          <div className="flex gap-2 sm:gap-3 mt-2">
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -223,14 +223,14 @@ function VerifyAccount() {
         <button
           type="submit"
           disabled={isSubmitting || code.some((d) => !d)}
-          className="w-full md:w-[60%] mx-auto block py-2.5 px-4 rounded-md text-white font-medium text-sm transition-all btn-primary disabled:opacity-50"
+          className="w-full md:w-[60%] block py-2.5 px-4 rounded-md text-white font-medium text-sm transition-all btn-primary disabled:opacity-50"
         >
           {isSubmitting ? "Verifying..." : "Verify Account"}
         </button>
       </form>
 
       {/* Resend section */}
-      <div className="text-center text-sm space-y-2">
+      <div className=" text-sm space-y-2">
         <p className="text-custom_grey">
           Didn't receive the code?{" "}
           {cooldown > 0 ? (
@@ -248,7 +248,7 @@ function VerifyAccount() {
         </p>
       </div>
 
-      <p className="text-center xs:text-sm">
+      <p className=" xs:text-sm">
         Already verified?{" "}
         <Link to="/login" className="font-bold text-black">
           Login
