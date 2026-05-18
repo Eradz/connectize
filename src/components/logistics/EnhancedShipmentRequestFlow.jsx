@@ -10,6 +10,7 @@ import {
   Plus, Minus, Upload, Save, Send
 } from 'lucide-react';
 import { logisticsAPI } from '../../api-services/logistics';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 import ProviderComparisonSystem from './ProviderComparisonSystem';
 
 const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isEditing = false, initialData = null, requestId = null }) => {
@@ -17,6 +18,21 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
   const [loading, setLoading] = useState(false);
   const [createdRequest, setCreatedRequest] = useState(null);
   const [showProviderComparison, setShowProviderComparison] = useState(false);
+  const [availableCompanies, setAvailableCompanies] = useState([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await getMyActionableCompanies('company_manage_logistics');
+        if (!cancelled) setAvailableCompanies(Array.isArray(list) ? list : []);
+      } catch {
+        if (!cancelled) setAvailableCompanies([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   
   const [requestData, setRequestData] = useState({
     title: '',
@@ -94,6 +110,9 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
       }));
       if (initialData.id) {
         setCreatedRequest(initialData);
+      }
+      if (initialData.company) {
+        setSelectedCompanyId(String(initialData.company));
       }
     }
   }, [isEditing, initialData]);
@@ -231,6 +250,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
       // Format data for API submission
       const submitData = {
         ...requestData,
+        company: selectedCompanyId || null,
 
         pickup_date_requested: new Date(requestData.pickup_date_requested).toISOString().split('T')[0],
         delivery_date_requested: requestData.delivery_date_requested ? new Date(requestData.delivery_date_requested).toISOString().split('T')[0] : null,
@@ -303,6 +323,25 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
         return (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900">Basic Shipment Information</h3>
+
+            {/* Company (optional) */}
+            {availableCompanies.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Create on behalf of company (optional)
+                </label>
+                <select
+                  value={selectedCompanyId}
+                  onChange={(e) => setSelectedCompanyId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Personal (no company)</option>
+                  {availableCompanies.map((c) => (
+                    <option key={c.id} value={c.id}>{c.company_name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Shipment Title */}
             <div>

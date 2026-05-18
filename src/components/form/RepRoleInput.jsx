@@ -8,43 +8,12 @@ import { getCompanyByIdOrEmail } from "../../api-services/companies";
 import {
   assignRepresentative,
   getAvailableRepresentativePermissions,
+  getRepresentativeRoleTemplates,
 } from "../../api-services/representatives";
 import Modal from "../ui/Modal";
 
-const ALL_COMPANY_CODES = [
-  "company_post",
-  "company_manage_products",
-  "company_edit_profile",
-  "company_manage_events",
-  "company_view_analytics",
-  "company_manage_jobs",
-  "company_respond_reviews",
-  "company_manage_representatives",
-];
-
-const TEMPLATE_DEFAULT_PERMISSIONS = {
-  human_resources: ["company_post", "company_manage_jobs", "company_view_analytics"],
-  technical: ["company_post", "company_manage_products"],
-  commercial: ["company_post", "company_manage_products", "company_respond_reviews", "company_view_analytics"],
-  marketing: ["company_post", "company_manage_events", "company_respond_reviews"],
-  cofounder: ALL_COMPANY_CODES,
-  partner: ["company_post", "company_view_analytics"],
-  developer: ["company_post", "company_manage_products"],
-  product_designer: ["company_post", "company_manage_products"],
-  custom: [],
-};
-
-const ROLE_TEMPLATES = [
-  { id: "human_resources", label: "Human Resources", description: "Manages hiring, team profiles, and HR communications for the company.", emoji: "👥", color: "#4CAF50" },
-  { id: "technical", label: "Technical", description: "Oversees technical content, products, and services.", emoji: "🔧", color: "#2196F3" },
-  { id: "commercial", label: "Commercial", description: "Handles business partnerships and commercial activity.", emoji: "💼", color: "#FF9800" },
-  { id: "marketing", label: "Marketing", description: "Creates content and manages brand presence on Connectize.", emoji: "📣", color: "#E91E63" },
-  { id: "cofounder", label: "Co-Founder", description: "Full access to manage the company and all its representatives.", emoji: "👑", color: "#d4af37" },
-  { id: "partner", label: "Partner", description: "Represents the company in external partnerships.", emoji: "🤝", color: "#9C27B0" },
-  { id: "developer", label: "Developer", description: "Manages software development updates and technical listings.", emoji: "💻", color: "#00BCD4" },
-  { id: "product_designer", label: "Product Designer", description: "Manages design assets and visual product listings.", emoji: "🎨", color: "#FF5722" },
-  { id: "custom", label: "Custom Role", description: "Define a custom role specific to your company.", emoji: "✏️", color: "#607D8B" },
-];
+// Roles & their default permissions are fully API-driven; edit them in the
+// Django admin (admin_permissions.RepresentativeRoleTemplate).
 
 export default function RepRoleInput({ user }) {
   const queryClient = useQueryClient();
@@ -66,10 +35,25 @@ export default function RepRoleInput({ user }) {
     staleTime: 10 * 60 * 1000,
   });
 
+  const { data: roleTemplates = [] } = useQuery({
+    queryKey: ["representative-role-templates"],
+    queryFn: getRepresentativeRoleTemplates,
+    staleTime: 10 * 60 * 1000,
+  });
+
   const permissionLabel = useMemo(
     () => Object.fromEntries(availablePermissions.map((p) => [p.code, p.label])),
     [availablePermissions]
   );
+
+  // Resolve the permission codes a template grants, honoring is_all_permissions.
+  const getTemplateDefaults = (template) => {
+    if (!template) return [];
+    if (template.is_all_permissions) return availablePermissions.map((p) => p.code);
+    return (template.default_permission_codes || []).filter((code) =>
+      availablePermissions.some((p) => p.code === code)
+    );
+  };
 
   const handleOpen = () => {
     setSelectedTemplate(null);
@@ -82,14 +66,8 @@ export default function RepRoleInput({ user }) {
 
   const handleSelectTemplate = (templateId) => {
     setSelectedTemplate(templateId);
-    if (templateId === "cofounder") {
-      setSelectedPermissions(availablePermissions.map((p) => p.code));
-    } else {
-      const defaults = TEMPLATE_DEFAULT_PERMISSIONS[templateId] || [];
-      setSelectedPermissions(
-        defaults.filter((code) => availablePermissions.some((p) => p.code === code))
-      );
-    }
+    const template = roleTemplates.find((t) => t.code === templateId);
+    setSelectedPermissions(getTemplateDefaults(template));
   };
 
   const handleTogglePermission = (code) => {
@@ -100,9 +78,9 @@ export default function RepRoleInput({ user }) {
 
   const handleAssign = async () => {
     if (!companies?.[0]) return;
-    const template = ROLE_TEMPLATES.find((t) => t.id === selectedTemplate);
+    const template = roleTemplates.find((t) => t.code === selectedTemplate);
     const roleName =
-      selectedTemplate === "custom" ? customRole.trim() : template?.label || "";
+      template?.is_custom ? customRole.trim() : template?.label || "";
     if (!roleName) return;
 
     setIsSubmitting(true);
@@ -122,9 +100,11 @@ export default function RepRoleInput({ user }) {
     }
   };
 
+  const selectedTemplateObj = roleTemplates.find((t) => t.code === selectedTemplate);
+
   const canAssign =
     !!selectedTemplate &&
-    (selectedTemplate !== "custom" || customRole.trim().length > 0) &&
+    (!selectedTemplateObj?.is_custom || customRole.trim().length > 0) &&
     !isSubmitting;
 
   return (
@@ -160,19 +140,16 @@ export default function RepRoleInput({ user }) {
 
         {/* Role template list */}
         <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-          {ROLE_TEMPLATES.map((item) => {
-            const active = selectedTemplate === item.id;
-            const defaults =
-              item.id === "cofounder"
-                ? availablePermissions.map((p) => p.code)
-                : TEMPLATE_DEFAULT_PERMISSIONS[item.id] || [];
+          {roleTemplates.map((item) => {
+            const active = selectedTemplate === item.code;
+            const defaults = getTemplateDefaults(item);
             const visible = defaults.slice(0, 2);
             const remaining = defaults.length - 2;
 
             return (
               <button
-                key={item.id}
-                onClick={() => handleSelectTemplate(item.id)}
+                key={item.code}
+                onClick={() => handleSelectTemplate(item.code)}
                 className={clsx(
                   "w-full flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-all duration-150",
                   active
@@ -233,7 +210,7 @@ export default function RepRoleInput({ user }) {
 
         {/* Custom role input */}
         <AnimatePresence>
-          {selectedTemplate === "custom" && (
+          {selectedTemplateObj?.is_custom && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}

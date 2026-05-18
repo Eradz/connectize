@@ -176,6 +176,14 @@ export const getAvailableRepresentativePermissions = async () => {
   return Array.isArray(result) ? result : [];
 };
 
+export const getRepresentativeRoleTemplates = async () => {
+  const result = await makeApiRequest({
+    url: "api/representatives/role-templates/",
+    method: "GET",
+  });
+  return Array.isArray(result) ? result : [];
+};
+
 export const updateRepresentativePermissions = async (id, permissions) => {
   const result = await makeApiRequest({
     url: `api/representatives/${id}/update-permissions/`,

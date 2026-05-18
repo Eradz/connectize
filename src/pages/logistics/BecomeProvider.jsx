@@ -9,7 +9,7 @@ import {
 import { logisticsAPI } from '../../api-services/logistics';
 import { getSession } from '../../lib/session';
 import { useAuth } from '../../context/userContext';
-import { useUserCompanies } from '../../hooks/useUserCompanies';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 import { webRoutes } from '../../lib/webRoutes';
 
 const SERVICE_TYPES = [
@@ -60,8 +60,27 @@ const BecomeProvider = () => {
 
   const [newRegion, setNewRegion] = useState('');
 
-  // Fetch full company objects for the current user
-  const { companies: userCompanies, loading: companiesLoading } = useUserCompanies(currentUser?.id);
+  // Fetch companies the user can act on behalf of for logistics (owner + active rep with permission)
+  const [userCompanies, setUserCompanies] = useState([]);
+  const [companiesLoading, setCompaniesLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!currentUser?.id) return;
+      setCompaniesLoading(true);
+      try {
+        const list = await getMyActionableCompanies('company_manage_logistics');
+        if (!cancelled) setUserCompanies(Array.isArray(list) ? list : []);
+      } catch (e) {
+        if (!cancelled) setUserCompanies([]);
+      } finally {
+        if (!cancelled) setCompaniesLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [currentUser]);
 
   useEffect(() => {
     checkExistingProvider();
