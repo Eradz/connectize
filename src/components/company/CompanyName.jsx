@@ -6,7 +6,7 @@ export default function CompanyName({ slug, name, verified, size = "sm", company
   return (
     <div className="flex items-center">
       <Link
-        to={company ? `/${name}` : `/co/${userId}`}
+        to={company ? `/${slug ? slug : name}` : `/co/${userId}`}
         className={clsx("text-lg font-bold break-all line-clamp-1", {
           "xs:text-sm": size === "sm",
           "xs:text-lg": size === "md",

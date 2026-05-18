@@ -15,7 +15,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud, CalendarDays, LockOpen, Trash2 } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud, CalendarDays, LockOpen, Trash2, Trash } from "lucide-react";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
@@ -1178,6 +1178,22 @@ export default function DealRoomDetail() {
                             }
                           };
                           
+                          const handleDocumentDelete = async() => {
+                            if (window.confirm("Are you sure you want to delete this document?")) {
+                              try {
+                              const docs = await makeApiRequest({
+                                url: "api/v1/deals/documents/",
+                                method: "DELETE",
+                                params: { deal_room: id, page_size: 200 },
+                              });
+                              console.log('Document deleted:', docs);
+                            } catch (err) {
+                              console.warn('Documents API failed:', err);
+                              if (isMounted) setDocuments([]);
+                            }
+                            }
+                          };
+                          
                           return (
                             <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
                               <div className="flex w-full items-center space-x-3">
@@ -1199,13 +1215,22 @@ export default function DealRoomDetail() {
                                       </div>
                                       <div className="flex w-full mt-1">
                                           {href ? (
-                                          <button 
-                                            onClick={handleDocumentOpen}
-                                            className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
-                                          >
-                                            <Eye className="h-4 w-4 mr-1" />
-                                            Open
-                                          </button>
+                                            <div>
+                                                <button 
+                                                  onClick={handleDocumentOpen}
+                                                  className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-gold hover:bg-gold/30"
+                                                >
+                                                  <Eye className="h-4 w-4 mr-1" />
+                                                  Open
+                                                </button>
+                                                <button 
+                                                  onClick={handleDocumentDelete}
+                                                  className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-red-500 hover:bg-red-600"
+                                                >
+                                                  <Trash className="h-4 w-4 mr-1" />
+                                                  Delete
+                                                </button>
+                                          </div>
                                         ) : (
                                           <button
                                             onClick={async () => {

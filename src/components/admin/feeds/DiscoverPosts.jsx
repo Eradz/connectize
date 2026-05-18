@@ -833,7 +833,7 @@ export function ButtonWithTooltipIcon({
       >
         {IconName && !loading && (
           <IconName
-            className={clsx("", iconClassName, {
+            className={clsx("", iconClassName,  tip === "Unlike post" && "text-red-500", {
               "xs:!size-4 !size-6 xs:!text-[14px] !text-[20px]": !iconClassName,
             })}
           />

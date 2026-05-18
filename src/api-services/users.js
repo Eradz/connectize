@@ -205,6 +205,7 @@ export const logOutCurrentUser = async () => {
     url: "logout",
     method: "POST",
     values: { refresh },
+    type: "logout"
   });
   if (success) goToLogin();
 };

@@ -22,6 +22,7 @@ import {
 import { knowledgeForumService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast } from 'sonner';
+import BackArrowButton from "../../components/BackArrowButton";
 
 // Custom SVG Icons
 const CreditCardIcon = () => (
@@ -117,9 +118,10 @@ const KnowledgeForums = () => {
 
   return (
     <div className="min-h-screen bg-white md:bg-background">
-      <div className="max-w-7xl mx-auto ">
+      <div className="max-w-7xl mx-auto py-4 ">
         {/* Mobile Header */}
         <div className="lg:hidden px-4 pt-4 pb-6">
+          <BackArrowButton/>
           <div className="flex justify-between items-start mb-2">
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-900 mb-1">Discussion Forums</h1>
@@ -134,14 +136,17 @@ const KnowledgeForums = () => {
         {/* Desktop Header */}
         <div className="hidden lg:block mb-8 px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center space-x-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">Discussion Forums</h1>
-                <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-                  Active
-                </span>
+            <div className="flex mt">
+              <BackArrowButton className={"md:w-fit"}/>
+              <div>
+                <div className="flex items-center space-x-3 mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900">Discussion Forums</h1>
+                  <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    Active
+                  </span>
+                </div>
+                <p className="text-gray-500">join conversations about oil & gas industry topics</p>
               </div>
-              <p className="text-gray-500">join conversations about oil & gas industry topics</p>
             </div>
             <Link to={webRoutes.knowledgeForumCreate} className="hover:bg-pale_yellow text-gray-900 font-medium px-5 py-2.5 rounded-lg flex items-center space-x-2 transition-colors bg-pale_yellow">
               <Plus className="h-5 w-5" />
