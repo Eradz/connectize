@@ -113,8 +113,14 @@ const Header = ({ banner, name, logo, type = "company" }) => {
 
     if (field === "banner") {
       setNewBanner(URL.createObjectURL(file));
+      // Auto-submit banner upload
+      bannerFormik.setFieldValue(field, file);
+      setTimeout(() => bannerFormik.submitForm(), 0);
     } else if (field === "logo") {
       setNewLogo(URL.createObjectURL(file));
+      // Auto-submit logo upload
+      logoFormik.setFieldValue(field, file);
+      setTimeout(() => logoFormik.submitForm(), 0);
     }
   };
 
@@ -160,7 +166,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                 position="absolute"
                 top="1"
                 right="1"
-                opacity={newBanner !== banner ? 1 : 0.75}
+                opacity={0.75}
                 height="8"
                 _hover={{ opacity: 1 }}
                 disabled={bannerFormik.isSubmitting}
@@ -171,7 +177,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                 {newBanner ? "Change banner" : "Add banner"}
               </Button>
             )}
-            {newBanner !== banner && (
+            {/* {newBanner !== banner && (
               <Button
                 type="submit"
                 position="absolute"
@@ -186,7 +192,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
               >
                 Upload banner
               </Button>
-            )}
+            )} */}
           </form>
         )}
       </section>
@@ -229,7 +235,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
               IconName={CameraIcon}
               disabled={logoFormik.isSubmitting}
             />
-            {newLogo !== logo && (
+            {/* {newLogo !== logo && (
               <ButtonWithTooltipIcon
                 type="submit"
                 tip="Upload image"
@@ -237,7 +243,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                 className="absolute !bottom-1 !bg-dark !text-white p-1 -translate-x-2 translate-y-4 rounded-full"
                 disabled={logoFormik.isSubmitting}
               />
-            )}
+            )} */}
           </form>
         )}
       </Avatar>
