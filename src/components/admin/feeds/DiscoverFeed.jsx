@@ -13,19 +13,19 @@ const DiscoverFeed = () => {
   const { data: companies = [] } = useGetCurrentCompany();
   const { data: actionableCompanies = [] } =
     useGetActionableCompanies("company_post");
-  const canCreatePost =
-    currentUser?.user_type === CompanyUserType || actionableCompanies.length > 0;
+  const canCreatePost = true;
+    // currentUser?.user_type === CompanyUserType || actionableCompanies.length > 0;
 
   useEffect(() => {
     setUser(currentUser);
   }, [currentUser, setUser]);
 
+  console.log("currentUser", currentUser);
   return (
     <section className="">
       <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">
         <h1 className="text-2xl font-bold">Discover</h1>
         {currentUser &&
-          currentUser?.user_type === CompanyUserType &&
           (currentUser?.is_first_time_user || companies.length < 1) && (
             <Link
               to={
