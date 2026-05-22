@@ -702,8 +702,8 @@ export const ProfileAboutList = ({ title = "", value = "", Icon }) => {
             >
               {value}
             </a>
-          ) : (formattedTitle?.includes("email") &&
-            formattedValue?.includes("@"))? (
+          ) : formattedTitle?.includes("email") &&
+            formattedValue?.includes("@") ? (
             <a
               href={`mailto:${value}`}
               target="_blank"
