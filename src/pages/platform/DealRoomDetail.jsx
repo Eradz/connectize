@@ -908,7 +908,7 @@ export default function DealRoomDetail() {
                                     onClick={async () => {
                                       if (!window.confirm(`Are you sure you want to delete "${label}"? This action cannot be undone.`)) return;
                                       try {
-                                        await dealDocumentService.delete(d.id);
+                                        await dealDocumentService.delete(d.id, id);
                                         // Refresh document list
                                         const docs = await makeApiRequest({
                                           url: "api/v1/deals/documents/",

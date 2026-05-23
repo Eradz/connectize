@@ -56,7 +56,9 @@ export const dealRoomAPI = {
     });
   },
   updateDocument: (id, data) => api.put(`${DEAL_ROOM_BASE_URL}/documents/${id}/`, data),
-  deleteDocument: (id) => api.delete(`${DEAL_ROOM_BASE_URL}/documents/${id}/`),
+  deleteDocument: (id, dealRoomId) => api.delete(`${DEAL_ROOM_BASE_URL}/documents/${id}/`, {
+    params: dealRoomId ? { deal_room: dealRoomId } : undefined,
+  }),
   
   // Deal Activities
   createActivities: (id, data) => api.post(`${DEAL_ROOM_BASE_URL}/activities/`, data),
