@@ -702,6 +702,28 @@ export default function SubmitBid() {
   const complianceIssueLabels = categorizedComplianceIssueLabels.length > 0
     ? categorizedComplianceIssueLabels
     : fallbackComplianceIssues;
+  const primaryComplianceIssue =
+    missingItems[0] || expiredItems[0] || rejectedItems[0] || pendingVerificationItems[0] || null;
+  const complianceVaultParams = new URLSearchParams();
+  if (form.bidder_company) {
+    complianceVaultParams.set("company", form.bidder_company);
+  }
+  if (primaryComplianceIssue?.requirement_id) {
+    complianceVaultParams.set("requirement", primaryComplianceIssue.requirement_id);
+    complianceVaultParams.set("requirementName", getComplianceItemLabel(primaryComplianceIssue));
+    if (primaryComplianceIssue.category) {
+      complianceVaultParams.set("requirementCategory", primaryComplianceIssue.category);
+    }
+    if (primaryComplianceIssue.valid_duration_months) {
+      complianceVaultParams.set("validDurationMonths", primaryComplianceIssue.valid_duration_months);
+    }
+    if (typeof primaryComplianceIssue.requires_verification === "boolean") {
+      complianceVaultParams.set("requiresVerification", String(primaryComplianceIssue.requires_verification));
+    }
+  }
+  const complianceVaultUrl = complianceVaultParams.toString()
+    ? `${webRoutes.biddingCompliance}?${complianceVaultParams.toString()}`
+    : webRoutes.biddingCompliance;
   const complianceAttentionCount = Math.max(
     missingCount + expiredCount + rejectedCount + pendingVerificationCount,
     complianceIssueLabels.length,
@@ -784,7 +806,7 @@ export default function SubmitBid() {
           </ul>
           <button
             type="button"
-            onClick={() => navigate(webRoutes.biddingCompliance)}
+            onClick={() => navigate(complianceVaultUrl)}
             className="mt-2 text-sm text-red-700 underline hover:text-red-900"
           >
             Go to Compliance Vault →
@@ -1405,7 +1427,7 @@ export default function SubmitBid() {
                 {project.status === "submission_open" && complianceIssueLabels.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => navigate(webRoutes.biddingCompliance)}
+                    onClick={() => navigate(complianceVaultUrl)}
                     className="text-xs font-medium text-amber-900 underline hover:text-amber-950"
                   >
                     Open Compliance Vault
