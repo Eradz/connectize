@@ -550,16 +550,26 @@ const KnowledgeForumDetail = () => {
             {members.length === 0 ? (
               <p className="text-sm text-gray-500">No members yet</p>
             ) : (
-              <ul className="divide-y">
-                {members.map(m => (
-                  <li key={m.id} className="py-3 flex items-center justify-between">
-                    <div className="text-sm text-gray-700">{m.user?.first_name} {m.user?.last_name} ({m.user?.email})</div>
-                    {forum.is_moderator && (
-                      <button onClick={() => onRemoveMember(m.user?.id)} className="px-2 py-1 text-sm border rounded hover:bg-gray-50">Remove</button>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="divide-y">
+                  {members.slice(0, 3).map(m => (
+                    <li key={m.id} className="py-3 flex items-center justify-between">
+                      <div className="text-sm text-gray-700">{m.user?.first_name} {m.user?.last_name} ({m.user?.email})</div>
+                      {forum.is_moderator && (
+                        <button onClick={() => onRemoveMember(m.user?.id)} className="px-2 py-1 text-sm border rounded hover:bg-gray-50">Remove</button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {members.length > 3 && (
+                  <button 
+                    onClick={() => navigate(webRoutes.knowledgeForumMembers?.replace(':forumSlug', forum.slug))}
+                    className="w-full mt-4 px-4 py-2 text-center text-gold font-medium border border-gold rounded-lg hover:bg-gold hover:text-white transition"
+                  >
+                    View All Members ({members.length})
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
