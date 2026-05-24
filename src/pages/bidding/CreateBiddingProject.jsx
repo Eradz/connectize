@@ -48,6 +48,7 @@ export default function CreateBiddingProject() {
   const [loadingProject, setLoadingProject] = useState(!!editId);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [editProject, setEditProject] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [userCompanies, setUserCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
@@ -133,6 +134,7 @@ export default function CreateBiddingProject() {
       setLoadingProject(true);
       const res = await biddingAPI.getProject(editId);
       const p = res?.data || res;
+      setEditProject(p);
       setForm({
         title: p.title || "",
         description: p.description || "",
@@ -160,6 +162,19 @@ export default function CreateBiddingProject() {
       if (p.terms_and_conditions) setShowAdvanced(true);
       if (Array.isArray(p.envelope_configuration) && p.envelope_configuration.length > 0) {
         setEnvelopeConfig(p.envelope_configuration);
+      }
+      if (p.company) {
+        setUserCompanies((prev) => {
+          const companyId = String(p.company);
+          if (prev.some((company) => String(company.id) === companyId)) return prev;
+          return [
+            ...prev,
+            {
+              id: companyId,
+              company_name: p.company_name || p.owner_company_name || `Company #${companyId}`,
+            },
+          ];
+        });
       }
     } catch {
       toast.error("Failed to load project");
@@ -287,6 +302,11 @@ export default function CreateBiddingProject() {
     }
   };
 
+  const isProjectCompanyLocked =
+    isEditMode &&
+    editProject &&
+    (editProject.status !== "draft" || Number(editProject.bids_count || 0) > 0);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -310,6 +330,9 @@ export default function CreateBiddingProject() {
     setLoading(true);
     try {
       const payload = { ...form };
+      if (isProjectCompanyLocked) {
+        delete payload.company;
+      }
       // Include custom field definitions in specifications
       if (customFieldDefs.length > 0) {
         payload.specifications = {
@@ -390,7 +413,9 @@ export default function CreateBiddingProject() {
       </h1>
       <p className="text-sm text-gray-500 mb-6">
         {isEditMode
-          ? "Update your draft project details."
+          ? isProjectCompanyLocked
+            ? "Update project details. Company is locked after publishing."
+            : "Update your draft project details."
           : "Set up a new procurement project. It will be created as a draft."}
       </p>
 
@@ -749,17 +774,20 @@ export default function CreateBiddingProject() {
               <Select
                 value={form.company}
                 onChange={(e) => handleChange("company", e.target.value)}
+                disabled={isProjectCompanyLocked}
               >
                 <option value="">Select a company</option>
                 {userCompanies.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.company_name}
+                    {c.company_name || c.name || `Company #${c.id}`}
                   </option>
                 ))}
               </Select>
             )}
             <p className="text-xs text-gray-400 mt-1">
-              Select the company publishing this project
+              {isProjectCompanyLocked
+                ? "Project company is locked after publishing or receiving bids."
+                : "Select the company publishing this project"}
             </p>
           </div>
         </section>
