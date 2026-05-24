@@ -276,16 +276,6 @@ const KnowledgeForumDetail = () => {
     }
   };
 
-  const onRemoveMember = async (user_id) => {
-    try {
-      await knowledgeForumService.removeMember(slug, user_id);
-      setMembers(prev => prev.filter(m => m.user?.id !== user_id));
-      toast.success('Member removed');
-    } catch (e) {
-      toast.error('Failed to remove member');
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen  p-6">
@@ -326,6 +316,7 @@ const KnowledgeForumDetail = () => {
   }
 
   const totalPages = Math.ceil(totalTopics / pageSize);
+  const memberCount = forum.members_count ?? forum.member_count ?? members.length;
 
   return (
     <div className="min-h-screen px-4 md:px-0">
@@ -542,27 +533,21 @@ const KnowledgeForumDetail = () => {
         )}
 
         {/* Members */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
-          <div className="p-6 border-b flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Members ({members.length})</h3>
+        <Link
+          to={webRoutes.knowledgeForumMembers.replace(':slug', forum.slug)}
+          className="bg-white rounded-lg shadow-sm border mb-6 p-6 flex items-center justify-between hover:border-gold transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <Users className="w-5 h-5 text-gray-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Members ({memberCount})</h3>
+              <p className="text-sm text-gray-500">Open the full member directory</p>
+            </div>
           </div>
-          <div className="p-6">
-            {members.length === 0 ? (
-              <p className="text-sm text-gray-500">No members yet</p>
-            ) : (
-              <ul className="divide-y">
-                {members.map(m => (
-                  <li key={m.id} className="py-3 flex items-center justify-between">
-                    <div className="text-sm text-gray-700">{m.user?.first_name} {m.user?.last_name} ({m.user?.email})</div>
-                    {forum.is_moderator && (
-                      <button onClick={() => onRemoveMember(m.user?.id)} className="px-2 py-1 text-sm border rounded hover:bg-gray-50">Remove</button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
+        </Link>
 
         {/* Topics List */}
         <div className="bg-white rounded-lg shadow-sm border">

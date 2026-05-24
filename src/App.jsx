@@ -158,6 +158,7 @@ const KnowledgeArticleCreate = lazy(() => import("./pages/knowledge/KnowledgeArt
 const KnowledgeArticleEdit = lazy(() => import("./pages/knowledge/KnowledgeArticleEdit"));
 const KnowledgeForumCreate = lazy(() => import("./pages/knowledge/KnowledgeForumCreate"));
 const KnowledgeForumDetail = lazy(() => import("./pages/knowledge/KnowledgeForumDetail"));
+const KnowledgeForumMembers = lazy(() => import("./pages/knowledge/KnowledgeForumMembers"));
 const KnowledgeTopicCreate = lazy(() => import("./pages/knowledge/KnowledgeTopicCreate"));
 const KnowledgeTopicDetail = lazy(() => import("./pages/knowledge/KnowledgeTopicDetail"));
 const KnowledgeForumInvite = lazy(() => import("./pages/knowledge/KnowledgeForumInvite"));
@@ -311,6 +312,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.knowledgeForums)} element={<KnowledgeForums />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumCreate)} element={<KnowledgeForumCreate />} />
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForumMembers)} element={<KnowledgeForumMembers />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumDetail)} element={<KnowledgeForumDetail />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumTopicCreate)} element={<KnowledgeTopicCreate />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeTopics)} element={<KnowledgeTopics />} />
@@ -516,6 +518,7 @@ const removeLeadingSlash = (path) => {
           <Route path={toRelativePath(webRoutes.knowledgeForums)} element={<KnowledgeForums />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumCreate)} element={<KnowledgeForumCreate />} />
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
+          <Route path={toRelativePath(webRoutes.knowledgeForumMembers)} element={<KnowledgeForumMembers />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumDetail)} element={<KnowledgeForumDetail />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumTopicCreate)} element={<KnowledgeTopicCreate />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumTopicDetail)} element={<KnowledgeTopicDetail />} />

@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
+import {
+  getDefaultBiddingDocumentType,
+  normalizeBiddingDocumentTypes,
+} from "../../lib/biddingDocumentTypes";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Input, { Select, Textarea } from "../../components/ui/Input";
@@ -48,6 +52,7 @@ export default function CreateBiddingProject() {
   const [userCompanies, setUserCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [prequalSchemes, setPrequalSchemes] = useState([]);
+  const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [envelopeConfig, setEnvelopeConfig] = useState([]);
   const [requiredDocuments, setRequiredDocuments] = useState([]);
   const [projectDocuments, setProjectDocuments] = useState([]);
@@ -81,8 +86,11 @@ export default function CreateBiddingProject() {
     fetchTemplates();
     fetchUserCompanies();
     fetchPrequalSchemes();
+    fetchDocumentTypes();
     if (editId) fetchProject();
   }, []);
+
+  const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
 
   const fetchUserCompanies = async () => {
     try {
@@ -108,6 +116,15 @@ export default function CreateBiddingProject() {
       setPrequalSchemes(res.data?.results || res.data || []);
     } catch {
       // non-critical
+    }
+  };
+
+  const fetchDocumentTypes = async () => {
+    try {
+      const res = await biddingAPI.getDocumentTypes({ page_size: 50 });
+      setDocumentTypeOptions(normalizeBiddingDocumentTypes(res));
+    } catch {
+      setDocumentTypeOptions([]);
     }
   };
 
@@ -235,7 +252,7 @@ export default function CreateBiddingProject() {
     const newDocs = Array.from(files).map((file) => ({
       file,
       title: file.name.replace(/\.[^/.]+$/, ""),
-      document_type: "other",
+      document_type: defaultDocumentType,
     }));
     setProjectDocuments((prev) => [...prev, ...newDocs]);
   };
@@ -315,6 +332,7 @@ export default function CreateBiddingProject() {
 
       if (isEditMode) {
         await biddingAPI.updateProject(editId, payload);
+        await uploadProjectDocuments(editId);
         if (publishing) {
           await biddingAPI.publishProject(editId);
           toast.success("Project published");
@@ -697,13 +715,11 @@ export default function CreateBiddingProject() {
                       value={doc.document_type}
                       onChange={(e) => updateProjectDocument(index, "document_type", e.target.value)}
                     >
-                      <option value="technical">Technical Proposal / Scope</option>
-                      <option value="commercial">Commercial / Pricing</option>
-                      <option value="hse">HSE Documentation</option>
-                      <option value="financial">Financial Statement</option>
-                      <option value="certificate">Certificate / License</option>
-                      <option value="reference">Reference / Past Performance</option>
-                      <option value="other">Other</option>
+                      {documentTypeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </Select>
                   </div>
                 </div>
