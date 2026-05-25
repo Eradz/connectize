@@ -526,6 +526,7 @@ export default function SubmitBid() {
   };
 
   const buildPayload = () => {
+    const totalPrice = String(form.total_price || "").trim();
     const lcPayload = Object.entries(lcDeclarations)
       .filter(([, value]) => value?.percentage !== "" && value?.percentage !== undefined)
       .map(([categoryId, value]) => ({
@@ -537,7 +538,7 @@ export default function SubmitBid() {
     return {
       project: projectId,
       bidder_company: form.bidder_company,
-      total_price: form.total_price,
+      total_price: totalPrice || undefined,
       currency: form.currency,
       technical_proposal: hasEnvelopeSubmissions
         ? undefined
@@ -561,10 +562,6 @@ export default function SubmitBid() {
   };
 
   const validateBidForm = ({ finalize }) => {
-    if (!form.total_price) {
-      toast.error("Total price is required");
-      return false;
-    }
     if (!form.bidder_company) {
       toast.error(
         eligibleUserCompanies.length === 0
@@ -964,7 +961,7 @@ export default function SubmitBid() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Price *
+                  Total Price (Optional)
                 </label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
