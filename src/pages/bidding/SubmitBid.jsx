@@ -115,6 +115,16 @@ const getCompanyId = (value) => {
 const getProjectCompanyId = (project) =>
   getCompanyId(project?.company || project?.company_id || project?.owner_company);
 
+const getBidCompanyId = (bid) =>
+  getCompanyId(bid?.bidder_company || bid?.bidder_company_id || bid?.company);
+
+const normalizeList = (payload) => {
+  const data = payload?.data || payload;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+};
+
 export default function SubmitBid() {
   const { id: projectId } = useParams();
   const [searchParams] = useSearchParams();
@@ -623,8 +633,17 @@ export default function SubmitBid() {
 
     try {
       let bid;
-      if (isEditMode) {
-        const res = await biddingAPI.updateBid(editBidId, payload);
+      let existingBidId = editBidId;
+      if (!existingBidId) {
+        const bidsRes = await biddingAPI.getBids({ project: projectId, page_size: 50 });
+        const existingBid = normalizeList(bidsRes).find(
+          (candidate) => getBidCompanyId(candidate) === String(form.bidder_company)
+        );
+        existingBidId = existingBid?.id;
+      }
+
+      if (existingBidId) {
+        const res = await biddingAPI.updateBid(existingBidId, payload);
         bid = res?.data || res;
       } else {
         const res = await biddingAPI.submitBid(payload);
@@ -643,7 +662,7 @@ export default function SubmitBid() {
         await biddingAPI.submitBidAction(bid.id);
         toast.success("Bid submitted successfully!");
       } else {
-        toast.success(isEditMode ? "Draft updated successfully!" : "Draft saved successfully!");
+        toast.success(existingBidId ? "Draft updated successfully!" : "Draft saved successfully!");
       }
 
       navigate(webRoutes.biddingDetail.replace(":id", projectId));
