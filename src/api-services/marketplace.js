@@ -39,6 +39,12 @@ export const listingService = {
     return response.data;
   },
 
+  // Toggle listing in the user's default wishlist
+  toggleWishlist: async (id) => {
+    const response = await marketplaceApi.post(`/listings/${id}/toggle_wishlist/`);
+    return response.data;
+  },
+
   // Get featured listings
   getFeaturedListings: async () => {
     const response = await marketplaceApi.get("/listings/featured/");

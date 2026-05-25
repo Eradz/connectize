@@ -57,7 +57,7 @@ const ListingDetail = () => {
       setLoading(true);
       const response = await marketplaceApi.getListingById(id);
       setListing(response);
-      setInWishlist(response.in_wishlist || false);
+      setInWishlist(Boolean(response.in_wishlist ?? response.is_in_wishlist ?? false));
     } catch (err) {
       setError('Failed to load listing');
       console.error(err);
@@ -126,8 +126,8 @@ const ListingDetail = () => {
     }
     
     try {
-      await marketplaceApi.toggleWishlist(listing.id);
-      setInWishlist(!inWishlist);
+      const response = await marketplaceApi.toggleWishlist(listing.id);
+      setInWishlist(Boolean(response?.in_wishlist ?? response?.is_in_wishlist ?? !inWishlist));
     } catch (err) {
       console.error('Failed to update wishlist:', err);
       if (err.response?.status === 401) {
