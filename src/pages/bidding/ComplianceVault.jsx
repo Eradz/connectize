@@ -111,10 +111,11 @@ export default function ComplianceVault() {
     setLoading(true);
     try {
       const params = selectedCompany ? { company: selectedCompany } : {};
+      const listParams = { ...params, page_size: 50 };
       const [catRes, reqRes, docRes, targetDocRes] = await Promise.all([
-        biddingAPI.getComplianceCategories(params),
-        biddingAPI.getComplianceRequirements(params),
-        biddingAPI.getComplianceDocuments(params),
+        biddingAPI.getComplianceCategories(listParams),
+        biddingAPI.getComplianceRequirements(listParams),
+        biddingAPI.getComplianceDocuments(listParams),
         initialCompanyId && initialRequirementId
           ? biddingAPI.getComplianceDocuments({
               company: initialCompanyId,
@@ -148,10 +149,14 @@ export default function ComplianceVault() {
     }
   }
 
-  function getDocForRequirement(reqId, companyId) {
+  function getDocForRequirement(reqId, companyId = "") {
     return documents
-      .filter((d) => String(d.requirement?.id ?? d.requirement) === String(reqId) && String(d.company) === String(companyId))
-      .sort((a, b) => b.version - a.version)[0];
+      .filter((d) => {
+        const matchesRequirement = String(d.requirement?.id ?? d.requirement) === String(reqId);
+        const matchesCompany = !companyId || String(d.company) === String(companyId);
+        return matchesRequirement && matchesCompany;
+      })
+      .sort((a, b) => (Number(b.version) || 0) - (Number(a.version) || 0))[0];
   }
 
   function getCompanyName(companyId) {
@@ -436,7 +441,7 @@ export default function ComplianceVault() {
                         </Button>
                       </div>
                     ) : group.reqs.map((req) => {
-                      const doc = selectedCompany ? getDocForRequirement(req.id, selectedCompany) : null;
+                      const doc = getDocForRequirement(req.id, selectedCompany);
                       const docStatus = doc ? doc.status : "missing";
 
                       return (
