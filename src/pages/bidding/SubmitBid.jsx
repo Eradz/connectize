@@ -178,6 +178,7 @@ export default function SubmitBid() {
   }, [projectId]);
 
   const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
+  const hasEnvelopeSubmissions = project?.envelope_configuration?.length > 0;
 
   useEffect(() => {
     if (form.bidder_company) {
@@ -513,7 +514,9 @@ export default function SubmitBid() {
       bidder_company: form.bidder_company,
       total_price: form.total_price,
       currency: form.currency,
-      technical_proposal: cleanRichTextValue(form.technical_proposal),
+      technical_proposal: hasEnvelopeSubmissions
+        ? undefined
+        : cleanRichTextValue(form.technical_proposal),
       custom_responses: { ...form.custom_responses },
       valid_until: project?.submission_deadline,
       envelopes: (project.envelope_configuration || [])
@@ -1027,24 +1030,26 @@ export default function SubmitBid() {
         </section>
 
         {/* Technical Proposal */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Technical Proposal
-          </h2>
-          <ReactQuill
-            theme="snow"
-            value={form.technical_proposal}
-            onChange={(value) => handleChange("technical_proposal", cleanRichTextValue(value))}
-            modules={RICH_TEXT_MODULES}
-            formats={RICH_TEXT_FORMATS}
-            placeholder="Describe your technical approach, methodology, timeline, team qualifications..."
-            className="[&_.ql-editor]:min-h-[180px]"
-          />
-          {renderContextDocuments("technical_proposal", "Technical Proposal", "technical proposal")}
-        </section>
+        {!hasEnvelopeSubmissions && (
+          <section className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Technical Proposal
+            </h2>
+            <ReactQuill
+              theme="snow"
+              value={form.technical_proposal}
+              onChange={(value) => handleChange("technical_proposal", cleanRichTextValue(value))}
+              modules={RICH_TEXT_MODULES}
+              formats={RICH_TEXT_FORMATS}
+              placeholder="Describe your technical approach, methodology, timeline, team qualifications..."
+              className="[&_.ql-editor]:min-h-[180px]"
+            />
+            {renderContextDocuments("technical_proposal", "Technical Proposal", "technical proposal")}
+          </section>
+        )}
 
         {/* Multi-Envelope Sections */}
-        {project.envelope_configuration?.length > 0 && (
+        {hasEnvelopeSubmissions && (
           <section className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-1">
               Envelope Submissions
