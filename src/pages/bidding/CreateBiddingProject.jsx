@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
@@ -53,10 +53,12 @@ export default function CreateBiddingProject() {
   const [userCompanies, setUserCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [prequalSchemes, setPrequalSchemes] = useState([]);
+  const [prequalSchemesCompany, setPrequalSchemesCompany] = useState("");
   const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [envelopeConfig, setEnvelopeConfig] = useState([]);
   const [requiredDocuments, setRequiredDocuments] = useState([]);
   const [projectDocuments, setProjectDocuments] = useState([]);
+  const submitIntentRef = useRef("draft");
   // Each entry: { file: File, title: string, document_type: string }
 
   const [form, setForm] = useState({
@@ -86,10 +88,29 @@ export default function CreateBiddingProject() {
   useEffect(() => {
     fetchTemplates();
     fetchUserCompanies();
-    fetchPrequalSchemes();
     fetchDocumentTypes();
     if (editId) fetchProject();
   }, []);
+
+  useEffect(() => {
+    fetchPrequalSchemes(form.company);
+  }, [form.company]);
+
+  useEffect(() => {
+    if (!form.required_prequalification_scheme_id) return;
+    if (String(prequalSchemesCompany) !== String(form.company)) return;
+    const hasSelectedScheme = prequalSchemes.some(
+      (scheme) => String(scheme.id) === String(form.required_prequalification_scheme_id)
+    );
+    if (!hasSelectedScheme) {
+      setForm((prev) => ({ ...prev, required_prequalification_scheme_id: "" }));
+    }
+  }, [
+    form.company,
+    form.required_prequalification_scheme_id,
+    prequalSchemes,
+    prequalSchemesCompany,
+  ]);
 
   const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
 
@@ -111,11 +132,23 @@ export default function CreateBiddingProject() {
     }
   };
 
-  const fetchPrequalSchemes = async () => {
+  const fetchPrequalSchemes = async (companyId) => {
+    const normalizedCompanyId = companyId ? String(companyId) : "";
+    if (!companyId) {
+      setPrequalSchemes([]);
+      setPrequalSchemesCompany("");
+      return;
+    }
     try {
-      const res = await biddingAPI.getPrequalificationSchemes({ active: true });
+      const res = await biddingAPI.getPrequalificationSchemes({
+        active: true,
+        company: companyId,
+        page_size: 50,
+      });
       setPrequalSchemes(res.data?.results || res.data || []);
+      setPrequalSchemesCompany(normalizedCompanyId);
     } catch {
+      setPrequalSchemes([]);
       // non-critical
     }
   };
@@ -209,7 +242,11 @@ export default function CreateBiddingProject() {
   };
 
   const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "company" ? { required_prequalification_scheme_id: "" } : {}),
+    }));
   };
 
   const handleCustomFieldChange = (key, value) => {
@@ -309,6 +346,7 @@ export default function CreateBiddingProject() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const shouldPublish = submitIntentRef.current === "publish";
 
     if (!form.title.trim()) {
       toast.error("Project title is required");
@@ -328,6 +366,7 @@ export default function CreateBiddingProject() {
     }
 
     setLoading(true);
+    setPublishing(shouldPublish);
     try {
       const payload = { ...form };
       if (isProjectCompanyLocked) {
@@ -356,7 +395,7 @@ export default function CreateBiddingProject() {
       if (isEditMode) {
         await biddingAPI.updateProject(editId, payload);
         await uploadProjectDocuments(editId);
-        if (publishing) {
+        if (shouldPublish) {
           await biddingAPI.publishProject(editId);
           toast.success("Project published");
         } else {
@@ -372,7 +411,12 @@ export default function CreateBiddingProject() {
         }
         // Upload attached documents
         await uploadProjectDocuments(newProject.id);
-        toast.success("Project created as draft");
+        if (shouldPublish) {
+          await biddingAPI.publishProject(newProject.id);
+          toast.success("Project published");
+        } else {
+          toast.success("Project created as draft");
+        }
         navigate(webRoutes.biddingDetail.replace(":id", newProject.id));
       }
     } catch (err) {
@@ -385,6 +429,7 @@ export default function CreateBiddingProject() {
         toast.error("Failed to create project");
       }
     } finally {
+      submitIntentRef.current = "draft";
       setLoading(false);
       setPublishing(false);
     }
@@ -934,29 +979,28 @@ export default function CreateBiddingProject() {
         </section>
 
         {/* Prequalification */}
-        {prequalSchemes.length > 0 && (
-          <section className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Prequalification Requirement
-            </h2>
-            <p className="text-sm text-gray-500 mb-3">
-              Require suppliers to be prequalified before they can bid.
-            </p>
-            <Select
-              value={form.required_prequalification_scheme_id}
-              onChange={(e) =>
-                handleChange("required_prequalification_scheme_id", e.target.value)
-              }
-            >
-              <option value="">None — any supplier can bid</option>
-              {prequalSchemes.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.industry_category?.replace(/_/g, " ")})
-                </option>
-              ))}
-            </Select>
-          </section>
-        )}
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            Prequalification Requirement
+          </h2>
+          <p className="text-sm text-gray-500 mb-3">
+            Require suppliers to be prequalified before they can bid.
+          </p>
+          <Select
+            value={form.required_prequalification_scheme_id}
+            onChange={(e) =>
+              handleChange("required_prequalification_scheme_id", e.target.value)
+            }
+            disabled={!form.company}
+          >
+            <option value="">None — any supplier can bid</option>
+            {prequalSchemes.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.industry_category?.replace(/_/g, " ")})
+              </option>
+            ))}
+          </Select>
+        </section>
 
         {/* Multi-Envelope Configuration */}
         <section className="bg-white rounded-xl border border-gray-200 p-6">
@@ -1098,17 +1142,20 @@ export default function CreateBiddingProject() {
               type="submit"
               loading={loading && !publishing}
               className="bg-[#F1C644] hover:bg-[#E0B533] text-gray-900 font-medium px-6"
+              onClick={() => {
+                submitIntentRef.current = "draft";
+              }}
             >
               {isEditMode ? "Save Changes" : "Create Draft Project"}
             </Button>
-            {isEditMode && (
+            {(!isEditMode || editProject?.status === "draft") && (
               <Button
                 type="button"
                 variant="primary"
                 loading={loading && publishing}
                 className="font-medium px-6"
                 onClick={() => {
-                  setPublishing(true);
+                  submitIntentRef.current = "publish";
                   document.querySelector("form").requestSubmit();
                 }}
               >
