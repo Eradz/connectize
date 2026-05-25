@@ -343,6 +343,11 @@ export default function CreateBiddingProject() {
     isEditMode &&
     editProject &&
     (editProject.status !== "draft" || Number(editProject.bids_count || 0) > 0);
+  const prequalificationHint = !form.company
+    ? "Select a project company first, or create a scheme from Prequalification and return here."
+    : prequalSchemes.length > 0
+      ? "Only schemes created for the selected company are shown here."
+      : "This company has no prequalification schemes yet. Create one if you want to restrict bidding to qualified suppliers.";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1000,6 +1005,26 @@ export default function CreateBiddingProject() {
               </option>
             ))}
           </Select>
+          <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p className="text-sm text-gray-600">{prequalificationHint}</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() =>
+                navigate(webRoutes.biddingPrequalification, {
+                  state: {
+                    openCreate: true,
+                    companyId: form.company || "",
+                  },
+                })
+              }
+            >
+              <Plus size={14} className="mr-1" />
+              Create prequalification scheme
+            </Button>
+          </div>
         </section>
 
         {/* Multi-Envelope Configuration */}
