@@ -86,6 +86,22 @@ const inferDocumentType = (requiredLabel = "", options = []) => {
   return match?.value || getDefaultBiddingDocumentType(options);
 };
 
+const normalizeDocumentLabel = (value = "") =>
+  String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+const isEnvelopeProposalDocument = (label, envelopeConfiguration = []) => {
+  const normalizedLabel = normalizeDocumentLabel(label);
+  return envelopeConfiguration.some((envelope) => {
+    const type = normalizeDocumentLabel(envelope?.type);
+    if (!type) return false;
+    return [
+      `${type} proposal`,
+      `${type} envelope`,
+      `${type} bid`,
+    ].includes(normalizedLabel);
+  });
+};
+
 const getComplianceItemLabel = (item) => {
   if (!item) return "Unknown requirement";
   if (typeof item === "string") return item;
@@ -179,6 +195,15 @@ export default function SubmitBid() {
 
   const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
   const hasEnvelopeSubmissions = project?.envelope_configuration?.length > 0;
+  const visibleRequiredDocuments = useMemo(() => {
+    const requiredDocuments = Array.isArray(project?.required_documents)
+      ? project.required_documents
+      : [];
+    if (!hasEnvelopeSubmissions) return requiredDocuments;
+    return requiredDocuments.filter(
+      (label) => !isEnvelopeProposalDocument(label, project.envelope_configuration)
+    );
+  }, [hasEnvelopeSubmissions, project?.envelope_configuration, project?.required_documents]);
 
   useEffect(() => {
     if (form.bidder_company) {
@@ -567,8 +592,8 @@ export default function SubmitBid() {
       }
     }
 
-    if (finalize && (project.required_documents || []).length > 0) {
-      const missingDocument = project.required_documents.find(
+    if (finalize && visibleRequiredDocuments.length > 0) {
+      const missingDocument = visibleRequiredDocuments.find(
         (requiredLabel) =>
           !documents.some((doc) => doc.requiredLabel === requiredLabel)
           && !existingDocuments.some(
@@ -1257,12 +1282,12 @@ export default function SubmitBid() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Bid Documents
           </h2>
-          {project.required_documents?.length > 0 && (
+          {visibleRequiredDocuments.length > 0 && (
             <div className="mb-4 space-y-3">
               <p className="text-sm text-gray-600">
                 Map each required document explicitly before final submission.
               </p>
-              {project.required_documents.map((requiredLabel) => {
+              {visibleRequiredDocuments.map((requiredLabel) => {
                 const existing = documents.find((doc) => doc.requiredLabel === requiredLabel);
                 const alreadyUploaded = existingDocuments.find(
                   (doc) =>
