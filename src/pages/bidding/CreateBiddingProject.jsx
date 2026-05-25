@@ -32,9 +32,9 @@ const PROJECT_TYPES = [
 ];
 
 const VISIBILITY_OPTIONS = [
-  { value: "public", label: "Public — visible to all companies" },
-  { value: "invited", label: "Invited only — only invited companies can bid" },
-  { value: "prequalified", label: "Prequalified — only qualified suppliers can bid" },
+  { value: "public", label: "Public - all companies can discover and bid" },
+  { value: "invited", label: "Private - invited companies only" },
+  { value: "prequalified", label: "Prequalified - qualified suppliers only" },
 ];
 
 const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"];
@@ -514,7 +514,7 @@ export default function CreateBiddingProject() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Visibility
+                  Supplier Access
                 </label>
                 <Select
                   value={form.visibility}
@@ -526,6 +526,9 @@ export default function CreateBiddingProject() {
                     </option>
                   ))}
                 </Select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Choose Private when only selected or invited companies should be able to view and bid.
+                </p>
               </div>
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3">
                 <input

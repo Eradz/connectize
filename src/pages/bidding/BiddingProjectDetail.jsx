@@ -174,6 +174,13 @@ function formatLabel(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function formatVisibility(value) {
+  if (value === "invited") return "Private - invited companies only";
+  if (value === "prequalified") return "Prequalified - qualified suppliers only";
+  if (value === "public") return "Public - all companies";
+  return formatLabel(value);
+}
+
 function summarizeStages(stages = []) {
   const activeStage = stages.find((stage) => stage.status === "active") || null;
   const evaluationStages = stages.filter((stage) => stage.stage_type === "evaluation");
@@ -222,8 +229,8 @@ function OverviewTab({ project }) {
               <dd className="font-medium">{project.category || "—"}</dd>
             </div>
             <div className="flex justify-between text-sm">
-              <dt className="text-gray-500">Visibility</dt>
-              <dd className="font-medium">{formatLabel(project.visibility)}</dd>
+              <dt className="text-gray-500">Supplier Access</dt>
+              <dd className="font-medium">{formatVisibility(project.visibility)}</dd>
             </div>
             <div className="flex justify-between text-sm">
               <dt className="text-gray-500">Workflow Template</dt>
@@ -297,7 +304,7 @@ function OverviewTab({ project }) {
           </div>
           <div className="rounded-lg bg-gray-50 px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Supplier Access</p>
-            <p className="text-sm font-medium text-gray-900">{formatLabel(project.visibility)}</p>
+            <p className="text-sm font-medium text-gray-900">{formatVisibility(project.visibility)}</p>
             <p className="text-xs text-gray-500 mt-1">
               {project.required_prequalification_scheme?.name
                 ? `Prequalification scheme: ${project.required_prequalification_scheme.name}`
