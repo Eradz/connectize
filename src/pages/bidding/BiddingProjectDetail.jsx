@@ -174,6 +174,23 @@ function formatLabel(value) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function normalizeDocumentMatchText(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function isSealedEnvelopeDocument(doc, bids = []) {
+  if (!doc?.bid) return false;
+  const bid = bids.find((candidate) => String(candidate.id) === String(doc.bid));
+  const sealedEnvelopeNames = (bid?.envelope_status || [])
+    .filter((env) => env?.is_sealed)
+    .map((env) => normalizeDocumentMatchText(`${env.envelope_type} envelope`));
+
+  if (sealedEnvelopeNames.length === 0) return false;
+
+  const title = normalizeDocumentMatchText(doc.title || doc.file?.split("/").pop());
+  return sealedEnvelopeNames.some((name) => title.startsWith(name));
+}
+
 function formatVisibility(value) {
   if (value === "invited") return "Private - invited companies only";
   if (value === "prequalified") return "Prequalified - qualified suppliers only";
@@ -1432,9 +1449,13 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete, documentTy
     }
   };
 
-  const visibleDocuments = project.is_owner
+  const accessibleDocuments = project.is_owner
     ? documents
     : documents.filter((doc) => !doc.bid);
+  const visibleDocuments = accessibleDocuments.filter(
+    (doc) => !project.is_owner || !isSealedEnvelopeDocument(doc, bids)
+  );
+  const hiddenSealedDocumentCount = accessibleDocuments.length - visibleDocuments.length;
 
   return (
     <div className="space-y-5">
@@ -1545,6 +1566,20 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete, documentTy
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {project.is_owner && hiddenSealedDocumentCount > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+          <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-amber-800">
+              {hiddenSealedDocumentCount} sealed envelope document{hiddenSealedDocumentCount === 1 ? "" : "s"} hidden
+            </p>
+            <p className="text-xs text-amber-700 mt-1">
+              Open the matching envelope from the Evaluation Panel before downloading or reviewing those documents.
+            </p>
           </div>
         </div>
       )}
@@ -2438,12 +2473,17 @@ function BiddingProjectDetailInner() {
           action: () => performAction(biddingAPI.startEvaluation),
           variant: "primary",
         },
-        project.status === "under_evaluation" && {
+        ["under_evaluation", "evaluation"].includes(project.status) && {
+          label: "Evaluate Bids",
+          action: () => navigate(webRoutes.biddingEvaluate.replace(":id", project.id)),
+          variant: "primary",
+        },
+        ["under_evaluation", "evaluation"].includes(project.status) && {
           label: "Calculate Scores",
           action: () => performAction(biddingAPI.calculateScores),
           variant: "outline",
         },
-        project.status === "under_evaluation" && {
+        ["under_evaluation", "evaluation"].includes(project.status) && {
           label: "Award",
           action: () => setShowAwardModal(true),
           variant: "warning",
@@ -2556,7 +2596,7 @@ function BiddingProjectDetailInner() {
             );
           })()}
           {/* Owner: Evaluate link */}
-          {project.is_owner && project.status === "under_evaluation" && (
+          {project.is_owner && ["under_evaluation", "evaluation"].includes(project.status) && (
             <Button
               variant="outline"
               size="sm"

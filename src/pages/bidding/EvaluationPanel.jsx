@@ -42,6 +42,20 @@ const SCORING_METHODS = [
 
 const EMPTY_CRITERION = { name: "", weight: "", scoring_method: "numeric", max_score: 100, description: "" };
 
+function formatEnvelopeLabel(value) {
+  return String(value || "envelope").replace(/_/g, " ");
+}
+
+function getEnvelopeProgress(envelopeStatus, envelopeType) {
+  const status = envelopeStatus[envelopeType] || { total: 0, opened: 0 };
+  return {
+    ...status,
+    hasSubmissions: status.total > 0,
+    allOpened: status.total > 0 && status.opened === status.total,
+    partial: status.opened > 0 && status.opened < status.total,
+  };
+}
+
 function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelopeType }) {
   const [rows, setRows] = useState([{ ...EMPTY_CRITERION }]);
   const [saving, setSaving] = useState(false);
@@ -996,6 +1010,19 @@ export default function EvaluationPanel() {
   };
 
   const isViewingActiveStage = selectedStage?.id === activeStage?.id;
+  const sortedEnvelopeConfig = useMemo(
+    () => [...(project?.envelope_configuration || [])].sort((a, b) => (a.order || 0) - (b.order || 0)),
+    [project?.envelope_configuration]
+  );
+  const hasEnvelopeWorkflow = sortedEnvelopeConfig.length > 0;
+  const activeEnvelopeProgress = getEnvelopeProgress(envelopeStatus, activeEnvelope);
+  const canOpenActiveEnvelope =
+    hasEnvelopeWorkflow
+    && selectedStage?.status === "active"
+    && activeEnvelope
+    && activeEnvelopeProgress.hasSubmissions
+    && !activeEnvelopeProgress.allOpened
+    && !stageActionLoading;
   // Compute frontend-consistent scores for each bid and sort by them
   const sortedBids = useMemo(() => {
     return [...bids]
@@ -1091,67 +1118,112 @@ export default function EvaluationPanel() {
             </div>
           )}
 
-          {criteria.length > 0 && (
-            <>
-              {/* Envelope Tabs */}
-              {project?.envelope_configuration?.length > 0 && (
-                <div className="flex gap-2 mb-4">
-                  {project.envelope_configuration
-                    .sort((a, b) => a.order - b.order)
-                    .map((env) => {
-                      const es = envelopeStatus[env.type];
-                      const allOpened = es && es.total > 0 && es.opened === es.total;
-                      const isOpened = es && es.opened > 0;
-                      return (
-                        <button
-                          key={env.type}
-                          onClick={() => setActiveEnvelope(env.type)}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition capitalize flex items-center gap-2 ${
-                            activeEnvelope === env.type
-                              ? "bg-gray-900 text-white border-gray-900"
-                              : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-                          }`}
-                        >
-                          {env.type} ({env.weight}%)
-                          {allOpened ? (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                              activeEnvelope === env.type ? "bg-green-400/30 text-green-200" : "bg-green-100 text-green-700"
-                            }`}>Opened</span>
-                          ) : isOpened ? (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                              activeEnvelope === env.type ? "bg-yellow-400/30 text-yellow-200" : "bg-yellow-100 text-yellow-700"
-                            }`}>Partial</span>
-                          ) : (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                              activeEnvelope === env.type ? "bg-gray-400/30 text-gray-300" : "bg-gray-100 text-gray-500"
-                            }`}>Sealed</span>
-                          )}
-                        </button>
-                      );
-                    })}
+          {hasEnvelopeWorkflow && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#F1C644]" />
+                    Envelope Workflow
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select an envelope, open it for evaluation, then review and score the matching criteria.
+                  </p>
+                </div>
+                {activeEnvelope && (
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {activeEnvelopeProgress.opened}/{activeEnvelopeProgress.total} opened
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {sortedEnvelopeConfig.map((env) => {
+                  const progress = getEnvelopeProgress(envelopeStatus, env.type);
+                  return (
+                    <button
+                      key={env.type}
+                      onClick={() => setActiveEnvelope(env.type)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium border transition capitalize flex items-center gap-2 ${
+                        activeEnvelope === env.type
+                          ? "bg-gray-900 text-white border-gray-900"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                      }`}
+                    >
+                      {formatEnvelopeLabel(env.type)} ({env.weight}%)
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          progress.allOpened
+                            ? activeEnvelope === env.type ? "bg-green-400/30 text-green-100" : "bg-green-100 text-green-700"
+                            : progress.partial
+                              ? activeEnvelope === env.type ? "bg-yellow-400/30 text-yellow-100" : "bg-yellow-100 text-yellow-700"
+                              : activeEnvelope === env.type ? "bg-gray-400/30 text-gray-200" : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {progress.allOpened ? "Opened" : progress.partial ? "Partial" : progress.hasSubmissions ? "Sealed" : "No bids"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {activeEnvelope && (
+                <div className={`mt-4 rounded-lg border p-3 ${
+                  activeEnvelopeProgress.allOpened
+                    ? "bg-green-50 border-green-200"
+                    : "bg-amber-50 border-amber-200"
+                }`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <p className={`text-sm font-medium ${
+                        activeEnvelopeProgress.allOpened ? "text-green-800" : "text-amber-800"
+                      }`}>
+                        {activeEnvelopeProgress.allOpened
+                          ? `${formatEnvelopeLabel(activeEnvelope)} envelope is open`
+                          : `${formatEnvelopeLabel(activeEnvelope)} envelope is sealed`}
+                      </p>
+                      <p className={`text-xs mt-1 ${
+                        activeEnvelopeProgress.allOpened ? "text-green-700" : "text-amber-700"
+                      }`}>
+                        {activeEnvelopeProgress.allOpened
+                          ? "Review the opened submission details and score below."
+                          : activeEnvelopeProgress.hasSubmissions
+                            ? "Open this envelope to reveal proposal text and documents. This cannot be undone."
+                            : "No submitted bid contains this envelope yet."}
+                      </p>
+                    </div>
+
+                    {!activeEnvelopeProgress.allOpened && (
+                      <Button
+                        variant="outline"
+                        onClick={handleOpenEnvelope}
+                        loading={stageActionLoading}
+                        disabled={!canOpenActiveEnvelope}
+                      >
+                        <FileText className="w-4 h-4 mr-1.5" />
+                        Open {formatEnvelopeLabel(activeEnvelope)}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
+            </div>
+          )}
 
-              {/* Open envelope button when needed */}
-              {project?.envelope_configuration?.length > 0 && selectedStage.status === "active" && (() => {
-                const es = envelopeStatus[activeEnvelope];
-                const allOpened = es && es.total > 0 && es.opened === es.total;
-                if (allOpened) return null;
-                return (
-                  <div className="mb-4">
-                    <Button variant="outline" onClick={handleOpenEnvelope} loading={stageActionLoading}>
-                      <FileText className="w-4 h-4 mr-1.5" />
-                      Open {activeEnvelope || "selected"} Envelope
-                      {es && es.total > 0 && (
-                        <span className="ml-1 text-xs text-gray-400">({es.opened}/{es.total})</span>
-                      )}
-                    </Button>
-                  </div>
-                );
-              })()}
-
+          {criteria.length > 0 && (
+            <>
               {/* Evaluate vs Rankings view */}
-              {view === "evaluate" ? (
+              {hasEnvelopeWorkflow && !activeEnvelopeProgress.allOpened ? (
+                <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
+                  <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-sm font-semibold text-gray-800 capitalize">
+                    {formatEnvelopeLabel(activeEnvelope)} envelope is sealed
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
+                    Open this envelope before reviewing proposal text, downloading envelope documents, or saving scores.
+                  </p>
+                </div>
+              ) : view === "evaluate" ? (
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 mb-2">
                     <PenLine className="w-5 h-5 text-[#F1C644]" />
