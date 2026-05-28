@@ -39,6 +39,29 @@ const VISIBILITY_OPTIONS = [
 
 const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"];
 
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+const normalizeDateTimeForApi = (value, fallbackHour = 12) => {
+  if (!value) return "";
+  const trimmed = String(value).trim();
+  const dateOnlyMatch = trimmed.match(DATE_ONLY_RE);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      fallbackHour,
+      fallbackHour === 23 ? 59 : 0,
+      fallbackHour === 23 ? 59 : 0,
+      fallbackHour === 23 ? 999 : 0
+    ).toISOString();
+  }
+
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? trimmed : parsed.toISOString();
+};
+
 export default function CreateBiddingProject() {
   const navigate = useNavigate();
   const { id: editId } = useParams();
@@ -374,6 +397,12 @@ export default function CreateBiddingProject() {
     setPublishing(shouldPublish);
     try {
       const payload = { ...form };
+      if (payload.submission_deadline) {
+        payload.submission_deadline = normalizeDateTimeForApi(payload.submission_deadline, 23);
+      }
+      if (payload.expected_award_date) {
+        payload.expected_award_date = normalizeDateTimeForApi(payload.expected_award_date, 12);
+      }
       if (isProjectCompanyLocked) {
         delete payload.company;
       }
