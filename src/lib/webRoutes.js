@@ -108,7 +108,7 @@ const webRoutes = {
   knowledgeForums: "/knowledge/forums",
   knowledgeForumCreate: "/knowledge/forums/create",
   knowledgeForumDetail: "/knowledge/forums/:slug",
-  knowledgeForumMembers: "/knowledge/forums/:forumSlug/members",
+  knowledgeForumMembers: "/knowledge/forums/:slug/members",
   knowledgeTopics: "/knowledge/topics",
   knowledgeForumTopicDetail: "/knowledge/topics/:slug",
   knowledgeForumTopicCreate: "/knowledge/forums/:forumSlug/topics/create",
@@ -277,4 +277,3 @@ const webRoutes = {
 };
 
 export { webRoutes };
-

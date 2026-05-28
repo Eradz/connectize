@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
 import { webRoutes } from "../../lib/webRoutes";
@@ -30,6 +30,7 @@ const STATUS_BADGE = {
 
 export default function PrequalificationSchemes() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("browse");
   const [schemes, setSchemes] = useState([]);
   const [myApplications, setMyApplications] = useState([]);
@@ -70,10 +71,18 @@ export default function PrequalificationSchemes() {
     fetchUserCompanies();
   }, []);
 
+  useEffect(() => {
+    if (!location.state?.openCreate) return;
+
+    if (location.state?.companyId) {
+      setSelectedCompany(String(location.state.companyId));
+    }
+    setShowCreateModal(true);
+  }, [location.state]);
+
   async function fetchUserCompanies() {
     try {
-      const { default: api } = await import("../../api-services/crud");
-      const res = await api.get("/api/v1/workforce/companies/my_companies/");
+      const res = await biddingAPI.getAccessibleCompanies();
       const companies = res.data?.results || res.data || [];
       setUserCompanies(companies);
       if (companies.length === 1) {

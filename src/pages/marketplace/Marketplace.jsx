@@ -15,6 +15,9 @@ import { listingService, cartService, wishlistService } from "../../api-services
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 
+const isListingInWishlist = (listing) =>
+  Boolean(listing?.in_wishlist ?? listing?.is_in_wishlist ?? false);
+
 export default function Marketplace() {
   const seoData = getSEOConfig("marketplace");
   const navigate = useNavigate();
@@ -51,7 +54,15 @@ export default function Marketplace() {
         if (params[key] === "" || params[key] === false) delete params[key];
       });
       const data = await listingService.getListings(params);
-      setListings(data.results || data);
+      const results = Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : []);
+      setListings(results);
+      setWishlistItems((prev) => {
+        const next = new Set(prev);
+        (results || [])
+          .filter(isListingInWishlist)
+          .forEach((listing) => next.add(listing.id));
+        return next;
+      });
     } catch (error) {
       console.error("Error fetching listings:", error);
     } finally {
@@ -111,38 +122,28 @@ export default function Marketplace() {
     }
   };
 
-  const handleAddToWishlist = async (listingId) => {
+  const handleToggleWishlist = async (listingId) => {
     try {
-      // Check if already in wishlist
-      if (wishlistItems.has(listingId)) {
-        toast.info("Already in wishlist");
-        return;
-      }
-      
-      // Get or create default wishlist
-      let wishlistsResponse = await wishlistService.getWishlists();
-      // Handle paginated response
-      let wishlists = wishlistsResponse.results || wishlistsResponse;
-      let defaultWishlist;
-      
-      if (!wishlists || wishlists.length === 0) {
-        defaultWishlist = await wishlistService.createWishlist("My Wishlist");
-      } else {
-        defaultWishlist = wishlists[0];
-      }
-      
-      await wishlistService.addItem(defaultWishlist.id, listingId);
-      // Update local state to show the heart as filled
-      setWishlistItems(prev => new Set([...prev, listingId]));
-      toast.success("Added to wishlist!");
+      const response = await listingService.toggleWishlist(listingId);
+      const inWishlist = Boolean(response?.in_wishlist ?? response?.is_in_wishlist);
+
+      setWishlistItems(prev => {
+        const next = new Set(prev);
+        if (inWishlist) {
+          next.add(listingId);
+        } else {
+          next.delete(listingId);
+        }
+        return next;
+      });
+      setListings(prev => prev.map(listing => (
+        listing.id === listingId
+          ? { ...listing, in_wishlist: inWishlist, is_in_wishlist: inWishlist }
+          : listing
+      )));
+      toast.success(inWishlist ? "Added to wishlist!" : "Removed from wishlist");
     } catch (error) {
-      if (error.response?.data?.error === "Item already in wishlist") {
-        // Also update local state in case it wasn't tracked
-        setWishlistItems(prev => new Set([...prev, listingId]));
-        toast.info("Already in wishlist");
-      } else {
-        toast.error(error.response?.data?.error || "Failed to add to wishlist");
-      }
+      toast.error(error.response?.data?.error || "Failed to update wishlist");
     }
   };
 
@@ -177,7 +178,7 @@ export default function Marketplace() {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            handleAddToWishlist(listing.id);
+            handleToggleWishlist(listing.id);
           }}
           className="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-gray-100"
         >

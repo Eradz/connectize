@@ -1,7 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
+import {
+  getDefaultBiddingDocumentType,
+  normalizeBiddingDocumentTypes,
+} from "../../lib/biddingDocumentTypes";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Input, { Select, Textarea } from "../../components/ui/Input";
@@ -28,12 +32,35 @@ const PROJECT_TYPES = [
 ];
 
 const VISIBILITY_OPTIONS = [
-  { value: "public", label: "Public — visible to all companies" },
-  { value: "invited", label: "Invited only — only invited companies can bid" },
-  { value: "prequalified", label: "Prequalified — only qualified suppliers can bid" },
+  { value: "public", label: "Public - all companies can discover and bid" },
+  { value: "invited", label: "Private - invited companies only" },
+  { value: "prequalified", label: "Prequalified - qualified suppliers only" },
 ];
 
 const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"];
+
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+const normalizeDateTimeForApi = (value, fallbackHour = 12) => {
+  if (!value) return "";
+  const trimmed = String(value).trim();
+  const dateOnlyMatch = trimmed.match(DATE_ONLY_RE);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      fallbackHour,
+      fallbackHour === 23 ? 59 : 0,
+      fallbackHour === 23 ? 59 : 0,
+      fallbackHour === 23 ? 999 : 0
+    ).toISOString();
+  }
+
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? trimmed : parsed.toISOString();
+};
 
 export default function CreateBiddingProject() {
   const navigate = useNavigate();
@@ -44,13 +71,17 @@ export default function CreateBiddingProject() {
   const [loadingProject, setLoadingProject] = useState(!!editId);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [editProject, setEditProject] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [userCompanies, setUserCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [prequalSchemes, setPrequalSchemes] = useState([]);
+  const [prequalSchemesCompany, setPrequalSchemesCompany] = useState("");
+  const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [envelopeConfig, setEnvelopeConfig] = useState([]);
   const [requiredDocuments, setRequiredDocuments] = useState([]);
   const [projectDocuments, setProjectDocuments] = useState([]);
+  const submitIntentRef = useRef("draft");
   // Each entry: { file: File, title: string, document_type: string }
 
   const [form, setForm] = useState({
@@ -80,9 +111,31 @@ export default function CreateBiddingProject() {
   useEffect(() => {
     fetchTemplates();
     fetchUserCompanies();
-    fetchPrequalSchemes();
+    fetchDocumentTypes();
     if (editId) fetchProject();
   }, []);
+
+  useEffect(() => {
+    fetchPrequalSchemes(form.company);
+  }, [form.company]);
+
+  useEffect(() => {
+    if (!form.required_prequalification_scheme_id) return;
+    if (String(prequalSchemesCompany) !== String(form.company)) return;
+    const hasSelectedScheme = prequalSchemes.some(
+      (scheme) => String(scheme.id) === String(form.required_prequalification_scheme_id)
+    );
+    if (!hasSelectedScheme) {
+      setForm((prev) => ({ ...prev, required_prequalification_scheme_id: "" }));
+    }
+  }, [
+    form.company,
+    form.required_prequalification_scheme_id,
+    prequalSchemes,
+    prequalSchemesCompany,
+  ]);
+
+  const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
 
   const fetchUserCompanies = async () => {
     try {
@@ -102,12 +155,33 @@ export default function CreateBiddingProject() {
     }
   };
 
-  const fetchPrequalSchemes = async () => {
+  const fetchPrequalSchemes = async (companyId) => {
+    const normalizedCompanyId = companyId ? String(companyId) : "";
+    if (!companyId) {
+      setPrequalSchemes([]);
+      setPrequalSchemesCompany("");
+      return;
+    }
     try {
-      const res = await biddingAPI.getPrequalificationSchemes({ active: true });
+      const res = await biddingAPI.getPrequalificationSchemes({
+        active: true,
+        company: companyId,
+        page_size: 50,
+      });
       setPrequalSchemes(res.data?.results || res.data || []);
+      setPrequalSchemesCompany(normalizedCompanyId);
     } catch {
+      setPrequalSchemes([]);
       // non-critical
+    }
+  };
+
+  const fetchDocumentTypes = async () => {
+    try {
+      const res = await biddingAPI.getDocumentTypes({ page_size: 50 });
+      setDocumentTypeOptions(normalizeBiddingDocumentTypes(res));
+    } catch {
+      setDocumentTypeOptions([]);
     }
   };
 
@@ -116,6 +190,7 @@ export default function CreateBiddingProject() {
       setLoadingProject(true);
       const res = await biddingAPI.getProject(editId);
       const p = res?.data || res;
+      setEditProject(p);
       setForm({
         title: p.title || "",
         description: p.description || "",
@@ -143,6 +218,19 @@ export default function CreateBiddingProject() {
       if (p.terms_and_conditions) setShowAdvanced(true);
       if (Array.isArray(p.envelope_configuration) && p.envelope_configuration.length > 0) {
         setEnvelopeConfig(p.envelope_configuration);
+      }
+      if (p.company) {
+        setUserCompanies((prev) => {
+          const companyId = String(p.company);
+          if (prev.some((company) => String(company.id) === companyId)) return prev;
+          return [
+            ...prev,
+            {
+              id: companyId,
+              company_name: p.company_name || p.owner_company_name || `Company #${companyId}`,
+            },
+          ];
+        });
       }
     } catch {
       toast.error("Failed to load project");
@@ -177,7 +265,11 @@ export default function CreateBiddingProject() {
   };
 
   const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "company" ? { required_prequalification_scheme_id: "" } : {}),
+    }));
   };
 
   const handleCustomFieldChange = (key, value) => {
@@ -235,7 +327,7 @@ export default function CreateBiddingProject() {
     const newDocs = Array.from(files).map((file) => ({
       file,
       title: file.name.replace(/\.[^/.]+$/, ""),
-      document_type: "other",
+      document_type: defaultDocumentType,
     }));
     setProjectDocuments((prev) => [...prev, ...newDocs]);
   };
@@ -270,8 +362,19 @@ export default function CreateBiddingProject() {
     }
   };
 
+  const isProjectCompanyLocked =
+    isEditMode &&
+    editProject &&
+    (editProject.status !== "draft" || Number(editProject.bids_count || 0) > 0);
+  const prequalificationHint = !form.company
+    ? "Select a project company first, or create a scheme from Prequalification and return here."
+    : prequalSchemes.length > 0
+      ? "Only schemes created for the selected company are shown here."
+      : "This company has no prequalification schemes yet. Create one if you want to restrict bidding to qualified suppliers.";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const shouldPublish = submitIntentRef.current === "publish";
 
     if (!form.title.trim()) {
       toast.error("Project title is required");
@@ -291,8 +394,18 @@ export default function CreateBiddingProject() {
     }
 
     setLoading(true);
+    setPublishing(shouldPublish);
     try {
       const payload = { ...form };
+      if (payload.submission_deadline) {
+        payload.submission_deadline = normalizeDateTimeForApi(payload.submission_deadline, 23);
+      }
+      if (payload.expected_award_date) {
+        payload.expected_award_date = normalizeDateTimeForApi(payload.expected_award_date, 12);
+      }
+      if (isProjectCompanyLocked) {
+        delete payload.company;
+      }
       // Include custom field definitions in specifications
       if (customFieldDefs.length > 0) {
         payload.specifications = {
@@ -315,7 +428,8 @@ export default function CreateBiddingProject() {
 
       if (isEditMode) {
         await biddingAPI.updateProject(editId, payload);
-        if (publishing) {
+        await uploadProjectDocuments(editId);
+        if (shouldPublish) {
           await biddingAPI.publishProject(editId);
           toast.success("Project published");
         } else {
@@ -331,7 +445,12 @@ export default function CreateBiddingProject() {
         }
         // Upload attached documents
         await uploadProjectDocuments(newProject.id);
-        toast.success("Project created as draft");
+        if (shouldPublish) {
+          await biddingAPI.publishProject(newProject.id);
+          toast.success("Project published");
+        } else {
+          toast.success("Project created as draft");
+        }
         navigate(webRoutes.biddingDetail.replace(":id", newProject.id));
       }
     } catch (err) {
@@ -344,6 +463,7 @@ export default function CreateBiddingProject() {
         toast.error("Failed to create project");
       }
     } finally {
+      submitIntentRef.current = "draft";
       setLoading(false);
       setPublishing(false);
     }
@@ -372,7 +492,9 @@ export default function CreateBiddingProject() {
       </h1>
       <p className="text-sm text-gray-500 mb-6">
         {isEditMode
-          ? "Update your draft project details."
+          ? isProjectCompanyLocked
+            ? "Update project details. Company is locked after publishing."
+            : "Update your draft project details."
           : "Set up a new procurement project. It will be created as a draft."}
       </p>
 
@@ -471,7 +593,7 @@ export default function CreateBiddingProject() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Visibility
+                  Supplier Access
                 </label>
                 <Select
                   value={form.visibility}
@@ -483,6 +605,9 @@ export default function CreateBiddingProject() {
                     </option>
                   ))}
                 </Select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Choose Private when only selected or invited companies should be able to view and bid.
+                </p>
               </div>
               <div className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3">
                 <input
@@ -697,13 +822,11 @@ export default function CreateBiddingProject() {
                       value={doc.document_type}
                       onChange={(e) => updateProjectDocument(index, "document_type", e.target.value)}
                     >
-                      <option value="technical">Technical Proposal / Scope</option>
-                      <option value="commercial">Commercial / Pricing</option>
-                      <option value="hse">HSE Documentation</option>
-                      <option value="financial">Financial Statement</option>
-                      <option value="certificate">Certificate / License</option>
-                      <option value="reference">Reference / Past Performance</option>
-                      <option value="other">Other</option>
+                      {documentTypeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </Select>
                   </div>
                 </div>
@@ -733,17 +856,20 @@ export default function CreateBiddingProject() {
               <Select
                 value={form.company}
                 onChange={(e) => handleChange("company", e.target.value)}
+                disabled={isProjectCompanyLocked}
               >
                 <option value="">Select a company</option>
                 {userCompanies.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.company_name}
+                    {c.company_name || c.name || `Company #${c.id}`}
                   </option>
                 ))}
               </Select>
             )}
             <p className="text-xs text-gray-400 mt-1">
-              Select the company publishing this project
+              {isProjectCompanyLocked
+                ? "Project company is locked after publishing or receiving bids."
+                : "Select the company publishing this project"}
             </p>
           </div>
         </section>
@@ -887,29 +1013,48 @@ export default function CreateBiddingProject() {
         </section>
 
         {/* Prequalification */}
-        {prequalSchemes.length > 0 && (
-          <section className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Prequalification Requirement
-            </h2>
-            <p className="text-sm text-gray-500 mb-3">
-              Require suppliers to be prequalified before they can bid.
-            </p>
-            <Select
-              value={form.required_prequalification_scheme_id}
-              onChange={(e) =>
-                handleChange("required_prequalification_scheme_id", e.target.value)
+        <section className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            Prequalification Requirement
+          </h2>
+          <p className="text-sm text-gray-500 mb-3">
+            Require suppliers to be prequalified before they can bid.
+          </p>
+          <Select
+            value={form.required_prequalification_scheme_id}
+            onChange={(e) =>
+              handleChange("required_prequalification_scheme_id", e.target.value)
+            }
+            disabled={!form.company}
+          >
+            <option value="">None — any supplier can bid</option>
+            {prequalSchemes.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.industry_category?.replace(/_/g, " ")})
+              </option>
+            ))}
+          </Select>
+          <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p className="text-sm text-gray-600">{prequalificationHint}</p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() =>
+                navigate(webRoutes.biddingPrequalification, {
+                  state: {
+                    openCreate: true,
+                    companyId: form.company || "",
+                  },
+                })
               }
             >
-              <option value="">None — any supplier can bid</option>
-              {prequalSchemes.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.industry_category?.replace(/_/g, " ")})
-                </option>
-              ))}
-            </Select>
-          </section>
-        )}
+              <Plus size={14} className="mr-1" />
+              Create prequalification scheme
+            </Button>
+          </div>
+        </section>
 
         {/* Multi-Envelope Configuration */}
         <section className="bg-white rounded-xl border border-gray-200 p-6">
@@ -1051,17 +1196,20 @@ export default function CreateBiddingProject() {
               type="submit"
               loading={loading && !publishing}
               className="bg-[#F1C644] hover:bg-[#E0B533] text-gray-900 font-medium px-6"
+              onClick={() => {
+                submitIntentRef.current = "draft";
+              }}
             >
               {isEditMode ? "Save Changes" : "Create Draft Project"}
             </Button>
-            {isEditMode && (
+            {(!isEditMode || editProject?.status === "draft") && (
               <Button
                 type="button"
                 variant="primary"
                 loading={loading && publishing}
                 className="font-medium px-6"
                 onClick={() => {
-                  setPublishing(true);
+                  submitIntentRef.current = "publish";
                   document.querySelector("form").requestSubmit();
                 }}
               >

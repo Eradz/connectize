@@ -3,313 +3,217 @@ import { createSEO } from "../../components/SEO";
 export const meta = () =>
   createSEO({
     title: "Forum Members | Knowledge Hub - Connectize",
-    description: "View and manage members of this oil and gas industry forum on Connectize.",
-    keywords: "forum members, discussion, oil and gas, community, Connectize",
+    description: "View forum members in the Connectize Knowledge Hub.",
+    keywords: "forum members, knowledge hub, community, Connectize",
   });
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeft,
-  Users,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Loader,
-} from 'lucide-react';
-import { webRoutes } from '../../lib/webRoutes';
-import { knowledgeForumService } from '../../api-services/oilgas';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Search, User, UserMinus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
-const KnowledgeForumMembers = () => {
-  const { forumSlug } = useParams();
+import { knowledgeForumService } from '../../api-services/oilgas';
+import { webRoutes } from '../../lib/webRoutes';
+
+const memberName = (member) => {
+  const user = member?.user || {};
+  return [user.first_name, user.last_name].filter(Boolean).join(' ').trim() ||
+    user.email ||
+    'Connectize member';
+};
+
+export default function KnowledgeForumMembers() {
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [forum, setForum] = useState(null);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalMembers, setTotalMembers] = useState(0);
-  const [nextPageUrl, setNextPageUrl] = useState(null);
-  const [prevPageUrl, setPrevPageUrl] = useState(null);
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
-  const [removingMember, setRemovingMember] = useState(null);
-  const [isRemoving, setIsRemoving] = useState(false);
-
-  const pageSize = 20;
+  const [removingUserId, setRemovingUserId] = useState(null);
 
   useEffect(() => {
-    if (forumSlug) {
-      loadForum();
-      loadMembers();
-    }
-  }, [forumSlug, currentPage]);
+    let cancelled = false;
 
-  const loadForum = async () => {
-    try {
-      const response = await knowledgeForumService.getById(forumSlug);
-      // Find forum by slug
-      if (response) {
-        setForum(response);
-      } else {
-        toast.error('Forum not found');
+    const load = async () => {
+      try {
+        setLoading(true);
+        const [forumResponse, membersResponse] = await Promise.all([
+          knowledgeForumService.getById(slug),
+          knowledgeForumService.getMembers(slug),
+        ]);
+
+        if (cancelled) return;
+
+        setForum(forumResponse?.data || forumResponse);
+        const data = membersResponse?.data || membersResponse;
+        setMembers(data?.results || []);
+      } catch (error) {
+        console.error('Error loading forum members:', error);
+        toast.error('Failed to load forum members');
+        navigate(webRoutes.knowledgeForums);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Error loading forum:', error);
-      toast.error('Failed to load forum details');
+    };
+
+    if (slug) {
+      load();
     }
-  };
 
-  const loadMembers = async (pageUrl = null) => {
-    try {
-      setLoading(true);
-        
-      // Load first page using slug
-       const response = await knowledgeForumService.getMembers(forumSlug);
-        
-      const membersData = Array.isArray(response) ? response : response.results || [];
-      const filteredMembers = searchTerm.trim()
-        ? membersData.filter((member) => {
-            const fullName = `${member.user?.first_name || ''} ${member.user?.last_name || ''}`.toLowerCase();
-            const email = member.user?.email?.toLowerCase() || '';
-            const search = searchTerm.toLowerCase();
-            return fullName.includes(search) || email.includes(search);
-          })
-        : membersData;
-          console.log("filteredMembers", filteredMembers);
-      setMembers(filteredMembers);
-      setTotalMembers(response.meta?.total || filteredMembers.length);
-      setNextPageUrl(response.meta?.next_page_url || null);
-      setPrevPageUrl(response.meta?.prev_page_url || null);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading members:', error);
-      toast.error('Failed to load members');
-    } finally {
-      setLoading(false);
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, slug]);
+
+  const filteredMembers = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) {
+      return members;
     }
-  };
 
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
+    return members.filter((member) => {
+      const user = member?.user || {};
+      return [
+        user.first_name,
+        user.last_name,
+        user.email,
+        memberName(member),
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query));
+    });
+  }, [members, searchTerm]);
 
-  const handleNextPage = () => {
-    if (nextPageUrl) {
-      loadMembers(nextPageUrl);
-      setCurrentPage((prev) => prev + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (prevPageUrl) {
-      loadMembers(prevPageUrl);
-      setCurrentPage((prev) => Math.max(1, prev - 1));
-    }
-  };
-
-  const handleRemoveClick = (member) => {
-    setRemovingMember(member);
-    setShowRemoveModal(true);
-  };
-
-  const confirmRemoveMember = async () => {
-    if (!removingMember) return;
+  const onRemoveMember = async (member) => {
+    const userId = member?.user?.id;
+    if (!userId) return;
+    if (!window.confirm(`Remove ${memberName(member)} from this forum?`)) return;
 
     try {
-      setIsRemoving(true);
-      await knowledgeForumService.removeMember(forumSlug, removingMember.user?.id);
-      toast.success('Member removed successfully');
-      setShowRemoveModal(false);
-      setRemovingMember(null);
-      loadMembers();
+      setRemovingUserId(userId);
+      await knowledgeForumService.removeMember(slug, userId);
+      setMembers((current) => current.filter((item) => item.user?.id !== userId));
+      toast.success('Member removed');
     } catch (error) {
-      console.error('Error removing member:', error);
+      console.error('Error removing forum member:', error);
       toast.error('Failed to remove member');
     } finally {
-      setIsRemoving(false);
+      setRemovingUserId(null);
     }
   };
 
-  if (!forum) {
+  const backToForum = forum
+    ? webRoutes.knowledgeForumDetail.replace(':slug', forum.slug)
+    : webRoutes.knowledgeForums;
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader className="w-8 h-8 animate-spin text-gold" />
+      <div className="min-h-screen px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-6 animate-pulse" />
+          <div className="bg-white border rounded-lg divide-y">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="p-4 flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-gray-200 animate-pulse" />
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
+                  <div className="h-3 bg-gray-100 rounded w-64 animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => navigate(webRoutes.knowledgeForumDetail?.replace(':slug', forum.slug))}
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
+    <div className="min-h-screen px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <Link
+          to={backToForum}
+          className="inline-flex items-center text-sm text-gray-600 hover:text-gold mb-5"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{forum.name}</h1>
-          <p className="text-gray-600 mt-1">Forum Members</p>
-        </div>
-      </div>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to forum
+        </Link>
 
-      {/* Search Bar */}
-      <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search members by name or email..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-          />
-        </div>
-      </div>
-
-      {/* Members List */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
-            All Members ({totalMembers})
-          </h2>
-        </div>
-
-        <div className="p-6">
-          {loading ? (
-            <div className="text-center py-8">
-              <Loader className="w-8 h-8 animate-spin text-gold mx-auto" />
-              <p className="mt-2 text-gray-600">Loading members...</p>
-            </div>
-          ) : members.length === 0 ? (
-            <div className="text-center py-8">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No members found</p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Name</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Email</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Joined</th>
-                      {forum.is_moderator && (
-                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((member) => (
-                      <tr key={member.id} className="border-b hover:bg-gray-50 transition">
-                        <td className="py-3 px-4 text-sm text-gray-900">
-                          {member.user?.first_name} {member.user?.last_name}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">
-                          {member.user?.email}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">
-                          {new Date(member.created_at).toLocaleDateString()}
-                        </td>
-                        {forum.is_moderator && (
-                          <td className="py-3 px-4 text-sm text-right">
-                            <button
-                              onClick={() => handleRemoveClick(member)}
-                              className="px-3 py-1 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 transition"
-                            >
-                              Remove
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        <div className="bg-white border rounded-lg shadow-sm mb-6">
+          <div className="p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                <Users className="w-4 h-4" />
+                <span>{members.length} member{members.length === 1 ? '' : 's'}</span>
               </div>
+              <h1 className="text-2xl font-bold text-gray-900">Forum Members</h1>
+              <p className="text-gray-600 mt-1">{forum?.name || 'Forum'}</p>
+            </div>
 
-              {/* Pagination */}
-              {(prevPageUrl || nextPageUrl) && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t">
-                  <button
-                    onClick={handlePrevPage}
-                    disabled={!prevPageUrl}
-                    className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </button>
-
-                  <span className="text-sm text-gray-600">
-                    Page {currentPage}
-                  </span>
-
-                  <button
-                    onClick={handleNextPage}
-                    disabled={!nextPageUrl}
-                    className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Remove Member Modal */}
-      {showRemoveModal && removingMember && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Remove Member?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to remove{' '}
-              <span className="font-medium">
-                {removingMember.user?.first_name} {removingMember.user?.last_name}
-              </span>{' '}
-              from this forum? This action cannot be undone.
-            </p>
-
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => {
-                  setShowRemoveModal(false);
-                  setRemovingMember(null);
-                }}
-                disabled={isRemoving}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmRemoveMember}
-                disabled={isRemoving}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 flex items-center gap-2"
-              >
-                {isRemoving ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    Removing...
-                  </>
-                ) : (
-                  'Remove Member'
-                )}
-              </button>
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search members"
+                className="w-full border rounded-lg pl-10 pr-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
           </div>
         </div>
-      )}
+
+        <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
+          {filteredMembers.length === 0 ? (
+            <div className="p-10 text-center">
+              <Users className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <h2 className="text-lg font-semibold text-gray-900">No members found</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                {searchTerm ? 'Try another search term.' : 'This forum has no members yet.'}
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y">
+              {filteredMembers.map((member) => (
+                <li key={member.id} className="p-4 flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex items-center gap-3">
+                    {member.user?.avatar ? (
+                      <img
+                        src={member.user.avatar}
+                        alt=""
+                        className="w-11 h-11 rounded-full object-cover bg-gray-100"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center">
+                        <User className="w-5 h-5 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{memberName(member)}</p>
+                      {member.user?.email && (
+                        <p className="text-sm text-gray-500 truncate">{member.user.email}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {forum?.is_moderator && member.user?.id && (
+                    <button
+                      type="button"
+                      onClick={() => onRemoveMember(member)}
+                      disabled={removingUserId === member.user.id}
+                      className="shrink-0 inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-60"
+                    >
+                      <UserMinus className="w-4 h-4" />
+                      {removingUserId === member.user.id ? 'Removing...' : 'Remove'}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
-};
-
-export default KnowledgeForumMembers;
+}

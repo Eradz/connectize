@@ -74,6 +74,7 @@ export const biddingAPI = {
   deleteCriterion: (stageId, criterionId) => api.delete(`${BIDDING_BASE_URL}/stages/${stageId}/criteria/${criterionId}/`),
 
   // ==================== DOCUMENTS ====================
+  getDocumentTypes: (params = {}) => api.get(`${BIDDING_BASE_URL}/bid-document-types/`, { params }),
   getDocuments: (params = {}) => api.get(`${BIDDING_BASE_URL}/bid-documents/`, { params }),
   uploadDocument: (data) => {
     const formData = new FormData();

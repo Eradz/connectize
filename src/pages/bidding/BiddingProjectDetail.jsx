@@ -3,6 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
 import { getAllCompanies } from "../../api-services/companies";
+import {
+  getBiddingDocumentTypeLabel,
+  getDefaultBiddingDocumentType,
+  normalizeBiddingDocumentTypes,
+} from "../../lib/biddingDocumentTypes";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
@@ -121,6 +126,38 @@ function unwrapApiList(response) {
   return [];
 }
 
+function getCompanyId(value) {
+  if (!value) return "";
+  if (typeof value === "object") {
+    return String(value.id || value.company || value.company_id || "");
+  }
+  return String(value);
+}
+
+function getProjectCompanyId(project) {
+  return getCompanyId(project?.company || project?.company_id || project?.owner_company);
+}
+
+function getBidCompanyId(bid) {
+  return getCompanyId(bid?.bidder_company || bid?.bidder_company_id || bid?.company);
+}
+
+function isUserManagedBid(bid, project, eligibleCompanyIds) {
+  if (bid?.is_mine) return true;
+  const bidCompanyId = getBidCompanyId(bid);
+  if (bidCompanyId && eligibleCompanyIds.has(bidCompanyId)) return true;
+  return !project?.is_owner && eligibleCompanyIds.size === 0;
+}
+
+function getSubmitBidUrl(projectId, { bidId, bidderCompanyId } = {}) {
+  const url = webRoutes.biddingSubmit.replace(":id", projectId);
+  const params = new URLSearchParams();
+  if (bidId) params.set("bid", bidId);
+  if (!bidId && bidderCompanyId) params.set("company", bidderCompanyId);
+  const query = params.toString();
+  return query ? `${url}?${query}` : url;
+}
+
 function StatusBadge({ status }) {
   const config = STATUS_LABELS[status] || { label: status, color: "bg-gray-100" };
   return (
@@ -135,6 +172,13 @@ function formatLabel(value) {
   return String(value)
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatVisibility(value) {
+  if (value === "invited") return "Private - invited companies only";
+  if (value === "prequalified") return "Prequalified - qualified suppliers only";
+  if (value === "public") return "Public - all companies";
+  return formatLabel(value);
 }
 
 function summarizeStages(stages = []) {
@@ -185,8 +229,8 @@ function OverviewTab({ project }) {
               <dd className="font-medium">{project.category || "—"}</dd>
             </div>
             <div className="flex justify-between text-sm">
-              <dt className="text-gray-500">Visibility</dt>
-              <dd className="font-medium">{formatLabel(project.visibility)}</dd>
+              <dt className="text-gray-500">Supplier Access</dt>
+              <dd className="font-medium">{formatVisibility(project.visibility)}</dd>
             </div>
             <div className="flex justify-between text-sm">
               <dt className="text-gray-500">Workflow Template</dt>
@@ -260,7 +304,7 @@ function OverviewTab({ project }) {
           </div>
           <div className="rounded-lg bg-gray-50 px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Supplier Access</p>
-            <p className="text-sm font-medium text-gray-900">{formatLabel(project.visibility)}</p>
+            <p className="text-sm font-medium text-gray-900">{formatVisibility(project.visibility)}</p>
             <p className="text-xs text-gray-500 mt-1">
               {project.required_prequalification_scheme?.name
                 ? `Prequalification scheme: ${project.required_prequalification_scheme.name}`
@@ -370,8 +414,9 @@ function OverviewTab({ project }) {
   );
 }
 
-function BidsTab({ project, bids, onRefresh }) {
+function BidsTab({ project, bids, onRefresh, eligibleBidCompanies = [] }) {
   const navigate = useNavigate();
+  const eligibleCompanyIds = new Set(eligibleBidCompanies.map(getCompanyId));
 
   return (
     <div className="space-y-4">
@@ -383,15 +428,25 @@ function BidsTab({ project, bids, onRefresh }) {
           const isExpired =
             project.submission_deadline &&
             new Date(project.submission_deadline) < new Date();
-          if (project.is_owner || project.status !== "submission_open" || isExpired) return null;
-          const myBid = bids.find(b => b.status !== "draft");
-          const myDraft = bids.find(b => b.status === "draft");
+          const canUseBidActions =
+            project.status === "submission_open" &&
+            !isExpired &&
+            (!project.is_owner || eligibleBidCompanies.length > 0);
+          if (!canUseBidActions) return null;
+          const myBid = bids.find(
+            (b) => isUserManagedBid(b, project, eligibleCompanyIds) && b.status !== "draft"
+          );
+          const myDraft = bids.find(
+            (b) => isUserManagedBid(b, project, eligibleCompanyIds) && b.status === "draft"
+          );
+          const bidderCompanyId =
+            eligibleBidCompanies.length === 1 ? getCompanyId(eligibleBidCompanies[0]) : "";
           if (myBid && project.allow_bid_amendments !== false) return (
             <Button
               size="sm"
               className="bg-gold hover:bg-[#E0B533] text-dark"
               onClick={() =>
-                navigate(`${webRoutes.biddingSubmit.replace(":id", project.id)}?bid=${myBid.id}`)
+                navigate(getSubmitBidUrl(project.id, { bidId: myBid.id }))
               }
             >
               <Pencil className="w-4 h-4 mr-1" />
@@ -404,7 +459,7 @@ function BidsTab({ project, bids, onRefresh }) {
               size="sm"
               className="bg-gold hover:bg-[#E0B533] text-dark"
               onClick={() =>
-                navigate(`${webRoutes.biddingSubmit.replace(":id", project.id)}?bid=${myDraft.id}`)
+                navigate(getSubmitBidUrl(project.id, { bidId: myDraft.id }))
               }
             >
               <Pencil className="w-4 h-4 mr-1" />
@@ -416,7 +471,7 @@ function BidsTab({ project, bids, onRefresh }) {
               size="sm"
               className="bg-gold hover:bg-[#E0B533] text-dark"
               onClick={() =>
-                navigate(webRoutes.biddingSubmit.replace(":id", project.id))
+                navigate(getSubmitBidUrl(project.id, { bidderCompanyId }))
               }
             >
               <Send className="w-4 h-4 mr-1" />
@@ -500,7 +555,7 @@ function BidsTab({ project, bids, onRefresh }) {
                   )}
                 </div>
               )}
-              {bid.status === "draft" && (
+              {bid.status === "draft" && isUserManagedBid(bid, project, eligibleCompanyIds) && (
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
                   <button
                     onClick={(e) => {
@@ -821,18 +876,6 @@ function AnswerForm({ clarificationId, onAnswer }) {
   );
 }
 
-const DOCUMENT_TYPE_OPTIONS = [
-  { value: "technical", label: "Technical Proposal" },
-  { value: "commercial", label: "Commercial Proposal" },
-  { value: "certificate", label: "Certificate / License" },
-  { value: "insurance", label: "Insurance Certificate" },
-  { value: "financial", label: "Financial Statement" },
-  { value: "reference", label: "Reference / Past Performance" },
-  { value: "bid_bond", label: "Bid Bond / Guarantee" },
-  { value: "hse", label: "HSE Documentation" },
-  { value: "other", label: "Other" },
-];
-
 function formatFileSize(bytes) {
   if (!bytes) return "";
   if (bytes < 1024) return `${bytes} B`;
@@ -987,7 +1030,7 @@ function BidderReviewSection({ companyId, projectId, requiredDocs, bidderDocs })
   );
 }
 
-function DocumentGroupedList({ documents, project, bids, onDelete }) {
+function DocumentGroupedList({ documents, project, bids, onDelete, documentTypeOptions }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [expandedGroups, setExpandedGroups] = useState({});
@@ -1100,7 +1143,7 @@ function DocumentGroupedList({ documents, project, bids, onDelete }) {
           <option value="all">All Types</option>
           {docTypes.map((t) => (
             <option key={t} value={t}>
-              {DOCUMENT_TYPE_OPTIONS.find((o) => o.value === t)?.label || t.replace(/_/g, " ")}
+              {getBiddingDocumentTypeLabel(t, documentTypeOptions)}
             </option>
           ))}
         </select>
@@ -1148,6 +1191,7 @@ function DocumentGroupedList({ documents, project, bids, onDelete }) {
                       onToggle={() => toggleGroup(group.key)}
                       project={project}
                       onDelete={onDelete}
+                      documentTypeOptions={documentTypeOptions}
                     />
                   );
                 })
@@ -1205,7 +1249,7 @@ function DocumentGroupedList({ documents, project, bids, onDelete }) {
   );
 }
 
-function GroupRows({ group, isExpanded, onToggle, project, onDelete }) {
+function GroupRows({ group, isExpanded, onToggle, project, onDelete, documentTypeOptions }) {
   const docCount = group.docs.length;
   const totalSize = group.docs.reduce((sum, d) => sum + (d.file_size || 0), 0);
   const isProject = group.key === "__project__";
@@ -1248,9 +1292,11 @@ function GroupRows({ group, isExpanded, onToggle, project, onDelete }) {
       {isExpanded &&
         group.docs.map((doc) => {
           const fileName = doc.file?.split("/").pop() || "";
-          const typeLabel =
-            DOCUMENT_TYPE_OPTIONS.find((o) => o.value === doc.document_type)?.label ||
-            doc.document_type?.replace(/_/g, " ");
+          const typeLabel = getBiddingDocumentTypeLabel(
+            doc.document_type,
+            documentTypeOptions,
+            doc.document_type_label,
+          );
           return (
             <tr key={doc.id} className="hover:bg-blue-50/40 transition border-t border-gray-100">
               <td className="py-2 pl-12 pr-3">
@@ -1287,7 +1333,7 @@ function GroupRows({ group, isExpanded, onToggle, project, onDelete }) {
                       <Download className="w-3.5 h-3.5" />
                     </a>
                   )}
-                  {project.is_owner && (
+                  {project.is_owner && isProject && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onDelete(doc.id); }}
                       className="p-1 text-gray-400 hover:text-red-500 transition rounded hover:bg-gray-100"
@@ -1334,14 +1380,23 @@ function ComplianceInlineBadge({ requiredDocs, bidderDocs }) {
   );
 }
 
-function DocumentsTab({ project, documents, bids, onUpload, onDelete }) {
+function DocumentsTab({ project, documents, bids, onUpload, onDelete, documentTypeOptions }) {
+  const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
   const [uploading, setUploading] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     file: null,
     title: "",
-    document_type: "other",
+    document_type: defaultDocumentType,
   });
+
+  useEffect(() => {
+    if (!documentTypeOptions.length) return;
+    const hasCurrentType = documentTypeOptions.some((option) => option.value === uploadForm.document_type);
+    if (!hasCurrentType) {
+      setUploadForm((prev) => ({ ...prev, document_type: defaultDocumentType }));
+    }
+  }, [defaultDocumentType, documentTypeOptions, uploadForm.document_type]);
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
@@ -1370,30 +1425,23 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete }) {
         document_type: uploadForm.document_type,
         title: uploadForm.title.trim(),
       });
-      setUploadForm({ file: null, title: "", document_type: "other" });
+      setUploadForm({ file: null, title: "", document_type: defaultDocumentType });
       setShowUploadForm(false);
     } finally {
       setUploading(false);
     }
   };
 
-  // Check which required docs have matching uploads
-  const getRequiredDocStatus = (reqDoc) => {
-    const reqLower = reqDoc.toLowerCase();
-    return documents.find(
-      (d) =>
-        d.title?.toLowerCase() === reqLower ||
-        d.title?.toLowerCase().includes(reqLower) ||
-        reqLower.includes(d.document_type?.replace(/_/g, " "))
-    );
-  };
+  const visibleDocuments = project.is_owner
+    ? documents
+    : documents.filter((doc) => !doc.bid);
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
-          Documents ({documents.length})
+          Documents ({visibleDocuments.length})
         </h3>
         {project.is_owner && (
           <Button
@@ -1461,7 +1509,7 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete }) {
               onChange={(e) => setUploadForm((p) => ({ ...p, document_type: e.target.value }))}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none"
             >
-              {DOCUMENT_TYPE_OPTIONS.map((opt) => (
+              {documentTypeOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -1476,30 +1524,23 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete }) {
         </div>
       )}
 
-      {/* Required documents checklist (shown to bidders, not owners — owners see per-bidder breakdown) */}
+      {/* Required documents checklist */}
       {!project.is_owner && project.required_documents && project.required_documents.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <h4 className="text-sm font-semibold text-gray-800 mb-3">Required Documents</h4>
           <div className="space-y-2">
             {project.required_documents.map((doc, i) => {
-              const match = getRequiredDocStatus(doc);
               return (
                 <div
                   key={i}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-                    match ? "bg-green-50" : "bg-red-50"
-                  }`}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm bg-amber-50"
                 >
-                  {match ? (
-                    <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                  )}
-                  <span className={`flex-1 ${match ? "text-green-800" : "text-red-700"}`}>
+                  <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span className="flex-1 text-amber-800">
                     {doc}
                   </span>
-                  <span className={`text-xs font-medium ${match ? "text-green-600" : "text-red-500"}`}>
-                    {match ? "Uploaded" : "Missing"}
+                  <span className="text-xs font-medium text-amber-600">
+                    Submit with bid
                   </span>
                 </div>
               );
@@ -1509,10 +1550,12 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete }) {
       )}
 
       {/* Uploaded documents grouped */}
-      {documents.length === 0 ? (
+      {visibleDocuments.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <FileText className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-          <p className="text-gray-500">No documents uploaded yet</p>
+          <p className="text-gray-500">
+            {project.is_owner ? "No documents uploaded yet" : "No project documents available yet"}
+          </p>
           {project.is_owner && (
             <p className="text-xs text-gray-400 mt-1">
               Click "Upload" above to add project documents
@@ -1520,7 +1563,13 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete }) {
           )}
         </div>
       ) : (
-        <DocumentGroupedList documents={documents} project={project} bids={bids} onDelete={onDelete} />
+        <DocumentGroupedList
+          documents={visibleDocuments}
+          project={project}
+          bids={bids}
+          onDelete={onDelete}
+          documentTypeOptions={documentTypeOptions}
+        />
       )}
     </div>
   );
@@ -2087,6 +2136,7 @@ function BiddingProjectDetailInner() {
   const [clarifications, setClarifications] = useState([]);
   const [activities, setActivities] = useState([]);
   const [documents, setDocuments] = useState([]);
+  const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
   const [selectedBidForAward, setSelectedBidForAward] = useState(null);
@@ -2094,6 +2144,7 @@ function BiddingProjectDetailInner() {
   const [addenda, setAddenda] = useState([]);
   const [invitations, setInvitations] = useState([]);
   const [availableCompanies, setAvailableCompanies] = useState([]);
+  const [accessibleCompanies, setAccessibleCompanies] = useState([]);
 
   const fetchProject = async () => {
     try {
@@ -2165,6 +2216,15 @@ function BiddingProjectDetailInner() {
     }
   };
 
+  const fetchDocumentTypes = async () => {
+    try {
+      const res = await biddingAPI.getDocumentTypes({ page_size: 50 });
+      setDocumentTypeOptions(normalizeBiddingDocumentTypes(unwrapApiPayload(res) || res));
+    } catch {
+      setDocumentTypeOptions([]);
+    }
+  };
+
   const fetchAddenda = async () => {
     try {
       const res = await biddingAPI.getAddenda(id);
@@ -2192,12 +2252,23 @@ function BiddingProjectDetailInner() {
     }
   };
 
+  const fetchAccessibleCompanies = async () => {
+    try {
+      const res = await biddingAPI.getAccessibleCompanies();
+      setAccessibleCompanies(unwrapApiList(res));
+    } catch {
+      setAccessibleCompanies([]);
+    }
+  };
+
   useEffect(() => {
     fetchProject();
     fetchStages();
     fetchClarifications();
     fetchDocuments();
+    fetchDocumentTypes();
     fetchAddenda();
+    fetchAccessibleCompanies();
   }, [id]);
 
   useEffect(() => {
@@ -2333,10 +2404,17 @@ function BiddingProjectDetailInner() {
     );
   }
 
+  const projectCompanyId = getProjectCompanyId(project);
+  const eligibleBidCompanies = accessibleCompanies.filter((company) => {
+    const companyId = getCompanyId(company);
+    return companyId && (!projectCompanyId || companyId !== projectCompanyId);
+  });
+  const eligibleCompanyIds = new Set(eligibleBidCompanies.map(getCompanyId));
+
   const ownerActions = project.is_owner
     ? [
-        project.status === "draft" && {
-          label: "Edit Draft",
+        ["draft", "published", "submission_open", "submission_closed"].includes(project.status) && {
+          label: project.status === "draft" ? "Edit Draft" : "Edit Project",
           action: () => navigate(webRoutes.biddingEdit.replace(":id", project.id)),
           variant: "outline",
         },
@@ -2426,15 +2504,25 @@ function BiddingProjectDetailInner() {
             const isExpired =
               project.submission_deadline &&
               new Date(project.submission_deadline) < new Date();
-            if (project.is_owner || project.status !== "submission_open" || isExpired) return null;
-            const myBid = bids.find(b => b.status !== "draft");
-            const myDraft = bids.find(b => b.status === "draft");
+            const canUseBidActions =
+              project.status === "submission_open" &&
+              !isExpired &&
+              (!project.is_owner || eligibleBidCompanies.length > 0);
+            if (!canUseBidActions) return null;
+            const myBid = bids.find(
+              (b) => isUserManagedBid(b, project, eligibleCompanyIds) && b.status !== "draft"
+            );
+            const myDraft = bids.find(
+              (b) => isUserManagedBid(b, project, eligibleCompanyIds) && b.status === "draft"
+            );
+            const bidderCompanyId =
+              eligibleBidCompanies.length === 1 ? getCompanyId(eligibleBidCompanies[0]) : "";
             if (myBid && project.allow_bid_amendments !== false) return (
               <Button
                 size="sm"
                 className="bg-gold hover:bg-[#E0B533] text-dark"
                 onClick={() =>
-                  navigate(`${webRoutes.biddingSubmit.replace(":id", project.id)}?bid=${myBid.id}`)
+                  navigate(getSubmitBidUrl(project.id, { bidId: myBid.id }))
                 }
               >
                 <Pencil className="w-4 h-4 mr-1" />
@@ -2447,7 +2535,7 @@ function BiddingProjectDetailInner() {
                 size="sm"
                 className="bg-gold hover:bg-[#E0B533] text-dark"
                 onClick={() =>
-                  navigate(`${webRoutes.biddingSubmit.replace(":id", project.id)}?bid=${myDraft.id}`)
+                  navigate(getSubmitBidUrl(project.id, { bidId: myDraft.id }))
                 }
               >
                 <Pencil className="w-4 h-4 mr-1" />
@@ -2459,7 +2547,7 @@ function BiddingProjectDetailInner() {
                 size="sm"
                 className="bg-gold hover:bg-[#E0B533] text-dark"
                 onClick={() =>
-                  navigate(webRoutes.biddingSubmit.replace(":id", project.id))
+                  navigate(getSubmitBidUrl(project.id, { bidderCompanyId }))
                 }
               >
                 <Send className="w-4 h-4 mr-1" />
@@ -2542,6 +2630,7 @@ function BiddingProjectDetailInner() {
           bids={bids}
           onUpload={handleUploadDocument}
           onDelete={handleDeleteDocument}
+          documentTypeOptions={documentTypeOptions}
         />
       )}
       {activeTab === "addenda" && (

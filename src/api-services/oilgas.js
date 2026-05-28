@@ -262,6 +262,14 @@ export class DealDocumentService extends CrudService {
     }
   }
 
+  async delete(documentId, dealRoomId) {
+    return makeApiRequest({
+      url: `${this.basePath}${documentId}/`,
+      method: "DELETE",
+      params: dealRoomId ? { deal_room: dealRoomId } : undefined,
+    });
+  }
+
   async downloadDocument(documentId) {
     return makeApiRequest({
   url: `${this.basePath}${documentId}/download/`,
@@ -1183,4 +1191,3 @@ export const knowledgeForumPostService = new KnowledgeForumPostService();
 export const knowledgeModerationService = new KnowledgeModerationService();
 export const knowledgeInteractionService = new KnowledgeInteractionService();
 export const knowledgeSearchService = new KnowledgeSearchService();
-

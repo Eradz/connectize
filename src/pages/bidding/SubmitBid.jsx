@@ -1,8 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
-import { getCompanyByIdOrEmail } from "../../api-services/companies";
+import {
+  getBiddingDocumentTypeLabel,
+  getDefaultBiddingDocumentType,
+  normalizeBiddingDocumentTypes,
+} from "../../lib/biddingDocumentTypes";
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Input, { Select, Textarea } from "../../components/ui/Input";
@@ -32,29 +38,68 @@ const getDocUrl = (filePath) => {
   return `${base}${filePath.startsWith("/") ? "" : "/"}${filePath}`;
 };
 
-const DOCUMENT_TYPE_OPTIONS = [
-  { value: "technical", label: "Technical Proposal" },
-  { value: "commercial", label: "Commercial Proposal" },
-  { value: "certificate", label: "Certificate / License" },
-  { value: "insurance", label: "Insurance Certificate" },
-  { value: "financial", label: "Financial Statement" },
-  { value: "reference", label: "Reference / Past Performance" },
-  { value: "bid_bond", label: "Bid Bond / Guarantee" },
-  { value: "hse", label: "HSE Documentation" },
-  { value: "other", label: "Other" },
+const RICH_TEXT_MODULES = {
+  toolbar: [
+    [{ header: [2, 3, false] }],
+    ["bold", "italic", "underline", "strike"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ align: [] }],
+    ["blockquote", "link"],
+    ["clean"],
+  ],
+  clipboard: {
+    matchVisual: false,
+  },
+};
+
+const RICH_TEXT_FORMATS = [
+  "header",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "list",
+  "bullet",
+  "align",
+  "blockquote",
+  "link",
 ];
 
-const inferDocumentType = (requiredLabel = "") => {
-  const value = requiredLabel.toLowerCase();
-  if (value.includes("technical")) return "technical";
-  if (value.includes("commercial")) return "commercial";
-  if (value.includes("insurance")) return "insurance";
-  if (value.includes("financial")) return "financial";
-  if (value.includes("bond") || value.includes("guarantee")) return "bid_bond";
-  if (value.includes("certificate") || value.includes("license")) return "certificate";
-  if (value.includes("reference") || value.includes("performance")) return "reference";
-  if (value.includes("hse") || value.includes("safety")) return "hse";
-  return "other";
+const cleanRichTextValue = (value = "") => {
+  const normalized = String(value || "").trim();
+  const textOnly = normalized
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+  return textOnly ? normalized : "";
+};
+
+const getFileTitle = (file, fallback = "Document") =>
+  file?.name?.replace(/\.[^/.]+$/, "") || file?.name || fallback;
+
+const inferDocumentType = (requiredLabel = "", options = []) => {
+  const words = requiredLabel.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const match = options.find((option) => {
+    const optionText = `${option.value} ${option.label}`.toLowerCase();
+    return words.some((word) => word.length > 2 && optionText.includes(word));
+  });
+  return match?.value || getDefaultBiddingDocumentType(options);
+};
+
+const normalizeDocumentLabel = (value = "") =>
+  String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+const isEnvelopeProposalDocument = (label, envelopeConfiguration = []) => {
+  const normalizedLabel = normalizeDocumentLabel(label);
+  return envelopeConfiguration.some((envelope) => {
+    const type = normalizeDocumentLabel(envelope?.type);
+    if (!type) return false;
+    return [
+      `${type} proposal`,
+      `${type} envelope`,
+      `${type} bid`,
+    ].includes(normalizedLabel);
+  });
 };
 
 const getComplianceItemLabel = (item) => {
@@ -75,10 +120,32 @@ const getComplianceIssueDescription = (issue) => {
   return label;
 };
 
+const getCompanyId = (value) => {
+  if (!value) return "";
+  if (typeof value === "object") {
+    return String(value.id || value.company || value.company_id || "");
+  }
+  return String(value);
+};
+
+const getProjectCompanyId = (project) =>
+  getCompanyId(project?.company || project?.company_id || project?.owner_company);
+
+const getBidCompanyId = (bid) =>
+  getCompanyId(bid?.bidder_company || bid?.bidder_company_id || bid?.company);
+
+const normalizeList = (payload) => {
+  const data = payload?.data || payload;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+};
+
 export default function SubmitBid() {
   const { id: projectId } = useParams();
   const [searchParams] = useSearchParams();
   const editBidId = searchParams.get("bid");
+  const preferredCompanyId = searchParams.get("company");
   const isEditMode = !!editBidId;
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
@@ -99,6 +166,7 @@ export default function SubmitBid() {
   ]);
   const [documents, setDocuments] = useState([]);
   const [existingDocuments, setExistingDocuments] = useState([]);
+  const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [userCompanies, setUserCompanies] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [complianceStatus, setComplianceStatus] = useState(null);
@@ -108,13 +176,34 @@ export default function SubmitBid() {
   const [acknowledgingAddenda, setAcknowledgingAddenda] = useState({});
   const [lcCategories, setLcCategories] = useState([]);
   const [lcDeclarations, setLcDeclarations] = useState({});
+  const projectCompanyId = getProjectCompanyId(project);
+  const eligibleUserCompanies = useMemo(
+    () => userCompanies.filter((company) => {
+      const companyId = getCompanyId(company);
+      return companyId && (!projectCompanyId || companyId !== projectCompanyId);
+    }),
+    [projectCompanyId, userCompanies]
+  );
 
   useEffect(() => {
     fetchProject();
     fetchUserCompanies();
     fetchAddenda();
     fetchLcCategories();
+    fetchDocumentTypes();
   }, [projectId]);
+
+  const defaultDocumentType = getDefaultBiddingDocumentType(documentTypeOptions);
+  const hasEnvelopeSubmissions = project?.envelope_configuration?.length > 0;
+  const visibleRequiredDocuments = useMemo(() => {
+    const requiredDocuments = Array.isArray(project?.required_documents)
+      ? project.required_documents
+      : [];
+    if (!hasEnvelopeSubmissions) return requiredDocuments;
+    return requiredDocuments.filter(
+      (label) => !isEnvelopeProposalDocument(label, project.envelope_configuration)
+    );
+  }, [hasEnvelopeSubmissions, project?.envelope_configuration, project?.required_documents]);
 
   useEffect(() => {
     if (form.bidder_company) {
@@ -130,12 +219,10 @@ export default function SubmitBid() {
   const fetchUserCompanies = async () => {
     try {
       setLoadingCompanies(true);
-      const companies = await getCompanyByIdOrEmail();
+      const res = await biddingAPI.getAccessibleCompanies();
+      const companies = Array.isArray(res?.data) ? res.data : res?.data?.results || res || [];
       if (Array.isArray(companies)) {
         setUserCompanies(companies);
-        if (companies.length === 1 && !form.bidder_company) {
-          setForm((prev) => ({ ...prev, bidder_company: companies[0].id }));
-        }
       }
     } catch {
       console.error("Failed to load companies");
@@ -143,6 +230,28 @@ export default function SubmitBid() {
       setLoadingCompanies(false);
     }
   };
+
+  useEffect(() => {
+    if (isEditMode || form.bidder_company) return;
+    const preferredCompany = preferredCompanyId
+      ? eligibleUserCompanies.find((company) => getCompanyId(company) === String(preferredCompanyId))
+      : null;
+    if (preferredCompany) {
+      setForm((prev) => ({ ...prev, bidder_company: getCompanyId(preferredCompany) }));
+    } else if (eligibleUserCompanies.length === 1) {
+      setForm((prev) => ({ ...prev, bidder_company: getCompanyId(eligibleUserCompanies[0]) }));
+    }
+  }, [eligibleUserCompanies, form.bidder_company, isEditMode, preferredCompanyId]);
+
+  useEffect(() => {
+    if (isEditMode || !form.bidder_company || eligibleUserCompanies.length === 0) return;
+    const selectedIsEligible = eligibleUserCompanies.some(
+      (company) => getCompanyId(company) === String(form.bidder_company)
+    );
+    if (!selectedIsEligible) {
+      setForm((prev) => ({ ...prev, bidder_company: "" }));
+    }
+  }, [eligibleUserCompanies, form.bidder_company, isEditMode]);
 
   const fetchProject = async () => {
     try {
@@ -256,6 +365,15 @@ export default function SubmitBid() {
     } catch { setLcCategories([]); }
   };
 
+  const fetchDocumentTypes = async () => {
+    try {
+      const res = await biddingAPI.getDocumentTypes({ page_size: 50 });
+      setDocumentTypeOptions(normalizeBiddingDocumentTypes(res));
+    } catch {
+      setDocumentTypeOptions([]);
+    }
+  };
+
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -275,10 +393,30 @@ export default function SubmitBid() {
       {
         file,
         title: file.name,
-        documentType: "other",
+        documentType: defaultDocumentType,
       },
     ]);
     handleCustomResponse(key, file.name);
+  };
+
+  const buildDocumentFromFile = (file, options = {}) => ({
+    file,
+    title: options.title || getFileTitle(file),
+    documentType: options.documentType || defaultDocumentType,
+    sourceKey: options.sourceKey,
+    sourceLabel: options.sourceLabel,
+  });
+
+  const addDocumentsFromFiles = (fileList, options = {}) => {
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+    setDocuments((prev) => [
+      ...prev,
+      ...files.map((file) => buildDocumentFromFile(file, {
+        ...options,
+        title: options.sourceLabel ? `${options.sourceLabel} - ${getFileTitle(file)}` : getFileTitle(file),
+      })),
+    ]);
   };
 
   // Price breakdown management
@@ -299,15 +437,16 @@ export default function SubmitBid() {
   };
 
   const handleDocumentAdd = (e) => {
-    const files = Array.from(e.target.files);
-    setDocuments((prev) => [
-      ...prev,
-      ...files.map((file) => ({
-        file,
-        title: file.name,
-        documentType: "other",
-      })),
-    ]);
+    addDocumentsFromFiles(e.target.files);
+    e.target.value = "";
+  };
+
+  const handleContextDocumentAdd = (sourceKey, sourceLabel, typeHint, fileList) => {
+    addDocumentsFromFiles(fileList, {
+      sourceKey,
+      sourceLabel,
+      documentType: inferDocumentType(typeHint, documentTypeOptions),
+    });
   };
 
   const handleRequiredDocumentAdd = (requiredLabel, fileList) => {
@@ -319,7 +458,7 @@ export default function SubmitBid() {
       next.push({
         file,
         title: requiredLabel,
-        documentType: inferDocumentType(requiredLabel),
+        documentType: inferDocumentType(requiredLabel, documentTypeOptions),
         requiredLabel,
       });
       return next;
@@ -328,6 +467,48 @@ export default function SubmitBid() {
 
   const removeDocument = (index) => {
     setDocuments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const renderContextDocuments = (sourceKey, sourceLabel, typeHint) => {
+    const sourceDocs = documents
+      .map((doc, index) => ({ doc, index }))
+      .filter(({ doc }) => doc.sourceKey === sourceKey);
+    const uploadLabel = sourceLabel.includes("Envelope")
+      ? "Upload Envelope Document"
+      : "Upload Proposal Document";
+
+    return (
+      <div className="mt-4 space-y-2">
+        {sourceDocs.map(({ doc, index }) => (
+          <div key={`${sourceKey}-${index}`} className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
+            <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+            <span className="min-w-0 flex-1 truncate text-sm text-gray-700">
+              {doc.file?.name || doc.title}
+            </span>
+            <button
+              type="button"
+              onClick={() => removeDocument(index)}
+              className="text-gray-400 hover:text-red-500"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-[#F1C644] px-3 py-2 text-sm font-medium text-[#C89B00] transition hover:bg-yellow-50">
+          <Upload className="w-4 h-4" />
+          {sourceDocs.length ? "Upload Another Document" : uploadLabel}
+          <input
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              handleContextDocumentAdd(sourceKey, sourceLabel, typeHint, e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      </div>
+    );
   };
 
   const updateDocument = (index, field, value) => {
@@ -345,6 +526,7 @@ export default function SubmitBid() {
   };
 
   const buildPayload = () => {
+    const totalPrice = String(form.total_price || "").trim();
     const lcPayload = Object.entries(lcDeclarations)
       .filter(([, value]) => value?.percentage !== "" && value?.percentage !== undefined)
       .map(([categoryId, value]) => ({
@@ -356,15 +538,19 @@ export default function SubmitBid() {
     return {
       project: projectId,
       bidder_company: form.bidder_company,
-      total_price: form.total_price,
+      total_price: totalPrice || undefined,
       currency: form.currency,
-      technical_proposal: form.technical_proposal,
+      technical_proposal: hasEnvelopeSubmissions
+        ? undefined
+        : cleanRichTextValue(form.technical_proposal),
       custom_responses: { ...form.custom_responses },
       valid_until: project?.submission_deadline,
-      envelopes: (project.envelope_configuration || []).map((env) => ({
-        envelope_type: env.type,
-        content: { text: envelopes[env.type] || "" },
-      })),
+      envelopes: (project.envelope_configuration || [])
+        .map((env) => ({
+          envelope_type: env.type,
+          content: { text: cleanRichTextValue(envelopes[env.type]) },
+        }))
+        .filter((env) => env.content.text),
       local_content_declarations: lcPayload,
       price_breakdown: priceBreakdown
         .filter((item) => item.item && item.amount)
@@ -376,12 +562,12 @@ export default function SubmitBid() {
   };
 
   const validateBidForm = ({ finalize }) => {
-    if (!form.total_price) {
-      toast.error("Total price is required");
-      return false;
-    }
     if (!form.bidder_company) {
-      toast.error("Please select your company");
+      toast.error(
+        eligibleUserCompanies.length === 0
+          ? "You need another associated company to submit a bid for this project"
+          : "Please select your company"
+      );
       return false;
     }
 
@@ -395,7 +581,7 @@ export default function SubmitBid() {
 
     if (finalize && project.envelope_configuration?.length > 0) {
       const missingEnvelope = project.envelope_configuration.find(
-        (env) => !(envelopes[env.type] || "").trim()
+        (env) => !cleanRichTextValue(envelopes[env.type])
       );
       if (missingEnvelope) {
         toast.error(`Complete the ${missingEnvelope.type} envelope before submitting`);
@@ -403,13 +589,13 @@ export default function SubmitBid() {
       }
     }
 
-    if (finalize && (project.required_documents || []).length > 0) {
-      const missingDocument = project.required_documents.find(
+    if (finalize && visibleRequiredDocuments.length > 0) {
+      const missingDocument = visibleRequiredDocuments.find(
         (requiredLabel) =>
           !documents.some((doc) => doc.requiredLabel === requiredLabel)
           && !existingDocuments.some(
             (doc) =>
-              doc.document_type === inferDocumentType(requiredLabel)
+              doc.document_type === inferDocumentType(requiredLabel, documentTypeOptions)
               || doc.title === requiredLabel
               || doc.title?.toLowerCase().includes(requiredLabel.toLowerCase())
           )
@@ -444,7 +630,7 @@ export default function SubmitBid() {
         await biddingAPI.uploadDocument({
           bid: bidId,
           title: doc.title || doc.file?.name,
-          document_type: doc.documentType || "other",
+          document_type: doc.documentType || defaultDocumentType,
           file: doc.file,
         });
       } catch {
@@ -472,8 +658,17 @@ export default function SubmitBid() {
 
     try {
       let bid;
-      if (isEditMode) {
-        const res = await biddingAPI.updateBid(editBidId, payload);
+      let existingBidId = editBidId;
+      if (!existingBidId) {
+        const bidsRes = await biddingAPI.getBids({ project: projectId, page_size: 50 });
+        const existingBid = normalizeList(bidsRes).find(
+          (candidate) => getBidCompanyId(candidate) === String(form.bidder_company)
+        );
+        existingBidId = existingBid?.id;
+      }
+
+      if (existingBidId) {
+        const res = await biddingAPI.updateBid(existingBidId, payload);
         bid = res?.data || res;
       } else {
         const res = await biddingAPI.submitBid(payload);
@@ -492,7 +687,7 @@ export default function SubmitBid() {
         await biddingAPI.submitBidAction(bid.id);
         toast.success("Bid submitted successfully!");
       } else {
-        toast.success(isEditMode ? "Draft updated successfully!" : "Draft saved successfully!");
+        toast.success(existingBidId ? "Draft updated successfully!" : "Draft saved successfully!");
       }
 
       navigate(webRoutes.biddingDetail.replace(":id", projectId));
@@ -551,6 +746,28 @@ export default function SubmitBid() {
   const complianceIssueLabels = categorizedComplianceIssueLabels.length > 0
     ? categorizedComplianceIssueLabels
     : fallbackComplianceIssues;
+  const primaryComplianceIssue =
+    missingItems[0] || expiredItems[0] || rejectedItems[0] || pendingVerificationItems[0] || null;
+  const complianceVaultParams = new URLSearchParams();
+  if (form.bidder_company) {
+    complianceVaultParams.set("company", form.bidder_company);
+  }
+  if (primaryComplianceIssue?.requirement_id) {
+    complianceVaultParams.set("requirement", primaryComplianceIssue.requirement_id);
+    complianceVaultParams.set("requirementName", getComplianceItemLabel(primaryComplianceIssue));
+    if (primaryComplianceIssue.category) {
+      complianceVaultParams.set("requirementCategory", primaryComplianceIssue.category);
+    }
+    if (primaryComplianceIssue.valid_duration_months) {
+      complianceVaultParams.set("validDurationMonths", primaryComplianceIssue.valid_duration_months);
+    }
+    if (typeof primaryComplianceIssue.requires_verification === "boolean") {
+      complianceVaultParams.set("requiresVerification", String(primaryComplianceIssue.requires_verification));
+    }
+  }
+  const complianceVaultUrl = complianceVaultParams.toString()
+    ? `${webRoutes.biddingCompliance}?${complianceVaultParams.toString()}`
+    : webRoutes.biddingCompliance;
   const complianceAttentionCount = Math.max(
     missingCount + expiredCount + rejectedCount + pendingVerificationCount,
     complianceIssueLabels.length,
@@ -633,7 +850,7 @@ export default function SubmitBid() {
           </ul>
           <button
             type="button"
-            onClick={() => navigate(webRoutes.biddingCompliance)}
+            onClick={() => navigate(complianceVaultUrl)}
             className="mt-2 text-sm text-red-700 underline hover:text-red-900"
           >
             Go to Compliance Vault →
@@ -713,9 +930,11 @@ export default function SubmitBid() {
               <div className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-400 text-sm">
                 Loading companies...
               </div>
-            ) : userCompanies.length === 0 ? (
+            ) : eligibleUserCompanies.length === 0 ? (
               <div className="w-full px-3 py-2.5 border border-red-200 rounded-lg bg-red-50 text-red-600 text-sm">
-                No companies found. You need a company to submit a bid.
+                {userCompanies.length === 0
+                  ? "No companies found. You need a company to submit a bid."
+                  : "No eligible bidding company. The project creator company cannot submit a bid."}
               </div>
             ) : (
               <Select
@@ -723,9 +942,9 @@ export default function SubmitBid() {
                 onChange={(e) => handleChange("bidder_company", e.target.value)}
               >
                 <option value="">Select your company</option>
-                {userCompanies.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.company_name}
+                {eligibleUserCompanies.map((c) => (
+                  <option key={getCompanyId(c)} value={getCompanyId(c)}>
+                    {c.company_name || c.name}
                   </option>
                 ))}
               </Select>
@@ -742,7 +961,7 @@ export default function SubmitBid() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Price *
+                  Total Price (Optional)
                 </label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -833,22 +1052,26 @@ export default function SubmitBid() {
         </section>
 
         {/* Technical Proposal */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Technical Proposal
-          </h2>
-          <Textarea
-            value={form.technical_proposal}
-            onChange={(e) =>
-              handleChange("technical_proposal", e.target.value)
-            }
-            placeholder="Describe your technical approach, methodology, timeline, team qualifications..."
-            rows={8}
-          />
-        </section>
+        {!hasEnvelopeSubmissions && (
+          <section className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Technical Proposal
+            </h2>
+            <ReactQuill
+              theme="snow"
+              value={form.technical_proposal}
+              onChange={(value) => handleChange("technical_proposal", cleanRichTextValue(value))}
+              modules={RICH_TEXT_MODULES}
+              formats={RICH_TEXT_FORMATS}
+              placeholder="Describe your technical approach, methodology, timeline, team qualifications..."
+              className="[&_.ql-editor]:min-h-[180px]"
+            />
+            {renderContextDocuments("technical_proposal", "Technical Proposal", "technical proposal")}
+          </section>
+        )}
 
         {/* Multi-Envelope Sections */}
-        {project.envelope_configuration?.length > 0 && (
+        {hasEnvelopeSubmissions && (
           <section className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-1">
               Envelope Submissions
@@ -867,17 +1090,21 @@ export default function SubmitBid() {
                         (Weight: {env.weight}%)
                       </span>
                     </h3>
-                    <Textarea
+                    <ReactQuill
+                      theme="snow"
                       value={envelopes[env.type] || ""}
-                      onChange={(e) =>
+                      onChange={(value) =>
                         setEnvelopes((prev) => ({
                           ...prev,
-                          [env.type]: e.target.value,
+                          [env.type]: cleanRichTextValue(value),
                         }))
                       }
+                      modules={RICH_TEXT_MODULES}
+                      formats={RICH_TEXT_FORMATS}
                       placeholder={`Enter your ${env.type} proposal content...`}
-                      rows={5}
+                      className="[&_.ql-editor]:min-h-[140px]"
                     />
+                    {renderContextDocuments(`envelope_${env.type}`, `${env.type} Envelope`, `${env.type} proposal`)}
                   </div>
                 ))}
             </div>
@@ -1050,18 +1277,18 @@ export default function SubmitBid() {
         {/* Documents */}
         <section className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Supporting Documents
+            Bid Documents
           </h2>
-          {project.required_documents?.length > 0 && (
+          {visibleRequiredDocuments.length > 0 && (
             <div className="mb-4 space-y-3">
               <p className="text-sm text-gray-600">
                 Map each required document explicitly before final submission.
               </p>
-              {project.required_documents.map((requiredLabel) => {
+              {visibleRequiredDocuments.map((requiredLabel) => {
                 const existing = documents.find((doc) => doc.requiredLabel === requiredLabel);
                 const alreadyUploaded = existingDocuments.find(
                   (doc) =>
-                    doc.document_type === inferDocumentType(requiredLabel)
+                    doc.document_type === inferDocumentType(requiredLabel, documentTypeOptions)
                     || doc.title === requiredLabel
                     || doc.title?.toLowerCase().includes(requiredLabel.toLowerCase())
                 );
@@ -1134,7 +1361,9 @@ export default function SubmitBid() {
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-gray-900 truncate">{doc.title}</p>
-                        <p className="text-xs text-gray-500 capitalize">{doc.document_type?.replace(/_/g, " ")}</p>
+                        <p className="text-xs text-gray-500 capitalize">
+                          {getBiddingDocumentTypeLabel(doc.document_type, documentTypeOptions, doc.document_type_label)}
+                        </p>
                       </div>
                       {url && (
                         <a
@@ -1191,7 +1420,7 @@ export default function SubmitBid() {
                             onChange={(e) => updateDocument(index, "documentType", e.target.value)}
                             className="max-w-[220px]"
                           >
-                            {DOCUMENT_TYPE_OPTIONS.map((option) => (
+                            {documentTypeOptions.map((option) => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
@@ -1244,7 +1473,7 @@ export default function SubmitBid() {
                 {project.status === "submission_open" && complianceIssueLabels.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => navigate(webRoutes.biddingCompliance)}
+                    onClick={() => navigate(complianceVaultUrl)}
                     className="text-xs font-medium text-amber-900 underline hover:text-amber-950"
                   >
                     Open Compliance Vault

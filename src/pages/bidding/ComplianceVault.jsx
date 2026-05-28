@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { biddingAPI } from "../../api-services/bidding";
 import HeadingText from "../../components/HeadingText";
@@ -41,6 +42,13 @@ function StatusBadge({ status }) {
 }
 
 export default function ComplianceVault() {
+  const [searchParams] = useSearchParams();
+  const initialCompanyId = searchParams.get("company") || "";
+  const initialRequirementId = searchParams.get("requirement") || "";
+  const initialRequirementName = searchParams.get("requirementName") || "";
+  const initialRequirementCategory = searchParams.get("requirementCategory") || "";
+  const initialRequirementValidMonths = Number(searchParams.get("validDurationMonths")) || 12;
+  const initialRequirementRequiresVerification = searchParams.get("requiresVerification") !== "false";
   const [categories, setCategories] = useState([]);
   const [requirements, setRequirements] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -87,7 +95,10 @@ export default function ComplianceVault() {
       const res = await api.get("/api/v1/workforce/companies/my_companies/");
       const companies = res.data?.results || res.data || [];
       setUserCompanies(companies);
-      if (companies.length === 1) {
+      if (initialCompanyId) {
+        setSelectedCompany(initialCompanyId);
+        setCategoryForm((prev) => ({ ...prev, company: initialCompanyId }));
+      } else if (companies.length === 1) {
         setSelectedCompany(companies[0].id);
         setCategoryForm((prev) => ({ ...prev, company: companies[0].id }));
       }
@@ -100,14 +111,37 @@ export default function ComplianceVault() {
     setLoading(true);
     try {
       const params = selectedCompany ? { company: selectedCompany } : {};
-      const [catRes, reqRes, docRes] = await Promise.all([
-        biddingAPI.getComplianceCategories(params),
-        biddingAPI.getComplianceRequirements(params),
-        biddingAPI.getComplianceDocuments(params),
+      const listParams = { ...params, page_size: 50 };
+      const [catRes, reqRes, docRes, targetDocRes] = await Promise.all([
+        biddingAPI.getComplianceCategories(listParams),
+        biddingAPI.getComplianceRequirements(listParams),
+        biddingAPI.getComplianceDocuments(listParams),
+        initialCompanyId && initialRequirementId
+          ? biddingAPI.getComplianceDocuments({
+              company: initialCompanyId,
+              requirement: initialRequirementId,
+              page_size: 5,
+            })
+          : Promise.resolve(null),
       ]);
+      const docList = docRes.data?.results || docRes.data || [];
+      const rawTargetDocList = targetDocRes?.data?.results || targetDocRes?.data || [];
+      const targetDocList = Array.isArray(rawTargetDocList)
+        ? rawTargetDocList.filter(
+            (doc) =>
+              String(doc.company) === String(initialCompanyId) &&
+              String(doc.requirement?.id ?? doc.requirement) === String(initialRequirementId)
+          )
+        : [];
+      const mergedDocs = [...docList];
+      targetDocList.forEach((doc) => {
+        if (!mergedDocs.some((existing) => String(existing.id) === String(doc.id))) {
+          mergedDocs.push(doc);
+        }
+      });
       setCategories(catRes.data?.results || catRes.data || []);
       setRequirements(reqRes.data?.results || reqRes.data || []);
-      setDocuments(docRes.data?.results || docRes.data || []);
+      setDocuments(mergedDocs);
     } catch (err) {
       toast.error("Failed to load compliance data");
     } finally {
@@ -115,17 +149,26 @@ export default function ComplianceVault() {
     }
   }
 
-  function getDocForRequirement(reqId, companyId) {
+  function getDocForRequirement(reqId, companyId = "") {
     return documents
-      .filter((d) => d.requirement === reqId && d.company === companyId)
-      .sort((a, b) => b.version - a.version)[0];
+      .filter((d) => {
+        const matchesRequirement = String(d.requirement?.id ?? d.requirement) === String(reqId);
+        const matchesCompany = !companyId || String(d.company) === String(companyId);
+        return matchesRequirement && matchesCompany;
+      })
+      .sort((a, b) => (Number(b.version) || 0) - (Number(a.version) || 0))[0];
+  }
+
+  function getCompanyName(companyId) {
+    const company = userCompanies.find((c) => String(c.id) === String(companyId));
+    return company?.company_name || company?.name || "";
   }
 
   function toggleCategory(catId) {
     setExpandedCategories((prev) => ({ ...prev, [catId]: !prev[catId] }));
   }
 
-  function openUploadModal(requirement) {
+  function openUploadModal(requirement, companyOverride = "") {
     setUploadRequirement(requirement);
     const expiryMonths = requirement.valid_duration_months || 12;
     const today = new Date().toISOString().split("T")[0];
@@ -133,7 +176,7 @@ export default function ComplianceVault() {
     expiry.setMonth(expiry.getMonth() + expiryMonths);
 
     setUploadForm({
-      company: selectedCompany || (userCompanies.length === 1 ? userCompanies[0].id : ""),
+      company: companyOverride || selectedCompany || (userCompanies.length === 1 ? userCompanies[0].id : ""),
       issue_date: today,
       expiry_date: expiry.toISOString().split("T")[0],
       document_file: null,
@@ -216,6 +259,25 @@ export default function ComplianceVault() {
       ...cat,
       reqs: filteredRequirements.filter((r) => r.category === cat.id),
     }));
+  const targetRequirement = initialRequirementId
+    ? requirements.find((req) => String(req.id) === String(initialRequirementId)) || {
+        id: initialRequirementId,
+        name: initialRequirementName || "Required compliance document",
+        description: "Required for this bid submission.",
+        category_name: initialRequirementCategory,
+        valid_duration_months: initialRequirementValidMonths,
+        requires_verification: initialRequirementRequiresVerification,
+      }
+    : null;
+  const targetCompanyId = initialCompanyId || selectedCompany;
+  const targetDoc = targetRequirement && targetCompanyId
+    ? getDocForRequirement(targetRequirement.id, targetCompanyId)
+    : null;
+  const targetDocStatus = targetDoc ? targetDoc.status : "missing";
+  const isUploadCompanyLocked =
+    Boolean(initialCompanyId) &&
+    Boolean(initialRequirementId) &&
+    String(uploadRequirement?.id) === String(initialRequirementId);
 
   if (loading) {
     return (
@@ -266,6 +328,54 @@ export default function ComplianceVault() {
           </div>
         </div>
       </div>
+
+      {targetRequirement && (
+        <div className="rounded-xl border border-gold/50 bg-gold/10 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+                Required for current bid
+              </p>
+              <h3 className="mt-1 text-base font-semibold text-gray-900">
+                {targetRequirement.name}
+              </h3>
+              <p className="mt-1 text-sm text-gray-600">
+                {[
+                  getCompanyName(targetCompanyId) ? `For ${getCompanyName(targetCompanyId)}` : "",
+                  targetRequirement.category_name || initialRequirementCategory,
+                  targetRequirement.requires_verification ? "Requires verification" : "",
+                ].filter(Boolean).join(" · ")}
+              </p>
+              {targetDocStatus === "pending_review" && (
+                <p className="mt-2 text-xs text-amber-800">
+                  Uploaded documents that require verification will remain a compliance issue until the buyer verifies them.
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <StatusBadge status={targetDocStatus} />
+              {targetDoc?.document_file && (
+                <a
+                  href={targetDoc.document_file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-9 items-center gap-1 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <Eye size={14} /> View
+                </a>
+              )}
+              <Button
+                size="sm"
+                className="bg-dark hover:bg-mid_grey text-white"
+                onClick={() => openUploadModal(targetRequirement, targetCompanyId)}
+              >
+                <Upload size={14} className="mr-1" />
+                {targetDoc ? "Re-upload Requirement" : "Upload Requirement"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex gap-3">
@@ -331,7 +441,7 @@ export default function ComplianceVault() {
                         </Button>
                       </div>
                     ) : group.reqs.map((req) => {
-                      const doc = selectedCompany ? getDocForRequirement(req.id, selectedCompany) : null;
+                      const doc = getDocForRequirement(req.id, selectedCompany);
                       const docStatus = doc ? doc.status : "missing";
 
                       return (
@@ -391,7 +501,14 @@ export default function ComplianceVault() {
             </div>
 
             <form onSubmit={handleUpload} className="space-y-4">
-              {userCompanies.length > 1 && (
+              {isUploadCompanyLocked ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                  <div className="inline-flex rounded-full bg-gold px-3 py-1.5 text-sm font-medium text-white">
+                    {getCompanyName(uploadForm.company) || "Selected company"}
+                  </div>
+                </div>
+              ) : userCompanies.length > 1 && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
                   <Select
