@@ -149,6 +149,14 @@ function isUserManagedBid(bid, project, eligibleCompanyIds) {
   return !project?.is_owner && eligibleCompanyIds.size === 0;
 }
 
+function isAddendumAcknowledgedForCompanies(addendum, companyIds) {
+  if (!companyIds?.size) return false;
+  return (addendum?.acknowledgments || []).some((ack) => {
+    const companyId = getCompanyId(ack?.company || ack?.company_id);
+    return companyId && companyIds.has(companyId);
+  });
+}
+
 function getSubmitBidUrl(projectId, { bidId, bidderCompanyId } = {}) {
   const url = webRoutes.biddingSubmit.replace(":id", projectId);
   const params = new URLSearchParams();
@@ -1701,7 +1709,7 @@ const ADDENDUM_TYPE_LABELS = {
   document_update: "Document Update",
 };
 
-function AddendaTab({ project, addenda, onRefresh }) {
+function AddendaTab({ project, addenda, onRefresh, eligibleBidCompanies = [] }) {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -1734,13 +1742,19 @@ function AddendaTab({ project, addenda, onRefresh }) {
 
   const handleAcknowledge = async (addendumNumber) => {
     try {
-      await biddingAPI.acknowledgeAddendum(project.id, addendumNumber);
+      const payload =
+        eligibleBidCompanies.length === 1
+          ? { company: getCompanyId(eligibleBidCompanies[0]) }
+          : {};
+      await biddingAPI.acknowledgeAddendum(project.id, addendumNumber, payload);
       toast.success(`Addendum #${addendumNumber} acknowledged`);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Failed to acknowledge");
     }
   };
+
+  const eligibleCompanyIds = new Set(eligibleBidCompanies.map(getCompanyId));
 
   return (
     <div className="space-y-4">
@@ -1809,42 +1823,53 @@ function AddendaTab({ project, addenda, onRefresh }) {
         </div>
       ) : (
         <div className="space-y-3">
-          {addenda.map((a) => (
-            <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      #{a.addendum_number}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded capitalize">
-                      {ADDENDUM_TYPE_LABELS[a.addendum_type] || a.addendum_type}
-                    </span>
-                  </div>
-                  <h4 className="font-medium text-gray-900 mt-1">{a.title}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{a.description}</p>
-                  {a.new_deadline && (
-                    <p className="text-xs text-orange-600 mt-1">
-                      New deadline: {new Date(a.new_deadline).toLocaleString()}
+          {addenda.map((a) => {
+            const acknowledged = isAddendumAcknowledgedForCompanies(a, eligibleCompanyIds);
+            return (
+              <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                        #{a.addendum_number}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded capitalize">
+                        {ADDENDUM_TYPE_LABELS[a.addendum_type] || a.addendum_type}
+                      </span>
+                    </div>
+                    <h4 className="font-medium text-gray-900 mt-1">{a.title}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{a.description}</p>
+                    {a.new_deadline && (
+                      <p className="text-xs text-orange-600 mt-1">
+                        New deadline: {new Date(a.new_deadline).toLocaleString()}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-2">
+                      Issued by {a.issued_by_name} on {new Date(a.issued_at).toLocaleString()}
+                      {" · "}{a.acknowledged_count} acknowledgment(s)
                     </p>
+                  </div>
+                  {!project.is_owner && (
+                    acknowledged ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-sm font-medium border border-green-100">
+                        <CheckCircle className="w-4 h-4" />
+                        Acknowledged
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAcknowledge(a.addendum_number)}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Acknowledge
+                      </Button>
+                    )
                   )}
-                  <p className="text-xs text-gray-400 mt-2">
-                    Issued by {a.issued_by_name} on {new Date(a.issued_at).toLocaleString()}
-                    {" · "}{a.acknowledged_count} acknowledgment(s)
-                  </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleAcknowledge(a.addendum_number)}
-                  disabled={project.is_owner}
-                >
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Acknowledge
-                </Button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -2678,6 +2703,7 @@ function BiddingProjectDetailInner() {
           project={project}
           addenda={addenda}
           onRefresh={fetchAddenda}
+          eligibleBidCompanies={eligibleBidCompanies}
         />
       )}
       {activeTab === "clarifications" && (
