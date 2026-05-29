@@ -22,6 +22,8 @@ export const biddingAPI = {
 
   // Project Sub-resources
   getProjectStages: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/stages/`),
+  getProjectLifecycle: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/lifecycle/`),
+  syncProjectLifecycle: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/sync-lifecycle/`),
   getProjectActivity: (id, params = {}) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/activity/`, { params }),
   getScoreboard: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/scoreboard/`),
   calculateScores: (id) => api.post(`${BIDDING_BASE_URL}/bid-projects/${id}/calculate-scores/`),
@@ -145,6 +147,8 @@ export const biddingAPI = {
   // ==================== MULTI-ENVELOPE ====================
   openEnvelope: (projectId, envelopeType) =>
     api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/open-envelope/`, { envelope_type: envelopeType }),
+  finalizeEnvelope: (projectId, envelopeType) =>
+    api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/finalize-envelope/`, { envelope_type: envelopeType }),
   calculateMultiEnvelopeScores: (projectId) =>
     api.post(`${BIDDING_BASE_URL}/bid-projects/${projectId}/calculate-multi-envelope-scores/`),
 

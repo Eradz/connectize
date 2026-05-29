@@ -167,6 +167,7 @@ const KnowledgeForumInvite = lazy(() => import("./pages/knowledge/KnowledgeForum
 const BiddingProjects = lazy(() => import("./pages/bidding/BiddingProjects"));
 const CreateBiddingProject = lazy(() => import("./pages/bidding/CreateBiddingProject"));
 const SubmitBid = lazy(() => import("./pages/bidding/SubmitBid"));
+const BidSubmissionDetail = lazy(() => import("./pages/bidding/BidSubmissionDetail"));
 const EvaluationPanel = lazy(() => import("./pages/bidding/EvaluationPanel"));
 const BiddingTemplates = lazy(() => import("./pages/bidding/BiddingTemplates"));
 const ComplianceVault = lazy(() => import("./pages/bidding/ComplianceVault"));
@@ -344,6 +345,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.biddingCreate)} element={<CreateBiddingProject />} />
           <Route path={removeLeadingSlash(webRoutes.biddingEdit)} element={<CreateBiddingProject />} />
           <Route path={removeLeadingSlash(webRoutes.biddingDetail)} element={<BiddingProjectDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingBidDetail)} element={<BidSubmissionDetail />} />
           <Route path={removeLeadingSlash(webRoutes.biddingSubmit)} element={<SubmitBid />} />
           <Route path={removeLeadingSlash(webRoutes.biddingEvaluate)} element={<EvaluationPanel />} />
           <Route path={removeLeadingSlash(webRoutes.biddingTemplates)} element={<BiddingTemplates />} />

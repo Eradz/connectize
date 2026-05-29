@@ -86,6 +86,8 @@ const STATUS_LABELS = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700", icon: XCircle },
 };
 
+const TERMINAL_PROJECT_STATUSES = new Set(["awarded", "completed", "cancelled"]);
+
 const ALL_TABS = [
   { key: "overview", label: "Overview", icon: FileText },
   { key: "bids", label: "Bids", icon: Gavel },
@@ -164,6 +166,12 @@ function getSubmitBidUrl(projectId, { bidId, bidderCompanyId } = {}) {
   if (!bidId && bidderCompanyId) params.set("company", bidderCompanyId);
   const query = params.toString();
   return query ? `${url}?${query}` : url;
+}
+
+function getBidDetailUrl(projectId, bidId) {
+  return webRoutes.biddingBidDetail
+    .replace(":id", projectId)
+    .replace(":bidId", bidId);
 }
 
 function StatusBadge({ status }) {
@@ -517,7 +525,7 @@ function BidsTab({ project, bids, onRefresh, eligibleBidCompanies = [] }) {
             <div
               key={bid.id}
               className="bg-white rounded-xl border border-gray-200 p-4 hover:border-[#F1C644]/40 transition cursor-pointer"
-              onClick={() => navigate(webRoutes.biddingDetail.replace(":id", project.id))}
+              onClick={() => navigate(getBidDetailUrl(project.id, bid.id))}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -2240,10 +2248,36 @@ function BiddingProjectDetailInner() {
     }
   };
 
-  const fetchStages = async () => {
+  const fetchStages = async (currentProject = project) => {
     try {
-      const res = await biddingAPI.getProjectStages(id);
-      setStages(unwrapApiList(res));
+      const canSync =
+        currentProject?.is_owner &&
+        currentProject?.status &&
+        currentProject.status !== "draft" &&
+        !TERMINAL_PROJECT_STATUSES.has(currentProject.status);
+
+      if (canSync) {
+        try {
+          const synced = await biddingAPI.syncProjectLifecycle(id);
+          const payload = unwrapApiPayload(synced);
+          setStages(Array.isArray(payload?.stages) ? payload.stages : unwrapApiList(synced));
+          return;
+        } catch (syncErr) {
+          const status = syncErr?.response?.status;
+          if (status && ![400, 403, 404].includes(status)) throw syncErr;
+        }
+      }
+
+      try {
+        const lifecycle = await biddingAPI.getProjectLifecycle(id);
+        const payload = unwrapApiPayload(lifecycle);
+        setStages(Array.isArray(payload?.stages) ? payload.stages : unwrapApiList(lifecycle));
+      } catch (lifecycleErr) {
+        const status = lifecycleErr?.response?.status;
+        if (status && ![404, 405].includes(status)) throw lifecycleErr;
+        const res = await biddingAPI.getProjectStages(id);
+        setStages(unwrapApiList(res));
+      }
     } catch {
       setStages([]);
     }
@@ -2337,6 +2371,7 @@ function BiddingProjectDetailInner() {
     }
 
     fetchBids(project.is_owner ? "buyer" : undefined);
+    fetchStages(project);
 
     if (project.is_owner) {
       fetchInvitations();
@@ -2369,6 +2404,19 @@ function BiddingProjectDetailInner() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const calculateProjectScores = async (projectId) => {
+    try {
+      await biddingAPI.syncProjectLifecycle(projectId);
+    } catch (syncErr) {
+      const status = syncErr?.response?.status;
+      if (status && ![400, 403, 404].includes(status)) throw syncErr;
+    }
+    if (project?.envelope_configuration?.length > 0) {
+      return biddingAPI.calculateMultiEnvelopeScores(projectId);
+    }
+    return biddingAPI.calculateScores(projectId);
   };
 
   const handleAskClarification = async (data) => {
@@ -2470,6 +2518,17 @@ function BiddingProjectDetailInner() {
     return companyId && (!projectCompanyId || companyId !== projectCompanyId);
   });
   const eligibleCompanyIds = new Set(eligibleBidCompanies.map(getCompanyId));
+  const activeWorkflowStage = stages.find((stage) => stage.status === "active");
+  const canCalculateScores =
+    ["under_evaluation", "evaluation"].includes(project.status) &&
+    (!stages.length ||
+      activeWorkflowStage?.stage_type === "evaluation" ||
+      stages.some(
+        (stage) => stage.stage_type === "evaluation" && stage.status === "completed"
+      ));
+  const canAwardProject =
+    ["under_evaluation", "evaluation"].includes(project.status) &&
+    activeWorkflowStage?.stage_type === "award";
 
   const ownerActions = project.is_owner
     ? [
@@ -2503,12 +2562,12 @@ function BiddingProjectDetailInner() {
           action: () => navigate(webRoutes.biddingEvaluate.replace(":id", project.id)),
           variant: "primary",
         },
-        ["under_evaluation", "evaluation"].includes(project.status) && {
+        canCalculateScores && {
           label: "Calculate Scores",
-          action: () => performAction(biddingAPI.calculateScores),
+          action: () => performAction(calculateProjectScores),
           variant: "outline",
         },
-        ["under_evaluation", "evaluation"].includes(project.status) && {
+        canAwardProject && {
           label: "Award",
           action: () => setShowAwardModal(true),
           variant: "warning",
@@ -2677,7 +2736,12 @@ function BiddingProjectDetailInner() {
       {/* Tab Content */}
       {activeTab === "overview" && <OverviewTab project={project} />}
       {activeTab === "bids" && (
-        <BidsTab project={project} bids={bids} onRefresh={() => fetchBids(project?.is_owner ? "buyer" : undefined)} />
+        <BidsTab
+          project={project}
+          bids={bids}
+          onRefresh={() => fetchBids(project?.is_owner ? "buyer" : undefined)}
+          eligibleBidCompanies={eligibleBidCompanies}
+        />
       )}
       {activeTab === 'stages' && <StagesTab project={project} stages={stages} bidCount={bids.length} />}
       {activeTab === "invitations" && project.is_owner && (

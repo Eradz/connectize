@@ -47,13 +47,24 @@ function formatEnvelopeLabel(value) {
 }
 
 function getEnvelopeProgress(envelopeStatus, envelopeType) {
-  const status = envelopeStatus[envelopeType] || { total: 0, opened: 0 };
+  const status = envelopeStatus[envelopeType] || { total: 0, opened: 0, evaluated: 0 };
   return {
     ...status,
     hasSubmissions: status.total > 0,
     allOpened: status.total > 0 && status.opened === status.total,
+    allEvaluated: status.total > 0 && status.opened === status.total && status.evaluated === status.total,
     partial: status.opened > 0 && status.opened < status.total,
   };
+}
+
+function uniqueById(items = []) {
+  const seen = new Set();
+  return items.filter((item, index) => {
+    const key = item?.id ?? `${item?.name || item?.title || "item"}-${item?.envelope_type || ""}-${index}`;
+    if (seen.has(String(key))) return false;
+    seen.add(String(key));
+    return true;
+  });
 }
 
 function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelopeType }) {
@@ -149,8 +160,8 @@ function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelope
             </p>
           </div>
           <div className="divide-y divide-gray-100">
-            {criteria.map((c) => (
-              <div key={c.id} className="px-5 py-3 flex items-center justify-between group">
+            {criteria.map((c, index) => (
+              <div key={c.id || `criterion-${index}`} className="px-5 py-3 flex items-center justify-between group">
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600">
                     {c.weight}%
@@ -477,8 +488,8 @@ function BidScoreCard({ bid, criteria, scores, onScoreChange, onNotesChange, not
       </div>
 
       <div className="p-5 space-y-4">
-        {criteria?.map((criterion) => (
-          <div key={criterion.id} className="space-y-1">
+        {criteria?.map((criterion, index) => (
+          <div key={criterion.id || `criterion-score-${index}`} className="space-y-1">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
                 {criterion.name}
@@ -537,8 +548,8 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
               <th className="px-4 py-3 text-left">Rank</th>
               <th className="px-4 py-3 text-left">Bidder</th>
               <th className="px-4 py-3 text-right">Price</th>
-              {criteria?.map((c) => (
-                <th key={c.id} className="px-4 py-3 text-center">
+              {criteria?.map((c, index) => (
+                <th key={c.id || `criterion-head-${index}`} className="px-4 py-3 text-center">
                   {c.name}
                   <br />
                   <span className="font-normal text-xs text-gray-400">
@@ -571,10 +582,10 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
                     ? `$${Number(bid.total_price).toLocaleString()}`
                     : "—"}
                 </td>
-                {criteria?.map((c) => {
+                {criteria?.map((c, index) => {
                   const s = (allScores[bid.id] || {})[c.id];
                   return (
-                    <td key={c.id} className="px-4 py-3 text-center">
+                    <td key={c.id || `criterion-value-${index}`} className="px-4 py-3 text-center">
                       {s !== undefined
                         ? c.scoring_method === "pass_fail"
                           ? s > 0
@@ -659,11 +670,13 @@ export default function EvaluationPanel() {
   // The evaluation stage's ID — used for loading/saving scores even when on other stages
   const evaluationStageId = useMemo(() => {
     if (!project?.stages) return null;
+    if (activeStage?.stage_type === "evaluation") return activeStage.id;
+    if (selectedStage?.stage_type === "evaluation") return selectedStage.id;
     const evalStage = project.stages
       .filter((s) => s.stage_type === "evaluation")
       .sort((a, b) => a.order - b.order)[0];
     return evalStage?.id || null;
-  }, [project]);
+  }, [project, activeStage, selectedStage]);
 
   // Name of the next stage after the active one
   const nextStageName = useMemo(() => {
@@ -675,12 +688,13 @@ export default function EvaluationPanel() {
 
   // Compute envelope open/sealed status from bid data
   const envelopeStatus = useMemo(() => {
-    const statusMap = {}; // { "technical": { total: N, opened: N } }
+    const statusMap = {}; // { "technical": { total: N, opened: N, evaluated: N } }
     for (const bid of bids) {
       for (const env of bid.envelope_status || []) {
-        if (!statusMap[env.envelope_type]) statusMap[env.envelope_type] = { total: 0, opened: 0 };
+        if (!statusMap[env.envelope_type]) statusMap[env.envelope_type] = { total: 0, opened: 0, evaluated: 0 };
         statusMap[env.envelope_type].total++;
         if (!env.is_sealed) statusMap[env.envelope_type].opened++;
+        if (env.is_evaluated || env.evaluated_at) statusMap[env.envelope_type].evaluated++;
       }
     }
     return statusMap;
@@ -717,6 +731,12 @@ export default function EvaluationPanel() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      try {
+        await biddingAPI.syncProjectLifecycle(projectId);
+      } catch (syncErr) {
+        const status = syncErr?.response?.status;
+        if (status && ![400, 403, 404].includes(status)) throw syncErr;
+      }
       const [projRes, bidsRes] = await Promise.all([
         biddingAPI.getProject(projectId),
         biddingAPI.getBids({ project: projectId, role: "buyer" }),
@@ -751,7 +771,7 @@ export default function EvaluationPanel() {
       const envelopeFilter = selectedStage?.stage_type === "evaluation" ? activeEnvelope : undefined;
       const critRes = await biddingAPI.getStageCriteria(evaluationStageDefinition, envelopeFilter);
       const critData = (critRes?.data || critRes)?.results || critRes?.data || [];
-      setCriteria(critData);
+      setCriteria(uniqueById(critData));
     } catch {
       setCriteria([]);
     }
@@ -908,6 +928,29 @@ export default function EvaluationPanel() {
     }
   };
 
+  const handleFinalizeEnvelope = async () => {
+    if (!activeEnvelope) {
+      toast.error("Select an envelope to mark evaluated");
+      return;
+    }
+    try {
+      setStageActionLoading(true);
+      await saveEvaluations();
+      await biddingAPI.finalizeEnvelope(projectId, activeEnvelope);
+      toast.success(`${formatEnvelopeLabel(activeEnvelope)} envelope marked evaluated`);
+      await fetchData();
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to mark envelope evaluated"
+      );
+    } finally {
+      setStageActionLoading(false);
+    }
+  };
+
   const handleShortlistBids = async () => {
     try {
       setStageActionLoading(true);
@@ -1022,6 +1065,13 @@ export default function EvaluationPanel() {
     && activeEnvelope
     && activeEnvelopeProgress.hasSubmissions
     && !activeEnvelopeProgress.allOpened
+    && !stageActionLoading;
+  const canFinalizeActiveEnvelope =
+    hasEnvelopeWorkflow
+    && selectedStage?.status === "active"
+    && activeEnvelope
+    && activeEnvelopeProgress.allOpened
+    && !activeEnvelopeProgress.allEvaluated
     && !stageActionLoading;
   // Compute frontend-consistent scores for each bid and sort by them
   const sortedBids = useMemo(() => {
@@ -1153,14 +1203,16 @@ export default function EvaluationPanel() {
                       {formatEnvelopeLabel(env.type)} ({env.weight}%)
                       <span
                         className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                          progress.allOpened
+                          progress.allEvaluated
+                            ? activeEnvelope === env.type ? "bg-blue-400/30 text-blue-100" : "bg-blue-100 text-blue-700"
+                            : progress.allOpened
                             ? activeEnvelope === env.type ? "bg-green-400/30 text-green-100" : "bg-green-100 text-green-700"
                             : progress.partial
                               ? activeEnvelope === env.type ? "bg-yellow-400/30 text-yellow-100" : "bg-yellow-100 text-yellow-700"
                               : activeEnvelope === env.type ? "bg-gray-400/30 text-gray-200" : "bg-gray-100 text-gray-500"
                         }`}
                       >
-                        {progress.allOpened ? "Opened" : progress.partial ? "Partial" : progress.hasSubmissions ? "Sealed" : "No bids"}
+                        {progress.allEvaluated ? "Evaluated" : progress.allOpened ? "Opened" : progress.partial ? "Partial" : progress.hasSubmissions ? "Sealed" : "No bids"}
                       </span>
                     </button>
                   );
@@ -1169,24 +1221,34 @@ export default function EvaluationPanel() {
 
               {activeEnvelope && (
                 <div className={`mt-4 rounded-lg border p-3 ${
-                  activeEnvelopeProgress.allOpened
+                  activeEnvelopeProgress.allEvaluated
+                    ? "bg-blue-50 border-blue-200"
+                    : activeEnvelopeProgress.allOpened
                     ? "bg-green-50 border-green-200"
                     : "bg-amber-50 border-amber-200"
                 }`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <p className={`text-sm font-medium ${
-                        activeEnvelopeProgress.allOpened ? "text-green-800" : "text-amber-800"
+                        activeEnvelopeProgress.allEvaluated
+                          ? "text-blue-800"
+                          : activeEnvelopeProgress.allOpened ? "text-green-800" : "text-amber-800"
                       }`}>
-                        {activeEnvelopeProgress.allOpened
+                        {activeEnvelopeProgress.allEvaluated
+                          ? `${formatEnvelopeLabel(activeEnvelope)} envelope is evaluated`
+                          : activeEnvelopeProgress.allOpened
                           ? `${formatEnvelopeLabel(activeEnvelope)} envelope is open`
                           : `${formatEnvelopeLabel(activeEnvelope)} envelope is sealed`}
                       </p>
                       <p className={`text-xs mt-1 ${
-                        activeEnvelopeProgress.allOpened ? "text-green-700" : "text-amber-700"
+                        activeEnvelopeProgress.allEvaluated
+                          ? "text-blue-700"
+                          : activeEnvelopeProgress.allOpened ? "text-green-700" : "text-amber-700"
                       }`}>
-                        {activeEnvelopeProgress.allOpened
-                          ? "Review the opened submission details and score below."
+                        {activeEnvelopeProgress.allEvaluated
+                          ? "This envelope can now unlock the next envelope in sequence."
+                          : activeEnvelopeProgress.allOpened
+                          ? "Save scores for every bid, then mark this envelope evaluated to unlock the next envelope."
                           : activeEnvelopeProgress.hasSubmissions
                             ? "Open this envelope to reveal proposal text and documents. This cannot be undone."
                             : "No submitted bid contains this envelope yet."}
@@ -1202,6 +1264,17 @@ export default function EvaluationPanel() {
                       >
                         <FileText className="w-4 h-4 mr-1.5" />
                         Open {formatEnvelopeLabel(activeEnvelope)}
+                      </Button>
+                    )}
+                    {activeEnvelopeProgress.allOpened && !activeEnvelopeProgress.allEvaluated && (
+                      <Button
+                        variant="outline"
+                        onClick={handleFinalizeEnvelope}
+                        loading={stageActionLoading}
+                        disabled={!canFinalizeActiveEnvelope}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1.5" />
+                        Mark {formatEnvelopeLabel(activeEnvelope)} Evaluated
                       </Button>
                     )}
                   </div>
@@ -1271,7 +1344,8 @@ export default function EvaluationPanel() {
                       <p className="text-xs text-gray-400 mt-2">
                         <strong>Save Scores</strong> stores your evaluations.{" "}
                         <strong>Calculate Rankings</strong> computes weighted scores and shows results.{" "}
-                        <strong>Finalize</strong> saves, calculates, completes this stage and advances the workflow.
+                        <strong>Mark Envelope Evaluated</strong> unlocks the next sealed envelope.{" "}
+                        <strong>Finalize</strong> completes this stage and advances the workflow.
                       </p>
                     </div>
                   )}
