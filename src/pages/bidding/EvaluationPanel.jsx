@@ -26,6 +26,7 @@ import {
   Target,
   PenLine,
   Trophy,
+  Search,
 } from "lucide-react";
 
 const APPROVAL_DECISIONS = [
@@ -40,22 +41,90 @@ const SCORING_METHODS = [
   { value: "ranked", label: "Ranked", desc: "Rank ordering (lower is better)" },
 ];
 
-const EMPTY_CRITERION = { name: "", weight: "", scoring_method: "numeric", max_score: 100, description: "" };
+const EMPTY_CRITERION = {
+  name: "",
+  weight: "",
+  scoring_method: "numeric",
+  max_score: 100,
+  description: "",
+};
 
-function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelopeType }) {
+function formatEnvelopeLabel(value) {
+  return String(value || "envelope").replace(/_/g, " ");
+}
+
+function getEnvelopeConfigType(envelope) {
+  return String(
+    envelope?.type || envelope?.envelope_type || envelope?.key || "",
+  ).trim();
+}
+
+function getEnvelopeConfigLabel(envelope) {
+  return (
+    envelope?.label ||
+    envelope?.name ||
+    formatEnvelopeLabel(getEnvelopeConfigType(envelope))
+  );
+}
+
+function getEnvelopeProgress(envelopeStatus, envelopeType) {
+  const status = envelopeStatus[envelopeType] || {
+    total: 0,
+    opened: 0,
+    evaluated: 0,
+  };
+  return {
+    ...status,
+    hasSubmissions: status.total > 0,
+    allOpened: status.total > 0 && status.opened === status.total,
+    allEvaluated:
+      status.total > 0 &&
+      status.opened === status.total &&
+      status.evaluated === status.total,
+    partial: status.opened > 0 && status.opened < status.total,
+  };
+}
+
+function uniqueById(items = []) {
+  const seen = new Set();
+  return items.filter((item, index) => {
+    const key =
+      item?.id ??
+      `${item?.name || item?.title || "item"}-${item?.envelope_type || ""}-${index}`;
+    if (seen.has(String(key))) return false;
+    seen.add(String(key));
+    return true;
+  });
+}
+
+function CriteriaSetup({
+  stageDefinitionId,
+  criteria,
+  onCriteriaChange,
+  envelopeType,
+}) {
   const [rows, setRows] = useState([{ ...EMPTY_CRITERION }]);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const totalNewWeight = rows.reduce((s, r) => s + (parseFloat(r.weight) || 0), 0);
-  const existingWeight = criteria.reduce((s, c) => s + (parseFloat(c.weight) || 0), 0);
+  const totalNewWeight = rows.reduce(
+    (s, r) => s + (parseFloat(r.weight) || 0),
+    0,
+  );
+  const existingWeight = criteria.reduce(
+    (s, c) => s + (parseFloat(c.weight) || 0),
+    0,
+  );
   const totalWeight = existingWeight + totalNewWeight;
 
   const addRow = () => setRows((prev) => [...prev, { ...EMPTY_CRITERION }]);
   const updateRow = (idx, field, value) =>
-    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)));
-  const removeRow = (idx) => setRows((prev) => prev.filter((_, i) => i !== idx));
+    setRows((prev) =>
+      prev.map((r, i) => (i === idx ? { ...r, [field]: value } : r)),
+    );
+  const removeRow = (idx) =>
+    setRows((prev) => prev.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
     const valid = rows.filter((r) => r.name.trim() && r.weight);
@@ -115,7 +184,9 @@ function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelope
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">
-              {criteria.length > 0 ? "Evaluation Criteria" : "Step 1: Define Evaluation Criteria"}
+              {criteria.length > 0
+                ? "Evaluation Criteria"
+                : "Step 1: Define Evaluation Criteria"}
             </h3>
             <p className="text-xs text-gray-500">
               {criteria.length > 0
@@ -131,19 +202,28 @@ function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelope
         <div>
           <div className="px-5 py-2 bg-gray-50 border-b border-gray-100">
             <p className="text-xs text-gray-400">
-              These criteria are defined on the workflow template for this evaluation stage. You can remove and re-add them as needed.
+              These criteria are defined on the workflow template for this
+              evaluation stage. You can remove and re-add them as needed.
             </p>
           </div>
           <div className="divide-y divide-gray-100">
-            {criteria.map((c) => (
-              <div key={c.id} className="px-5 py-3 flex items-center justify-between group">
+            {criteria.map((c, index) => (
+              <div
+                key={c.id || `criterion-${index}`}
+                className="px-5 py-3 flex items-center justify-between group"
+              >
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600">
                     {c.weight}%
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                    <p className="text-xs text-gray-400 capitalize">{c.scoring_method.replace("_", "/")} · max {c.max_score || 100}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {c.name}
+                    </p>
+                    <p className="text-xs text-gray-400 capitalize">
+                      {c.scoring_method.replace("_", "/")} · max{" "}
+                      {c.max_score || 100}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -171,81 +251,95 @@ function CriteriaSetup({ stageDefinitionId, criteria, onCriteriaChange, envelope
         </div>
       ) : (
         <div className="p-5 bg-gray-50/50 space-y-3 border-t border-gray-100">
-        {criteria.length === 0 && (
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3">
-            <p className="text-sm text-blue-800 font-medium">Quick start</p>
-            <p className="text-xs text-blue-600 mt-0.5">
-              Common criteria: Technical Capability, Price Competitiveness, Experience &amp; References,
-              Project Timeline, Safety Record. Weights must total 100%.
-            </p>
-          </div>
-        )}
+          {criteria.length === 0 && (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3">
+              <p className="text-sm text-blue-800 font-medium">Quick start</p>
+              <p className="text-xs text-blue-600 mt-0.5">
+                Common criteria: Technical Capability, Price Competitiveness,
+                Experience &amp; References, Project Timeline, Safety Record.
+                Weights must total 100%.
+              </p>
+            </div>
+          )}
 
-        {rows.map((row, idx) => (
-          <div key={idx} className="flex gap-2 items-start">
-            <div className="flex-1 min-w-0">
-              <Input
-                placeholder="Criterion name (e.g. Technical Capability)"
-                value={row.name}
-                onChange={(e) => updateRow(idx, "name", e.target.value)}
-              />
+          {rows.map((row, idx) => (
+            <div key={idx} className="flex gap-2 items-start">
+              <div className="flex-1 min-w-0">
+                <Input
+                  placeholder="Criterion name (e.g. Technical Capability)"
+                  value={row.name}
+                  onChange={(e) => updateRow(idx, "name", e.target.value)}
+                />
+              </div>
+              <div className="w-20">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="%"
+                  value={row.weight}
+                  onChange={(e) => updateRow(idx, "weight", e.target.value)}
+                />
+              </div>
+              <div className="w-36">
+                <select
+                  value={row.scoring_method}
+                  onChange={(e) =>
+                    updateRow(idx, "scoring_method", e.target.value)
+                  }
+                  className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+                >
+                  {SCORING_METHODS.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-20">
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="Max"
+                  value={row.max_score}
+                  onChange={(e) => updateRow(idx, "max_score", e.target.value)}
+                />
+              </div>
+              {rows.length > 1 && (
+                <button
+                  onClick={() => removeRow(idx)}
+                  className="text-gray-400 hover:text-red-500 mt-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                </button>
+              )}
             </div>
-            <div className="w-20">
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                placeholder="%"
-                value={row.weight}
-                onChange={(e) => updateRow(idx, "weight", e.target.value)}
-              />
-            </div>
-            <div className="w-36">
-              <select
-                value={row.scoring_method}
-                onChange={(e) => updateRow(idx, "scoring_method", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-2 py-2 text-sm"
+          ))}
+
+          <div className="flex items-center justify-between pt-2">
+            <button
+              onClick={addRow}
+              className="flex items-center gap-1 text-sm text-[#F1C644] hover:text-[#d4a832] font-medium"
+            >
+              <Plus className="w-4 h-4" /> Add another
+            </button>
+            <div className="flex items-center gap-3">
+              <span
+                className={`text-xs font-medium ${totalWeight > 100.5 ? "text-red-500" : totalWeight >= 99.5 ? "text-green-600" : "text-gray-400"}`}
               >
-                {SCORING_METHODS.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-              </select>
+                Total: {totalWeight.toFixed(0)}%
+              </span>
+              <Button
+                onClick={handleSave}
+                loading={saving}
+                disabled={!rows.some((r) => r.name.trim() && r.weight)}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Save Criteria
+              </Button>
             </div>
-            <div className="w-20">
-              <Input
-                type="number"
-                min="1"
-                placeholder="Max"
-                value={row.max_score}
-                onChange={(e) => updateRow(idx, "max_score", e.target.value)}
-              />
-            </div>
-            {rows.length > 1 && (
-              <button onClick={() => removeRow(idx)} className="text-gray-400 hover:text-red-500 mt-2">
-                <XCircle className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        ))}
-
-        <div className="flex items-center justify-between pt-2">
-          <button
-            onClick={addRow}
-            className="flex items-center gap-1 text-sm text-[#F1C644] hover:text-[#d4a832] font-medium"
-          >
-            <Plus className="w-4 h-4" /> Add another
-          </button>
-          <div className="flex items-center gap-3">
-            <span className={`text-xs font-medium ${totalWeight > 100.5 ? "text-red-500" : totalWeight >= 99.5 ? "text-green-600" : "text-gray-400"}`}>
-              Total: {totalWeight.toFixed(0)}%
-            </span>
-            <Button onClick={handleSave} loading={saving} disabled={!rows.some((r) => r.name.trim() && r.weight)}>
-              <Plus className="w-4 h-4 mr-1" />
-              Save Criteria
-            </Button>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
@@ -272,10 +366,10 @@ function StageTabs({ stages, selectedStageId, onSelect }) {
                 isSelected
                   ? "bg-[#F1C644]/10 border border-[#F1C644]/30 font-medium text-gray-900"
                   : isCompleted
-                  ? "bg-green-50/50 text-green-700 hover:bg-green-100 cursor-pointer"
-                  : isActive
-                  ? "bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer"
-                  : "bg-gray-50 text-gray-400 cursor-not-allowed"
+                    ? "bg-green-50/50 text-green-700 hover:bg-green-100 cursor-pointer"
+                    : isActive
+                      ? "bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer"
+                      : "bg-gray-50 text-gray-400 cursor-not-allowed"
               }`}
             >
               <div
@@ -283,8 +377,8 @@ function StageTabs({ stages, selectedStageId, onSelect }) {
                   isCompleted
                     ? "bg-green-500 text-white"
                     : isActive
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-500"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-500"
                 }`}
               >
                 {isCompleted ? <CheckCircle className="w-3 h-3" /> : i + 1}
@@ -369,10 +463,7 @@ function ScoreInput({ criterion, score, onChange }) {
         onChange={(e) =>
           onChange(
             criterion.id,
-            Math.min(
-              parseFloat(e.target.value) || 0,
-              maxScore
-            )
+            Math.min(parseFloat(e.target.value) || 0, maxScore),
           )
         }
         className="w-24"
@@ -388,8 +479,8 @@ function ScoreInput({ criterion, score, onChange }) {
                 numScore / maxScore > 0.7
                   ? "#22c55e"
                   : numScore / maxScore > 0.4
-                  ? "#F1C644"
-                  : "#ef4444",
+                    ? "#F1C644"
+                    : "#ef4444",
             }}
           />
         </div>
@@ -411,7 +502,9 @@ function computeWeightedScore(criteria, scores) {
       if (isNaN(numScore)) continue;
       const normalizedScore =
         c.scoring_method === "pass_fail"
-          ? numScore > 0 ? 100 : 0
+          ? numScore > 0
+            ? 100
+            : 0
           : (numScore / maxScore) * 100;
       weightedSum += normalizedScore * (Number(c.weight) / 100);
       totalWeight += Number(c.weight);
@@ -420,10 +513,17 @@ function computeWeightedScore(criteria, scores) {
   return totalWeight > 0 ? Math.round(weightedSum) : 0;
 }
 
-function BidScoreCard({ bid, criteria, scores, onScoreChange, onNotesChange, notes }) {
+function BidScoreCard({
+  bid,
+  criteria,
+  scores,
+  onScoreChange,
+  onNotesChange,
+  notes,
+}) {
   const totalWeightedScore = useMemo(
     () => computeWeightedScore(criteria, scores),
-    [criteria, scores]
+    [criteria, scores],
   );
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -435,7 +535,10 @@ function BidScoreCard({ bid, criteria, scores, onScoreChange, onNotesChange, not
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">
-                {bid.bidder_company_name || bid.bidder_name || bid.company_name || `Bid #${bid.id}`}
+                {bid.bidder_company_name ||
+                  bid.bidder_name ||
+                  bid.company_name ||
+                  `Bid #${bid.id}`}
               </h3>
               <p className="text-xs text-gray-500">
                 {bid.total_price
@@ -451,8 +554,8 @@ function BidScoreCard({ bid, criteria, scores, onScoreChange, onNotesChange, not
                 totalWeightedScore >= 70
                   ? "text-green-600"
                   : totalWeightedScore >= 40
-                  ? "text-yellow-600"
-                  : "text-red-500"
+                    ? "text-yellow-600"
+                    : "text-red-500"
               }`}
             >
               {totalWeightedScore}
@@ -463,8 +566,11 @@ function BidScoreCard({ bid, criteria, scores, onScoreChange, onNotesChange, not
       </div>
 
       <div className="p-5 space-y-4">
-        {criteria?.map((criterion) => (
-          <div key={criterion.id} className="space-y-1">
+        {criteria?.map((criterion, index) => (
+          <div
+            key={criterion.id || `criterion-score-${index}`}
+            className="space-y-1"
+          >
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">
                 {criterion.name}
@@ -497,6 +603,246 @@ function BidScoreCard({ bid, criteria, scores, onScoreChange, onNotesChange, not
   );
 }
 
+function getBidDisplayName(bid) {
+  return (
+    bid.bidder_company_name ||
+    bid.bidder_name ||
+    bid.company_name ||
+    `Bid #${bid.id}`
+  );
+}
+
+function getBidMeta(bid) {
+  const parts = [];
+  if (bid.total_price)
+    parts.push(`$${Number(bid.total_price).toLocaleString()}`);
+  if (bid.delivery_timeline) parts.push(`${bid.delivery_timeline} days`);
+  if (!parts.length && bid.status)
+    parts.push(String(bid.status).replace(/_/g, " "));
+  return parts.join(" · ");
+}
+
+function EvaluationCriteriaDock({
+  criteria,
+  bids,
+  allScores,
+  selectedCriterionId,
+  onSelectCriterion,
+}) {
+  const totalWeight = criteria.reduce(
+    (sum, c) => sum + (parseFloat(c.weight) || 0),
+    0,
+  );
+  const completedScores = bids.reduce(
+    (count, bid) =>
+      count +
+      criteria.filter((criterion) => {
+        const value = allScores[bid.id]?.[criterion.id];
+        return (
+          value !== undefined && value !== null && String(value).trim() !== ""
+        );
+      }).length,
+    0,
+  );
+  const totalScores = bids.length * criteria.length;
+  const selectedCriterion =
+    criteria.find(
+      (criterion) => String(criterion.id) === String(selectedCriterionId),
+    ) || criteria[0];
+
+  if (!criteria.length) return null;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <ListChecks className="w-5 h-5 text-[#F1C644]" />
+            Evaluation Criteria
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Score one criterion across all companies, then switch criteria
+            without losing your place.
+          </p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 min-w-full sm:min-w-[360px] lg:min-w-[420px]">
+          <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+            <p className="text-lg font-bold text-gray-900">{criteria.length}</p>
+            <p className="text-xs text-gray-500">Criteria</p>
+          </div>
+          <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+            <p
+              className={`text-lg font-bold ${totalWeight > 100 ? "text-red-500" : "text-gray-900"}`}
+            >
+              {totalWeight}%
+            </p>
+            <p className="text-xs text-gray-500">Weight</p>
+          </div>
+          <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+            <p className="text-lg font-bold text-gray-900">
+              {completedScores}/{totalScores || 0}
+            </p>
+            <p className="text-xs text-gray-500">Scores</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+        {criteria.map((criterion, index) => {
+          const selected =
+            String(criterion.id) === String(selectedCriterion?.id);
+          return (
+            <button
+              key={criterion.id || `criterion-pill-${index}`}
+              type="button"
+              onClick={() => onSelectCriterion(criterion.id)}
+              className={`min-w-[190px] rounded-lg border px-3 py-2 text-left transition ${
+                selected
+                  ? "border-[#F1C644] bg-[#F1C644]/10"
+                  : "border-gray-200 bg-gray-50 hover:border-gray-300"
+              }`}
+            >
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {criterion.name}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {criterion.weight}% ·{" "}
+                {criterion.scoring_method === "pass_fail"
+                  ? "Pass/Fail"
+                  : `0-${criterion.max_score || 100}`}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CriterionScoreMatrix({
+  bids,
+  criteria,
+  selectedCriterion,
+  allScores,
+  onScoreChange,
+  onReviewBid,
+  search,
+  onSearchChange,
+  onSave,
+  saving,
+}) {
+  if (!selectedCriterion) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+        <Target className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">
+          Select a criterion to score bids.
+        </p>
+      </div>
+    );
+  }
+
+  const filteredBids = bids.filter((bid) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [getBidDisplayName(bid), getBidMeta(bid), bid.id, bid.status]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(query));
+  });
+  const scoredCount = bids.filter((bid) => {
+    const value = allScores[bid.id]?.[selectedCriterion.id];
+    return value !== undefined && value !== null && String(value).trim() !== "";
+  }).length;
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {selectedCriterion.name}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {scoredCount}/{bids.length} companies scored · Weight{" "}
+              {selectedCriterion.weight}%
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="relative">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Search companies"
+                className="pl-9 sm:w-64"
+              />
+            </div>
+            <Button onClick={onSave} loading={saving}>
+              <CheckCircle className="w-4 h-4 mr-1.5" />
+              Save Scores
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="hidden md:grid grid-cols-[minmax(220px,1.2fr)_minmax(260px,1fr)_110px] gap-4 px-4 py-3 bg-gray-50 text-xs font-semibold text-gray-500 uppercase">
+          <span>Company</span>
+          <span>{selectedCriterion.name}</span>
+          <span className="text-right">Total</span>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {filteredBids.map((bid, index) => {
+            const weighted = computeWeightedScore(
+              criteria,
+              allScores[bid.id] || {},
+            );
+            return (
+              <div
+                key={bid.id || `criterion-bid-${index}`}
+                className="grid gap-3 px-4 py-4 md:grid-cols-[minmax(220px,1.2fr)_minmax(260px,1fr)_110px] md:items-center md:gap-4"
+              >
+                <button
+                  type="button"
+                  onClick={() => onReviewBid(bid)}
+                  className="text-left"
+                >
+                  <p className="font-semibold text-gray-900 truncate">
+                    {getBidDisplayName(bid)}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">
+                    {getBidMeta(bid)}
+                  </p>
+                </button>
+                <ScoreInput
+                  criterion={selectedCriterion}
+                  score={allScores[bid.id]?.[selectedCriterion.id]}
+                  onChange={(criterionId, score) =>
+                    onScoreChange(bid.id, criterionId, score)
+                  }
+                />
+                <div className="flex items-center justify-between md:justify-end gap-3">
+                  <span className="text-xs text-gray-400 md:hidden">
+                    Weighted total
+                  </span>
+                  <span className="text-lg font-bold text-[#B88A00]">
+                    {weighted}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+          {filteredBids.length === 0 && (
+            <div className="px-4 py-10 text-center text-sm text-gray-500">
+              No bids match your search.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ScoreSummaryTable({ bids, criteria, allScores, project }) {
   const hasLC = project && Number(project.local_content_weight) > 0;
   const ranked = useMemo(() => {
@@ -523,8 +869,11 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
               <th className="px-4 py-3 text-left">Rank</th>
               <th className="px-4 py-3 text-left">Bidder</th>
               <th className="px-4 py-3 text-right">Price</th>
-              {criteria?.map((c) => (
-                <th key={c.id} className="px-4 py-3 text-center">
+              {criteria?.map((c, index) => (
+                <th
+                  key={c.id || `criterion-head-${index}`}
+                  className="px-4 py-3 text-center"
+                >
                   {c.name}
                   <br />
                   <span className="font-normal text-xs text-gray-400">
@@ -538,10 +887,7 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {ranked.map((bid, i) => (
-              <tr
-                key={bid.id}
-                className={i === 0 ? "bg-green-50/50" : ""}
-              >
+              <tr key={bid.id} className={i === 0 ? "bg-green-50/50" : ""}>
                 <td className="px-4 py-3">
                   {i === 0 ? (
                     <Award className="w-5 h-5 text-[#F1C644]" />
@@ -550,17 +896,23 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
                   )}
                 </td>
                 <td className="px-4 py-3 font-medium">
-                  {bid.bidder_company_name || bid.bidder_name || bid.company_name || `Bid #${bid.id}`}
+                  {bid.bidder_company_name ||
+                    bid.bidder_name ||
+                    bid.company_name ||
+                    `Bid #${bid.id}`}
                 </td>
                 <td className="px-4 py-3 text-right">
                   {bid.total_price
                     ? `$${Number(bid.total_price).toLocaleString()}`
                     : "—"}
                 </td>
-                {criteria?.map((c) => {
+                {criteria?.map((c, index) => {
                   const s = (allScores[bid.id] || {})[c.id];
                   return (
-                    <td key={c.id} className="px-4 py-3 text-center">
+                    <td
+                      key={c.id || `criterion-value-${index}`}
+                      className="px-4 py-3 text-center"
+                    >
                       {s !== undefined
                         ? c.scoring_method === "pass_fail"
                           ? s > 0
@@ -577,8 +929,8 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
                       bid.weightedScore >= 70
                         ? "text-green-600"
                         : bid.weightedScore >= 40
-                        ? "text-yellow-600"
-                        : "text-red-500"
+                          ? "text-yellow-600"
+                          : "text-red-500"
                     }
                   >
                     {bid.weightedScore}
@@ -586,11 +938,22 @@ function ScoreSummaryTable({ bids, criteria, allScores, project }) {
                 </td>
                 {hasLC && (
                   <td className="px-4 py-3 text-center text-sm">
-                    {bid.local_content_scorecard
-                      ? <span className={bid.local_content_scorecard.ncdmb_compliant ? "text-green-600" : "text-red-500"}>
-                          {Number(bid.local_content_scorecard.total_score).toFixed(1)}%
-                        </span>
-                      : "—"}
+                    {bid.local_content_scorecard ? (
+                      <span
+                        className={
+                          bid.local_content_scorecard.ncdmb_compliant
+                            ? "text-green-600"
+                            : "text-red-500"
+                        }
+                      >
+                        {Number(
+                          bid.local_content_scorecard.total_score,
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                 )}
               </tr>
@@ -613,29 +976,38 @@ export default function EvaluationPanel() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [stageActionLoading, setStageActionLoading] = useState(false);
-  const [view, setView] = useState("evaluate");
+  const [view, setView] = useState("criterion");
+  const [selectedCriterionId, setSelectedCriterionId] = useState(null);
+  const [bidSearch, setBidSearch] = useState("");
   const [activeEnvelope, setActiveEnvelope] = useState("");
   const [approvals, setApprovals] = useState([]);
-  const [approvalForm, setApprovalForm] = useState({ decision: "approved", comments: "" });
+  const [approvalForm, setApprovalForm] = useState({
+    decision: "approved",
+    comments: "",
+  });
   const [currentUserId, setCurrentUserId] = useState(null);
   const [selectedStageId, setSelectedStageId] = useState(null);
-  const [awardForm, setAwardForm] = useState({ bidId: null, justification: "" });
+  const [awardForm, setAwardForm] = useState({
+    bidIds: [],
+    justification: "",
+  });
 
   const activeStage = useMemo(
     () => project?.stages?.find((stage) => stage.status === "active") || null,
-    [project]
+    [project],
   );
 
   const selectedStage = useMemo(
     () => project?.stages?.find((s) => s.id === selectedStageId) || activeStage,
-    [project, selectedStageId, activeStage]
+    [project, selectedStageId, activeStage],
   );
 
   // Find the evaluation stage's definition for criteria (even when active stage is shortlist/award/etc.)
   const evaluationStageDefinition = useMemo(() => {
     if (!project?.stages) return null;
     const active = project.stages.find((s) => s.status === "active");
-    if (active?.stage_type === "evaluation" && active.stage_definition) return active.stage_definition;
+    if (active?.stage_type === "evaluation" && active.stage_definition)
+      return active.stage_definition;
     const evalStage = project.stages
       .filter((s) => s.stage_type === "evaluation" && s.stage_definition)
       .sort((a, b) => a.order - b.order)[0];
@@ -645,11 +1017,13 @@ export default function EvaluationPanel() {
   // The evaluation stage's ID — used for loading/saving scores even when on other stages
   const evaluationStageId = useMemo(() => {
     if (!project?.stages) return null;
+    if (activeStage?.stage_type === "evaluation") return activeStage.id;
+    if (selectedStage?.stage_type === "evaluation") return selectedStage.id;
     const evalStage = project.stages
       .filter((s) => s.stage_type === "evaluation")
       .sort((a, b) => a.order - b.order)[0];
     return evalStage?.id || null;
-  }, [project]);
+  }, [project, activeStage, selectedStage]);
 
   // Name of the next stage after the active one
   const nextStageName = useMemo(() => {
@@ -661,12 +1035,15 @@ export default function EvaluationPanel() {
 
   // Compute envelope open/sealed status from bid data
   const envelopeStatus = useMemo(() => {
-    const statusMap = {}; // { "technical": { total: N, opened: N } }
+    const statusMap = {}; // { "technical": { total: N, opened: N, evaluated: N } }
     for (const bid of bids) {
       for (const env of bid.envelope_status || []) {
-        if (!statusMap[env.envelope_type]) statusMap[env.envelope_type] = { total: 0, opened: 0 };
+        if (!statusMap[env.envelope_type])
+          statusMap[env.envelope_type] = { total: 0, opened: 0, evaluated: 0 };
         statusMap[env.envelope_type].total++;
         if (!env.is_sealed) statusMap[env.envelope_type].opened++;
+        if (env.is_evaluated || env.evaluated_at)
+          statusMap[env.envelope_type].evaluated++;
       }
     }
     return statusMap;
@@ -703,17 +1080,30 @@ export default function EvaluationPanel() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      try {
+        await biddingAPI.syncProjectLifecycle(projectId);
+      } catch (syncErr) {
+        const status = syncErr?.response?.status;
+        if (status && ![400, 403, 404].includes(status)) throw syncErr;
+      }
       const [projRes, bidsRes] = await Promise.all([
         biddingAPI.getProject(projectId),
         biddingAPI.getBids({ project: projectId, role: "buyer" }),
       ]);
 
       const projData = projRes?.data || projRes;
-      const bidsData = (bidsRes?.data || bidsRes)?.results || bidsRes?.data || [];
+      const bidsData =
+        (bidsRes?.data || bidsRes)?.results || bidsRes?.data || [];
       setProject(projData);
       setBids(bidsData);
       if (projData?.envelope_configuration?.length) {
-        setActiveEnvelope((current) => current || projData.envelope_configuration[0]?.type || "");
+        setActiveEnvelope((current) => {
+          const currentIsConfigured = projData.envelope_configuration.some(
+            (env) => getEnvelopeConfigType(env) === current,
+          );
+          if (current && currentIsConfigured) return current;
+          return getEnvelopeConfigType(projData.envelope_configuration[0]) || "";
+        });
       } else {
         setActiveEnvelope("");
       }
@@ -734,31 +1124,51 @@ export default function EvaluationPanel() {
       return;
     }
     try {
-      const envelopeFilter = selectedStage?.stage_type === "evaluation" ? activeEnvelope : undefined;
-      const critRes = await biddingAPI.getStageCriteria(evaluationStageDefinition, envelopeFilter);
-      const critData = (critRes?.data || critRes)?.results || critRes?.data || [];
-      setCriteria(critData);
+      const envelopeFilter =
+        selectedStage?.stage_type === "evaluation" ? activeEnvelope : undefined;
+      const critRes = await biddingAPI.getStageCriteria(
+        evaluationStageDefinition,
+        envelopeFilter,
+      );
+      const critData =
+        (critRes?.data || critRes)?.results || critRes?.data || [];
+      const visibleCriteria =
+        envelopeFilter
+          ? critData.filter(
+              (criterion) => criterion.envelope_type === envelopeFilter,
+            )
+          : critData;
+      setCriteria(uniqueById(visibleCriteria));
     } catch {
       setCriteria([]);
     }
-  }, [evaluationStageDefinition, activeEnvelope, selectedStage?.stage_type]);
+  }, [
+    evaluationStageDefinition,
+    activeEnvelope,
+    selectedStage?.stage_type,
+  ]);
 
   useEffect(() => {
     loadCriteria();
   }, [loadCriteria]);
 
-  const loadExistingEvaluations = async (currentBids, stageId, envelopeType) => {
+  const loadExistingEvaluations = async (
+    currentBids,
+    stageId,
+    envelopeType,
+  ) => {
     const existingScores = {};
     const existingNotes = {};
 
     for (const bid of currentBids) {
       try {
         const evalRes = await biddingAPI.getBidEvaluations(bid.id);
-        const evals = (evalRes?.data || evalRes)?.results || evalRes?.data || [];
+        const evals =
+          (evalRes?.data || evalRes)?.results || evalRes?.data || [];
         const relevantEvaluation = evals.find(
           (evaluation) =>
-            evaluation.stage === stageId
-            && (evaluation.envelope_type || "") === (envelopeType || "")
+            evaluation.stage === stageId &&
+            (evaluation.envelope_type || "") === (envelopeType || ""),
         );
         existingScores[bid.id] = {};
         const rawScores = relevantEvaluation?.scores || {};
@@ -808,9 +1218,13 @@ export default function EvaluationPanel() {
     // Check eval stage is still active (scores can only be saved when active)
     const evalStage = project?.stages?.find((s) => s.id === evalStageId);
     if (evalStage?.status !== "active") {
-      throw new Error("Evaluation stage is no longer active. Scores are locked.");
+      throw new Error(
+        "Evaluation stage is no longer active. Scores are locked.",
+      );
     }
-    const hasScores = bids.some((bid) => Object.keys(allScores[bid.id] || {}).length > 0);
+    const hasScores = bids.some(
+      (bid) => Object.keys(allScores[bid.id] || {}).length > 0,
+    );
     if (!hasScores) return true;
 
     for (const bid of bids) {
@@ -845,10 +1259,10 @@ export default function EvaluationPanel() {
     try {
       await saveEvaluations();
       const scoredCount = bids.filter(
-        (bid) => Object.keys(allScores[bid.id] || {}).length > 0
+        (bid) => Object.keys(allScores[bid.id] || {}).length > 0,
       ).length;
       toast.success(
-        `Scores saved for ${scoredCount} bid${scoredCount !== 1 ? "s" : ""}. Click "Calculate Rankings" to compute final results.`
+        `Scores saved for ${scoredCount} bid${scoredCount !== 1 ? "s" : ""}. Click "Calculate Rankings" to compute final results.`,
       );
       await fetchData();
     } catch (err) {
@@ -871,7 +1285,11 @@ export default function EvaluationPanel() {
       setView("summary");
       await fetchData();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || err?.message || "Failed to calculate scores");
+      toast.error(
+        err?.response?.data?.detail ||
+          err?.message ||
+          "Failed to calculate scores",
+      );
     } finally {
       setStageActionLoading(false);
     }
@@ -888,7 +1306,36 @@ export default function EvaluationPanel() {
       toast.success(`${activeEnvelope} envelope opened`);
       await fetchData();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || err?.response?.data?.error || "Failed to open envelope");
+      toast.error(
+        err?.response?.data?.detail ||
+          err?.response?.data?.error ||
+          "Failed to open envelope",
+      );
+    } finally {
+      setStageActionLoading(false);
+    }
+  };
+
+  const handleFinalizeEnvelope = async () => {
+    if (!activeEnvelope) {
+      toast.error("Select an envelope to mark evaluated");
+      return;
+    }
+    try {
+      setStageActionLoading(true);
+      await saveEvaluations();
+      await biddingAPI.finalizeEnvelope(projectId, activeEnvelope);
+      toast.success(
+        `${formatEnvelopeLabel(activeEnvelope)} envelope marked evaluated`,
+      );
+      await fetchData();
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.detail ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Failed to mark envelope evaluated",
+      );
     } finally {
       setStageActionLoading(false);
     }
@@ -899,7 +1346,9 @@ export default function EvaluationPanel() {
       setStageActionLoading(true);
       const res = await biddingAPI.shortlistBids(projectId, {});
       const count = res?.data?.shortlisted_count || res?.shortlisted_count || 0;
-      toast.success(`${count} bid${count !== 1 ? "s" : ""} shortlisted based on evaluation scores`);
+      toast.success(
+        `${count} bid${count !== 1 ? "s" : ""} shortlisted based on evaluation scores`,
+      );
       await fetchData();
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Failed to shortlist bids");
@@ -913,11 +1362,15 @@ export default function EvaluationPanel() {
     try {
       setStageActionLoading(true);
       await biddingAPI.advanceStage(projectId);
-      toast.success(next ? `Advanced to "${next}"` : "Workflow advanced to the next stage");
+      toast.success(
+        next ? `Advanced to "${next}"` : "Workflow advanced to the next stage",
+      );
       setSelectedStageId(null); // Auto-select new active stage
       await fetchData();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || "Failed to advance workflow stage");
+      toast.error(
+        err?.response?.data?.detail || "Failed to advance workflow stage",
+      );
     } finally {
       setStageActionLoading(false);
     }
@@ -935,11 +1388,19 @@ export default function EvaluationPanel() {
       }
       await biddingAPI.advanceStage(projectId);
       const next = nextStageName;
-      toast.success(next ? `Evaluation complete! Advanced to "${next}"` : "Evaluation complete!");
+      toast.success(
+        next
+          ? `Evaluation complete! Advanced to "${next}"`
+          : "Evaluation complete!",
+      );
       setSelectedStageId(null);
       await fetchData();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || err?.message || "Failed to finalize evaluation");
+      toast.error(
+        err?.response?.data?.detail ||
+          err?.message ||
+          "Failed to finalize evaluation",
+      );
     } finally {
       setStageActionLoading(false);
     }
@@ -954,8 +1415,8 @@ export default function EvaluationPanel() {
       setStageActionLoading(true);
       const existingApproval = approvals.find(
         (approval) =>
-          String(approval.stage) === String(activeStage.id)
-          && String(approval.approver) === String(currentUserId)
+          String(approval.stage) === String(activeStage.id) &&
+          String(approval.approver) === String(currentUserId),
       );
       if (existingApproval) {
         await biddingAPI.submitApproval(existingApproval.id, approvalForm);
@@ -968,25 +1429,27 @@ export default function EvaluationPanel() {
       toast.success("Approval decision recorded");
       await Promise.all([fetchApprovals(activeStage.id), fetchData()]);
     } catch (err) {
-      toast.error(err?.response?.data?.detail || "Failed to submit approval decision");
+      toast.error(
+        err?.response?.data?.detail || "Failed to submit approval decision",
+      );
     } finally {
       setStageActionLoading(false);
     }
   };
 
   const handleAwardBid = async () => {
-    if (!awardForm.bidId) {
-      toast.error("Select a bid to award");
+    if (!awardForm.bidIds.length) {
+      toast.error("Select at least one bid to award");
       return;
     }
     try {
       setStageActionLoading(true);
       await biddingAPI.awardProject(projectId, {
-        bid_id: awardForm.bidId,
+        bid_ids: awardForm.bidIds,
         justification: awardForm.justification,
       });
       toast.success("Project awarded successfully!");
-      setAwardForm({ bidId: null, justification: "" });
+      setAwardForm({ bidIds: [], justification: "" });
       await fetchData();
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Failed to award project");
@@ -996,6 +1459,47 @@ export default function EvaluationPanel() {
   };
 
   const isViewingActiveStage = selectedStage?.id === activeStage?.id;
+  const sortedEnvelopeConfig = useMemo(
+    () =>
+      [...(project?.envelope_configuration || [])].sort(
+        (a, b) => (a.order || 0) - (b.order || 0),
+      ),
+    [project?.envelope_configuration],
+  );
+  const configuredEnvelopeOptions = useMemo(
+    () =>
+      sortedEnvelopeConfig
+        .map((env) => {
+          const key = getEnvelopeConfigType(env);
+          if (!key) return null;
+          return {
+            key,
+            label: getEnvelopeConfigLabel(env),
+            weight: env?.weight,
+          };
+        })
+        .filter(Boolean),
+    [sortedEnvelopeConfig],
+  );
+  const hasEnvelopeWorkflow = configuredEnvelopeOptions.length > 0;
+  const activeEnvelopeProgress = getEnvelopeProgress(
+    envelopeStatus,
+    activeEnvelope,
+  );
+  const canOpenActiveEnvelope =
+    hasEnvelopeWorkflow &&
+    selectedStage?.status === "active" &&
+    activeEnvelope &&
+    activeEnvelopeProgress.hasSubmissions &&
+    !activeEnvelopeProgress.allOpened &&
+    !stageActionLoading;
+  const canFinalizeActiveEnvelope =
+    hasEnvelopeWorkflow &&
+    selectedStage?.status === "active" &&
+    activeEnvelope &&
+    activeEnvelopeProgress.allOpened &&
+    !activeEnvelopeProgress.allEvaluated &&
+    !stageActionLoading;
   // Compute frontend-consistent scores for each bid and sort by them
   const sortedBids = useMemo(() => {
     return [...bids]
@@ -1005,6 +1509,63 @@ export default function EvaluationPanel() {
       }))
       .sort((a, b) => b.computedScore - a.computedScore);
   }, [bids, criteria, allScores]);
+  const selectedCriterion = useMemo(
+    () =>
+      criteria.find(
+        (criterion) => String(criterion.id) === String(selectedCriterionId),
+      ) || criteria[0],
+    [criteria, selectedCriterionId],
+  );
+  const completedScoreCells = useMemo(
+    () =>
+      bids.reduce(
+        (count, bid) =>
+          count +
+          criteria.filter((criterion) => {
+            const value = allScores[bid.id]?.[criterion.id];
+            return (
+              value !== undefined &&
+              value !== null &&
+              String(value).trim() !== ""
+            );
+          }).length,
+        0,
+      ),
+    [bids, criteria, allScores],
+  );
+  const fullyScoredBidCount = useMemo(
+    () =>
+      bids.filter(
+        (bid) =>
+          criteria.length > 0 &&
+          criteria.every((criterion) => {
+            const value = allScores[bid.id]?.[criterion.id];
+            return (
+              value !== undefined &&
+              value !== null &&
+              String(value).trim() !== ""
+            );
+          }),
+      ).length,
+    [bids, criteria, allScores],
+  );
+  const totalScoreCells = bids.length * criteria.length;
+
+  useEffect(() => {
+    if (!criteria.length) {
+      setSelectedCriterionId(null);
+      return;
+    }
+    setSelectedCriterionId((current) => {
+      if (
+        current &&
+        criteria.some((criterion) => String(criterion.id) === String(current))
+      ) {
+        return current;
+      }
+      return criteria[0]?.id || null;
+    });
+  }, [criteria]);
 
   if (loading) {
     return (
@@ -1030,7 +1591,7 @@ export default function EvaluationPanel() {
         Back to Project
       </button>
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Evaluation Panel</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -1039,19 +1600,33 @@ export default function EvaluationPanel() {
           </p>
         </div>
         {selectedStage?.stage_type === "evaluation" && criteria.length > 0 && (
-          <div className="flex bg-gray-100 rounded-lg p-0.5">
+          <div className="flex flex-wrap bg-gray-100 rounded-lg p-0.5 gap-0.5">
             <button
-              onClick={() => setView("evaluate")}
+              onClick={() => setView("criterion")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                view === "evaluate" ? "bg-white shadow text-gray-900" : "text-gray-500"
+                view === "criterion"
+                  ? "bg-white shadow text-gray-900"
+                  : "text-gray-500"
               }`}
             >
-              Evaluate
+              By Criterion
+            </button>
+            <button
+              onClick={() => setView("company")}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                view === "company"
+                  ? "bg-white shadow text-gray-900"
+                  : "text-gray-500"
+              }`}
+            >
+              By Company
             </button>
             <button
               onClick={() => setView("summary")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                view === "summary" ? "bg-white shadow text-gray-900" : "text-gray-500"
+                view === "summary"
+                  ? "bg-white shadow text-gray-900"
+                  : "text-gray-500"
               }`}
             >
               Rankings
@@ -1085,79 +1660,221 @@ export default function EvaluationPanel() {
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-green-800">Evaluation stage completed</p>
-                <p className="text-xs text-green-600">Scores are locked. View the results below.</p>
+                <p className="text-sm font-medium text-green-800">
+                  Evaluation stage completed
+                </p>
+                <p className="text-xs text-green-600">
+                  Scores are locked. View the results below.
+                </p>
               </div>
             </div>
           )}
 
           {criteria.length > 0 && (
-            <>
-              {/* Envelope Tabs */}
-              {project?.envelope_configuration?.length > 0 && (
-                <div className="flex gap-2 mb-4">
-                  {project.envelope_configuration
-                    .sort((a, b) => a.order - b.order)
-                    .map((env) => {
-                      const es = envelopeStatus[env.type];
-                      const allOpened = es && es.total > 0 && es.opened === es.total;
-                      const isOpened = es && es.opened > 0;
-                      return (
-                        <button
-                          key={env.type}
-                          onClick={() => setActiveEnvelope(env.type)}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition capitalize flex items-center gap-2 ${
-                            activeEnvelope === env.type
-                              ? "bg-gray-900 text-white border-gray-900"
-                              : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-                          }`}
+            <EvaluationCriteriaDock
+              criteria={criteria}
+              bids={bids}
+              allScores={allScores}
+              selectedCriterionId={selectedCriterion?.id}
+              onSelectCriterion={(criterionId) => {
+                setSelectedCriterionId(criterionId);
+                setView("criterion");
+              }}
+            />
+          )}
+
+          {hasEnvelopeWorkflow && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-[#F1C644]" />
+                    Envelope Workflow
+                  </h2>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select an envelope, open it for evaluation, then review and
+                    score the matching criteria.
+                  </p>
+                </div>
+                {activeEnvelope && (
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {activeEnvelopeProgress.opened}/
+                    {activeEnvelopeProgress.total} opened
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {configuredEnvelopeOptions.map((env) => {
+                  const progress = getEnvelopeProgress(
+                    envelopeStatus,
+                    env.key,
+                  );
+                  return (
+                    <button
+                      key={env.key}
+                      onClick={() => setActiveEnvelope(env.key)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium border transition capitalize flex items-center gap-2 ${
+                        activeEnvelope === env.key
+                          ? "bg-gray-900 text-white border-gray-900"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                      }`}
+                    >
+                      {env.label}
+                      {env.weight !== undefined && env.weight !== null
+                        ? ` (${env.weight}%)`
+                        : ""}
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                          progress.allEvaluated
+                            ? activeEnvelope === env.key
+                              ? "bg-blue-400/30 text-blue-100"
+                              : "bg-blue-100 text-blue-700"
+                            : progress.allOpened
+                              ? activeEnvelope === env.key
+                                ? "bg-green-400/30 text-green-100"
+                                : "bg-green-100 text-green-700"
+                              : progress.partial
+                                ? activeEnvelope === env.key
+                                  ? "bg-yellow-400/30 text-yellow-100"
+                                  : "bg-yellow-100 text-yellow-700"
+                                : activeEnvelope === env.key
+                                  ? "bg-gray-400/30 text-gray-200"
+                                  : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {progress.allEvaluated
+                          ? "Evaluated"
+                          : progress.allOpened
+                            ? "Opened"
+                            : progress.partial
+                              ? "Partial"
+                              : progress.hasSubmissions
+                                ? "Sealed"
+                                : "No bids"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {activeEnvelope && (
+                <div
+                  className={`mt-4 rounded-lg border p-3 ${
+                    activeEnvelopeProgress.allEvaluated
+                      ? "bg-blue-50 border-blue-200"
+                      : activeEnvelopeProgress.allOpened
+                        ? "bg-green-50 border-green-200"
+                        : "bg-amber-50 border-amber-200"
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <p
+                        className={`text-sm font-medium ${
+                          activeEnvelopeProgress.allEvaluated
+                            ? "text-blue-800"
+                            : activeEnvelopeProgress.allOpened
+                              ? "text-green-800"
+                              : "text-amber-800"
+                        }`}
+                      >
+                        {activeEnvelopeProgress.allEvaluated
+                          ? `${formatEnvelopeLabel(activeEnvelope)} envelope is evaluated`
+                          : activeEnvelopeProgress.allOpened
+                            ? `${formatEnvelopeLabel(activeEnvelope)} envelope is open`
+                            : `${formatEnvelopeLabel(activeEnvelope)} envelope is sealed`}
+                      </p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          activeEnvelopeProgress.allEvaluated
+                            ? "text-blue-700"
+                            : activeEnvelopeProgress.allOpened
+                              ? "text-green-700"
+                              : "text-amber-700"
+                        }`}
+                      >
+                        {activeEnvelopeProgress.allEvaluated
+                          ? "This envelope can now unlock the next envelope in sequence."
+                          : activeEnvelopeProgress.allOpened
+                            ? "Save scores for every bid, then mark this envelope evaluated to unlock the next envelope."
+                            : activeEnvelopeProgress.hasSubmissions
+                              ? "Open this envelope to reveal proposal text and documents. This cannot be undone."
+                              : "No submitted bid contains this envelope yet."}
+                      </p>
+                    </div>
+
+                    {!activeEnvelopeProgress.allOpened && (
+                      <Button
+                        variant="outline"
+                        onClick={handleOpenEnvelope}
+                        loading={stageActionLoading}
+                        disabled={!canOpenActiveEnvelope}
+                      >
+                        <FileText className="w-4 h-4 mr-1.5" />
+                        Open {formatEnvelopeLabel(activeEnvelope)}
+                      </Button>
+                    )}
+                    {activeEnvelopeProgress.allOpened &&
+                      !activeEnvelopeProgress.allEvaluated && (
+                        <Button
+                          variant="outline"
+                          onClick={handleFinalizeEnvelope}
+                          loading={stageActionLoading}
+                          disabled={!canFinalizeActiveEnvelope}
                         >
-                          {env.type} ({env.weight}%)
-                          {allOpened ? (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                              activeEnvelope === env.type ? "bg-green-400/30 text-green-200" : "bg-green-100 text-green-700"
-                            }`}>Opened</span>
-                          ) : isOpened ? (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                              activeEnvelope === env.type ? "bg-yellow-400/30 text-yellow-200" : "bg-yellow-100 text-yellow-700"
-                            }`}>Partial</span>
-                          ) : (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                              activeEnvelope === env.type ? "bg-gray-400/30 text-gray-300" : "bg-gray-100 text-gray-500"
-                            }`}>Sealed</span>
-                          )}
-                        </button>
-                      );
-                    })}
+                          <CheckCircle className="w-4 h-4 mr-1.5" />
+                          Mark {formatEnvelopeLabel(activeEnvelope)} Evaluated
+                        </Button>
+                      )}
+                  </div>
                 </div>
               )}
+            </div>
+          )}
 
-              {/* Open envelope button when needed */}
-              {project?.envelope_configuration?.length > 0 && selectedStage.status === "active" && (() => {
-                const es = envelopeStatus[activeEnvelope];
-                const allOpened = es && es.total > 0 && es.opened === es.total;
-                if (allOpened) return null;
-                return (
-                  <div className="mb-4">
-                    <Button variant="outline" onClick={handleOpenEnvelope} loading={stageActionLoading}>
-                      <FileText className="w-4 h-4 mr-1.5" />
-                      Open {activeEnvelope || "selected"} Envelope
-                      {es && es.total > 0 && (
-                        <span className="ml-1 text-xs text-gray-400">({es.opened}/{es.total})</span>
-                      )}
-                    </Button>
-                  </div>
-                );
-              })()}
-
+          {criteria.length > 0 && (
+            <>
               {/* Evaluate vs Rankings view */}
-              {view === "evaluate" ? (
+              {hasEnvelopeWorkflow && !activeEnvelopeProgress.allOpened ? (
+                <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
+                  <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-sm font-semibold text-gray-800 capitalize">
+                    {formatEnvelopeLabel(activeEnvelope)} envelope is sealed
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
+                    Open this envelope before reviewing proposal text,
+                    downloading envelope documents, or saving scores.
+                  </p>
+                </div>
+              ) : view === "criterion" ? (
+                <CriterionScoreMatrix
+                  bids={bids}
+                  criteria={criteria}
+                  selectedCriterion={selectedCriterion}
+                  allScores={allScores}
+                  onScoreChange={handleScoreChange}
+                  onReviewBid={(bid) =>
+                    navigate(`/bidding/projects/${projectId}/bids/${bid.id}`)
+                  }
+                  search={bidSearch}
+                  onSearchChange={setBidSearch}
+                  onSave={handleSubmitEvaluations}
+                  saving={submitting}
+                />
+              ) : view === "company" ? (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <PenLine className="w-5 h-5 text-[#F1C644]" />
-                    <h2 className="text-lg font-semibold text-gray-900">Score Bids</h2>
-                    <span className="text-xs text-gray-400 ml-auto">
-                      {bids.length} bid{bids.length !== 1 ? "s" : ""} to evaluate
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <PenLine className="w-5 h-5 text-[#F1C644]" />
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        Score by Company
+                      </h2>
+                    </div>
+                    <span className="text-xs text-gray-500 sm:ml-auto">
+                      {fullyScoredBidCount}/{bids.length} bids complete ·{" "}
+                      {completedScoreCells}/{totalScoreCells || 0} scores
+                      entered
                     </span>
                   </div>
 
@@ -1174,35 +1891,6 @@ export default function EvaluationPanel() {
                       onNotesChange={handleNotesChange}
                     />
                   ))}
-
-                  {/* Action buttons — only when evaluation stage is active */}
-                  {selectedStage.status === "active" && (
-                    <div className="bg-white rounded-xl border border-gray-200 p-4">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <Button variant="outline" onClick={handleSubmitEvaluations} loading={submitting}>
-                          <CheckCircle className="w-4 h-4 mr-1.5" />
-                          Save Scores
-                        </Button>
-                        <Button variant="outline" onClick={handleCalculateScores} loading={stageActionLoading}>
-                          <BarChart3 className="w-4 h-4 mr-1.5" />
-                          Calculate Rankings
-                        </Button>
-                        <div className="ml-auto">
-                          <Button onClick={handleFinalizeEvaluation} loading={stageActionLoading}>
-                            <Send className="w-4 h-4 mr-1.5" />
-                            {nextStageName
-                              ? `Finalize & Advance to ${nextStageName}`
-                              : "Finalize Evaluation"}
-                          </Button>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2">
-                        <strong>Save Scores</strong> stores your evaluations.{" "}
-                        <strong>Calculate Rankings</strong> computes weighted scores and shows results.{" "}
-                        <strong>Finalize</strong> saves, calculates, completes this stage and advances the workflow.
-                      </p>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <ScoreSummaryTable
@@ -1212,16 +1900,60 @@ export default function EvaluationPanel() {
                   project={project}
                 />
               )}
+
+              {/* Action buttons — only when evaluation stage is active */}
+              {selectedStage.status === "active" && view !== "summary" && (
+                <div className="bg-white rounded-xl border border-gray-200 p-4 mt-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                    <Button
+                      variant="outline"
+                      onClick={handleSubmitEvaluations}
+                      loading={submitting}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1.5" />
+                      Save Scores
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleCalculateScores}
+                      loading={stageActionLoading}
+                    >
+                      <BarChart3 className="w-4 h-4 mr-1.5" />
+                      Calculate Rankings
+                    </Button>
+                    <div className="sm:ml-auto">
+                      <Button
+                        onClick={handleFinalizeEvaluation}
+                        loading={stageActionLoading}
+                      >
+                        <Send className="w-4 h-4 mr-1.5" />
+                        {nextStageName
+                          ? `Finalize & Advance to ${nextStageName}`
+                          : "Finalize Evaluation"}
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    <strong>By Criterion</strong> is best for many companies.{" "}
+                    <strong>By Company</strong> is best for a deep review of one
+                    supplier. <strong>Calculate Rankings</strong> computes
+                    weighted scores after saving.
+                  </p>
+                </div>
+              )}
             </>
           )}
 
           {criteria.length === 0 && selectedStage.status === "active" && (
             <div className="bg-gray-50 rounded-xl border border-dashed border-gray-300 p-8 text-center">
               <Target className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-              <h3 className="font-semibold text-gray-700 mb-1">Define criteria to start evaluating</h3>
+              <h3 className="font-semibold text-gray-700 mb-1">
+                Define criteria to start evaluating
+              </h3>
               <p className="text-sm text-gray-400 max-w-md mx-auto">
-                Use the form above to add evaluation criteria (e.g. Technical Capability 40%, Price 30%, Experience 30%).
-                Once saved, scoring inputs will appear for each of the {bids.length} bids.
+                Use the form above to add evaluation criteria (e.g. Technical
+                Capability 40%, Price 30%, Experience 30%). Once saved, scoring
+                inputs will appear for each of the {bids.length} bids.
               </p>
             </div>
           )}
@@ -1237,7 +1969,9 @@ export default function EvaluationPanel() {
                 <ListChecks className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Shortlist Bids</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Shortlist Bids
+                </h2>
                 <p className="text-sm text-gray-500">
                   {selectedStage.status === "completed"
                     ? "Shortlisting is complete. See the results below."
@@ -1249,9 +1983,11 @@ export default function EvaluationPanel() {
             {selectedStage.status === "active" && (
               <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
                 <p className="text-sm text-blue-800">
-                  <strong>How shortlisting works:</strong> Clicking &quot;Shortlist Bids&quot; automatically
-                  selects the top-scoring bids based on their evaluation rankings. Bids below the minimum
-                  score threshold are disqualified, and only the top bids advance.
+                  <strong>How shortlisting works:</strong> Clicking
+                  &quot;Shortlist Bids&quot; automatically selects the
+                  top-scoring bids based on their evaluation rankings. Bids
+                  below the minimum score threshold are disqualified, and only
+                  the top bids advance.
                 </p>
               </div>
             )}
@@ -1259,17 +1995,24 @@ export default function EvaluationPanel() {
             {/* Bid ranking overview */}
             <div className="divide-y divide-gray-100">
               {sortedBids.map((bid, i) => (
-                <div key={bid.id} className="flex items-center justify-between py-3">
+                <div
+                  key={bid.id}
+                  className="flex items-center justify-between py-3"
+                >
                   <div className="flex items-center gap-3">
                     <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                       {bid.rank || i + 1}
                     </span>
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        {bid.bidder_company_name || bid.bidder_name || `Bid #${bid.id}`}
+                        {bid.bidder_company_name ||
+                          bid.bidder_name ||
+                          `Bid #${bid.id}`}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {bid.total_price ? `$${Number(bid.total_price).toLocaleString()}` : "No price"}
+                        {bid.total_price
+                          ? `$${Number(bid.total_price).toLocaleString()}`
+                          : "No price"}
                       </p>
                     </div>
                   </div>
@@ -1281,9 +2024,10 @@ export default function EvaluationPanel() {
                       className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${
                         bid.status === "shortlisted"
                           ? "bg-green-100 text-green-700"
-                          : bid.status === "rejected" || bid.status === "disqualified"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-600"
+                          : bid.status === "rejected" ||
+                              bid.status === "disqualified"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-gray-100 text-gray-600"
                       }`}
                     >
                       {bid.status.replace("_", " ")}
@@ -1296,27 +2040,42 @@ export default function EvaluationPanel() {
 
           {/* Evaluation scores reference */}
           {criteria.length > 0 && (
-            <ScoreSummaryTable bids={bids} criteria={criteria} allScores={allScores} project={project} />
+            <ScoreSummaryTable
+              bids={bids}
+              criteria={criteria}
+              allScores={allScores}
+              project={project}
+            />
           )}
 
           {/* Actions */}
           {selectedStage.status === "active" && isViewingActiveStage && (
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex flex-wrap items-center gap-3">
-                <Button variant="outline" onClick={handleShortlistBids} loading={stageActionLoading}>
+                <Button
+                  variant="outline"
+                  onClick={handleShortlistBids}
+                  loading={stageActionLoading}
+                >
                   <Award className="w-4 h-4 mr-1.5" />
                   Shortlist Bids
                 </Button>
                 <div className="ml-auto">
-                  <Button onClick={handleAdvanceStage} loading={stageActionLoading}>
+                  <Button
+                    onClick={handleAdvanceStage}
+                    loading={stageActionLoading}
+                  >
                     <ChevronRight className="w-4 h-4 mr-1.5" />
-                    {nextStageName ? `Advance to ${nextStageName}` : "Advance Stage"}
+                    {nextStageName
+                      ? `Advance to ${nextStageName}`
+                      : "Advance Stage"}
                   </Button>
                 </div>
               </div>
               <p className="text-xs text-gray-400 mt-2">
-                <strong>Shortlist</strong> automatically selects top bids by score.{" "}
-                <strong>Advance</strong> moves to the next workflow stage.
+                <strong>Shortlist</strong> automatically selects top bids by
+                score. <strong>Advance</strong> moves to the next workflow
+                stage.
               </p>
             </div>
           )}
@@ -1328,7 +2087,9 @@ export default function EvaluationPanel() {
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Approval Gate</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Approval Gate
+              </h2>
               <p className="text-sm text-gray-500 mt-1">
                 Record the approval decision for this workflow stage.
               </p>
@@ -1337,7 +2098,10 @@ export default function EvaluationPanel() {
             {approvals.length > 0 && (
               <div className="space-y-2">
                 {approvals.map((approval) => (
-                  <div key={approval.id} className="rounded-lg border border-gray-200 px-3 py-2 text-sm">
+                  <div
+                    key={approval.id}
+                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                  >
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-medium text-gray-900">
                         {approval.approver_name || "Approver"}
@@ -1360,7 +2124,10 @@ export default function EvaluationPanel() {
                   <Select
                     value={approvalForm.decision}
                     onChange={(e) =>
-                      setApprovalForm((prev) => ({ ...prev, decision: e.target.value }))
+                      setApprovalForm((prev) => ({
+                        ...prev,
+                        decision: e.target.value,
+                      }))
                     }
                   >
                     {APPROVAL_DECISIONS.map((option) => (
@@ -1373,19 +2140,31 @@ export default function EvaluationPanel() {
                     rows={3}
                     value={approvalForm.comments}
                     onChange={(e) =>
-                      setApprovalForm((prev) => ({ ...prev, comments: e.target.value }))
+                      setApprovalForm((prev) => ({
+                        ...prev,
+                        comments: e.target.value,
+                      }))
                     }
                     placeholder="Approval comments"
                   />
                 </div>
                 <div className="flex items-center gap-3 justify-end">
-                  <Button onClick={handleApprovalSubmit} loading={stageActionLoading}>
+                  <Button
+                    onClick={handleApprovalSubmit}
+                    loading={stageActionLoading}
+                  >
                     <CheckCircle className="w-4 h-4 mr-1.5" />
                     Submit Approval Decision
                   </Button>
-                  <Button variant="outline" onClick={handleAdvanceStage} loading={stageActionLoading}>
+                  <Button
+                    variant="outline"
+                    onClick={handleAdvanceStage}
+                    loading={stageActionLoading}
+                  >
                     <ChevronRight className="w-4 h-4 mr-1.5" />
-                    {nextStageName ? `Advance to ${nextStageName}` : "Advance Stage"}
+                    {nextStageName
+                      ? `Advance to ${nextStageName}`
+                      : "Advance Stage"}
                   </Button>
                 </div>
               </>
@@ -1394,7 +2173,12 @@ export default function EvaluationPanel() {
 
           {/* Evaluation scores for reference */}
           {criteria.length > 0 && (
-            <ScoreSummaryTable bids={bids} criteria={criteria} allScores={allScores} project={project} />
+            <ScoreSummaryTable
+              bids={bids}
+              criteria={criteria}
+              allScores={allScores}
+              project={project}
+            />
           )}
         </div>
       )}
@@ -1408,11 +2192,17 @@ export default function EvaluationPanel() {
                 <Trophy className="w-5 h-5 text-[#F1C644]" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Award Decision</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Award Decision
+                </h2>
                 <p className="text-sm text-gray-500">
                   {project?.status === "awarded"
-                    ? `Awarded to ${project.awarded_to_name || "winner"}`
-                    : "Select the winning bid to award this project."}
+                    ? `Awarded to ${
+                        project.awarded_company_names?.length
+                          ? project.awarded_company_names.join(", ")
+                          : project.awarded_to_name || "winner"
+                      }`
+                    : "Select one or more winning bids to award this project."}
                 </p>
               </div>
             </div>
@@ -1422,11 +2212,16 @@ export default function EvaluationPanel() {
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-green-600" />
                   <p className="text-sm font-medium text-green-800">
-                    Project awarded to {project.awarded_to_name}
+                    Project awarded to{" "}
+                    {project.awarded_company_names?.length
+                      ? project.awarded_company_names.join(", ")
+                      : project.awarded_to_name}
                   </p>
                 </div>
                 {project.award_justification && (
-                  <p className="text-sm text-green-700 mt-2">{project.award_justification}</p>
+                  <p className="text-sm text-green-700 mt-2">
+                    {project.award_justification}
+                  </p>
                 )}
               </div>
             ) : (
@@ -1434,17 +2229,24 @@ export default function EvaluationPanel() {
                 <div className="divide-y divide-gray-100 mb-4">
                   {sortedBids
                     .filter((b) =>
-                      ["shortlisted", "under_review", "submitted"].includes(b.status)
+                      ["shortlisted", "under_review", "submitted"].includes(
+                        b.status,
+                      ),
                     )
                     .map((bid, i) => (
-                      <div key={bid.id} className="flex items-center justify-between py-3">
+                      <div
+                        key={bid.id}
+                        className="flex items-center justify-between py-3"
+                      >
                         <div className="flex items-center gap-3">
                           <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
                             {bid.rank || i + 1}
                           </span>
                           <div>
                             <p className="text-sm font-medium text-gray-900">
-                              {bid.bidder_company_name || bid.bidder_name || `Bid #${bid.id}`}
+                              {bid.bidder_company_name ||
+                                bid.bidder_name ||
+                                `Bid #${bid.id}`}
                             </p>
                             <p className="text-xs text-gray-400">
                               {bid.total_price
@@ -1455,27 +2257,35 @@ export default function EvaluationPanel() {
                             </p>
                           </div>
                         </div>
-                        {selectedStage.status === "active" && isViewingActiveStage && (
-                          <button
-                            onClick={() =>
-                              setAwardForm((prev) => ({ ...prev, bidId: bid.id }))
-                            }
-                            className={`text-sm px-3 py-1.5 rounded-lg border transition ${
-                              awardForm.bidId === bid.id
-                                ? "bg-[#F1C644] text-white border-[#F1C644]"
-                                : "border-gray-200 text-gray-600 hover:border-[#F1C644] hover:text-[#F1C644]"
-                            }`}
-                          >
-                            {awardForm.bidId === bid.id ? "Selected" : "Select"}
-                          </button>
-                        )}
+                        {selectedStage.status === "active" &&
+                          isViewingActiveStage && (
+                            <button
+                              onClick={() =>
+                                setAwardForm((prev) => ({
+                                  ...prev,
+                                  bidIds: prev.bidIds.includes(bid.id)
+                                    ? prev.bidIds.filter((value) => value !== bid.id)
+                                    : [...prev.bidIds, bid.id],
+                                }))
+                              }
+                              className={`text-sm px-3 py-1.5 rounded-lg border transition ${
+                                awardForm.bidIds.includes(bid.id)
+                                  ? "bg-[#F1C644] text-white border-[#F1C644]"
+                                  : "border-gray-200 text-gray-600 hover:border-[#F1C644] hover:text-[#F1C644]"
+                              }`}
+                            >
+                              {awardForm.bidIds.includes(bid.id)
+                                ? "Selected"
+                                : "Select"}
+                            </button>
+                          )}
                       </div>
                     ))}
                 </div>
 
                 {selectedStage.status === "active" &&
                   isViewingActiveStage &&
-                  awardForm.bidId && (
+                  awardForm.bidIds.length > 0 && (
                     <div className="space-y-3 border-t border-gray-100 pt-4">
                       <Textarea
                         value={awardForm.justification}
@@ -1489,11 +2299,17 @@ export default function EvaluationPanel() {
                         rows={3}
                       />
                       <div className="flex justify-end">
-                        <Button onClick={handleAwardBid} loading={stageActionLoading}>
+                        <Button
+                          onClick={handleAwardBid}
+                          loading={stageActionLoading}
+                        >
                           <Award className="w-4 h-4 mr-1.5" />
-                          Award Project to{" "}
-                          {bids.find((b) => b.id === awardForm.bidId)?.bidder_company_name ||
-                            "Selected Bidder"}
+                          {awardForm.bidIds.length > 1
+                            ? `Award ${awardForm.bidIds.length} Companies`
+                            : `Award Project to ${
+                                bids.find((b) => b.id === awardForm.bidIds[0])
+                                  ?.bidder_company_name || "Selected Bidder"
+                              }`}
                         </Button>
                       </div>
                     </div>
@@ -1517,7 +2333,7 @@ export default function EvaluationPanel() {
       {/* ============ OTHER STAGES (submission, negotiation, etc.) ============ */}
       {selectedStage &&
         !["evaluation", "shortlist", "approval", "award"].includes(
-          selectedStage.stage_type
+          selectedStage.stage_type,
         ) && (
           <div className="space-y-6">
             <div className="bg-white rounded-xl border border-gray-200 p-5">
@@ -1525,14 +2341,20 @@ export default function EvaluationPanel() {
                 {selectedStage.name}
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                Stage type: {selectedStage.stage_type} · Status: {selectedStage.status}
+                Stage type: {selectedStage.stage_type} · Status:{" "}
+                {selectedStage.status}
               </p>
 
               {selectedStage.status === "active" && isViewingActiveStage && (
                 <div className="mt-4">
-                  <Button onClick={handleAdvanceStage} loading={stageActionLoading}>
+                  <Button
+                    onClick={handleAdvanceStage}
+                    loading={stageActionLoading}
+                  >
                     <ChevronRight className="w-4 h-4 mr-1.5" />
-                    {nextStageName ? `Advance to ${nextStageName}` : "Advance Stage"}
+                    {nextStageName
+                      ? `Advance to ${nextStageName}`
+                      : "Advance Stage"}
                   </Button>
                 </div>
               )}

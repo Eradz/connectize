@@ -263,6 +263,7 @@ const webRoutes = {
   biddingCreate: "/bidding/create",
   biddingEdit: "/bidding/projects/:id/edit",
   biddingDetail: "/bidding/projects/:id",
+  biddingBidDetail: "/bidding/projects/:id/bids/:bidId",
   biddingSubmit: "/bidding/projects/:id/submit",
   biddingEvaluate: "/bidding/projects/:id/evaluate",
   biddingTemplates: "/bidding/templates",

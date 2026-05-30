@@ -86,6 +86,8 @@ const STATUS_LABELS = {
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700", icon: XCircle },
 };
 
+const TERMINAL_PROJECT_STATUSES = new Set(["awarded", "completed", "cancelled"]);
+
 const ALL_TABS = [
   { key: "overview", label: "Overview", icon: FileText },
   { key: "bids", label: "Bids", icon: Gavel },
@@ -149,6 +151,14 @@ function isUserManagedBid(bid, project, eligibleCompanyIds) {
   return !project?.is_owner && eligibleCompanyIds.size === 0;
 }
 
+function isAddendumAcknowledgedForCompanies(addendum, companyIds) {
+  if (!companyIds?.size) return false;
+  return (addendum?.acknowledgments || []).some((ack) => {
+    const companyId = getCompanyId(ack?.company || ack?.company_id);
+    return companyId && companyIds.has(companyId);
+  });
+}
+
 function getSubmitBidUrl(projectId, { bidId, bidderCompanyId } = {}) {
   const url = webRoutes.biddingSubmit.replace(":id", projectId);
   const params = new URLSearchParams();
@@ -156,6 +166,12 @@ function getSubmitBidUrl(projectId, { bidId, bidderCompanyId } = {}) {
   if (!bidId && bidderCompanyId) params.set("company", bidderCompanyId);
   const query = params.toString();
   return query ? `${url}?${query}` : url;
+}
+
+function getBidDetailUrl(projectId, bidId) {
+  return webRoutes.biddingBidDetail
+    .replace(":id", projectId)
+    .replace(":bidId", bidId);
 }
 
 function StatusBadge({ status }) {
@@ -172,6 +188,23 @@ function formatLabel(value) {
   return String(value)
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function normalizeDocumentMatchText(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function isSealedEnvelopeDocument(doc, bids = []) {
+  if (!doc?.bid) return false;
+  const bid = bids.find((candidate) => String(candidate.id) === String(doc.bid));
+  const sealedEnvelopeNames = (bid?.envelope_status || [])
+    .filter((env) => env?.is_sealed)
+    .map((env) => normalizeDocumentMatchText(`${env.envelope_type} envelope`));
+
+  if (sealedEnvelopeNames.length === 0) return false;
+
+  const title = normalizeDocumentMatchText(doc.title || doc.file?.split("/").pop());
+  return sealedEnvelopeNames.some((name) => title.startsWith(name));
 }
 
 function formatVisibility(value) {
@@ -492,7 +525,7 @@ function BidsTab({ project, bids, onRefresh, eligibleBidCompanies = [] }) {
             <div
               key={bid.id}
               className="bg-white rounded-xl border border-gray-200 p-4 hover:border-[#F1C644]/40 transition cursor-pointer"
-              onClick={() => navigate(webRoutes.biddingDetail.replace(":id", project.id))}
+              onClick={() => navigate(getBidDetailUrl(project.id, bid.id))}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -553,6 +586,14 @@ function BidsTab({ project, bids, onRefresh, eligibleBidCompanies = [] }) {
                   {bid.rank && (
                     <span className="text-xs text-gray-500 ml-2">Rank #{bid.rank}</span>
                   )}
+                </div>
+              )}
+              {bid.bidder_performance && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  Credibility {Number(bid.bidder_performance.credibility_score || 0).toFixed(1)}
+                  <span className="capitalize">· {bid.bidder_performance.performance_tier}</span>
+                  <span>· {bid.bidder_performance.total_reviews || 0} reviews</span>
                 </div>
               )}
               {bid.status === "draft" && isUserManagedBid(bid, project, eligibleCompanyIds) && (
@@ -1432,9 +1473,13 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete, documentTy
     }
   };
 
-  const visibleDocuments = project.is_owner
+  const accessibleDocuments = project.is_owner
     ? documents
     : documents.filter((doc) => !doc.bid);
+  const visibleDocuments = accessibleDocuments.filter(
+    (doc) => !project.is_owner || !isSealedEnvelopeDocument(doc, bids)
+  );
+  const hiddenSealedDocumentCount = accessibleDocuments.length - visibleDocuments.length;
 
   return (
     <div className="space-y-5">
@@ -1545,6 +1590,20 @@ function DocumentsTab({ project, documents, bids, onUpload, onDelete, documentTy
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {project.is_owner && hiddenSealedDocumentCount > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+          <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-amber-800">
+              {hiddenSealedDocumentCount} sealed envelope document{hiddenSealedDocumentCount === 1 ? "" : "s"} hidden
+            </p>
+            <p className="text-xs text-amber-700 mt-1">
+              Open the matching envelope from the Evaluation Panel before downloading or reviewing those documents.
+            </p>
           </div>
         </div>
       )}
@@ -1666,7 +1725,7 @@ const ADDENDUM_TYPE_LABELS = {
   document_update: "Document Update",
 };
 
-function AddendaTab({ project, addenda, onRefresh }) {
+function AddendaTab({ project, addenda, onRefresh, eligibleBidCompanies = [] }) {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -1699,13 +1758,19 @@ function AddendaTab({ project, addenda, onRefresh }) {
 
   const handleAcknowledge = async (addendumNumber) => {
     try {
-      await biddingAPI.acknowledgeAddendum(project.id, addendumNumber);
+      const payload =
+        eligibleBidCompanies.length === 1
+          ? { company: getCompanyId(eligibleBidCompanies[0]) }
+          : {};
+      await biddingAPI.acknowledgeAddendum(project.id, addendumNumber, payload);
       toast.success(`Addendum #${addendumNumber} acknowledged`);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Failed to acknowledge");
     }
   };
+
+  const eligibleCompanyIds = new Set(eligibleBidCompanies.map(getCompanyId));
 
   return (
     <div className="space-y-4">
@@ -1774,42 +1839,53 @@ function AddendaTab({ project, addenda, onRefresh }) {
         </div>
       ) : (
         <div className="space-y-3">
-          {addenda.map((a) => (
-            <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      #{a.addendum_number}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded capitalize">
-                      {ADDENDUM_TYPE_LABELS[a.addendum_type] || a.addendum_type}
-                    </span>
-                  </div>
-                  <h4 className="font-medium text-gray-900 mt-1">{a.title}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{a.description}</p>
-                  {a.new_deadline && (
-                    <p className="text-xs text-orange-600 mt-1">
-                      New deadline: {new Date(a.new_deadline).toLocaleString()}
+          {addenda.map((a) => {
+            const acknowledged = isAddendumAcknowledgedForCompanies(a, eligibleCompanyIds);
+            return (
+              <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                        #{a.addendum_number}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded capitalize">
+                        {ADDENDUM_TYPE_LABELS[a.addendum_type] || a.addendum_type}
+                      </span>
+                    </div>
+                    <h4 className="font-medium text-gray-900 mt-1">{a.title}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{a.description}</p>
+                    {a.new_deadline && (
+                      <p className="text-xs text-orange-600 mt-1">
+                        New deadline: {new Date(a.new_deadline).toLocaleString()}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-2">
+                      Issued by {a.issued_by_name} on {new Date(a.issued_at).toLocaleString()}
+                      {" · "}{a.acknowledged_count} acknowledgment(s)
                     </p>
+                  </div>
+                  {!project.is_owner && (
+                    acknowledged ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 text-green-700 text-sm font-medium border border-green-100">
+                        <CheckCircle className="w-4 h-4" />
+                        Acknowledged
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAcknowledge(a.addendum_number)}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Acknowledge
+                      </Button>
+                    )
                   )}
-                  <p className="text-xs text-gray-400 mt-2">
-                    Issued by {a.issued_by_name} on {new Date(a.issued_at).toLocaleString()}
-                    {" · "}{a.acknowledged_count} acknowledgment(s)
-                  </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleAcknowledge(a.addendum_number)}
-                  disabled={project.is_owner}
-                >
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Acknowledge
-                </Button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -2139,7 +2215,8 @@ function BiddingProjectDetailInner() {
   const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
-  const [selectedBidForAward, setSelectedBidForAward] = useState(null);
+  const [selectedBidsForAward, setSelectedBidsForAward] = useState([]);
+  const [showRateSupplierModal, setShowRateSupplierModal] = useState(false);
   const [error, setError] = useState(null);
   const [addenda, setAddenda] = useState([]);
   const [invitations, setInvitations] = useState([]);
@@ -2180,10 +2257,36 @@ function BiddingProjectDetailInner() {
     }
   };
 
-  const fetchStages = async () => {
+  const fetchStages = async (currentProject = project) => {
     try {
-      const res = await biddingAPI.getProjectStages(id);
-      setStages(unwrapApiList(res));
+      const canSync =
+        currentProject?.is_owner &&
+        currentProject?.status &&
+        currentProject.status !== "draft" &&
+        !TERMINAL_PROJECT_STATUSES.has(currentProject.status);
+
+      if (canSync) {
+        try {
+          const synced = await biddingAPI.syncProjectLifecycle(id);
+          const payload = unwrapApiPayload(synced);
+          setStages(Array.isArray(payload?.stages) ? payload.stages : unwrapApiList(synced));
+          return;
+        } catch (syncErr) {
+          const status = syncErr?.response?.status;
+          if (status && ![400, 403, 404].includes(status)) throw syncErr;
+        }
+      }
+
+      try {
+        const lifecycle = await biddingAPI.getProjectLifecycle(id);
+        const payload = unwrapApiPayload(lifecycle);
+        setStages(Array.isArray(payload?.stages) ? payload.stages : unwrapApiList(lifecycle));
+      } catch (lifecycleErr) {
+        const status = lifecycleErr?.response?.status;
+        if (status && ![404, 405].includes(status)) throw lifecycleErr;
+        const res = await biddingAPI.getProjectStages(id);
+        setStages(unwrapApiList(res));
+      }
     } catch {
       setStages([]);
     }
@@ -2277,6 +2380,7 @@ function BiddingProjectDetailInner() {
     }
 
     fetchBids(project.is_owner ? "buyer" : undefined);
+    fetchStages(project);
 
     if (project.is_owner) {
       fetchInvitations();
@@ -2309,6 +2413,19 @@ function BiddingProjectDetailInner() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const calculateProjectScores = async (projectId) => {
+    try {
+      await biddingAPI.syncProjectLifecycle(projectId);
+    } catch (syncErr) {
+      const status = syncErr?.response?.status;
+      if (status && ![400, 403, 404].includes(status)) throw syncErr;
+    }
+    if (project?.envelope_configuration?.length > 0) {
+      return biddingAPI.calculateMultiEnvelopeScores(projectId);
+    }
+    return biddingAPI.calculateScores(projectId);
   };
 
   const handleAskClarification = async (data) => {
@@ -2352,17 +2469,17 @@ function BiddingProjectDetailInner() {
   };
 
   const handleAward = async () => {
-    if (!selectedBidForAward) return;
+    if (selectedBidsForAward.length === 0) return;
     try {
       setActionLoading(true);
-      await biddingAPI.awardProject(id, { bid_id: selectedBidForAward });
+      await biddingAPI.awardProject(id, { bid_ids: selectedBidsForAward });
       toast.success("Project awarded!");
       setShowAwardModal(false);
-      fetchProject();
-      fetchBids("buyer");
+      setSelectedBidsForAward([]);
+      await Promise.all([fetchProject(), fetchBids("buyer")]);
       if (project?.is_owner) fetchActivity();
     } catch (err) {
-      toast.error(err?.error || "Award failed");
+      toast.error(err?.response?.data?.detail || err?.error || "Award failed");
     } finally {
       setActionLoading(false);
     }
@@ -2410,6 +2527,17 @@ function BiddingProjectDetailInner() {
     return companyId && (!projectCompanyId || companyId !== projectCompanyId);
   });
   const eligibleCompanyIds = new Set(eligibleBidCompanies.map(getCompanyId));
+  const activeWorkflowStage = stages.find((stage) => stage.status === "active");
+  const canCalculateScores =
+    ["under_evaluation", "evaluation"].includes(project.status) &&
+    (!stages.length ||
+      activeWorkflowStage?.stage_type === "evaluation" ||
+      stages.some(
+        (stage) => stage.stage_type === "evaluation" && stage.status === "completed"
+      ));
+  const canAwardProject =
+    ["under_evaluation", "evaluation"].includes(project.status) &&
+    activeWorkflowStage?.stage_type === "award";
 
   const ownerActions = project.is_owner
     ? [
@@ -2438,12 +2566,17 @@ function BiddingProjectDetailInner() {
           action: () => performAction(biddingAPI.startEvaluation),
           variant: "primary",
         },
-        project.status === "under_evaluation" && {
+        ["under_evaluation", "evaluation"].includes(project.status) && {
+          label: "Evaluate Bids",
+          action: () => navigate(webRoutes.biddingEvaluate.replace(":id", project.id)),
+          variant: "primary",
+        },
+        canCalculateScores && {
           label: "Calculate Scores",
-          action: () => performAction(biddingAPI.calculateScores),
+          action: () => performAction(calculateProjectScores),
           variant: "outline",
         },
-        project.status === "under_evaluation" && {
+        canAwardProject && {
           label: "Award",
           action: () => setShowAwardModal(true),
           variant: "warning",
@@ -2556,7 +2689,7 @@ function BiddingProjectDetailInner() {
             );
           })()}
           {/* Owner: Evaluate link */}
-          {project.is_owner && project.status === "under_evaluation" && (
+          {project.is_owner && ["under_evaluation", "evaluation"].includes(project.status) && (
             <Button
               variant="outline"
               size="sm"
@@ -2568,18 +2701,29 @@ function BiddingProjectDetailInner() {
               Evaluate Bids
             </Button>
           )}
-          {/* Owner: Rate Supplier for awarded/completed projects */}
-          {project.is_owner && ["awarded", "completed"].includes(project.status) && project.awarded_to && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(webRoutes.supplierScorecard.replace(":companyId", project.awarded_to).replace(":projectId", project.id))
-              }
-            >
-              <Star className="w-4 h-4 mr-1" />
-              Rate Supplier
-            </Button>
+          {/* Owner: Rate awarded suppliers for awarded/completed projects */}
+          {project.is_owner && ["awarded", "completed"].includes(project.status) && (
+            ((project.awards?.length || 0) > 0 || project.awarded_to) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const awards = project.awards?.length
+                    ? project.awards
+                    : [{ company: project.awarded_to, company_name: project.awarded_to_name }];
+                  if (awards.length === 1) {
+                    navigate(webRoutes.supplierScorecard
+                      .replace(":companyId", awards[0].company)
+                      .replace(":projectId", project.id));
+                  } else {
+                    setShowRateSupplierModal(true);
+                  }
+                }}
+              >
+                <Star className="w-4 h-4 mr-1" />
+                {(project.awards?.length || 0) > 1 ? "Rate Suppliers" : "Rate Supplier"}
+              </Button>
+            )
           )}
         </div>
       </div>
@@ -2612,7 +2756,12 @@ function BiddingProjectDetailInner() {
       {/* Tab Content */}
       {activeTab === "overview" && <OverviewTab project={project} />}
       {activeTab === "bids" && (
-        <BidsTab project={project} bids={bids} onRefresh={() => fetchBids(project?.is_owner ? "buyer" : undefined)} />
+        <BidsTab
+          project={project}
+          bids={bids}
+          onRefresh={() => fetchBids(project?.is_owner ? "buyer" : undefined)}
+          eligibleBidCompanies={eligibleBidCompanies}
+        />
       )}
       {activeTab === 'stages' && <StagesTab project={project} stages={stages} bidCount={bids.length} />}
       {activeTab === "invitations" && project.is_owner && (
@@ -2638,6 +2787,7 @@ function BiddingProjectDetailInner() {
           project={project}
           addenda={addenda}
           onRefresh={fetchAddenda}
+          eligibleBidCompanies={eligibleBidCompanies}
         />
       )}
       {activeTab === "clarifications" && (
@@ -2653,35 +2803,80 @@ function BiddingProjectDetailInner() {
         <ComplianceReviewTab project={project} />
       )}
 
+      {/* Rate Suppliers Modal */}
+      {showRateSupplierModal && (
+        <Modal
+          isOpen={showRateSupplierModal}
+          onClose={() => setShowRateSupplierModal(false)}
+          title="Rate Suppliers"
+        >
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Select the awarded supplier you want to review.
+            </p>
+            {(project.awards?.length
+              ? project.awards
+              : [{ company: project.awarded_to, company_name: project.awarded_to_name }]
+            ).map((award) => (
+              <button
+                key={award.id || award.company}
+                type="button"
+                onClick={() => {
+                  setShowRateSupplierModal(false);
+                  navigate(webRoutes.supplierScorecard
+                    .replace(":companyId", award.company)
+                    .replace(":projectId", project.id));
+                }}
+                className="w-full rounded-lg border border-gray-200 p-3 text-left hover:border-[#F1C644] hover:bg-[#F1C644]/5 transition"
+              >
+                <p className="font-medium text-gray-900">{award.company_name || "Awarded supplier"}</p>
+                <p className="text-xs text-gray-500">
+                  Credibility: {Number(award.supplier_performance?.credibility_score || 0).toFixed(1)}
+                </p>
+              </button>
+            ))}
+          </div>
+        </Modal>
+      )}
+
       {/* Award Modal */}
       {showAwardModal && (
         <Modal
           isOpen={showAwardModal}
-          onClose={() => setShowAwardModal(false)}
+          onClose={() => {
+            setShowAwardModal(false);
+            setSelectedBidsForAward([]);
+          }}
           title="Award Project"
         >
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Select a bid to award this project to:
+              Select one or more bids to award this project to:
             </p>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {bids
-                .filter((b) => ["submitted", "shortlisted"].includes(b.status))
+                .filter((b) => ["submitted", "under_review", "shortlisted"].includes(b.status))
                 .map((bid) => (
                   <label
                     key={bid.id}
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
-                      selectedBidForAward === bid.id
+                      selectedBidsForAward.includes(bid.id)
                         ? "border-[#F1C644] bg-[#F1C644]/5"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <input
-                      type="radio"
+                      type="checkbox"
                       name="awardBid"
                       value={bid.id}
-                      checked={selectedBidForAward === bid.id}
-                      onChange={() => setSelectedBidForAward(bid.id)}
+                      checked={selectedBidsForAward.includes(bid.id)}
+                      onChange={() =>
+                        setSelectedBidsForAward((current) =>
+                          current.includes(bid.id)
+                            ? current.filter((value) => value !== bid.id)
+                            : [...current, bid.id],
+                        )
+                      }
                       className="text-[#F1C644]"
                     />
                     <div className="flex-1">
@@ -2695,17 +2890,25 @@ function BiddingProjectDetailInner() {
                 ))}
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowAwardModal(false)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAwardModal(false);
+                  setSelectedBidsForAward([]);
+                }}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={handleAward}
                 loading={actionLoading}
-                disabled={!selectedBidForAward}
+                disabled={selectedBidsForAward.length === 0}
               >
                 <Award className="w-4 h-4 mr-1" />
-                Award
+                {selectedBidsForAward.length > 1
+                  ? `Award ${selectedBidsForAward.length} Companies`
+                  : "Award"}
               </Button>
             </div>
           </div>

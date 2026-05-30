@@ -28,11 +28,18 @@ export default function SupplierScorecard() {
 
   const [metrics, setMetrics] = useState([]);
   const [review, setReview] = useState(null);
+  const [project, setProject] = useState(null);
   const [performanceScore, setPerformanceScore] = useState(null);
   const [scores, setScores] = useState({});
   const [overallScore, setOverallScore] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const getId = (value) => {
+    if (!value) return value;
+    if (typeof value === "object") return value.id || value.company || value.company_id;
+    return value;
+  };
 
   useEffect(() => {
     fetchData();
@@ -41,12 +48,14 @@ export default function SupplierScorecard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [metricsRes, reviewsRes, scoreRes] = await Promise.all([
-        biddingAPI.getPerformanceMetrics(),
+      const [projectRes, metricsRes, reviewsRes, scoreRes] = await Promise.all([
+        biddingAPI.getProject(projectId),
+        biddingAPI.getPerformanceMetrics({ project: projectId }),
         biddingAPI.getPerformanceReviews({ project: projectId, company: companyId }),
         biddingAPI.getSupplierPerformanceScore(companyId),
       ]);
 
+      setProject(projectRes.data?.data || projectRes.data);
       setMetrics(metricsRes.data?.results || metricsRes.data || []);
       setPerformanceScore(scoreRes.data);
 
@@ -55,6 +64,10 @@ export default function SupplierScorecard() {
         setReview(existingReview);
         setScores(existingReview.scores || {});
         setOverallScore(existingReview.overall_score?.toString() || "");
+      } else {
+        setReview(null);
+        setScores({});
+        setOverallScore("");
       }
     } catch (err) {
       console.error("Failed to load scorecard data:", err);
@@ -79,6 +92,7 @@ export default function SupplierScorecard() {
       const payload = {
         project: projectId,
         supplier_company: companyId,
+        reviewer_company: getId(project?.company),
         scores,
         overall_score: overallScore || null,
         is_draft: !finalize,
@@ -93,7 +107,13 @@ export default function SupplierScorecard() {
       toast.success(finalize ? "Review submitted successfully" : "Draft saved");
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Failed to save review");
+      const data = err.response?.data;
+      const firstEntry = data && typeof data === "object" ? Object.entries(data)[0] : null;
+      const htmlError = typeof data === "string" && (data.trim().startsWith("<!DOCTYPE") || data.includes("<html"));
+      const message = htmlError
+        ? "The server failed while saving this supplier rating. Please try again."
+        : data?.detail || (firstEntry ? `${firstEntry[0]}: ${firstEntry[1]}` : null);
+      toast.error(message || "Failed to save review");
     } finally {
       setSaving(false);
     }
@@ -109,6 +129,14 @@ export default function SupplierScorecard() {
     );
   }
 
+  const supplierName = performanceScore?.company_name || review?.supplier_name || "Selected supplier";
+  const projectTitle = project?.title || review?.project_title || "Selected project";
+  const reviewerCompanyName = project?.company_name || review?.reviewer_company_name || "project company";
+  const isSubmitted = review?.is_draft === false;
+  const submittedDate = review?.submitted_at || review?.review_date;
+  const formattedSubmittedDate = submittedDate ? new Date(submittedDate).toLocaleDateString() : null;
+  const reviewerName = review?.reviewer_name || "a project representative";
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
@@ -122,9 +150,37 @@ export default function SupplierScorecard() {
         <div>
           <HeadingText>Supplier Performance Scorecard</HeadingText>
           <p className="text-sm text-gray-500 mt-1">
-            Rate supplier performance for this project
+            Rate the awarded supplier for this project
           </p>
         </div>
+      </div>
+
+      <div className="bg-white border rounded-xl p-6">
+        <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">
+          Supplier being rated
+        </p>
+        <h2 className="text-2xl font-bold text-gray-950">{supplierName}</h2>
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+          <div>
+            <span className="text-gray-400">Project:</span>{" "}
+            <span className="font-medium text-gray-900">{projectTitle}</span>
+          </div>
+          <div>
+            <span className="text-gray-400">Rating as:</span>{" "}
+            <span className="font-medium text-gray-900">{reviewerCompanyName}</span>
+          </div>
+        </div>
+        {review ? (
+          <div className={`mt-4 rounded-lg px-3 py-2 text-sm ${isSubmitted ? "bg-green-50 text-green-800" : "bg-yellow-50 text-yellow-800"}`}>
+            {isSubmitted
+              ? `These are saved scores from a submitted review by ${reviewerName}${formattedSubmittedDate ? ` on ${formattedSubmittedDate}` : ""}.`
+              : "A draft review already exists for this supplier. You can continue editing it."}
+          </div>
+        ) : (
+          <div className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
+            No saved review found. Start a new supplier rating below.
+          </div>
+        )}
       </div>
 
       {/* Performance Summary Card */}
@@ -132,12 +188,15 @@ export default function SupplierScorecard() {
         <div className="bg-white border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
-            Overall Performance Record
+            Supplier Performance Record
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-xs text-gray-500">Average Score</p>
-              <p className="text-2xl font-bold">{Number(performanceScore.average_score).toFixed(1)}</p>
+              <p className="text-xs text-gray-500">Credibility Score</p>
+              <p className="text-2xl font-bold">{Number(performanceScore.credibility_score || 0).toFixed(1)}</p>
+              <p className="text-xs text-gray-400">
+                Avg review {Number(performanceScore.average_score || 0).toFixed(1)}
+              </p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Total Reviews</p>
@@ -151,9 +210,15 @@ export default function SupplierScorecard() {
               </span>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Company</p>
-              <p className="text-sm font-medium">{performanceScore.company_name || "—"}</p>
+              <p className="text-xs text-gray-500">Completed Projects</p>
+              <p className="text-2xl font-bold">{performanceScore.completed_projects || 0}</p>
             </div>
+          </div>
+          <div className="mt-5 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
+            Tier is calculated, not selected. Credibility uses submitted supplier
+            performance reviews only: average review score weighted at 85% plus
+            review-history confidence up to 15%. Bid evaluation rankings do not
+            feed this rating.
           </div>
         </div>
       )}
@@ -175,11 +240,29 @@ export default function SupplierScorecard() {
           )}
         </h3>
 
+        <div className="mb-5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+          Rating{" "}
+          <span className="font-medium text-gray-900">{supplierName}</span>
+          {" "}on behalf of{" "}
+          <span className="font-medium text-gray-900">
+            {reviewerCompanyName}
+          </span>
+        </div>
+
         {/* Overall Score */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Overall Score (0-100)
+            Overall Score (0-100, optional)
           </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Leave blank to calculate automatically from weighted metric scores.
+          </p>
+          {isSubmitted && (
+            <div className="mb-3 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
+              Submitted reviews are locked audit records. These saved scores are
+              read-only.
+            </div>
+          )}
           <input
             type="number"
             min="0"
@@ -187,9 +270,9 @@ export default function SupplierScorecard() {
             step="0.01"
             value={overallScore}
             onChange={(e) => setOverallScore(e.target.value)}
-            className="w-40 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F1C644] focus:border-transparent"
+            className={`w-40 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F1C644] focus:border-transparent ${isSubmitted ? "bg-gray-100 text-gray-600" : ""}`}
             placeholder="0-100"
-            disabled={review?.is_draft === false}
+            disabled={isSubmitted}
           />
         </div>
 
@@ -220,8 +303,8 @@ export default function SupplierScorecard() {
                       step="0.01"
                       value={scores[metric.id]?.score || ""}
                       onChange={(e) => handleScoreChange(metric.id, "score", e.target.value)}
-                      className="w-full border rounded px-3 py-1.5 text-sm"
-                      disabled={review?.is_draft === false}
+                      className={`w-full border rounded px-3 py-1.5 text-sm ${isSubmitted ? "bg-gray-100 text-gray-600" : ""}`}
+                      disabled={isSubmitted}
                     />
                   </div>
                   <div>
@@ -230,9 +313,9 @@ export default function SupplierScorecard() {
                       type="text"
                       value={scores[metric.id]?.comments || ""}
                       onChange={(e) => handleScoreChange(metric.id, "comments", e.target.value)}
-                      className="w-full border rounded px-3 py-1.5 text-sm"
+                      className={`w-full border rounded px-3 py-1.5 text-sm ${isSubmitted ? "bg-gray-100 text-gray-600" : ""}`}
                       placeholder="Optional comments"
-                      disabled={review?.is_draft === false}
+                      disabled={isSubmitted}
                     />
                   </div>
                 </div>

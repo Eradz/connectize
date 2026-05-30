@@ -62,6 +62,25 @@ const normalizeDateTimeForApi = (value, fallbackHour = 12) => {
   return Number.isNaN(parsed.getTime()) ? trimmed : parsed.toISOString();
 };
 
+const normalizePaginatedList = (payload) => {
+  const data = payload?.data ?? payload;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data?.results)) return data.data.results;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+};
+
+const dedupeById = (items) => {
+  const seen = new Set();
+  return items.filter((item, index) => {
+    const key = item?.id == null ? `index-${index}` : String(item.id);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export default function CreateBiddingProject() {
   const navigate = useNavigate();
   const { id: editId } = useParams();
@@ -243,8 +262,7 @@ export default function CreateBiddingProject() {
   const fetchTemplates = async () => {
     try {
       const res = await biddingAPI.getTemplates();
-      const data = (res?.data || res)?.results || res?.data || [];
-      setTemplates(data);
+      setTemplates(dedupeById(normalizePaginatedList(res)));
     } catch {}
   };
 
@@ -513,8 +531,8 @@ export default function CreateBiddingProject() {
               onChange={(e) => handleTemplateSelect(e.target.value)}
             >
               <option value="">No template — configure manually</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
+              {templates.map((t, index) => (
+                <option key={t.id || `workflow-template-${index}`} value={t.id}>
                   {t.name} ({t.stages_count || 0} stages)
                 </option>
               ))}

@@ -45,6 +45,25 @@ const BID_MODES = [
   { value: "reverse_auction", label: "Reverse Auction" },
 ];
 
+const normalizePaginatedList = (payload) => {
+  const data = payload?.data ?? payload;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data?.results)) return data.data.results;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+};
+
+const dedupeById = (items) => {
+  const seen = new Set();
+  return items.filter((item, index) => {
+    const key = item?.id == null ? `index-${index}` : String(item.id);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 function TemplateCard({ template, onEdit, onDuplicate, onDelete }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-[#F1C644]/40 transition group">
@@ -268,8 +287,7 @@ export default function BiddingTemplates() {
     try {
       setLoading(true);
       const res = await biddingAPI.getTemplates();
-      const data = (res?.data || res)?.results || res?.data || [];
-      setTemplates(data);
+      setTemplates(dedupeById(normalizePaginatedList(res)));
     } catch {
       toast.error("Failed to load templates");
     } finally {
@@ -312,8 +330,8 @@ export default function BiddingTemplates() {
           name: "Submission",
           stage_type: "submission",
           duration_days: 14,
-          auto_advance: true,
-          description: "",
+          auto_advance: false,
+          description: "Suppliers prepare and submit their bid responses.",
           criteria: [],
         },
         {
@@ -321,15 +339,56 @@ export default function BiddingTemplates() {
           stage_type: "evaluation",
           duration_days: 7,
           auto_advance: false,
-          description: "",
+          description: "Review envelopes, score responses, and calculate rankings.",
+          criteria: [
+            {
+              name: "Technical Capability",
+              weight: 40,
+              scoring_method: "numeric",
+              max_score: 100,
+            },
+            {
+              name: "Commercial Competitiveness",
+              weight: 30,
+              scoring_method: "numeric",
+              max_score: 100,
+            },
+            {
+              name: "Delivery & Execution Schedule",
+              weight: 20,
+              scoring_method: "numeric",
+              max_score: 100,
+            },
+            {
+              name: "Compliance & Risk",
+              weight: 10,
+              scoring_method: "numeric",
+              max_score: 100,
+            },
+          ],
+        },
+        {
+          name: "Shortlisting",
+          stage_type: "shortlist",
+          duration_days: 2,
+          auto_advance: false,
+          description: "Select bidders that should proceed to award review.",
           criteria: [],
         },
         {
-          name: "Award",
+          name: "Approval Gate",
+          stage_type: "approval",
+          duration_days: 2,
+          auto_advance: false,
+          description: "Record internal approval before award.",
+          criteria: [],
+        },
+        {
+          name: "Award Decision",
           stage_type: "award",
           duration_days: 3,
           auto_advance: false,
-          description: "",
+          description: "Select and award the winning bidder.",
           criteria: [],
         },
       ]);
@@ -848,9 +907,9 @@ export default function BiddingTemplates() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {templates.map((template) => (
+          {templates.map((template, index) => (
             <TemplateCard
-              key={template.id}
+              key={template.id || `workflow-template-${index}`}
               template={template}
               onEdit={openEditor}
               onDuplicate={handleDuplicate}
