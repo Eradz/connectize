@@ -8,6 +8,7 @@ import { useSubscription } from '../../context/SubscriptionContext';
 // import { loginForTesting, isTestAuthActive } from '../../lib/testAuth';
 import { webRoutes } from '../../lib/webRoutes';
 import TrialBanner from '../../components/TrialBanner';
+import { getCurrencySymbol } from '../../utils/currency';
 
 // Card components
 const Card = ({ children, className = "", ...props }) => (
@@ -360,8 +361,8 @@ const SubscriptionDashboard = () => {
                   <div className="mb-6">
                     <h3 className={`text-lg font-bold mb-3 ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
                     <div className="mb-2">
-                      <span className={`text-3xl font-bold ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{plan.price}</span>
-                      <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'month'}</span>
+                      <span className={`text-3xl font-bold ${isCurrentPlan ? 'text-white' : 'text-gray-900'}`}>{`${getCurrencySymbol(plan.currency || '$')}${plan.price}`}</span>
+                      <span className={`text-sm ${isCurrentPlan ? 'text-gray-300' : 'text-gray-700'}`}> / {plan.billing_cycle || 'monthly'}</span>
                     </div>
                     <div 
                       className="w-20 h-0.5"
