@@ -226,10 +226,18 @@ const normalizeNotificationLink = (notification) => {
   }
 
   if (rawLink) {
-    const pathOnly = /^https?:\/\//i.test(rawLink)
-      ? new URL(rawLink).pathname + new URL(rawLink).search
-      : rawLink;
-    const normalizedPath = pathOnly.replace("/room", "/?room_name=room");
+    let pathOnly = rawLink;
+    if (/^https?:\/\//i.test(rawLink)) {
+      try {
+        const url = new URL(rawLink);
+        pathOnly = url.pathname + url.search;
+      } catch {
+        pathOnly = rawLink;
+      }
+    }
+
+    const withoutLegacyPlatform = pathOnly.replace(/^\/?platform(?=\/|$)/, "");
+    const normalizedPath = (withoutLegacyPlatform || "/").replace("/room", "/?room_name=room");
     const normalized = normalizedPath.startsWith("/") || normalizedPath.startsWith("#")
       ? normalizedPath
       : `/${normalizedPath}`;

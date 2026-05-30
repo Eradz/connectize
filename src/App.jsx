@@ -363,11 +363,13 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.workforceJobApply)} element={<WorkforceJobDetail />} />
           <Route path={removeLeadingSlash(webRoutes.workforceMyPostedJobs)} element={<WorkforceMyPostedJobs />} />
           <Route path={removeLeadingSlash(webRoutes.workforceApplicationsManage)} element={<WorkforceJobApplications />} />
+          <Route path="workforce/jobs/:id/applications" element={<WorkforceJobApplications />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfiles)} element={<WorkforceProfessionals />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfileCreate)} element={<WorkforceProfileCreate />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfileDetail)} element={<WorkforceProfileDetail />} />
           <Route path={removeLeadingSlash(webRoutes.workforceProfileEdit)} element={<WorkforceProfileEdit />} />
           <Route path={removeLeadingSlash(webRoutes.workforceEvents)} element={<WorkforceEvents />} />
+          <Route path="workforce/events" element={<WorkforceEvents />} />
           <Route path={removeLeadingSlash(webRoutes.workforceEventCreate)} element={<WorkforceEventCreate />} />
           <Route path={removeLeadingSlash(webRoutes.workforceCompanyEarnings)} element={<CompanyEarnings />} />
           <Route path={removeLeadingSlash(webRoutes.workforceMyEvents)} element={<WorkforceMyEvents />} />
@@ -375,6 +377,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.workforceMyBookmarks)} element={<WorkforceMyBookmarks />} />
           <Route path={removeLeadingSlash(webRoutes.workforceEventEdit)} element={<WorkforceEventCreate />} />
           <Route path={removeLeadingSlash(webRoutes.workforceEventDetail)} element={<WorkforceEventDetail />} />
+          <Route path="workforce/events/:id" element={<WorkforceEventDetail />} />
           <Route path={removeLeadingSlash(webRoutes.workforceApplications)} element={<WorkforceApplications />} />
           
           {/* AI Services */}
