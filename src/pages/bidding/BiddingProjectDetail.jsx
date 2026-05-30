@@ -588,6 +588,14 @@ function BidsTab({ project, bids, onRefresh, eligibleBidCompanies = [] }) {
                   )}
                 </div>
               )}
+              {bid.bidder_performance && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  Credibility {Number(bid.bidder_performance.credibility_score || 0).toFixed(1)}
+                  <span className="capitalize">· {bid.bidder_performance.performance_tier}</span>
+                  <span>· {bid.bidder_performance.total_reviews || 0} reviews</span>
+                </div>
+              )}
               {bid.status === "draft" && isUserManagedBid(bid, project, eligibleCompanyIds) && (
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
                   <button
@@ -2207,7 +2215,8 @@ function BiddingProjectDetailInner() {
   const [documentTypeOptions, setDocumentTypeOptions] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
-  const [selectedBidForAward, setSelectedBidForAward] = useState(null);
+  const [selectedBidsForAward, setSelectedBidsForAward] = useState([]);
+  const [showRateSupplierModal, setShowRateSupplierModal] = useState(false);
   const [error, setError] = useState(null);
   const [addenda, setAddenda] = useState([]);
   const [invitations, setInvitations] = useState([]);
@@ -2460,17 +2469,17 @@ function BiddingProjectDetailInner() {
   };
 
   const handleAward = async () => {
-    if (!selectedBidForAward) return;
+    if (selectedBidsForAward.length === 0) return;
     try {
       setActionLoading(true);
-      await biddingAPI.awardProject(id, { bid_id: selectedBidForAward });
+      await biddingAPI.awardProject(id, { bid_ids: selectedBidsForAward });
       toast.success("Project awarded!");
       setShowAwardModal(false);
-      fetchProject();
-      fetchBids("buyer");
+      setSelectedBidsForAward([]);
+      await Promise.all([fetchProject(), fetchBids("buyer")]);
       if (project?.is_owner) fetchActivity();
     } catch (err) {
-      toast.error(err?.error || "Award failed");
+      toast.error(err?.response?.data?.detail || err?.error || "Award failed");
     } finally {
       setActionLoading(false);
     }
@@ -2692,18 +2701,29 @@ function BiddingProjectDetailInner() {
               Evaluate Bids
             </Button>
           )}
-          {/* Owner: Rate Supplier for awarded/completed projects */}
-          {project.is_owner && ["awarded", "completed"].includes(project.status) && project.awarded_to && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                navigate(webRoutes.supplierScorecard.replace(":companyId", project.awarded_to).replace(":projectId", project.id))
-              }
-            >
-              <Star className="w-4 h-4 mr-1" />
-              Rate Supplier
-            </Button>
+          {/* Owner: Rate awarded suppliers for awarded/completed projects */}
+          {project.is_owner && ["awarded", "completed"].includes(project.status) && (
+            ((project.awards?.length || 0) > 0 || project.awarded_to) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const awards = project.awards?.length
+                    ? project.awards
+                    : [{ company: project.awarded_to, company_name: project.awarded_to_name }];
+                  if (awards.length === 1) {
+                    navigate(webRoutes.supplierScorecard
+                      .replace(":companyId", awards[0].company)
+                      .replace(":projectId", project.id));
+                  } else {
+                    setShowRateSupplierModal(true);
+                  }
+                }}
+              >
+                <Star className="w-4 h-4 mr-1" />
+                {(project.awards?.length || 0) > 1 ? "Rate Suppliers" : "Rate Supplier"}
+              </Button>
+            )
           )}
         </div>
       </div>
@@ -2783,35 +2803,80 @@ function BiddingProjectDetailInner() {
         <ComplianceReviewTab project={project} />
       )}
 
+      {/* Rate Suppliers Modal */}
+      {showRateSupplierModal && (
+        <Modal
+          isOpen={showRateSupplierModal}
+          onClose={() => setShowRateSupplierModal(false)}
+          title="Rate Suppliers"
+        >
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600">
+              Select the awarded supplier you want to review.
+            </p>
+            {(project.awards?.length
+              ? project.awards
+              : [{ company: project.awarded_to, company_name: project.awarded_to_name }]
+            ).map((award) => (
+              <button
+                key={award.id || award.company}
+                type="button"
+                onClick={() => {
+                  setShowRateSupplierModal(false);
+                  navigate(webRoutes.supplierScorecard
+                    .replace(":companyId", award.company)
+                    .replace(":projectId", project.id));
+                }}
+                className="w-full rounded-lg border border-gray-200 p-3 text-left hover:border-[#F1C644] hover:bg-[#F1C644]/5 transition"
+              >
+                <p className="font-medium text-gray-900">{award.company_name || "Awarded supplier"}</p>
+                <p className="text-xs text-gray-500">
+                  Credibility: {Number(award.supplier_performance?.credibility_score || 0).toFixed(1)}
+                </p>
+              </button>
+            ))}
+          </div>
+        </Modal>
+      )}
+
       {/* Award Modal */}
       {showAwardModal && (
         <Modal
           isOpen={showAwardModal}
-          onClose={() => setShowAwardModal(false)}
+          onClose={() => {
+            setShowAwardModal(false);
+            setSelectedBidsForAward([]);
+          }}
           title="Award Project"
         >
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
-              Select a bid to award this project to:
+              Select one or more bids to award this project to:
             </p>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {bids
-                .filter((b) => ["submitted", "shortlisted"].includes(b.status))
+                .filter((b) => ["submitted", "under_review", "shortlisted"].includes(b.status))
                 .map((bid) => (
                   <label
                     key={bid.id}
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
-                      selectedBidForAward === bid.id
+                      selectedBidsForAward.includes(bid.id)
                         ? "border-[#F1C644] bg-[#F1C644]/5"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     <input
-                      type="radio"
+                      type="checkbox"
                       name="awardBid"
                       value={bid.id}
-                      checked={selectedBidForAward === bid.id}
-                      onChange={() => setSelectedBidForAward(bid.id)}
+                      checked={selectedBidsForAward.includes(bid.id)}
+                      onChange={() =>
+                        setSelectedBidsForAward((current) =>
+                          current.includes(bid.id)
+                            ? current.filter((value) => value !== bid.id)
+                            : [...current, bid.id],
+                        )
+                      }
                       className="text-[#F1C644]"
                     />
                     <div className="flex-1">
@@ -2825,17 +2890,25 @@ function BiddingProjectDetailInner() {
                 ))}
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setShowAwardModal(false)}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAwardModal(false);
+                  setSelectedBidsForAward([]);
+                }}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={handleAward}
                 loading={actionLoading}
-                disabled={!selectedBidForAward}
+                disabled={selectedBidsForAward.length === 0}
               >
                 <Award className="w-4 h-4 mr-1" />
-                Award
+                {selectedBidsForAward.length > 1
+                  ? `Award ${selectedBidsForAward.length} Companies`
+                  : "Award"}
               </Button>
             </div>
           </div>

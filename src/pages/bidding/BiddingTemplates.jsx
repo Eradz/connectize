@@ -45,6 +45,25 @@ const BID_MODES = [
   { value: "reverse_auction", label: "Reverse Auction" },
 ];
 
+const normalizePaginatedList = (payload) => {
+  const data = payload?.data ?? payload;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data?.results)) return data.data.results;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+};
+
+const dedupeById = (items) => {
+  const seen = new Set();
+  return items.filter((item, index) => {
+    const key = item?.id == null ? `index-${index}` : String(item.id);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 function TemplateCard({ template, onEdit, onDuplicate, onDelete }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md hover:border-[#F1C644]/40 transition group">
@@ -268,8 +287,7 @@ export default function BiddingTemplates() {
     try {
       setLoading(true);
       const res = await biddingAPI.getTemplates();
-      const data = (res?.data || res)?.results || res?.data || [];
-      setTemplates(data);
+      setTemplates(dedupeById(normalizePaginatedList(res)));
     } catch {
       toast.error("Failed to load templates");
     } finally {
@@ -889,9 +907,9 @@ export default function BiddingTemplates() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {templates.map((template) => (
+          {templates.map((template, index) => (
             <TemplateCard
-              key={template.id}
+              key={template.id || `workflow-template-${index}`}
               template={template}
               onEdit={openEditor}
               onDuplicate={handleDuplicate}

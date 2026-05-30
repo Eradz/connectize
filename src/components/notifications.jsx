@@ -204,6 +204,45 @@ const NotificationsArray = memo(
   }
 );
 
+const normalizeNotificationLink = (notification) => {
+  const rawLink = notification?.link || "";
+  const extra = notification?.extra_data || notification?.extra || {};
+  const type = notification?.notification_type;
+  const projectId = extra.project_id || extra.bid_project_id || extra.project;
+  const bidId = extra.bid_id || extra.submission_id || extra.bid;
+  const isBiddingNotification =
+    typeof type === "string" && (
+      type.startsWith("bid_") ||
+      type === "prequalification" ||
+      type === "performance_review_reminder"
+    );
+
+  if (projectId && bidId && ["bid_submission", "bid_submitted", "bid_awarded", "bid_rejected", "bid_shortlisted"].includes(type)) {
+    return `/bidding/projects/${projectId}/bids/${bidId}`;
+  }
+
+  if (projectId && isBiddingNotification) {
+    return `/bidding/projects/${projectId}`;
+  }
+
+  if (rawLink) {
+    const pathOnly = /^https?:\/\//i.test(rawLink)
+      ? new URL(rawLink).pathname + new URL(rawLink).search
+      : rawLink;
+    const normalizedPath = pathOnly.replace("/room", "/?room_name=room");
+    const normalized = normalizedPath.startsWith("/") || normalizedPath.startsWith("#")
+      ? normalizedPath
+      : `/${normalizedPath}`;
+    const legacyBiddingMatch = normalized.match(/^\/?bidding\/([a-f0-9-]{36}|\d+)\/?$/i);
+    if (legacyBiddingMatch) {
+      return `/bidding/projects/${legacyBiddingMatch[1]}`;
+    }
+    return normalized;
+  }
+
+  return "#";
+};
+
 const NotificationTile = memo(({ notification, index }) => {
   const { markAsRead, deleteNotification: deleteThis } =
     useNotificationsStore();
@@ -254,10 +293,7 @@ const NotificationTile = memo(({ notification, index }) => {
           verified={isVerified}
         />
         <Link
-          to={
-            (notification?.link || "#").replace("/room", "/?room_name=room")
-            // .replace("/representatives", "/co/representatives")
-          }
+          to={normalizeNotificationLink(notification)}
           onClick={handleMarkAsRead}
           className="text-[.825rem] !text-gray-600 leading-none block"
         >
