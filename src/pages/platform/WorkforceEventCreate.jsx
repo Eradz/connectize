@@ -33,13 +33,19 @@ import {
   Eye,
   EyeOff,
   Heart,
-  ExternalLink
+  ExternalLink,
+  Search
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { getMyActionableCompanies } from '../../api-services/representatives';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
+import { searchCurrencies } from '../../utils/currency';
+
+// One-tap chips for the most common picks; the long tail (all 141) lives behind
+// the "More" button in a searchable modal. Keep in sync with the mobile app.
+const POPULAR_CURRENCIES = ['USD', 'EUR', 'GBP', 'NGN', 'KES', 'GHS', 'ZAR', 'AED'];
 
 const WorkforceEventCreate = () => {
   const navigate = useNavigate();
@@ -59,6 +65,8 @@ const WorkforceEventCreate = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [eventTypes, setEventTypes] = useState([]);
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState('');
 
   // Fetch admin-managed event types
   useEffect(() => {
@@ -1099,27 +1107,57 @@ const WorkforceEventCreate = () => {
                       </div>
 
                       {!formData.is_free && (
-                        <div className="grid grid-cols-3 gap-2 animate-in slide-in-from-top duration-300">
-                          <select
-                            value={formData.currency}
-                            onChange={(e) => handleInputChange('currency', e.target.value)}
-                            className="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold text-sm"
-                          >
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                            <option value="GBP">GBP</option>
-                            <option value="NGN">NGN</option>
-                          </select>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            required
-                            value={formData.ticket_price}
-                            onChange={(e) => handleInputChange('ticket_price', e.target.value)}
-                            className="col-span-2 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold"
-                            placeholder="0.00"
-                          />
+                        <div className="space-y-3 animate-in slide-in-from-top duration-300">
+                          {/* Currency: popular chips + searchable "More" */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1.5">Currency</label>
+                            <div className="flex flex-wrap gap-2">
+                              {POPULAR_CURRENCIES.map((code) => (
+                                <button
+                                  key={code}
+                                  type="button"
+                                  onClick={() => handleInputChange('currency', code)}
+                                  className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                                    formData.currency === code
+                                      ? 'bg-gold text-white border-gold'
+                                      : 'bg-white text-gray-700 border-gray-200 hover:border-gold'
+                                  }`}
+                                >
+                                  {code}
+                                </button>
+                              ))}
+                              {/* Show the selected currency as a chip when it isn't a popular one */}
+                              {!POPULAR_CURRENCIES.includes(formData.currency) && (
+                                <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-white text-sm font-medium">
+                                  {formData.currency}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => { setCurrencySearch(''); setShowCurrencyPicker(true); }}
+                                className="px-3 py-1.5 rounded-full border border-dashed border-gray-300 text-sm font-medium text-gray-600 hover:border-gold hover:text-gold transition-colors flex items-center gap-1"
+                              >
+                                <Search className="w-3.5 h-3.5" />
+                                More
+                              </button>
+                            </div>
+                          </div>
+                          {/* Ticket price, labelled with the chosen currency */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                              Ticket Price ({formData.currency})
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              required
+                              value={formData.ticket_price}
+                              onChange={(e) => handleInputChange('ticket_price', e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold"
+                              placeholder="0.00"
+                            />
+                          </div>
                         </div>
                       )}
 
@@ -1220,6 +1258,68 @@ const WorkforceEventCreate = () => {
             </div>
           </div>
         </form>
+
+        {/* Searchable currency picker for the long tail of supported currencies */}
+        {showCurrencyPicker && (
+          <div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
+            onClick={() => setShowCurrencyPicker(false)}
+          >
+            <div
+              className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-xl flex flex-col max-h-[80vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <h3 className="text-base font-semibold text-gray-900">Select currency</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowCurrencyPicker(false)}
+                  className="p-1 rounded-lg hover:bg-gray-100 text-gray-500"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="px-4 py-3">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    autoFocus
+                    value={currencySearch}
+                    onChange={(e) => setCurrencySearch(e.target.value)}
+                    placeholder="Search by name or code"
+                    className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold text-sm"
+                  />
+                </div>
+              </div>
+              <div className="overflow-y-auto px-2 pb-3">
+                {searchCurrencies(currencySearch).map((c) => (
+                  <button
+                    key={c.code}
+                    type="button"
+                    onClick={() => {
+                      handleInputChange('currency', c.code);
+                      setShowCurrencyPicker(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left text-sm hover:bg-gray-50 ${
+                      formData.currency === c.code ? 'bg-gold/10' : ''
+                    }`}
+                  >
+                    <span className="text-gray-700">
+                      <span className="font-medium text-gray-900">{c.code}</span>
+                      <span className="mx-2 text-gray-300">·</span>
+                      {c.name}
+                    </span>
+                    {formData.currency === c.code && <Check className="w-4 h-4 text-gold" />}
+                  </button>
+                ))}
+                {searchCurrencies(currencySearch).length === 0 && (
+                  <p className="px-3 py-6 text-center text-sm text-gray-400">No currencies match “{currencySearch}”.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
