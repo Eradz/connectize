@@ -10,6 +10,7 @@ import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast } from 'sonner';
 import BackArrowButton from '../../components/BackArrowButton';
+import { formatCurrency } from '../../utils/currency';
 
 const WorkforceMyEvents = () => {
   const [events, setEvents] = useState([]);
@@ -342,7 +343,7 @@ const WorkforceMyEvents = () => {
                         </span>
                       ) : (
                         <span className="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-700 rounded-md">
-                          ${event.ticket_price}
+                          {formatCurrency(event.ticket_price, event.currency)}
                         </span>
                       )}
                     </div>

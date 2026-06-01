@@ -63,21 +63,37 @@ export const getCurrencySymbol = (currency) => {
 };
 
 /**
- * Formats a number as currency with the appropriate symbol
- * @param {number} amount - The amount to format
- * @param {string} currency - The currency code (default: 'USD')
- * @param {number} decimals - Number of decimal places (default: 2)
- * @returns {string} - Formatted currency string (e.g., '$1,234.56')
+ * Formats a number as currency using the platform's single, locale-aware
+ * formatter. The number of decimal places defaults to the currency's own
+ * ISO 4217 convention (e.g. JPY -> 0, USD -> 2, KWD -> 3) so amounts are never
+ * mis-rendered. Always pass the real currency code -- never hard-code a symbol.
+ *
+ * @param {number|string} amount - The amount to format
+ * @param {string} currency - The ISO 4217 currency code (default: 'USD')
+ * @param {number} [decimals] - Optional override for decimal places
+ * @returns {string} - Formatted currency string (e.g. '$1,234.56', '¥1,235', '₦1,234.56')
  */
-export const formatCurrency = (amount, currency = 'USD', decimals = 2) => {
-  if (amount === null || amount === undefined) return `${getCurrencySymbol(currency)}0.00`;
+export const formatCurrency = (amount, currency = 'USD', decimals) => {
+  const value = Number(amount);
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const code = (currency || 'USD').toString().toUpperCase();
 
-  const symbol = getCurrencySymbol(currency);
-  const formatted = parseFloat(amount)
-    .toFixed(decimals)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-  return `${symbol}${formatted}`;
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: code,
+      ...(decimals !== undefined
+        ? { minimumFractionDigits: decimals, maximumFractionDigits: decimals }
+        : {}),
+    }).format(safeValue);
+  } catch (e) {
+    // Unsupported/invalid currency code: fall back to the symbol map.
+    const symbol = getCurrencySymbol(code);
+    const formatted = safeValue
+      .toFixed(decimals ?? 2)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `${symbol}${formatted}`;
+  }
 };
 
 /**
