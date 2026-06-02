@@ -693,7 +693,7 @@ export const ProfileAboutList = ({ title = "", value = "", Icon }) => {
       <div className="flex gap-1 items-baseline max-sm:flex-col">
         <strong className="leading-none">{title}:</strong>
         <LightParagraph>
-          {(isWebsiteField || looksLikeUrl) && value ? (
+          {(isWebsiteField && looksLikeUrl) && value ? (
             <a 
               href={ensureUrlProtocol(value)} 
               target="_blank" 

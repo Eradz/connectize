@@ -130,6 +130,8 @@ export default function DealRoomDetail() {
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
   const [showCreateMilestoneModal, setShowCreateMilestoneModal] = useState(false);
   const [showParticipantModal, setShowParticipantModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteDocumentData, setDeleteDocumentData] = useState(null);
   const [editingMilestone, setEditingMilestone] = useState(null);
   // Milestone modal state: progress and optional notes
   const [milestoneForm, setMilestoneForm] = useState({ progress: 0, notes: "" });
@@ -471,6 +473,36 @@ export default function DealRoomDetail() {
         return webRoutes.dealRoomValuations.replace(":id", id);
       default:
         return webRoutes.dealRoomDetail.replace(":id", id);
+    }
+  };
+
+  const handleDocumentDelete = async({id, label, dealroomId}) => {
+    setDeleteDocumentData({ id, label, dealroomId });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteDocument = async () => {
+    if (!deleteDocumentData) return;
+
+    try {
+      const { id, label, dealroomId } = deleteDocumentData;
+      const deleteDocResponse = await dealDocumentService.delete(id);
+
+      if(!deleteDocResponse) {
+        const docs = await makeApiRequest({
+          url: "api/v1/deals/documents/",
+          method: "GET",
+          params: { deal_room: dealroomId },
+        });
+        if (docs != null) {
+          setDocuments(docs?.results || docs?.data || docs || []);
+          notify.success("Document deleted");
+        }
+      }
+      setShowDeleteModal(false);
+      setDeleteDocumentData(null);
+    } catch (e) {
+      notify.error("Failed to delete document: " + (e.message || "Unknown error"));
     }
   };
 
@@ -830,7 +862,7 @@ export default function DealRoomDetail() {
                           }
                         } catch (apiError) {
                           console.log('❌ Database upload failed:', apiError);
-                          notify.error((apiError?.status === 401 ? 'Authentication required. Please log in.' : 'Upload failed') + (apiError?.message ? `: ${apiError.message}` : ''));
+                          // notify.error((apiError?.status === 401 ? 'Authentication required. Please log in.' : ('Upload failed' + (apiError?.message ? `: ${apiError.message}` : '')) ) );
                           return; // Do not create temporary documents anymore
                         }
                         
@@ -1178,21 +1210,7 @@ export default function DealRoomDetail() {
                             }
                           };
                           
-                          const handleDocumentDelete = async() => {
-                            if (window.confirm("Are you sure you want to delete this document?")) {
-                              try {
-                              const docs = await makeApiRequest({
-                                url: "api/v1/deals/documents/",
-                                method: "DELETE",
-                                params: { deal_room: id, page_size: 200 },
-                              });
-                              console.log('Document deleted:', docs);
-                            } catch (err) {
-                              console.warn('Documents API failed:', err);
-                              if (isMounted) setDocuments([]);
-                            }
-                            }
-                          };
+                          
                           
                           return (
                             <div key={d.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
@@ -1223,13 +1241,15 @@ export default function DealRoomDetail() {
                                                   <Eye className="h-4 w-4 mr-1" />
                                                   Open
                                                 </button>
-                                                <button 
-                                                  onClick={handleDocumentDelete}
-                                                  className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm bg-red-500 hover:bg-red-600"
-                                                >
+                                                {(canEdit && !d._isTemporary && d.id) && (
+                                                    <button 
+                                                      onClick={() => handleDocumentDelete({id: d.id, label: d.title, dealroomId: id})}
+                                                      className="w-fit  inline-flex mr-1 justify-center items-center px-3 py-1.5 rounded border text-sm border-red-300 text-red-500 hover:text-red-600"
+                                                    >
                                                   <Trash className="h-4 w-4 mr-1" />
                                                   Delete
                                                 </button>
+                                                  )}
                                           </div>
                                         ) : (
                                           <button
@@ -1289,32 +1309,6 @@ export default function DealRoomDetail() {
                                     </span> }
                                     {d._isTemporary && ' • Temporary (not saved to database)'}
                                   </div>
-                                {/* Delete button - only visible for users with edit privileges */}
-                                {canEdit && !d._isTemporary && d.id && (
-                                  <button
-                                    onClick={async () => {
-                                      if (!window.confirm(`Are you sure you want to delete "${label}"? This action cannot be undone.`)) return;
-                                      try {
-                                        await dealDocumentService.delete(d.id, id);
-                                        // Refresh document list
-                                        const docs = await makeApiRequest({
-                                          url: "api/v1/deals/documents/",
-                                          method: "GET",
-                                          params: { deal_room: id },
-                                        });
-                                        setDocuments(docs?.results || docs?.data || docs || []);
-                                        notify.success("Document deleted");
-                                      } catch (e) {
-                                        notify.error("Failed to delete document: " + (e.message || "Unknown error"));
-                                      }
-                                    }}
-                                    className="inline-flex items-center px-3 py-1.5 rounded border text-sm text-red-600 border-red-200 hover:bg-red-50"
-                                    title="Delete document"
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-1" />
-                                    Delete
-                                  </button>
-                                )}
                               </div>
                             </div>
                           );
@@ -2096,6 +2090,45 @@ export default function DealRoomDetail() {
           </div>
         </form>
       </Modal>
+
+      {/* Delete Document Confirmation Modal */}
+      {showDeleteModal && deleteDocumentData && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-sm w-full">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Delete Document</h3>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 py-4">
+              <p className="text-gray-700">
+                Are you sure you want to delete <span className="font-semibold">"{deleteDocumentData.label}"</span>?
+              </p>
+              <p className="text-gray-500 text-sm mt-2">This action cannot be undone.</p>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteDocumentData(null);
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteDocument}
+                className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition font-medium"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

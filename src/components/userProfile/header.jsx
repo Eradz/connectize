@@ -16,6 +16,7 @@ import { useAuth } from "../../context/userContext";
 import { useGetCurrentCompany } from "../../hooks";
 import { avatarStyle } from "../ResponsiveNav";
 import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
+import { Pen, PencilIcon, Trash2 } from "lucide-react";
 
 const fileSchema = yup
   .mixed()
@@ -45,8 +46,18 @@ const Header = ({ banner, name, logo, type = "company" }) => {
   const [logoPosition, setLogoPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [bannerEditMode, setBannerEditMode] = useState(false);
+  const [logoEditMode, setLogoEditMode] = useState(false);
+  const [bannerTempImage, setBannerTempImage] = useState(null);
+  const [logoTempImage, setLogoTempImage] = useState(null);
+  const [bannerTempFile, setBannerTempFile] = useState(null);
+  const [logoTempFile, setLogoTempFile] = useState(null);
   const bannerImageRef = useRef(null);
   const logoImageRef = useRef(null);
+  const bannerCanvasRef = useRef(null);
+  const logoCanvasRef = useRef(null);
+  const bannerUploadInputRef = useRef(null);
+  const logoUploadInputRef = useRef(null);
   const { user: currentUser } = useAuth();
   const { data: currentCompany } = useGetCurrentCompany();
   const params = useParams();
@@ -66,7 +77,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
     initialValues: { banner },
     validationSchema: yup.object().shape({ banner: fileSchema }),
     onSubmit: async (values) => {
-      if (values.banner !== banner) {
+      if (values.banner && (values.banner !== banner || typeof values.banner === 'object')) {
         toast.promise(uploadCompanyBanner(values.banner), {
           loading: "Uploading banner...",
           success: "Banner uploaded successfully",
@@ -80,7 +91,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
     initialValues: { logo },
     validationSchema: yup.object().shape({ logo: fileSchema }),
     onSubmit: async (values) => {
-      if (values.logo !== logo) {
+      if (values.logo && (values.logo !== logo || typeof values.logo === 'object')) {
         toast.promise(
           isCompanyHeader
             ? uploadCompanyLogo(values.logo)
@@ -139,20 +150,22 @@ const Header = ({ banner, name, logo, type = "company" }) => {
     setNewLogo(logo);
   }, [banner, logo]);
 
-  // Zoom and pan handlers
+  // Zoom and pan handlers - Enhanced for better UX
   const handleWheel = (e, isLogo = false) => {
     e.preventDefault();
     const zoomLevel = isLogo ? logoZoom : bannerZoom;
-    const delta = e.deltaY > 0 ? 0.1 : -0.1;
+    // Smoother zoom with smaller increments
+    const delta = e.deltaY > 0 ? 0.05 : -0.05;
     const newZoom = Math.max(1, Math.min(5, zoomLevel - delta));
     if (isLogo) {
-      setLogoZoom(newZoom);
+      setLogoZoom(Math.round(newZoom * 100) / 100); // Round to 2 decimals
     } else {
-      setBannerZoom(newZoom);
+      setBannerZoom(Math.round(newZoom * 100) / 100);
     }
   };
 
   const handleMouseDown = (e, isLogo = false) => {
+    if (e.button !== 0) return; // Only left click
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
   };
@@ -190,6 +203,162 @@ const Header = ({ banner, name, logo, type = "company" }) => {
       setBannerZoom(1);
       setBannerPosition({ x: 0, y: 0 });
     }
+  };
+
+  // Crop and save edited image with zoom/position applied
+  const cropAndSaveImage = (isLogo = false) => {
+    const imageRef = isLogo ? logoImageRef : bannerImageRef;
+    const canvasRef = isLogo ? logoCanvasRef : bannerCanvasRef;
+    const zoom = isLogo ? logoZoom : bannerZoom;
+    const position = isLogo ? logoPosition : bannerPosition;
+    const formik = isLogo ? logoFormik : bannerFormik;
+    const currentImage = isLogo ? newLogo : newBanner;
+
+    if (!imageRef.current || !currentImage) {
+      toast.error("Image reference not found");
+      return;
+    }
+
+    try {
+      const img = imageRef.current;
+      const canvas = canvasRef.current;
+
+      // Calculate crop dimensions
+      const cropWidth = isLogo ? 300 : 900; // Logo is 1:1, banner is 3:1
+      const cropHeight = isLogo ? 300 : 300;
+
+      // Set canvas size to crop area
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        toast.error("Could not get canvas context");
+        return;
+      }
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Calculate image dimensions with zoom applied
+      const scaledWidth = img.width * zoom;
+      const scaledHeight = img.height * zoom;
+
+      // Draw the zoomed and positioned image
+      ctx.drawImage(
+        img,
+        position.x, // sourceX
+        position.y, // sourceY
+        cropWidth,
+        cropHeight,
+        0, // destX
+        0, // destY
+        cropWidth,
+        cropHeight
+      );
+
+      // Convert canvas to blob
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            toast.error("Failed to create image blob");
+            return;
+          }
+
+          const file = new File(
+            [blob],
+            `${isLogo ? "logo" : "banner"}-${Date.now()}.png`,
+            { type: "image/png" }
+          );
+
+          formik.setFieldValue(isLogo ? "logo" : "banner", file);
+
+          // Wait a tick for state update then submit
+          setTimeout(() => {
+            formik.submitForm();
+
+            if (isLogo) {
+              setLogoEditMode(false);
+              setShowLogoModal(false);
+              setLogoZoom(1);
+              setLogoPosition({ x: 0, y: 0 });
+              setLogoTempFile(null);
+            } else {
+              setBannerEditMode(false);
+              setShowBannerModal(false);
+              setBannerZoom(1);
+              setBannerPosition({ x: 0, y: 0 });
+              setBannerTempFile(null);
+            }
+          }, 100);
+
+          toast.success("Image prepared successfully. Uploading...");
+        },
+        "image/png",
+        0.95
+      );
+    } catch (error) {
+      console.error("Error processing image:", error);
+      toast.error("Failed to process image: " + error.message);
+    }
+  };
+
+  // Delete image
+  const deleteImage = async (isLogo = false) => {
+    if (!window.confirm(`Delete ${isLogo ? "logo" : "banner"}?`)) return;
+
+    if (isLogo) {
+      setNewLogo(null);
+      setLogoEditMode(false);
+      setShowLogoModal(false);
+      toast.success("Logo deleted");
+    } else {
+      setNewBanner(null);
+      setBannerEditMode(false);
+      setShowBannerModal(false);
+      toast.success("Banner deleted");
+    }
+  };
+
+  // Handle new image upload from modal
+  const handleModalImageUpload = (event, isLogo = false) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    const fileSizeError = file.size > 4 * 1024 * 1024;
+    const fileTypeError = ![
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/avif",
+    ].includes(file.type);
+
+    if (fileSizeError || fileTypeError) {
+      const errorMessage = fileSizeError
+        ? "File size must be less than 4MB"
+        : "Only image files are allowed";
+      toast.error(errorMessage);
+      return;
+    }
+
+    // Create preview and store the file
+    const previewUrl = URL.createObjectURL(file);
+    if (isLogo) {
+      setNewLogo(previewUrl);
+      setLogoTempFile(file);
+      setLogoEditMode(true);
+      setLogoZoom(1);
+      setLogoPosition({ x: 0, y: 0 });
+    } else {
+      setNewBanner(previewUrl);
+      setBannerTempFile(file);
+      setBannerEditMode(true);
+      setBannerZoom(1);
+      setBannerPosition({ x: 0, y: 0 });
+    }
+
+    toast.success("Image loaded. Adjust and save when ready.");
   };
 
   return (
@@ -310,148 +479,380 @@ const Header = ({ banner, name, logo, type = "company" }) => {
         )}
       </Avatar>
 
-      {/* Banner Preview Modal */}
+      {/* Banner Preview Modal - LinkedIn Style */}
       {showBannerModal && (
         <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
-          onClick={() => setShowBannerModal(false)}
+          className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
+          onClick={() => {
+            setShowBannerModal(false);
+            setBannerEditMode(false);
+            resetZoom(false);
+          }}
         >
           <div
-            className="relative w-full h-full flex items-center justify-center"
+            className="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setShowBannerModal(false)}
-              className="absolute top-4 right-4 z-10 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-200 transition"
-            >
-              ✕
-            </button>
-
-            {/* Zoom Controls */}
-            <div className="absolute top-4 left-4 z-10 flex gap-2">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {bannerEditMode ? "Edit Banner" : "Banner"}
+              </h2>
               <button
-                onClick={() => setBannerZoom(Math.max(1, bannerZoom - 0.2))}
-                className="bg-white text-black px-3 py-2 rounded hover:bg-gray-200 transition"
+                onClick={() => {
+                  setShowBannerModal(false);
+                  setBannerEditMode(false);
+                  resetZoom(false);
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
               >
-                −
+                ✕
               </button>
-              <div className="bg-white text-black px-4 py-2 rounded min-w-[60px] text-center">
-                {Math.round(bannerZoom * 100)}%
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-50 p-4">
+              {bannerEditMode ? (
+                <div className="relative w-full h-full max-h-[500px] flex items-center justify-center">
+                  <div
+                    className="relative w-full h-full max-w-full overflow-hidden rounded-lg border-4 border-blue-500 bg-white shadow-inner"
+                    onWheel={(e) => handleWheel(e, false)}
+                    onMouseDown={(e) => handleMouseDown(e, false)}
+                    onMouseMove={(e) => handleMouseMove(e, false)}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    style={{ userSelect: "none", aspectRatio: "3/1" }}
+                  >
+                    {/* Grid overlay for visual guidance */}
+                    <div className="absolute inset-0 pointer-events-none opacity-10 z-10">
+                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-white"></div>
+                    </div>
+
+                    {/* Image */}
+                    <img
+                      ref={bannerImageRef}
+                      src={newBanner}
+                      alt="Banner Edit"
+                      className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
+                      style={{
+                        transform: `scale(${bannerZoom}) translate(${bannerPosition.x}px, ${bannerPosition.y}px)`,
+                        transition: isDragging ? "none" : "transform 0.2s ease-out",
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <img
+                  src={newBanner}
+                  alt="Banner Preview"
+                  className="w-full h-auto max-h-[500px] object-contain rounded-lg"
+                />
+              )}
+              <canvas ref={bannerCanvasRef} className="hidden" />
+            </div>
+
+            {/* Zoom Controls (Edit Mode) */}
+            {bannerEditMode && (
+              <div className="bg-white border-t border-gray-200 p-4">
+                <div className="flex flex-col gap-4">
+                  {/* Zoom Slider */}
+                  <div className="flex items-center justify-center gap-4">
+                    <button
+                      onClick={() => setBannerZoom(Math.max(1, bannerZoom - 0.2))}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
+                    >
+                      − Zoom Out
+                    </button>
+                    <div className="flex items-center gap-3 flex-1 max-w-sm">
+                      <input
+                        type="range"
+                        min="100"
+                        max="500"
+                        value={Math.round(bannerZoom * 100)}
+                        onChange={(e) => setBannerZoom(Math.max(1, Math.min(5, parseInt(e.target.value) / 100)))}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-semibold min-w-[50px] text-center text-sm">
+                        {Math.round(bannerZoom * 100)}%
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setBannerZoom(Math.min(5, bannerZoom + 0.2))}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
+                    >
+                      + Zoom In
+                    </button>
+                  </div>
+                  {/* Instructions and Reset */}
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-gray-600 text-sm">
+                      📌 <span className="font-medium">Drag the image</span> to position • <span className="font-medium">Scroll</span> to zoom
+                    </p>
+                    <button
+                      onClick={() => resetZoom(false)}
+                      className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition font-medium text-sm whitespace-nowrap"
+                    >
+                      ↺ Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Footer Actions */}
+            <div className="bg-gray-50 border-t border-gray-200 p-4 flex justify-between items-center">
+              <div className="flex gap-2">
+                {isCurrentUser && !bannerEditMode && (
+                  <>
+                    <button
+                      onClick={() => bannerUploadInputRef.current?.click()}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
+                    >
+                      ⬆️ Upload New
+                    </button>
+                    <button
+                      onClick={() => setBannerEditMode(true)}
+                      className="px-4 py-2 border border-gold text-white rounded-lg hover:border-custom_yellow transition font-medium"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => deleteImage(false)}
+                      className="px-4 py-2 border border-red-600 text-white rounded-lg hover:border-red-700 transition font-medium"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </>
+                )}
+                {isCurrentUser && bannerEditMode && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setBannerEditMode(false);
+                        resetZoom(false);
+                      }}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => cropAndSaveImage(false)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                    >
+                      ✓ Save & Upload
+                    </button>
+                  </>
+                )}
               </div>
               <button
-                onClick={() => setBannerZoom(Math.min(5, bannerZoom + 0.2))}
-                className="bg-white text-black px-3 py-2 rounded hover:bg-gray-200 transition"
-              >
-                +
-              </button>
-              <button
-                onClick={() => resetZoom(false)}
-                className="bg-white text-black px-3 py-2 rounded hover:bg-gray-200 transition"
-              >
-                Reset
-              </button>
-            </div>
-
-            {/* Image Container */}
-            <div
-              className="overflow-hidden rounded-lg max-w-[90vw] max-h-[90vh] cursor-grab active:cursor-grabbing"
-              onWheel={(e) => handleWheel(e, false)}
-              onMouseDown={(e) => handleMouseDown(e, false)}
-              onMouseMove={(e) => handleMouseMove(e, false)}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ userSelect: "none" }}
-            >
-              <img
-                ref={bannerImageRef}
-                src={newBanner}
-                alt="Banner Preview"
-                className="w-full h-full object-contain"
-                style={{
-                  transform: `scale(${bannerZoom}) translate(${bannerPosition.x}px, ${bannerPosition.y}px)`,
-                  transition: isDragging ? "none" : "transform 0.2s ease-out",
+                onClick={() => {
+                  setShowBannerModal(false);
+                  setBannerEditMode(false);
+                  resetZoom(false);
                 }}
-              />
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+              >
+                Close
+              </button>
             </div>
-
-            {/* Instructions */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm text-center">
-              <p>Scroll to zoom • Drag to pan</p>
-            </div>
+            {/* Hidden file input for banner upload */}
+            <input
+              ref={bannerUploadInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => handleModalImageUpload(e, false)}
+            />
           </div>
         </div>
       )}
 
-      {/* Logo Preview Modal */}
+      {/* Logo Preview Modal - LinkedIn Style */}
       {showLogoModal && (
         <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
-          onClick={() => setShowLogoModal(false)}
+          className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
+          onClick={() => {
+            setShowLogoModal(false);
+            setLogoEditMode(false);
+            resetZoom(true);
+          }}
         >
           <div
-            className="relative w-full h-full flex items-center justify-center"
+            className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setShowLogoModal(false)}
-              className="absolute top-4 right-4 z-10 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center hover:bg-gray-200 transition"
-            >
-              ✕
-            </button>
-
-            {/* Zoom Controls */}
-            <div className="absolute top-4 left-4 z-10 flex gap-2">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {logoEditMode ? "Edit " : ""}{isCompanyHeader ? "Logo" : "Profile Photo"}
+              </h2>
               <button
-                onClick={() => setLogoZoom(Math.max(1, logoZoom - 0.2))}
-                className="bg-white text-black px-3 py-2 rounded hover:bg-gray-200 transition"
+                onClick={() => {
+                  setShowLogoModal(false);
+                  setLogoEditMode(false);
+                  resetZoom(true);
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
               >
-                −
+                ✕
               </button>
-              <div className="bg-white text-black px-4 py-2 rounded min-w-[60px] text-center">
-                {Math.round(logoZoom * 100)}%
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-50 p-8">
+              {logoEditMode ? (
+                <div className="relative w-full h-full max-w-md max-h-[400px] flex items-center justify-center">
+                  <div
+                    className="relative w-full h-full overflow-hidden rounded-lg border-4 border-blue-500 bg-white shadow-inner"
+                    onWheel={(e) => handleWheel(e, true)}
+                    onMouseDown={(e) => handleMouseDown(e, true)}
+                    onMouseMove={(e) => handleMouseMove(e, true)}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    style={{ userSelect: "none", aspectRatio: "1/1" }}
+                  >
+                    {/* Grid overlay for visual guidance */}
+                    <div className="absolute inset-0 pointer-events-none opacity-10 z-10">
+                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-white"></div>
+                    </div>
+
+                    {/* Image */}
+                    <img
+                      ref={logoImageRef}
+                      src={newLogo}
+                      alt="Logo Edit"
+                      className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
+                      style={{
+                        transform: `scale(${logoZoom}) translate(${logoPosition.x}px, ${logoPosition.y}px)`,
+                        transition: isDragging ? "none" : "transform 0.2s ease-out",
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <img
+                  src={newLogo}
+                  alt="Logo Preview"
+                  className="max-w-xs max-h-[400px] object-contain rounded-lg"
+                />
+              )}
+              <canvas ref={logoCanvasRef} className="hidden" />
+            </div>
+
+            {/* Zoom Controls (Edit Mode) */}
+            {logoEditMode && (
+              <div className="bg-white border-t border-gray-200 p-4">
+                <div className="flex flex-col gap-4">
+                  {/* Zoom Slider */}
+                  <div className="flex items-center justify-center gap-4">
+                    <button
+                      onClick={() => setLogoZoom(Math.max(1, logoZoom - 0.2))}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
+                    >
+                      − Zoom Out
+                    </button>
+                    <div className="flex items-center gap-3 flex-1 max-w-sm">
+                      <input
+                        type="range"
+                        min="100"
+                        max="500"
+                        value={Math.round(logoZoom * 100)}
+                        onChange={(e) => setLogoZoom(Math.max(1, Math.min(5, parseInt(e.target.value) / 100)))}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-semibold min-w-[50px] text-center text-sm">
+                        {Math.round(logoZoom * 100)}%
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setLogoZoom(Math.min(5, logoZoom + 0.2))}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
+                    >
+                      + Zoom In
+                    </button>
+                  </div>
+                  {/* Instructions and Reset */}
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-gray-600 text-sm">
+                      📌 <span className="font-medium">Drag the image</span> to position • <span className="font-medium">Scroll</span> to zoom
+                    </p>
+                    <button
+                      onClick={() => resetZoom(true)}
+                      className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition font-medium text-sm whitespace-nowrap"
+                    >
+                      ↺ Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Footer Actions */}
+            <div className="bg-gray-50 border-t border-gray-200 p-4 flex justify-between items-center">
+              <div className="flex gap-2">
+                {isCurrentUser && !logoEditMode && (
+                  <>
+                    <button
+                      onClick={() => logoUploadInputRef.current?.click()}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
+                    >
+                      ⬆️ Upload New
+                    </button>
+                    <button
+                      onClick={() => setLogoEditMode(true)}
+                      className="flex items-center gap-2 px-4 py-2 border border-gold text-gold rounded-lg hover:border-custom_yellow transition font-medium"
+                    >
+                      <PencilIcon className="w-4 h-4 text-gold" />
+                       <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => deleteImage(true)}
+                      className="flex items-center gap-2 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:border-red-700 transition font-medium"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                      <span>Delete</span>
+                    </button>
+                  </>
+                )}
+                {isCurrentUser && logoEditMode && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setLogoEditMode(false);
+                        resetZoom(true);
+                      }}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => cropAndSaveImage(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                    >
+                      ✓ Save & Upload
+                    </button>
+                  </>
+                )}
               </div>
               <button
-                onClick={() => setLogoZoom(Math.min(5, logoZoom + 0.2))}
-                className="bg-white text-black px-3 py-2 rounded hover:bg-gray-200 transition"
-              >
-                +
-              </button>
-              <button
-                onClick={() => resetZoom(true)}
-                className="bg-white text-black px-3 py-2 rounded hover:bg-gray-200 transition"
-              >
-                Reset
-              </button>
-            </div>
-
-            {/* Image Container */}
-            <div
-              className="overflow-hidden rounded-lg max-w-[90vw] max-h-[90vh] cursor-grab active:cursor-grabbing"
-              onWheel={(e) => handleWheel(e, true)}
-              onMouseDown={(e) => handleMouseDown(e, true)}
-              onMouseMove={(e) => handleMouseMove(e, true)}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ userSelect: "none" }}
-            >
-              <img
-                ref={logoImageRef}
-                src={newLogo}
-                alt="Logo Preview"
-                className="w-full h-full object-contain"
-                style={{
-                  transform: `scale(${logoZoom}) translate(${logoPosition.x}px, ${logoPosition.y}px)`,
-                  transition: isDragging ? "none" : "transform 0.2s ease-out",
+                onClick={() => {
+                  setShowLogoModal(false);
+                  setLogoEditMode(false);
+                  resetZoom(true);
                 }}
-              />
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+              >
+                Close
+              </button>
             </div>
-
-            {/* Instructions */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm text-center">
-              <p>Scroll to zoom • Drag to pan</p>
-            </div>
+            {/* Hidden file input for logo upload */}
+            <input
+              ref={logoUploadInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => handleModalImageUpload(e, true)}
+            />
           </div>
         </div>
       )}

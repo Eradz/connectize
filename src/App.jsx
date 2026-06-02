@@ -315,6 +315,7 @@ const removeLeadingSlash = (path) => {
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumMembers)} element={<KnowledgeForumMembers />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumDetail)} element={<KnowledgeForumDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.knowledgeForumMembers)} element={<KnowledgeForumMembers />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumTopicCreate)} element={<KnowledgeTopicCreate />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeTopics)} element={<KnowledgeTopics />} />
           <Route path={removeLeadingSlash(webRoutes.knowledgeForumTopicDetail)} element={<KnowledgeTopicDetail />} />
@@ -525,6 +526,7 @@ const removeLeadingSlash = (path) => {
           <Route path="knowledge/forums/invite" element={<KnowledgeForumInvite />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumMembers)} element={<KnowledgeForumMembers />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumDetail)} element={<KnowledgeForumDetail />} />
+          <Route path={toRelativePath(webRoutes.knowledgeForumMembers)} element={<KnowledgeForumMembers />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumTopicCreate)} element={<KnowledgeTopicCreate />} />
           <Route path={toRelativePath(webRoutes.knowledgeForumTopicDetail)} element={<KnowledgeTopicDetail />} />
           <Route path={toRelativePath(webRoutes.knowledgeTopics)} element={<KnowledgeTopics />} />
