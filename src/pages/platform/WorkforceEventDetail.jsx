@@ -29,6 +29,7 @@ import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
+import { getCurrencySymbol } from "../../utils/currency";
 const WorkforceEventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -1373,10 +1374,7 @@ const WorkforceEventDetail = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-gray-600">Price:</span>
                     <span className="text-2xl font-bold ">
-                      {event.is_free ? 'FREE' : `$${event.ticket_price}`}
-                      {!event.is_free && event.currency && event.currency !== 'USD' && (
-                        <span className="text-base lg:text-lg  ml-2">{event.currency}</span>
-                      )}
+                      {event.is_free ? 'FREE' : `${getCurrencySymbol(event.currency)}${Number(event.ticket_price).toFixed(2)}`}
                     </span>
                   </div>
                 </div>
