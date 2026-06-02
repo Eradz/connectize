@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
+import CurrencyPicker from '../../components/CurrencyPicker';
 
 const CompanyEarnings = () => {
   const navigate = useNavigate();
@@ -356,19 +357,11 @@ const CompanyEarnings = () => {
                               placeholder="e.g., United States, Nigeria"
                             />
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Currency</label>
-                            <select
-                              value={bankForm.bank_currency}
-                              onChange={(e) => handleBankFormChange('bank_currency', e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-gold"
-                            >
-                              <option value="USD">USD - US Dollar</option>
-                              <option value="EUR">EUR - Euro</option>
-                              <option value="GBP">GBP - British Pound</option>
-                              <option value="NGN">NGN - Nigerian Naira</option>
-                            </select>
-                          </div>
+                          <CurrencyPicker
+                            label="Preferred Currency"
+                            value={bankForm.bank_currency}
+                            onChange={(code) => handleBankFormChange('bank_currency', code)}
+                          />
                         </div>
                         <div className="flex justify-end space-x-3">
                           <button

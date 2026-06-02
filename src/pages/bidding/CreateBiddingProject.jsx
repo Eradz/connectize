@@ -9,6 +9,7 @@ import {
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Input, { Select, Textarea } from "../../components/ui/Input";
+import CurrencyPicker from "../../components/CurrencyPicker";
 import {
   ArrowLeft,
   Plus,
@@ -36,8 +37,6 @@ const VISIBILITY_OPTIONS = [
   { value: "invited", label: "Private - invited companies only" },
   { value: "prequalified", label: "Prequalified - qualified suppliers only" },
 ];
-
-const CURRENCIES = ["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"];
 
 const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -644,22 +643,12 @@ export default function CreateBiddingProject() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Currency
-                </label>
-                <Select
-                  value={form.currency}
-                  onChange={(e) => handleChange("currency", e.target.value)}
-                >
-                  {CURRENCIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </Select>
-              </div>
+            <CurrencyPicker
+              value={form.currency}
+              onChange={(code) => handleChange("currency", code)}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Min Budget <span className="text-gray-400 font-normal">(Optional)</span>

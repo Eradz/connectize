@@ -24,6 +24,7 @@ import { logisticsShipmentService } from '../../api-services/oilgas';
 import { logisticsAPI } from '../../api-services/logistics';
 import { getMyActionableCompanies } from '../../api-services/representatives';
 import { toast } from 'sonner';
+import CurrencyPicker from '../../components/CurrencyPicker';
 
 const LogisticsShipmentCreate = ({ isRequestMode = false }) => {
   const navigate = useNavigate();
@@ -1113,21 +1114,10 @@ const renderStepIndicator = () => (
                     placeholder="Optional"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency
-                  </label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) => handleInputChange(null, 'currency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="NGN">NGN</option>
-                  </select>
-                </div>
+                <CurrencyPicker
+                  value={formData.currency}
+                  onChange={(code) => handleInputChange(null, 'currency', code)}
+                />
               </div>
 
               <div className="space-y-4">

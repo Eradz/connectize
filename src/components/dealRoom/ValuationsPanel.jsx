@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { toast as notify } from "sonner";
 import { makeApiRequest } from "../../lib/helpers";
 import Modal from "../ui/Modal";
+import CurrencyPicker from "../CurrencyPicker";
+import { getCurrencySymbol } from "../../utils/currency";
 import { 
   Plus, 
   Calculator, 
@@ -54,29 +56,19 @@ const VALUATION_METHODS = {
   },
 };
 
-const CURRENCIES = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
-  { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
-  { code: "ZAR", symbol: "R", name: "South African Rand" },
-  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
-];
-
 // Format currency values
 function formatCurrency(value, currency = "USD") {
-  const currencyObj = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0];
+  const symbol = getCurrencySymbol(currency);
   const numValue = parseFloat(value) || 0;
-  
+
   if (numValue >= 1000000000) {
-    return `${currencyObj.symbol}${(numValue / 1000000000).toFixed(2)}B`;
+    return `${symbol}${(numValue / 1000000000).toFixed(2)}B`;
   } else if (numValue >= 1000000) {
-    return `${currencyObj.symbol}${(numValue / 1000000).toFixed(2)}M`;
+    return `${symbol}${(numValue / 1000000).toFixed(2)}M`;
   } else if (numValue >= 1000) {
-    return `${currencyObj.symbol}${(numValue / 1000).toFixed(2)}K`;
+    return `${symbol}${(numValue / 1000).toFixed(2)}K`;
   }
-  return `${currencyObj.symbol}${numValue.toLocaleString()}`;
+  return `${symbol}${numValue.toLocaleString()}`;
 }
 
 // Format date
@@ -722,22 +714,10 @@ export default function ValuationsPanel({ dealRoomId }) {
                 step="1000"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Currency
-              </label>
-              <select
-                value={formData.currency}
-                onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F1C644] focus:border-[#F1C644] outline-none"
-              >
-                {CURRENCIES.map(c => (
-                  <option key={c.code} value={c.code}>
-                    {c.code} ({c.symbol})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CurrencyPicker
+              value={formData.currency}
+              onChange={(code) => setFormData(prev => ({ ...prev, currency: code }))}
+            />
           </div>
 
           {/* Assumptions */}

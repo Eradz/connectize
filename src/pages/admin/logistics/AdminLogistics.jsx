@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { logisticsAPI } from '../../../api-services/logistics';
+import CurrencyPicker from '../../../components/CurrencyPicker';
 
 const AdminLogistics = () => {
   const [activeTab, setActiveTab] = useState('requests'); // 'requests', 'shipments', 'inventory', 'providers'
@@ -1584,19 +1585,10 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   <option value="emergency">Emergency</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                <select
-                  value={formData.currency}
-                  onChange={(e) => handleInputChange('currency', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="USD">USD</option>
-                  <option value="NGN">NGN</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                </select>
-              </div>
+              <CurrencyPicker
+                value={formData.currency}
+                onChange={(code) => handleInputChange('currency', code)}
+              />
               <div>
                 <label className="flex items-center space-x-2">
                   <input
