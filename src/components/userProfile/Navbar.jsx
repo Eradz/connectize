@@ -2,9 +2,9 @@ import Headroom from "react-headroom";
 import Logo from "../logo";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
-import { Tooltip } from "@chakra-ui/react";
+import { Tooltip, Badge } from "@chakra-ui/react";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
@@ -13,17 +13,24 @@ import { CompanyUserType } from "../../lib/helpers/types";
 import FeedSearch from "../custom/FeedSearch";
 import NavbarDropdown from "../NavbarDropdown";
 import { NavigationSection } from "../NavigationSection";
-import { NotificationPopOver } from "../notifications";
+import { IndicatorBadge, NotificationPopOver } from "../notifications";
 import { JoinedUserCompanyImages } from "../ResponsiveNav";
 import { webRoutes } from "../../lib/webRoutes";
 import { SearchOutlined} from "@ant-design/icons";
 import { SearchIcon } from "lucide-react";
+import { useMessagesStore } from "../../stores/messagesStore";
 
 const Navbar = () => {
   const { user: currentUser } = useAuth();
   const weirdFlex = "flex w-full gap-4 md:!gap-6 items-center";
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Get unread messages count
+  const lastMessages = useMessagesStore((state) => state.lastMessages);
+  const totalUnreadMessages = useMemo(() => {
+    return lastMessages?.reduce((total, message) => total + (message.unread_count || 0), 0) || 0;
+  }, [lastMessages]);
 
   const handleScroll = () => {
     if (window.scrollY > lastScrollY) {
@@ -69,7 +76,10 @@ const Navbar = () => {
               <Link to={webRoutes.search} className="md:hidden">
                 <SearchIcon className="font-bold" width={20} height={20} />
               </Link>
-                <Link to={webRoutes.messages} className="md:hidden">
+                <Link to={webRoutes.messages} className="md:hidden relative">
+                  {totalUnreadMessages > 0 && (
+                    <IndicatorBadge indicator={totalUnreadMessages} floating={true} />
+                  )}
                   <Message width={20} height={20} />
                 </Link>
                 <Link to={webRoutes.coNotifications}>

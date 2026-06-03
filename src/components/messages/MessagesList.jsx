@@ -16,6 +16,7 @@ import {
 import { StarFilledIcon, StarOutlinedIcon } from "../../icon";
 import clsx from "clsx";
 import { useAuth } from "../../context/userContext";
+import { webRoutes } from "../../lib/webRoutes";
 
 export default function MessagesList() {
   const { user: currentUser } = useAuth();
@@ -182,7 +183,7 @@ const MessagesListTile = React.memo(({ message, currentUserId }) => {
     setOpenedMessage(message);
 
     // Navigate to the chat room
-    navigate(`/messages/?room_name=${room_name}`);
+    navigate(`${webRoutes.messages}/?room_name=${room_name}`);
 
     if (unread_count > 0) {
       await markAllAsRead(room_name);
