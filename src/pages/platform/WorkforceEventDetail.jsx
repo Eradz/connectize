@@ -29,7 +29,7 @@ import { workforceAPI } from '../../api-services/workforce';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
-import { getCurrencySymbol } from "../../utils/currency";
+import { formatCurrency } from '../../utils/currency';
 const WorkforceEventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -317,7 +317,7 @@ const WorkforceEventDetail = () => {
       return 'Registered';
     }
     if (!event?.is_free && event?.ticket_price) {
-      return `Register - $${event.ticket_price}`;
+      return `Register - ${formatCurrency(event.ticket_price, event.currency)}`;
     }
     return 'Register Now';
   };
@@ -684,7 +684,7 @@ const WorkforceEventDetail = () => {
                           event.image ? 'bg-gray-100 text-gray-700' : 'bg-white text-yellow-800'
                         }`}>
                           <DollarSign className="w-3 h-3 mr-1" />
-                          ${event.ticket_price} {event.currency !== 'USD' && event.currency}
+                          {formatCurrency(event.ticket_price, event.currency)}
                         </span>
                       )}
                       {daysUntil && (
@@ -1374,7 +1374,7 @@ const WorkforceEventDetail = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-gray-600">Price:</span>
                     <span className="text-2xl font-bold ">
-                      {event.is_free ? 'FREE' : `${getCurrencySymbol(event.currency)}${Number(event.ticket_price).toFixed(2)}`}
+                      {event.is_free ? 'FREE' : formatCurrency(event.ticket_price, event.currency)}
                     </span>
                   </div>
                 </div>
@@ -1395,7 +1395,7 @@ const WorkforceEventDetail = () => {
                           </p>
                           <div className="bg-white/60 rounded-lg p-3 mb-4">
                             <p className="text-2xl font-bold text-orange-800">
-                              ${event.ticket_price} <span className="text-sm font-normal">{event.currency}</span>
+                              {formatCurrency(event.ticket_price, event.currency)}
                             </p>
                           </div>
                           
@@ -1586,7 +1586,7 @@ const WorkforceEventDetail = () => {
                               </p>
                               <div className="bg-white/60 rounded-lg p-3 mb-4">
                                 <p className="text-2xl font-bold text-orange-800">
-                                  ${event.ticket_price} <span className="text-sm font-normal">{event.currency}</span>
+                                  {formatCurrency(event.ticket_price, event.currency)}
                                 </p>
                               </div>
                               
@@ -1706,7 +1706,7 @@ const WorkforceEventDetail = () => {
                               {!event.is_free && event.ticket_price && (
                                 <div className="bg-white/60 rounded-lg p-3 mb-4">
                                   <p className="text-xl font-bold text-yellow-800">
-                                    ${event.ticket_price} <span className="text-sm font-normal">{event.currency}</span>
+                                    {formatCurrency(event.ticket_price, event.currency)}
                                   </p>
                                 </div>
                               )}

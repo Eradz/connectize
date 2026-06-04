@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
+import CurrencyPicker from "../CurrencyPicker";
 
  export const StepIndicator = ({currentStep}) => (
     <div className="flex items-center justify-center mb-8">
@@ -23,7 +24,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
     </div>
   );
 
- export  const StepContent = ({employmentTypes, currentStep, formData, handleTextChange, loadingCompanies, userCompanies, experienceLevels, departments, currentSkill, setCurrentSkill, addSkill, removeSkill, currentQualification, setCurrentQualification, addQualification, removeQualification, handleCheckboxChange, currencies, currentBenefit, setCurrentBenefit, addBenefit, removeBenefit}) => {
+ export  const StepContent = ({employmentTypes, currentStep, formData, handleTextChange, loadingCompanies, userCompanies, experienceLevels, departments, currentSkill, setCurrentSkill, addSkill, removeSkill, currentQualification, setCurrentQualification, addQualification, removeQualification, handleCheckboxChange, currentBenefit, setCurrentBenefit, addBenefit, removeBenefit}) => {
       switch (currentStep) {
         case 1:
           return (
@@ -311,7 +312,7 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Salary Range
                     </label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <input
                           type="number"
@@ -334,20 +335,12 @@ import { AlertCircle, CheckCircle, Plus, X } from "lucide-react";
                           min="0"
                         />
                       </div>
-                      <div>
-                        <select
-                          name="currency"
-                          value={formData.currency}
-                          onChange={handleTextChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        >
-                          {currencies.map((currency) => (
-                            <option key={currency} value={currency}>{currency}</option>
-                          ))}
-                        </select>
-                      </div>
                     </div>
                   </div>
+                  <CurrencyPicker
+                    value={formData.currency}
+                    onChange={(code) => handleTextChange({ target: { name: 'currency', value: code } })}
+                  />
   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -12,6 +12,7 @@ import {
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Input, { Select, Textarea } from "../../components/ui/Input";
+import CurrencyPicker from "../../components/CurrencyPicker";
 import { Skeleton } from "../../components/ui/Skeleton";
 import {
   ArrowLeft,
@@ -958,42 +959,27 @@ export default function SubmitBid() {
             Pricing
           </h2>
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Price (Optional)
-                </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    type="number"
-                    value={form.total_price}
-                    onChange={(e) => handleChange("total_price", e.target.value)}
-                    placeholder="0.00"
-                    className="pl-10"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Currency
-                </label>
-                <Select
-                  value={form.currency}
-                  onChange={(e) => handleChange("currency", e.target.value)}
-                >
-                  {["USD", "EUR", "GBP", "NGN", "CAD", "AUD", "AED", "SAR"].map(
-                    (c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    )
-                  )}
-                </Select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Total Price (Optional)
+              </label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="number"
+                  value={form.total_price}
+                  onChange={(e) => handleChange("total_price", e.target.value)}
+                  placeholder="0.00"
+                  className="pl-10"
+                  min="0"
+                  step="0.01"
+                />
               </div>
             </div>
+            <CurrencyPicker
+              value={form.currency}
+              onChange={(code) => handleChange("currency", code)}
+            />
 
             {/* Price Breakdown */}
             <div>

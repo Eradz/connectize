@@ -276,12 +276,9 @@ export class StripePaymentService {
 export const stripeService = new StripePaymentService();
 
 // Utility functions
-export const formatCurrency = (amount, currency = 'USD') => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-  }).format(amount);
-};
+// Single source of truth for currency formatting lives in utils/currency.
+// Re-exported here so existing imports from stripeUtils keep working.
+export { formatCurrency } from '../utils/currency';
 
 export const centsToDollars = (cents) => cents / 100;
 export const dollarsToCents = (dollars) => Math.round(dollars * 100);

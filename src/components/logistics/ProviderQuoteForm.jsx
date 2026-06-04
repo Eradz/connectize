@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 import { logisticsAPI } from '../../api-services/logistics';
+import CurrencyPicker from '../CurrencyPicker';
 
 const toISODateTime = (dateStr, endOfDay = false) => {
   if (!dateStr) return null;
@@ -108,21 +109,11 @@ const ProviderQuoteForm = ({ requestId, onSuccess, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost *</label>
-          <input type="number" step="0.01" value={form.total_cost} onChange={(e) => handleChange('total_cost', e.target.value)} className="w-full border px-3 py-2 rounded-lg" required />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-          <select value={form.currency} onChange={(e) => handleChange('currency', e.target.value)} className="w-full border px-3 py-2 rounded-lg">
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-            <option value="NGN">NGN</option>
-          </select>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost *</label>
+        <input type="number" step="0.01" value={form.total_cost} onChange={(e) => handleChange('total_cost', e.target.value)} className="w-full border px-3 py-2 rounded-lg" required />
       </div>
+      <CurrencyPicker value={form.currency} onChange={(code) => handleChange('currency', code)} />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>

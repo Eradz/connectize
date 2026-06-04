@@ -95,7 +95,6 @@ const WorkforceJobCreate = () => {
     'Information Technology', 'Legal & Compliance', 'Business Development'
   ];
 
-  const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NOK'];
 
   // Fetch companies on mount
   useEffect(() => {
@@ -313,7 +312,6 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
             addQualification={addQualification}
             removeQualification={removeQualification}
             handleCheckboxChange={handleCheckboxChange}
-            currencies={currencies}
             currentBenefit={currentBenefit}
             setCurrentBenefit={setCurrentBenefit}
             addBenefit={addBenefit}

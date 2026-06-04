@@ -40,6 +40,7 @@ import { getMyActionableCompanies } from '../../api-services/representatives';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
+import CurrencyPicker from '../../components/CurrencyPicker';
 
 const WorkforceEventCreate = () => {
   const navigate = useNavigate();
@@ -1099,27 +1100,28 @@ const WorkforceEventCreate = () => {
                       </div>
 
                       {!formData.is_free && (
-                        <div className="grid grid-cols-3 gap-2 animate-in slide-in-from-top duration-300">
-                          <select
+                        <div className="space-y-3 animate-in slide-in-from-top duration-300">
+                          {/* Currency: popular chips + searchable "More" */}
+                          <CurrencyPicker
                             value={formData.currency}
-                            onChange={(e) => handleInputChange('currency', e.target.value)}
-                            className="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold text-sm"
-                          >
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                            <option value="GBP">GBP</option>
-                            <option value="NGN">NGN</option>
-                          </select>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            required
-                            value={formData.ticket_price}
-                            onChange={(e) => handleInputChange('ticket_price', e.target.value)}
-                            className="col-span-2 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold"
-                            placeholder="0.00"
+                            onChange={(code) => handleInputChange('currency', code)}
                           />
+                          {/* Ticket price, labelled with the chosen currency */}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                              Ticket Price ({formData.currency})
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              required
+                              value={formData.ticket_price}
+                              onChange={(e) => handleInputChange('ticket_price', e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gold"
+                              placeholder="0.00"
+                            />
+                          </div>
                         </div>
                       )}
 
@@ -1220,6 +1222,7 @@ const WorkforceEventCreate = () => {
             </div>
           </div>
         </form>
+
       </div>
     </div>
   );

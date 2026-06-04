@@ -16,6 +16,7 @@ import {
   Tag
 } from 'lucide-react';
 import dealRoomAPI from '../../api-services/dealRoom';
+import CurrencyPicker from '../CurrencyPicker';
 import { getMyActionableCompanies } from '../../api-services/representatives';
 import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
@@ -80,9 +81,8 @@ const StepContent = ({
   currentStep, 
   formData, 
   handleInputChange, 
-  dealTypes, 
+  dealTypes,
   securityTypes,
-  currencies,
   currentTag,
   addTag,
   removeTag,
@@ -209,16 +209,10 @@ const StepContent = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-            <select
-              value={formData.currency}
-              onChange={(e) => handleInputChange('currency', e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 outline-none bg-white"
-            >
-              {currencies.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
+          <CurrencyPicker
+            value={formData.currency}
+            onChange={(code) => handleInputChange('currency', code)}
+          />
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Target Close Date</label>
@@ -481,8 +475,6 @@ const DealRoomCreate = () => {
     { value: 'viewer', label: 'Viewer' }
   ];
 
-  const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'NOK'];
-
   const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -666,9 +658,8 @@ const DealRoomCreate = () => {
                 formData={formData} 
                 securityTypes={securityTypes}
                 handleInputChange={handleInputChange} 
-                dealTypes={dealTypes} 
-                currencies={currencies} 
-                currentTag={currentTag} 
+                dealTypes={dealTypes}
+                currentTag={currentTag}
                 addTag={handleAddTagWrapper}
                 removeTag={removeTag}
                 currentParticipant={currentParticipant} 

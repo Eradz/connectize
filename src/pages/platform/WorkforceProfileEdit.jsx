@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import SkillsManager from '../../components/workforce/SkillsManager';
+import CurrencyPicker from '../../components/CurrencyPicker';
 
 const WorkforceProfileEdit = () => {
   const navigate = useNavigate();
@@ -278,23 +279,10 @@ const WorkforceProfileEdit = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency
-                  </label>
-                  <select
-                    name="currency"
-                    value={formData.currency}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="CAD">CAD</option>
-                    <option value="AUD">AUD</option>
-                  </select>
-                </div>
+                <CurrencyPicker
+                  value={formData.currency}
+                  onChange={(code) => setFormData(prev => ({ ...prev, currency: code }))}
+                />
               </div>
             </div>
 
