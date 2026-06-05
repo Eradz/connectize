@@ -219,7 +219,7 @@ export default function CreateListing() {
         // Create manual listing
         const listingData = {
           ...formData,
-          seller_company_id: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
+          seller_company: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
           price: parseFloat(formData.price),
           compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
           quantity_available: parseInt(formData.quantity_available),
@@ -544,29 +544,6 @@ export default function CreateListing() {
               </div>
             </div>
           </div>
-
-          {/* Company */}
-            <div className="bg-white rounded-lg p-6">
-              <label className="block font-semibold text-gray-700 mb-4">Company</label>
-              {companies.length === 0 ? (
-                <div className="p-3 rounded-lg border border-yellow-200 bg-yellow-50 text-sm text-yellow-800">
-                  You don’t have a company yet. Create a company first to create market listings.
-                </div>
-              ) : (
-                <select
-                  value={formData.seller_company_id || ''}
-                  onChange={(e) => handleInputChange('seller_company_id', e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all bg-white"
-                >
-                  <option value="">Select a company</option>
-                  {companies.map((company) => (
-                    <option key={company.id} value={company.id}>
-                      {company.name || company.company_name || company.title || `Company #${company.id}`}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
 
           {/* Inventory */}
           <div className="bg-white rounded-lg p-6">
