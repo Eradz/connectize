@@ -529,7 +529,7 @@ export default function CreateListing() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price *
+                  Price {formData.listing_type === 'product' && '*'}
                 </label>
                 <input
                   type="number"
@@ -538,7 +538,7 @@ export default function CreateListing() {
                   value={formData.price}
                   onChange={(e) => handleInputChange('price', e.target.value)}
                   className="w-full border rounded-lg px-4 py-2"
-                  placeholder="0.00"
+                  placeholder={`0.00 ${formData.listing_type === 'service' ? '(Optional)' : ''}`}
                   required
                 />
               </div>
@@ -561,129 +561,135 @@ export default function CreateListing() {
             </div>
           </div>
 
-          {/* Inventory */}
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Package size={20} /> Inventory
-            </h3>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantity Available *
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.quantity_available}
-                  onChange={(e) => handleInputChange('quantity_available', e.target.value)}
-                  className="w-full border rounded-lg px-4 py-2"
-                  required
-                />
-              </div>
+          {formData.listing_type === 'product' && (
+            <>
+              {/* Inventory */}
+              <div className="bg-white rounded-lg p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Package size={20} /> Inventory
+                </h3>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Order Qty
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.min_order_quantity}
-                  onChange={(e) => handleInputChange('min_order_quantity', e.target.value)}
-                  className="w-full border rounded-lg px-4 py-2"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Order Qty
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.max_order_quantity}
-                  onChange={(e) => handleInputChange('max_order_quantity', e.target.value)}
-                  className="w-full border rounded-lg px-4 py-2"
-                  placeholder="No limit"
-                />
-              </div>
-            </div>
-            
-            <label className="flex items-center gap-2 mt-4 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.track_inventory}
-                onChange={(e) => handleInputChange('track_inventory', e.target.checked)}
-                className="rounded"
-              />
-              <span className="text-sm">Track inventory</span>
-            </label>
-          </div>
-
-          {/* Shipping */}
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Truck size={20} /> Shipping
-            </h3>
-            
-            <label className="flex items-center gap-2 mb-4 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.free_shipping}
-                onChange={(e) => handleInputChange('free_shipping', e.target.checked)}
-                className="rounded"
-              />
-              <span className="text-sm">Free shipping</span>
-            </label>
-            
-            {!formData.free_shipping && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Shipping Cost
+                    Quantity Available *
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.shipping_cost}
-                      onChange={(e) => handleInputChange('shipping_cost', e.target.value)}
-                      className="w-full border rounded-lg pl-8 pr-4 py-2"
-                    />
-                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.quantity_available}
+                    onChange={(e) => handleInputChange('quantity_available', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Est. Delivery (days)
+                    Min Order Qty
                   </label>
                   <input
                     type="number"
                     min="1"
-                    value={formData.estimated_delivery_days}
-                    onChange={(e) => handleInputChange('estimated_delivery_days', e.target.value)}
+                    value={formData.min_order_quantity}
+                    onChange={(e) => handleInputChange('min_order_quantity', e.target.value)}
                     className="w-full border rounded-lg px-4 py-2"
                   />
                 </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max Order Qty
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.max_order_quantity}
+                    onChange={(e) => handleInputChange('max_order_quantity', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    placeholder="No limit"
+                  />
+                </div>
               </div>
-            )}
-            
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ships From
+              
+              <label className="flex items-center gap-2 mt-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.track_inventory}
+                  onChange={(e) => handleInputChange('track_inventory', e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm">Track inventory</span>
               </label>
-              <input
-                type="text"
-                value={formData.shipping_from_location}
-                onChange={(e) => handleInputChange('shipping_from_location', e.target.value)}
-                className="w-full border rounded-lg px-4 py-2"
-                placeholder="City, State or Country"
-              />
             </div>
-          </div>
+
+            {/* Shipping */}
+            <div className="bg-white rounded-lg p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Truck size={20} /> Shipping
+              </h3>
+              
+              <label className="flex items-center gap-2 mb-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.free_shipping}
+                  onChange={(e) => handleInputChange('free_shipping', e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm">Free shipping</span>
+              </label>
+              
+              {!formData.free_shipping && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shipping Cost
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.shipping_cost}
+                        onChange={(e) => handleInputChange('shipping_cost', e.target.value)}
+                        className="w-full border rounded-lg pl-8 pr-4 py-2"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Est. Delivery (days)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.estimated_delivery_days}
+                      onChange={(e) => handleInputChange('estimated_delivery_days', e.target.value)}
+                      className="w-full border rounded-lg px-4 py-2"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ships From
+                </label>
+                <input
+                  type="text"
+                  value={formData.shipping_from_location}
+                  onChange={(e) => handleInputChange('shipping_from_location', e.target.value)}
+                  className="w-full border rounded-lg px-4 py-2"
+                  placeholder="City, State or Country"
+                />
+              </div>
+            </div>
+            </>
+          )
+
+          }
 
           {/* Tags */}
           <div className="bg-white rounded-lg p-6">
