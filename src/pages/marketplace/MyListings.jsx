@@ -17,6 +17,7 @@ import { listingService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 import { webRoutes } from "../../lib/webRoutes";
+import { getCurrencySymbol } from "../../utils/currency";
 
 export default function MyListings() {
   const navigate = useNavigate();
@@ -202,7 +203,7 @@ export default function MyListings() {
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-lg overflow-hidden">
+          <div className="bg-white rounded-lg overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b">
                 <tr>
@@ -214,7 +215,7 @@ export default function MyListings() {
                   <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y h-full">
                 {listings.map((listing) => (
                   <tr key={listing.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
@@ -248,12 +249,12 @@ export default function MyListings() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
-                        <DollarSign size={14} className="text-gray-400" />
+                        <span>{getCurrencySymbol(listing.currency || 'NGN')}</span>
                         <span className="font-medium">{parseFloat(listing.price).toFixed(2)}</span>
                       </div>
                       {listing.compare_at_price && (
                         <span className="text-sm text-gray-400 line-through">
-                          ${parseFloat(listing.compare_at_price).toFixed(2)}
+                          {getCurrencySymbol(listing.currency || 'NGN')}{parseFloat(listing.compare_at_price).toFixed(2)}
                         </span>
                       )}
                     </td>
@@ -265,10 +266,10 @@ export default function MyListings() {
                     <td className="px-6 py-4 text-gray-500">
                       {listing.view_count}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2 relative">
+                    <td className="px-6 py-4 relative">
+                      <div className="flex items-center justify-end gap-2">
                         <Link
-                          to={`/marketplace/edit-listing/${listing.id}`}
+                          to={webRoutes.marketplaceEditListing.replace(':id', listing.id)}
                           className="p-2 hover:bg-gray-100 rounded-lg"
                           title="Edit"
                         >
@@ -284,9 +285,9 @@ export default function MyListings() {
                         
                         {/* Dropdown Menu */}
                         {activeMenu === listing.id && (
-                          <div className="absolute right-0 top-full mt-1 bg-white border rounded-lg shadow-lg py-2 z-10 min-w-[160px]">
+                          <div className="absolute right-0 top-0 mt-1 bg-white border rounded-lg shadow-lg py-2 z-[999] min-w-[160px]">
                             <Link
-                              to={`/marketplace/listing/${listing.id}`}
+                              to={webRoutes.marketplaceListing.replace(':id', listing.id)}
                               className="block px-4 py-2 text-sm hover:bg-gray-50"
                             >
                               View Listing

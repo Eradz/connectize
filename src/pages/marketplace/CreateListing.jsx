@@ -15,6 +15,7 @@ import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
 import { useGetActionableCompanies } from "../../hooks";
 import { getMyActionableCompanies } from "../../api-services/representatives";
+import { SUPPORTED_CURRENCIES } from "../../utils/currency";
 
 export default function CreateListing() {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function CreateListing() {
     service_category: "",
     price: "",
     compare_at_price: "",
+    currency: "NGN",
     quantity_available: "",
     min_order_quantity: 1,
     max_order_quantity: "",
@@ -229,6 +231,7 @@ export default function CreateListing() {
           estimated_delivery_days: formData.estimated_delivery_days ? parseInt(formData.estimated_delivery_days) : null,
           product_category: formData.product_category || null,
           service_category: formData.service_category || null,
+          currency: formData.currency || "NGN",
         };
         listing = await listingService.createListing(listingData);
       }
@@ -240,7 +243,7 @@ export default function CreateListing() {
       }
 
       toast.success("Listing created successfully!");
-      navigate(`/marketplace/listing/${listing.id}`);
+      navigate(webRoutes.marketplaceListing.replace(':id', listing.id));
 
     } catch (error) {
       console.error("Error creating listing:", error);
@@ -504,42 +507,55 @@ export default function CreateListing() {
               <DollarSign size={20} /> Pricing
             </h3>
             
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Currency
+                </label>
+                <select
+                  value={formData.currency}
+                  onChange={(e) => handleInputChange('currency', e.target.value)}
+                  className="w-full border rounded-lg px-4 py-2"
+                >
+                  {SUPPORTED_CURRENCIES.map((curr) => (
+                    <option key={curr.code} value={curr.code}>
+                      {curr.code} - {curr.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Price *
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
-                    className="w-full border rounded-lg pl-8 pr-4 py-2"
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  className="w-full border rounded-lg px-4 py-2"
+                  placeholder="0.00"
+                  required
+                />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Compare at Price
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.compare_at_price}
-                    onChange={(e) => handleInputChange('compare_at_price', e.target.value)}
-                    className="w-full border rounded-lg pl-8 pr-4 py-2"
-                    placeholder="Original price (optional)"
-                  />
-                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.compare_at_price}
+                  onChange={(e) => handleInputChange('compare_at_price', e.target.value)}
+                  className="w-full border rounded-lg px-4 py-2"
+                  placeholder="Original price (optional)"
+                />
                 <p className="text-xs text-gray-400 mt-1">Shows as discounted if higher than price</p>
               </div>
             </div>

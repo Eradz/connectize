@@ -30,6 +30,7 @@ import {
 import marketplaceApi from '../../api-services/marketplace';
 import { getSession } from '../../lib/session';
 import { webRoutes } from '../../lib/webRoutes';
+import { getCurrencySymbol } from '../../utils/currency';
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -335,14 +336,26 @@ const ListingDetail = () => {
           <div className="bg-gray-50 p-4 rounded-xl">
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-gray-900">
-                ${Number(listing.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                {getCurrencySymbol(listing.currency || 'NGN')}{Number(listing.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
               {listing.quantity_available > 0 && (
                 <span className="text-gray-500">/ unit</span>
               )}
             </div>
+            {listing.compare_at_price && (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-500 line-through">
+                  {getCurrencySymbol(listing.currency || 'NGN')}{Number(listing.compare_at_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+                {listing.compare_at_price > listing.price && (
+                  <span className="text-sm font-semibold text-green-600">
+                    Save {Math.round(((listing.compare_at_price - listing.price) / listing.compare_at_price) * 100)}%
+                  </span>
+                )}
+              </div>
+            )}
             {listing.quantity_available > 0 && (
-              <p className="text-green-600 mt-1 flex items-center gap-1">
+              <p className="text-green-600 mt-2 flex items-center gap-1">
                 <Package size={16} />
                 {listing.quantity_available} available
               </p>
