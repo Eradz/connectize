@@ -734,7 +734,7 @@ export default function CreateListing() {
 
           {/* Status & Submit */}
           <div className="bg-white rounded-lg p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap md:flex-nowrap gap-4 items-center justify-between">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Listing Status
@@ -749,7 +749,7 @@ export default function CreateListing() {
                 </select>
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex justify-between w-full md:w-auto gap-4">
                 <Link
                   to="/marketplace/my-listings"
                   className="px-6 py-3 border rounded-lg hover:bg-gray-50"
@@ -767,7 +767,7 @@ export default function CreateListing() {
                       Creating...
                     </>
                   ) : (
-                    'Create Listing'
+                    'Create'
                   )}
                 </button>
               </div>

@@ -14,6 +14,7 @@ import { getSEOConfig } from "../../lib/seoConfig";
 import { listingService, cartService, wishlistService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
+import { webRoutes } from "../../lib/webRoutes";
 
 const isListingInWishlist = (listing) =>
   Boolean(listing?.in_wishlist ?? listing?.is_in_wishlist ?? false);
@@ -297,6 +298,47 @@ export default function Marketplace() {
           </div>
         </div>
       </div>
+
+      {/* NAVIGATION GRID */}
+            <div className="md:hidden pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Link
+                  to={webRoutes.marketplaceMyListings}
+                  className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  <div className="flex-1">
+                    <p className="text-[12px] text-gray-900">My Listings</p>
+                  </div>
+                </Link>
+      
+                <Link
+                  to={webRoutes.marketplaceCreateListing}
+                  className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  <div className="flex-1">
+                    <p className="text-[12px] text-gray-900">Create Listing</p>
+                  </div>
+                </Link>
+      
+                <Link
+                  to={webRoutes.marketplaceOrders}
+                  className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  <div className="flex-1">
+                    <p className="text-[12px] text-gray-900">My Orders</p>
+                  </div>
+                </Link>
+      
+                <Link
+                  to={webRoutes.marketplaceSellerOrders}
+                  className="flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                >
+                  <div className="flex-1">
+                    <p className="text-[12px] text-gray-900">Seller Orders</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
       
       <div className="container py-6">
         {/* Type Toggle + Filters */}
@@ -334,7 +376,7 @@ export default function Marketplace() {
                 className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg hover:bg-gray-50"
               >
                 <Filter size={18} />
-                Filters
+                <span className="hidden md:block">Filters</span>
               </button>
               <Link to="/marketplace/my-listings" className="text-sm text-primary hover:underline hidden sm:block">
                 My Listings

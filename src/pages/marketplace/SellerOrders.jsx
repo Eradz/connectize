@@ -247,7 +247,7 @@ const SellerOrders = () => {
       )}
       
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Seller Orders</h1>
           <p className="text-gray-600">Manage orders for your listings</p>
