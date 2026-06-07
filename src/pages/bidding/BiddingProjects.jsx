@@ -272,7 +272,17 @@ export default function BiddingProjects() {
 
   const inboundInvitations = useMemo(() => {
     const companyIds = new Set(userCompanies.map((company) => String(company.id)));
-    return invitations.filter((invitation) => companyIds.has(String(invitation.invited_company)));
+    const seen = new Set();
+    return invitations
+      .filter((invitation) => companyIds.has(String(invitation.invited_company)))
+      .filter((invitation) => {
+        const key = String(
+          invitation.id ?? `${invitation.project}-${invitation.invited_company}`
+        );
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   }, [invitations, userCompanies]);
 
   const handleInvitationResponse = async (invitationId, decision) => {
@@ -415,7 +425,9 @@ export default function BiddingProjects() {
           <div className="space-y-3">
             {inboundInvitations.map((invitation) => (
               <div
-                key={invitation.id}
+                key={String(
+                  invitation.id ?? `${invitation.project}-${invitation.invited_company}`
+                )}
                 className="rounded-xl border border-gray-200 px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div>
