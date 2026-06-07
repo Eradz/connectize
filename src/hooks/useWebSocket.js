@@ -14,8 +14,11 @@ const useWebSocket = (url, params, opts) => {
   // const [ws, setWs] = useState(null);
   const wsRef = useRef(null);
   const session = getSession();
+  const enabled = opts?.enabled !== false;
 
   useEffect(() => {
+    if (!enabled || !session?.tokens?.access) return;
+
     const wsBaseUrl =
       process.env.NODE_ENV === "development"
         ? baseURL.replace("http", "ws")
@@ -53,7 +56,7 @@ const useWebSocket = (url, params, opts) => {
     wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       opts?.onMessage?.(data);
-      // setMessages((prevMessages) => [...prevMessages, data]);
+      setMessages((prevMessages) => [...prevMessages, data]);
     };
 
     // setWs(socket);
@@ -62,7 +65,7 @@ const useWebSocket = (url, params, opts) => {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [params, session?.tokens?.access, url]);
+  }, [enabled, params, session?.tokens?.access, url]);
 
   const sendMessage = (message) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {

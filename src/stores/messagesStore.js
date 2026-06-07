@@ -17,6 +17,22 @@ function getCurrentUserId() {
   return session?.user?.id || session?.id;
 }
 
+function toNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : value;
+}
+
+function dedupeMessages(messages) {
+  const seen = new Set();
+  return messages.filter((message) => {
+    const key = message?.id ?? message?.tempId;
+    if (!key) return true;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /**
  * @typedef {} ChatMessage
  * @property {}
@@ -301,20 +317,7 @@ export const useMessagesStore = create((set, get) => ({
     try {
       const confirmed = await messageUser(formData);
       get().replaceOptimisticMessage(room_name, tempId, confirmed);
-      const lastMessages = get().lastMessages
-      const indexOfLastMessageToUnshift = lastMessages.findIndex(
-        (m) => m.room_name === room_name
-      );
-      if (indexOfLastMessageToUnshift !== -1) {
-         const messageToMove = lastMessages[indexOfLastMessageToUnshift];
-      const newLastMessages = [
-        messageToMove,
-        ...lastMessages.slice(0, indexOfLastMessageToUnshift),
-        ...lastMessages.slice(indexOfLastMessageToUnshift + 1)
-      ];
-      
-      set({ lastMessages: newLastMessages });
-      }
+      get().updateLastMessages(confirmed);
     } catch (err) {
       console.error("Failed to send message", err);
       get().replaceOptimisticMessage(room_name, tempId, {
@@ -344,7 +347,10 @@ export const useMessagesStore = create((set, get) => ({
       console.log("✅ Updated unread counts for room:", room_name);
 
       return {
-        messages: updatedMessages,
+        messages: {
+          ...state.messages,
+          [room_name]: updatedMessages,
+        },
         lastMessages: updatedLastMessages,
       };
     });
@@ -363,10 +369,15 @@ export const useMessagesStore = create((set, get) => ({
    * @param {(string | number)} tempId
    */
   removeMessage: (room_name, tempId) => {
-    const room_msgs = state.messages[room_name] || [];
-    set((state) => ({
-      messages: room_msgs.filter((m) => m.id !== tempId),
-    }));
+    set((state) => {
+      const room_msgs = state.messages[room_name] || [];
+      return {
+        messages: {
+          ...state.messages,
+          [room_name]: room_msgs.filter((m) => m.id !== tempId),
+        },
+      };
+    });
   },
 
   setLastMessages: (newLastMessages) => {
@@ -403,18 +414,23 @@ export const useMessagesStore = create((set, get) => ({
         },
       };
 
-      const newMessages = { [room_name]: [...room_msgs, enhancedMessage] };
+      const newMessages = dedupeMessages([...room_msgs, enhancedMessage]);
       console.log("✅ Adding message. New count:", newMessages.length);
 
       return {
-        messages: newMessages,
+        messages: {
+          ...state.messages,
+          [room_name]: newMessages,
+        },
       };
     });
   },
 
   updateLastMessages: (newMessage) => {
+    if (!newMessage?.room_name) return;
     set((state) => {
-      const currentUserId = getCurrentUserId();
+      const currentUserId = toNumber(getCurrentUserId());
+      const senderId = toNumber(newMessage.sender);
       const existingIndex = state.lastMessages.findIndex(
         (m) => m.room_name === newMessage.room_name
       );
@@ -424,25 +440,33 @@ export const useMessagesStore = create((set, get) => ({
         const updatedLastMessages = [...state.lastMessages];
         const existingMessage = updatedLastMessages[existingIndex];
 
-        updatedLastMessages[existingIndex] = {
+        const updatedConversation = {
           ...existingMessage,
+          ...newMessage,
+          other_user: existingMessage.other_user || newMessage.other_user,
           content: newMessage.content,
           timestamp: newMessage.timestamp,
           // Reset unread count to 0 when user sends a message
           unread_count:
-            newMessage.sender === currentUserId
+            senderId === currentUserId
               ? 0
               : (existingMessage.unread_count || 0) + 1,
         };
-        return { lastMessages: updatedLastMessages };
+        return {
+          lastMessages: [
+            updatedConversation,
+            ...updatedLastMessages.slice(0, existingIndex),
+            ...updatedLastMessages.slice(existingIndex + 1),
+          ],
+        };
       } else {
         // For new conversations, determine the other user
         const otherUserId =
-          newMessage.sender === currentUserId
+          senderId === currentUserId
             ? newMessage.recipient
             : newMessage.sender;
         const otherUserInfo =
-          newMessage.sender === currentUserId
+          senderId === currentUserId
             ? newMessage.recipient_info
             : newMessage.sender_info;
 
@@ -458,7 +482,7 @@ export const useMessagesStore = create((set, get) => ({
             email: otherUserInfo?.email,
           },
           // Only set unread count if message is from someone else
-          unread_count: newMessage.sender === currentUserId ? 0 : 1,
+          unread_count: senderId === currentUserId ? 0 : 1,
         };
 
         return {
