@@ -13,6 +13,7 @@ import marketplaceApi from '../../api-services/marketplace';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
+import { SUPPORTED_CURRENCIES } from '../../utils/currency';
 
 const EditListing = () => {
   const { id } = useParams();
@@ -32,6 +33,7 @@ const EditListing = () => {
     category: '',
     condition: 'good',
     location: '',
+    currency: 'NGN',
     status: 'active'
   });
   
@@ -92,6 +94,7 @@ const EditListing = () => {
         category: listing.category || '',
         condition: listing.condition || 'good',
         location: listing.location || '',
+        currency: listing.currency || 'NGN',
         status: listing.status || 'active'
       });
       
@@ -282,10 +285,28 @@ const EditListing = () => {
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing & Inventory</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price ($) <span className="text-red-500">*</span>
+                Currency
+              </label>
+              <select
+                name="currency"
+                value={formData.currency}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {SUPPORTED_CURRENCIES.map(curr => (
+                  <option key={curr.code} value={curr.code}>
+                    {curr.code} - {curr.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"

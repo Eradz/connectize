@@ -67,12 +67,8 @@ const Header = ({ banner, name, logo, type = "company" }) => {
   const isCompanyHeader = type.toLowerCase() === "company";
 
   const isCurrentUserById = Number(currentUser?.id) === Number(paramsId);
-  const isCurrentUserByCompany =
-    currentCompany?.[0]?.slug?.toLowerCase() ===
-    paramsCompany?.toLowerCase();
-
-  const isCurrentUser = isCurrentUserByCompany || isCurrentUserById;
-
+  const isCurrentUserByCompany =  paramsCompany ? currentCompany?.[0]?.slug?.toLowerCase() === paramsCompany?.toLowerCase() : false;
+  const isCurrentUser = (isCurrentUserByCompany ) || isCurrentUserById;
   const bannerFormik = useFormik({
     initialValues: { banner },
     validationSchema: yup.object().shape({ banner: fileSchema }),

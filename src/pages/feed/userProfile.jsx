@@ -364,17 +364,23 @@ export default function UserProfile() {
                           : emptyWord
                       }
                     />
-                    <ProfileAboutList
-                      Icon={PhoneOutlined}
-                      title="Phone number"
-                      value={formatPhoneNumber(phone_number, country)}
-                    />
-                    <ProfileAboutList
-                      Icon={MailOutlined}
-                      title="Email"
-                      value={email}
-                    />
-                  </ProfileSection>
+                    {
+                      currentUser?.id === Number(userId) && (
+                        <div>
+                          <ProfileAboutList
+                            Icon={PhoneOutlined}
+                            title="Phone number"
+                            value={formatPhoneNumber(phone_number, country)}
+                            />
+                            <ProfileAboutList
+                              Icon={MailOutlined}
+                              title="Email"
+                              value={email}
+                            />
+                        </div>
+                      )
+                    }
+                    </ProfileSection>
                   </div>
                 )}
 

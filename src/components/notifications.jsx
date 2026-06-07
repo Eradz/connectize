@@ -38,7 +38,7 @@ import { NotificationsSkeleton } from "./skeletons/notification";
 import TimeAgo from "./TimeAgo";
 // import { getNotificationsForUser } from "../hooks/usePolling";
 
-const IndicatorBadge = ({ indicator, floating = false }) => {
+export const IndicatorBadge = ({ indicator, floating = false }) => {
   return (
     <>
       {indicator > 0 && (

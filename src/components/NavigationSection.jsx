@@ -2,6 +2,7 @@ import { LogoutOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import { useMemo, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Badge } from "@chakra-ui/react";
 import { logOutCurrentUser } from "../api-services/users";
 import { useNav } from "../context/navContext";
 import { useAuth } from "../context/userContext";
@@ -10,6 +11,7 @@ import { getSession } from "../lib/session";
 import {ButtonWithTooltipIcon} from './ButtonWithTooltipIcon'
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
+import { useMessagesStore } from "../stores/messagesStore";
 import { 
   BookOpen, 
   CreditCard, 
@@ -120,6 +122,12 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
     setLoading(false);
   };
 
+  // Calculate total unread messages
+  const lastMessages = useMessagesStore((state) => state.lastMessages);
+  const totalUnreadMessages = useMemo(() => {
+    return lastMessages?.reduce((total, message) => total + (message.unread_count || 0), 0) || 0;
+  }, [lastMessages]);
+
   const toggleSection = (sectionName) => {
     const newExpanded = new Set(expandedSections);
     if (newExpanded.has(sectionName)) {
@@ -216,7 +224,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                 onClick={() => toggleNav(false)}
                 className={clsx(
-                  "flex items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm flex-col text-xs xs:text-[.65rem]",
+                  "flex items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm flex-col text-xs xs:text-[.65rem] relative",
                   {
                     "bg-mid_grey pointer-events-none": isActive,
                     "!text-gold rounded": isActive,
@@ -237,6 +245,14 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   )}
                 />
                 <span className="text-white text-[9px]">{name}</span>
+                {name === "Messages" && totalUnreadMessages > 0 && (
+                  <Badge 
+                    className="absolute top-0 right-0 !text-[.5rem] !text-white !bg-gold"
+                    fontSize="xs"
+                  >
+                    {totalUnreadMessages}
+                  </Badge>
+                )}
               </Link>
             </li>
           );
@@ -281,7 +297,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                   onClick={() => toggleNav(false)}
                   className={clsx(
-                    "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded",
+                    "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded relative",
                     {
                       "bg-mid_grey pointer-events-none": isActive,
                       "!text-gold": isActive,
@@ -302,6 +318,14 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                     )}
                   />
                   <span className="max-md:sr-only lg:!text-sm">{name}</span>
+                  {name === "Messages" && totalUnreadMessages > 0 && (
+                    <Badge 
+                      className="size-4 !text-[.55rem] !bg-gold !rounded-full !flex !items-center justify-center"
+                      // fontSize="xs"
+                    >
+                      <span>{totalUnreadMessages}</span>
+                    </Badge>
+                  )}
                 </Link>
               </li>
             );

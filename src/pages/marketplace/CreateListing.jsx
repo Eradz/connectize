@@ -15,6 +15,7 @@ import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
 import { useGetActionableCompanies } from "../../hooks";
 import { getMyActionableCompanies } from "../../api-services/representatives";
+import { SUPPORTED_CURRENCIES } from "../../utils/currency";
 
 export default function CreateListing() {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function CreateListing() {
     service_category: "",
     price: "",
     compare_at_price: "",
+    currency: "NGN",
     quantity_available: "",
     min_order_quantity: 1,
     max_order_quantity: "",
@@ -219,7 +221,7 @@ export default function CreateListing() {
         // Create manual listing
         const listingData = {
           ...formData,
-          seller_company_id: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
+          seller_company: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
           price: parseFloat(formData.price),
           compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
           quantity_available: parseInt(formData.quantity_available),
@@ -229,6 +231,7 @@ export default function CreateListing() {
           estimated_delivery_days: formData.estimated_delivery_days ? parseInt(formData.estimated_delivery_days) : null,
           product_category: formData.product_category || null,
           service_category: formData.service_category || null,
+          currency: formData.currency || "NGN",
         };
         listing = await listingService.createListing(listingData);
       }
@@ -240,7 +243,7 @@ export default function CreateListing() {
       }
 
       toast.success("Listing created successfully!");
-      navigate(`/marketplace/listing/${listing.id}`);
+      navigate(webRoutes.marketplaceListing.replace(':id', listing.id));
 
     } catch (error) {
       console.error("Error creating listing:", error);
@@ -504,193 +507,189 @@ export default function CreateListing() {
               <DollarSign size={20} /> Pricing
             </h3>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price *
+                  Currency
                 </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
-                    className="w-full border rounded-lg pl-8 pr-4 py-2"
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Compare at Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.compare_at_price}
-                    onChange={(e) => handleInputChange('compare_at_price', e.target.value)}
-                    className="w-full border rounded-lg pl-8 pr-4 py-2"
-                    placeholder="Original price (optional)"
-                  />
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Shows as discounted if higher than price</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Company */}
-            <div className="bg-white rounded-lg p-6">
-              <label className="block font-semibold text-gray-700 mb-4">Company</label>
-              {companies.length === 0 ? (
-                <div className="p-3 rounded-lg border border-yellow-200 bg-yellow-50 text-sm text-yellow-800">
-                  You don’t have a company yet. Create a company first to create market listings.
-                </div>
-              ) : (
                 <select
-                  value={formData.seller_company_id || ''}
-                  onChange={(e) => handleInputChange('seller_company_id', e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition-all bg-white"
+                  value={formData.currency}
+                  onChange={(e) => handleInputChange('currency', e.target.value)}
+                  className="w-full border rounded-lg px-4 py-2"
                 >
-                  <option value="">Select a company</option>
-                  {companies.map((company) => (
-                    <option key={company.id} value={company.id}>
-                      {company.name || company.company_name || company.title || `Company #${company.id}`}
+                  {SUPPORTED_CURRENCIES.map((curr) => (
+                    <option key={curr.code} value={curr.code}>
+                      {curr.code} - {curr.name}
                     </option>
                   ))}
                 </select>
-              )}
+              </div>
             </div>
-
-          {/* Inventory */}
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Package size={20} /> Inventory
-            </h3>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantity Available *
+                  Price {formData.listing_type === 'product' && '*'}
                 </label>
                 <input
                   type="number"
-                  min="0"
-                  value={formData.quantity_available}
-                  onChange={(e) => handleInputChange('quantity_available', e.target.value)}
+                  step="0.01"
+                  min="0.01"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
                   className="w-full border rounded-lg px-4 py-2"
+                  placeholder={`0.00 ${formData.listing_type === 'service' ? '(Optional)' : ''}`}
                   required
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Order Qty
+                  Compare at Price
                 </label>
                 <input
                   type="number"
-                  min="1"
-                  value={formData.min_order_quantity}
-                  onChange={(e) => handleInputChange('min_order_quantity', e.target.value)}
+                  step="0.01"
+                  min="0"
+                  value={formData.compare_at_price}
+                  onChange={(e) => handleInputChange('compare_at_price', e.target.value)}
                   className="w-full border rounded-lg px-4 py-2"
+                  placeholder="Original price (optional)"
                 />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Order Qty
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.max_order_quantity}
-                  onChange={(e) => handleInputChange('max_order_quantity', e.target.value)}
-                  className="w-full border rounded-lg px-4 py-2"
-                  placeholder="No limit"
-                />
+                <p className="text-xs text-gray-400 mt-1">Shows as discounted if higher than price</p>
               </div>
             </div>
-            
-            <label className="flex items-center gap-2 mt-4 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.track_inventory}
-                onChange={(e) => handleInputChange('track_inventory', e.target.checked)}
-                className="rounded"
-              />
-              <span className="text-sm">Track inventory</span>
-            </label>
           </div>
 
-          {/* Shipping */}
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Truck size={20} /> Shipping
-            </h3>
-            
-            <label className="flex items-center gap-2 mb-4 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.free_shipping}
-                onChange={(e) => handleInputChange('free_shipping', e.target.checked)}
-                className="rounded"
-              />
-              <span className="text-sm">Free shipping</span>
-            </label>
-            
-            {!formData.free_shipping && (
-              <div className="grid grid-cols-2 gap-4">
+          {formData.listing_type === 'product' && (
+            <>
+              {/* Inventory */}
+              <div className="bg-white rounded-lg p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Package size={20} /> Inventory
+                </h3>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Shipping Cost
+                    Quantity Available *
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.shipping_cost}
-                      onChange={(e) => handleInputChange('shipping_cost', e.target.value)}
-                      className="w-full border rounded-lg pl-8 pr-4 py-2"
-                    />
-                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.quantity_available}
+                    onChange={(e) => handleInputChange('quantity_available', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    required
+                  />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Est. Delivery (days)
+                    Min Order Qty
                   </label>
                   <input
                     type="number"
                     min="1"
-                    value={formData.estimated_delivery_days}
-                    onChange={(e) => handleInputChange('estimated_delivery_days', e.target.value)}
+                    value={formData.min_order_quantity}
+                    onChange={(e) => handleInputChange('min_order_quantity', e.target.value)}
                     className="w-full border rounded-lg px-4 py-2"
                   />
                 </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max Order Qty
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.max_order_quantity}
+                    onChange={(e) => handleInputChange('max_order_quantity', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    placeholder="No limit"
+                  />
+                </div>
               </div>
-            )}
-            
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ships From
+              
+              <label className="flex items-center gap-2 mt-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.track_inventory}
+                  onChange={(e) => handleInputChange('track_inventory', e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm">Track inventory</span>
               </label>
-              <input
-                type="text"
-                value={formData.shipping_from_location}
-                onChange={(e) => handleInputChange('shipping_from_location', e.target.value)}
-                className="w-full border rounded-lg px-4 py-2"
-                placeholder="City, State or Country"
-              />
             </div>
-          </div>
+
+            {/* Shipping */}
+            <div className="bg-white rounded-lg p-6">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Truck size={20} /> Shipping
+              </h3>
+              
+              <label className="flex items-center gap-2 mb-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.free_shipping}
+                  onChange={(e) => handleInputChange('free_shipping', e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm">Free shipping</span>
+              </label>
+              
+              {!formData.free_shipping && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Shipping Cost
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.shipping_cost}
+                        onChange={(e) => handleInputChange('shipping_cost', e.target.value)}
+                        className="w-full border rounded-lg pl-8 pr-4 py-2"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Est. Delivery (days)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.estimated_delivery_days}
+                      onChange={(e) => handleInputChange('estimated_delivery_days', e.target.value)}
+                      className="w-full border rounded-lg px-4 py-2"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ships From
+                </label>
+                <input
+                  type="text"
+                  value={formData.shipping_from_location}
+                  onChange={(e) => handleInputChange('shipping_from_location', e.target.value)}
+                  className="w-full border rounded-lg px-4 py-2"
+                  placeholder="City, State or Country"
+                />
+              </div>
+            </div>
+            </>
+          )
+
+          }
 
           {/* Tags */}
           <div className="bg-white rounded-lg p-6">
@@ -735,7 +734,7 @@ export default function CreateListing() {
 
           {/* Status & Submit */}
           <div className="bg-white rounded-lg p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap md:flex-nowrap gap-4 items-center justify-between">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Listing Status
@@ -750,7 +749,7 @@ export default function CreateListing() {
                 </select>
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex justify-between w-full md:w-auto gap-4">
                 <Link
                   to="/marketplace/my-listings"
                   className="px-6 py-3 border rounded-lg hover:bg-gray-50"
@@ -768,7 +767,7 @@ export default function CreateListing() {
                       Creating...
                     </>
                   ) : (
-                    'Create Listing'
+                    'Create'
                   )}
                 </button>
               </div>
