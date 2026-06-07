@@ -7,7 +7,7 @@ import {
 import { Badge } from "@chakra-ui/react";
 import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import React, { use, useEffect, useMemo, useState } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getUserById } from "../../api-services/users";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
