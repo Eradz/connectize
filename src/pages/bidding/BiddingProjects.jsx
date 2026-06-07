@@ -235,7 +235,7 @@ export default function BiddingProjects() {
 
   const fetchInvitations = async () => {
     try {
-      const res = await biddingAPI.getAllInvitations();
+      const res = await biddingAPI.getAllInvitations({ incoming: true });
       const data = res?.data || res;
       const list = data.results || (Array.isArray(data) ? data : []);
       setInvitations(list);
