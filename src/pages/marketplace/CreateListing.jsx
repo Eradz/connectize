@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { 
-  ArrowLeft, Upload, X, Plus, Package, DollarSign, 
-  Truck, Info, Loader2 
+import {
+  ArrowLeft, Upload, X, Plus, Package, DollarSign,
+  Truck, Info, Loader2
 } from "lucide-react";
 import { listingService } from "../../api-services/marketplace";
 import { logisticsAPI } from "../../api-services/logistics";
@@ -67,7 +67,7 @@ export default function CreateListing() {
     const fetchCompanies = async () => {
         try {
           const result = await getMyActionableCompanies();
-          if (!cancelled && Array.isArray(result)) {
+          if (Array.isArray(result)) {
             setCompanies(result);
           }
         } catch (err) {
@@ -174,20 +174,22 @@ export default function CreateListing() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       toast.error("Please enter a title");
       return;
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    const isService = formData.listing_type === "service";
+
+    if (!isService && (!formData.price || parseFloat(formData.price) <= 0)) {
       toast.error("Please enter a valid price");
       return;
     }
-    if (!formData.quantity_available || parseInt(formData.quantity_available) < 0) {
+    if (!isService && (!formData.quantity_available || parseInt(formData.quantity_available) < 0)) {
       toast.error("Please enter available quantity");
       return;
     }
-    
+
     if ((formData.listing_type === "product" || formData.listing_type === "inventory") && !formData.product_category) {
       toast.error("Please select a product category");
       return;
@@ -221,16 +223,18 @@ export default function CreateListing() {
         // Create manual listing
         const listingData = {
           ...formData,
-          seller_company: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
-          price: parseFloat(formData.price),
-          compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
-          quantity_available: parseInt(formData.quantity_available),
-          min_order_quantity: parseInt(formData.min_order_quantity) || 1,
-          max_order_quantity: formData.max_order_quantity ? parseInt(formData.max_order_quantity) : null,
-          shipping_cost: formData.shipping_cost ? parseFloat(formData.shipping_cost) : null,
+          seller_company_id: formData.seller_company_id || actionableCompanies[0]?.id || undefined,
+          price: isService && !formData.price ? null : parseFloat(formData.price),
+          compare_at_price: formData.price && formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
+          quantity_available: isService ? 1 : parseInt(formData.quantity_available),
+          min_order_quantity: isService ? 1 : (parseInt(formData.min_order_quantity) || 1),
+          max_order_quantity: isService ? null : (formData.max_order_quantity ? parseInt(formData.max_order_quantity) : null),
+          track_inventory: isService ? false : formData.track_inventory,
+          free_shipping: isService ? true : formData.free_shipping,
+          shipping_cost: isService ? null : (formData.shipping_cost ? parseFloat(formData.shipping_cost) : null),
           estimated_delivery_days: formData.estimated_delivery_days ? parseInt(formData.estimated_delivery_days) : null,
-          product_category: formData.product_category || null,
-          service_category: formData.service_category || null,
+          product_category: isService ? null : (formData.product_category || null),
+          service_category: isService ? (formData.service_category || null) : null,
           currency: formData.currency || "NGN",
         };
         listing = await listingService.createListing(listingData);
@@ -275,8 +279,8 @@ export default function CreateListing() {
                 setSelectedInventoryItem(null);
               }}
               className={`flex-1 p-4 border-2 rounded-lg text-center transition ${
-                creationMode === "manual" 
-                  ? "border-gold bg-gold/5" 
+                creationMode === "manual"
+                  ? "border-gold bg-gold/5"
                   : "border-gray-200 hover:border-gray-300"
               }`}
             >
@@ -284,13 +288,13 @@ export default function CreateListing() {
               <p className="font-medium">Create Manually</p>
               <p className="text-sm text-gray-500">Enter all details from scratch</p>
             </button>
-            
+
             <button
               type="button"
               onClick={() => setCreationMode("inventory")}
               className={`flex-1 p-4 border-2 rounded-lg text-center transition ${
-                creationMode === "inventory" 
-                  ? "border-gold bg-gold/5" 
+                creationMode === "inventory"
+                  ? "border-gold bg-gold/5"
                   : "border-gray-200 hover:border-gray-300"
               }`}
             >
@@ -305,7 +309,7 @@ export default function CreateListing() {
         {creationMode === "inventory" && (
           <div className="bg-white rounded-lg p-6 mb-6">
             <h3 className="font-semibold mb-4">Select Inventory Item</h3>
-            
+
             {loadingInventory ? (
               <div className="text-center py-8">
                 <Loader2 className="animate-spin mx-auto" size={24} />
@@ -352,7 +356,7 @@ export default function CreateListing() {
           {/* Basic Info */}
           <div className="bg-white rounded-lg p-6">
             <h3 className="font-semibold mb-4">Basic Information</h3>
-            
+
             <div className="space-y-4">
               {actionableCompanies.length > 0 && (
                 <div>
@@ -463,7 +467,7 @@ export default function CreateListing() {
           {/* Images */}
           <div className="bg-white rounded-lg p-6">
             <h3 className="font-semibold mb-4">Images</h3>
-            
+
             <div className="flex flex-wrap gap-4">
               {images.map((img, index) => (
                 <div key={index} className="relative w-24 h-24">
@@ -486,7 +490,7 @@ export default function CreateListing() {
                   </button>
                 </div>
               ))}
-              
+
               <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gold hover:bg-gold/5 transition">
                 <Upload size={24} className="text-gray-400" />
                 <span className="text-xs text-gray-400 mt-1">Add Image</span>
@@ -506,7 +510,7 @@ export default function CreateListing() {
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <DollarSign size={20} /> Pricing
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -524,123 +528,128 @@ export default function CreateListing() {
                   ))}
                 </select>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price {formData.listing_type === 'product' && '*'}
+                  Price {formData.listing_type === "service" ? "(optional)" : "*"}
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={formData.price}
-                  onChange={(e) => handleInputChange('price', e.target.value)}
-                  className="w-full border rounded-lg px-4 py-2"
-                  placeholder={`0.00 ${formData.listing_type === 'service' ? '(Optional)' : ''}`}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min={formData.listing_type === "service" ? "0" : "0.01"}
+                    value={formData.price}
+                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    placeholder="0.00"
+                    required={formData.listing_type !== "service"}
+                  />
+                </div>
+                {formData.listing_type === "service" && (
+                  <p className="text-xs text-gray-400 mt-1">Leave blank for contact/custom pricing.</p>
+                )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Compare at Price
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.compare_at_price}
-                  onChange={(e) => handleInputChange('compare_at_price', e.target.value)}
-                  className="w-full border rounded-lg px-4 py-2"
-                  placeholder="Original price (optional)"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.compare_at_price}
+                    onChange={(e) => handleInputChange('compare_at_price', e.target.value)}
+                    className="w-full border rounded-lg px-4 py-2"
+                    placeholder="Original price (optional)"
+                  />
+                </div>
                 <p className="text-xs text-gray-400 mt-1">Shows as discounted if higher than price</p>
               </div>
             </div>
           </div>
 
-          {formData.listing_type === 'product' && (
+          {formData.listing_type !== "service" && (
             <>
               {/* Inventory */}
               <div className="bg-white rounded-lg p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
                   <Package size={20} /> Inventory
                 </h3>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Quantity Available *
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.quantity_available}
-                    onChange={(e) => handleInputChange('quantity_available', e.target.value)}
-                    className="w-full border rounded-lg px-4 py-2"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Min Order Qty
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.min_order_quantity}
-                    onChange={(e) => handleInputChange('min_order_quantity', e.target.value)}
-                    className="w-full border rounded-lg px-4 py-2"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Max Order Qty
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.max_order_quantity}
-                    onChange={(e) => handleInputChange('max_order_quantity', e.target.value)}
-                    className="w-full border rounded-lg px-4 py-2"
-                    placeholder="No limit"
-                  />
-                </div>
-              </div>
-              
-              <label className="flex items-center gap-2 mt-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.track_inventory}
-                  onChange={(e) => handleInputChange('track_inventory', e.target.checked)}
-                  className="rounded"
-                />
-                <span className="text-sm">Track inventory</span>
-              </label>
-            </div>
 
-            {/* Shipping */}
-            <div className="bg-white rounded-lg p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Truck size={20} /> Shipping
-              </h3>
-              
-              <label className="flex items-center gap-2 mb-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.free_shipping}
-                  onChange={(e) => handleInputChange('free_shipping', e.target.checked)}
-                  className="rounded"
-                />
-                <span className="text-sm">Free shipping</span>
-              </label>
-              
-              {!formData.free_shipping && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Quantity Available *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.quantity_available}
+                      onChange={(e) => handleInputChange('quantity_available', e.target.value)}
+                      className="w-full border rounded-lg px-4 py-2"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Min Order Qty
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.min_order_quantity}
+                      onChange={(e) => handleInputChange('min_order_quantity', e.target.value)}
+                      className="w-full border rounded-lg px-4 py-2"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Max Order Qty
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.max_order_quantity}
+                      onChange={(e) => handleInputChange('max_order_quantity', e.target.value)}
+                      className="w-full border rounded-lg px-4 py-2"
+                      placeholder="No limit"
+                    />
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 mt-4 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.track_inventory}
+                    onChange={(e) => handleInputChange('track_inventory', e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Track inventory</span>
+                </label>
+              </div>
+
+              {/* Shipping */}
+              <div className="bg-white rounded-lg p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Truck size={20} /> Shipping
+                </h3>
+
+                <label className="flex items-center gap-2 mb-4 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.free_shipping}
+                    onChange={(e) => handleInputChange('free_shipping', e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm">Free shipping</span>
+                </label>
+
+                {!formData.free_shipping && (
+                  <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Shipping Cost
@@ -657,7 +666,7 @@ export default function CreateListing() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Est. Delivery (days)
@@ -672,7 +681,7 @@ export default function CreateListing() {
                   </div>
                 </div>
               )}
-              
+
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ships From
@@ -687,14 +696,12 @@ export default function CreateListing() {
               </div>
             </div>
             </>
-          )
-
-          }
+          )}
 
           {/* Tags */}
           <div className="bg-white rounded-lg p-6">
             <h3 className="font-semibold mb-4">Tags</h3>
-            
+
             <div className="flex flex-wrap gap-2 mb-3">
               {formData.tags.map((tag) => (
                 <span
@@ -712,7 +719,7 @@ export default function CreateListing() {
                 </span>
               ))}
             </div>
-            
+
             <div className="flex gap-2">
               <input
                 type="text"
@@ -748,7 +755,7 @@ export default function CreateListing() {
                   <option value="active">Publish Now</option>
                 </select>
               </div>
-              
+
               <div className="flex justify-between w-full md:w-auto gap-4">
                 <Link
                   to="/marketplace/my-listings"

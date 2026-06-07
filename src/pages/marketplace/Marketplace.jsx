@@ -19,6 +19,19 @@ import { webRoutes } from "../../lib/webRoutes";
 const isListingInWishlist = (listing) =>
   Boolean(listing?.in_wishlist ?? listing?.is_in_wishlist ?? false);
 
+const hasListingPrice = (listing) =>
+  listing?.price !== null &&
+  listing?.price !== undefined &&
+  listing?.price !== "" &&
+  !Number.isNaN(Number(listing.price));
+
+const formatListingPrice = (listing) => {
+  if (!hasListingPrice(listing)) return "Contact for Pricing";
+  const currency = listing?.currency || "USD";
+  const prefix = currency === "USD" ? "$" : `${currency} `;
+  return `${prefix}${parseFloat(listing.price).toFixed(2)}`;
+};
+
 export default function Marketplace() {
   const seoData = getSEOConfig("marketplace");
   const navigate = useNavigate();
@@ -113,9 +126,14 @@ export default function Marketplace() {
     fetchListings();
   };
 
-  const handleAddToCart = async (listingId) => {
+  const handleAddToCart = async (listing) => {
+    if (!hasListingPrice(listing)) {
+      navigate(`/marketplace/listing/${listing.id}`);
+      return;
+    }
+
     try {
-      const data = await cartService.addItem(listingId, 1);
+      const data = await cartService.addItem(listing.id, 1);
       setCart(data);
       toast.success("Added to cart!");
     } catch (error) {
@@ -223,9 +241,9 @@ export default function Marketplace() {
         {/* Price */}
         <div className="flex flex-wrap items-baseline gap-2 mb-3">
           <span className="text-sm md:text-lg font-bold text-primary">
-            ${parseFloat(listing.price).toFixed(2)}
+            {formatListingPrice(listing)}
           </span>
-          {listing.compare_at_price && (
+          {hasListingPrice(listing) && listing.compare_at_price && (
             <span className="text-xs md:text-sm text-gray-400 line-through">
               ${parseFloat(listing.compare_at_price).toFixed(2)}
             </span>
@@ -244,13 +262,13 @@ export default function Marketplace() {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            handleAddToCart(listing.id);
+            handleAddToCart(listing);
           }}
-          disabled={!listing.is_in_stock}
+          disabled={!listing.is_in_stock && hasListingPrice(listing)}
           className="w-full mt-3 py-2 md:spx-4 bg-gold text-white rounded-lg text-sm font-medium hover:bg-gold/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1 md:gap-2"
         >
           <ShoppingCart size={16} />
-          <span className="text-sm md:text-base">Add to Cart</span>
+          <span className="text-sm md:text-base">{hasListingPrice(listing) ? "Add to Cart" : "View Details"}</span>
         </button>
       </div>
     </div>

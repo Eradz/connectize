@@ -28,6 +28,19 @@ const formatCurrency = (amount, currency = "USD") => {
   return amount.toLocaleString();
 };
 
+const hasListingPrice = (listing) =>
+  listing?.price !== null &&
+  listing?.price !== undefined &&
+  listing?.price !== "" &&
+  !Number.isNaN(Number(listing.price));
+
+const formatListingPrice = (listing) => {
+  if (!hasListingPrice(listing)) return "Contact for Pricing";
+  const currency = listing?.currency || "USD";
+  const prefix = currency === "USD" ? "$" : `${currency} `;
+  return `${prefix}${parseFloat(listing.price).toLocaleString()}`;
+};
+
 const timeAgo = (dateStr) => {
   if (!dateStr) return "";
   const now = new Date();
@@ -100,10 +113,10 @@ export const SearchMarketplaceCard = ({ listing }) => (
       </h4>
       <div className="flex items-center gap-2 mb-2">
         <span className="text-lg font-bold text-gray-900">
-          {listing.currency === "USD" ? "$" : listing.currency}
-          {parseFloat(listing.price).toLocaleString()}
+          {formatListingPrice(listing)}
         </span>
-        {listing.compare_at_price &&
+        {hasListingPrice(listing) &&
+          listing.compare_at_price &&
           parseFloat(listing.compare_at_price) > parseFloat(listing.price) && (
             <span className="text-sm text-gray-400 line-through">
               ${parseFloat(listing.compare_at_price).toLocaleString()}
