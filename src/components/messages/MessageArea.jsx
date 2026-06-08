@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
-import useMessagingWebSocket from "../../hooks/useMessagingWebSocket";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
 import {
@@ -56,9 +55,6 @@ const defaultEmptyMessages = [];
 export default function MessageArea() {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name") || "";
-
-  useMessagingWebSocket({});
-  // useMessagingWebSocket({ room_name });
 
   // Reduce polling frequency since WebSocket handles real-time updates
   // const { data: messageList = [], isLoading } = usePollMessages(30000);

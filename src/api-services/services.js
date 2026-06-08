@@ -95,11 +95,13 @@ export const getServiceImages = async () => {
 
 // Service categories
 export const getServiceCategories = async (params, returnFullRes = false) => {
-  const { results: categories, next } = await makeApiRequest({
+  const response = await makeApiRequest({
     url: `api/service-categories/`,
     method: "GET",
     params,
   });
+  const categories = Array.isArray(response) ? response : response?.results;
+  const next = Array.isArray(response) ? null : response?.next;
 
   if (returnFullRes) return { data: categories, next };
   return categories || [];

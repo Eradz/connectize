@@ -7,12 +7,13 @@ import { useAuth } from "../context/userContext";
  * This handles real-time message delivery within a specific conversation.
  */
 // const useMessagingWebSocket = ({ room_name }) => {
-const useMessagingWebSocket = ({}) => {
+const useMessagingWebSocket = ({ enabled = true } = {}) => {
   const { user: currentUser } = useAuth();
   // const [searchParams] = useSearchParams();
   // const room_name = searchParams.get("room_name")
 
   const addRealtimeMessage = useMessagesStore((s) => s.addRealtimeMessage);
+  const updateLastMessages = useMessagesStore((s) => s.updateLastMessages);
   const openedMessage = useMessagesStore((s) => s.openedMessage);
   const setOpenedMessage = useMessagesStore((s) => s.setOpenedMessage);
 
@@ -22,30 +23,37 @@ const useMessagingWebSocket = ({}) => {
   // });
   useWebSocket("unified", undefined, {
     onMessage: handleNewMessage,
+    enabled: enabled && Boolean(currentUser?.id),
   });
 
   function handleNewMessage(event) {
-    if (event.eventName !== "message_received") return;
-    const room_name = !event.roomId;
-    if (!room_name) return;
-    const message = event.payload;
-    console.log("A new message just arrived", message);
-    //
-    if (message.sender == currentUser.id) return;
+    if (
+      event.eventName !== "message_received" ||
+      event.eventType !== "chat_message"
+    ) return;
+
+    const message = event.payload ? { ...event.payload } : null;
+    const room_name = event.roomId || message?.room_name;
+    if (!room_name || !message) return;
+    message.room_name = room_name;
+
+    updateLastMessages({ ...message, room_name });
+
+    if (message.sender == currentUser?.id) return;
 
     //
-    if (message && message.id && message.room_name) {
+    if (message && message.id) {
       // Add to current messages since we're in the right room
       addRealtimeMessage(room_name, message);
 
       // If we don't have openedMessage or it's incomplete, update it with sender info
       if (!openedMessage || !openedMessage.other_user?.first_name) {
         const otherUserId =
-          message.sender === currentUser.id
+          message.sender == currentUser.id
             ? message.recipient
             : message.sender;
         const otherUserInfo =
-          message.sender === currentUser.id
+          message.sender == currentUser.id
             ? message.recipient_info
             : message.sender_info;
 

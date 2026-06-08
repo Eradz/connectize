@@ -9,17 +9,17 @@ export const meta = () =>
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  ShoppingCart, 
-  Heart, 
-  Share2, 
-  ArrowLeft, 
-  Star, 
-  MapPin, 
-  Package, 
-  Truck, 
-  Shield, 
-  ChevronLeft, 
+import {
+  ShoppingCart,
+  Heart,
+  Share2,
+  ArrowLeft,
+  Star,
+  MapPin,
+  Package,
+  Truck,
+  Shield,
+  ChevronLeft,
   ChevronRight,
   Plus,
   Minus,
@@ -32,6 +32,19 @@ import { getSession } from '../../lib/session';
 import { webRoutes } from '../../lib/webRoutes';
 import { getCurrencySymbol } from '../../utils/currency';
 
+const hasListingPrice = (listing) =>
+  listing?.price !== null &&
+  listing?.price !== undefined &&
+  listing?.price !== '' &&
+  !Number.isNaN(Number(listing.price));
+
+const formatListingPrice = (listing) => {
+  if (!hasListingPrice(listing)) return 'Contact for Pricing';
+  const currency = listing?.currency || 'NGN';
+  const prefix = getCurrencySymbol(currency);
+  return `${prefix}${Number(listing.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+};
+
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -42,7 +55,7 @@ const ListingDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
-  
+
   // Check if user is logged in
   const isLoggedIn = () => {
     const session = getSession();
@@ -68,13 +81,18 @@ const ListingDetail = () => {
   };
 
   const handleAddToCart = async () => {
+    if (!hasListingPrice(listing)) {
+      alert('This service uses contact pricing. Please contact the seller for a quote.');
+      return;
+    }
+
     // Check if user is logged in
     if (!isLoggedIn()) {
       alert('Please log in to add items to your cart');
       navigate('/login');
       return;
     }
-    
+
     try {
       setAddingToCart(true);
       await marketplaceApi.addToCart(listing.id, quantity);
@@ -93,13 +111,18 @@ const ListingDetail = () => {
   };
 
   const handleBuyNow = async () => {
+    if (!hasListingPrice(listing)) {
+      alert('This service uses contact pricing. Please contact the seller for a quote.');
+      return;
+    }
+
     // Check if user is logged in
     if (!isLoggedIn()) {
       alert('Please log in to purchase');
       navigate('/login');
       return;
     }
-    
+
     try {
       setAddingToCart(true);
       await marketplaceApi.addToCart(listing.id, quantity);
@@ -125,7 +148,7 @@ const ListingDetail = () => {
       navigate('/login');
       return;
     }
-    
+
     try {
       const response = await marketplaceApi.toggleWishlist(listing.id);
       setInWishlist(Boolean(response?.in_wishlist ?? response?.is_in_wishlist ?? !inWishlist));
@@ -143,8 +166,8 @@ const ListingDetail = () => {
   const handleShare = async () => {
     const shareUrl = window.location.href;
     const shareTitle = listing?.title || 'Check out this listing';
-    const shareText = `Check out "${listing?.title}" on Connectize Marketplace - $${Number(listing?.price).toLocaleString()}`;
-    
+    const shareText = `Check out "${listing?.title}" on Connectize Marketplace - ${formatListingPrice(listing)}`;
+
     // Try native share API first (works on mobile and some desktop browsers)
     if (navigator.share) {
       try {
@@ -229,9 +252,11 @@ const ListingDetail = () => {
     );
   }
 
-  const images = listing.images?.length > 0 
-    ? listing.images 
+  const images = listing.images?.length > 0
+    ? listing.images
     : [{ image: '/placeholder-product.png', alt_text: listing.title }];
+  const hasPrice = hasListingPrice(listing);
+  const isPurchasable = listing.status === 'active' && listing.quantity_available > 0 && hasPrice;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -251,7 +276,7 @@ const ListingDetail = () => {
               alt={images[currentImageIndex]?.alt_text || listing.title}
               className="w-full h-full object-contain"
             />
-            
+
             {images.length > 1 && (
               <>
                 <button
@@ -307,15 +332,15 @@ const ListingDetail = () => {
                 <button
                   onClick={handleToggleWishlist}
                   className={`p-2 rounded-full border ${
-                    inWishlist 
-                      ? 'bg-red-50 border-red-200 text-red-600' 
+                    inWishlist
+                      ? 'bg-red-50 border-red-200 text-red-600'
                       : 'border-gray-200 hover:bg-gray-50'
                   }`}
                   title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
                   <Heart size={20} fill={inWishlist ? 'currentColor' : 'none'} />
                 </button>
-                <button 
+                <button
                   onClick={handleShare}
                   className="p-2 rounded-full border border-gray-200 hover:bg-gray-50"
                   title="Share listing"
@@ -324,7 +349,7 @@ const ListingDetail = () => {
                 </button>
               </div>
             </div>
-            
+
             {listing.category && (
               <span className="inline-block mt-2 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                 {listing.category}
@@ -336,13 +361,13 @@ const ListingDetail = () => {
           <div className="bg-gray-50 p-4 rounded-xl">
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-gray-900">
-                {getCurrencySymbol(listing.currency || 'NGN')}{Number(listing.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                {formatListingPrice(listing)}
               </span>
-              {listing.quantity_available > 0 && (
+              {hasPrice && listing.quantity_available > 0 && (
                 <span className="text-gray-500">/ unit</span>
               )}
             </div>
-            {listing.compare_at_price && (
+            {hasPrice && listing.compare_at_price && (
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-sm text-gray-500 line-through">
                   {getCurrencySymbol(listing.currency || 'NGN')}{Number(listing.compare_at_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -354,16 +379,21 @@ const ListingDetail = () => {
                 )}
               </div>
             )}
-            {listing.quantity_available > 0 && (
-              <p className="text-green-600 mt-2 flex items-center gap-1">
+            {hasPrice && listing.quantity_available > 0 && (
+              <p className="text-green-600 mt-1 flex items-center gap-1">
                 <Package size={16} />
                 {listing.quantity_available} available
+              </p>
+            )}
+            {!hasPrice && (
+              <p className="text-gray-600 mt-1">
+                Request pricing directly from the seller.
               </p>
             )}
           </div>
 
           {/* Quantity Selector & Add to Cart */}
-          {listing.status === 'active' && listing.quantity_available > 0 && (
+          {isPurchasable && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <span className="text-gray-700 font-medium">Quantity:</span>
@@ -403,6 +433,13 @@ const ListingDetail = () => {
                   {addingToCart ? 'Processing...' : 'Buy Now'}
                 </button>
               </div>
+            </div>
+          )}
+
+          {listing.status === 'active' && !hasPrice && (
+            <div className="bg-blue-50 text-blue-700 p-4 rounded-xl flex items-center gap-2">
+              <MessageCircle size={20} />
+              This service is priced by quote. Contact the seller to continue.
             </div>
           )}
 
@@ -513,10 +550,10 @@ const ListingDetail = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        size={16} 
-                        fill={i < review.rating ? 'currentColor' : 'none'} 
+                      <Star
+                        key={i}
+                        size={16}
+                        fill={i < review.rating ? 'currentColor' : 'none'}
                       />
                     ))}
                   </div>

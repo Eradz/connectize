@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Save, 
-  Image, 
-  X, 
+import {
+  ArrowLeft,
+  Save,
+  Image,
+  X,
   Upload,
   AlertCircle,
   Loader2
 } from 'lucide-react';
 import marketplaceApi from '../../api-services/marketplace';
 import { webRoutes } from '../../lib/webRoutes';
-import { useAuth } from '../../context/userContext';
-import { getSession } from '../../lib/session';
 import { SUPPORTED_CURRENCIES } from '../../utils/currency';
+import SearchableSelect from '../../components/SearchableSelect';
+import { getProductCategories } from '../../api-services/products';
+import { getServiceCategories } from '../../api-services/services';
 
 const EditListing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const session = getSession();
-  const userId = user?.id ?? session?.user?.id;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -34,24 +32,18 @@ const EditListing = () => {
     condition: 'good',
     location: '',
     currency: 'NGN',
-    status: 'active'
+    status: 'active',
+    listing_type: 'product',
+    product_category: '',
+    service_category: '',
   });
-  
+
   const [existingImages, setExistingImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
-
-  const categories = [
-    'Electronics',
-    'Machinery',
-    'Raw Materials',
-    'Office Equipment',
-    'Vehicles',
-    'Tools',
-    'Parts & Components',
-    'Safety Equipment',
-    'Other'
-  ];
+  const [productCategories, setProductCategories] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   const conditions = [
     { value: 'new', label: 'New' },
@@ -69,35 +61,49 @@ const EditListing = () => {
     { value: 'archived', label: 'Archived' }
   ];
 
+  const isService = formData.listing_type === 'service';
+
   useEffect(() => {
     fetchListing();
+    fetchCategories();
   }, [id]);
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const [prodCats, servCats] = await Promise.all([
+        getProductCategories(),
+        getServiceCategories(),
+      ]);
+      setProductCategories(prodCats || []);
+      setServiceCategories(servCats || []);
+    } catch (err) {
+      console.error('Failed to load listing categories:', err);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const fetchListing = async () => {
     try {
       setLoading(true);
       const listing = await marketplaceApi.getListingById(id);
-      
-      // Ownership check: only the seller can edit
-      const sellerId = listing.seller?.id || listing.seller_id || listing.seller;
-      if (userId && String(sellerId) !== String(userId)) {
-        setError('You do not have permission to edit this listing.');
-        setTimeout(() => navigate('/marketplace/my-listings'), 2000);
-        return;
-      }
-      
+
       setFormData({
         title: listing.title || '',
         description: listing.description || '',
-        price: listing.price || '',
+        price: listing.price ?? '',
         quantity_available: listing.quantity_available || 1,
         category: listing.category || '',
         condition: listing.condition || 'good',
         location: listing.location || '',
         currency: listing.currency || 'NGN',
-        status: listing.status || 'active'
+        status: listing.status || 'active',
+        listing_type: listing.listing_type || 'product',
+        product_category: listing.product_category ? String(listing.product_category) : '',
+        service_category: listing.service_category ? String(listing.service_category) : '',
       });
-      
+
       setExistingImages(listing.images || []);
     } catch (err) {
       setError('Failed to load listing');
@@ -137,8 +143,9 @@ const EditListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.title || !formData.price) {
+
+    const isService = formData.listing_type === 'service';
+    if (!formData.title || (!isService && !formData.price)) {
       setError('Please fill in all required fields');
       return;
     }
@@ -147,8 +154,16 @@ const EditListing = () => {
       setSaving(true);
       setError(null);
 
+      const payload = {
+        ...formData,
+        price: isService && !formData.price ? null : formData.price,
+        quantity_available: isService ? 1 : formData.quantity_available,
+        product_category: isService ? null : (formData.product_category || null),
+        service_category: isService ? (formData.service_category || null) : null,
+      };
+
       // Update listing data
-      await marketplaceApi.updateListing(id, formData);
+      await marketplaceApi.updateListing(id, payload);
 
       // Delete removed images
       for (const imageId of imagesToDelete) {
@@ -215,7 +230,7 @@ const EditListing = () => {
         {/* Basic Information */}
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -245,22 +260,25 @@ const EditListing = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select category</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
+              {isService ? (
+                <SearchableSelect
+                  label="Service Category"
+                  options={serviceCategories}
+                  value={formData.service_category}
+                  onChange={(value) => setFormData(prev => ({ ...prev, service_category: value }))}
+                  placeholder="Search service categories..."
+                  loading={loadingCategories}
+                />
+              ) : (
+                <SearchableSelect
+                  label="Product Category"
+                  options={productCategories}
+                  value={formData.product_category}
+                  onChange={(value) => setFormData(prev => ({ ...prev, product_category: value }))}
+                  placeholder="Search product categories..."
+                  loading={loadingCategories}
+                />
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -284,7 +302,7 @@ const EditListing = () => {
         {/* Pricing & Inventory */}
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Pricing & Inventory</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -306,20 +324,26 @@ const EditListing = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price <span className="text-red-500">*</span>
+                Price {isService ? <span className="text-gray-400">(optional)</span> : <span className="text-red-500">*</span>}
               </label>
               <input
                 type="number"
                 name="price"
                 value={formData.price}
                 onChange={handleInputChange}
-                min="0"
+                min={isService ? "0" : "0.01"}
                 step="0.01"
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                required={!isService}
               />
+              {isService && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave blank for contact/custom pricing.
+                </p>
+              )}
             </div>
 
+            {!isService && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Quantity Available
@@ -333,6 +357,7 @@ const EditListing = () => {
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -355,7 +380,7 @@ const EditListing = () => {
         {/* Location */}
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Item Location
@@ -374,7 +399,7 @@ const EditListing = () => {
         {/* Images */}
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Images</h2>
-          
+
           {/* Existing Images */}
           {existingImages.length > 0 && (
             <div className="mb-4">

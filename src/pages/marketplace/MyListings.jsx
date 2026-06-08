@@ -9,15 +9,28 @@ export const meta = () =>
 
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  Plus, Edit2, Trash2, Eye, MoreVertical, Package, 
-  DollarSign, ArrowLeft, ChevronDown, AlertCircle, CreditCard
+import {
+  Plus, Edit2, Trash2, Eye, MoreVertical, Package,
+  ArrowLeft, ChevronDown, AlertCircle, CreditCard
 } from "lucide-react";
 import { listingService } from "../../api-services/marketplace";
 import HeadingText from "../../components/HeadingText";
 import { toast } from "sonner";
 import { webRoutes } from "../../lib/webRoutes";
 import { getCurrencySymbol } from "../../utils/currency";
+
+const hasListingPrice = (listing) =>
+  listing?.price !== null &&
+  listing?.price !== undefined &&
+  listing?.price !== "" &&
+  !Number.isNaN(Number(listing.price));
+
+const formatListingPrice = (listing) => {
+  if (!hasListingPrice(listing)) return "Contact for pricing";
+  const currency = listing?.currency || "NGN";
+  const prefix = getCurrencySymbol(currency);
+  return `${prefix}${parseFloat(listing.price).toFixed(2)}`;
+};
 
 export default function MyListings() {
   const navigate = useNavigate();
@@ -58,7 +71,7 @@ export default function MyListings() {
 
   const handleDelete = async (listingId) => {
     if (!window.confirm("Are you sure you want to delete this listing?")) return;
-    
+
     try {
       await listingService.deleteListing(listingId);
       toast.success("Listing deleted");
@@ -101,7 +114,7 @@ export default function MyListings() {
             </Link>
             <HeadingText>My Listings</HeadingText>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Link
               to={webRoutes.marketplaceSellerPayments}
@@ -249,10 +262,9 @@ export default function MyListings() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1">
-                        <span>{getCurrencySymbol(listing.currency || 'NGN')}</span>
-                        <span className="font-medium">{parseFloat(listing.price).toFixed(2)}</span>
+                        <span className="font-medium">{formatListingPrice(listing)}</span>
                       </div>
-                      {listing.compare_at_price && (
+                      {hasListingPrice(listing) && listing.compare_at_price && (
                         <span className="text-sm text-gray-400 line-through">
                           {getCurrencySymbol(listing.currency || 'NGN')}{parseFloat(listing.compare_at_price).toFixed(2)}
                         </span>
@@ -275,14 +287,14 @@ export default function MyListings() {
                         >
                           <Edit2 size={16} className="text-gray-600" />
                         </Link>
-                        
+
                         <button
                           onClick={() => setActiveMenu(activeMenu === listing.id ? null : listing.id)}
                           className="p-2 hover:bg-gray-100 rounded-lg"
                         >
                           <MoreVertical size={16} className="text-gray-600" />
                         </button>
-                        
+
                         {/* Dropdown Menu */}
                         {activeMenu === listing.id && (
                           <div className="absolute right-0 top-0 mt-1 bg-white border rounded-lg shadow-lg py-2 z-[999] min-w-[160px]">

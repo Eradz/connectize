@@ -124,11 +124,13 @@ export const getOrCreateProductImages = async (image, { onUploadProgress }) => {
 };
 
 export const getProductCategories = async (params, returnFullRes = false) => {
-  const { results, next } = await makeApiRequest({
+  const response = await makeApiRequest({
     url: `api/product-categories/`,
     method: "GET",
     params,
   });
+  const results = Array.isArray(response) ? response : response?.results;
+  const next = Array.isArray(response) ? null : response?.next;
 
   if (returnFullRes) return { data: results, next };
 

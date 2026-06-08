@@ -12,6 +12,7 @@ import { getMessagesForUser, getFavoriteChats } from "../api-services/messaging"
 import { getAllCompanies } from "../api-services/companies";
 import { getAllRepresentatives } from "../api-services/representatives";
 import { getPosts } from "../api-services/posts";
+import useMessagingWebSocket from "../hooks/useMessagingWebSocket";
 import { useMessagesStore } from "../stores/messagesStore";
 
 /**
@@ -26,6 +27,7 @@ export function GlobalPrefetch() {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
   const hasPrefetched = useRef(false);
+  useMessagingWebSocket({ enabled: Boolean(user) && !loading });
   
   // Get store actions for messages (uses Zustand)
   const fetchLastMessages = useMessagesStore((state) => state.getLastMessages);
