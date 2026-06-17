@@ -31,6 +31,7 @@ export default function DealRoomEdit() {
   });
 
   const [companies, setCompanies] = useState([]);
+  const [companiesLoading, setCompaniesLoading] = useState(true);
 
   // Fetch the current user's companies from the API
   useEffect(() => {
@@ -38,12 +39,15 @@ export default function DealRoomEdit() {
     let cancelled = false;
     const fetchCompanies = async () => {
       try {
+        setCompaniesLoading(true);
         const result = await getCompanyByIdOrEmail(null);
         if (!cancelled && Array.isArray(result)) {
           setCompanies(result);
         }
       } catch (err) {
         console.error('Failed to fetch user companies:', err);
+      } finally {
+        if (!cancelled) setCompaniesLoading(false);
       }
     };
     fetchCompanies();
@@ -243,7 +247,11 @@ export default function DealRoomEdit() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Company
                 </label>
-                {companies.length === 0 ? (
+                {companiesLoading ? (
+                  <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    Loading companies...
+                  </div>
+                ) : companies.length === 0 ? (
                   <div className="text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                     You don’t have a company yet. Create one before assigning this deal room.
                   </div>
