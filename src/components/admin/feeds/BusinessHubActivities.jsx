@@ -106,6 +106,9 @@ function useBusinessHubData() {
 // ─── Section Components ─────────────────────────────────────────────────────
 
 function ActivitySection({ icon: Icon, iconBg, iconColor, title, viewMoreUrl, children, isEmpty }) {
+  // Hide the whole card when there's no content to show.
+  if (isEmpty) return null;
+
   return (
     <div className="bg-white rounded-xl p-3 space-y-1">
       <div className="flex items-center justify-between px-1">
@@ -123,11 +126,7 @@ function ActivitySection({ icon: Icon, iconBg, iconColor, title, viewMoreUrl, ch
         </div>
       </div>
 
-      {isEmpty ? (
-        <p className="text-xs text-gray-400 px-1 py-2">No recent activity</p>
-      ) : (
-        <div className="space-y-0.5">{children}</div>
-      )}
+      <div className="space-y-0.5">{children}</div>
 
       <Link
         to={viewMoreUrl}
@@ -437,6 +436,18 @@ function ActivitySkeleton() {
 // ─── Main Component ─────────────────────────────────────────────────────────
 export default function BusinessHubActivities() {
   const { data, isLoading } = useBusinessHubData();
+
+  // When not loading, hide the entire section if every card is empty.
+  const hasAnyContent =
+    (data?.dealRooms?.length || 0) +
+      (data?.jobs?.length || 0) +
+      (data?.events?.length || 0) +
+      (data?.articles?.length || 0) +
+      (data?.listings?.length || 0) +
+      (data?.logistics?.length || 0) >
+    0;
+
+  if (!isLoading && !hasAnyContent) return null;
 
   return (
     <section className="w-full">

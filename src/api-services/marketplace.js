@@ -478,7 +478,7 @@ export default {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await axios.get(`${API_BASE_URL}/api/inventory/items/`, {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/inventory/items/`, {
       headers,
     });
     return response.data;
@@ -500,7 +500,7 @@ export default {
       headers.Authorization = `Bearer ${token}`;
     }
     
-    const response = await axios.get(`${API_BASE_URL}/api/providers/`, { headers });
+    const response = await axios.get(`${API_BASE_URL}/api/v1/logistics/providers/`, { headers });
     return response.data;
   },
   
