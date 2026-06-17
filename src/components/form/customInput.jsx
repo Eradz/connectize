@@ -275,3 +275,95 @@ export const CustomSelect = ({
     ))}
   </Select>
 );
+
+export const CURRENCIES = [
+  { code: "NGN", symbol: "₦" },
+  { code: "USD", symbol: "$" },
+  { code: "GBP", symbol: "£" },
+  { code: "EUR", symbol: "€" },
+  { code: "GHS", symbol: "GH₵" },
+  { code: "ZAR", symbol: "R" },
+  { code: "KES", symbol: "KSh" },
+  { code: "CAD", symbol: "CA$" },
+  { code: "XOF", symbol: "CFA" },
+];
+
+const DEFAULT_CURRENCY = "₦";
+
+function parseCurrencyValue(raw) {
+  if (!raw || typeof raw !== "string") {
+    return { symbol: DEFAULT_CURRENCY, amount: "" };
+  }
+  const match = CURRENCIES.find((c) => raw.startsWith(c.symbol));
+  if (match) {
+    return { symbol: match.symbol, amount: raw.slice(match.symbol.length).trim() };
+  }
+  return { symbol: DEFAULT_CURRENCY, amount: raw.trim() };
+}
+
+export const CurrencyInput = ({ formik, name, placeholder, validate, error }) => {
+  const parsed = parseCurrencyValue(formik.values[`${name}`]);
+  const [symbol, setSymbol] = useState(
+    parsed.amount
+      ? parsed.symbol
+      : localStorage.getItem(`${name}_currency`) || DEFAULT_CURRENCY
+  );
+  const [amount, setAmount] = useState(parsed.amount);
+
+  const commit = (nextSymbol, nextAmount) => {
+    const trimmed = String(nextAmount ?? "").trim();
+    const combined = trimmed ? `${nextSymbol} ${trimmed}` : "";
+    localStorage.setItem(`${name}_currency`, nextSymbol);
+    localStorage.setItem(name, combined);
+    formik.setFieldValue(name, combined);
+  };
+
+  const handleSymbolChange = (e) => {
+    const next = e.currentTarget.value;
+    setSymbol(next);
+    commit(next, amount);
+  };
+
+  const handleAmountChange = (e) => {
+    const next = e.currentTarget.value.replace(/[^0-9.]/g, "");
+    setAmount(next);
+    commit(symbol, next);
+  };
+
+  return (
+    <div className="relative w-full mt-2 flex items-stretch">
+      <Select
+        aria-label="Currency"
+        value={symbol}
+        onChange={handleSymbolChange}
+        onBlur={() => formik.setFieldTouched(name, true)}
+        className="!w-28 shrink-0 !bg-background px-2 !text-base md:!text-sm border-gray-100 !rounded-r-none"
+      >
+        {CURRENCIES.map((c) => (
+          <option key={c.code} value={c.symbol}>
+            {c.symbol} {c.code}
+          </option>
+        ))}
+      </Select>
+      <Input
+        autoComplete="true"
+        inputMode="decimal"
+        type="text"
+        placeholder={placeholder}
+        value={amount}
+        onChange={handleAmountChange}
+        onBlur={() => formik.setFieldTouched(name, true)}
+        id={name}
+        name={name}
+        className={clsx(
+          inputClassNames,
+          "!mt-0 !rounded-l-none focus:!outline-none",
+          {
+            "!border-green-800 !bg-green-50/50": validate && !error,
+            "!border-[#9e3818] !bg-[#9e3818]/5 animate-shake": error,
+          }
+        )}
+      />
+    </div>
+  );
+};

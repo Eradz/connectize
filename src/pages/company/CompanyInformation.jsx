@@ -71,9 +71,9 @@ const CompanyInformation = () => {
     },
     {
       name: "company_annual_revenue",
-      type: "number",
+      type: "currency",
       label: "Company's average annual revenue",
-      placeholder: "Select range of average annual revenue",
+      placeholder: "Enter average annual revenue",
     },
   ];
   return (
