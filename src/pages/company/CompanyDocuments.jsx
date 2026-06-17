@@ -18,6 +18,7 @@ import LightParagraph from "../../components/ParagraphText";
 import Form from "../../components/form";
 import { ImageSelect } from "../../components/form/customInput";
 import StepButton from "../../components/profile/StepButton";
+import SaveDraftButton from "../../components/profile/SaveDraftButton";
 import { customFormikFieldValidator } from "../../lib/utils";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
@@ -158,11 +159,14 @@ const CompanyDocuments = () => {
           nextStep={webRoutes.companyInformation}
           stepText="Back"
         />
-        <StepButton
-          doStepChange={doStepChange}
-          nextStep={newCompanyName || "/"}
-          stepText="Submit"
-        />
+        <div className="flex items-center gap-3">
+          <SaveDraftButton formik={formik} />
+          <StepButton
+            doStepChange={doStepChange}
+            nextStep={newCompanyName || "/"}
+            stepText="Submit"
+          />
+        </div>
       </div>
     </section>
   );

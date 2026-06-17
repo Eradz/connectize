@@ -16,6 +16,7 @@ export const meta = () =>
 
 import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
+import SaveDraftButton from "../../components/profile/SaveDraftButton";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
 import { getCompanyCategories, getCompanySizes } from "../../api-services/companies";
@@ -212,11 +213,14 @@ const CreateCompany = () => {
       />
       <div className="flex justify-between my-6">
         <div></div>
-        <StepButton
-          doStepChange={doStepChange}
-          nextStep={webRoutes.companyInformation}
-          stepText="Next"
-        />
+        <div className="flex items-center gap-3">
+          <SaveDraftButton formik={formik} />
+          <StepButton
+            doStepChange={doStepChange}
+            nextStep={webRoutes.companyInformation}
+            stepText="Next"
+          />
+        </div>
       </div>
     </section>
   );

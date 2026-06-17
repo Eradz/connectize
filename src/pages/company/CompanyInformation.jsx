@@ -14,6 +14,7 @@ import Form from "../../components/form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import StepButton from "../../components/profile/StepButton";
+import SaveDraftButton from "../../components/profile/SaveDraftButton";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
 
@@ -98,11 +99,14 @@ const CompanyInformation = () => {
           nextStep={webRoutes.createCompany}
           stepText="Back"
         />
-        <StepButton
-          doStepChange={doStepChange}
-          nextStep={webRoutes.companyDocuments}
-          stepText="Next"
-        />
+        <div className="flex items-center gap-3">
+          <SaveDraftButton formik={formik} />
+          <StepButton
+            doStepChange={doStepChange}
+            nextStep={webRoutes.companyDocuments}
+            stepText="Next"
+          />
+        </div>
       </div>
     </section>
   );
