@@ -558,11 +558,15 @@ const ProductSidebar = React.memo(({ company }) => {
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-bold">Summary</h2>
           {isCurrentUser && (
-            <button className="text-gray-500 hover:text-black">
+            <Link
+              to={`/company/${companyName}/edit`}
+              aria-label="Edit summary"
+              className="text-gray-500 hover:text-black"
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.334 2.00004L14 4.66671M1.33398 14.6667L3.42998 14.3907C3.70189 14.3578 3.83785 14.3413 3.96646 14.3019C4.08041 14.2672 4.18965 14.2182 4.29146 14.1562C4.40647 14.0864 4.50793 13.9949 4.71084 13.792L14.0007 4.50204C14.7371 3.76562 14.7371 2.56846 14.0007 1.83204C13.2642 1.09562 12.0671 1.09562 11.3307 1.83204L2.04065 11.122C1.83774 11.3249 1.73629 11.4264 1.66646 11.5414C1.60453 11.6432 1.55562 11.7524 1.52094 11.8664C1.48156 11.995 1.46509 12.131 1.43214 12.4029L1.33398 14.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </button>
+            </Link>
           )}
         </div>
         <p className="text-sm text-gray-600 leading-relaxed">
@@ -575,11 +579,15 @@ const ProductSidebar = React.memo(({ company }) => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">ABOUT</h2>
           {isCurrentUser && (
-            <button className="text-gray-500 hover:text-black">
+            <Link
+              to={`/company/${companyName}/edit`}
+              aria-label="Edit company information"
+              className="text-gray-500 hover:text-black"
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.334 2.00004L14 4.66671M1.33398 14.6667L3.42998 14.3907C3.70189 14.3578 3.83785 14.3413 3.96646 14.3019C4.08041 14.2672 4.18965 14.2182 4.29146 14.1562C4.40647 14.0864 4.50793 13.9949 4.71084 13.792L14.0007 4.50204C14.7371 3.76562 14.7371 2.56846 14.0007 1.83204C13.2642 1.09562 12.0671 1.09562 11.3307 1.83204L2.04065 11.122C1.83774 11.3249 1.73629 11.4264 1.66646 11.5414C1.60453 11.6432 1.55562 11.7524 1.52094 11.8664C1.48156 11.995 1.46509 12.131 1.43214 12.4029L1.33398 14.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </button>
+            </Link>
           )}
         </div>
         
