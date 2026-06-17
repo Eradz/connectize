@@ -124,6 +124,19 @@ export const createCompany = async (data, resetForm) => {
   return company;
 };
 
+export const getCompanyCategories = async () => {
+  const res = await makeApiRequest({
+    url: `api/company-categories/`,
+    method: "GET",
+    params: { page_size: 100 },
+  });
+
+  const list = Array.isArray(res) ? res : res?.results || [];
+  return list
+    .map((category) => category?.name)
+    .filter((name) => typeof name === "string" && name.trim().length > 0);
+};
+
 export const getOrCreateCompanyCategories = async (name) => {
   const { results: categories } = await makeApiRequest({
     url: `api/company-categories/`,

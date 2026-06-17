@@ -1,6 +1,7 @@
 import { getCountries } from "@loophq/country-state-list";
 import { useFormik } from "formik";
 import { useContext, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import * as Yup from "yup";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
@@ -17,6 +18,20 @@ import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
+import { getCompanyCategories } from "../../api-services/companies";
+
+// Fallback used only if the backend categories can't be loaded.
+const FALLBACK_COMPANY_CATEGORIES = [
+  "Drilling Contractor Company",
+  "Integrated Oil & Gas Company",
+  "Independent Oil & Gas Company",
+  "Oil Service Company",
+  "Oil Equipment Manufacturer",
+  "Media Company",
+  "Security",
+  "Renewable Energy Company",
+  "Oil Refining",
+];
 
 export const validationSchema = Yup.object().shape({
   company_name: Yup.string().required("Company name cannot be empty"),
@@ -54,6 +69,18 @@ const CreateCompany = () => {
   const formik = formiks?.indexFormik;
 
   const countriesString = countries.map((country) => country.name);
+
+  const { data: companyCategories } = useQuery({
+    queryKey: ["company-categories"],
+    queryFn: getCompanyCategories,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const companyTypeOptions =
+    companyCategories && companyCategories.length > 0
+      ? companyCategories
+      : FALLBACK_COMPANY_CATEGORIES;
 
   const stateForCountry =
     countries.find((country) => country.name === formik.values["country"])
@@ -128,17 +155,7 @@ const CreateCompany = () => {
           type: "select",
           label: "Company type",
           placeholder: "Select company type",
-          options: [
-            "Drilling Contractor Company",
-            "Integrated Oil & Gas Company",
-            "Independent Oil & Gas Company",
-            "Oil Service Company",
-            "Oil Equipment Manufacturer",
-            "Media Company",
-            "Security",
-            "Renewable Energy Company",
-            "Oil Refining",
-          ],
+          options: companyTypeOptions,
         },
         {
           name: "company_size",
