@@ -18,7 +18,7 @@ import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
-import { getCompanyCategories } from "../../api-services/companies";
+import { getCompanyCategories, getCompanySizes } from "../../api-services/companies";
 
 // Fallback used only if the backend categories can't be loaded.
 const FALLBACK_COMPANY_CATEGORIES = [
@@ -31,6 +31,13 @@ const FALLBACK_COMPANY_CATEGORIES = [
   "Security",
   "Renewable Energy Company",
   "Oil Refining",
+];
+
+// Fallback used only if the backend sizes can't be loaded.
+const FALLBACK_COMPANY_SIZES = [
+  "0-10 employees",
+  "11-50 employees",
+  "50 and above employees",
 ];
 
 export const validationSchema = Yup.object().shape({
@@ -81,6 +88,18 @@ const CreateCompany = () => {
     companyCategories && companyCategories.length > 0
       ? companyCategories
       : FALLBACK_COMPANY_CATEGORIES;
+
+  const { data: companySizes } = useQuery({
+    queryKey: ["company-sizes"],
+    queryFn: getCompanySizes,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const companySizeOptions =
+    companySizes && companySizes.length > 0
+      ? companySizes
+      : FALLBACK_COMPANY_SIZES;
 
   const stateForCountry =
     countries.find((country) => country.name === formik.values["country"])
@@ -162,11 +181,7 @@ const CreateCompany = () => {
           type: "select",
           label: "Company's size",
           placeholder: "Select range",
-          options: [
-            "0-10 employees",
-            "11-50 employees",
-            "50 and above employees",
-          ],
+          options: companySizeOptions,
         },
       ],
     },

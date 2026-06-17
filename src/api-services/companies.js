@@ -137,6 +137,19 @@ export const getCompanyCategories = async () => {
     .filter((name) => typeof name === "string" && name.trim().length > 0);
 };
 
+export const getCompanySizes = async () => {
+  const res = await makeApiRequest({
+    url: `api/company-sizes/`,
+    method: "GET",
+    params: { page_size: 100 },
+  });
+
+  const list = Array.isArray(res) ? res : res?.results || [];
+  return list
+    .map((item) => item?.size)
+    .filter((size) => typeof size === "string" && size.trim().length > 0);
+};
+
 export const getOrCreateCompanyCategories = async (name) => {
   const { results: categories } = await makeApiRequest({
     url: `api/company-categories/`,
