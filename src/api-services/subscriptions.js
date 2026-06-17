@@ -580,6 +580,12 @@ const subscriptions = {
   getBillingData: function(params = {}) {
     return this.getBillingHistory(params).then(d => ({ data: d?.data || d }));
   },
+
+  // Admin-controlled promotional banner (public)
+  getPromotionalBanner: async () => {
+    const response = await api.get('/api/v1/promotional-banner/');
+    return response.data;
+  },
 };
 
 export default subscriptions;
