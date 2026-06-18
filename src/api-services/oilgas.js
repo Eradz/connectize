@@ -542,10 +542,11 @@ export class WorkforceEventService extends CrudService {
     });
   }
 
-  async getUpcomingEvents() {
+  async getUpcomingEvents(params = {}) {
     return makeApiRequest({
       url: `${this.basePath}upcoming/`,
       method: "GET",
+      params,
     });
   }
 
