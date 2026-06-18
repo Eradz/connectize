@@ -28,11 +28,11 @@ import useRedirect from "../../hooks/useRedirect";
 import { useAuth } from "../../context/userContext";
 
 const validationSchema = Yup.object().shape({
-  nationality: Yup.string().trim().required("This field is required"),
-  state: Yup.string().trim().required("This field is required"),
+  nationality: Yup.string().trim().optional(),
+  state: Yup.string().trim().optional(),
   city: Yup.string().optional(),
-  postal_code: Yup.string().trim().required("This field is required"),
-  company_address: Yup.string().trim().required("This field is required"),
+  postal_code: Yup.string().trim().optional(),
+  company_address: Yup.string().trim().optional(),
 });
 
 function Address() {

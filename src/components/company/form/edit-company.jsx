@@ -46,16 +46,16 @@ export default function EditCompanyForm({ company }) {
   };
 
   const validationSchema = Yup.object({
-    company_name: Yup.string().required("Company name is required"),
+    company_name: Yup.string().optional(),
     email: Yup.string().email("Invalid email address").optional(),
     about: Yup.string().optional(),
     website: Yup.string().url("Invalid website URL").optional(),
     office_address: Yup.string().optional(),
-    country: Yup.string().required("Country is required"),
-    state: Yup.string().required("State is required"),
+    country: Yup.string().optional(),
+    state: Yup.string().optional(),
     city: Yup.string().optional(),
     tag_line: Yup.string().optional(),
-    organization_type: Yup.string().required("Organization type is required"),
+    organization_type: Yup.string().optional(),
   });
 
   const [loading, setLoading] = useState(false);

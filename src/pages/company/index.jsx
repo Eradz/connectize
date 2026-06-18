@@ -42,15 +42,15 @@ const FALLBACK_COMPANY_SIZES = [
 ];
 
 export const validationSchema = Yup.object().shape({
-  company_name: Yup.string().required("Company name cannot be empty"),
-  company_tagline: Yup.string().required("Company tagline cannot be empty"),
-  company_email: Yup.string().required("Company email cannot be empty"),
-  company_address: Yup.string().required("Company address cannot be empty"),
-  country: Yup.string().required("Country cannot be empty"),
-  city: Yup.string().required("City cannot be empty"),
+  company_name: Yup.string().optional(),
+  company_tagline: Yup.string().optional(),
+  company_email: Yup.string().email("Invalid email address").optional(),
+  company_address: Yup.string().optional(),
+  country: Yup.string().optional(),
+  city: Yup.string().optional(),
   company_website: Yup.string().optional(),
-  company_category: Yup.string().required("Company category cannot be empty"),
-  company_size: Yup.string().required("Company size cannot be empty"),
+  company_category: Yup.string().optional(),
+  company_size: Yup.string().optional(),
   company_description: Yup.string().optional(),
 });
 

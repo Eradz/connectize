@@ -19,9 +19,9 @@ import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
 
 export const validationSchema = Yup.object().shape({
-  company_registration_no: Yup.string().required("Field cannot be empty"),
-  company_registration_date: Yup.string().required("Field cannot be empty"),
-  company_annual_revenue: Yup.string().required("Field cannot be empty"),
+  company_registration_no: Yup.string().optional(),
+  company_registration_date: Yup.string().optional(),
+  company_annual_revenue: Yup.string().optional(),
 });
 
 export function getInitialValues() {

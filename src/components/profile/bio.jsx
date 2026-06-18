@@ -25,7 +25,7 @@ import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
 
 const validationSchema = Yup.object().shape({
-  bio: Yup.string().trim().required("This field is required"),
+  bio: Yup.string().trim().optional(),
   website_url: Yup.string()
     .trim()
     .transform((value) => {
