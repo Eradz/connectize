@@ -53,6 +53,12 @@ const normalizeStoreListings = (storeData) => {
   return Array.isArray(listings) ? listings.filter(Boolean) : [];
 };
 
+const normalizeListResponse = (response) => {
+  const payload = response?.data ?? response;
+  const list = payload?.results ?? payload;
+  return Array.isArray(list) ? list.filter(Boolean) : [];
+};
+
 const isServiceListing = (listing) =>
   String(listing?.listing_type || listing?.type || "").toLowerCase() === "service";
 
@@ -99,6 +105,7 @@ const CompanyProfile = React.memo(() => {
   const [activeTab, setActiveTab] = useState("Activities");
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
+  const companyDisplayName = company?.company_name || companyName;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registrations, setRegistrations] = useState([]);
@@ -110,7 +117,11 @@ const CompanyProfile = React.memo(() => {
     try {
       setLoading(true);
       const response = await workforceAPI.getEvents();
-      setRegistrations((response.data.results || response.data).filter(event => event?.organizer_company_name === companyName) || []);
+      setRegistrations(
+        normalizeListResponse(response).filter(
+          event => event?.organizer_company_name === companyDisplayName
+        )
+      );
           setError(null);
         } catch (err) {
           console.error('Error loading registrations:', err);
@@ -125,7 +136,7 @@ const CompanyProfile = React.memo(() => {
               try {
                 setLoading(true);
                 const response = await workforceAPI.getJobs();
-                const data = (response.data?.results || response.data || response)?.filter(job => job?.company_name == companyName) || [];
+                const data = normalizeListResponse(response).filter(job => job?.company_name == companyDisplayName);
                 console.log("Filtered jobs:", data);
                 setApplications(data);
             // No separate filtered state; derived via useMemo
@@ -157,7 +168,7 @@ const CompanyProfile = React.memo(() => {
   useEffect(() => {
     loadMyRegistrations();
     loadCreatedJobs();
-  }, []);
+  }, [companyDisplayName]);
 
   useEffect(() => {
     loadDealRooms();
@@ -264,7 +275,7 @@ const CompanyProfile = React.memo(() => {
         ))}
       </div>
       <section className=" flex max-xl:flex-col items-start gap-2 relative sm:px-2">
-              <ProductSidebar company={company} />
+              <ProductSidebar company={company} companyName={companyName} />
           <ProfileSection className="max-xl:w-full grid grid-cols-1 gap-2 flex-1 pt-0">
           <div className="">
             <h2 className="text-xl font-semibold mb-4">Quick action</h2>
@@ -519,12 +530,13 @@ export const ManageRepresentativesLink = ({ main = false }) => {
   );
 };
 
-const ProductSidebar = React.memo(({ company }) => {
+const ProductSidebar = React.memo(({ company, companyName }) => {
 
   const { user: currentUser } = useAuth();
   const [showReportModal, setShowReportModal] = useState(false);
 
   const isCurrentUser = currentUser?.id === company?.user?.id;
+  const editCompanyName = companyName || company?.slug || company?.company_name || company?.id;
 
  const myAccounts = [
     {
@@ -559,7 +571,7 @@ const ProductSidebar = React.memo(({ company }) => {
           <h2 className="text-lg font-bold">Summary</h2>
           {isCurrentUser && (
             <Link
-              to={`/company/${companyName}/edit`}
+              to={`/company/${editCompanyName}/edit`}
               aria-label="Edit summary"
               className="text-gray-500 hover:text-black"
             >
@@ -580,7 +592,7 @@ const ProductSidebar = React.memo(({ company }) => {
           <h2 className="text-lg font-bold">ABOUT</h2>
           {isCurrentUser && (
             <Link
-              to={`/company/${companyName}/edit`}
+              to={`/company/${editCompanyName}/edit`}
               aria-label="Edit company information"
               className="text-gray-500 hover:text-black"
             >

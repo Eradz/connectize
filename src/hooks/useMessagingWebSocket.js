@@ -21,7 +21,7 @@ const useMessagingWebSocket = ({ enabled = true } = {}) => {
   // useWebSocket("chat", room_name, {
   //   onMessage: handleNewMessage,
   // });
-  useWebSocket("unified", undefined, {
+  useWebSocket("chat", undefined, {
     onMessage: handleNewMessage,
     enabled: enabled && Boolean(currentUser?.id),
   });

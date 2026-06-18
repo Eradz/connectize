@@ -30,6 +30,13 @@ import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
 import { formatCurrency } from '../../utils/currency';
+
+const normalizeListResponse = (response) => {
+  const payload = response?.data ?? response;
+  const list = payload?.results ?? payload;
+  return Array.isArray(list) ? list.filter(Boolean) : [];
+};
+
 const WorkforceEventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -146,9 +153,10 @@ const WorkforceEventDetail = () => {
       const checkMyRegistration = async () => {
         try {
           const response = await workforceAPI.getMyEventRegistrations();
+          const registrations = normalizeListResponse(response);
 
-          if (response.data?.results) {
-            const myReg = response.data.results.find(reg => {
+          if (registrations.length > 0) {
+            const myReg = registrations.find(reg => {
               const regEventId = reg.event?.id;
               const currentEventId = event.id;
               return String(regEventId) === String(currentEventId);

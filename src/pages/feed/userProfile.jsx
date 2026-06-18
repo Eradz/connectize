@@ -45,6 +45,12 @@ import DealRoomParticipationCard from "../../components/dealRoom/DealRoomPartici
 
 const emptyWord = "Not Added";
 
+const normalizeListResponse = (response) => {
+  const payload = response?.data ?? response;
+  const list = payload?.results ?? payload;
+  return Array.isArray(list) ? list.filter(Boolean) : [];
+};
+
 export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
@@ -79,7 +85,7 @@ export default function UserProfile() {
       try {
         setLoading(true);
         const response = await workforceAPI.getMyEventRegistrations({ userId });
-        setRegistrations(response.data.results || response.data || []);
+        setRegistrations(normalizeListResponse(response));
         setError(null);
       } catch (err) {
         console.error('Error loading registrations:', err);
@@ -94,7 +100,7 @@ export default function UserProfile() {
       try {
         setLoading(true);
         const response = await workforceAPI.getEvents();
-        setCreatedEvents((response.data.results || response.data || response.results)?.filter(event => event?.organizer == userId) || []);
+        setCreatedEvents(normalizeListResponse(response).filter(event => event?.organizer == userId));
         setError(null);
       } catch (err) {
         console.error('Error loading created events:', err);
