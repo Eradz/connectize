@@ -29,19 +29,25 @@ export const SUPPORTED_FORMATS = [
   "text/plain",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ".docx",
 ];
+const SUPPORTED_EXTENSIONS = [".pdf", ".txt", ".doc", ".docx"];
 
 export const unSupportedText =
   "Unsupported file format, only .pdfs, msword, .docx and plain text are allowed";
 
 export const largeFileText =
-  "File size is too large, only images less than 10mb is allowed";
+  "File size is too large, only documents less than 10mb are allowed";
 
 export function checkFileFormat(value) {
   if (!value) return true;
 
-  return value && SUPPORTED_FORMATS.includes(value.type.toLowerCase());
+  const fileType = String(value.type || "").toLowerCase();
+  const fileName = String(value.name || "").toLowerCase();
+
+  return (
+    SUPPORTED_FORMATS.includes(fileType) ||
+    SUPPORTED_EXTENSIONS.some((extension) => fileName.endsWith(extension))
+  );
 }
 
 export function checkFileSize(value) {
@@ -50,9 +56,24 @@ export function checkFileSize(value) {
 }
 
 export const validationSchema = Yup.object().shape({
-  document_type: Yup.string().optional(),
+  document_type: Yup.string()
+    .optional()
+    .test(
+      "document-type-required",
+      "Select a document type",
+      function (value) {
+        return !this.parent.company_document || Boolean(value?.trim());
+      }
+    ),
   company_document: Yup.mixed()
     .optional()
+    .test(
+      "document-required",
+      "Select a document file",
+      function (value) {
+        return !this.parent.document_type || Boolean(value);
+      }
+    )
     .test("file-size", largeFileText, checkFileSize)
     .test("file-format", unSupportedText, checkFileFormat),
 });
