@@ -255,8 +255,6 @@ export const useMessagesStore = create((set, get) => ({
               room_name: room_name,
               other_user: {
                 id: recipientId,
-                first_name: "Unknown",
-                last_name: "User",
               },
             },
           });
@@ -475,8 +473,8 @@ export const useMessagesStore = create((set, get) => ({
           ...newMessage,
           other_user: {
             id: otherUserId,
-            first_name: otherUserInfo?.first_name || "Unknown",
-            last_name: otherUserInfo?.last_name || "User",
+            first_name: otherUserInfo?.first_name,
+            last_name: otherUserInfo?.last_name,
             avatar: otherUserInfo?.avatar,
             role: otherUserInfo?.role,
             email: otherUserInfo?.email,

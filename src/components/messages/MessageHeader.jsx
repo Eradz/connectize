@@ -10,6 +10,7 @@ import Username from "../Username";
 import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
 import { useAuth } from "../../context/userContext";
+import { getUserDisplayName } from "../../lib/userDisplay";
 
 function MessageHeader() {
   const { user: currentUser } = useAuth();
@@ -43,9 +44,7 @@ function MessageHeader() {
   ) {
     nameToDisplay = `${openedMessage?.other_user?.first_name} ${openedMessage?.other_user?.last_name}`;
   } else {
-    nameToDisplay =
-      openedMessage?.other_user?.first_name ||
-      openedMessage?.other_user?.last_name;
+    nameToDisplay = getUserDisplayName(openedMessage?.other_user);
   }
   useEffect(() => {
     if (!room_name) return;
