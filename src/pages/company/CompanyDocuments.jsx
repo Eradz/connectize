@@ -141,6 +141,16 @@ const getDocumentTypeForUpload = (document) => {
   return document.documentType.trim();
 };
 
+const getCompanyRouteSegment = (company, fallbackName) => {
+  return String(
+    company?.route_slug ||
+      company?.slug ||
+      company?.company_name ||
+      fallbackName ||
+      ""
+  ).trim();
+};
+
 const CompanyDocuments = () => {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -224,6 +234,7 @@ const CompanyDocuments = () => {
     const toastId = toast.info(
       `Onboarding ${formiks.indexFormik.values.company_name} to the connectize platform`
     );
+    const submittedCompanyName = formiks.indexFormik.values.company_name;
 
     const companyDocumentsForUpload = companyDocuments.map((document) => ({
       type: getDocumentTypeForUpload(document),
@@ -238,11 +249,15 @@ const CompanyDocuments = () => {
     });
 
     if (newCompany) {
+      const companyRouteSegment = getCompanyRouteSegment(
+        newCompany,
+        submittedCompanyName
+      );
       for (let key in formiks.indexFormik.values) localStorage.removeItem(key);
       for (let key in formiks.companyInfoFormik.values) localStorage.removeItem(key);
       for (let key in formik.values) localStorage.removeItem(key);
       toast.dismiss(toastId);
-      navigate(`/${newCompany.slug || newCompany.company_name}`);
+      navigate(companyRouteSegment ? `/${encodeURIComponent(companyRouteSegment)}` : "/");
       return false; // Return false to prevent StepButton from overriding navigation
     }
     toast.dismiss(toastId);

@@ -83,9 +83,37 @@ const getCompanyNameForUpload = (company, fallbackName) => {
     company?.company_name ||
       company?.name ||
       company?.data?.company_name ||
+      company?.data?.name ||
       fallbackName ||
       ""
   ).trim();
+};
+
+const slugifyCompanyName = (name) => {
+  return String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+const getCreatedCompanyRecord = (company) => {
+  if (company?.data && typeof company.data === "object") return company.data;
+  if (company?.company && typeof company.company === "object") return company.company;
+  return company && typeof company === "object" ? company : {};
+};
+
+const normalizeCreatedCompany = (company, fallbackName) => {
+  const companyRecord = getCreatedCompanyRecord(company);
+  const companyName = getCompanyNameForUpload(companyRecord, fallbackName);
+  const slug = String(companyRecord?.slug || "").trim() || slugifyCompanyName(companyName);
+
+  return {
+    ...companyRecord,
+    company_name: companyRecord?.company_name || companyName,
+    slug,
+    route_slug: slug || companyName,
+  };
 };
 
 export const createCompany = async (data, resetForm) => {
@@ -126,10 +154,11 @@ export const createCompany = async (data, resetForm) => {
     return;
   }
 
-  const companyNameForUpload = getCompanyNameForUpload(
+  const createdCompany = normalizeCreatedCompany(
     company,
     data.company_name
   );
+  const companyNameForUpload = createdCompany.company_name;
 
   const documentsToUpload = Array.isArray(data.company_documents)
     ? data.company_documents
@@ -157,9 +186,9 @@ export const createCompany = async (data, resetForm) => {
   }
 
   resetForm?.();
-  toast.success(`${companyNameForUpload || data.company_name} was created successfully`);
+  toast.success(`${companyNameForUpload || data.company_name || "Company"} was created successfully`);
 
-  return company;
+  return createdCompany;
 };
 
 export const getCompanyCategories = async () => {
