@@ -25,6 +25,7 @@ function MessageHeader() {
   const [isLoadingOpenedMessage, setIsLoadingOpenedMessage] = useState(false);
 
   // console.log({ openedMessage });
+  const otherUser = openedMessage?.other_user || null;
 
   async function handleSetOpenedMessage() {
     try {
@@ -38,21 +39,35 @@ function MessageHeader() {
 
   let nameToDisplay;
 
-  if (
-    openedMessage?.other_user?.first_name &&
-    openedMessage?.other_user?.last_name
-  ) {
-    nameToDisplay = `${openedMessage?.other_user?.first_name} ${openedMessage?.other_user?.last_name}`;
+  if (otherUser?.first_name && otherUser?.last_name) {
+    nameToDisplay = `${otherUser.first_name} ${otherUser.last_name}`;
   } else {
-    nameToDisplay = getUserDisplayName(openedMessage?.other_user);
+    nameToDisplay = getUserDisplayName(otherUser);
   }
+
   useEffect(() => {
     if (!room_name) return;
     if (openedMessage && openedMessage.room_name == room_name) return;
     handleSetOpenedMessage();
   }, [openedMessage, room_name, loading]);
 
-  const isSentToSelf = currentUser?.id === openedMessage?.other_user?.id;
+  const isSentToSelf = Boolean(
+    currentUser?.id &&
+      otherUser?.id &&
+      String(currentUser.id) === String(otherUser.id)
+  );
+  const userToDisplay = otherUser
+    ? {
+        ...otherUser,
+        ...(isSentToSelf
+          ? { last_name: `${otherUser.last_name || ""} (You)`.trim() }
+          : {}),
+      }
+    : {
+        first_name: "Unknown",
+        last_name: `User${isSentToSelf ? " (You)" : ""}`,
+      };
+
   return (
     <header className="flex items-center justify-between bg-white p-2 pr-4 rounded-t-md gap-2 sticky">
       <ButtonWithTooltipIcon
@@ -69,37 +84,21 @@ function MessageHeader() {
         ) : (
           <>
             <Avatar
-              src={openedMessage?.other_user?.avatar}
+              src={otherUser?.avatar}
               name={nameToDisplay}
               className={avatarStyle}
               width="40px"
               height="40px"
             />
             <div className="text-sm leading-0">
-              <Username
-                user={
-                  nameToDisplay
-                    ? isSentToSelf
-                      ? {
-                          ...openedMessage?.other_user,
-                          last_name:
-                            openedMessage.other_user?.last_name + " (You)",
-                        }
-                      : openedMessage?.other_user
-                    : {
-                        ...openedMessage?.other_user,
-                        first_name: "Unknown",
-                        last_name: "User" + isSentToSelf ? " (You)" : "",
-                      }
-                }
-              />
+              <Username user={userToDisplay} noClick={!otherUser?.id} />
               <Text
                 color="green.500"
                 fontSize="small"
                 fontWeight="600"
                 isTruncated
               >
-                {openedMessage?.other_user?.role}
+                {otherUser?.role}
               </Text>
             </div>
           </>
