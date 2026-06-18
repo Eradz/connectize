@@ -116,18 +116,27 @@ export const createCompany = async (data, resetForm) => {
     return;
   }
 
-  // Upload document if provided, but don't block company creation
-  if (data.document_type && data.company_document) {
+  const documentsToUpload = Array.isArray(data.company_documents)
+    ? data.company_documents
+    : data.document_type && data.company_document
+      ? [{ type: data.document_type, document: data.company_document }]
+      : [];
+
+  if (documentsToUpload.length > 0) {
     try {
-      await createCompanyDocument({
-        type: data.document_type,
-        document: data.company_document,
-        company: company?.company_name,
-      });
+      await Promise.all(
+        documentsToUpload.map((documentItem) =>
+          createCompanyDocument({
+            type: documentItem.type,
+            document: documentItem.document,
+            company: company?.company_name,
+          })
+        )
+      );
     } catch (e) {
       console.error("Document upload failed:", e);
       toast.error(
-        "Company created, but the document upload failed. Please try uploading it again from the company profile."
+        "Company created, but one or more documents failed to upload. Please try uploading them again from the company profile."
       );
     }
   }
@@ -162,6 +171,19 @@ export const getCompanySizes = async () => {
   return list
     .map((item) => item?.size)
     .filter((size) => typeof size === "string" && size.trim().length > 0);
+};
+
+export const getCompanyDocumentTypes = async () => {
+  const res = await makeApiRequest({
+    url: `api/document-types/`,
+    method: "GET",
+    params: { page_size: 100 },
+  });
+
+  const list = Array.isArray(res) ? res : res?.results || [];
+  return list
+    .map((documentType) => documentType?.name || documentType?.type)
+    .filter((name) => typeof name === "string" && name.trim().length > 0);
 };
 
 export const getOrCreateCompanyCategories = async (name) => {
