@@ -78,6 +78,16 @@ const normalizeWebsite = (website) => {
     : `https://${trimmedWebsite}`;
 };
 
+const getCompanyNameForUpload = (company, fallbackName) => {
+  return String(
+    company?.company_name ||
+      company?.name ||
+      company?.data?.company_name ||
+      fallbackName ||
+      ""
+  ).trim();
+};
+
 export const createCompany = async (data, resetForm) => {
   // await getOrCreateCompanyCategories(data.company_category);
 
@@ -116,6 +126,11 @@ export const createCompany = async (data, resetForm) => {
     return;
   }
 
+  const companyNameForUpload = getCompanyNameForUpload(
+    company,
+    data.company_name
+  );
+
   const documentsToUpload = Array.isArray(data.company_documents)
     ? data.company_documents
     : data.document_type && data.company_document
@@ -129,7 +144,7 @@ export const createCompany = async (data, resetForm) => {
           createCompanyDocument({
             type: documentItem.type,
             document: documentItem.document,
-            company: company?.company_name,
+            company: companyNameForUpload,
           })
         )
       );
@@ -142,7 +157,7 @@ export const createCompany = async (data, resetForm) => {
   }
 
   resetForm?.();
-  toast.success(company?.company_name + " was created successfully");
+  toast.success(`${companyNameForUpload || data.company_name} was created successfully`);
 
   return company;
 };
@@ -228,6 +243,7 @@ export const getOrCreateCompanySize = async (size) => {
 
 export const createCompanyDocument = async (data) => {
   const type = String(data?.type || "").trim();
+  const company = String(data?.company || "").trim();
 
   if (!type) {
     throw new Error("Document type is required");
@@ -237,7 +253,7 @@ export const createCompanyDocument = async (data) => {
     throw new Error("Document file is required");
   }
 
-  if (!data?.company) {
+  if (!company) {
     throw new Error("Company is required");
   }
 
@@ -246,7 +262,7 @@ export const createCompanyDocument = async (data) => {
 
   const formData = new FormData();
   formData.append("type", documentTypeName);
-  formData.append("company", data.company);
+  formData.append("company", company);
   formData.append("document", data.document);
 
   const companyDocument = await makeApiRequest({
