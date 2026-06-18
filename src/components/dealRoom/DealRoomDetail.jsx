@@ -23,6 +23,7 @@ import RefreshButton from "../RefreshButton";
 import dealRoomAPI from "../../api-services/dealRoom";
 import ValuationsPanel from "./ValuationsPanel";
 import { useAuth } from "../../context/userContext";
+import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -41,6 +42,26 @@ function currentSection(pathname) {
   if (pathname.includes("/valuations")) return "valuations";
   return "overview";
 }
+
+const nonEmailText = (value) => {
+  const text = String(value || "").trim();
+  return text && !text.includes("@") ? text : "";
+};
+
+const getParticipantIdentity = (participant = {}, index = 0) => {
+  const user = {
+    full_name:
+      nonEmailText(participant.full_name) ||
+      nonEmailText(participant.user_name) ||
+      nonEmailText(participant.name),
+    username: nonEmailText(participant.username),
+    email: participant.user_email || participant.email,
+  };
+  const displayName = getUserDisplayName(user) || `Participant ${index + 1}`;
+  const handle = getUserHandle(user);
+
+  return { displayName, handle };
+};
 
 export default function DealRoomDetail() {
   const { id } = useParams();
@@ -1330,27 +1351,35 @@ export default function DealRoomDetail() {
                     <div className="space-y-2">
                       {participants
                         .filter(p => {
+                          const { displayName, handle } = getParticipantIdentity(p);
                           const matchesSearch = !searchTerm || 
-                            (p.user_name || p.name || p.username || p.user_email || p.email || "").toLowerCase().includes(searchTerm.toLowerCase());
+                            [displayName, handle, p.user_email, p.email]
+                              .filter(Boolean)
+                              .some((value) => String(value).toLowerCase().includes(searchTerm.toLowerCase()));
                           const matchesRole = filterRole === "all" || p.role === filterRole;
                           return matchesSearch && matchesRole;
                         })
-                        .map((p, i) => (
-                          <div key={p.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
-                            <div className="flex items-center space-x-3">
-                              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-pale_yellow">
-                                  {(p.user_name || p.name || p.username || p.user_email || p.email || "U")[0].toUpperCase()}
-                                </span>
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {p.user_name || p.name || p.username || p.user_email || p.email || `Participant ${i + 1}`}
+                        .map((p, i) => {
+                          const { displayName, handle } = getParticipantIdentity(p, i);
+
+                          return (
+                            <div key={p.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
+                              <div className="flex items-center space-x-3">
+                                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-sm font-medium text-pale_yellow">
+                                    {displayName[0]?.toUpperCase() || "U"}
+                                  </span>
                                 </div>
-                                <div className="text-sm text-gray-500">{p.user_email || p.email}</div>
+                                <div>
+                                  <div className="font-medium text-gray-900">
+                                    {displayName}
+                                  </div>
+                                  {handle && (
+                                    <div className="text-sm text-gray-500">@{handle}</div>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2">
                               {p.permission_level && (
                                 <span className={`px-2 py-1 text-xs rounded-full ${
                                   p.permission_level === 'admin' ? 'bg-red-100 text-red-800' :
@@ -1387,8 +1416,14 @@ export default function DealRoomDetail() {
                               )}
                             </div>
                           </div>
-                        ))}
-                      {searchTerm && participants.filter(p => (p.name || p.username || p.email || "").toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                          );
+                        })}
+                      {searchTerm && participants.filter(p => {
+                        const { displayName, handle } = getParticipantIdentity(p);
+                        return [displayName, handle, p.email]
+                          .filter(Boolean)
+                          .some((value) => String(value).toLowerCase().includes(searchTerm.toLowerCase()));
+                      }).length === 0 && (
                         <EmptySearch searchTerm={searchTerm} />
                       )}
                     </div>
@@ -1822,23 +1857,29 @@ export default function DealRoomDetail() {
                   {userSearching && (
                     <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
                   )}
-                  {userResults.map((u) => (
-                    <button
-                      type="button"
-                      key={u.id}
-                      onClick={() => {
-                        const label = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
-                        setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
-                        setUserSearch(label);
-                        setUserResults([]);
-                        setCreateMilestoneForm(prev => ({ ...prev, assigned_to: u.id }));
-                      }}
-                      className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
-                    >
-                      <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
-                      <div className="text-xs text-gray-500">{u.email}</div>
-                    </button>
-                  ))}
+                  {userResults.map((u) => {
+                    const label = getUserDisplayName(u);
+                    const handle = getUserHandle(u);
+
+                    return (
+                      <button
+                        type="button"
+                        key={u.id}
+                        onClick={() => {
+                          setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
+                          setUserSearch(label);
+                          setUserResults([]);
+                          setCreateMilestoneForm(prev => ({ ...prev, assigned_to: u.id }));
+                        }}
+                        className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
+                      >
+                        <div className="text-sm text-gray-900">{label}</div>
+                        {handle && (
+                          <div className="text-xs text-gray-500">@{handle}</div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
               {(!userSearching && userResults.length === 0 && userSearch.length < 0) && (
@@ -2021,22 +2062,28 @@ export default function DealRoomDetail() {
                   {userSearching && (
                     <div className="px-3 py-2 text-sm text-gray-500">Searching...</div>
                   )}
-                  {userResults.map((u) => (
-                    <button
-                      type="button"
-                      key={u.id}
-                      onClick={() => {
-                        const label = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
-                        setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
-                        setUserSearch(label);
-                        setUserResults([]);
-                      }}
-                      className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
-                    >
-                      <div className="text-sm text-gray-900">{u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email}</div>
-                      <div className="text-xs text-gray-500">{u.email}</div>
-                    </button>
-                  ))}
+                  {userResults.map((u) => {
+                    const label = getUserDisplayName(u);
+                    const handle = getUserHandle(u);
+
+                    return (
+                      <button
+                        type="button"
+                        key={u.id}
+                        onClick={() => {
+                          setParticipantForm(prev => ({ ...prev, userId: u.id, userDisplay: label }));
+                          setUserSearch(label);
+                          setUserResults([]);
+                        }}
+                        className="w-full text-left px-3 py-2 hover:border border-[#D9D9D9]"
+                      >
+                        <div className="text-sm text-gray-900">{label}</div>
+                        {handle && (
+                          <div className="text-xs text-gray-500">@{handle}</div>
+                        )}
+                      </button>
+                    );
+                  })}
                   {!userSearching && userResults.length === 0 && userSearch.length < 0 && (
                     <div className="px-3 py-2 text-sm text-gray-500">No users found</div>
                   )}

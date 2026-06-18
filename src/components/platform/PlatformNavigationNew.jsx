@@ -35,6 +35,7 @@ import { JoinedUserCompanyImages } from '../ResponsiveNav';
 import { Avatar } from '@chakra-ui/react';
 import { VerifiedIcon } from '../../icon';
 import { capitalizeFirst } from '../../lib/utils';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 import clsx from 'clsx';
 import { avatarStyle } from '../ResponsiveNav';
 import Headroom from 'react-headroom';
@@ -205,6 +206,13 @@ const PlatformNavigation = ({ children }) => {
   const location = useLocation();
   const { user: currentUser } = useAuth();
   const { hasFeature, hasMinPlan, loading: featureLoading } = useFeatureAccess();
+  const currentUserDisplayName = getUserDisplayName(currentUser);
+  const currentUserHandle = getUserHandle(currentUser);
+  const currentUserSecondaryText = currentUser?.role
+    ? capitalizeFirst(currentUser?.role || "")
+    : currentUserHandle
+      ? `@${currentUserHandle}`
+      : "";
 
   /**
    * Check if user has access to a navigation item based on feature/plan requirements
@@ -414,11 +422,7 @@ const PlatformNavigation = ({ children }) => {
             <div className="flex items-center gap-2">
               <Link to={`/co/${currentUser?.id}`}>
                 <Avatar
-                  name={
-                    currentUser?.first_name
-                      ? `${currentUser?.first_name} ${currentUser?.last_name}`
-                      : currentUser?.email
-                  }
+                  name={currentUserDisplayName}
                   src={currentUser?.avatar || ""}
                   className={clsx(avatarStyle)}
                   size="md"
@@ -430,16 +434,12 @@ const PlatformNavigation = ({ children }) => {
                     to={`/co/${currentUser?.id}`}
                     className="font-semibold text-sm line-clamp-1 break-all"
                   >
-                    {currentUser?.first_name
-                      ? `${currentUser?.first_name} ${currentUser?.last_name}`
-                      : currentUser?.email.split("@")[0]}
+                    {currentUserDisplayName}
                   </Link>
                   <VerifiedIcon color="black" />
                 </div>
                 <span className="text-[.75rem] text-gray-400 !-mt-0.5 block">
-                  {currentUser?.role
-                    ? capitalizeFirst(currentUser?.role || "")
-                    : currentUser?.email}
+                  {currentUserSecondaryText}
                 </span>
               </div>
             </div>

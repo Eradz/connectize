@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { getUserDisplayName } from '../../lib/userDisplay';
 
 /**
  * CommentAsSelector - Allows users to choose whether to comment as themselves or as a company
@@ -21,11 +22,7 @@ export default function CommentAsSelector({
   idPrefix = 'comment-as',
 }) {
   const personalLabel = useMemo(
-    () =>
-      [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
-      user?.username ||
-      user?.email?.split('@')[0] ||
-      'Personal account',
+    () => getUserDisplayName(user) || 'Personal account',
     [user]
   );
 

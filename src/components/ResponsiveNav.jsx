@@ -25,6 +25,7 @@ import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
 import { LogoutOutlined } from "@ant-design/icons";
 import { webRoutes } from "../lib/webRoutes";
+import { getUserDisplayName } from "../lib/userDisplay";
 
 function ResponsiveNav() {
   const { toggleNav } = useNav();
@@ -57,6 +58,7 @@ export const avatarStyle = "!bg-gold !text-black border-2 border-white";
 
 export const JoinedUserCompanyImages = () => {
   const { user: currentUser } = useAuth();
+  const currentUserDisplayName = getUserDisplayName(currentUser);
 
   const { data: companies, isLoading } = useGetCurrentCompany();
 
@@ -120,8 +122,7 @@ export const JoinedUserCompanyImages = () => {
           <PopoverTrigger>
             <Avatar
               src={currentUser?.avatar || ""}
-              name={`${currentUser?.first_name || ""} ${currentUser?.last_name || "" || currentUser?.email
-                }`}
+              name={currentUserDisplayName}
               size={"sm"}
               style={{
                 transform: `translateX(-${6 * 0}px)`,
@@ -206,8 +207,7 @@ export const JoinedUserCompanyImages = () => {
           array={[
             {
               src: currentUser?.avatar || "",
-              name: `${currentUser?.first_name || ""} ${currentUser?.last_name || "" || currentUser?.email
-                }`,
+              name: currentUserDisplayName,
               href: `/co/${currentUser?.id}`,
             },
 

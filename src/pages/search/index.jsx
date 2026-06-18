@@ -40,6 +40,7 @@ import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 import { getRandomOilAndGasKeyword } from "../../lib/helpers/getRandomOilAndGasWords";
+import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 import { CompaniesArray } from "../companies";
 import {
   SearchMarketplaceCard,
@@ -585,13 +586,9 @@ const PeopleGrid = ({ users, navigate }) => {
   return (
     <section className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
       {filtered.map((user) => {
-        const displayName =
-          user?.full_name ||
-          [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
-          user?.display_name ||
-          user?.username ||
-          user?.email ||
-          "User";
+        const displayName = getUserDisplayName(user);
+        const handle = getUserHandle(user);
+
         return (
           <motion.div
             key={user?.id}
@@ -610,11 +607,11 @@ const PeopleGrid = ({ users, navigate }) => {
             />
             <div className="flex flex-col items-center text-center">
               <Username user={user} />
-              {user?.email && (
-                <small className="text-gray-400 line-clamp-1">{user?.email}</small>
+              {handle && (
+                <small className="text-gray-400 line-clamp-1">@{handle}</small>
               )}
             </div>
-            <ConnectButton first_name={user?.first_name} id={user?.id} />
+            <ConnectButton first_name={displayName} id={user?.id} />
           </motion.div>
         );
       })}

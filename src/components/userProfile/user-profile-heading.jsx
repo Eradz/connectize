@@ -12,6 +12,7 @@ import { useState } from "react";
 import BlockUserButton from "../moderation/BlockUserButton";
 import ReportModal from "../moderation/ReportModal";
 import { webRoutes } from "../../lib/webRoutes";
+import { getUserDisplayName } from "../../lib/userDisplay";
 
 export default function UserProfileHeadings({
   first_name,
@@ -23,10 +24,22 @@ export default function UserProfileHeadings({
   followers_count,
   following_count,
   email,
+  full_name,
+  display_name,
+  username,
 }) {
   const { user: currentUser } = useAuth();
   const [cachedConnections, setCachedConnections] = useState(followers_count);
   const [showReportModal, setShowReportModal] = useState(false);
+  const displayName = getUserDisplayName({
+    first_name,
+    last_name,
+    full_name,
+    display_name,
+    username,
+    email,
+  });
+
   return (
     <section className="flex max-md:flex-col md:items-center gap-4 md:justify-between">
       <section className="space-y-1">
@@ -35,11 +48,11 @@ export default function UserProfileHeadings({
             className={clsx(
               "text-2xl xs:leading-tight text-gray-700 font-bold",
               {
-                capitalize: first_name,
+                capitalize: displayName,
               }
             )}
           >
-            {`${first_name || email} ${last_name || ""}`}
+            {displayName}
           </h2>
           {verified && <VerifiedIcon />}
         </div>
@@ -67,12 +80,12 @@ export default function UserProfileHeadings({
           <ConnectButton
             id={id}
             setCachedConnections={setCachedConnections}
-            first_name={first_name}
+            first_name={displayName}
             slug={id}
           />
           <BlockUserButton
             userId={id}
-            userName={`${first_name} ${last_name || ""}`}
+            userName={displayName}
           />
           <Menu>
             <MenuButton

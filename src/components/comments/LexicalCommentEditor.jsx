@@ -8,6 +8,7 @@ import { $getRoot, $createParagraphNode, $createTextNode, $nodesOfType } from 'l
 import { $generateHtmlFromNodes } from '@lexical/html';
 import ToolbarPlugin from './ToolbarPlugin';
 import UnifiedMentionPlugin, { MentionNode } from './UnifiedMentionPlugin';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 
 const theme = {
   paragraph: 'mb-1',
@@ -29,14 +30,6 @@ const normalizeMentionToken = (value) =>
     .replace(/^@/, "")
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-const getUserDisplayName = (user) => {
-  const fullName =
-    user?.full_name ||
-    [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
-
-  return fullName || user?.username || user?.email?.split("@")[0] || "";
-};
 
 const getCompanyDisplayName = (company) =>
   company?.company_name || company?.name || company?.slug || "";
@@ -100,7 +93,7 @@ export default function LexicalCommentEditor({
         const user = users.find((item) =>
           mentionMatches(mentionText, [
             item?.username,
-            item?.email?.split("@")[0],
+            getUserHandle(item),
             getUserDisplayName(item),
           ])
         );

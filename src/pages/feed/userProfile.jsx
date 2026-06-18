@@ -38,6 +38,7 @@ import { dealRoomService, workforceService } from "../../api-services/oilgas";
 import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
 import clsx from "clsx";
 import { webRoutes } from "../../lib/webRoutes";
+import { getUserDisplayName } from "../../lib/userDisplay";
 import Scroll from "../../components/Scroll";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import HeadingText from "../../components/HeadingText";
@@ -182,11 +183,14 @@ export default function UserProfile() {
   });
 
   const headerProps = useMemo(
-    () => ({
-      banner: paramUser?.banner || "",
-      name: `${paramUser?.first_name || ""} ${paramUser?.last_name || ""}`,
-      logo: paramUser?.avatar || "",
-    }),
+    () => {
+      const displayName = getUserDisplayName(paramUser);
+      return {
+        banner: paramUser?.banner || "",
+        name: displayName,
+        logo: paramUser?.avatar || "",
+      };
+    },
     [paramUser]
   );
 
@@ -260,9 +264,7 @@ export default function UserProfile() {
   return (
     <section className="rounded-md overflow-hidden bg-white px-6">
       <SEO
-        title={`${paramUser?.first_name || paramUser?.email || ""} ${
-          paramUser?.last_name || ""
-        } | connectize`}
+        title={`${getUserDisplayName(paramUser)} | connectize`}
       />
       <Header type="user" {...headerProps} />
 

@@ -41,6 +41,8 @@ export function deriveUsernameFromEmail(email) {
   return base || "user";
 }
 
+const isEmailLike = (value) => String(value || "").includes("@");
+
 /**
  * Resolve the best display name for a user, never falling back to the raw
  * email. Order: real first/last name -> backend full_name -> backend
@@ -52,18 +54,20 @@ export function getUserDisplayName(user) {
   const first = String(user.first_name || "").trim();
   const last = String(user.last_name || "").trim();
   const combined = `${first} ${last}`.trim();
-  if (combined) return combined;
+  if (combined && !isEmailLike(combined)) return combined;
 
   const fullName = String(user.full_name || "").trim();
-  if (fullName) return fullName;
+  if (fullName && !isEmailLike(fullName)) return fullName;
 
   const displayName = String(user.display_name || "").trim();
-  if (displayName) return displayName;
+  if (displayName && !isEmailLike(displayName)) return displayName;
 
   if (user.email) return deriveNameFromEmail(user.email);
 
   const username = String(user.username || "").trim();
-  if (username) return username;
+  if (username) {
+    return isEmailLike(username) ? deriveNameFromEmail(username) : username;
+  }
 
   return "User";
 }
@@ -76,9 +80,11 @@ export function getUserHandle(user) {
   if (!user) return "";
 
   const username = String(user.username || "").trim();
-  if (username) return username;
+  if (username && !isEmailLike(username)) return username;
 
   if (user.email) return deriveUsernameFromEmail(user.email);
+
+  if (username) return deriveUsernameFromEmail(username);
 
   return "";
 }

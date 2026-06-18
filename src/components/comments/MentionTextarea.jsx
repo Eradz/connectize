@@ -3,6 +3,7 @@ import { BuildingOffice2Icon, UserIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { avatarStyle } from "../ResponsiveNav";
+import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 
 const normalizeToken = (value) =>
   String(value || "")
@@ -12,22 +13,13 @@ const normalizeToken = (value) =>
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const getUserDisplayName = (user = {}) => {
-  const fullName =
-    user.full_name ||
-    [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
-
-  return fullName || user.username || user.email?.split("@")[0] || "";
-};
-
 const getCompanyDisplayName = (company = {}) =>
   company.company_name || company.name || company.slug || "";
 
 const getUserMentionToken = (user = {}) =>
   normalizeToken(
-    user.username ||
+    getUserHandle(user) ||
       getUserDisplayName(user) ||
-      user.email?.split("@")[0] ||
       (user.id ? `user-${user.id}` : "")
   );
 
@@ -123,14 +115,14 @@ const MentionSuggestion = ({ item, onSelect }) => (
     {item.type === "user" ? (
       <>
         <Avatar
-          name={getUserDisplayName(item) || item.email}
+          name={getUserDisplayName(item)}
           src={item.avatar}
           size="sm"
           className={avatarStyle}
         />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium text-gray-900">
-            {getUserDisplayName(item) || item.email || "User"}
+            {getUserDisplayName(item)}
           </div>
           <div className="truncate text-xs text-blue-600">
             @{getUserMentionToken(item)} • User

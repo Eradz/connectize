@@ -10,6 +10,7 @@ import { MarkdownComponent } from '../MarkDownComponent';
 import { avatarStyle } from '../ResponsiveNav';
 import LexicalCommentEditor from './LexicalCommentEditor';
 import CommentAsSelector from './CommentAsSelector';
+import { getUserDisplayName } from '../../lib/userDisplay';
 
 const CommentThread = memo(({ 
   comment, 
@@ -45,10 +46,7 @@ const CommentThread = memo(({
   );
   const authorName = isCompanyAuthor
     ? authorCompany.company_name || authorCompany.name
-    : `${authorUser?.first_name || ''} ${authorUser?.last_name || ''}`.trim() ||
-      authorUser?.username ||
-      authorUser?.email?.split('@')[0] ||
-      'User';
+    : getUserDisplayName(authorUser);
   const authorAvatar = isCompanyAuthor
     ? authorCompany.logo || authorCompany.image
     : authorUser?.avatar || authorUser?.profile_picture;

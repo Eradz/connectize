@@ -1,3 +1,5 @@
+import { getUserDisplayName, getUserHandle } from "../lib/userDisplay";
+
 const mentionPattern = /(^|[\s([{*_~])@([A-Za-z0-9_][A-Za-z0-9_-]*)/g;
 
 const normalizeToken = (value) =>
@@ -7,14 +9,6 @@ const normalizeToken = (value) =>
     .replace(/^@/, "")
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-const getUserDisplayName = (user) => {
-  const fullName =
-    user?.full_name ||
-    [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim();
-
-  return fullName || user?.username || user?.email?.split("@")[0] || "";
-};
 
 const getCompanyDisplayName = (company) =>
   company?.company_name || company?.name || company?.slug || "";
@@ -44,7 +38,7 @@ export const extractMentionIdsFromText = (text = "", users = [], companies = [])
     const user = users.find((item) =>
       tokenMatches(token, [
         item?.username,
-        item?.email?.split("@")[0],
+        getUserHandle(item),
         getUserDisplayName(item),
       ])
     );
