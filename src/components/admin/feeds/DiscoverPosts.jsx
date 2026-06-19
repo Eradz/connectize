@@ -330,10 +330,11 @@ export const DiscoverPostItem = ({
 
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
             <CompanyName
-              name={postItem?.company?.slug || postItem?.user?.full_name}
+              name={postItem?.company?.company_name || postItem?.user?.full_name}
               verified={postItem?.company?.verify}
               company={!!postItem?.company?.slug}
               userId={postItem?.user?.id}
+              slug={postItem?.company?.slug}
             />
             <small className="text-gray-400 lowercase shrink-0">
               <Link to={`/co/${postItem?.user?.id}`}>

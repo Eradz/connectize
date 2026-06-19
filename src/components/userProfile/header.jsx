@@ -18,6 +18,12 @@ import { avatarStyle } from "../ResponsiveNav";
 import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { Pen, PencilIcon, Trash2 } from "lucide-react";
 
+
+import {
+  CoverPhotoPreviewModal,
+  ProfilePhotoPreviewModal,
+} from "./ImagePreviewModal";
+
 const fileSchema = yup
   .mixed()
   .test(
@@ -58,6 +64,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
   const logoCanvasRef = useRef(null);
   const bannerUploadInputRef = useRef(null);
   const logoUploadInputRef = useRef(null);
+
   const { user: currentUser } = useAuth();
   const { data: currentCompany } = useGetCurrentCompany();
   const params = useParams();
@@ -93,9 +100,8 @@ const Header = ({ banner, name, logo, type = "company" }) => {
             ? uploadCompanyLogo(values.logo)
             : uploadDisplayPicture(values.logo),
           {
-            loading: `Uploading ${
-              isCompanyHeader ? "logo" : "display image"
-            }...`,
+            loading: `Uploading ${isCompanyHeader ? "logo" : "display image"
+              }...`,
             success:
               (isCompanyHeader ? "Logo" : "Display image") +
               " uploaded successfully",
@@ -360,85 +366,107 @@ const Header = ({ banner, name, logo, type = "company" }) => {
   return (
     <section className="relative bg-gradient-to-r from-gold to-transparent from-70%">
       <section className="w-full relative">
-        {newBanner ? (
-          <button
-            onClick={() => setShowBannerModal(true)}
-            className="w-full h-64 max-h-[45vh] block relative cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <div
-              className="absolute inset-0 bg-center bg-cover"
-              style={{
-                backgroundImage: `url(${newBanner})`,
-              }}
-            />
-            <div className="absolute inset-0 bg-dark opacity-60 hover:opacity-40 transition-all duration-500" />
-          </button>
-        ) : (
-          <div className="w-full h-48 bg-gradient-to-r from-gold to-transparent from-70%" />
-        )}
+        {/* Banner Display */}
+        <div className="w-full h-64 max-h-[45vh] relative overflow-hidden group">
+          {newBanner ? (
+            <>
+              {/* ONLY image area zooms */}
+              <div
+                onClick={() => setShowBannerModal(true)}
+                className="absolute inset-0 cursor-zoom-in"
+              >
+                <div
+                  className="absolute inset-0 bg-center bg-cover transition-transform duration-500 group-hover:scale-105"
+                  style={{
+                    backgroundImage: `url(${newBanner})`,
+                  }}
+                />
 
-        {isCurrentUser && (
-          <form onSubmit={bannerFormik.handleSubmit}>
-            <input
-              type="file"
-              id="banner"
-              accept="image/*"
-              hidden
-              onChange={(e) => handleFileChange(e, "banner", bannerFormik)}
-            />
-            {isCompanyHeader && (
+                <div className="absolute inset-0 bg-dark opacity-60 group-hover:opacity-40 transition-all duration-500" />
+
+                {/* Zoom Indicator */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none">
+                  <div className="bg-black/40 backdrop-blur-sm rounded-full p-3">
+                    <ImageIcon className="text-white w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-gold to-transparent from-70%" />
+          )}
+
+          {/* Upload Button ALWAYS visible */}
+          {isCurrentUser && isCompanyHeader && (
+            <form
+              onSubmit={bannerFormik.handleSubmit}
+              className="absolute top-2 right-2 z-50"
+            >
+              <input
+                type="file"
+                id="banner"
+                accept="image/*"
+                hidden
+                onChange={(e) => handleFileChange(e, "banner", bannerFormik)}
+              />
+
               <Button
                 type="button"
-                position="absolute"
-                top="1"
-                right="1"
-                opacity={0.75}
+                opacity={0.9}
                 height="8"
-                _hover={{ opacity: 1 }}
-                disabled={bannerFormik.isSubmitting}
                 fontSize="xs"
-                onClick={() => document.getElementById("banner").click()}
-                leftIcon={<ImageIcon />}
+                disabled={bannerFormik.isSubmitting}
+                leftIcon={<CameraIcon />}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  document.getElementById("banner")?.click();
+                }}
               >
                 {newBanner ? "Change banner" : "Add banner"}
               </Button>
-            )}
-            {/* {newBanner !== banner && (
-              <Button
-                type="submit"
-                position="absolute"
-                top="10"
-                right="1"
-                height="8"
-                disabled={bannerFormik.isSubmitting}
-                _hover={{ opacity: 1 }}
-                fontSize="xs"
-                leftIcon={<CloudUploadOutlined />}
-                className="!bg-gold"
-              >
-                Upload banner
-              </Button>
-            )} */}
-          </form>
-        )}
+            </form>
+          )}
+        </div>
       </section>
 
-      <Avatar
-        src={newLogo}
-        name={name}
-        size="xl"
+      <div
         className={clsx(
-          avatarStyle,
-          "!absolute !left-[7%] md:!left-[3%] !size-[90px] lg:!size-[120px] group cursor-pointer",
+          "absolute left-[7%] md:left-[3%] group",
           {
-            "!bottom-10": newBanner,
-            "!-bottom-8": !newBanner,
+            "bottom-10": newBanner,
+            "-bottom-8": !newBanner,
           }
         )}
-        onClick={() => newLogo && setShowLogoModal(true)}
       >
+        {/* Clickable Avatar */}
+          <div
+            onClick={(e) => {
+              // prevent upload button click from bubbling
+              if (e.target.closest("button")) return;
+
+              newLogo && setShowLogoModal(true);
+            }}
+            className="cursor-zoom-in"
+          >
+          <Avatar
+            src={newLogo}
+            name={name}
+            size="xl"
+            className={clsx(
+              avatarStyle,
+              "!size-[90px] lg:!size-[120px]"
+            )}
+          />
+        </div>
+
+        {/* Upload Button */}
         {isCurrentUser && (
-          <form onSubmit={logoFormik.handleSubmit} className="relative ">
+          <form
+            onSubmit={logoFormik.handleSubmit}
+            className="absolute bottom-1 right-1 z-20"
+          >
             <input
               type="file"
               id="logo"
@@ -446,8 +474,10 @@ const Header = ({ banner, name, logo, type = "company" }) => {
               hidden
               onChange={(e) => handleFileChange(e, "logo", logoFormik)}
             />
+
             <ButtonWithTooltipIcon
-              className="absolute !bg-white !text-dark p-2 -translate-x-8 translate-y-2 rounded-full opacity-0 group-hover:opacity-100"
+              type="button"
+              className="!bg-white !text-dark p-2 rounded-full opacity-0 group-hover:opacity-100 transition"
               tip={
                 newLogo
                   ? isCompanyHeader
@@ -457,404 +487,34 @@ const Header = ({ banner, name, logo, type = "company" }) => {
                     ? "Add logo"
                     : "Add display picture"
               }
-              onClick={() => document.getElementById("logo").click()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                document.getElementById("logo").click();
+              }}
               iconClassName={"size-5"}
               IconName={CameraIcon}
               disabled={logoFormik.isSubmitting}
             />
-            {/* {newLogo !== logo && (
-              <ButtonWithTooltipIcon
-                type="submit"
-                tip="Upload image"
-                IconName={CloudUploadOutlined}
-                className="absolute !bottom-1 !bg-dark !text-white p-1 -translate-x-2 translate-y-4 rounded-full"
-                disabled={logoFormik.isSubmitting}
-              />
-            )} */}
           </form>
         )}
-      </Avatar>
+      </div>
 
-      {/* Banner Preview Modal - LinkedIn Style */}
-      {showBannerModal && (
-        <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
-          onClick={() => {
-            setShowBannerModal(false);
-            setBannerEditMode(false);
-            resetZoom(false);
-          }}
-        >
-          <div
-            className="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {bannerEditMode ? "Edit Banner" : "Banner"}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowBannerModal(false);
-                  setBannerEditMode(false);
-                  resetZoom(false);
-                }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
-              >
-                ✕
-              </button>
-            </div>
+      <CoverPhotoPreviewModal
+        open={showBannerModal}
+        onClose={() => setShowBannerModal(false)}
+        image={newBanner}
+      />
+      <ProfilePhotoPreviewModal
+        open={showLogoModal}
+        onClose={() => setShowLogoModal(false)}
+        image={newLogo}
+      />
 
-            {/* Content */}
-            <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-50 p-4">
-              {bannerEditMode ? (
-                <div className="relative w-full h-full max-h-[500px] flex items-center justify-center">
-                  <div
-                    className="relative w-full h-full max-w-full overflow-hidden rounded-lg border-4 border-blue-500 bg-white shadow-inner"
-                    onWheel={(e) => handleWheel(e, false)}
-                    onMouseDown={(e) => handleMouseDown(e, false)}
-                    onMouseMove={(e) => handleMouseMove(e, false)}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                    style={{ userSelect: "none", aspectRatio: "3/1" }}
-                  >
-                    {/* Grid overlay for visual guidance */}
-                    <div className="absolute inset-0 pointer-events-none opacity-10 z-10">
-                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-white"></div>
-                    </div>
-
-                    {/* Image */}
-                    <img
-                      ref={bannerImageRef}
-                      src={newBanner}
-                      alt="Banner Edit"
-                      className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
-                      style={{
-                        transform: `scale(${bannerZoom}) translate(${bannerPosition.x}px, ${bannerPosition.y}px)`,
-                        transition: isDragging ? "none" : "transform 0.2s ease-out",
-                      }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <img
-                  src={newBanner}
-                  alt="Banner Preview"
-                  className="w-full h-auto max-h-[500px] object-contain rounded-lg"
-                />
-              )}
-              <canvas ref={bannerCanvasRef} className="hidden" />
-            </div>
-
-            {/* Zoom Controls (Edit Mode) */}
-            {bannerEditMode && (
-              <div className="bg-white border-t border-gray-200 p-4">
-                <div className="flex flex-col gap-4">
-                  {/* Zoom Slider */}
-                  <div className="flex items-center justify-center gap-4">
-                    <button
-                      onClick={() => setBannerZoom(Math.max(1, bannerZoom - 0.2))}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
-                    >
-                      − Zoom Out
-                    </button>
-                    <div className="flex items-center gap-3 flex-1 max-w-sm">
-                      <input
-                        type="range"
-                        min="100"
-                        max="500"
-                        value={Math.round(bannerZoom * 100)}
-                        onChange={(e) => setBannerZoom(Math.max(1, Math.min(5, parseInt(e.target.value) / 100)))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                      />
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-semibold min-w-[50px] text-center text-sm">
-                        {Math.round(bannerZoom * 100)}%
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setBannerZoom(Math.min(5, bannerZoom + 0.2))}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
-                    >
-                      + Zoom In
-                    </button>
-                  </div>
-                  {/* Instructions and Reset */}
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-gray-600 text-sm">
-                      📌 <span className="font-medium">Drag the image</span> to position • <span className="font-medium">Scroll</span> to zoom
-                    </p>
-                    <button
-                      onClick={() => resetZoom(false)}
-                      className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition font-medium text-sm whitespace-nowrap"
-                    >
-                      ↺ Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Footer Actions */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 flex justify-between items-center">
-              <div className="flex gap-2">
-                {isCurrentUser && !bannerEditMode && (
-                  <>
-                    <button
-                      onClick={() => bannerUploadInputRef.current?.click()}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
-                    >
-                      ⬆️ Upload New
-                    </button>
-                    <button
-                      onClick={() => setBannerEditMode(true)}
-                      className="px-4 py-2 border border-gold text-white rounded-lg hover:border-custom_yellow transition font-medium"
-                    >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      onClick={() => deleteImage(false)}
-                      className="px-4 py-2 border border-red-600 text-white rounded-lg hover:border-red-700 transition font-medium"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </>
-                )}
-                {isCurrentUser && bannerEditMode && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setBannerEditMode(false);
-                        resetZoom(false);
-                      }}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => cropAndSaveImage(false)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                    >
-                      ✓ Save & Upload
-                    </button>
-                  </>
-                )}
-              </div>
-              <button
-                onClick={() => {
-                  setShowBannerModal(false);
-                  setBannerEditMode(false);
-                  resetZoom(false);
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
-              >
-                Close
-              </button>
-            </div>
-            {/* Hidden file input for banner upload */}
-            <input
-              ref={bannerUploadInputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => handleModalImageUpload(e, false)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Logo Preview Modal - LinkedIn Style */}
-      {showLogoModal && (
-        <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
-          onClick={() => {
-            setShowLogoModal(false);
-            setLogoEditMode(false);
-            resetZoom(true);
-          }}
-        >
-          <div
-            className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {logoEditMode ? "Edit " : ""}{isCompanyHeader ? "Logo" : "Profile Photo"}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowLogoModal(false);
-                  setLogoEditMode(false);
-                  resetZoom(true);
-                }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-auto flex items-center justify-center bg-gray-50 p-8">
-              {logoEditMode ? (
-                <div className="relative w-full h-full max-w-md max-h-[400px] flex items-center justify-center">
-                  <div
-                    className="relative w-full h-full overflow-hidden rounded-lg border-4 border-blue-500 bg-white shadow-inner"
-                    onWheel={(e) => handleWheel(e, true)}
-                    onMouseDown={(e) => handleMouseDown(e, true)}
-                    onMouseMove={(e) => handleMouseMove(e, true)}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                    style={{ userSelect: "none", aspectRatio: "1/1" }}
-                  >
-                    {/* Grid overlay for visual guidance */}
-                    <div className="absolute inset-0 pointer-events-none opacity-10 z-10">
-                      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-white"></div>
-                    </div>
-
-                    {/* Image */}
-                    <img
-                      ref={logoImageRef}
-                      src={newLogo}
-                      alt="Logo Edit"
-                      className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
-                      style={{
-                        transform: `scale(${logoZoom}) translate(${logoPosition.x}px, ${logoPosition.y}px)`,
-                        transition: isDragging ? "none" : "transform 0.2s ease-out",
-                      }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <img
-                  src={newLogo}
-                  alt="Logo Preview"
-                  className="max-w-xs max-h-[400px] object-contain rounded-lg"
-                />
-              )}
-              <canvas ref={logoCanvasRef} className="hidden" />
-            </div>
-
-            {/* Zoom Controls (Edit Mode) */}
-            {logoEditMode && (
-              <div className="bg-white border-t border-gray-200 p-4">
-                <div className="flex flex-col gap-4">
-                  {/* Zoom Slider */}
-                  <div className="flex items-center justify-center gap-4">
-                    <button
-                      onClick={() => setLogoZoom(Math.max(1, logoZoom - 0.2))}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
-                    >
-                      − Zoom Out
-                    </button>
-                    <div className="flex items-center gap-3 flex-1 max-w-sm">
-                      <input
-                        type="range"
-                        min="100"
-                        max="500"
-                        value={Math.round(logoZoom * 100)}
-                        onChange={(e) => setLogoZoom(Math.max(1, Math.min(5, parseInt(e.target.value) / 100)))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                      />
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-semibold min-w-[50px] text-center text-sm">
-                        {Math.round(logoZoom * 100)}%
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setLogoZoom(Math.min(5, logoZoom + 0.2))}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition font-medium"
-                    >
-                      + Zoom In
-                    </button>
-                  </div>
-                  {/* Instructions and Reset */}
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="text-gray-600 text-sm">
-                      📌 <span className="font-medium">Drag the image</span> to position • <span className="font-medium">Scroll</span> to zoom
-                    </p>
-                    <button
-                      onClick={() => resetZoom(true)}
-                      className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition font-medium text-sm whitespace-nowrap"
-                    >
-                      ↺ Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Footer Actions */}
-            <div className="bg-gray-50 border-t border-gray-200 p-4 flex justify-between items-center">
-              <div className="flex gap-2">
-                {isCurrentUser && !logoEditMode && (
-                  <>
-                    <button
-                      onClick={() => logoUploadInputRef.current?.click()}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
-                    >
-                      ⬆️ Upload New
-                    </button>
-                    <button
-                      onClick={() => setLogoEditMode(true)}
-                      className="flex items-center gap-2 px-4 py-2 border border-gold text-gold rounded-lg hover:border-custom_yellow transition font-medium"
-                    >
-                      <PencilIcon className="w-4 h-4 text-gold" />
-                       <span>Edit</span>
-                    </button>
-                    <button
-                      onClick={() => deleteImage(true)}
-                      className="flex items-center gap-2 px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:border-red-700 transition font-medium"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                      <span>Delete</span>
-                    </button>
-                  </>
-                )}
-                {isCurrentUser && logoEditMode && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setLogoEditMode(false);
-                        resetZoom(true);
-                      }}
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => cropAndSaveImage(true)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
-                    >
-                      ✓ Save & Upload
-                    </button>
-                  </>
-                )}
-              </div>
-              <button
-                onClick={() => {
-                  setShowLogoModal(false);
-                  setLogoEditMode(false);
-                  resetZoom(true);
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
-              >
-                Close
-              </button>
-            </div>
-            {/* Hidden file input for logo upload */}
-            <input
-              ref={logoUploadInputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => handleModalImageUpload(e, true)}
-            />
-          </div>
-        </div>
-      )}
-
-</section>
-  )}
+    </section>
+  )
+}
 
 
-  export default Header;
+export default Header;
