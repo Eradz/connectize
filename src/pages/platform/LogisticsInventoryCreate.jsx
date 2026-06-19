@@ -11,6 +11,8 @@ import { inventoryWarehouseService } from '../../api-services/inventory';
 import { getMyActionableCompanies } from '../../api-services/representatives';
 import { toast } from 'sonner';
 
+const currencyOptions = ['USD', 'EUR', 'GBP', 'NGN', 'KES', 'GHS', 'ZAR', 'AED'];
+
 const LogisticsInventoryForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -33,6 +35,7 @@ const LogisticsInventoryForm = () => {
     minimum_stock: 0,
     unit: 'pcs',
     unit_cost: 0,
+    currency: 'USD',
     status: 'available',
     condition: 'new',
     warehouse: '',
@@ -135,6 +138,7 @@ const LogisticsInventoryForm = () => {
       
       setFormData({
         ...data,
+        currency: data.currency || 'USD',
         purchase_date: data.purchase_date ? data.purchase_date.split('T')[0] : '',
         warranty_expiry: data.warranty_expiry ? data.warranty_expiry.split('T')[0] : ''
       });
@@ -567,10 +571,12 @@ const LogisticsInventoryForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Unit Cost ($)
+                  Unit Cost ({formData.currency})
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-gray-500">
+                    {formData.currency}
+                  </span>
                   <input
                     type="number"
                     name="unit_cost"
@@ -579,9 +585,25 @@ const LogisticsInventoryForm = () => {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                    className="w-full pl-14 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Unit Cost Currency
+                </label>
+                <select
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                >
+                  {currencyOptions.map((currency) => (
+                    <option key={currency} value={currency}>{currency}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -589,12 +611,11 @@ const LogisticsInventoryForm = () => {
                   Total Value (Read-only)
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    value={`${((formData.current_stock || 0) * (formData.unit_cost || 0)).toFixed(2)}`}
+                    value={`${formData.currency} ${((formData.current_stock || 0) * (formData.unit_cost || 0)).toFixed(2)}`}
                     disabled
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                   />
                 </div>
               </div>

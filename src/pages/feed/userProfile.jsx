@@ -38,12 +38,19 @@ import { dealRoomService, workforceService } from "../../api-services/oilgas";
 import { DealRoomCard } from "../../components/dealRoom/DealRoomCard";
 import clsx from "clsx";
 import { webRoutes } from "../../lib/webRoutes";
+import { getUserDisplayName } from "../../lib/userDisplay";
 import Scroll from "../../components/Scroll";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import HeadingText from "../../components/HeadingText";
 import DealRoomParticipationCard from "../../components/dealRoom/DealRoomParticipationCard";
 
 const emptyWord = "Not Added";
+
+const normalizeListResponse = (response) => {
+  const payload = response?.data ?? response;
+  const list = payload?.results ?? payload;
+  return Array.isArray(list) ? list.filter(Boolean) : [];
+};
 
 export default function UserProfile() {
   const { userId } = useParams();
@@ -66,44 +73,44 @@ export default function UserProfile() {
   const [createdDeals, setCreatedDeals] = useState([]);
   const [participatingDeals, setParticipatingDeals] = useState([]);
 
-  useEffect(() => {
-    loadMyRegistrations();
-    loadMyCreatedEvents();
-    loadApplications();
-    loadJobs();
-    loadParticipatingDealRooms();
-    loadMyCreatedJobs();
-  }, []);
+    useEffect(() => {
+      loadMyRegistrations();
+      loadMyCreatedEvents();
+      loadApplications();
+      loadJobs();
+      loadParticipatingDealRooms();
+      loadMyCreatedJobs();
+    }, []);
+  
+    const loadMyRegistrations = async () => {
+      try {
+        setLoading(true);
+        const response = await workforceAPI.getMyEventRegistrations({ userId });
+        setRegistrations(normalizeListResponse(response));
+        setError(null);
+      } catch (err) {
+        console.error('Error loading registrations:', err);
+        setError('Failed to load your event registrations. Please try again.');
+        setRegistrations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loadMyRegistrations = async () => {
-    try {
-      setLoading(true);
-      const response = await workforceAPI.getMyEventRegistrations({ userId });
-      setRegistrations(response.data.results || response.data || []);
-      setError(null);
-    } catch (err) {
-      console.error('Error loading registrations:', err);
-      setError('Failed to load your event registrations. Please try again.');
-      setRegistrations([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadMyCreatedEvents = async () => {
-    try {
-      setLoading(true);
-      const response = await workforceAPI.getEvents();
-      setCreatedEvents((response.data.results || response.data || response.results)?.filter(event => event?.organizer == userId) || []);
-      setError(null);
-    } catch (err) {
-      console.error('Error loading created events:', err);
-      setError('Failed to load your created events. Please try again.');
-      setCreatedEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadMyCreatedEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await workforceAPI.getEvents();
+        setCreatedEvents(normalizeListResponse(response).filter(event => event?.organizer == userId));
+        setError(null);
+      } catch (err) {
+        console.error('Error loading created events:', err);
+        setError('Failed to load your created events. Please try again.');
+        setCreatedEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const loadApplications = async () => {
     try {
@@ -176,11 +183,14 @@ export default function UserProfile() {
   });
 
   const headerProps = useMemo(
-    () => ({
-      banner: paramUser?.banner || "",
-      name: `${paramUser?.first_name || ""} ${paramUser?.last_name || ""}`,
-      logo: paramUser?.avatar || "",
-    }),
+    () => {
+      const displayName = getUserDisplayName(paramUser);
+      return {
+        banner: paramUser?.banner || "",
+        name: displayName,
+        logo: paramUser?.avatar || "",
+      };
+    },
     [paramUser]
   );
 
@@ -254,8 +264,7 @@ export default function UserProfile() {
   return (
     <section className="rounded-md overflow-hidden bg-white px-6">
       <SEO
-        title={`${paramUser?.first_name || paramUser?.email || ""} ${paramUser?.last_name || ""
-          } | connectize`}
+        title={`${getUserDisplayName(paramUser)} | connectize`}
       />
       <Header type="user" {...headerProps} />
 

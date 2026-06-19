@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { makeApiRequest } from '../lib/helpers';
 import { useAuth } from '../context/userContext';
+import { getUserDisplayName, getUserHandle } from '../lib/userDisplay';
 
 /**
  * Custom hook for searching users for @ mentions
@@ -39,21 +40,15 @@ export const useUserSearch = ({ enabled = true } = {}) => {
 
       // Transform users to match mention plugin format
       const transformedUsers = (response.results || []).map(user => {
-        // Create username from first_name and last_name, or email
-        const firstName = user.first_name || '';
-        const lastName = user.last_name || '';
-        const emailPrefix = user.email?.split('@')[0] || '';
-        
-        // Username format: firstname-lastname or email prefix
-        const username = firstName && lastName 
-          ? `${firstName.toLowerCase()}-${lastName.toLowerCase()}`.replace(/\s+/g, '-')
-          : emailPrefix.toLowerCase();
+        const displayName = getUserDisplayName(user);
+        const username = getUserHandle(user);
         
         return {
           id: user.id,
           first_name: user.first_name,
           last_name: user.last_name,
-          full_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+          full_name: user.full_name || displayName,
+          display_name: user.display_name,
           email: user.email,
           avatar: user.avatar,
           username: username

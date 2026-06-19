@@ -27,13 +27,14 @@ import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
 
 const validationSchema = Yup.object().shape({
-  first_name: Yup.string().trim().required("first name is required"),
-  last_name: Yup.string().trim().required("last name is required"),
-  role: Yup.string().trim().required("This field is required"),
-  gender: Yup.string().trim().required("This field is required"),
+  first_name: Yup.string().trim().optional(),
+  last_name: Yup.string().trim().optional(),
+  role: Yup.string().trim().optional(),
+  gender: Yup.string().trim().optional(),
   age: Yup.string()
-    .required("Age is required, not less than 16 years")
+    .optional()
     .test("compare-age", "You have to be at least 16 years", function (value) {
+      if (!value) return true;
       const inputDate = new Date(value);
 
       const today = new Date();

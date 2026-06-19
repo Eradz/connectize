@@ -37,6 +37,9 @@ const CERTIFICATIONS = [
   'Bonded Warehouse', 'GDP Certified', 'IATA Certified'
 ];
 
+const getCompanyId = (company) => company?.id ?? company?.company_id ?? company?.company;
+const getCompanyName = (company) => company?.company_name || company?.name || '';
+
 const BecomeProvider = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
@@ -83,19 +86,18 @@ const BecomeProvider = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    checkExistingProvider();
-  }, [currentUser]);
-
-  useEffect(() => {
     // Auto-select company if user has only one
     if (userCompanies.length === 1 && !selectedCompany) {
       setSelectedCompany(userCompanies[0]);
     }
-  }, [userCompanies]);
+  }, [userCompanies, selectedCompany]);
 
-  const checkExistingProvider = async () => {
+  useEffect(() => {
+    checkExistingProvider(selectedCompany);
+  }, [currentUser, selectedCompany, companiesLoading]);
+
+  const checkExistingProvider = async (company) => {
     try {
-      setCheckingStatus(true);
       const session = getSession();
       
       // Session has { id, email, tokens } structure
@@ -103,17 +105,32 @@ const BecomeProvider = () => {
         setCheckingStatus(false);
         return;
       }
+      if (companiesLoading) {
+        return;
+      }
 
+      const companyId = getCompanyId(company);
+      if (!companyId) {
+        setExistingProvider(null);
+        setCheckingStatus(false);
+        return;
+      }
+
+      setCheckingStatus(true);
       try {
-        const response = await logisticsAPI.getLogisticsProviders({ user: session.id });
-        const providers = response?.results || response || [];
-        const myProvider = providers.find(p => p.user === session.id);
-        
-        if (myProvider) {
-          setExistingProvider(myProvider);
+        const response = await logisticsAPI.getMyProviderProfile({ company: companyId });
+        const provider = response?.provider || (response?.is_registered === false ? null : response);
+
+        if (provider?.id) {
+          setExistingProvider(provider);
+        } else {
+          setExistingProvider(null);
         }
       } catch (err) {
-        console.log('No existing provider found or API error:', err);
+        if (err?.response?.status !== 404) {
+          console.log('No existing provider found or API error:', err);
+        }
+        setExistingProvider(null);
       }
     } catch (err) {
       console.error('Error checking provider status:', err);
@@ -222,17 +239,22 @@ const BecomeProvider = () => {
       }
 
       // Validate company selection
-      if (!selectedCompany) {
+      const companyId = getCompanyId(selectedCompany);
+      if (!companyId) {
         setError('Please select a company to register');
         setLoading(false);
         return;
       }
 
-      const companyName = selectedCompany?.company_name || 
-                          (currentUser?.first_name + ' ' + currentUser?.last_name).trim() ||
-                          currentUser?.email?.split('@')[0] || 'Provider';
+      const companyName = getCompanyName(selectedCompany);
+      if (!companyName) {
+        setError('Selected company is missing a display name.');
+        setLoading(false);
+        return;
+      }
 
       const payload = {
+        company: companyId,
         company_name: companyName,
         license_number: formData.license_number || null,
         service_types: formData.service_types,
@@ -467,17 +489,17 @@ const BecomeProvider = () => {
           </label>
           <select
             id="company-select"
-            value={selectedCompany?.id || ''}
+            value={getCompanyId(selectedCompany) || ''}
             onChange={(e) => {
-              const company = userCompanies.find(c => String(c.id) === e.target.value);
+              const company = userCompanies.find(c => String(getCompanyId(c)) === e.target.value);
               setSelectedCompany(company || null);
             }}
             className="w-full max-w-md px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Select a company...</option>
             {userCompanies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.company_name}
+              <option key={getCompanyId(company)} value={getCompanyId(company)}>
+                {getCompanyName(company)}
               </option>
             ))}
           </select>

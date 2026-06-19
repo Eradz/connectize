@@ -1,6 +1,7 @@
 import { getCountries } from "@loophq/country-state-list";
 import { useFormik } from "formik";
 import { useContext, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import * as Yup from "yup";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
@@ -15,19 +16,41 @@ export const meta = () =>
 
 import Form from "../../components/form";
 import StepButton from "../../components/profile/StepButton";
+import SaveDraftButton from "../../components/profile/SaveDraftButton";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
+import { getCompanyCategories, getCompanySizes } from "../../api-services/companies";
+
+// Fallback used only if the backend categories can't be loaded.
+const FALLBACK_COMPANY_CATEGORIES = [
+  "Drilling Contractor Company",
+  "Integrated Oil & Gas Company",
+  "Independent Oil & Gas Company",
+  "Oil Service Company",
+  "Oil Equipment Manufacturer",
+  "Media Company",
+  "Security",
+  "Renewable Energy Company",
+  "Oil Refining",
+];
+
+// Fallback used only if the backend sizes can't be loaded.
+const FALLBACK_COMPANY_SIZES = [
+  "0-10 employees",
+  "11-50 employees",
+  "50 and above employees",
+];
 
 export const validationSchema = Yup.object().shape({
-  company_name: Yup.string().required("Company name cannot be empty"),
-  company_tagline: Yup.string().required("Company tagline cannot be empty"),
-  company_email: Yup.string().required("Company email cannot be empty"),
-  company_address: Yup.string().required("Company address cannot be empty"),
-  country: Yup.string().required("Country cannot be empty"),
-  city: Yup.string().required("City cannot be empty"),
+  company_name: Yup.string().optional(),
+  company_tagline: Yup.string().optional(),
+  company_email: Yup.string().email("Invalid email address").optional(),
+  company_address: Yup.string().optional(),
+  country: Yup.string().optional(),
+  city: Yup.string().optional(),
   company_website: Yup.string().optional(),
-  company_category: Yup.string().required("Company category cannot be empty"),
-  company_size: Yup.string().required("Company size cannot be empty"),
+  company_category: Yup.string().optional(),
+  company_size: Yup.string().optional(),
   company_description: Yup.string().optional(),
 });
 
@@ -54,6 +77,30 @@ const CreateCompany = () => {
   const formik = formiks?.indexFormik;
 
   const countriesString = countries.map((country) => country.name);
+
+  const { data: companyCategories } = useQuery({
+    queryKey: ["company-categories"],
+    queryFn: getCompanyCategories,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const companyTypeOptions =
+    companyCategories && companyCategories.length > 0
+      ? companyCategories
+      : FALLBACK_COMPANY_CATEGORIES;
+
+  const { data: companySizes } = useQuery({
+    queryKey: ["company-sizes"],
+    queryFn: getCompanySizes,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const companySizeOptions =
+    companySizes && companySizes.length > 0
+      ? companySizes
+      : FALLBACK_COMPANY_SIZES;
 
   const stateForCountry =
     countries.find((country) => country.name === formik.values["country"])
@@ -128,28 +175,14 @@ const CreateCompany = () => {
           type: "select",
           label: "Company type",
           placeholder: "Select company type",
-          options: [
-            "Drilling Contractor Company",
-            "Integrated Oil & Gas Company",
-            "Independent Oil & Gas Company",
-            "Oil Service Company",
-            "Oil Equipment Manufacturer",
-            "Media Company",
-            "Security",
-            "Renewable Energy Company",
-            "Oil Refining",
-          ],
+          options: companyTypeOptions,
         },
         {
           name: "company_size",
           type: "select",
           label: "Company's size",
           placeholder: "Select range",
-          options: [
-            "0-10 employees",
-            "11-50 employees",
-            "50 and above employees",
-          ],
+          options: companySizeOptions,
         },
       ],
     },
@@ -180,11 +213,14 @@ const CreateCompany = () => {
       />
       <div className="flex justify-between my-6">
         <div></div>
-        <StepButton
-          doStepChange={doStepChange}
-          nextStep={webRoutes.companyInformation}
-          stepText="Next"
-        />
+        <div className="flex items-center gap-3">
+          <SaveDraftButton formik={formik} />
+          <StepButton
+            doStepChange={doStepChange}
+            nextStep={webRoutes.companyInformation}
+            stepText="Next"
+          />
+        </div>
       </div>
     </section>
   );

@@ -137,7 +137,7 @@ export class DealRoomService extends CrudService {
   async addDealRoom(dealRoomId, dealRoomData) {
     try {
       const res = await makeApiRequest({
-  url: `${this.basePath}${dealRoomId}api/v1/deals/deal-rooms/`,
+  url: `${this.basePath}${dealRoomId}/`,
         method: "POST",
         data: dealRoomData,
       });
@@ -542,10 +542,11 @@ export class WorkforceEventService extends CrudService {
     });
   }
 
-  async getUpcomingEvents() {
+  async getUpcomingEvents(params = {}) {
     return makeApiRequest({
       url: `${this.basePath}upcoming/`,
       method: "GET",
+      params,
     });
   }
 

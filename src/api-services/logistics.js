@@ -1,12 +1,19 @@
 import api from './crud';
 
+const cleanParams = (params = {}) =>
+  Object.fromEntries(
+    Object.entries(params).filter(([, value]) =>
+      value !== undefined && value !== null && value !== 'all' && value !== ''
+    )
+  );
+
 const logistics = {
   // Shipment Requests
   getShipmentRequests: async (params = {}) => {
     try {
-      const cleanParams = Object.fromEntries(Object.entries(params).filter(([,v]) => v !== undefined && v !== null && v !== 'all' && v !== ''));
-      console.log('🔗 Making requests API call to:', '/api/v1/logistics/requests/', 'with params:', cleanParams);
-      const response = await api.get('/api/v1/logistics/requests/', { params: cleanParams });
+      const requestParams = cleanParams(params);
+      console.log('🔗 Making requests API call to:', '/api/v1/logistics/requests/', 'with params:', requestParams);
+      const response = await api.get('/api/v1/logistics/requests/', { params: requestParams });
       console.log('📋 Requests API response received:', response.data);
       return response.data;
     } catch (error) {
@@ -144,8 +151,10 @@ const logistics = {
   },
 
   // Get current user's provider profile
-  getMyProviderProfile: async () => {
-    const response = await api.get('/api/v1/logistics/providers/my_profile/');
+  getMyProviderProfile: async (params = {}) => {
+    const response = await api.get('/api/v1/logistics/providers/my_profile/', {
+      params: cleanParams(params),
+    });
     return response.data;
   },
 

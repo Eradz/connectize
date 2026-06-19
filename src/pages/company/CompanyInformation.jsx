@@ -14,13 +14,14 @@ import Form from "../../components/form";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import StepButton from "../../components/profile/StepButton";
+import SaveDraftButton from "../../components/profile/SaveDraftButton";
 import { FormikCtx } from "./context";
 import { webRoutes } from "../../lib/webRoutes";
 
 export const validationSchema = Yup.object().shape({
-  company_registration_no: Yup.string().required("Field cannot be empty"),
-  company_registration_date: Yup.string().required("Field cannot be empty"),
-  company_annual_revenue: Yup.string().required("Field cannot be empty"),
+  company_registration_no: Yup.string().optional(),
+  company_registration_date: Yup.string().optional(),
+  company_annual_revenue: Yup.string().optional(),
 });
 
 export function getInitialValues() {
@@ -70,9 +71,9 @@ const CompanyInformation = () => {
     },
     {
       name: "company_annual_revenue",
-      type: "number",
+      type: "currency",
       label: "Company's average annual revenue",
-      placeholder: "Select range of average annual revenue",
+      placeholder: "Enter average annual revenue",
     },
   ];
   return (
@@ -98,11 +99,14 @@ const CompanyInformation = () => {
           nextStep={webRoutes.createCompany}
           stepText="Back"
         />
-        <StepButton
-          doStepChange={doStepChange}
-          nextStep={webRoutes.companyDocuments}
-          stepText="Next"
-        />
+        <div className="flex items-center gap-3">
+          <SaveDraftButton formik={formik} />
+          <StepButton
+            doStepChange={doStepChange}
+            nextStep={webRoutes.companyDocuments}
+            stepText="Next"
+          />
+        </div>
       </div>
     </section>
   );

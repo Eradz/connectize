@@ -68,6 +68,54 @@ export const getSingleCompany = async (companyName) => {
   return singleCompany;
 };
 
+const normalizeWebsite = (website) => {
+  const trimmedWebsite = String(website || "").trim();
+
+  if (!trimmedWebsite) return "";
+
+  return /^https?:\/\//i.test(trimmedWebsite)
+    ? trimmedWebsite
+    : `https://${trimmedWebsite}`;
+};
+
+const getCompanyNameForUpload = (company, fallbackName) => {
+  return String(
+    company?.company_name ||
+      company?.name ||
+      company?.data?.company_name ||
+      company?.data?.name ||
+      fallbackName ||
+      ""
+  ).trim();
+};
+
+const slugifyCompanyName = (name) => {
+  return String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
+const getCreatedCompanyRecord = (company) => {
+  if (company?.data && typeof company.data === "object") return company.data;
+  if (company?.company && typeof company.company === "object") return company.company;
+  return company && typeof company === "object" ? company : {};
+};
+
+const normalizeCreatedCompany = (company, fallbackName) => {
+  const companyRecord = getCreatedCompanyRecord(company);
+  const companyName = getCompanyNameForUpload(companyRecord, fallbackName);
+  const slug = String(companyRecord?.slug || "").trim() || slugifyCompanyName(companyName);
+
+  return {
+    ...companyRecord,
+    company_name: companyRecord?.company_name || companyName,
+    slug,
+    route_slug: slug || companyName,
+  };
+};
+
 export const createCompany = async (data, resetForm) => {
   // await getOrCreateCompanyCategories(data.company_category);
 
@@ -80,6 +128,7 @@ export const createCompany = async (data, resetForm) => {
 
   // console.log("form data", data);
   const registration_date = data.company_registration_date || null;
+  const website = normalizeWebsite(data.company_website);
   const company = await makeApiRequest({
     url: `api/companies/`,
     method: "POST",
@@ -94,7 +143,7 @@ export const createCompany = async (data, resetForm) => {
       country: data.country,
       state: data.city,
       city: data.city,
-      website: data.company_website,
+      website,
       registration_number: data.company_registration_no,
       registration_date,
       annual_revenue: data.company_annual_revenue,
@@ -105,23 +154,80 @@ export const createCompany = async (data, resetForm) => {
     return;
   }
 
-  // Upload document if provided, but don't block company creation
-  if (data.document_type && data.company_document) {
+  const createdCompany = normalizeCreatedCompany(
+    company,
+    data.company_name
+  );
+  const companyNameForUpload = createdCompany.company_name;
+
+  const documentsToUpload = Array.isArray(data.company_documents)
+    ? data.company_documents
+    : data.document_type && data.company_document
+      ? [{ type: data.document_type, document: data.company_document }]
+      : [];
+
+  if (documentsToUpload.length > 0) {
     try {
-      await createCompanyDocument({
-        type: data.document_type,
-        document: data.company_document,
-        company: company?.company_name,
-      });
+      await Promise.all(
+        documentsToUpload.map((documentItem) =>
+          createCompanyDocument({
+            type: documentItem.type,
+            document: documentItem.document,
+            company: companyNameForUpload,
+          })
+        )
+      );
     } catch (e) {
       console.error("Document upload failed:", e);
+      toast.error(
+        "Company created, but one or more documents failed to upload. Please try uploading them again from the company profile."
+      );
     }
   }
 
   resetForm?.();
-  toast.success(company?.company_name + " was created successfully");
+  toast.success(`${companyNameForUpload || data.company_name || "Company"} was created successfully`);
 
-  return company;
+  return createdCompany;
+};
+
+export const getCompanyCategories = async () => {
+  const res = await makeApiRequest({
+    url: `api/company-categories/`,
+    method: "GET",
+    params: { page_size: 100 },
+  });
+
+  const list = Array.isArray(res) ? res : res?.results || [];
+  return list
+    .map((category) => category?.name)
+    .filter((name) => typeof name === "string" && name.trim().length > 0);
+};
+
+export const getCompanySizes = async () => {
+  const res = await makeApiRequest({
+    url: `api/company-sizes/`,
+    method: "GET",
+    params: { page_size: 100 },
+  });
+
+  const list = Array.isArray(res) ? res : res?.results || [];
+  return list
+    .map((item) => item?.size)
+    .filter((size) => typeof size === "string" && size.trim().length > 0);
+};
+
+export const getCompanyDocumentTypes = async () => {
+  const res = await makeApiRequest({
+    url: `api/document-types/`,
+    method: "GET",
+    params: { page_size: 100 },
+  });
+
+  const list = Array.isArray(res) ? res : res?.results || [];
+  return list
+    .map((documentType) => documentType?.name || documentType?.type)
+    .filter((name) => typeof name === "string" && name.trim().length > 0);
 };
 
 export const getOrCreateCompanyCategories = async (name) => {
@@ -165,34 +271,69 @@ export const getOrCreateCompanySize = async (size) => {
  */
 
 export const createCompanyDocument = async (data) => {
-  await getOrCreateCompanyDocumentTypes(data.type, data.type);
+  const type = String(data?.type || "").trim();
+  const company = String(data?.company || "").trim();
+
+  if (!type) {
+    throw new Error("Document type is required");
+  }
+
+  if (!data?.document) {
+    throw new Error("Document file is required");
+  }
+
+  if (!company) {
+    throw new Error("Company is required");
+  }
+
+  const documentType = await getOrCreateCompanyDocumentTypes(type, type);
+  const documentTypeName = documentType?.name || type;
+
+  const formData = new FormData();
+  formData.append("type", documentTypeName);
+  formData.append("company", company);
+  formData.append("document", data.document);
+
   const companyDocument = await makeApiRequest({
     url: `api/documents/`,
     method: "POST",
-    data,
+    data: formData,
     contentType: "multipart/form-data",
   });
+
+  if (!companyDocument) {
+    throw new Error("Document upload failed");
+  }
 
   return companyDocument;
 };
 
 export const getOrCreateCompanyDocumentTypes = async (type, name) => {
-  const { results: documentType } = await makeApiRequest({
+  const safeName = String(name || type || "").trim();
+
+  if (!safeName) {
+    throw new Error("Document type is required");
+  }
+
+  const response = await makeApiRequest({
     url: `api/document-types/`,
     method: "GET",
   });
+  const documentTypes = Array.isArray(response) ? response : response?.results || [];
 
-  if (
-    documentType.find(
-      (document) => document.type === type || document.name === name
-    )
-  )
-    return documentType;
+  const existing = documentTypes.find((document) => {
+    const existingName = String(document?.name || "").trim().toLowerCase();
+    const existingType = String(document?.type || "").trim().toLowerCase();
+    const target = safeName.toLowerCase();
+    return existingName === target || existingType === target;
+  });
+
+  if (existing) return existing;
 
   return await makeApiRequest({
     url: `api/document-types/`,
     method: "POST",
-    data: { name, type },
+    data: { name: safeName, type: safeName },
   });
 };
 

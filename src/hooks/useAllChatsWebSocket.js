@@ -36,10 +36,11 @@ const useAllChatsWebSocket = () => {
           ...lastMessage,
           other_user: {
             id: otherUserId,
-            first_name: otherUserInfo?.first_name || "Unknown",
-            last_name: otherUserInfo?.last_name || "User",
+            first_name: otherUserInfo?.first_name,
+            last_name: otherUserInfo?.last_name,
             avatar: otherUserInfo?.avatar,
-            role: otherUserInfo?.role
+            role: otherUserInfo?.role,
+            email: otherUserInfo?.email
           }
         };
         

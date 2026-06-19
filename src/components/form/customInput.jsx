@@ -17,6 +17,8 @@ import { motion } from "framer-motion";
 import "react-quill/dist/quill.snow.css";
 import { capitalizeFirst } from "../../lib/utils";
 import { MarkdownComponent } from "../MarkDownComponent";
+import CurrencyPicker from "../CurrencyPicker";
+import { getCurrencySymbol } from "../../utils/currency";
 
 import clsx from "clsx";
 
@@ -275,3 +277,85 @@ export const CustomSelect = ({
     ))}
   </Select>
 );
+
+const DEFAULT_CURRENCY_CODE = "NGN";
+
+/**
+ * Parse a stored revenue value ("USD 5000000") back into its currency code and
+ * amount. Falls back to the default currency for legacy plain-number values.
+ */
+function parseRevenueValue(raw) {
+  if (!raw || typeof raw !== "string") {
+    return { code: DEFAULT_CURRENCY_CODE, amount: "" };
+  }
+  const parts = raw.trim().split(/\s+/);
+  const maybeCode = parts[0]?.toUpperCase();
+  if (/^[A-Z]{3}$/.test(maybeCode)) {
+    return { code: maybeCode, amount: parts.slice(1).join(" ") };
+  }
+  return { code: DEFAULT_CURRENCY_CODE, amount: raw.trim() };
+}
+
+/**
+ * Amount input with a Stripe-approved currency selector. Reuses the shared
+ * CurrencyPicker (popular chips + searchable modal over SUPPORTED_CURRENCIES)
+ * and stores the value as "<ISO_CODE> <amount>" in a single formik field.
+ */
+export const CurrencyInput = ({ formik, name, placeholder, validate, error }) => {
+  const parsed = parseRevenueValue(formik.values[`${name}`]);
+  const [code, setCode] = useState(
+    parsed.amount
+      ? parsed.code
+      : localStorage.getItem(`${name}_currency`) || DEFAULT_CURRENCY_CODE
+  );
+  const [amount, setAmount] = useState(parsed.amount);
+
+  const commit = (nextCode, nextAmount) => {
+    const trimmed = String(nextAmount ?? "").trim();
+    const combined = trimmed ? `${nextCode} ${trimmed}` : "";
+    localStorage.setItem(`${name}_currency`, nextCode);
+    localStorage.setItem(name, combined);
+    formik.setFieldValue(name, combined);
+  };
+
+  const handleCurrencyChange = (nextCode) => {
+    setCode(nextCode);
+    commit(nextCode, amount);
+  };
+
+  const handleAmountChange = (e) => {
+    const next = e.currentTarget.value.replace(/[^0-9.]/g, "");
+    setAmount(next);
+    commit(code, next);
+  };
+
+  return (
+    <div className="mt-2 space-y-2">
+      <CurrencyPicker value={code} onChange={handleCurrencyChange} label={null} />
+      <div className="flex items-stretch w-full">
+        <span className="inline-flex items-center justify-center min-w-12 px-3 rounded-l-md border border-gray-100 bg-background text-gray-600 text-base md:text-sm">
+          {getCurrencySymbol(code)}
+        </span>
+        <Input
+          autoComplete="true"
+          inputMode="decimal"
+          type="text"
+          placeholder={placeholder}
+          value={amount}
+          onChange={handleAmountChange}
+          onBlur={() => formik.setFieldTouched(name, true)}
+          id={name}
+          name={name}
+          className={clsx(
+            inputClassNames,
+            "!mt-0 !rounded-l-none focus:!outline-none",
+            {
+              "!border-green-800 !bg-green-50/50": validate && !error,
+              "!border-[#9e3818] !bg-[#9e3818]/5 animate-shake": error,
+            }
+          )}
+        />
+      </div>
+    </div>
+  );
+};

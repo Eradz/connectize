@@ -25,9 +25,9 @@ import { useAuth } from "../../context/userContext";
 
 const validationSchema = Yup.object().shape({
   phone_number: Yup.string()
-    .required("This field is required")
+    .optional()
     .test('is-valid-phone', 'Please enter a valid phone number', function(value) {
-      if (!value) return false;
+      if (!value) return true;
       // Remove all non-digit characters except +
       const cleaned = value.replace(/[^\d+]/g, '');
       // Must have at least 10 digits (US/Canada format) or start with + and have 10+ digits
@@ -35,7 +35,7 @@ const validationSchema = Yup.object().shape({
     }),
   personal_email: Yup.string()
     .email("Invalid Email")
-    .required("This field is required"),
+    .optional(),
 });
 
 function Contact() {

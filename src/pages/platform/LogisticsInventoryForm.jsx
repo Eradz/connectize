@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 
+const currencyOptions = ['USD', 'EUR', 'GBP', 'NGN', 'KES', 'GHS', 'ZAR', 'AED'];
+
 const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = null }) => {
   const isEdit = Boolean(itemId);
   
@@ -17,7 +19,8 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
     current_stock: 0,
     minimum_stock: 0,
     maximum_stock: 0,
-    unit_cost: 0
+    unit_cost: 0,
+    currency: 'USD'
   });
 
   // Populate form with current data when editing
@@ -34,7 +37,8 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
         current_stock: currentData.current_stock || 0,
         minimum_stock: currentData.minimum_stock || 0,
         maximum_stock: currentData.maximum_stock || 0,
-        unit_cost: currentData.unit_cost || 0
+        unit_cost: currentData.unit_cost || 0,
+        currency: currentData.currency || 'USD'
       });
     }
   }, [isEdit, currentData, isOpen]);
@@ -288,9 +292,9 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
               </div>
 
               {/* Unit Cost */}
-              <div className="col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Unit cost
+                  Unit cost ({formData.currency})
                 </label>
                 <input
                   type="number"
@@ -302,6 +306,22 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   placeholder="15000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Unit cost currency
+                </label>
+                <select
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                >
+                  {currencyOptions.map((currency) => (
+                    <option key={currency} value={currency}>{currency}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -40,6 +40,7 @@ import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
 import { useCustomSearchParams } from "../../hooks/useCustomSearchParams";
 import { getRandomOilAndGasKeyword } from "../../lib/helpers/getRandomOilAndGasWords";
+import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 import { CompaniesArray } from "../companies";
 import {
   SearchMarketplaceCard,
@@ -568,34 +569,52 @@ export const SearchTab = () => {
 /* ─── Sub-components ─── */
 
 const PeopleGrid = ({ users, navigate }) => {
-  const filtered = users?.filter((u) => u?.first_name && u?.last_name) || [];
+  // Keep any user we can identify by name, username, or email — not only
+  // users that have BOTH a first and last name.
+  const filtered =
+    users?.filter(
+      (u) =>
+        u?.first_name ||
+        u?.last_name ||
+        u?.full_name ||
+        u?.display_name ||
+        u?.username ||
+        u?.email
+    ) || [];
   if (filtered.length === 0) return <EmptyTab message="No people found" />;
 
   return (
     <section className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-      {filtered.map((user) => (
-        <motion.div
-          key={user?.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center flex-col gap-4 rounded-xl bg-white border px-4 py-6 hover:shadow-md transition-shadow cursor-pointer"
-          onClick={() => navigate(`/co/${user?.id}`)}
-        >
-          <Avatar
-            src={user?.avatar}
-            name={`${user?.first_name} ${user?.last_name}`}
-            className={avatarStyle}
-            size="sm"
-            width={50}
-            height={50}
-          />
-          <div className="flex flex-col items-center text-center">
-            <Username user={user} />
-            <small className="text-gray-400 line-clamp-1">{user?.email}</small>
-          </div>
-          <ConnectButton first_name={user?.first_name} id={user?.id} />
-        </motion.div>
-      ))}
+      {filtered.map((user) => {
+        const displayName = getUserDisplayName(user);
+        const handle = getUserHandle(user);
+
+        return (
+          <motion.div
+            key={user?.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center flex-col gap-4 rounded-xl bg-white border px-4 py-6 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => navigate(`/co/${user?.id}`)}
+          >
+            <Avatar
+              src={user?.avatar}
+              name={displayName}
+              className={avatarStyle}
+              size="sm"
+              width={50}
+              height={50}
+            />
+            <div className="flex flex-col items-center text-center">
+              <Username user={user} />
+              {handle && (
+                <small className="text-gray-400 line-clamp-1">@{handle}</small>
+              )}
+            </div>
+            <ConnectButton first_name={displayName} id={user?.id} />
+          </motion.div>
+        );
+      })}
     </section>
   );
 };

@@ -32,6 +32,16 @@ import { workforceProfileService } from '../../api-services/oilgas';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
+import { deriveNameFromEmail } from '../../lib/userDisplay';
+
+const getProfessionalDisplayName = (professional = {}) => {
+  const userName = String(professional.user_name || '').trim();
+  if (userName && !userName.includes('@')) {
+    return userName;
+  }
+
+  return deriveNameFromEmail(professional.user_email || userName) || 'Professional';
+};
 
 const WorkforceProfessionals = () => {
   const { user } = useAuth(); // Get authentication state
@@ -513,18 +523,21 @@ const WorkforceProfessionals = () => {
 
         {/* ========== MOBILE PROFESSIONALS LIST - ONLY VISIBLE ON MOBILE ========== */}
         <div className="lg:hidden space-y-4">
-          {filteredProfessionals.map((professional) => (
+          {filteredProfessionals.map((professional) => {
+            const professionalName = getProfessionalDisplayName(professional);
+
+            return (
             <div key={professional.id} className="bg-white rounded-xl border shadow-sm">
               <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=3b82f6&color=white`}
-                      alt={professional.user_name || professional.user_email || 'Professional'}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=3b82f6&color=white`}
+                      alt={professionalName}
                       className="w-12 h-12 rounded-full object-cover"
                     />
                     <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">{professional.user_name || professional.user_email || 'Professional'}</h3>
+                      <h3 className="font-semibold text-gray-900 text-sm">{professionalName}</h3>
                       <p className="text-xs text-gray-600">{professional.professional_title || 'No title specified'}</p>
                     </div>
                   </div>
@@ -591,29 +604,33 @@ const WorkforceProfessionals = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         {/* ========== END MOBILE PROFESSIONALS LIST ========== */}
 
         {/* Professionals Grid */}
         <div className="hidden lg:flex lg:flex-wrap gap-[2%] mt-6 ">
           {/* <h1 className="text-xl font-bold text-gray-900">Jobs {filteredProfessionals.length} of {filteredProfessionals.length}</h1> */}
-          {filteredProfessionals.map((professional) => (
+          {filteredProfessionals.map((professional) => {
+            const professionalName = getProfessionalDisplayName(professional);
+
+            return (
             <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow w-[32%] mb-2">
               <div className="px-2 py-6 h-full">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4 h-[20%]">
                   <div className="flex items-start space-x-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professional.user_name || professional.user_email || 'User')}&background=F1C644&color=white`}
-                      alt={professional.user_name || professional.user_email || 'Professional'}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=F1C644&color=white`}
+                      alt={professionalName}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     {/* <div className='rounded-full border-2 border-black'>
                       <User fill='#6D8FAF' className="w-10 h-10 text-[#6D8FAF]" />
                     </div> */}
                     <div>
-                      <h3 className="font-semibold text-gray-900">{professional.user_name || professional.user_email || 'Professional'}</h3>
+                      <h3 className="font-semibold text-gray-900">{professionalName}</h3>
                       <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
                     </div>
                   </div>
@@ -706,7 +723,8 @@ const WorkforceProfessionals = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Empty State */}

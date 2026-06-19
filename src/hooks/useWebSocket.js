@@ -15,9 +15,10 @@ const useWebSocket = (url, params, opts) => {
   const wsRef = useRef(null);
   const session = getSession();
   const enabled = opts?.enabled !== false;
+  const accessToken = session?.tokens?.access;
 
   useEffect(() => {
-    if (!enabled || !session?.tokens?.access) return;
+    if (!enabled || !accessToken) return;
 
     const wsBaseUrl =
       process.env.NODE_ENV === "development"
@@ -28,18 +29,18 @@ const useWebSocket = (url, params, opts) => {
     let wsUrl;
     if (url === "chat" && !params) {
       // All chats endpoint: ws/chat/
-      wsUrl = `${wsBaseUrl}/ws/chat/?token=${session?.tokens?.access}`;
+      wsUrl = `${wsBaseUrl}/ws/chat/`;
     } else if (url === "chat" && params) {
       // Specific chat room endpoint: ws/chat/<room_name>/
-      wsUrl = `${wsBaseUrl}/ws/chat/${params}/?token=${session?.tokens?.access}`;
+      wsUrl = `${wsBaseUrl}/ws/chat/${params}/`;
     } else if (url === "group" && params) {
       // Group chat endpoint: ws/group/<room_name>/
-      wsUrl = `${wsBaseUrl}/ws/group/${params}/?token=${session?.tokens?.access}`;
+      wsUrl = `${wsBaseUrl}/ws/group/${params}/`;
     } else {
       // Fallback for other endpoints (notifications, etc.)
       wsUrl = params
-        ? `${wsBaseUrl}/ws/${url}/${params}/?token=${session?.tokens?.access}`
-        : `${wsBaseUrl}/ws/${url}/?token=${session?.tokens?.access}`;
+        ? `${wsBaseUrl}/ws/${url}/${params}/`
+        : `${wsBaseUrl}/ws/${url}/`;
     }
 
     if (wsRef.current) {
@@ -47,7 +48,7 @@ const useWebSocket = (url, params, opts) => {
     }
 
     //
-    wsRef.current = new WebSocket(wsUrl);
+    wsRef.current = new WebSocket(wsUrl, [`access_token.${accessToken}`]);
 
     wsRef.current.onopen = () => {};
 
@@ -65,7 +66,7 @@ const useWebSocket = (url, params, opts) => {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [enabled, params, session?.tokens?.access, url]);
+  }, [accessToken, enabled, params, url]);
 
   const sendMessage = (message) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {

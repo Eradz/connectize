@@ -7,6 +7,7 @@ import { getServiceCategories } from "../../../api-services/services";
 import { useAuth } from "../../../context/userContext";
 import { CategoryIcon, VerifiedIcon } from "../../../icon";
 import { capitalizeFirst } from "../../../lib/utils";
+import { getUserDisplayName, getUserHandle } from "../../../lib/userDisplay";
 import HeadingText from "../../HeadingText";
 import { NavigationSection } from "../../NavigationSection";
 import LightParagraph from "../../ParagraphText";
@@ -44,15 +45,19 @@ function Sidebar() {
 export default Sidebar;
 
 const UserProfile = ({ currentUser }) => {
+  const displayName = getUserDisplayName(currentUser);
+  const handle = getUserHandle(currentUser);
+  const secondaryText = currentUser?.role
+    ? capitalizeFirst(currentUser?.role || "")
+    : handle
+      ? `@${handle}`
+      : "";
+
   return (
     <div className="flex items-center gap-2">
       <Link to={`/co/${currentUser?.id}`}>
         <Avatar
-          name={
-            currentUser?.first_name
-              ? `${currentUser?.first_name} ${currentUser?.last_name}`
-              : currentUser?.email
-          }
+          name={displayName}
           src={currentUser?.avatar || ""}
           className={clsx(avatarStyle)}
           size="md"
@@ -64,16 +69,12 @@ const UserProfile = ({ currentUser }) => {
             to={`/co/${currentUser?.id}`}
             className="font-semibold text-sm line-clamp-1 break-all"
           >
-            {currentUser?.first_name
-              ? `${currentUser?.first_name} ${currentUser?.last_name}`
-              : currentUser?.email.split("@")[0]}
+            {displayName}
           </Link>
           <VerifiedIcon color="black" />
         </div>
         <span className="text-[.75rem] text-gray-400 !-mt-0.5 block">
-          {currentUser?.role
-            ? capitalizeFirst(currentUser?.role || "")
-            : currentUser?.email}
+          {secondaryText}
         </span>
       </div>
     </div>

@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { VerifiedIcon } from "../icon";
+import { getUserDisplayName } from "../lib/userDisplay";
 
 export default function Username({ user, noClick = false }) {
-  const username = user?.full_name || `${user?.first_name} ${user?.last_name}`;
+  const username = getUserDisplayName(user);
   return (
     <div className="flex items-center">
       <Link

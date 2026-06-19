@@ -17,6 +17,7 @@ import { StarFilledIcon, StarOutlinedIcon } from "../../icon";
 import clsx from "clsx";
 import { useAuth } from "../../context/userContext";
 import { webRoutes } from "../../lib/webRoutes";
+import { getUserDisplayName } from "../../lib/userDisplay";
 
 export default function MessagesList() {
   const { user: currentUser } = useAuth();
@@ -171,9 +172,7 @@ const MessagesListTile = React.memo(({ message, currentUserId }) => {
   const { other_user, unread_count } = msgToDisplay;
   const navigate = useNavigate();
 
-  const firstName = other_user?.first_name || "Unknown";
-  const lastName = other_user?.last_name || "User";
-  const name = `${firstName} ${lastName}`;
+  const name = getUserDisplayName(other_user);
 
   const markAllAsRead = useMessagesStore((state) => state.markAllAsRead);
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);

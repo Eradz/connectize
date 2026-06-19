@@ -7,8 +7,10 @@ import { motion } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
+import { useAuth } from "../../context/userContext";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
+import { getUserDisplayName } from "../../lib/userDisplay";
 import {
   converthourTo12hrFormat,
   getMonthFromNumber,
@@ -49,10 +51,26 @@ function linkifyText(text) {
   });
 }
 
+function mergeUserDisplayFallback(user, fallbackUser) {
+  if (!fallbackUser) return user;
+  return {
+    ...fallbackUser,
+    ...user,
+    first_name: user?.first_name || fallbackUser?.first_name,
+    last_name: user?.last_name || fallbackUser?.last_name,
+    full_name: user?.full_name || fallbackUser?.full_name,
+    display_name: user?.display_name || fallbackUser?.display_name,
+    username: user?.username || fallbackUser?.username,
+    email: user?.email || fallbackUser?.email,
+    avatar: user?.avatar || fallbackUser?.avatar,
+  };
+}
+
 //
 
 const defaultEmptyMessages = [];
 export default function MessageArea() {
+  const { user: currentUser } = useAuth();
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name") || "";
 
@@ -213,6 +231,10 @@ export default function MessageArea() {
                   .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
                   .map((message, index) => {
                     const { sender_info, is_current_user } = message;
+                    const senderUser = is_current_user
+                      ? mergeUserDisplayFallback(sender_info, currentUser)
+                      : sender_info;
+                    const senderName = getUserDisplayName(senderUser);
 
                     const msgDate = new Date(message.timestamp);
 
@@ -230,7 +252,7 @@ export default function MessageArea() {
                       >
                         <Link to={`/co/${sender_info?.id}`} className="h-fit">
                           <Avatar
-                            name={`${sender_info?.first_name} ${sender_info?.last_name}`}
+                            name={senderName}
                             src={sender_info?.avatar}
                             size="sm"
                             className={avatarStyle}
@@ -245,11 +267,7 @@ export default function MessageArea() {
                           )}
                         >
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
-                            {is_current_user
-                              ? "You"
-                              : `${sender_info?.first_name || ""} ${
-                                  sender_info?.last_name || ""
-                                }`}
+                            {is_current_user ? "You" : senderName}
                           </h1>
                           <p className="text-gray-700 hover:text-gray-900 transition-all duration-300 whitespace-pre-wrap break-words">
                             {linkifyText(message?.content.substring(0, readMoreLimit))}

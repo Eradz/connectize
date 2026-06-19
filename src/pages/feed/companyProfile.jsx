@@ -53,6 +53,12 @@ const normalizeStoreListings = (storeData) => {
   return Array.isArray(listings) ? listings.filter(Boolean) : [];
 };
 
+const normalizeListResponse = (response) => {
+  const payload = response?.data ?? response;
+  const list = payload?.results ?? payload;
+  return Array.isArray(list) ? list.filter(Boolean) : [];
+};
+
 const isServiceListing = (listing) =>
   String(listing?.listing_type || listing?.type || "").toLowerCase() === "service";
 
@@ -99,6 +105,7 @@ const CompanyProfile = React.memo(() => {
   const [activeTab, setActiveTab] = useState("Activities");
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
+  const companyDisplayName = company?.company_name || companyName;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registrations, setRegistrations] = useState([]);
@@ -110,7 +117,11 @@ const CompanyProfile = React.memo(() => {
     try {
       setLoading(true);
       const response = await workforceAPI.getEvents();
-      setRegistrations((response.data.results || response.data).filter(event => event?.organizer_company_name === companyName) || []);
+      setRegistrations(
+        normalizeListResponse(response).filter(
+          event => event?.organizer_company_name === companyDisplayName
+        )
+      );
           setError(null);
         } catch (err) {
           console.error('Error loading registrations:', err);
@@ -125,7 +136,7 @@ const CompanyProfile = React.memo(() => {
               try {
                 setLoading(true);
                 const response = await workforceAPI.getJobs();
-                const data = (response.data?.results || response.data || response)?.filter(job => job?.company_name == companyName) || [];
+                const data = normalizeListResponse(response).filter(job => job?.company_name == companyDisplayName);
                 console.log("Filtered jobs:", data);
                 setApplications(data);
             // No separate filtered state; derived via useMemo
@@ -157,7 +168,7 @@ const CompanyProfile = React.memo(() => {
   useEffect(() => {
     loadMyRegistrations();
     loadCreatedJobs();
-  }, []);
+  }, [companyDisplayName]);
 
   useEffect(() => {
     loadDealRooms();
@@ -264,7 +275,7 @@ const CompanyProfile = React.memo(() => {
         ))}
       </div>
       <section className=" flex max-xl:flex-col items-start gap-2 relative sm:px-2">
-              <ProductSidebar company={company} />
+              <ProductSidebar company={company} companyName={companyName} />
           <ProfileSection className="max-xl:w-full grid grid-cols-1 gap-2 flex-1 pt-0">
           <div className="">
             <h2 className="text-xl font-semibold mb-4">Quick action</h2>
@@ -519,12 +530,13 @@ export const ManageRepresentativesLink = ({ main = false }) => {
   );
 };
 
-const ProductSidebar = React.memo(({ company }) => {
+const ProductSidebar = React.memo(({ company, companyName }) => {
 
   const { user: currentUser } = useAuth();
   const [showReportModal, setShowReportModal] = useState(false);
 
   const isCurrentUser = currentUser?.id === company?.user?.id;
+  const editCompanyName = companyName || company?.slug || company?.company_name || company?.id;
 
  const myAccounts = [
     {
@@ -558,11 +570,15 @@ const ProductSidebar = React.memo(({ company }) => {
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-bold">Summary</h2>
           {isCurrentUser && (
-            <button className="text-gray-500 hover:text-black">
+            <Link
+              to={`/company/${editCompanyName}/edit`}
+              aria-label="Edit summary"
+              className="text-gray-500 hover:text-black"
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.334 2.00004L14 4.66671M1.33398 14.6667L3.42998 14.3907C3.70189 14.3578 3.83785 14.3413 3.96646 14.3019C4.08041 14.2672 4.18965 14.2182 4.29146 14.1562C4.40647 14.0864 4.50793 13.9949 4.71084 13.792L14.0007 4.50204C14.7371 3.76562 14.7371 2.56846 14.0007 1.83204C13.2642 1.09562 12.0671 1.09562 11.3307 1.83204L2.04065 11.122C1.83774 11.3249 1.73629 11.4264 1.66646 11.5414C1.60453 11.6432 1.55562 11.7524 1.52094 11.8664C1.48156 11.995 1.46509 12.131 1.43214 12.4029L1.33398 14.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </button>
+            </Link>
           )}
         </div>
         <p className="text-sm text-gray-600 leading-relaxed">
@@ -575,11 +591,15 @@ const ProductSidebar = React.memo(({ company }) => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">ABOUT</h2>
           {isCurrentUser && (
-            <button className="text-gray-500 hover:text-black">
+            <Link
+              to={`/company/${editCompanyName}/edit`}
+              aria-label="Edit company information"
+              className="text-gray-500 hover:text-black"
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.334 2.00004L14 4.66671M1.33398 14.6667L3.42998 14.3907C3.70189 14.3578 3.83785 14.3413 3.96646 14.3019C4.08041 14.2672 4.18965 14.2182 4.29146 14.1562C4.40647 14.0864 4.50793 13.9949 4.71084 13.792L14.0007 4.50204C14.7371 3.76562 14.7371 2.56846 14.0007 1.83204C13.2642 1.09562 12.0671 1.09562 11.3307 1.83204L2.04065 11.122C1.83774 11.3249 1.73629 11.4264 1.66646 11.5414C1.60453 11.6432 1.55562 11.7524 1.52094 11.8664C1.48156 11.995 1.46509 12.131 1.43214 12.4029L1.33398 14.6667Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </button>
+            </Link>
           )}
         </div>
         

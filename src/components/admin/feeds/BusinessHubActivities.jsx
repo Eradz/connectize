@@ -66,6 +66,76 @@ const getStatusColor = (status) => {
   }
 };
 
+const isDateOnlyValue = (value) => /^\d{4}-\d{2}-\d{2}$/.test(String(value || ""));
+
+const parseEventDate = (value, { endOfDay = false } = {}) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  if (endOfDay && isDateOnlyValue(value)) {
+    date.setHours(23, 59, 59, 999);
+  }
+  return date;
+};
+
+const getEventLifecycle = (event) => {
+  if (!event) return { status: "unknown", label: "Unknown" };
+  if (event.is_cancelled) return { status: "cancelled", label: "Cancelled" };
+
+  const now = new Date();
+  const start = parseEventDate(event.start_date);
+  const end = event.end_date
+    ? parseEventDate(event.end_date, { endOfDay: true })
+    : parseEventDate(event.start_date, { endOfDay: true });
+
+  if (end && end < now) {
+    return { status: "completed", label: "Past" };
+  }
+
+  if (start) {
+    if (start > now) return { status: "upcoming", label: "Upcoming" };
+    return { status: "ongoing", label: "Ongoing" };
+  }
+
+  const rawStatus = String(event.event_status || event.status || "").toLowerCase();
+  if (rawStatus === "past") return { status: "completed", label: "Past" };
+  if (rawStatus === "open") return { status: "ongoing", label: "Ongoing" };
+  if (rawStatus) {
+    return {
+      status: rawStatus,
+      label: rawStatus.replace(/_/g, " "),
+    };
+  }
+
+  return { status: "unknown", label: "Unknown" };
+};
+
+const getEventStatusColor = (status) => {
+  switch (status) {
+    case "upcoming":
+      return "bg-amber-50 text-amber-700";
+    case "ongoing":
+      return "bg-emerald-50 text-emerald-700";
+    case "completed":
+      return "bg-gray-100 text-gray-600";
+    case "cancelled":
+      return "bg-red-50 text-red-700";
+    default:
+      return getStatusColor(status);
+  }
+};
+
+const getVisibleSidebarEvents = (events = []) =>
+  events
+    .filter((event) => {
+      const { status } = getEventLifecycle(event);
+      return status === "upcoming" || status === "ongoing";
+    })
+    .slice(0, 4);
+
+const getResults = (response) =>
+  Array.isArray(response) ? response : response?.results || [];
+
 // ─── Data Hook ──────────────────────────────────────────────────────────────
 function useBusinessHubData() {
   return useQuery({
@@ -75,7 +145,7 @@ function useBusinessHubData() {
         await Promise.allSettled([
           dealRoomService.getAll(1, 4),
           workforceJobService.getAll(1, 4),
-          workforceEventService.getAll(1, 4),
+          workforceEventService.getUpcomingEvents({ page_size: 4 }),
           knowledgeHubAPI
             .getArticles({ page_size: 4 })
             .then((r) => r?.data ?? r),
@@ -85,16 +155,16 @@ function useBusinessHubData() {
 
       return {
         dealRooms:
-          dealRooms.status === "fulfilled" ? dealRooms.value?.results : [],
-        jobs: jobs.status === "fulfilled" ? jobs.value?.results : [],
-        events: events.status === "fulfilled" ? events.value?.results : [],
+          dealRooms.status === "fulfilled" ? getResults(dealRooms.value) : [],
+        jobs: jobs.status === "fulfilled" ? getResults(jobs.value) : [],
+        events: events.status === "fulfilled" ? getResults(events.value) : [],
         articles:
-          articles.status === "fulfilled" ? articles.value?.results : [],
+          articles.status === "fulfilled" ? getResults(articles.value) : [],
         listings:
-          listings.status === "fulfilled" ? listings.value?.results : [],
+          listings.status === "fulfilled" ? getResults(listings.value) : [],
         logistics:
           logisticsData.status === "fulfilled"
-            ? logisticsData.value?.results
+            ? getResults(logisticsData.value)
             : [],
       };
     },
@@ -106,6 +176,9 @@ function useBusinessHubData() {
 // ─── Section Components ─────────────────────────────────────────────────────
 
 function ActivitySection({ icon: Icon, iconBg, iconColor, title, viewMoreUrl, children, isEmpty }) {
+  // Hide the whole card when there's no content to show.
+  if (isEmpty) return null;
+
   return (
     <div className="bg-white rounded-xl p-3 space-y-1">
       <div className="flex items-center justify-between px-1">
@@ -123,11 +196,7 @@ function ActivitySection({ icon: Icon, iconBg, iconColor, title, viewMoreUrl, ch
         </div>
       </div>
 
-      {isEmpty ? (
-        <p className="text-xs text-gray-400 px-1 py-2">No recent activity</p>
-      ) : (
-        <div className="space-y-0.5">{children}</div>
-      )}
+      <div className="space-y-0.5">{children}</div>
 
       <Link
         to={viewMoreUrl}
@@ -239,6 +308,8 @@ function JobsSection({ jobs = [] }) {
 
 // ─── Events Section ──────────────────────────────────────────────────────────
 function EventsSection({ events = [] }) {
+  const visibleEvents = getVisibleSidebarEvents(events);
+
   return (
     <ActivitySection
       icon={Calendar}
@@ -246,41 +317,43 @@ function EventsSection({ events = [] }) {
       iconColor="text-orange-600"
       title="Events"
       viewMoreUrl={webRoutes.workforceEvents}
-      isEmpty={events.length === 0}
+      isEmpty={visibleEvents.length === 0}
     >
-      {events.slice(0, 4).map((event) => (
-        <ActivityItem
-          key={event.id}
-          to={webRoutes.workforceEventDetail.replace(":id", event.id)}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-800 truncate group-hover:text-black">
-                {event.title}
-              </p>
-              <p className="text-xs text-gray-400 truncate">
-                {event.start_date
-                  ? new Date(event.start_date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : ""}
-                {event.location ? ` · ${event.location}` : ""}
-              </p>
+      {visibleEvents.map((event) => {
+        const eventLifecycle = getEventLifecycle(event);
+
+        return (
+          <ActivityItem
+            key={event.id}
+            to={webRoutes.workforceEventDetail.replace(":id", event.id)}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-800 truncate group-hover:text-black">
+                  {event.title}
+                </p>
+                <p className="text-xs text-gray-400 truncate">
+                  {event.start_date
+                    ? new Date(event.start_date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : ""}
+                  {event.location ? ` · ${event.location}` : ""}
+                </p>
+              </div>
+              <span
+                className={clsx(
+                  "text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize shrink-0",
+                  getEventStatusColor(eventLifecycle.status)
+                )}
+              >
+                {eventLifecycle.label}
+              </span>
             </div>
-            <span
-              className={clsx(
-                "text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize shrink-0",
-                event.status === "upcoming"
-                  ? "bg-amber-50 text-amber-700"
-                  : getStatusColor(event.status)
-              )}
-            >
-              {event.status || "upcoming"}
-            </span>
-          </div>
-        </ActivityItem>
-      ))}
+          </ActivityItem>
+        );
+      })}
     </ActivitySection>
   );
 }
@@ -437,6 +510,19 @@ function ActivitySkeleton() {
 // ─── Main Component ─────────────────────────────────────────────────────────
 export default function BusinessHubActivities() {
   const { data, isLoading } = useBusinessHubData();
+  const visibleEvents = getVisibleSidebarEvents(data?.events || []);
+
+  // When not loading, hide the entire section if every card is empty.
+  const hasAnyContent =
+    (data?.dealRooms?.length || 0) +
+      (data?.jobs?.length || 0) +
+      visibleEvents.length +
+      (data?.articles?.length || 0) +
+      (data?.listings?.length || 0) +
+      (data?.logistics?.length || 0) >
+    0;
+
+  if (!isLoading && !hasAnyContent) return null;
 
   return (
     <section className="w-full">
@@ -452,7 +538,7 @@ export default function BusinessHubActivities() {
           <>
             <DealRoomsSection deals={data?.dealRooms} />
             <JobsSection jobs={data?.jobs} />
-            <EventsSection events={data?.events} />
+            <EventsSection events={visibleEvents} />
             <KnowledgeSection articles={data?.articles} />
             <MarketplaceSection listings={data?.listings} />
             <LogisticsSection requests={data?.logistics} />

@@ -5,6 +5,7 @@ import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import CustomInput, {
   CustomSelect,
   CustomTextArea,
+  CurrencyInput,
   inputClassNames,
 } from "./customInput";
 import PhoneInput from "./PhoneInput";
@@ -85,6 +86,14 @@ export default function Form({
             onBlur={formik.handleBlur}
             value={formik.values[`${name}`]}
             className={clsx({ "opacity-80 pointer-events-none": disabled })}
+            validate={formik.touched[name] && validate}
+            error={formik.touched[name] && formik.errors[name]}
+          />
+        ) : type === "currency" ? (
+          <CurrencyInput
+            formik={formik}
+            name={name}
+            placeholder={placeholder}
             validate={formik.touched[name] && validate}
             error={formik.touched[name] && formik.errors[name]}
           />

@@ -13,13 +13,11 @@ import { ArrowLeft, Search, User, UserMinus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { knowledgeForumService } from '../../api-services/oilgas';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 import { webRoutes } from '../../lib/webRoutes';
 
 const memberName = (member) => {
-  const user = member?.user || {};
-  return [user.first_name, user.last_name].filter(Boolean).join(' ').trim() ||
-    user.email ||
-    'Connectize member';
+  return getUserDisplayName(member?.user) || 'Connectize member';
 };
 
 export default function KnowledgeForumMembers() {
@@ -175,41 +173,45 @@ export default function KnowledgeForumMembers() {
             </div>
           ) : (
             <ul className="divide-y">
-              {filteredMembers.map((member) => (
-                <li key={member.id} className="p-4 flex items-center justify-between gap-4">
-                  <div className="min-w-0 flex items-center gap-3">
-                    {member.user?.avatar ? (
-                      <img
-                        src={member.user.avatar}
-                        alt=""
-                        className="w-11 h-11 rounded-full object-cover bg-gray-100"
-                      />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center">
-                        <User className="w-5 h-5 text-gray-400" />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{memberName(member)}</p>
-                      {member.user?.email && (
-                        <p className="text-sm text-gray-500 truncate">{member.user.email}</p>
-                      )}
-                    </div>
-                  </div>
+              {filteredMembers.map((member) => {
+                const handle = getUserHandle(member.user);
 
-                  {forum?.is_moderator && member.user?.id && (
-                    <button
-                      type="button"
-                      onClick={() => onRemoveMember(member)}
-                      disabled={removingUserId === member.user.id}
-                      className="shrink-0 inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-60"
-                    >
-                      <UserMinus className="w-4 h-4" />
-                      {removingUserId === member.user.id ? 'Removing...' : 'Remove'}
-                    </button>
-                  )}
-                </li>
-              ))}
+                return (
+                  <li key={member.id} className="p-4 flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex items-center gap-3">
+                      {member.user?.avatar ? (
+                        <img
+                          src={member.user.avatar}
+                          alt=""
+                          className="w-11 h-11 rounded-full object-cover bg-gray-100"
+                        />
+                      ) : (
+                        <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center">
+                          <User className="w-5 h-5 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{memberName(member)}</p>
+                        {handle && (
+                          <p className="text-sm text-gray-500 truncate">@{handle}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {forum?.is_moderator && member.user?.id && (
+                      <button
+                        type="button"
+                        onClick={() => onRemoveMember(member)}
+                        disabled={removingUserId === member.user.id}
+                        className="shrink-0 inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-60"
+                      >
+                        <UserMinus className="w-4 h-4" />
+                        {removingUserId === member.user.id ? 'Removing...' : 'Remove'}
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

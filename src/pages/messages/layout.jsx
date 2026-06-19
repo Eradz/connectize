@@ -8,6 +8,7 @@ import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import SEO, { createSEO } from "../../components/SEO";
 import { useAuth } from "../../context/userContext";
+import { getUserDisplayName } from "../../lib/userDisplay";
 
 import MessagesPage from "../messages";
 
@@ -20,6 +21,7 @@ export default function MessagesLayout() {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name");
   const { user: currentUser, loading } = useAuth();
+  const firstDisplayName = getUserDisplayName(currentUser).split(/\s+/)[0];
 
   return (
     <section className="w-full h-full flex gap-4">
@@ -62,7 +64,7 @@ export default function MessagesLayout() {
               ) : (
                 <h1 className="text-3xl font-light">
                   <span className="font-bold text-gold">
-                    {currentUser?.first_name},
+                    {firstDisplayName},
                   </span>
                 </h1>
               )}

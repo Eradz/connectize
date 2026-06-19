@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
 
+const currencyOptions = ['USD', 'EUR', 'GBP', 'NGN', 'KES', 'GHS', 'ZAR', 'AED'];
+
 export default function LogisticsInventoryEdit() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -31,6 +33,7 @@ export default function LogisticsInventoryEdit() {
     minimum_stock: 0,
     unit: 'pcs',
     unit_cost: 0,
+    currency: 'USD',
     status: 'available',
     condition: 'new',
     warehouse: '',
@@ -116,6 +119,7 @@ export default function LogisticsInventoryEdit() {
       
       setForm({
         ...data,
+        currency: data.currency || 'USD',
         purchase_date: data.purchase_date ? data.purchase_date.split('T')[0] : '',
         warranty_expiry: data.warranty_expiry ? data.warranty_expiry.split('T')[0] : ''
       });
@@ -519,10 +523,12 @@ export default function LogisticsInventoryEdit() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Unit Cost ($)
+                  Unit Cost ({form.currency})
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold text-gray-500">
+                    {form.currency}
+                  </span>
                   <input
                     type="number"
                     name="unit_cost"
@@ -531,9 +537,25 @@ export default function LogisticsInventoryEdit() {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                    className="w-full pl-14 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Unit Cost Currency
+                </label>
+                <select
+                  name="currency"
+                  value={form.currency}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom_yellow focus:border-transparent"
+                >
+                  {currencyOptions.map((currency) => (
+                    <option key={currency} value={currency}>{currency}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -541,12 +563,11 @@ export default function LogisticsInventoryEdit() {
                   Total Value (Read-only)
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    value={`${((form.current_stock || 0) * (form.unit_cost || 0)).toFixed(2)}`}
+                    value={`${form.currency} ${((form.current_stock || 0) * (form.unit_cost || 0)).toFixed(2)}`}
                     disabled
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                   />
                 </div>
               </div>

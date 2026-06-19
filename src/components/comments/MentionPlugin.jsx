@@ -6,6 +6,7 @@ import {
   TextNode,
 } from 'lexical';
 import { mergeRegister } from '@lexical/utils';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 
 // Simple mention detection - looks for @username pattern
 const MENTION_REGEX = /@(\w+)/g;
@@ -57,7 +58,10 @@ export function $isMentionNode(node) {
 function MentionTypeahead({ users, onSelect, position, searchTerm }) {
   const filteredUsers = users.filter(user =>
     user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -72,22 +76,33 @@ function MentionTypeahead({ users, onSelect, position, searchTerm }) {
         minWidth: '200px',
       }}
     >
-      {filteredUsers.slice(0, 5).map((user) => (
-        <button
-          key={user.id}
-          type="button"
-          className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
-          onClick={() => onSelect(user)}
-        >
-          <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-white text-xs font-bold">
-            {user.first_name?.[0]}{user.last_name?.[0]}
-          </div>
-          <div>
-            <div className="text-sm font-medium">{user.full_name || `${user.first_name} ${user.last_name}`}</div>
-            <div className="text-xs text-gray-500">@{user.first_name?.toLowerCase()}</div>
-          </div>
-        </button>
-      ))}
+      {filteredUsers.slice(0, 5).map((user) => {
+        const displayName = getUserDisplayName(user);
+        const handle = getUserHandle(user);
+
+        return (
+          <button
+            key={user.id}
+            type="button"
+            className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
+            onClick={() => onSelect(user)}
+          >
+            <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-white text-xs font-bold">
+              {displayName
+                .split(/\s+/)
+                .map((part) => part[0])
+                .join("")
+                .slice(0, 2)}
+            </div>
+            <div>
+              <div className="text-sm font-medium">{displayName}</div>
+              {handle && (
+                <div className="text-xs text-gray-500">@{handle}</div>
+              )}
+            </div>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -102,7 +117,9 @@ export default function MentionPlugin({ users = [] }) {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        const mentionNode = $createMentionNode(user.first_name?.toLowerCase() || user.email);
+        const mentionNode = $createMentionNode(
+          getUserHandle(user) || `user-${user.id}`
+        );
         selection.insertNodes([mentionNode]);
       }
     });

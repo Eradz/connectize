@@ -15,6 +15,7 @@ import { UserSearchInput } from "../../components/representatives/UserSearchInpu
 import { avatarStyle } from "../../components/ResponsiveNav";
 import Username from "../../components/Username";
 import { useAuth } from "../../context/userContext";
+import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 import { webRoutes } from "../../lib/webRoutes";
 
 export default function MessagesPage() {
@@ -39,13 +40,24 @@ export default function MessagesPage() {
     return (
       users?.filter((user) => {
         const isCurrentUser = user?.id !== currentUser?.id;
-        const hasDetails = user?.first_name || user?.last_name;
+        const hasDetails =
+          user?.first_name ||
+          user?.last_name ||
+          user?.full_name ||
+          user?.display_name ||
+          user?.username ||
+          user?.email;
         const formattedUsername = username.toLowerCase();
+        const displayName = getUserDisplayName(user).toLowerCase();
+        const handle = getUserHandle(user).toLowerCase();
+
         if (username.length > 0) {
           return (
             isCurrentUser &&
             hasDetails &&
-            (user?.first_name?.toLowerCase().includes(formattedUsername) ||
+            (displayName.includes(formattedUsername) ||
+              handle.includes(formattedUsername) ||
+              user?.first_name?.toLowerCase().includes(formattedUsername) ||
               user?.last_name?.toLowerCase().includes(formattedUsername) ||
               user?.email?.toLowerCase().includes(formattedUsername) ||
               user?.country?.toLowerCase().includes(formattedUsername))
@@ -93,7 +105,9 @@ export default function MessagesPage() {
               </div>
             ) : (
               filteredUsers.map((user, index) => {
-                const { first_name, last_name, avatar, email: hashtag } = user;
+                const { avatar } = user;
+                const displayName = getUserDisplayName(user);
+                const handle = getUserHandle(user);
                 return (
                   <motion.li
                     initial={{ opacity: 0, y: 10 }}
@@ -103,13 +117,15 @@ export default function MessagesPage() {
                   >
                     <Avatar
                       src={avatar}
-                      name={`${first_name} ${last_name}`}
+                      name={displayName}
                       size="sm"
                       className={avatarStyle}
                     />
                     <div className="flex-1">
                       <Username user={user} />
-                      <p className="text-sm text-gray-400 m-0">{hashtag}</p>
+                      {handle && (
+                        <p className="text-sm text-gray-400 m-0">@{handle}</p>
+                      )}
                     </div>
 
                     <ChatSellerLink text="Chat" recipientId={user?.id} />

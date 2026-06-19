@@ -32,6 +32,7 @@ import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
 import { useAuth } from "../../context/userContext";
 import { useUserCompanies } from "../../hooks/useUserCompanies";
+import { getUserDisplayName } from "../../lib/userDisplay";
 import { webRoutes } from "../../lib/webRoutes";
 
 const createDefaultEnterpriseForm = (companyId = "") => ({
@@ -756,7 +757,7 @@ export default function EnterpriseSSOSetupPage() {
                       <div key={representative.id} className="rounded-lg border p-4 flex items-start justify-between gap-4 max-md:flex-col">
                         <div>
                           <p className="font-semibold text-base">
-                            {representative.first_name || representative.email} {representative.last_name || ""}
+                            {getUserDisplayName(representative)}
                           </p>
                           <p className="text-sm text-gray-600">{representative.email}</p>
                           <p className="text-sm text-gray-600 mt-1">Requested role: {representative.role || "Employee"}</p>

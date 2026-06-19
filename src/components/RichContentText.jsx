@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 import Markdown from "markdown-to-jsx";
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { getUserDisplayName, getUserHandle } from "../lib/userDisplay";
 
 const tokenPattern = /(^|[\s([{*_~])([#@])([A-Za-z0-9_][A-Za-z0-9_-]*)/g;
 
@@ -25,14 +26,6 @@ const toMentionTitle = (value = "") =>
     .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(" ");
 
-const getUserDisplayName = (user = {}) => {
-  const fullName =
-    user.full_name ||
-    [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
-
-  return fullName || user.username || user.email?.split("@")[0] || "User";
-};
-
 const getCompanyDisplayName = (company = {}) =>
   company.company_name || company.name || company.slug || "Company";
 
@@ -40,7 +33,7 @@ const getUserMentionKeys = (user = {}) => {
   const displayName = getUserDisplayName(user);
   const keys = [
     user.username,
-    user.email?.split("@")[0],
+    getUserHandle(user),
     user.first_name,
     user.last_name,
     displayName,

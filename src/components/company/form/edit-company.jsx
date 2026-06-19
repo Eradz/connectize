@@ -6,13 +6,26 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
-import { editCompanyInformation } from "../../../api-services/companies";
+import { editCompanyInformation, getCompanyCategories } from "../../../api-services/companies";
 // import cities from "../../../lib/data/cities.json";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { makeApiRequest } from "../../../lib/helpers";
+
+// Fallback used only if the backend categories can't be loaded.
+const FALLBACK_COMPANY_CATEGORIES = [
+  "Drilling Contractor Company",
+  "Integrated Oil & Gas Company",
+  "Independent Oil & Gas Company",
+  "Oil Service Company",
+  "Oil Equipment Manufacturer",
+  "Media Company",
+  "Security",
+  "Renewable Energy Company",
+  "Oil Refining",
+];
 
 export default function EditCompanyForm({ company }) {
   const countries = getCountries();
@@ -33,16 +46,16 @@ export default function EditCompanyForm({ company }) {
   };
 
   const validationSchema = Yup.object({
-    company_name: Yup.string().required("Company name is required"),
+    company_name: Yup.string().optional(),
     email: Yup.string().email("Invalid email address").optional(),
     about: Yup.string().optional(),
     website: Yup.string().url("Invalid website URL").optional(),
     office_address: Yup.string().optional(),
-    country: Yup.string().required("Country is required"),
-    state: Yup.string().required("State is required"),
+    country: Yup.string().optional(),
+    state: Yup.string().optional(),
     city: Yup.string().optional(),
     tag_line: Yup.string().optional(),
-    organization_type: Yup.string().required("Organization type is required"),
+    organization_type: Yup.string().optional(),
   });
 
   const [loading, setLoading] = useState(false);
@@ -75,6 +88,18 @@ export default function EditCompanyForm({ company }) {
   };
 
   const countriesString = countries.map((country) => country.name);
+
+  const { data: companyCategories } = useQuery({
+    queryKey: ["company-categories"],
+    queryFn: getCompanyCategories,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const companyTypeOptions =
+    companyCategories && companyCategories.length > 0
+      ? companyCategories
+      : FALLBACK_COMPANY_CATEGORIES;
 
   const stateForCountry =
     countries.find((country) => country.name === formik.values["country"])
@@ -177,17 +202,7 @@ export default function EditCompanyForm({ company }) {
           type: "select",
           label: "Company type",
           placeholder: "Select company type",
-          options: [
-            "Drilling Contractor Company",
-            "Integrated Oil & Gas Company",
-            "Independent Oil & Gas Company",
-            "Oil Service Company",
-            "Oil Equipment Manufacturer",
-            "Media Company",
-            "Security",
-            "Renewable Energy Company",
-            "Oil Refining",
-          ],
+          options: companyTypeOptions,
         },
 
         {

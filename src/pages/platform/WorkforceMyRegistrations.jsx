@@ -22,6 +22,12 @@ import { webRoutes } from '../../lib/webRoutes';
 import BackArrowButton from "../../components/BackArrowButton"
 import { getCurrencySymbol } from '../../utils/currency';
 
+const normalizeListResponse = (response) => {
+  const payload = response?.data ?? response;
+  const list = payload?.results ?? payload;
+  return Array.isArray(list) ? list.filter(Boolean) : [];
+};
+
 const WorkforceMyRegistrations = () => {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +43,7 @@ const WorkforceMyRegistrations = () => {
     try {
       setLoading(true);
       const response = await workforceAPI.getMyEventRegistrations();
-      setRegistrations(response.data.results || response.data || []);
+      setRegistrations(normalizeListResponse(response));
       setError(null);
     } catch (err) {
       console.error('Error loading registrations:', err);
