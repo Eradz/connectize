@@ -3,24 +3,21 @@ import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import {
   dealRoomService,
-  dealMilestoneService,
-  dealActivityService
+  dealMilestoneService
 } from "../../api-services/oilgas";
 
 import { baseURL, getAuthorizationHeader, makeApiRequest } from "../../lib/helpers";
-import { dealDocumentService, dealValuationService } from "../../api-services/oilgas";
+import { dealDocumentService } from "../../api-services/oilgas";
 import axios from "axios";
 import { toast as notify } from "sonner";
 import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
-import { EmptyDocuments, EmptyParticipants, EmptyMilestones, EmptyValuations, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, Upload, File, X, CloudUpload, RefreshCcw, Dot, UploadCloud, CalendarDays, LockOpen, Trash2, Trash } from "lucide-react";
-import { CloudUploadOutlined } from "@ant-design/icons";
+import { EmptyParticipants, EmptyMilestones, EmptySearch } from "../../components/ui/EmptyStates";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, File, X, CloudUpload, RefreshCcw, UploadCloud, CalendarDays, LockOpen, Trash2, Trash } from "lucide-react";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
-import dealRoomAPI from "../../api-services/dealRoom";
 import ValuationsPanel from "./ValuationsPanel";
 import { useAuth } from "../../context/userContext";
 import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
@@ -137,16 +134,6 @@ export default function DealRoomDetail() {
   const [newDocName, setNewDocName] = useState("");
   const [newDocType, setNewDocType] = useState("other");
   const [newDocFile, setNewDocFile] = useState(null);
-  const [participantUserId, setParticipantUserId] = useState("");
-  const [valuationMethod, setValuationMethod] = useState("dcf");
-  const [valuationNotes, setValuationNotes] = useState("");
-  const [valuationBase, setValuationBase] = useState(0);
-  const [valuationAdjusted, setValuationAdjusted] = useState(0);
-  const [valuationCurrency, setValuationCurrency] = useState("USD");
-  const [valuationPreparedBy, setValuationPreparedBy] = useState("");
-  const [actPage, setActPage] = useState(1);
-  const pageSize = 10;
-  
   // Modal states
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
   const [showCreateMilestoneModal, setShowCreateMilestoneModal] = useState(false);
@@ -154,6 +141,7 @@ export default function DealRoomDetail() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteDocumentData, setDeleteDocumentData] = useState(null);
   const [editingMilestone, setEditingMilestone] = useState(null);
+  const [showDeleteDealModal, setShowDeleteDealModal] = useState(false);
   // Milestone modal state: progress and optional notes
   const [milestoneForm, setMilestoneForm] = useState({ progress: 0, notes: "" });
   const [createMilestoneForm, setCreateMilestoneForm] = useState({ 
@@ -579,12 +567,24 @@ export default function DealRoomDetail() {
                   </div>
                 )}
               </div>
-             {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
-              <PencilIcon className= "w-4 h-4"/>
-              <span className="hidden md:flex">
-                Edit Deal Room
-              </span>
-              </Link>}
+             {deal?.initiator === user?.id &&  
+             <div className="flex gap-4 items-center">
+                <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-gold text-white text-sm hover:bg-pale_yellow mb-4">
+                  <PencilIcon className= "w-4 h-4 "/>
+                  <span className="hidden md:flex">
+                    Edit Deal Room
+                  </span>
+                  </Link>
+
+                <button onClick={() => setShowDeleteDealModal(true)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 mb-4">
+                  <Trash2 className= "w-4 h-4 text-white"/>
+                  <span className="hidden md:flex text-white">
+                    Delete Deal Room
+                  </span>
+                  </button>
+             </div>
+              
+              }
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}
@@ -1011,7 +1011,6 @@ export default function DealRoomDetail() {
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                   </form>
-                    // <EmptyDocuments onUpload={() => document.querySelector('input[type="file"]')?.click()} />
                   ) : (
                     
                       uploadSomeDocument ?
@@ -1594,6 +1593,38 @@ export default function DealRoomDetail() {
           )}
         </div>
       </div>
+
+      {/* Delete Deal Room Modal */}
+      <Modal
+        isOpen={showDeleteDealModal}
+        onClose={() => setShowDeleteDealModal(false)}
+        title="Delete Deal Room"
+        size="md"
+      >
+        <p>Are you sure you want to delete this deal room "{deal?.title}"? This action cannot be undone.</p>
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={() => setShowDeleteDealModal(false)}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                await dealRoomService.delete(id);
+                notify.success("Deal room deleted");
+                window.location.href = webRoutes.dealRooms;
+              } catch (err) {
+                notify.error(err.message || 'Failed to delete deal room');
+              }
+            }}
+            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </Modal>
 
       {/* Milestone Update Modal */}
       <Modal
