@@ -365,7 +365,7 @@ export default function UserProfile() {
                         title="Location"
                         value={
                           address || city || region || country
-                            ? `${address || ""} ${city || ""} ${region || ""} ${country || ""
+                            ? `${currentUser?.id === Number(userId) ? address || "" : ""} ${city || ""} ${region || ""} ${country || ""
                             }`
                           : emptyWord
                       }
