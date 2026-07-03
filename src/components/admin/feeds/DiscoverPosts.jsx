@@ -15,6 +15,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import { BarChart3 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -812,8 +813,15 @@ export const DiscoverPostItem = ({
         </section>
 
         {isPostOwner && !isPlainRepost && (
-          <MoreOptions className="shrink-0 !max-w-[120px]">
+          <MoreOptions className="shrink-0 !max-w-[145px]">
             <div className="flex flex-col gap-2">
+              <ButtonWithTooltipIcon
+                text="View insights"
+                IconName={BarChart3}
+                onClick={() =>
+                  navigate(webRoutes.postInsights.replace(":id", postItem?.id))
+                }
+              />
               <ButtonWithTooltipIcon
                 text="Edit post"
                 IconName={Pencil1Icon}

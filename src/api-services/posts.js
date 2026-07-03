@@ -103,6 +103,34 @@ export const getPostById = async (id) => {
   return post;
 };
 
+export const getPostInsights = async (id, period = "30d") => {
+  return await makeApiRequest({
+    url: `api/posts/${id}/insights/?period=${encodeURIComponent(period)}`,
+    method: "GET",
+  });
+};
+
+export const getPostInsightActors = async (
+  id,
+  { type = "all", period = "30d", page = 1, pageSize = 20 } = {}
+) => {
+  const response = await makeApiRequest({
+    url:
+      `api/posts/${id}/insights/actors/?type=${encodeURIComponent(type)}` +
+      `&period=${encodeURIComponent(period)}&page=${page}&page_size=${pageSize}`,
+    method: "GET",
+  });
+
+  return {
+    actors: response?.results || [],
+    count: response?.count || 0,
+    next: response?.next || null,
+    previous: response?.previous || null,
+    hasMore: !!response?.next,
+    nextPage: page + 1,
+  };
+};
+
 export const getPostUploadStatus = async (uploadId) => {
   if (!uploadId) return null;
 
