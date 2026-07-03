@@ -262,6 +262,13 @@ const stripHtmlTags = (value) => {
   return (doc.body.textContent || "").trim();
 };
 
+/** Display name for a repost row (company reposts win over the user). */
+const getRepostAuthorName = (repost = {}) =>
+  repost.company?.company_name ||
+  repost.company?.name ||
+  repost.user?.full_name ||
+  `${repost.user?.first_name || ""} ${repost.user?.last_name || ""}`.trim();
+
 /** Muted placeholder shown where a repost's original post used to be. */
 const DeletedParentNotice = ({ className }) => (
   <div
@@ -501,6 +508,23 @@ export const DiscoverPostItem = ({
     onOpen: onRepostMenuOpen,
     onClose: onRepostMenuClose,
   } = useDisclosure();
+
+  // "Reposted by {first reposter} and N others" attribution — SINGLE POST
+  // PAGE ONLY (feeds must not fire a per-card reposts request). Shares the
+  // ["reposts", id] cache key with RepostersModal, so this fetches once and
+  // opening the modal reuses the cached list.
+  const { data: repostersPreview } = useQuery({
+    queryKey: ["reposts", activePost?.id],
+    queryFn: () => getPostReposts(activePost?.id),
+    enabled: isSinglePost && !!activePost?.id && reposts > 0,
+    staleTime: 30000,
+  });
+  const repostersList =
+    repostersPreview?.results ||
+    (Array.isArray(repostersPreview) ? repostersPreview : []);
+  const firstReposterName = getRepostAuthorName(repostersList[0]);
+  const totalReposters = repostersPreview?.count ?? repostersList.length;
+  const otherReposterCount = Math.max(totalReposters - 1, 0);
 
   // Refresh every feed reading from the shared ["posts"] cache (discover feed,
   // following feed and the user/company profile feeds all consume this key),
@@ -982,9 +1006,6 @@ export const DiscoverPostItem = ({
                   )}
                 >
                   <RetweetOutlined className="xs:!text-[14px] !text-[20px]" />
-                  {!isSinglePost && (
-                    <span className="!text-[.6rem]">{formatNumber(reposts)}</span>
-                  )}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="!p-2 !w-fit">
@@ -1023,7 +1044,9 @@ export const DiscoverPostItem = ({
               </PopoverContent>
             </Popover>
 
-            {isSinglePost && (
+            {/* Repost COUNT: tappable on every card when > 0 — opens the
+                reposters list. The repost/undo menu stays on the icon. */}
+            {reposts > 0 ? (
               <button
                 type="button"
                 onClick={() => setShowRepostersModal(true)}
@@ -1035,6 +1058,15 @@ export const DiscoverPostItem = ({
               >
                 {formatNumber(reposts)}
               </button>
+            ) : (
+              <span
+                className={clsx(
+                  "!text-[.6rem]",
+                  reposted ? "text-green-600" : "text-gray-600"
+                )}
+              >
+                {formatNumber(reposts)}
+              </span>
             )}
           </div>
 
@@ -1058,6 +1090,25 @@ export const DiscoverPostItem = ({
           </CustomShareButton>
         </div>
       </div>
+
+      {/* Single post page: subtle "Reposted by …" attribution line. Tapping
+          it opens the same RepostersModal as the count. */}
+      {isSinglePost && firstReposterName && (
+        <button
+          type="button"
+          onClick={() => setShowRepostersModal(true)}
+          className="mt-2 flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 hover:underline transition-colors"
+        >
+          <RetweetOutlined className="!text-[12px]" />
+          <span className="truncate">
+            Reposted by {firstReposterName}
+            {otherReposterCount > 0 &&
+              ` and ${otherReposterCount} ${
+                otherReposterCount === 1 ? "other" : "others"
+              }`}
+          </span>
+        </button>
+      )}
 
       {/* Quote repost modal */}
       <ReusableModal

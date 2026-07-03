@@ -18,14 +18,6 @@ const normalizeMentionToken = (value = "") =>
 const slugifyMentionValue = (value = "") =>
   normalizeMentionToken(String(value).replace(/[_\s]+/g, "-"));
 
-const toMentionTitle = (value = "") =>
-  String(value)
-    .replace(/[-_]+/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-
 const getCompanyDisplayName = (company = {}) =>
   company.company_name || company.name || company.slug || "Company";
 
@@ -95,8 +87,10 @@ const getTokenTarget = (symbol, value, mentionUsers = [], mentionCompanies = [])
     const mentionTarget = resolveMentionTarget(value, mentionUsers, mentionCompanies);
     if (mentionTarget) return mentionTarget;
 
+    // Unresolved mention: keep the raw @token text (never guess a name),
+    // but still link it to search so it stays tappable.
     return {
-      label: toMentionTitle(value),
+      label: `@${value}`,
       url: `/search?search_query=${encodeURIComponent(`@${value}`)}`,
       type: "mention",
     };
