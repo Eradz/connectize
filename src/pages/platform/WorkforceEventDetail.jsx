@@ -22,13 +22,19 @@ import {
   Plus,
   CreditCard,
   Loader2,
-  Play
+  Play,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import { workforceAPI } from '../../api-services/workforce';
+import { workforceEventService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
+import MoreOptions from '../../components/MoreOptions';
+import { confirmDialog } from '../../lib/confirm.jsx';
 import { formatCurrency } from '../../utils/currency';
 
 const normalizeListResponse = (response) => {
@@ -64,6 +70,7 @@ const WorkforceEventDetail = () => {
   const [myRegistration, setMyRegistration] = useState(null);
   const [showStartModal, setShowStartModal] = useState(false);
   const [isStartingEvent, setIsStartingEvent] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [updatingRegistrationId, setUpdatingRegistrationId] = useState(null);
 
@@ -470,6 +477,27 @@ const WorkforceEventDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete event',
+      message: 'Are you sure you want to delete this event? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await workforceEventService.delete(event.id);
+      if (result === null) return; // makeApiRequest returns null on failure and already toasts the API error
+      toast.success('Event deleted');
+      navigate(webRoutes.workforceEvents);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete event');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleStartEvent = async () => {
     try {
       setIsStartingEvent(true);
@@ -639,7 +667,7 @@ const WorkforceEventDetail = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex h-[90%]">
+                    <div className="flex h-[90%] items-center gap-2">
                        <Link
                        to={webRoutes.workforceEventCreate}
                        className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
@@ -649,6 +677,27 @@ const WorkforceEventDetail = () => {
                         Create Event
                         </p>
                        </Link>
+                       {isEventCreator && (
+                         <MoreOptions className="!w-fit">
+                           <div className="flex flex-col gap-2">
+                             <button
+                               onClick={() => navigate(webRoutes.workforceEventEdit.replace(':id', event.id))}
+                               className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                             >
+                               <Edit className="h-4 w-4" />
+                               <span>Edit</span>
+                             </button>
+                             <button
+                               onClick={handleDelete}
+                               disabled={isDeleting}
+                               className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                             >
+                               <Trash2 className="h-4 w-4" />
+                               <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                             </button>
+                           </div>
+                         </MoreOptions>
+                       )}
                        </div>
                   </div>
           {/* Main Content */}

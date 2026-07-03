@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
+import ArticleAuthorByline from '../../components/knowledge/ArticleAuthorByline';
 
 const KnowledgeArticles = () => {
   const { user: currentUser } = useAuth();
@@ -436,10 +437,7 @@ const KnowledgeArticles = () => {
                     {article.excerpt || article.content?.substring(0, 50) + '...'}
                   </p>
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1" />
-                      <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
-                    </div>
+                    <ArticleAuthorByline article={article} iconClassName="h-4 w-4" />
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
                       <span>{new Date(article.created_at).toLocaleDateString()}</span>
@@ -675,10 +673,11 @@ const KnowledgeArticles = () => {
                     {article.excerpt || article.content?.substring(0, 100) + '...'}
                   </p>
                   <div className="flex flex-col gap-2 mb-4">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <User className="h-4 w-4 mr-1.5" />
-                      <span>{`${article.author.first_name} ${article.author.last_name} `|| 'Anonymous'}</span>
-                    </div>
+                    <ArticleAuthorByline
+                      article={article}
+                      className="text-xs text-gray-500"
+                      iconClassName="h-4 w-4"
+                    />
                     <div className="flex items-center text-xs text-gray-500">
                       <Calendar className="h-4 w-4 mr-1.5" />
                       <span>{new Date(article.created_at).toLocaleDateString('en-GB')}</span>

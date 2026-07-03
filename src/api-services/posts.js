@@ -22,6 +22,25 @@ export const getPosts = async (page = 1, pageSize = 10) => {
 };
 
 /**
+ * Get posts for a company profile - authored + reposted by the company (server-side filter)
+ */
+export const getCompanyPosts = async (companyId, page = 1, pageSize = 10) => {
+  const response = await makeApiRequest({
+    url: `api/posts/?company=${companyId}&page=${page}&page_size=${pageSize}`,
+    method: "GET",
+  });
+
+  return {
+    posts: response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED"),
+    count: response.count,
+    next: response.next,
+    previous: response.previous,
+    hasMore: !!response.next,
+    nextPage: page + 1
+  };
+};
+
+/**
  * Get Following feed - posts from users/companies the user follows
  * @param {number} page - Page number
  * @param {number} pageSize - Number of posts per page  
@@ -163,6 +182,38 @@ export const likePost = async (id, data, hasLikedPost) => {
   });
 };
 
+export const repostPost = async (id, { comment = "", companyId = null } = {}) => {
+  const result = await makeApiRequest({
+    url: `api/posts/${id}/repost/`,
+    method: "POST",
+    data: {
+      comment,
+      ...(companyId ? { company_id: companyId } : {}),
+    },
+  });
+
+  return result;
+};
+
+export const unrepostPost = async (id, companyId = null) => {
+  const result = await makeApiRequest({
+    url: `api/posts/${id}/unrepost/`,
+    method: "POST",
+    data: companyId ? { company_id: companyId } : {},
+  });
+
+  return result;
+};
+
+export const getPostReposts = async (id, page = 1) => {
+  const result = await makeApiRequest({
+    url: `api/posts/${id}/reposts/?page=${page}`,
+    method: "GET",
+  });
+
+  return result;
+};
+
 export const commentOnPost = async (id, comment, mentions = [], companyMentions = [], commentAsCompanyId = null) => {
   const result = await makeApiRequest({
     url: `api/posts/${id}/comment/`,
@@ -189,6 +240,44 @@ export const replyToComment = async (commentId, content, mentions = [], companyM
       parent_reply_id: parentReplyId,  // NEW: For nested replies
       company_id: replyAsCompanyId,
     },
+  });
+
+  return result;
+};
+
+export const updateComment = async (commentId, content) => {
+  const result = await makeApiRequest({
+    url: `api/comments/${commentId}/`,
+    method: "PATCH",
+    data: { content },
+  });
+
+  return result;
+};
+
+export const deleteComment = async (commentId) => {
+  const result = await makeApiRequest({
+    url: `api/comments/${commentId}/`,
+    method: "DELETE",
+  });
+
+  return result;
+};
+
+export const updateReply = async (replyId, content) => {
+  const result = await makeApiRequest({
+    url: `api/replies/${replyId}/`,
+    method: "PATCH",
+    data: { content },
+  });
+
+  return result;
+};
+
+export const deleteReply = async (replyId) => {
+  const result = await makeApiRequest({
+    url: `api/replies/${replyId}/`,
+    method: "DELETE",
   });
 
   return result;

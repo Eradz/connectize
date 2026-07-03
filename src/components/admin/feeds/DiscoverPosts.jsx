@@ -1,11 +1,16 @@
-import { MessageOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { MessageOutlined, RetweetOutlined, ShareAltOutlined } from "@ant-design/icons";
 import {
   Avatar,
   Button,
   CloseButton,
+  Popover,
+  PopoverArrow,
+  PopoverContent,
+  PopoverTrigger,
   Spinner,
   Textarea,
   Tooltip,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
@@ -21,12 +26,19 @@ import {
   likeComment,
   replyToComment,
   likeReply,
+  updateComment,
+  deleteComment,
+  updateReply,
+  deleteReply,
+  repostPost,
+  unrepostPost,
+  getPostReposts,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
 import { useCompanySearch } from "../../../hooks/useCompanySearch";
 import { useGetActionableCompanies } from "../../../hooks";
-import { usePollPosts } from "../../../hooks/usePolling";
+import { usePollPosts, usePollCompanyPosts } from "../../../hooks/usePolling";
 import { useUserSearch } from "../../../hooks/useUserSearch";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber } from "../../../lib/utils";
@@ -45,7 +57,7 @@ import TimeAgo from "../../TimeAgo";
 import SocialShareModal from "../../CustomShareButton";
 import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CommentThread from "../../comments/CommentThread";
 import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import CommentAsSelector from "../../comments/CommentAsSelector";
@@ -56,17 +68,19 @@ function DiscoverPosts({
   isSearch,
   searchLoading,
   companyName = null,
+  companyId = null,
 }) {
-  // const { data: posts, isLoading, error } = usePollPosts();
+  const discoverQuery = usePollPosts();
+  const companyQuery = usePollCompanyPosts(companyId);
 
-  const { 
-    data: posts, 
-    isLoading, 
+  const {
+    data: posts,
+    isLoading,
     error,
-    fetchNextPage, 
-    hasNextPage, 
-    isFetchingNextPage 
-  } = usePollPosts();
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = companyId ? companyQuery : discoverQuery;
   // Debug logging
   if (error) {
     console.error("❌ [DiscoverPosts] Error loading posts:", error);
@@ -75,6 +89,8 @@ function DiscoverPosts({
   const lastPostRef = useRef();
   const finalArray = isSearch
     ? searchArray
+    : companyId
+    ? posts?.pages?.flatMap(page => page.posts)
     : companyName
     ? posts?.pages?.flatMap(page => page.posts)?.filter(
         (post) =>
@@ -88,7 +104,7 @@ function DiscoverPosts({
 
    // Infinite scroll observer
   useEffect(() => {
-    if (isSearch || companyName) return; // Disable infinite scroll for filtered views
+    if (isSearch || (companyName && !companyId)) return; // Disable infinite scroll for client-filtered views
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -108,7 +124,7 @@ function DiscoverPosts({
         observer.disconnect();
       }
     };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName, companyId]);
   
   return (
     <section className="w-full space-y-1.5 md:space-y-6 mt-6">
@@ -238,6 +254,18 @@ export const DiscoverPostItem = ({
 
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Repost attribution (optional field surfaced by profile/following feeds)
+  const repostedBy = postItem?.repostedBy || null;
+  const isSelfRepost =
+    !!repostedBy &&
+    repostedBy.type === "user" &&
+    repostedBy.id === currentUser?.id;
+  const repostedByHref =
+    repostedBy?.type === "company"
+      ? `/${repostedBy?.slug || ""}`
+      : `/co/${repostedBy?.id}`;
 
   const postTitle = `Connectize Post by ${
     postItem?.user?.first_name
@@ -281,6 +309,94 @@ export const DiscoverPostItem = ({
     setRefetchInterval(1000);
     setTimeout(() => setRefetchInterval(false), 2000);
   };
+  // Repost state - mirrors the optimistic like-button pattern above
+  const [reposted, setReposted] = useState(() => !!postItem?.isRepostedByUser);
+  const [reposts, setReposts] = useState(() => postItem?.numberOfReposts || 0);
+  const [repostLoading, setRepostLoading] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [quoteText, setQuoteText] = useState("");
+  const [isQuoteSubmitting, setIsQuoteSubmitting] = useState(false);
+  const [showRepostersModal, setShowRepostersModal] = useState(false);
+  const {
+    isOpen: isRepostMenuOpen,
+    onOpen: onRepostMenuOpen,
+    onClose: onRepostMenuClose,
+  } = useDisclosure();
+
+  // Refresh every feed reading from the shared ["posts"] cache (discover feed,
+  // following feed and the user/company profile feeds all consume this key),
+  // plus the reposters list, so a new repost is visible on the profile page.
+  const invalidateFeedsAfterRepost = () => {
+    queryClient.invalidateQueries({ queryKey: ["posts"] });
+    queryClient.invalidateQueries({ queryKey: ["reposts", postItem?.id] });
+  };
+
+  const handleRepost = async (quote = "") => {
+    onRepostMenuClose();
+    setRepostLoading(true);
+    setReposted(true);
+    setReposts((prev) => prev + 1);
+    try {
+      // makeApiRequest returns null on failure (and toasts the API error itself)
+      const result = await repostPost(postItem?.id, { comment: quote });
+      if (result === null) {
+        setReposted(false);
+        setReposts((prev) => prev - 1);
+        return false;
+      }
+      toast.success("Reposted");
+      invalidateFeedsAfterRepost();
+      setRefetchInterval(1000);
+      setTimeout(() => setRefetchInterval(false), 2000);
+      return true;
+    } catch (error) {
+      setReposted(false);
+      setReposts((prev) => prev - 1);
+      toast.error("Failed to repost");
+      console.error("Repost error:", error);
+      return false;
+    } finally {
+      setRepostLoading(false);
+    }
+  };
+
+  const handleUnrepost = async () => {
+    onRepostMenuClose();
+    setRepostLoading(true);
+    setReposted(false);
+    setReposts((prev) => Math.max(prev - 1, 0));
+    try {
+      const result = await unrepostPost(postItem?.id);
+      if (result === null) {
+        setReposted(true);
+        setReposts((prev) => prev + 1);
+        return;
+      }
+      toast.success("Repost removed");
+      invalidateFeedsAfterRepost();
+      setRefetchInterval(1000);
+      setTimeout(() => setRefetchInterval(false), 2000);
+    } catch (error) {
+      setReposted(true);
+      setReposts((prev) => prev + 1);
+      toast.error("Failed to remove repost");
+      console.error("Unrepost error:", error);
+    } finally {
+      setRepostLoading(false);
+    }
+  };
+
+  const handleQuoteRepost = async () => {
+    if (!quoteText.trim()) return;
+    setIsQuoteSubmitting(true);
+    const success = await handleRepost(quoteText.trim());
+    setIsQuoteSubmitting(false);
+    if (success) {
+      setQuoteText("");
+      setShowQuoteModal(false);
+    }
+  };
+
   const shareUrlString = window?.location?.hostname?.includes("localhost")
     ? `http://${window.location.hostname}:3000${webRoutes.singlePost.replace(":id", postItem.id)}`
     : `https://${window.location.hostname}${webRoutes.singlePost.replace(":id", postItem.id)}`;
@@ -319,6 +435,39 @@ export const DiscoverPostItem = ({
       )}
     >
       {isSinglePost && <SEO title={postTitle} description={postItem?.body} />}
+
+      {/* Repost attribution header (only when the feed marks this as a repost) */}
+      {repostedBy && (
+        <div className="flex items-center gap-1.5 mb-2 text-xs text-gray-500">
+          <RetweetOutlined className="!text-[12px] shrink-0" />
+          <Link
+            to={repostedByHref}
+            className="font-medium hover:underline truncate"
+          >
+            {isSelfRepost ? "You" : repostedBy.name || "Someone"}
+          </Link>
+          <span className="shrink-0">reposted</span>
+          {repostedBy.reposted_at && (
+            <span className="shrink-0">
+              • <TimeAgo time={repostedBy.reposted_at} />
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Quote repost commentary (the reposter's own text) */}
+      {repostedBy?.comment && (
+        <p className="text-sm text-gray-800 whitespace-pre-wrap mb-2">
+          {repostedBy.comment}
+        </p>
+      )}
+
+      <div
+        className={clsx(
+          repostedBy?.comment &&
+            "border border-gray-200 rounded-lg p-3 xs:p-4 mb-1"
+        )}
+      >
       <header className="flex justify-between mb-2 gap-5 xs:gap-6 w-full overflow-hidden">
         <section className="flex xs:items-center gap-2">
           <Avatar
@@ -459,6 +608,7 @@ export const DiscoverPostItem = ({
       />
 
       {hasImage && <PostImageCollage images={postItem.images} />}
+      </div>
 
       <SocialShareModal
         isOpen={isSharing}
@@ -496,6 +646,82 @@ export const DiscoverPostItem = ({
             text={formatNumber(likes)}
           />
 
+          <div className="flex items-center gap-1">
+            <Popover
+              isOpen={isRepostMenuOpen}
+              onOpen={onRepostMenuOpen}
+              onClose={onRepostMenuClose}
+              placement="top"
+            >
+              <PopoverTrigger>
+                <button
+                  type="button"
+                  disabled={repostLoading}
+                  title={reposted ? "Reposted" : "Repost"}
+                  className={clsx(
+                    "flex items-center text-sm gap-1 bg-transparent active:scale-95 transition-all duration-300 disabled:cursor-not-allowed",
+                    reposted
+                      ? "text-green-600 hover:text-green-500"
+                      : "text-gray-600 hover:text-custom_blue"
+                  )}
+                >
+                  <RetweetOutlined className="xs:!text-[14px] !text-[20px]" />
+                  {!isSinglePost && (
+                    <span className="!text-[.6rem]">{formatNumber(reposts)}</span>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="!p-2 !w-fit">
+                <PopoverArrow />
+                <div className="flex flex-col gap-2">
+                  {reposted ? (
+                    <button
+                      onClick={handleUnrepost}
+                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-red-500 transition-colors"
+                    >
+                      <RetweetOutlined />
+                      <span>Undo repost</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleRepost()}
+                        className="flex items-center gap-2 text-sm text-gray-700 hover:text-custom_blue transition-colors"
+                      >
+                        <RetweetOutlined />
+                        <span>Repost</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onRepostMenuClose();
+                          setShowQuoteModal(true);
+                        }}
+                        className="flex items-center gap-2 text-sm text-gray-700 hover:text-custom_blue transition-colors"
+                      >
+                        <Pencil1Icon className="w-4 h-4" />
+                        <span>Quote repost</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {isSinglePost && (
+              <button
+                type="button"
+                onClick={() => setShowRepostersModal(true)}
+                title="View reposts"
+                className={clsx(
+                  "!text-[.6rem] hover:underline",
+                  reposted ? "text-green-600" : "text-gray-600"
+                )}
+              >
+                {formatNumber(reposts)}
+              </button>
+            )}
+          </div>
+
           {/* <PDFPreview
             postBody={postItem?.body}
             postTitle={postTitle}
@@ -516,6 +742,68 @@ export const DiscoverPostItem = ({
           </CustomShareButton>
         </div>
       </div>
+
+      {/* Quote repost modal */}
+      <ReusableModal
+        isOpen={showQuoteModal}
+        onClose={() => setShowQuoteModal(false)}
+        title="Quote repost"
+        footerContent={<></>}
+      >
+        <Textarea
+          value={quoteText}
+          placeholder="Add a comment to your repost..."
+          className="max-h-40 !text-sm placeholder:!text-sm"
+          onChange={(e) => setQuoteText(e.target.value)}
+        />
+
+        {/* Preview of the original post */}
+        <div className="mt-3 border border-gray-200 rounded-lg p-3 bg-gray-50">
+          <div className="flex items-center gap-2 mb-2">
+            <Avatar
+              name={
+                postItem?.company?.company_name || postItem?.user?.first_name
+              }
+              size="xs"
+              src={postItem?.company?.logo || postItem?.user?.avatar}
+              className={avatarStyle}
+            />
+            <span className="font-semibold text-sm">
+              {postItem?.company?.company_name || postItem?.user?.full_name}
+            </span>
+            <small className="text-gray-400">
+              • <TimeAgo time={postItem?.date_created} />
+            </small>
+          </div>
+          <p className="text-sm text-gray-700 line-clamp-4 whitespace-pre-wrap">
+            {postItem?.body}
+          </p>
+          {postItem?.images?.length > 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              {postItem.images.length}{" "}
+              {postItem.images.length === 1 ? "image" : "images"} attached
+            </p>
+          )}
+        </div>
+
+        <Button
+          className="!bg-gold block mt-4 float-right !text-sm"
+          isLoading={isQuoteSubmitting}
+          disabled={isQuoteSubmitting || !quoteText.trim()}
+          onClick={handleQuoteRepost}
+        >
+          {isQuoteSubmitting ? "Reposting..." : "Repost"}
+        </Button>
+      </ReusableModal>
+
+      {/* Reposters list modal (post detail page) */}
+      {showRepostersModal && (
+        <RepostersModal
+          postId={postItem?.id}
+          isOpen={showRepostersModal}
+          onClose={() => setShowRepostersModal(false)}
+        />
+      )}
 
       <CommentSection
         showCommentSection={showCommentSection}
@@ -688,6 +976,41 @@ const CommentSection = ({
     }
   }, [refetchComments]);
 
+  const handleEditComment = useCallback(async (commentId, isReply, content) => {
+    try {
+      const result = isReply
+        ? await updateReply(commentId, content)
+        : await updateComment(commentId, content);
+      // makeApiRequest returns null on failure (and toasts the API error itself)
+      if (!result) return false;
+      refetchComments();
+      toast.success(isReply ? "Reply updated" : "Comment updated");
+      return true;
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      toast.error(isReply ? "Failed to update reply" : "Failed to update comment");
+      throw error;
+    }
+  }, [refetchComments]);
+
+  const handleDeleteComment = useCallback(async (commentId, isReply) => {
+    try {
+      const result = isReply
+        ? await deleteReply(commentId)
+        : await deleteComment(commentId);
+      // DELETE returns "" on 204 success and null on failure
+      if (result === null) return;
+      // Drop any cached comment pages for this post so deleted items disappear
+      queryClient.invalidateQueries({ queryKey: ["comments", postItem.id] });
+      refetchComments();
+      toast.success(isReply ? "Reply deleted" : "Comment deleted");
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      toast.error(isReply ? "Failed to delete reply" : "Failed to delete comment");
+      throw error;
+    }
+  }, [postItem.id, queryClient, refetchComments]);
+
   useEffect(() => {
     if (!showCommentSection) {
       setComment(createEmptyCommentContent());
@@ -752,6 +1075,8 @@ const CommentSection = ({
             onReply={handleReplyToComment}
             onLike={handleLikeComment}
             onLikeReply={handleLikeReply}
+            onEdit={handleEditComment}
+            onDelete={handleDeleteComment}
             users={mentionUsers}
             companies={mentionCompanies}
             commentAsCompanies={commentAsCompanies}
@@ -793,6 +1118,87 @@ const CommentSection = ({
         </>
       )}
     </section>
+  );
+};
+
+/**
+ * Modal listing everyone who reposted a post (with quote text when present).
+ * Shown when clicking the repost count on the post detail page.
+ */
+const RepostersModal = ({ postId, isOpen, onClose }) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["reposts", postId],
+    queryFn: () => getPostReposts(postId),
+    enabled: isOpen && !!postId,
+  });
+
+  const reposters = data?.results || (Array.isArray(data) ? data : []);
+
+  return (
+    <ReusableModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Reposts"
+      footerContent={<></>}
+    >
+      {isLoading ? (
+        <div className="flex justify-center py-6">
+          <Spinner size="md" />
+        </div>
+      ) : reposters.length === 0 ? (
+        <LightParagraph>No reposts yet.</LightParagraph>
+      ) : (
+        <div className="space-y-4">
+          {reposters.map((repost) => {
+            const isCompany = !!repost.company;
+            const name = isCompany
+              ? repost.company?.company_name || repost.company?.name
+              : repost.user?.full_name ||
+                `${repost.user?.first_name || ""} ${
+                  repost.user?.last_name || ""
+                }`.trim();
+            const avatarSrc = isCompany
+              ? repost.company?.logo
+              : repost.user?.avatar;
+            const href = isCompany
+              ? `/${repost.company?.slug || repost.company?.company_name || ""}`
+              : `/co/${repost.user?.id}`;
+
+            return (
+              <div key={repost.id} className="flex gap-2">
+                <Link to={href} onClick={onClose}>
+                  <Avatar
+                    name={name}
+                    size="sm"
+                    src={avatarSrc}
+                    className={avatarStyle}
+                  />
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={href}
+                      onClick={onClose}
+                      className="font-semibold text-sm hover:underline truncate"
+                    >
+                      {name || "Unknown"}
+                    </Link>
+                    <small className="text-gray-400 shrink-0">
+                      <TimeAgo time={repost.created_at} />
+                    </small>
+                  </div>
+                  {repost.comment && (
+                    <p className="text-sm text-gray-600 mt-0.5 whitespace-pre-wrap">
+                      {repost.comment}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </ReusableModal>
   );
 };
 

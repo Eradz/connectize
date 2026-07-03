@@ -22,12 +22,16 @@ import {
 import { webRoutes } from '../../lib/webRoutes';
 import { knowledgeForumTopicService, knowledgeForumPostService } from '../../api-services/oilgas';
 import RichTextEditor from '../../components/RichTextEditor';
+import MoreOptions from '../../components/MoreOptions';
 import { toast } from 'sonner';
+import { useAuth } from '../../context/userContext';
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 const KnowledgeTopicDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  
+  const { user } = useAuth();
+
   const [topic, setTopic] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,8 +47,11 @@ const KnowledgeTopicDetail = () => {
   const [likedPosts, setLikedPosts] = useState(new Set()); // Track liked posts
   const [topicLiked, setTopicLiked] = useState(false); // Track if topic is liked
   const [topicLikes, setTopicLikes] = useState(0); // Track topic likes count
-  
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const pageSize = 20;
+
+  const isCreator = user?.id && topic?.author?.id === user.id;
 
   useEffect(() => {
     if (slug) {
@@ -104,6 +111,31 @@ const KnowledgeTopicDetail = () => {
       toast.error('Failed to load posts');
     } finally {
       setPostsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete topic',
+      message: 'Are you sure you want to delete this topic? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await knowledgeForumTopicService.delete(slug);
+      if (result === null) return;
+      toast.success('Topic deleted');
+      navigate(
+        topic?.forum?.slug
+          ? `/knowledge/forums/${topic.forum.slug}`
+          : webRoutes.knowledgeTopics
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete topic');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -368,6 +400,20 @@ const KnowledgeTopicDetail = () => {
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <MoreVertical className="w-5 h-5" />
               </button>
+              {isCreator && (
+                <MoreOptions className="!w-fit">
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </MoreOptions>
+              )}
             </div>
           </div>
         </div>

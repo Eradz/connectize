@@ -426,7 +426,7 @@ const CompanyProfile = React.memo(() => {
               )}
             {activeTab === "Activities" && (<section className="space-y-6 w-full shrink-0">
                   <CreatePost />
-                  <DiscoverPosts companyName={company?.company_name} />
+                  <DiscoverPosts companyName={company?.company_name} companyId={company?.id} />
                 </section>)}
             {activeTab === "Services" && (
               <div className="">

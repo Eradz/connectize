@@ -532,7 +532,7 @@ const WorkforceProfessionals = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=3b82f6&color=white`}
+                      src={professional.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=F1C644&color=white`}
                       alt={professionalName}
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -622,7 +622,7 @@ const WorkforceProfessionals = () => {
                 <div className="flex items-start justify-between mb-4 h-[20%]">
                   <div className="flex items-start space-x-3">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=F1C644&color=white`}
+                      src={professional.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=F1C644&color=white`}
                       alt={professionalName}
                       className="w-10 h-10 rounded-full object-cover"
                     />

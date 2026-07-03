@@ -16,6 +16,7 @@ import {
 import { knowledgeTagService, knowledgeArticleService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast } from 'sonner';
+import ArticleAuthorByline from '../../components/knowledge/ArticleAuthorByline';
 
 const KnowledgeTagDetail = () => {
   const { slug } = useParams();
@@ -300,11 +301,11 @@ const KnowledgeTagDetail = () => {
 
                   {/* Author & Date */}
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
-                    <span>
-                      {article.author?.first_name 
-                        ? `${article.author.first_name} ${article.author.last_name || ''}`.trim()
-                        : 'Anonymous'}
-                    </span>
+                    <ArticleAuthorByline
+                      article={article}
+                      iconClassName="w-3 h-3"
+                      linkable={false}
+                    />
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       <span>{formatDate(article.published_at || article.created_at)}</span>

@@ -20,19 +20,30 @@ import {
   Clock,
   Edit,
   BookOpen,
-  User2
+  User2,
+  Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import ArticleAuthorByline from '../../components/knowledge/ArticleAuthorByline';
+import MoreOptions from '../../components/MoreOptions';
 import { knowledgeArticleService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
+import { useAuth } from '../../context/userContext';
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 const KnowledgeArticleDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const isCreator =
+    (article?.author?.id && user?.id === article.author.id) ||
+    (article?.company?.id && user?.companies?.includes(article.company.id));
 
   useEffect(() => {
     if (slug) {
@@ -109,6 +120,27 @@ const KnowledgeArticleDetail = () => {
       } catch (clipboardError) {
         toast.error('Failed to share article');
       }
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete article',
+      message: 'Are you sure you want to delete this article? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await knowledgeArticleService.delete(slug);
+      if (result === null) return;
+      toast.success('Article deleted');
+      navigate(webRoutes.knowledgeArticles);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete article');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -214,12 +246,11 @@ const KnowledgeArticleDetail = () => {
                       {formatDate(article.published_at || article.created_at)}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <User2 className="h-5 w-5" />
-                    <span className="text-sm">
-                      {article.author ? `${article.author.first_name} ${article.author.last_name}` : 'Anonymous'}
-                    </span>
-                  </div>
+                  <ArticleAuthorByline
+                    article={article}
+                    iconClassName="h-5 w-5"
+                    textClassName="text-sm"
+                  />
                   <div className="flex items-center space-x-1">
                     <Clock className="h-5 w-5" />
                     <span className="text-sm">
@@ -255,6 +286,27 @@ const KnowledgeArticleDetail = () => {
                     <span>{article.views || 0}</span>
                     <p>Views</p>
                   </div>
+                  {isCreator && (
+                    <MoreOptions className="!w-fit">
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => navigate(`/knowledge/articles/${article.slug}/edit`)}
+                          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                        >
+                          <Edit className="h-4 w-4" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                        </button>
+                      </div>
+                    </MoreOptions>
+                  )}
                 </div>
               </div>
             </header>

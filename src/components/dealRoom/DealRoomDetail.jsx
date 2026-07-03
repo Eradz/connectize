@@ -24,6 +24,7 @@ import dealRoomAPI from "../../api-services/dealRoom";
 import ValuationsPanel from "./ValuationsPanel";
 import { useAuth } from "../../context/userContext";
 import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
+import { confirmDialog } from "../../lib/confirm.jsx";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -153,6 +154,7 @@ export default function DealRoomDetail() {
   const [showParticipantModal, setShowParticipantModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteDocumentData, setDeleteDocumentData] = useState(null);
+  const [isDeletingDeal, setIsDeletingDeal] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState(null);
   // Milestone modal state: progress and optional notes
   const [milestoneForm, setMilestoneForm] = useState({ progress: 0, notes: "" });
@@ -497,6 +499,29 @@ export default function DealRoomDetail() {
     }
   };
 
+  const handleDeleteDealRoom = async () => {
+    const confirmed = await confirmDialog({
+      title: "Delete deal room",
+      message:
+        "Are you sure you want to delete this deal room? All documents, milestones and activities will be removed. This action cannot be undone.",
+      confirmLabel: "Delete",
+    });
+    if (!confirmed) return;
+
+    setIsDeletingDeal(true);
+    try {
+      const result = await dealRoomService.delete(id);
+      if (result === null) return; // makeApiRequest returns null on failure and toasts the error
+      notify.success("Deal room deleted");
+      navigate(webRoutes.dealRooms);
+    } catch (e) {
+      console.error("Failed to delete deal room:", e);
+      notify.error("Failed to delete deal room");
+    } finally {
+      setIsDeletingDeal(false);
+    }
+  };
+
   const handleDocumentDelete = async({id, label, dealroomId}) => {
     setDeleteDocumentData({ id, label, dealroomId });
     setShowDeleteModal(true);
@@ -579,12 +604,26 @@ export default function DealRoomDetail() {
                   </div>
                 )}
               </div>
-             {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
-              <PencilIcon className= "w-4 h-4"/>
-              <span className="hidden md:flex">
-                Edit Deal Room
-              </span>
-              </Link>}
+             <div className="flex items-center gap-2">
+               {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
+                <PencilIcon className= "w-4 h-4"/>
+                <span className="hidden md:flex">
+                  Edit Deal Room
+                </span>
+                </Link>}
+               {canDelete && (
+                 <button
+                   onClick={handleDeleteDealRoom}
+                   disabled={isDeletingDeal}
+                   className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg border border-red-300 text-red-600 text-sm hover:bg-red-50 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   <Trash2 className="w-4 h-4" />
+                   <span className="hidden md:flex">
+                     {isDeletingDeal ? "Deleting..." : "Delete"}
+                   </span>
+                 </button>
+               )}
+             </div>
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}

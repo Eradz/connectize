@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { getAllCompanies, getSingleCompany } from "../api-services/companies";
 import { getMessagesForUser } from "../api-services/messaging";
 import { getNotificationsForUser } from "../api-services/notifications";
-import { getPosts } from "../api-services/posts";
+import { getPosts, getCompanyPosts } from "../api-services/posts";
 import { getProducts } from "../api-services/products";
 import { getServices } from "../api-services/services";
 import { useCompaniesStore } from "../stores/companiesStore";
@@ -48,6 +48,21 @@ export const usePollPosts = (interval = 30000) => {
     staleTime: 30 * 1000, // Data stays fresh for 30 seconds
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on tab switch
+  });
+};
+
+export const usePollCompanyPosts = (companyId, interval = 30000) => {
+  return useInfiniteQuery({
+    queryKey: ["posts", "company", companyId],
+    queryFn: ({ pageParam = 1 }) => getCompanyPosts(companyId, pageParam, 10),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextPage : undefined,
+    initialPageParam: 1,
+    enabled: !!companyId,
+    refetchInterval: interval,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
