@@ -43,8 +43,9 @@ export const getCompanyPosts = async (companyId, page = 1, pageSize = 10) => {
 /**
  * Get Following feed - posts authored or reposted by users/companies the user
  * follows. Fully server-side: the backend's `?feed=following` handles the
- * follow filtering, repost surfacing (with `repostedBy` attribution) and
- * activity-bumped ordering, so no client-side filtering is needed.
+ * follow filtering, repost surfacing (reposts are first-class child posts
+ * with `is_repost` + `parent_post`) and activity-bumped ordering, so no
+ * client-side filtering is needed.
  * @param {number} page - Page number
  * @param {number} pageSize - Number of posts per page
  */
