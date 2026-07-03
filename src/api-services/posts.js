@@ -182,12 +182,17 @@ export const likePost = async (id, data, hasLikedPost) => {
   });
 };
 
-export const repostPost = async (id, { comment = "", companyId = null } = {}) => {
+export const repostPost = async (
+  id,
+  { comment = "", companyId = null, mentions = [], companyMentions = [] } = {}
+) => {
   const result = await makeApiRequest({
     url: `api/posts/${id}/repost/`,
     method: "POST",
     data: {
       comment,
+      mentions, // User mentions (quote reposts only)
+      company_mentions: companyMentions, // Company mentions (quote reposts only)
       ...(companyId ? { company_id: companyId } : {}),
     },
   });

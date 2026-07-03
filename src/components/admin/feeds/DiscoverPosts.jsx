@@ -203,6 +203,13 @@ function DiscoverPosts({
 
 export default DiscoverPosts;
 
+const createEmptyCommentContent = () => ({
+  text: "",
+  plainText: "",
+  mentions: [],
+  companyMentions: [],
+});
+
 export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
@@ -314,7 +321,8 @@ export const DiscoverPostItem = ({
   const [reposts, setReposts] = useState(() => postItem?.numberOfReposts || 0);
   const [repostLoading, setRepostLoading] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [quoteText, setQuoteText] = useState("");
+  const [quoteContent, setQuoteContent] = useState(createEmptyCommentContent);
+  const [quoteEditorKey, setQuoteEditorKey] = useState(0);
   const [isQuoteSubmitting, setIsQuoteSubmitting] = useState(false);
   const [showRepostersModal, setShowRepostersModal] = useState(false);
   const {
@@ -331,14 +339,18 @@ export const DiscoverPostItem = ({
     queryClient.invalidateQueries({ queryKey: ["reposts", postItem?.id] });
   };
 
-  const handleRepost = async (quote = "") => {
+  const handleRepost = async (quote = "", mentions = [], companyMentions = []) => {
     onRepostMenuClose();
     setRepostLoading(true);
     setReposted(true);
     setReposts((prev) => prev + 1);
     try {
       // makeApiRequest returns null on failure (and toasts the API error itself)
-      const result = await repostPost(postItem?.id, { comment: quote });
+      const result = await repostPost(postItem?.id, {
+        comment: quote,
+        mentions,
+        companyMentions,
+      });
       if (result === null) {
         setReposted(false);
         setReposts((prev) => prev - 1);
@@ -387,15 +399,29 @@ export const DiscoverPostItem = ({
   };
 
   const handleQuoteRepost = async () => {
-    if (!quoteText.trim()) return;
+    if (!quoteContent.plainText?.trim()) return;
     setIsQuoteSubmitting(true);
-    const success = await handleRepost(quoteText.trim());
+    // Mirror the comment composer: submit the editor HTML plus the mention id arrays
+    const success = await handleRepost(
+      quoteContent.text,
+      quoteContent.mentions || [],
+      quoteContent.companyMentions || []
+    );
     setIsQuoteSubmitting(false);
     if (success) {
-      setQuoteText("");
+      setQuoteContent(createEmptyCommentContent());
+      setQuoteEditorKey((key) => key + 1);
       setShowQuoteModal(false);
     }
   };
+
+  // Reset the quote editor whenever the modal closes (mirrors CommentSection)
+  useEffect(() => {
+    if (!showQuoteModal) {
+      setQuoteContent(createEmptyCommentContent());
+      setQuoteEditorKey((key) => key + 1);
+    }
+  }, [showQuoteModal]);
 
   const shareUrlString = window?.location?.hostname?.includes("localhost")
     ? `http://${window.location.hostname}:3000${webRoutes.singlePost.replace(":id", postItem.id)}`
@@ -424,6 +450,29 @@ export const DiscoverPostItem = ({
   const postMentionCompanies = useMemo(
     () => [postItem?.company, ...(mentionCompanies || [])].filter(Boolean),
     [mentionCompanies, postItem?.company]
+  );
+
+  // Live mention directories for the quote-repost editor (mirrors CommentSection)
+  const { users: quoteLiveMentionUsers = [] } = useUserSearch({
+    enabled: showQuoteModal,
+  });
+  const { companies: quoteLiveMentionCompanies = [] } = useCompanySearch({
+    enabled: showQuoteModal,
+  });
+  const quoteMentionUsers = useMemo(
+    () =>
+      [...(postMentionUsers || []), ...(quoteLiveMentionUsers || [])].filter(
+        Boolean
+      ),
+    [postMentionUsers, quoteLiveMentionUsers]
+  );
+  const quoteMentionCompanies = useMemo(
+    () =>
+      [
+        ...(postMentionCompanies || []),
+        ...(quoteLiveMentionCompanies || []),
+      ].filter(Boolean),
+    [postMentionCompanies, quoteLiveMentionCompanies]
   );
 
   return (
@@ -455,11 +504,15 @@ export const DiscoverPostItem = ({
         </div>
       )}
 
-      {/* Quote repost commentary (the reposter's own text) */}
+      {/* Quote repost commentary (the reposter's own text) - rendered like
+          comment content so @mentions are linkified consistently */}
       {repostedBy?.comment && (
-        <p className="text-sm text-gray-800 whitespace-pre-wrap mb-2">
-          {repostedBy.comment}
-        </p>
+        <MarkdownComponent
+          markdownContent={repostedBy.comment}
+          className="text-sm !text-gray-800 mb-2"
+          mentionUsers={postMentionUsers}
+          mentionCompanies={postMentionCompanies}
+        />
       )}
 
       <div
@@ -750,11 +803,12 @@ export const DiscoverPostItem = ({
         title="Quote repost"
         footerContent={<></>}
       >
-        <Textarea
-          value={quoteText}
+        <LexicalCommentEditor
+          key={quoteEditorKey}
+          onChange={setQuoteContent}
           placeholder="Add a comment to your repost..."
-          className="max-h-40 !text-sm placeholder:!text-sm"
-          onChange={(e) => setQuoteText(e.target.value)}
+          users={quoteMentionUsers}
+          companies={quoteMentionCompanies}
         />
 
         {/* Preview of the original post */}
@@ -789,7 +843,7 @@ export const DiscoverPostItem = ({
         <Button
           className="!bg-gold block mt-4 float-right !text-sm"
           isLoading={isQuoteSubmitting}
-          disabled={isQuoteSubmitting || !quoteText.trim()}
+          disabled={isQuoteSubmitting || !quoteContent.plainText?.trim()}
           onClick={handleQuoteRepost}
         >
           {isQuoteSubmitting ? "Reposting..." : "Repost"}
@@ -827,13 +881,6 @@ export const DiscoverPostItem = ({
  * Comment section with instant display - uses preview_comments from post data
  * Background prefetching loads more comments while user views preview
  */
-const createEmptyCommentContent = () => ({
-  text: "",
-  plainText: "",
-  mentions: [],
-  companyMentions: [],
-});
-
 const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
@@ -1131,6 +1178,11 @@ const RepostersModal = ({ postId, isOpen, onClose }) => {
     queryFn: () => getPostReposts(postId),
     enabled: isOpen && !!postId,
   });
+  // Mention directories so quote text linkifies @mentions like comments do
+  const { users: mentionUsers = [] } = useUserSearch({ enabled: isOpen });
+  const { companies: mentionCompanies = [] } = useCompanySearch({
+    enabled: isOpen,
+  });
 
   const reposters = data?.results || (Array.isArray(data) ? data : []);
 
@@ -1188,9 +1240,12 @@ const RepostersModal = ({ postId, isOpen, onClose }) => {
                     </small>
                   </div>
                   {repost.comment && (
-                    <p className="text-sm text-gray-600 mt-0.5 whitespace-pre-wrap">
-                      {repost.comment}
-                    </p>
+                    <MarkdownComponent
+                      markdownContent={repost.comment}
+                      className="text-sm !text-gray-600 mt-0.5"
+                      mentionUsers={mentionUsers}
+                      mentionCompanies={mentionCompanies}
+                    />
                   )}
                 </div>
               </div>
