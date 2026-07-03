@@ -662,6 +662,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
     associated
     thisUser={company.user}
     companyId={company.id}
+    companySlug={company.slug}
     viewMoreUrl={`/co/representatives/?company=${company?.id}---${company?.slug}`}
   />
 </ProfileSection>
