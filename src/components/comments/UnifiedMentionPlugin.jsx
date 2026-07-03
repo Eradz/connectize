@@ -1,6 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { TextNode } from 'lexical';
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { $getSelection, $isRangeSelection, $createTextNode } from 'lexical';
 import { Avatar } from '@chakra-ui/react';
 import { avatarStyle } from '../ResponsiveNav';
@@ -155,8 +156,14 @@ const UnifiedMentionTypeahead = ({
   if (!items || items.length === 0) {
     return null;
   }
-  
-  return (
+
+  // Portal to document.body: when the editor lives inside a Chakra Modal, the
+  // framer-motion animated ModalContent keeps `will-change: transform`, which
+  // makes it the containing block for position:fixed descendants — so the
+  // dropdown's viewport coordinates get re-anchored to the modal and it
+  // renders way off-position (effectively invisible). Rendering at the body
+  // level keeps `fixed` viewport-relative in every context.
+  return createPortal(
     <div
       className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto w-72"
       style={{
@@ -167,6 +174,10 @@ const UnifiedMentionTypeahead = ({
       {items.map((item, index) => (
         <button
           key={`${item.type}-${item.id}`}
+          // Keep focus (and the Lexical selection) in the editor — otherwise
+          // the click blurs the contenteditable, the mention query resets and
+          // the modal's focus lock fights over focus before onClick fires.
+          onMouseDown={(event) => event.preventDefault()}
           onClick={() => handleSelect(item)}
           className={clsx(
             'w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0',
@@ -214,7 +225,8 @@ const UnifiedMentionTypeahead = ({
           )}
         </button>
       ))}
-    </div>
+    </div>,
+    document.body
   );
 };
 

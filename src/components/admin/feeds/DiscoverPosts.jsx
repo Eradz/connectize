@@ -38,7 +38,12 @@ import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
 import { useCompanySearch } from "../../../hooks/useCompanySearch";
 import { useGetActionableCompanies } from "../../../hooks";
-import { usePollPosts, usePollCompanyPosts } from "../../../hooks/usePolling";
+import {
+  usePollPosts,
+  usePollCompanyPosts,
+  usePollFollowingPosts,
+  usePollTrendingPosts,
+} from "../../../hooks/usePolling";
 import { useUserSearch } from "../../../hooks/useUserSearch";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber } from "../../../lib/utils";
@@ -69,9 +74,18 @@ function DiscoverPosts({
   searchLoading,
   companyName = null,
   companyId = null,
+  feedType = "discover", // "discover" | "following" | "trending"
 }) {
-  const discoverQuery = usePollPosts();
+  // Only the active feed's query is enabled - the others stay cached but idle,
+  // so switching tabs is instant without triple-polling the API.
+  const isFollowingFeed = !companyId && feedType === "following";
+  const isTrendingFeed = !companyId && feedType === "trending";
+  const isDiscoverFeed = !companyId && !isFollowingFeed && !isTrendingFeed;
+
+  const discoverQuery = usePollPosts(30000, { enabled: isDiscoverFeed });
   const companyQuery = usePollCompanyPosts(companyId);
+  const followingQuery = usePollFollowingPosts(30000, { enabled: isFollowingFeed });
+  const trendingQuery = usePollTrendingPosts(30000, { enabled: isTrendingFeed });
 
   const {
     data: posts,
@@ -80,7 +94,13 @@ function DiscoverPosts({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = companyId ? companyQuery : discoverQuery;
+  } = companyId
+    ? companyQuery
+    : isFollowingFeed
+    ? followingQuery
+    : isTrendingFeed
+    ? trendingQuery
+    : discoverQuery;
   // Debug logging
   if (error) {
     console.error("❌ [DiscoverPosts] Error loading posts:", error);
@@ -124,8 +144,24 @@ function DiscoverPosts({
         observer.disconnect();
       }
     };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName, companyId]);
-  
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName, companyId, feedType]);
+
+  // Tab-specific empty states (mirrors the mobile app's copy)
+  const emptyCopy = isFollowingFeed
+    ? {
+        title: "No Posts From People You Follow",
+        body: "Posts from users and companies you follow will appear here. Discover interesting people and companies to follow!",
+      }
+    : isTrendingFeed
+    ? {
+        title: "No Trending Posts Yet",
+        body: "Posts with the most engagement over the last few days will appear here.",
+      }
+    : {
+        title: "No Posts Yet",
+        body: "There are no posts to display. Start sharing your thoughts to get the conversation going!",
+      };
+
   return (
     <section className="w-full space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
@@ -147,9 +183,9 @@ function DiscoverPosts({
                 <path d="M8 44L24 28L40 40L56 24" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Posts Yet</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{emptyCopy.title}</h3>
             <p className="text-gray-600 text-center max-w-sm mb-6">
-              There are no posts to display. Start sharing your thoughts to get the conversation going!
+              {emptyCopy.body}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -210,6 +246,22 @@ const createEmptyCommentContent = () => ({
   companyMentions: [],
 });
 
+/**
+ * Quote-repost comments are stored as plain text with @tokens, but a few
+ * legacy rows contain Lexical HTML. Strip tags defensively so both formats
+ * render the same through MarkdownComponent.
+ */
+const stripHtmlTags = (value) => {
+  const text = String(value || "");
+  if (!/<\/?[a-z][^>]*>/i.test(text)) return text;
+  // Preserve paragraph/line breaks before dropping tags
+  const withBreaks = text
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li)>/gi, "\n");
+  const doc = new DOMParser().parseFromString(withBreaks, "text/html");
+  return (doc.body.textContent || "").trim();
+};
+
 export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
@@ -265,6 +317,8 @@ export const DiscoverPostItem = ({
 
   // Repost attribution (optional field surfaced by profile/following feeds)
   const repostedBy = postItem?.repostedBy || null;
+  // Quote text may be plain text with @tokens (canonical) or legacy Lexical HTML
+  const repostQuoteText = stripHtmlTags(repostedBy?.comment);
   const isSelfRepost =
     !!repostedBy &&
     repostedBy.type === "user" &&
@@ -307,10 +361,17 @@ export const DiscoverPostItem = ({
     setLikes((prev) => (!currentIsLiked ? prev + 1 : prev - 1));
     // setDisabled(true);
     try {
-      await likePost(postItem?.id, postItem, currentIsLiked);
+      // Any non-error (2xx) response is success — the backend is idempotent,
+      // so "already liked/unliked" also comes back as 200. makeApiRequest
+      // returns null/undefined instead of throwing when the request fails.
+      const result = await likePost(postItem?.id, postItem, currentIsLiked);
+      if (result == null) throw new Error("Like request failed");
     } catch (error) {
+      // Roll back the optimistic update and re-sync this post's like state
+      // from the server so the heart can't drift from what the backend holds.
       setLiked(currentIsLiked);
       setLikes((prev) => (!currentIsLiked ? prev - 1 : prev + 1));
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
     // setDisabled(false);
     setRefetchInterval(1000);
@@ -401,9 +462,12 @@ export const DiscoverPostItem = ({
   const handleQuoteRepost = async () => {
     if (!quoteContent.plainText?.trim()) return;
     setIsQuoteSubmitting(true);
-    // Mirror the comment composer: submit the editor HTML plus the mention id arrays
+    // Submit the PLAIN TEXT with @tokens (not Lexical HTML) — plain text is
+    // the cross-platform canonical quote format (mobile renders it with a
+    // plain-text MentionText component; web linkifies @tokens on render).
+    // Mention/company-mention id arrays are still sent alongside.
     const success = await handleRepost(
-      quoteContent.text,
+      quoteContent.plainText.trim(),
       quoteContent.mentions || [],
       quoteContent.companyMentions || []
     );
@@ -505,10 +569,11 @@ export const DiscoverPostItem = ({
       )}
 
       {/* Quote repost commentary (the reposter's own text) - rendered like
-          comment content so @mentions are linkified consistently */}
-      {repostedBy?.comment && (
+          comment content so @mentions are linkified consistently. Stripped of
+          HTML tags defensively (legacy quotes may be stored as Lexical HTML). */}
+      {repostQuoteText && (
         <MarkdownComponent
-          markdownContent={repostedBy.comment}
+          markdownContent={repostQuoteText}
           className="text-sm !text-gray-800 mb-2"
           mentionUsers={postMentionUsers}
           mentionCompanies={postMentionCompanies}
@@ -517,7 +582,7 @@ export const DiscoverPostItem = ({
 
       <div
         className={clsx(
-          repostedBy?.comment &&
+          repostQuoteText &&
             "border border-gray-200 rounded-lg p-3 xs:p-4 mb-1"
         )}
       >
@@ -1239,9 +1304,9 @@ const RepostersModal = ({ postId, isOpen, onClose }) => {
                       <TimeAgo time={repost.created_at} />
                     </small>
                   </div>
-                  {repost.comment && (
+                  {stripHtmlTags(repost.comment) && (
                     <MarkdownComponent
-                      markdownContent={repost.comment}
+                      markdownContent={stripHtmlTags(repost.comment)}
                       className="text-sm !text-gray-600 mt-0.5"
                       mentionUsers={mentionUsers}
                       mentionCompanies={mentionCompanies}
