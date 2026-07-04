@@ -8,10 +8,13 @@ import {
 } from "react-router-dom";
 import Sidebar from "../components/admin/markets/sidebar";
 import Navbar from "../components/userProfile/Navbar";
+import PublicNavbar from "../components/PublicNavbar";
 import TrialBanner from "../components/TrialBanner";
+import { getSession } from "../lib/session";
 
 const AppLayout = () => {
   const { pathname } = useLocation();
+  const isAuthenticated = !!getSession();
 
   // Cleanup any stuck scroll-blocking classes when navigating between routes
   useEffect(() => {
@@ -24,7 +27,7 @@ const AppLayout = () => {
   return (
     <main className="bg-background w-full lg:w-[80rem] lg:mx-auto h-screen flex flex-col flex-1 overflow-x-hidden ">
       {/* <TrialBanner persistent={false} dismissibleDuration={180000} /> */}
-      <Navbar />
+      {isAuthenticated ? <Navbar /> : <PublicNavbar />}
       <section
         className={clsx(
           // Added overflow-x-hidden and max-w-full to stop child 100vw elements causing shift
@@ -36,7 +39,7 @@ const AppLayout = () => {
           }
         )}
       >
-        <Sidebar />
+        {isAuthenticated && <Sidebar />}
         <section
           className={clsx(
             // Added relative and overflow-x-hidden to isolate scroll context & prevent horizontal bleed

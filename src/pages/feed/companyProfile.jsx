@@ -614,7 +614,16 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
               <p className="text-xs text-gray-500 mb-1">Location :</p>
               <p className="text-sm text-gray-800">
                 {company?.office_address || "2972 Westheimer Rd."}<br/>
-                {company?.city || "Santa Ana"}, {company?.state || "Illinois"} {company?.country || "85486"}
+                {[company?.city, company?.state, company?.country]
+                  .filter(Boolean)
+                  .filter(
+                    (part, index, all) =>
+                      all.findIndex(
+                        (other) =>
+                          other.trim().toLowerCase() === part.trim().toLowerCase()
+                      ) === index
+                  )
+                  .join(", ") || "Santa Ana, Illinois"}
               </p>
             </div>
           </div>

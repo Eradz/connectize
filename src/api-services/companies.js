@@ -68,7 +68,7 @@ export const getSingleCompany = async (companyName) => {
   return singleCompany;
 };
 
-const normalizeWebsite = (website) => {
+export const normalizeWebsite = (website) => {
   const trimmedWebsite = String(website || "").trim();
 
   if (!trimmedWebsite) return "";
@@ -142,7 +142,7 @@ export const createCompany = async (data, resetForm) => {
       office_address: data.company_address,
       country: data.country,
       state: data.city,
-      city: data.city,
+      city: "",
       website,
       registration_number: data.company_registration_no,
       registration_date,

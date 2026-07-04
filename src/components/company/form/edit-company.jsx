@@ -6,13 +6,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
-import { editCompanyInformation, getCompanyCategories } from "../../../api-services/companies";
-// import cities from "../../../lib/data/cities.json";
+import { editCompanyInformation, getCompanyCategories, normalizeWebsite } from "../../../api-services/companies";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { makeApiRequest } from "../../../lib/helpers";
 
 // Fallback used only if the backend categories can't be loaded.
 const FALLBACK_COMPANY_CATEGORIES = [
@@ -49,7 +46,14 @@ export default function EditCompanyForm({ company }) {
     company_name: Yup.string().optional(),
     email: Yup.string().email("Invalid email address").optional(),
     about: Yup.string().optional(),
-    website: Yup.string().url("Invalid website URL").optional(),
+    website: Yup.string()
+      .transform((value) => {
+        const trimmed = String(value || "").trim();
+        if (!trimmed) return trimmed;
+        return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      })
+      .url("Invalid website URL")
+      .optional(),
     office_address: Yup.string().optional(),
     country: Yup.string().optional(),
     state: Yup.string().optional(),
@@ -71,7 +75,10 @@ export default function EditCompanyForm({ company }) {
     const toastId = toast.loading("Updating company information");
 
     try {
-      await editCompanyInformation(formik.values);
+      await editCompanyInformation({
+        ...formik.values,
+        website: normalizeWebsite(formik.values.website),
+      });
 
       toast.success("Updated profile information Successfully", {
         id: toastId,
@@ -104,40 +111,6 @@ export default function EditCompanyForm({ company }) {
   const stateForCountry =
     countries.find((country) => country.name === formik.values["country"])
       ?.states || [];
-
-  const countryName = formik.values["country"];
-  const stateName = formik.values["state"];
-
-  const {
-    data: citiesForState,
-    isLoading: isLoadingGetCitiesForState,
-    isFetching,
-  } = useQuery({
-    queryKey: ["cities", { countryName, stateName }],
-    initialData: [],
-    queryFn: async () => {
-      if (!countryName || !stateName) return [];
-      try {
-        const cities = await makeApiRequest({
-          url: "api/cities/",
-          method: "GET",
-          params: { country: countryName, state: stateName },
-        });
-
-        return cities?.map((city) => city.name) || [];
-      } catch (error) {
-        toast.error(
-          "Could not get list of cities for " + stateName + " " + countryName
-        );
-        throw error;
-      }
-    },
-  });
-
-  // const citiesForState =
-  //   cities
-  //     .filter((city) => city.state_name === formik.values["state"])
-  //     .map((city) => city.name) || [];
 
   const companyFields = [
     {
@@ -189,13 +162,9 @@ export default function EditCompanyForm({ company }) {
         },
         {
           name: "city",
-          type: "select",
+          type: "text",
           label: "Region/City",
-          placeholder: "Select city",
-          disabled: isLoadingGetCitiesForState || isFetching,
-          options: citiesForState,
-          isLoading: isLoadingGetCitiesForState || isFetching,
-          loadingText: "Loading cites...",
+          placeholder: "E.g Houston",
         },
         {
           name: "organization_type",

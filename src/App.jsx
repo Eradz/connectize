@@ -231,8 +231,9 @@ const removeLeadingSlash = (path) => {
           </Route>
           <Route path="" element={<FeedLayout />}>
             <Route path="posts/:id/insights" element={<PostInsightsPage />} />
-            <Route path="posts/:id" element={<SinglePostPage />} />
           </Route>
+          {/* Public, crawlable post detail — no auth wall so it can be indexed */}
+          <Route path="posts/:id" element={<SinglePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.createPost)} element={<CreatePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.profile)} element={<Profile />} />
 

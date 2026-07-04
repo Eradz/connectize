@@ -25,6 +25,7 @@ import {
   getPostInsights,
 } from "../../api-services/posts";
 import LightParagraph from "../../components/ParagraphText";
+import RichContentText from "../../components/RichContentText";
 import TimeAgo from "../../components/TimeAgo";
 import { formatNumber } from "../../lib/utils";
 
@@ -107,7 +108,7 @@ function MetricCard({ icon: Icon, label, value, tone = "all" }) {
         <p className="text-2xl font-bold leading-none text-gray-950">
           {formatNumber(value || 0)}
         </p>
-        <p className="mt-2 whitespace-nowrap text-sm font-semibold text-gray-500">
+        <p className="mt-1 truncate text-sm font-semibold text-gray-500">
           {label}
         </p>
       </div>
@@ -219,6 +220,18 @@ function PostInsightsPage() {
     () => stripInsightText(insights?.post?.body_preview || ""),
     [insights?.post?.body_preview]
   );
+  const postMentionUsers = useMemo(
+    () =>
+      [insights?.post?.user, insights?.post?.parent_post?.user].filter(Boolean),
+    [insights?.post?.parent_post?.user, insights?.post?.user]
+  );
+  const postMentionCompanies = useMemo(
+    () =>
+      [insights?.post?.company, insights?.post?.parent_post?.company].filter(
+        Boolean
+      ),
+    [insights?.post?.company, insights?.post?.parent_post?.company]
+  );
 
   if (insightsLoading) {
     return (
@@ -250,7 +263,7 @@ function PostInsightsPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 lg:px-8">
+    <section className="w-full py-5">
       <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
         <button
           type="button"
@@ -262,9 +275,20 @@ function PostInsightsPage() {
         </button>
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-gray-950">Post insights</h1>
-          <p className="line-clamp-2 text-sm leading-5 text-gray-500">
-            {postPreview || "No text content"}
-          </p>
+          {postPreview ? (
+            <div className="line-clamp-2 text-sm leading-5 text-gray-500">
+              <RichContentText
+                content={insights?.post?.body_preview || ""}
+                className="!text-gray-500 [&>div]:!space-y-0 [&_p]:!mb-0"
+                mentionUsers={postMentionUsers}
+                mentionCompanies={postMentionCompanies}
+              />
+            </div>
+          ) : (
+            <p className="line-clamp-2 text-sm leading-5 text-gray-500">
+              No text content
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -298,7 +322,7 @@ function PostInsightsPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-2">
         <MetricCard
           icon={BarChart3}
           label="Engagements"
