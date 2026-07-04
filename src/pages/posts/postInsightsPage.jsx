@@ -54,16 +54,63 @@ const countForTab = (totals = {}, tab) => {
   return totals[tab] || 0;
 };
 
+const decodeHtmlEntities = (value = "") =>
+  String(value).replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity) => {
+    if (entity[0] === "#") {
+      const isHex = entity[1]?.toLowerCase() === "x";
+      const codePoint = Number.parseInt(entity.slice(isHex ? 2 : 1), isHex ? 16 : 10);
+      if (Number.isFinite(codePoint)) {
+        try {
+          return String.fromCodePoint(codePoint);
+        } catch {
+          return match;
+        }
+      }
+    }
+
+    const named = {
+      amp: "&",
+      apos: "'",
+      gt: ">",
+      lt: "<",
+      nbsp: " ",
+      quot: '"',
+    };
+    return named[entity] ?? match;
+  });
+
+const stripInsightText = (value = "") => {
+  const withoutTags = String(value)
+    .replace(
+      /<span\b(?=[^>]*\bclass=["'][^"']*\bmention-node\b[^"']*["'])([^>]*)>([\s\S]*?)<\/span>/gi,
+      (_match, attrs, fallbackText) => {
+        const label = attrs.match(/\bdata-mention-label=["']([^"']+)["']/i)?.[1];
+        return label || fallbackText;
+      }
+    )
+    .replace(/<br\s*\/?\s*>/gi, " ")
+    .replace(/<\/(?:p|div|li|h[1-6]|blockquote)\s*>/gi, " ")
+    .replace(/<[^>]*>/g, "");
+
+  return decodeHtmlEntities(withoutTags).replace(/\s+/g, " ").trim();
+};
+
 function MetricCard({ icon: Icon, label, value, tone = "all" }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex min-h-[92px] items-center gap-3 rounded-lg border border-gray-200 bg-white p-4">
       <div
-        className={`mb-4 flex h-9 w-9 items-center justify-center rounded-lg border ${toneByType[tone]}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${toneByType[tone]}`}
       >
         <Icon className="h-4 w-4" />
       </div>
-      <p className="text-2xl font-bold text-gray-950">{formatNumber(value || 0)}</p>
-      <p className="mt-1 text-sm font-medium text-gray-500">{label}</p>
+      <div className="min-w-0">
+        <p className="text-2xl font-bold leading-none text-gray-950">
+          {formatNumber(value || 0)}
+        </p>
+        <p className="mt-2 whitespace-nowrap text-sm font-semibold text-gray-500">
+          {label}
+        </p>
+      </div>
     </div>
   );
 }
@@ -76,6 +123,7 @@ function actorHref(actor) {
 
 function ActorRow({ item }) {
   const href = actorHref(item.actor);
+  const preview = stripInsightText(item.preview);
   const tone =
     item.type === "like"
       ? toneByType.likes
@@ -109,9 +157,9 @@ function ActorRow({ item }) {
             <Icon className="h-3.5 w-3.5" />
           </span>
         </div>
-        {item.preview ? (
+        {preview ? (
           <p className="mt-2 line-clamp-2 text-sm leading-5 text-gray-700">
-            {item.preview}
+            {preview}
           </p>
         ) : null}
       </div>
@@ -167,6 +215,10 @@ function PostInsightsPage() {
     [actorPages]
   );
   const totals = insights?.totals || {};
+  const postPreview = useMemo(
+    () => stripInsightText(insights?.post?.body_preview || ""),
+    [insights?.post?.body_preview]
+  );
 
   if (insightsLoading) {
     return (
@@ -199,7 +251,7 @@ function PostInsightsPage() {
 
   return (
     <section className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 lg:px-8">
-      <div className="mb-5 flex items-center justify-between gap-3">
+      <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -210,8 +262,8 @@ function PostInsightsPage() {
         </button>
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-gray-950">Post insights</h1>
-          <p className="truncate text-sm text-gray-500">
-            {insights?.post?.body_preview || "No text content"}
+          <p className="line-clamp-2 text-sm leading-5 text-gray-500">
+            {postPreview || "No text content"}
           </p>
         </div>
         <button
@@ -246,7 +298,7 @@ function PostInsightsPage() {
         ))}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={BarChart3}
           label="Engagements"

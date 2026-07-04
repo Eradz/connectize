@@ -74,6 +74,14 @@ export class MentionNode extends TextNode {
   createDOM(config) {
     const dom = super.createDOM(config);
     dom.className = 'mention-node';
+    dom.dataset.mention = this.__mention || '';
+    dom.dataset.mentionType = this.__mentionType || 'user';
+    if (this.__mentionId !== null && this.__mentionId !== undefined) {
+      dom.dataset.mentionId = String(this.__mentionId);
+    }
+    if (this.__mentionLabel) {
+      dom.dataset.mentionLabel = this.__mentionLabel;
+    }
     dom.style.color = '#D4AF37';
     dom.style.fontWeight = '600';
     return dom;
