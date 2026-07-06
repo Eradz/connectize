@@ -4,7 +4,12 @@ import { useSearchParams } from "react-router-dom";
 import { getAllCompanies, getSingleCompany } from "../api-services/companies";
 import { getMessagesForUser } from "../api-services/messaging";
 import { getNotificationsForUser } from "../api-services/notifications";
-import { getPosts } from "../api-services/posts";
+import {
+  getPosts,
+  getCompanyPosts,
+  getFollowingPosts,
+  getTrendingPosts,
+} from "../api-services/posts";
 import { getProducts } from "../api-services/products";
 import { getServices } from "../api-services/services";
 import { useCompaniesStore } from "../stores/companiesStore";
@@ -36,18 +41,70 @@ export const useSafePoll = (callback, interval, deps = []) => {
   }, [interval, ...deps]);
 };
 
-export const usePollPosts = (interval = 30000) => {
+export const usePollPosts = (interval = 30000, { enabled = true } = {}) => {
   return useInfiniteQuery({
     queryKey: ["posts"],
     queryFn: ({ pageParam = 1 }) => getPosts(pageParam, 10),
-    getNextPageParam: (lastPage) => 
+    getNextPageParam: (lastPage) =>
       lastPage.hasMore ? lastPage.nextPage : undefined,
     initialPageParam: 1,
+    enabled,
     refetchInterval: interval,
     // ✅ Caching for instant display
     staleTime: 30 * 1000, // Data stays fresh for 30 seconds
     gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch on tab switch
+  });
+};
+
+// Following feed - posts authored/reposted by users & companies the current
+// user follows (server-side `?feed=following`). Same pagination contract as
+// usePollPosts; keyed under the shared ["posts"] prefix so the existing
+// like/repost invalidations (["posts"]) refresh this feed too.
+export const usePollFollowingPosts = (interval = 30000, { enabled = true } = {}) => {
+  return useInfiniteQuery({
+    queryKey: ["posts", "following"],
+    queryFn: ({ pageParam = 1 }) => getFollowingPosts(pageParam, 10),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextPage : undefined,
+    initialPageParam: 1,
+    enabled,
+    refetchInterval: interval,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Trending feed - engagement-ranked posts from the last 7 days (server-side
+// `?feed=trending&days=7`). Also under the ["posts"] prefix for invalidation.
+export const usePollTrendingPosts = (interval = 30000, { enabled = true } = {}) => {
+  return useInfiniteQuery({
+    queryKey: ["posts", "trending"],
+    queryFn: ({ pageParam = 1 }) => getTrendingPosts(pageParam, 10),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextPage : undefined,
+    initialPageParam: 1,
+    enabled,
+    refetchInterval: interval,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const usePollCompanyPosts = (companyId, interval = 30000) => {
+  return useInfiniteQuery({
+    queryKey: ["posts", "company", companyId],
+    queryFn: ({ pageParam = 1 }) => getCompanyPosts(companyId, pageParam, 10),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextPage : undefined,
+    initialPageParam: 1,
+    enabled: !!companyId,
+    refetchInterval: interval,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 

@@ -18,14 +18,6 @@ const normalizeMentionToken = (value = "") =>
 const slugifyMentionValue = (value = "") =>
   normalizeMentionToken(String(value).replace(/[_\s]+/g, "-"));
 
-const toMentionTitle = (value = "") =>
-  String(value)
-    .replace(/[-_]+/g, " ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-
 const getCompanyDisplayName = (company = {}) =>
   company.company_name || company.name || company.slug || "Company";
 
@@ -95,8 +87,10 @@ const getTokenTarget = (symbol, value, mentionUsers = [], mentionCompanies = [])
     const mentionTarget = resolveMentionTarget(value, mentionUsers, mentionCompanies);
     if (mentionTarget) return mentionTarget;
 
+    // Unresolved mention: keep the raw @token text (never guess a name),
+    // but still link it to search so it stays tappable.
     return {
-      label: toMentionTitle(value),
+      label: `@${value}`,
       url: `/search?search_query=${encodeURIComponent(`@${value}`)}`,
       type: "mention",
     };
@@ -267,6 +261,25 @@ const linkifyHtml = (html, mentionUsers = [], mentionCompanies = []) => {
   template.innerHTML = sanitizedHtml;
 
   template.content.querySelectorAll(".mention-node").forEach((element) => {
+    const mentionLabel = element.getAttribute("data-mention-label");
+    const mentionType = element.getAttribute("data-mention-type");
+    const mentionId = element.getAttribute("data-mention-id");
+    const mentionToken = element.getAttribute("data-mention");
+
+    if (mentionLabel && (mentionId || mentionToken)) {
+      const anchor = document.createElement("a");
+      anchor.className = getTokenClassName("@");
+      anchor.textContent = mentionLabel;
+      anchor.href =
+        mentionType === "company"
+          ? `/${encodeURIComponent(mentionToken || mentionLabel)}`
+          : mentionId
+          ? `/co/${encodeURIComponent(mentionId)}`
+          : `/search?search_query=${encodeURIComponent(`@${mentionToken}`)}`;
+      element.replaceWith(anchor);
+      return;
+    }
+
     element.removeAttribute("style");
     element.classList.remove("mention-node");
   });

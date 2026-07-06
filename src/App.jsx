@@ -58,6 +58,7 @@ const Market = lazy(() => import("./pages/market/market"));
 const Product = lazy(() => import("./pages/market/product"));
 const MessagesLayout = lazy(() => import("./pages/messages/layout"));
 const NotFound = lazy(() => import("./pages/not-found"));
+const PostInsightsPage = lazy(() => import("./pages/posts/postInsightsPage"));
 const SinglePostPage = lazy(() => import("./pages/posts/singlePostPage"));
 const RepresentativesPage = lazy(() => import("./pages/representatives"));
 const AcceptRepresentation = lazy(() => import("./pages/representatives/AcceptRepresentation"));
@@ -229,8 +230,10 @@ const removeLeadingSlash = (path) => {
             <Route index element={<NewsFeed />} />
           </Route>
           <Route path="" element={<FeedLayout />}>
-            <Route path="posts/:id" element={<SinglePostPage />} />
+            <Route path="posts/:id/insights" element={<PostInsightsPage />} />
           </Route>
+          {/* Public, crawlable post detail — no auth wall so it can be indexed */}
+          <Route path="posts/:id" element={<SinglePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.createPost)} element={<CreatePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.profile)} element={<Profile />} />
 
@@ -543,6 +546,7 @@ const removeLeadingSlash = (path) => {
         <Route path="/app" element={<AppLayout />}>
           <Route path="feed" element={<FeedLayout />}>
             <Route index element={<NewsFeed />} />
+            <Route path="posts/:id/insights" element={<PostInsightsPage />} />
             <Route path="posts/:id" element={<SinglePostPage />} />
           </Route>
 

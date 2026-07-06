@@ -1,6 +1,7 @@
 import { Avatar, Badge } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
+import { getAssociatedPeopleForCompany } from "../../../api-services/companies";
 import {
   getAssociatedUsersForUser,
   getSuggestedUsersForCurrentUser,
@@ -44,23 +45,33 @@ export function SuggestionList({
   associated = false,
   thisUser,
   companyId,
+  companySlug,
   viewMoreUrl,
 }) {
   const { user: currentUser } = useAuth();
 
-  // For "People Associated" (associated=true): fetch connections for the target user
-  // For "Suggested" (associated=false): fetch smart suggestions for current user
+  // Three modes:
+  // - Company "People Associated" (associated=true + companySlug/companyId):
+  //   active representatives + the company's user followers
+  // - User "People Associated" (associated=true): the user's personal connections
+  // - "Suggested" (associated=false): smart suggestions for the current user
+  const isCompany = associated && !!(companySlug || companyId);
   const userId = associated ? thisUser?.id : currentUser?.id;
-  const queryKey = associated
+
+  const queryKey = isCompany
+    ? ["companyAssociatedPeople", companySlug ?? companyId]
+    : associated
     ? ["userConnections", userId]
     : ["userSuggestions", currentUser?.id];
 
   const { data: users = [], isLoading } = useQuery({
     queryKey,
-    queryFn: associated
+    queryFn: isCompany
+      ? () => getAssociatedPeopleForCompany({ slug: companySlug, companyId })
+      : associated
       ? () => getAssociatedUsersForUser(userId)
       : () => getSuggestedUsersForCurrentUser(),
-    enabled: !!currentUser && (associated ? !!userId : true),
+    enabled: !!currentUser && (associated ? isCompany || !!userId : true),
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -74,7 +85,9 @@ export function SuggestionList({
           ))
         ) : users?.length <= 0 ? (
           <LightParagraph>
-            {associated
+            {isCompany
+              ? "No people associated yet"
+              : associated
               ? "No connections yet"
               : "No suggestions available"}
           </LightParagraph>
@@ -85,12 +98,17 @@ export function SuggestionList({
               last_name,
               full_name,
               avatar,
-              email: hashtag,
+              username,
+              email,
               id,
               connection_type,
               is_mutual,
               suggestion_reasons,
+              role,
             } = user;
+
+            // email is null for privacy now; prefer the @handle
+            const hashtag = username ? `@${username}` : email;
 
             return (
               <SuggestionListItem
@@ -103,6 +121,7 @@ export function SuggestionList({
                 connectionType={connection_type}
                 isMutual={is_mutual}
                 suggestionReasons={suggestion_reasons}
+                role={role}
                 associated={associated}
               />
             );
@@ -131,11 +150,15 @@ function SuggestionListItem({
   connectionType,
   isMutual,
   suggestionReasons,
+  role,
   associated = false,
 }) {
-  // Pick the most relevant badge to show
+  // Pick the most relevant badge to show; representatives show their role
+  const roleLabel = role
+    ? role.charAt(0).toUpperCase() + role.slice(1)
+    : null;
   const badge = associated
-    ? (isMutual ? "Mutual" : connectionType === "following" ? "Following" : connectionType === "follower" ? "Follower" : null)
+    ? (roleLabel || (isMutual ? "Mutual" : connectionType === "following" ? "Following" : connectionType === "follower" ? "Follower" : null))
     : (suggestionReasons?.length > 0 ? REASON_LABELS[suggestionReasons[0]] : null);
 
   return (
@@ -151,7 +174,7 @@ function SuggestionListItem({
           <Username user={user} />
           {badge && (
             <Badge
-              colorScheme={isMutual || suggestionReasons?.[0] === 'mutual_connection' ? "green" : suggestionReasons?.[0] === 'follows_you' ? "blue" : "gray"}
+              colorScheme={roleLabel ? "purple" : isMutual || suggestionReasons?.[0] === 'mutual_connection' ? "green" : suggestionReasons?.[0] === 'follows_you' ? "blue" : "gray"}
               className="!text-[.6rem]"
             >
               {badge}

@@ -291,8 +291,19 @@ export const CompaniesArray = ({
                   <div className="flex items-center text-gray-400">
                     <LocationOnOutlined className="sm:!size-4 !size-5" />
                     <span className="text-sm sm:text-xs">
-                      {company?.office_address} {company?.city}, {company?.state},{" "}
-                      {company?.country}.
+                      {company?.office_address}{" "}
+                      {[company?.city, company?.state, company?.country]
+                        .filter(Boolean)
+                        .filter(
+                          (part, index, all) =>
+                            all.findIndex(
+                              (other) =>
+                                other.trim().toLowerCase() ===
+                                part.trim().toLowerCase()
+                            ) === index
+                        )
+                        .join(", ")}
+                      .
                     </span>
                   </div>
                 )}

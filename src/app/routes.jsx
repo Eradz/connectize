@@ -12,6 +12,7 @@ export default [
     layout("../pages/FeedLayout.jsx", [
       route(webRoutes.newsFeed, "../pages/feed/newsFeed.jsx"),
       route(webRoutes.singlePost, "../pages/posts/singlePostPage.jsx"),
+      route(webRoutes.postInsights, "../pages/posts/postInsightsPage.jsx"),
     ]),
 
     route(webRoutes.profile, "../components/profile/profile.jsx"),

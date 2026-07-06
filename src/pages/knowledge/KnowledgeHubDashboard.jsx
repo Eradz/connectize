@@ -38,6 +38,7 @@ import {
 import { toast } from 'sonner';
 import Scroll from '../../components/Scroll';
 import BackArrowButton from '../../components/BackArrowButton';
+import ArticleAuthorByline from '../../components/knowledge/ArticleAuthorByline';
 
 // Custom SVG Icons
 const WriteArticleIcon = (props) => (
@@ -368,14 +369,11 @@ const KnowledgeHubDashboard = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 text-white/90 text-xs">
-                        <div className="flex items-center space-x-1.5">
-                          <Users className="w-3.5 h-3.5" />
-                          <span>
-                            {article.author?.first_name || article.author?.last_name
-                              ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
-                              : 'Anonymous'}
-                          </span>
-                        </div>
+                        <ArticleAuthorByline
+                          article={article}
+                          iconClassName="w-3.5 h-3.5"
+                          linkable={false}
+                        />
                         <div className="flex items-center space-x-1.5">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>{formatDate(article.published_at)}</span>
@@ -437,14 +435,11 @@ const KnowledgeHubDashboard = () => {
 
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3 text-white/90 text-xs">
-                      <div className="flex items-center space-x-1">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>
-                          {article.author?.first_name || article.author?.last_name
-                            ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
-                            : 'Anonymous'}
-                        </span>
-                      </div>
+                      <ArticleAuthorByline
+                        article={article}
+                        iconClassName="w-3.5 h-3.5"
+                        linkable={false}
+                      />
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-3.5 h-3.5" />
                         <span>{formatDate(article.published_at)}</span>
@@ -643,14 +638,10 @@ const KnowledgeHubDashboard = () => {
 
                         <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 mb-4">
                           <div className="flex flex-col md:flex-row md:items-center items-start gap-1.5 md:gap-4">
-                            <div className="flex items-center gap-1.5">
-                              <Users className="w-4 h-4" />
-                              <span>
-                                {article.author?.first_name || article.author?.last_name
-                                  ? `${article.author.first_name || ''} ${article.author.last_name || ''}`.trim()
-                                  : 'Anonymous'}
-                              </span>
-                            </div>
+                            <ArticleAuthorByline
+                              article={article}
+                              iconClassName="w-4 h-4"
+                            />
                             <div className="flex items-center gap-1.5">
                               <Calendar className="w-4 h-4" />
                               <span>{formatDate(article.published_at)}</span>

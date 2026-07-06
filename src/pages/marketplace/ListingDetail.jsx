@@ -25,12 +25,18 @@ import {
   Minus,
   Building2,
   MessageCircle,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Trash2
 } from 'lucide-react';
+import { toast } from 'sonner';
 import marketplaceApi from '../../api-services/marketplace';
 import { getSession } from '../../lib/session';
 import { webRoutes } from '../../lib/webRoutes';
 import { getCurrencySymbol } from '../../utils/currency';
+import { useAuth } from '../../context/userContext';
+import MoreOptions from '../../components/MoreOptions';
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 const hasListingPrice = (listing) =>
   listing?.price !== null &&
@@ -48,6 +54,7 @@ const formatListingPrice = (listing) => {
 const ListingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,6 +62,7 @@ const ListingDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
   const [inWishlist, setInWishlist] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if user is logged in
   const isLoggedIn = () => {
@@ -163,6 +171,26 @@ const ListingDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete listing',
+      message: 'Are you sure you want to delete this listing? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      await marketplaceApi.deleteListing(id);
+      toast.success('Listing deleted');
+      navigate(webRoutes.marketplaceMyListings);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete listing');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleShare = async () => {
     const shareUrl = window.location.href;
     const shareTitle = listing?.title || 'Check out this listing';
@@ -257,6 +285,7 @@ const ListingDetail = () => {
     : [{ image: '/placeholder-product.png', alt_text: listing.title }];
   const hasPrice = hasListingPrice(listing);
   const isPurchasable = listing.status === 'active' && listing.quantity_available > 0 && hasPrice;
+  const isCreator = Boolean(user && String(listing.seller?.id ?? listing.seller) === String(user.id));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -347,6 +376,27 @@ const ListingDetail = () => {
                 >
                   <Share2 size={20} />
                 </button>
+                {isCreator && (
+                  <MoreOptions className="!w-fit">
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => navigate(webRoutes.marketplaceEditListing.replace(':id', id))}
+                        className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                      </button>
+                    </div>
+                  </MoreOptions>
+                )}
               </div>
             </div>
 

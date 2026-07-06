@@ -52,6 +52,7 @@ const webRoutes = {
   settings: "/co/settings",
   signup: "/signup",
   singlePost: "/posts/:id",
+  postInsights: "/posts/:id/insights",
   success: "/success",
   support:"/support",
   subscriptions: "/subscriptions",

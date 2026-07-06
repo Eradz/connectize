@@ -1,17 +1,23 @@
-import { MessageOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { MessageOutlined, RetweetOutlined, ShareAltOutlined } from "@ant-design/icons";
 import {
   Avatar,
   Button,
   CloseButton,
+  Popover,
+  PopoverArrow,
+  PopoverContent,
+  PopoverTrigger,
   Spinner,
   Textarea,
   Tooltip,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
+import { BarChart3 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   commentOnPost,
@@ -21,12 +27,24 @@ import {
   likeComment,
   replyToComment,
   likeReply,
+  updateComment,
+  deleteComment,
+  updateReply,
+  deleteReply,
+  repostPost,
+  unrepostPost,
+  getPostReposts,
 } from "../../../api-services/posts";
 import { useCustomQuery } from "../../../context/queryContext";
 import { useAuth } from "../../../context/userContext";
 import { useCompanySearch } from "../../../hooks/useCompanySearch";
 import { useGetActionableCompanies } from "../../../hooks";
-import { usePollPosts } from "../../../hooks/usePolling";
+import {
+  usePollPosts,
+  usePollCompanyPosts,
+  usePollFollowingPosts,
+  usePollTrendingPosts,
+} from "../../../hooks/usePolling";
 import { useUserSearch } from "../../../hooks/useUserSearch";
 import { Heart } from "../../../icon";
 import { capitalizeFirst, formatNumber } from "../../../lib/utils";
@@ -45,7 +63,7 @@ import TimeAgo from "../../TimeAgo";
 import SocialShareModal from "../../CustomShareButton";
 import CustomShareButton from "../../CustomShareButton";
 import { useGetPostComments } from "../../../hooks/useComments";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CommentThread from "../../comments/CommentThread";
 import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import CommentAsSelector from "../../comments/CommentAsSelector";
@@ -56,17 +74,34 @@ function DiscoverPosts({
   isSearch,
   searchLoading,
   companyName = null,
+  companyId = null,
+  feedType = "discover", // "discover" | "following" | "trending"
 }) {
-  // const { data: posts, isLoading, error } = usePollPosts();
+  // Only the active feed's query is enabled - the others stay cached but idle,
+  // so switching tabs is instant without triple-polling the API.
+  const isFollowingFeed = !companyId && feedType === "following";
+  const isTrendingFeed = !companyId && feedType === "trending";
+  const isDiscoverFeed = !companyId && !isFollowingFeed && !isTrendingFeed;
 
-  const { 
-    data: posts, 
-    isLoading, 
+  const discoverQuery = usePollPosts(30000, { enabled: isDiscoverFeed });
+  const companyQuery = usePollCompanyPosts(companyId);
+  const followingQuery = usePollFollowingPosts(30000, { enabled: isFollowingFeed });
+  const trendingQuery = usePollTrendingPosts(30000, { enabled: isTrendingFeed });
+
+  const {
+    data: posts,
+    isLoading,
     error,
-    fetchNextPage, 
-    hasNextPage, 
-    isFetchingNextPage 
-  } = usePollPosts();
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = companyId
+    ? companyQuery
+    : isFollowingFeed
+    ? followingQuery
+    : isTrendingFeed
+    ? trendingQuery
+    : discoverQuery;
   // Debug logging
   if (error) {
     console.error("❌ [DiscoverPosts] Error loading posts:", error);
@@ -75,6 +110,8 @@ function DiscoverPosts({
   const lastPostRef = useRef();
   const finalArray = isSearch
     ? searchArray
+    : companyId
+    ? posts?.pages?.flatMap(page => page.posts)
     : companyName
     ? posts?.pages?.flatMap(page => page.posts)?.filter(
         (post) =>
@@ -88,7 +125,7 @@ function DiscoverPosts({
 
    // Infinite scroll observer
   useEffect(() => {
-    if (isSearch || companyName) return; // Disable infinite scroll for filtered views
+    if (isSearch || (companyName && !companyId)) return; // Disable infinite scroll for client-filtered views
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -108,8 +145,24 @@ function DiscoverPosts({
         observer.disconnect();
       }
     };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName]);
-  
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isSearch, companyName, companyId, feedType]);
+
+  // Tab-specific empty states (mirrors the mobile app's copy)
+  const emptyCopy = isFollowingFeed
+    ? {
+        title: "No Posts From People You Follow",
+        body: "Posts from users and companies you follow will appear here. Discover interesting people and companies to follow!",
+      }
+    : isTrendingFeed
+    ? {
+        title: "No Trending Posts Yet",
+        body: "Posts with the most engagement over the last few days will appear here.",
+      }
+    : {
+        title: "No Posts Yet",
+        body: "There are no posts to display. Start sharing your thoughts to get the conversation going!",
+      };
+
   return (
     <section className="w-full space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
@@ -131,9 +184,9 @@ function DiscoverPosts({
                 <path d="M8 44L24 28L40 40L56 24" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Posts Yet</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{emptyCopy.title}</h3>
             <p className="text-gray-600 text-center max-w-sm mb-6">
-              There are no posts to display. Start sharing your thoughts to get the conversation going!
+              {emptyCopy.body}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -187,6 +240,128 @@ function DiscoverPosts({
 
 export default DiscoverPosts;
 
+const createEmptyCommentContent = () => ({
+  text: "",
+  plainText: "",
+  mentions: [],
+  companyMentions: [],
+});
+
+/**
+ * Quote-repost comments are stored as plain text with @tokens, but a few
+ * legacy rows contain Lexical HTML. Strip tags defensively so both formats
+ * render the same through MarkdownComponent.
+ */
+const stripHtmlTags = (value) => {
+  const text = String(value || "");
+  if (!/<\/?[a-z][^>]*>/i.test(text)) return text;
+  // Preserve paragraph/line breaks before dropping tags
+  const withBreaks = text
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li)>/gi, "\n");
+  const doc = new DOMParser().parseFromString(withBreaks, "text/html");
+  return (doc.body.textContent || "").trim();
+};
+
+/** Display name for a repost row (company reposts win over the user). */
+const getRepostAuthorName = (repost = {}) =>
+  repost.company?.company_name ||
+  repost.company?.name ||
+  repost.user?.full_name ||
+  `${repost.user?.first_name || ""} ${repost.user?.last_name || ""}`.trim();
+
+/** Muted placeholder shown where a repost's original post used to be. */
+const DeletedParentNotice = ({ className }) => (
+  <div
+    className={clsx(
+      "border border-gray-200 bg-gray-50 rounded-lg p-4 text-sm text-gray-500",
+      className
+    )}
+  >
+    This post is no longer available
+  </div>
+);
+
+/**
+ * One-level embed of the original post inside a quote repost.
+ * Clicking anywhere on it (except links/buttons) opens the parent's post page.
+ */
+const ParentPostEmbed = ({
+  parentPost,
+  mentionUsers = [],
+  mentionCompanies = [],
+}) => {
+  const navigate = useNavigate();
+
+  if (!parentPost) return <DeletedParentNotice className="mt-2" />;
+
+  const authorName =
+    parentPost?.company?.company_name ||
+    parentPost?.user?.full_name ||
+    `${parentPost?.user?.first_name || ""} ${
+      parentPost?.user?.last_name || ""
+    }`.trim();
+
+  const openParent = (event) => {
+    if (event?.target?.closest?.("a, button")) return;
+    navigate(webRoutes.singlePost.replace(":id", parentPost.id));
+  };
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={openParent}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") openParent(event);
+      }}
+      className="mt-2 border border-gray-200 rounded-lg p-3 xs:p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <Avatar
+          name={
+            parentPost?.company?.company_name || parentPost?.user?.first_name
+          }
+          size="xs"
+          src={parentPost?.company?.logo || parentPost?.user?.avatar}
+          className={avatarStyle}
+        />
+        <CompanyName
+          name={authorName || "Unknown"}
+          verified={
+            parentPost?.company?.verified ??
+            parentPost?.company?.verify ??
+            parentPost?.user?.verified
+          }
+          company={!!parentPost?.company}
+          userId={parentPost?.user?.id}
+          slug={parentPost?.company?.slug}
+        />
+        {parentPost?.date_created && (
+          <small className="text-gray-400 shrink-0">
+            • <TimeAgo time={parentPost.date_created} />
+          </small>
+        )}
+      </div>
+      {parentPost?.body && (
+        <div className="line-clamp-4">
+          <MarkdownComponent
+            markdownContent={stripHtmlTags(parentPost.body)}
+            className="text-sm !text-gray-800"
+            mentionUsers={[parentPost?.user, ...mentionUsers].filter(Boolean)}
+            mentionCompanies={[parentPost?.company, ...mentionCompanies].filter(
+              Boolean
+            )}
+          />
+        </div>
+      )}
+      {parentPost?.images?.length > 0 && (
+        <PostImageCollage images={parentPost.images} />
+      )}
+    </div>
+  );
+};
+
 export const DiscoverPostItem = ({
   postItem = {},
   hasImage = false,
@@ -195,10 +370,33 @@ export const DiscoverPostItem = ({
   mentionCompanies = [],
 }) => {
   const [showCommentSection, setShowCommentSection] = useState(false);
-  
+
+  // ---- Repost model: reposts are first-class child posts ----
+  // post.is_repost + post.parent_post (one-level embed or null when the
+  // original was deleted). The reposter is this post's own author.
+  const isRepost = !!postItem?.is_repost;
+  const parentPost = isRepost ? postItem?.parent_post || null : null;
+  // Quote text is plain text with @tokens; strip legacy Lexical HTML defensively
+  const quoteText = isRepost ? stripHtmlTags(postItem?.body).trim() : "";
+  const isQuoteRepost = isRepost && quoteText.length > 0;
+  const isPlainRepost = isRepost && !isQuoteRepost;
+  const isParentDeleted = isRepost && !parentPost;
+  // Plain reposts proxy content AND every interaction (like/comment/repost/
+  // share/counts) to the PARENT post; normal posts and quote reposts act on
+  // themselves.
+  const activePost = (isPlainRepost && parentPost) || postItem;
+
+  const navigate = useNavigate();
+  const goToPost = (id) => (event) => {
+    if (!id) return;
+    // Don't hijack clicks on links, buttons or interactive media in the card
+    if (event?.target?.closest?.("a, button, img, video")) return;
+    navigate(webRoutes.singlePost.replace(":id", id));
+  };
+
   // Use preview_comments from post data initially - instant display!
-  const previewComments = postItem.preview_comments || [];
-  const totalComments = postItem.numberOfComments || 0;
+  const previewComments = activePost?.preview_comments || [];
+  const totalComments = activePost?.numberOfComments || 0;
   const hasMoreComments = totalComments > previewComments.length;
   
   // Show all comments (switch from preview to full list)
@@ -212,8 +410,8 @@ export const DiscoverPostItem = ({
     isLoading: isLoadingMoreComments,
     isFetched: commentsFetched,
   } = useGetPostComments(
-    { postId: postItem.id },
-    { 
+    { postId: activePost?.id },
+    {
       // Start fetching in background when comments section is shown AND there are more comments
       enabled: showCommentSection && hasMoreComments,
       staleTime: 30000, // Cache for 30 seconds
@@ -238,24 +436,32 @@ export const DiscoverPostItem = ({
 
   const { setRefetchInterval } = useCustomQuery();
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Reposter attribution for the compact "{reposter} reposted" header
+  const reposterIsCompany = !!postItem?.company;
+  const reposterName = reposterIsCompany
+    ? postItem?.company?.company_name
+    : postItem?.user?.full_name ||
+      `${postItem?.user?.first_name || ""} ${
+        postItem?.user?.last_name || ""
+      }`.trim();
+  const reposterHref = reposterIsCompany
+    ? `/${postItem?.company?.slug || postItem?.company?.company_name || ""}`
+    : `/co/${postItem?.user?.id}`;
+  const isSelfRepost =
+    !reposterIsCompany && !!postItem?.user?.id && postItem?.user?.id === currentUser?.id;
 
   const postTitle = `Connectize Post by ${
-    postItem?.user?.first_name
-  } | ${capitalizeFirst(postItem?.company?.company_name)} Company`;
-
-  // const userHasLikedPost = postItem?.likes.find(
-  //   (post) => post?.user?.id === currentUser?.id
-  // )
-  //   ? true
-  //   : false;
+    activePost?.user?.first_name
+  } | ${capitalizeFirst(activePost?.company?.company_name)} Company`;
 
   const [commentsLength, setCommentsLength] = useState(
-    () => postItem.numberOfComments || 0
+    () => activePost?.numberOfComments || 0
   );
 
-  const recentLikes = postItem?.likes;
-  const [liked, setLiked] = useState(() => !!postItem?.isLikedByUser);
-  const [likes, setLikes] = useState(() => postItem?.numberOfLikes || 0);
+  const [liked, setLiked] = useState(() => !!activePost?.isLikedByUser);
+  const [likes, setLikes] = useState(() => activePost?.numberOfLikes || 0);
   const [disabled, setDisabled] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
@@ -272,21 +478,183 @@ export const DiscoverPostItem = ({
     setLikes((prev) => (!currentIsLiked ? prev + 1 : prev - 1));
     // setDisabled(true);
     try {
-      await likePost(postItem?.id, postItem, currentIsLiked);
+      // Any non-error (2xx) response is success — the backend is idempotent,
+      // so "already liked/unliked" also comes back as 200. makeApiRequest
+      // returns null/undefined instead of throwing when the request fails.
+      const result = await likePost(activePost?.id, activePost, currentIsLiked);
+      if (result == null) throw new Error("Like request failed");
     } catch (error) {
+      // Roll back the optimistic update and re-sync this post's like state
+      // from the server so the heart can't drift from what the backend holds.
       setLiked(currentIsLiked);
       setLikes((prev) => (!currentIsLiked ? prev - 1 : prev + 1));
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
     // setDisabled(false);
     setRefetchInterval(1000);
     setTimeout(() => setRefetchInterval(false), 2000);
   };
+  // Repost state - mirrors the optimistic like-button pattern above.
+  // For plain reposts these reflect (and mutate) the PARENT post.
+  const [reposted, setReposted] = useState(() => !!activePost?.isRepostedByUser);
+  const [reposts, setReposts] = useState(() => activePost?.numberOfReposts || 0);
+  const [repostLoading, setRepostLoading] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [quoteContent, setQuoteContent] = useState(createEmptyCommentContent);
+  const [quoteEditorKey, setQuoteEditorKey] = useState(0);
+  const [isQuoteSubmitting, setIsQuoteSubmitting] = useState(false);
+  const [showRepostersModal, setShowRepostersModal] = useState(false);
+  const {
+    isOpen: isRepostMenuOpen,
+    onOpen: onRepostMenuOpen,
+    onClose: onRepostMenuClose,
+  } = useDisclosure();
+
+  // "Reposted by {first reposter} and N others" attribution — SINGLE POST
+  // PAGE ONLY (feeds must not fire a per-card reposts request). Shares the
+  // ["reposts", id] cache key with RepostersModal, so this fetches once and
+  // opening the modal reuses the cached list.
+  const { data: repostersPreview } = useQuery({
+    queryKey: ["reposts", activePost?.id],
+    queryFn: () => getPostReposts(activePost?.id),
+    enabled: isSinglePost && !!activePost?.id && reposts > 0,
+    staleTime: 30000,
+  });
+  const repostersList =
+    repostersPreview?.results ||
+    (Array.isArray(repostersPreview) ? repostersPreview : []);
+  const firstReposterName = getRepostAuthorName(repostersList[0]);
+  const totalReposters = repostersPreview?.count ?? repostersList.length;
+  const otherReposterCount = Math.max(totalReposters - 1, 0);
+
+  // Refresh every feed reading from the shared ["posts"] cache (discover feed,
+  // following feed and the user/company profile feeds all consume this key),
+  // plus the reposters list, so the NEW child repost appears in the feeds.
+  // (The repost response's "post" payload is the child post; invalidating
+  // ["posts"] re-fetches it at the top of the feed.)
+  const invalidateFeedsAfterRepost = () => {
+    queryClient.invalidateQueries({ queryKey: ["posts"] });
+    queryClient.invalidateQueries({ queryKey: ["reposts", activePost?.id] });
+  };
+
+  const handleRepost = async (quote = "", mentions = [], companyMentions = []) => {
+    onRepostMenuClose();
+    setRepostLoading(true);
+    setReposted(true);
+    setReposts((prev) => prev + 1);
+    try {
+      // makeApiRequest returns null on failure (and toasts the API error itself)
+      const result = await repostPost(activePost?.id, {
+        comment: quote,
+        mentions,
+        companyMentions,
+      });
+      if (result === null) {
+        setReposted(false);
+        setReposts((prev) => prev - 1);
+        return false;
+      }
+      toast.success("Reposted");
+      invalidateFeedsAfterRepost();
+      setRefetchInterval(1000);
+      setTimeout(() => setRefetchInterval(false), 2000);
+      return true;
+    } catch (error) {
+      setReposted(false);
+      setReposts((prev) => prev - 1);
+      toast.error("Failed to repost");
+      console.error("Repost error:", error);
+      return false;
+    } finally {
+      setRepostLoading(false);
+    }
+  };
+
+  const handleUnrepost = async () => {
+    onRepostMenuClose();
+    setRepostLoading(true);
+    setReposted(false);
+    setReposts((prev) => Math.max(prev - 1, 0));
+    try {
+      const result = await unrepostPost(activePost?.id);
+      if (result === null) {
+        setReposted(true);
+        setReposts((prev) => prev + 1);
+        return;
+      }
+      toast.success("Repost removed");
+      invalidateFeedsAfterRepost();
+      setRefetchInterval(1000);
+      setTimeout(() => setRefetchInterval(false), 2000);
+    } catch (error) {
+      setReposted(true);
+      setReposts((prev) => prev + 1);
+      toast.error("Failed to remove repost");
+      console.error("Unrepost error:", error);
+    } finally {
+      setRepostLoading(false);
+    }
+  };
+
+  // Kebab "Undo repost" on the reposter's own plain-repost feed item.
+  // Unreposting the parent removes this child post server-side; when the
+  // parent was deleted, delete the orphaned child repost directly instead.
+  const handleUndoOwnRepost = async () => {
+    if (parentPost?.id) {
+      await handleUnrepost();
+      return;
+    }
+    setRepostLoading(true);
+    try {
+      const result = await deletePost(postItem?.id);
+      if (result === null) return;
+      toast.success("Repost removed");
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setRefetchInterval(1000);
+      setTimeout(() => setRefetchInterval(false), 2000);
+    } catch (error) {
+      toast.error("Failed to remove repost");
+      console.error("Undo repost error:", error);
+    } finally {
+      setRepostLoading(false);
+    }
+  };
+
+  const handleQuoteRepost = async () => {
+    if (!quoteContent.plainText?.trim()) return;
+    setIsQuoteSubmitting(true);
+    // Submit the PLAIN TEXT with @tokens (not Lexical HTML) — plain text is
+    // the cross-platform canonical quote format (mobile renders it with a
+    // plain-text MentionText component; web linkifies @tokens on render).
+    // Mention/company-mention id arrays are still sent alongside.
+    const success = await handleRepost(
+      quoteContent.plainText.trim(),
+      quoteContent.mentions || [],
+      quoteContent.companyMentions || []
+    );
+    setIsQuoteSubmitting(false);
+    if (success) {
+      setQuoteContent(createEmptyCommentContent());
+      setQuoteEditorKey((key) => key + 1);
+      setShowQuoteModal(false);
+    }
+  };
+
+  // Reset the quote editor whenever the modal closes (mirrors CommentSection)
+  useEffect(() => {
+    if (!showQuoteModal) {
+      setQuoteContent(createEmptyCommentContent());
+      setQuoteEditorKey((key) => key + 1);
+    }
+  }, [showQuoteModal]);
+
+  // Plain reposts share the PARENT post's page; everything else shares itself
   const shareUrlString = window?.location?.hostname?.includes("localhost")
-    ? `http://${window.location.hostname}:3000${webRoutes.singlePost.replace(":id", postItem.id)}`
-    : `https://${window.location.hostname}${webRoutes.singlePost.replace(":id", postItem.id)}`;
+    ? `http://${window.location.hostname}:3000${webRoutes.singlePost.replace(":id", activePost?.id)}`
+    : `https://${window.location.hostname}${webRoutes.singlePost.replace(":id", activePost?.id)}`;
   const shareData = {
     title: postTitle,
-    text: postItem.body,
+    text: activePost?.body,
     // url: shareUrlString,
   };
 
@@ -302,12 +670,43 @@ export const DiscoverPostItem = ({
   const isPostOwner = postItem?.user?.id === currentUser?.id || 
     (postItem?.company?.id && currentUser?.companies?.includes(postItem.company.id));
   const postMentionUsers = useMemo(
-    () => [postItem?.user, ...(mentionUsers || [])].filter(Boolean),
-    [mentionUsers, postItem?.user]
+    () =>
+      [postItem?.user, parentPost?.user, ...(mentionUsers || [])].filter(
+        Boolean
+      ),
+    [mentionUsers, postItem?.user, parentPost?.user]
   );
   const postMentionCompanies = useMemo(
-    () => [postItem?.company, ...(mentionCompanies || [])].filter(Boolean),
-    [mentionCompanies, postItem?.company]
+    () =>
+      [
+        postItem?.company,
+        parentPost?.company,
+        ...(mentionCompanies || []),
+      ].filter(Boolean),
+    [mentionCompanies, postItem?.company, parentPost?.company]
+  );
+
+  // Live mention directories for the quote-repost editor (mirrors CommentSection)
+  const { users: quoteLiveMentionUsers = [] } = useUserSearch({
+    enabled: showQuoteModal,
+  });
+  const { companies: quoteLiveMentionCompanies = [] } = useCompanySearch({
+    enabled: showQuoteModal,
+  });
+  const quoteMentionUsers = useMemo(
+    () =>
+      [...(postMentionUsers || []), ...(quoteLiveMentionUsers || [])].filter(
+        Boolean
+      ),
+    [postMentionUsers, quoteLiveMentionUsers]
+  );
+  const quoteMentionCompanies = useMemo(
+    () =>
+      [
+        ...(postMentionCompanies || []),
+        ...(quoteLiveMentionCompanies || []),
+      ].filter(Boolean),
+    [postMentionCompanies, quoteLiveMentionCompanies]
   );
 
   return (
@@ -318,36 +717,111 @@ export const DiscoverPostItem = ({
         "w-full max-w-none py-4 px-4 xs:px-6 bg-white rounded-md transition-colors duration-300"
       )}
     >
-      {isSinglePost && <SEO title={postTitle} description={postItem?.body} />}
+      {isSinglePost && <SEO title={postTitle} description={activePost?.body} />}
+
+      {/* Plain repost: compact "{reposter} reposted" attribution header.
+          The kebab offers the reposter an "Undo repost" affordance. */}
+      {isPlainRepost && (
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 min-w-0">
+            <RetweetOutlined className="!text-[12px] shrink-0" />
+            <Link
+              to={reposterHref}
+              className="font-medium hover:underline truncate"
+            >
+              {isSelfRepost ? "You" : reposterName || "Someone"}
+            </Link>
+            <span className="shrink-0">reposted</span>
+            {postItem?.date_created && (
+              <span className="shrink-0">
+                • <TimeAgo time={postItem.date_created} />
+              </span>
+            )}
+          </div>
+          {isPostOwner && (
+            <MoreOptions className="shrink-0 !max-w-[130px]">
+              <ButtonWithTooltipIcon
+                text="Undo repost"
+                IconName={RetweetOutlined}
+                onClick={handleUndoOwnRepost}
+                disabled={repostLoading}
+                className={clsx(
+                  "!text-red-700 hover:!text-red-500",
+                  repostLoading && "opacity-50 cursor-not-allowed"
+                )}
+              />
+            </MoreOptions>
+          )}
+        </div>
+      )}
+
+      {isPlainRepost && isParentDeleted ? (
+        // The original post behind this plain repost was deleted
+        <DeletedParentNotice />
+      ) : (
+        <>
+      {/* Plain reposts render the PARENT post's content as the card;
+          clicking it (outside links/buttons) opens the parent's post page */}
+      <div
+        className={clsx(isPlainRepost && !isSinglePost && "cursor-pointer")}
+        onClick={
+          isPlainRepost && !isSinglePost ? goToPost(parentPost?.id) : undefined
+        }
+      >
       <header className="flex justify-between mb-2 gap-5 xs:gap-6 w-full overflow-hidden">
         <section className="flex xs:items-center gap-2">
           <Avatar
-            name={postItem?.company?.company_name || postItem?.user?.first_name}
+            name={
+              activePost?.company?.company_name || activePost?.user?.first_name
+            }
             size="sm"
-            src={postItem?.company?.logo || postItem?.user?.avatar || "images/default-company-logo.png"}
+            src={
+              activePost?.company?.logo ||
+              activePost?.user?.avatar ||
+              "images/default-company-logo.png"
+            }
             className={avatarStyle}
           />
 
           <section className="flex max-xs:flex-col xs:items-center gap-0.5 xs:gap-1">
             <CompanyName
-              name={postItem?.company?.company_name || postItem?.user?.full_name}
-              verified={postItem?.company?.verify}
-              company={!!postItem?.company?.slug}
-              userId={postItem?.user?.id}
-              slug={postItem?.company?.slug}
+              name={
+                activePost?.company?.company_name ||
+                activePost?.user?.full_name ||
+                `${activePost?.user?.first_name || ""} ${
+                  activePost?.user?.last_name || ""
+                }`.trim()
+              }
+              verified={
+                activePost?.company?.verified ??
+                activePost?.company?.verify ??
+                activePost?.user?.verified
+              }
+              company={!!activePost?.company?.slug}
+              userId={activePost?.user?.id}
+              slug={activePost?.company?.slug}
             />
             <small className="text-gray-400 lowercase shrink-0">
-              <Link to={`/co/${postItem?.user?.id}`}>
-                @{postItem.user.first_name}{" "}
-              </Link>
-              • <TimeAgo time={postItem.date_created} />
+              {activePost?.user && (
+                <Link to={`/co/${activePost?.user?.id}`}>
+                  @{activePost?.user?.first_name}{" "}
+                </Link>
+              )}
+              • <TimeAgo time={activePost?.date_created} />
             </small>
           </section>
         </section>
 
-        {isPostOwner && (
-          <MoreOptions className="shrink-0 !max-w-[120px]">
+        {isPostOwner && !isPlainRepost && (
+          <MoreOptions className="shrink-0 !max-w-[145px]">
             <div className="flex flex-col gap-2">
+              <ButtonWithTooltipIcon
+                text="View insights"
+                IconName={BarChart3}
+                onClick={() =>
+                  navigate(webRoutes.postInsights.replace(":id", postItem?.id))
+                }
+              />
               <ButtonWithTooltipIcon
                 text="Edit post"
                 IconName={Pencil1Icon}
@@ -450,15 +924,47 @@ export const DiscoverPostItem = ({
         </ReusableModal>
       </header>
 
-      <FormatPostText
-        text={postItem?.body}
-        postId={postItem?.id}
-        isSinglePost={isSinglePost}
-        mentionUsers={postMentionUsers}
-        mentionCompanies={postMentionCompanies}
-      />
+      {isQuoteRepost ? (
+        <>
+          {/* Quote commentary (this post's own body): plain text with
+              @tokens, linkified like comments. Clicking it (outside links)
+              opens THIS post's page. */}
+          <div
+            className={clsx(!isSinglePost && "cursor-pointer")}
+            onClick={!isSinglePost ? goToPost(postItem?.id) : undefined}
+          >
+            <MarkdownComponent
+              markdownContent={quoteText}
+              className="text-sm !text-gray-800"
+              mentionUsers={postMentionUsers}
+              mentionCompanies={postMentionCompanies}
+            />
+          </div>
 
-      {hasImage && <PostImageCollage images={postItem.images} />}
+          {/* The original post embedded as a bordered child card (or the
+              deleted-original notice when the parent no longer exists) */}
+          <ParentPostEmbed
+            parentPost={parentPost}
+            mentionUsers={mentionUsers}
+            mentionCompanies={mentionCompanies}
+          />
+        </>
+      ) : (
+        <>
+          <FormatPostText
+            text={activePost?.body}
+            postId={activePost?.id}
+            isSinglePost={isSinglePost}
+            mentionUsers={postMentionUsers}
+            mentionCompanies={postMentionCompanies}
+          />
+
+          {activePost?.images?.length > 0 && (
+            <PostImageCollage images={activePost.images} />
+          )}
+        </>
+      )}
+      </div>
 
       <SocialShareModal
         isOpen={isSharing}
@@ -468,17 +974,9 @@ export const DiscoverPostItem = ({
         // footerContent={<></>}
       ></SocialShareModal>
 
+      {/* Action bar: for plain reposts every action/count below targets the
+          PARENT post (activePost); otherwise this post itself. */}
       <div className="flex items-center gap-2 justify-between mt-4">
-        {/* <ConJoinedImages
-          size={30}
-          array={recentLikes?.map((post) => ({
-            name: `${post?.user?.first_name} ${post?.user?.last_name}`,
-            src: post?.user?.avatar,
-            href: `/co/${post?.user?.id}`,
-          }))}
-          sizeVariant="sm"
-        /> */}
-
         <div className="flex items-center gap-3">
           <ButtonWithTooltipIcon
             IconName={MessageOutlined}
@@ -495,6 +993,90 @@ export const DiscoverPostItem = ({
             disabled={disabled}
             text={formatNumber(likes)}
           />
+
+          <div className="flex items-center gap-1">
+            <Popover
+              isOpen={isRepostMenuOpen}
+              onOpen={onRepostMenuOpen}
+              onClose={onRepostMenuClose}
+              placement="top"
+            >
+              <PopoverTrigger>
+                <button
+                  type="button"
+                  disabled={repostLoading}
+                  title={reposted ? "Reposted" : "Repost"}
+                  className={clsx(
+                    "flex items-center text-sm gap-1 bg-transparent active:scale-95 transition-all duration-300 disabled:cursor-not-allowed",
+                    reposted
+                      ? "text-green-600 hover:text-green-500"
+                      : "text-gray-600 hover:text-custom_blue"
+                  )}
+                >
+                  <RetweetOutlined className="xs:!text-[14px] !text-[20px]" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="!p-2 !w-fit">
+                <PopoverArrow />
+                <div className="flex flex-col gap-2">
+                  {reposted ? (
+                    <button
+                      onClick={handleUnrepost}
+                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-red-500 transition-colors"
+                    >
+                      <RetweetOutlined />
+                      <span>Undo repost</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleRepost()}
+                        className="flex items-center gap-2 text-sm text-gray-700 hover:text-custom_blue transition-colors"
+                      >
+                        <RetweetOutlined />
+                        <span>Repost</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onRepostMenuClose();
+                          setShowQuoteModal(true);
+                        }}
+                        className="flex items-center gap-2 text-sm text-gray-700 hover:text-custom_blue transition-colors"
+                      >
+                        <Pencil1Icon className="w-4 h-4" />
+                        <span>Quote repost</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Repost COUNT: tappable on every card when > 0 — opens the
+                reposters list. The repost/undo menu stays on the icon. */}
+            {reposts > 0 ? (
+              <button
+                type="button"
+                onClick={() => setShowRepostersModal(true)}
+                title="View reposts"
+                className={clsx(
+                  "!text-[.6rem] hover:underline",
+                  reposted ? "text-green-600" : "text-gray-600"
+                )}
+              >
+                {formatNumber(reposts)}
+              </button>
+            ) : (
+              <span
+                className={clsx(
+                  "!text-[.6rem]",
+                  reposted ? "text-green-600" : "text-gray-600"
+                )}
+              >
+                {formatNumber(reposts)}
+              </span>
+            )}
+          </div>
 
           {/* <PDFPreview
             postBody={postItem?.body}
@@ -517,11 +1099,99 @@ export const DiscoverPostItem = ({
         </div>
       </div>
 
+      {/* Single post page: subtle "Reposted by …" attribution line. Tapping
+          it opens the same RepostersModal as the count. */}
+      {isSinglePost && firstReposterName && (
+        <button
+          type="button"
+          onClick={() => setShowRepostersModal(true)}
+          className="mt-2 flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 hover:underline transition-colors"
+        >
+          <RetweetOutlined className="!text-[12px]" />
+          <span className="truncate">
+            Reposted by {firstReposterName}
+            {otherReposterCount > 0 &&
+              ` and ${otherReposterCount} ${
+                otherReposterCount === 1 ? "other" : "others"
+              }`}
+          </span>
+        </button>
+      )}
+
+      {/* Quote repost modal */}
+      <ReusableModal
+        isOpen={showQuoteModal}
+        onClose={() => setShowQuoteModal(false)}
+        title="Quote repost"
+        footerContent={<></>}
+      >
+        <LexicalCommentEditor
+          key={quoteEditorKey}
+          onChange={setQuoteContent}
+          placeholder="Add a comment to your repost..."
+          users={quoteMentionUsers}
+          companies={quoteMentionCompanies}
+        />
+
+        {/* Preview of the post being reposted (the parent for plain reposts) */}
+        <div className="mt-3 border border-gray-200 rounded-lg p-3 bg-gray-50">
+          <div className="flex items-center gap-2 mb-2">
+            <Avatar
+              name={
+                activePost?.company?.company_name ||
+                activePost?.user?.first_name
+              }
+              size="xs"
+              src={activePost?.company?.logo || activePost?.user?.avatar}
+              className={avatarStyle}
+            />
+            <span className="font-semibold text-sm">
+              {activePost?.company?.company_name ||
+                activePost?.user?.full_name ||
+                `${activePost?.user?.first_name || ""} ${
+                  activePost?.user?.last_name || ""
+                }`.trim()}
+            </span>
+            <small className="text-gray-400">
+              • <TimeAgo time={activePost?.date_created} />
+            </small>
+          </div>
+          <p className="text-sm text-gray-700 line-clamp-4 whitespace-pre-wrap">
+            {activePost?.body}
+          </p>
+          {activePost?.images?.length > 0 && (
+            <p className="text-xs text-gray-400 mt-1">
+              {activePost.images.length}{" "}
+              {activePost.images.length === 1 ? "image" : "images"} attached
+            </p>
+          )}
+        </div>
+
+        <Button
+          className="!bg-gold block mt-4 float-right !text-sm"
+          isLoading={isQuoteSubmitting}
+          disabled={isQuoteSubmitting || !quoteContent.plainText?.trim()}
+          onClick={handleQuoteRepost}
+        >
+          {isQuoteSubmitting ? "Reposting..." : "Repost"}
+        </Button>
+      </ReusableModal>
+
+      {/* Reposters list modal (post detail page) - lists who reposted the
+          post being interacted with (the parent for plain reposts) */}
+      {showRepostersModal && (
+        <RepostersModal
+          postId={activePost?.id}
+          isOpen={showRepostersModal}
+          onClose={() => setShowRepostersModal(false)}
+        />
+      )}
+
       <CommentSection
         showCommentSection={showCommentSection}
         setShowCommentSection={setShowCommentSection}
         commentsData={comments}
-        postItem={postItem}
+        postItem={activePost}
         mentionUsers={postMentionUsers}
         mentionCompanies={postMentionCompanies}
         refetchComments={refetchComments}
@@ -531,6 +1201,8 @@ export const DiscoverPostItem = ({
         moreCommentsReady={moreCommentsReady}
         showAllComments={showAllComments}
       />
+        </>
+      )}
     </motion.article>
   );
 };
@@ -539,13 +1211,6 @@ export const DiscoverPostItem = ({
  * Comment section with instant display - uses preview_comments from post data
  * Background prefetching loads more comments while user views preview
  */
-const createEmptyCommentContent = () => ({
-  text: "",
-  plainText: "",
-  mentions: [],
-  companyMentions: [],
-});
-
 const CommentSection = ({
   showCommentSection,
   setShowCommentSection,
@@ -688,6 +1353,41 @@ const CommentSection = ({
     }
   }, [refetchComments]);
 
+  const handleEditComment = useCallback(async (commentId, isReply, content) => {
+    try {
+      const result = isReply
+        ? await updateReply(commentId, content)
+        : await updateComment(commentId, content);
+      // makeApiRequest returns null on failure (and toasts the API error itself)
+      if (!result) return false;
+      refetchComments();
+      toast.success(isReply ? "Reply updated" : "Comment updated");
+      return true;
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      toast.error(isReply ? "Failed to update reply" : "Failed to update comment");
+      throw error;
+    }
+  }, [refetchComments]);
+
+  const handleDeleteComment = useCallback(async (commentId, isReply) => {
+    try {
+      const result = isReply
+        ? await deleteReply(commentId)
+        : await deleteComment(commentId);
+      // DELETE returns "" on 204 success and null on failure
+      if (result === null) return;
+      // Drop any cached comment pages for this post so deleted items disappear
+      queryClient.invalidateQueries({ queryKey: ["comments", postItem.id] });
+      refetchComments();
+      toast.success(isReply ? "Reply deleted" : "Comment deleted");
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      toast.error(isReply ? "Failed to delete reply" : "Failed to delete comment");
+      throw error;
+    }
+  }, [postItem.id, queryClient, refetchComments]);
+
   useEffect(() => {
     if (!showCommentSection) {
       setComment(createEmptyCommentContent());
@@ -752,6 +1452,8 @@ const CommentSection = ({
             onReply={handleReplyToComment}
             onLike={handleLikeComment}
             onLikeReply={handleLikeReply}
+            onEdit={handleEditComment}
+            onDelete={handleDeleteComment}
             users={mentionUsers}
             companies={mentionCompanies}
             commentAsCompanies={commentAsCompanies}
@@ -793,6 +1495,97 @@ const CommentSection = ({
         </>
       )}
     </section>
+  );
+};
+
+/**
+ * Modal listing everyone who reposted a post (with quote text when present).
+ * Shown when clicking the repost count on the post detail page.
+ */
+const RepostersModal = ({ postId, isOpen, onClose }) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["reposts", postId],
+    queryFn: () => getPostReposts(postId),
+    enabled: isOpen && !!postId,
+  });
+  // Mention directories so quote text linkifies @mentions like comments do
+  const { users: mentionUsers = [] } = useUserSearch({ enabled: isOpen });
+  const { companies: mentionCompanies = [] } = useCompanySearch({
+    enabled: isOpen,
+  });
+
+  const reposters = data?.results || (Array.isArray(data) ? data : []);
+
+  return (
+    <ReusableModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Reposts"
+      footerContent={<></>}
+    >
+      {isLoading ? (
+        <div className="flex justify-center py-6">
+          <Spinner size="md" />
+        </div>
+      ) : reposters.length === 0 ? (
+        <LightParagraph>No reposts yet.</LightParagraph>
+      ) : (
+        <div className="space-y-4">
+          {reposters.map((repost) => {
+            const isCompany = !!repost.company;
+            const name = isCompany
+              ? repost.company?.company_name || repost.company?.name
+              : repost.user?.full_name ||
+                `${repost.user?.first_name || ""} ${
+                  repost.user?.last_name || ""
+                }`.trim();
+            const avatarSrc = isCompany
+              ? repost.company?.logo
+              : repost.user?.avatar;
+            const href = isCompany
+              ? `/${repost.company?.slug || repost.company?.company_name || ""}`
+              : `/co/${repost.user?.id}`;
+
+            return (
+              <div key={repost.id} className="flex gap-2">
+                <Link to={href} onClick={onClose}>
+                  <Avatar
+                    name={name}
+                    size="sm"
+                    src={avatarSrc}
+                    className={avatarStyle}
+                  />
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={href}
+                      onClick={onClose}
+                      className="font-semibold text-sm hover:underline truncate"
+                    >
+                      {name || "Unknown"}
+                    </Link>
+                    <small className="text-gray-400 shrink-0">
+                      <TimeAgo time={repost.created_at || repost.date_created} />
+                    </small>
+                  </div>
+                  {/* Quote text: legacy rows expose `comment`, the new
+                      child-post model exposes the quote as `body` */}
+                  {stripHtmlTags(repost.comment ?? repost.body) && (
+                    <MarkdownComponent
+                      markdownContent={stripHtmlTags(repost.comment ?? repost.body)}
+                      className="text-sm !text-gray-600 mt-0.5"
+                      mentionUsers={mentionUsers}
+                      mentionCompanies={mentionCompanies}
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </ReusableModal>
   );
 };
 

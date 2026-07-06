@@ -1,4 +1,27 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-Sitemap: https://connectize-eight.vercel.app/sitemap.xml
+
+# Private / authenticated areas — keep out of the index
+Disallow: /login
+Disallow: /signup
+Disallow: /reset-password
+Disallow: /confirm-reset-password
+Disallow: /verify-account
+Disallow: /reactivate-account
+Disallow: /messages
+Disallow: /notifications
+Disallow: /co/notifications
+Disallow: /co/settings
+Disallow: /co/bookmarks
+Disallow: /bookmarks
+Disallow: /co/blocked-users
+Disallow: /co/blocked-companies
+Disallow: /update-profile
+Disallow: /post/create
+Disallow: /subscriptions
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /search
+
+Sitemap: https://connectize.co/sitemap.xml

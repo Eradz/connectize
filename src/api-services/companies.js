@@ -68,7 +68,7 @@ export const getSingleCompany = async (companyName) => {
   return singleCompany;
 };
 
-const normalizeWebsite = (website) => {
+export const normalizeWebsite = (website) => {
   const trimmedWebsite = String(website || "").trim();
 
   if (!trimmedWebsite) return "";
@@ -142,7 +142,7 @@ export const createCompany = async (data, resetForm) => {
       office_address: data.company_address,
       country: data.country,
       state: data.city,
-      city: data.city,
+      city: "",
       website,
       registration_number: data.company_registration_no,
       registration_date,
@@ -335,6 +335,74 @@ export const getOrCreateCompanyDocumentTypes = async (type, name) => {
     method: "POST",
     data: { name: safeName, type: safeName },
   });
+};
+
+/**
+ * People associated with a COMPANY: active representatives first (labeled with
+ * their role), then user followers of the company, deduped by user id.
+ * Companies are followed via FollowingRelationships.company_following, so the
+ * owner's personal user<->user connections are NOT what should be shown here.
+ */
+export const getAssociatedPeopleForCompany = async ({ slug, companyId }) => {
+  if (!slug && !companyId) return [];
+
+  const [reps, followers] = await Promise.all([
+    // Active representatives (requires auth; defaults to active-only for non-owners)
+    makeApiRequest({
+      url: `api/representatives/`,
+      method: "GET",
+      params: { company: companyId ?? slug, status: true },
+    })
+      .then((res) => (Array.isArray(res) ? res : res?.results) || [])
+      .catch(() => []),
+    // User followers of the company (FollowerRelationshipSerializer, paginated)
+    makeApiRequest({
+      url: `api/companies/${slug ?? companyId}/followers/`,
+      method: "GET",
+    })
+      .then((res) => (Array.isArray(res) ? res : res?.results) || [])
+      .catch(() => []),
+  ]);
+
+  const people = [];
+  const seen = new Set();
+
+  for (const rep of reps) {
+    const repUser = rep?.user;
+    const id = repUser?.id;
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    people.push({
+      id,
+      first_name: repUser.first_name,
+      last_name: repUser.last_name,
+      full_name: repUser.full_name,
+      display_name: repUser.display_name,
+      username: repUser.username,
+      avatar: repUser.avatar,
+      verified: repUser.verified,
+      role: rep.role || rep.category?.type || "Representative",
+    });
+  }
+
+  for (const follower of followers) {
+    const id = follower?.user_id;
+    // Only user followers count as "people"; skip company followers and dupes
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    people.push({
+      id,
+      first_name: follower.first_name,
+      last_name: follower.last_name,
+      full_name: follower.full_name,
+      display_name: follower.display_name,
+      username: follower.username,
+      avatar: follower.avatar,
+      connection_type: "follower",
+    });
+  }
+
+  return people.slice(0, 10);
 };
 
 export const connectWithCompany = async (slug, hasConnected) => {

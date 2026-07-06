@@ -22,40 +22,17 @@ export const getPosts = async (page = 1, pageSize = 10) => {
 };
 
 /**
- * Get Following feed - posts from users/companies the user follows
- * @param {number} page - Page number
- * @param {number} pageSize - Number of posts per page  
- * @param {Array} followingIds - Array of following objects {type, id}
+ * Get posts for a company profile - authored + reposted by the company (server-side filter)
  */
-export const getFollowingPosts = async (page = 1, pageSize = 10, followingIds = []) => {
-  // Get all posts first
+export const getCompanyPosts = async (companyId, page = 1, pageSize = 10) => {
   const response = await makeApiRequest({
-    url: `api/posts/?page=${page}&page_size=${pageSize}`,
+    url: `api/posts/?company=${companyId}&page=${page}&page_size=${pageSize}`,
     method: "GET",
   });
 
-  // Filter posts to only include those from followed users/companies
-  const followedUserIds = followingIds
-    .filter(f => f.type === 'user')
-    .map(f => f.id);
-  const followedCompanyIds = followingIds
-    .filter(f => f.type === 'company')
-    .map(f => f.id);
-
-  const filteredPosts = response.results
-    .filter((post) => post.status.toUpperCase() === "PUBLISHED")
-    .filter((post) => {
-      // Check if the post is from a followed user
-      const isFromFollowedUser = post.user?.id && followedUserIds.includes(post.user.id);
-      // Check if the post is from a followed company  
-      const isFromFollowedCompany = post.company?.id && followedCompanyIds.includes(post.company.id);
-      
-      return isFromFollowedUser || isFromFollowedCompany;
-    });
-
   return {
-    posts: filteredPosts,
-    count: filteredPosts.length,
+    posts: response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED"),
+    count: response.count,
     next: response.next,
     previous: response.previous,
     hasMore: !!response.next,
@@ -64,33 +41,55 @@ export const getFollowingPosts = async (page = 1, pageSize = 10, followingIds = 
 };
 
 /**
- * Get Trending posts - posts sorted by engagement (likes + comments)
+ * Get Following feed - posts authored or reposted by users/companies the user
+ * follows. Fully server-side: the backend's `?feed=following` handles the
+ * follow filtering, repost surfacing (reposts are first-class child posts
+ * with `is_repost` + `parent_post`) and activity-bumped ordering, so no
+ * client-side filtering is needed.
  * @param {number} page - Page number
  * @param {number} pageSize - Number of posts per page
  */
-export const getTrendingPosts = async (page = 1, pageSize = 10) => {
-  // Try to use ordering parameter if backend supports it
-  // Otherwise fetch and sort client-side
+export const getFollowingPosts = async (page = 1, pageSize = 10) => {
   const response = await makeApiRequest({
-    url: `api/posts/?page=${page}&page_size=${pageSize}&ordering=-likes_count,-comments_count`,
+    url: `api/posts/?feed=following&page=${page}&page_size=${pageSize}`,
     method: "GET",
   });
 
-  let posts = response.results.filter((post) => post.status.toUpperCase() === "PUBLISHED");
-  
-  // Sort by engagement (likes + comments) client-side as fallback
-  posts = posts.sort((a, b) => {
-    const aEngagement = (a.numberOfLikes || 0) + (a.numberOfComments || 0);
-    const bEngagement = (b.numberOfLikes || 0) + (b.numberOfComments || 0);
-    return bEngagement - aEngagement;
+  return {
+    posts: (response?.results || []).filter(
+      (post) => post.status?.toUpperCase() === "PUBLISHED"
+    ),
+    count: response?.count ?? 0,
+    next: response?.next ?? null,
+    previous: response?.previous ?? null,
+    hasMore: !!response?.next,
+    nextPage: page + 1
+  };
+};
+
+/**
+ * Get Trending feed - engagement-ranked posts over a recent time window.
+ * Fully server-side: the backend's `?feed=trending` handles the engagement
+ * scoring and ordering (likes + comments + reposts), scoped to the last
+ * `days` days, so no client-side sorting is needed.
+ * @param {number} page - Page number
+ * @param {number} pageSize - Number of posts per page
+ * @param {number} days - Trending window in days (backend default: 7)
+ */
+export const getTrendingPosts = async (page = 1, pageSize = 10, days = 7) => {
+  const response = await makeApiRequest({
+    url: `api/posts/?feed=trending&days=${days}&page=${page}&page_size=${pageSize}`,
+    method: "GET",
   });
 
   return {
-    posts,
-    count: response.count,
-    next: response.next,
-    previous: response.previous,
-    hasMore: !!response.next,
+    posts: (response?.results || []).filter(
+      (post) => post.status?.toUpperCase() === "PUBLISHED"
+    ),
+    count: response?.count ?? 0,
+    next: response?.next ?? null,
+    previous: response?.previous ?? null,
+    hasMore: !!response?.next,
     nextPage: page + 1
   };
 };
@@ -102,6 +101,34 @@ export const getPostById = async (id) => {
   });
 
   return post;
+};
+
+export const getPostInsights = async (id, period = "30d") => {
+  return await makeApiRequest({
+    url: `api/posts/${id}/insights/?period=${encodeURIComponent(period)}`,
+    method: "GET",
+  });
+};
+
+export const getPostInsightActors = async (
+  id,
+  { type = "all", period = "30d", page = 1, pageSize = 20 } = {}
+) => {
+  const response = await makeApiRequest({
+    url:
+      `api/posts/${id}/insights/actors/?type=${encodeURIComponent(type)}` +
+      `&period=${encodeURIComponent(period)}&page=${page}&page_size=${pageSize}`,
+    method: "GET",
+  });
+
+  return {
+    actors: response?.results || [],
+    count: response?.count || 0,
+    next: response?.next || null,
+    previous: response?.previous || null,
+    hasMore: !!response?.next,
+    nextPage: page + 1,
+  };
 };
 
 export const getPostUploadStatus = async (uploadId) => {
@@ -149,18 +176,50 @@ export const deletePost = async (id) => {
 };
 
 export const likePost = async (id, data, hasLikedPost) => {
-  if (hasLikedPost) {
-    await makeApiRequest({
-      url: `api/posts/${id}/unlike/`,
-      method: "POST",
-    });
-
-    return;
-  }
-  await makeApiRequest({
-    url: `api/posts/${id}/like/`,
+  // makeApiRequest resolves with the response data on any 2xx (including the
+  // idempotent "already liked/unliked" 200) and returns null on failure, so
+  // surface the result to callers instead of swallowing it.
+  return await makeApiRequest({
+    url: `api/posts/${id}/${hasLikedPost ? "unlike" : "like"}/`,
     method: "POST",
   });
+};
+
+export const repostPost = async (
+  id,
+  { comment = "", companyId = null, mentions = [], companyMentions = [] } = {}
+) => {
+  const result = await makeApiRequest({
+    url: `api/posts/${id}/repost/`,
+    method: "POST",
+    data: {
+      comment,
+      mentions, // User mentions (quote reposts only)
+      company_mentions: companyMentions, // Company mentions (quote reposts only)
+      ...(companyId ? { company_id: companyId } : {}),
+    },
+  });
+
+  return result;
+};
+
+export const unrepostPost = async (id, companyId = null) => {
+  const result = await makeApiRequest({
+    url: `api/posts/${id}/unrepost/`,
+    method: "POST",
+    data: companyId ? { company_id: companyId } : {},
+  });
+
+  return result;
+};
+
+export const getPostReposts = async (id, page = 1) => {
+  const result = await makeApiRequest({
+    url: `api/posts/${id}/reposts/?page=${page}`,
+    method: "GET",
+  });
+
+  return result;
 };
 
 export const commentOnPost = async (id, comment, mentions = [], companyMentions = [], commentAsCompanyId = null) => {
@@ -189,6 +248,44 @@ export const replyToComment = async (commentId, content, mentions = [], companyM
       parent_reply_id: parentReplyId,  // NEW: For nested replies
       company_id: replyAsCompanyId,
     },
+  });
+
+  return result;
+};
+
+export const updateComment = async (commentId, content) => {
+  const result = await makeApiRequest({
+    url: `api/comments/${commentId}/`,
+    method: "PATCH",
+    data: { content },
+  });
+
+  return result;
+};
+
+export const deleteComment = async (commentId) => {
+  const result = await makeApiRequest({
+    url: `api/comments/${commentId}/`,
+    method: "DELETE",
+  });
+
+  return result;
+};
+
+export const updateReply = async (replyId, content) => {
+  const result = await makeApiRequest({
+    url: `api/replies/${replyId}/`,
+    method: "PATCH",
+    data: { content },
+  });
+
+  return result;
+};
+
+export const deleteReply = async (replyId) => {
+  const result = await makeApiRequest({
+    url: `api/replies/${replyId}/`,
+    method: "DELETE",
   });
 
   return result;

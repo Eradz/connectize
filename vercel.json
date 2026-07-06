@@ -78,6 +78,10 @@
       "destination": "/api/render-meta?path=/marketplace/listing/$1"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "https://about.connectize.co/sitemap.xml"
+    },
+    {
       "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }

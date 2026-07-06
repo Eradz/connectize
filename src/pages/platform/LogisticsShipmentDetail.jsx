@@ -18,7 +18,8 @@ import {
   CheckCircle,
   Plane,
   Ship,
-  Info
+  Info,
+  Trash2
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
@@ -26,6 +27,8 @@ import { toast } from 'sonner';
 import ProviderComparisonSystem from '../../components/logistics/ProviderComparisonSystem';
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
+import MoreOptions from '../../components/MoreOptions';
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 const LogisticsShipmentDetail = () => {
   const { id } = useParams();
@@ -36,6 +39,42 @@ const LogisticsShipmentDetail = () => {
   const [loading, setLoading] = useState(true);
   const [shipment, setShipment] = useState(null);
   const [trackingHistory, setTrackingHistory] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Creator check: the shipment payload exposes the requester via
+  // request_details.requested_by (or requested_by when the page fell back
+  // to loading the underlying request).
+  const shipmentOwnerId =
+    shipment?.request_details?.requested_by ??
+    shipment?.request?.requested_by ??
+    shipment?.requested_by ??
+    null;
+  const isOwner =
+    userId != null &&
+    shipmentOwnerId != null &&
+    String(shipmentOwnerId) === String(userId);
+
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete shipment',
+      message:
+        'Are you sure you want to delete this shipment? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await logisticsAPI.deleteShipment(id);
+      if (result === null) return; // makeApiRequest returns null on failure and toasts the error
+      toast.success('Shipment deleted');
+      navigate(webRoutes.logisticsShipments);
+    } catch (e) {
+      console.error('Failed to delete shipment:', e);
+      toast.error('Failed to delete shipment');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   useEffect(() => {
     loadShipmentDetail();
@@ -638,7 +677,7 @@ const LogisticsShipmentDetail = () => {
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </button>
-              <button 
+              <button
                 onClick={handleDownload}
                 disabled={!shipment?.id}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
@@ -646,6 +685,29 @@ const LogisticsShipmentDetail = () => {
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </button>
+              {isOwner && (
+                <MoreOptions className="!w-fit">
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() =>
+                        navigate(webRoutes.logisticsShipmentEdit.replace(':id', id))
+                      }
+                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </MoreOptions>
+              )}
             </div>
           </div>
         </div>

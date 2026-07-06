@@ -426,7 +426,7 @@ const CompanyProfile = React.memo(() => {
               )}
             {activeTab === "Activities" && (<section className="space-y-6 w-full shrink-0">
                   <CreatePost />
-                  <DiscoverPosts companyName={company?.company_name} />
+                  <DiscoverPosts companyName={company?.company_name} companyId={company?.id} />
                 </section>)}
             {activeTab === "Services" && (
               <div className="">
@@ -614,7 +614,16 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
               <p className="text-xs text-gray-500 mb-1">Location :</p>
               <p className="text-sm text-gray-800">
                 {company?.office_address || "2972 Westheimer Rd."}<br/>
-                {company?.city || "Santa Ana"}, {company?.state || "Illinois"} {company?.country || "85486"}
+                {[company?.city, company?.state, company?.country]
+                  .filter(Boolean)
+                  .filter(
+                    (part, index, all) =>
+                      all.findIndex(
+                        (other) =>
+                          other.trim().toLowerCase() === part.trim().toLowerCase()
+                      ) === index
+                  )
+                  .join(", ") || "Santa Ana, Illinois"}
               </p>
             </div>
           </div>
@@ -662,6 +671,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
     associated
     thisUser={company.user}
     companyId={company.id}
+    companySlug={company.slug}
     viewMoreUrl={`/co/representatives/?company=${company?.id}---${company?.slug}`}
   />
 </ProfileSection>

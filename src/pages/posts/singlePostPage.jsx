@@ -9,8 +9,9 @@ export const meta = () =>
 import { Button } from "@chakra-ui/react";
 import { ArrowBackIos } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { getPostById } from "../../api-services/posts";
+import { webRoutes } from "../../lib/webRoutes";
 import {
   DiscoverPostItem,
   DiscoverPostSkeleton,
@@ -34,6 +35,21 @@ function SinglePostPage() {
 
   if (isLoading) return <DiscoverPostSkeleton />;
   if (isError || !postItem) return <LightParagraph>No post found</LightParagraph>;
+
+  // A plain repost (is_repost with an empty body) is just a pointer at its
+  // parent - its detail page is the PARENT's post page. Quote reposts render
+  // as their own post (with the parent embedded). If the parent was deleted,
+  // fall through and render the "no longer available" notice.
+  const isPlainRepost =
+    !!postItem?.is_repost && !String(postItem?.body || "").trim();
+  if (isPlainRepost && postItem?.parent_post?.id) {
+    return (
+      <Navigate
+        to={webRoutes.singlePost.replace(":id", postItem.parent_post.id)}
+        replace
+      />
+    );
+  }
 
   return (
     <section className="space-y-4">

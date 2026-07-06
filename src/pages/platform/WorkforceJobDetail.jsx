@@ -12,7 +12,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { toast } from "sonner";
 import { workforceJobService } from "../../api-services/oilgas";
-import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar, Eye, ClockFading } from "lucide-react";
+import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar, Eye, ClockFading, Edit, Trash2 } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
 import workforce, { workforceAPI } from "../../api-services/workforce";
@@ -21,6 +21,8 @@ import { JobCard } from "../../components/workforce/JobCard";
 import BackArrowButton from "../../components/BackArrowButton";
 import DownloadButton from "../../components/DownloadButton";
 import { useAuth } from "../../context/userContext";
+import MoreOptions from "../../components/MoreOptions";
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 export default function WorkforceJobDetail() {
   const { id } = useParams();
@@ -131,6 +133,28 @@ export default function WorkforceJobDetail() {
 
   const isJobPoster = user?.id === job?.posted_by || user?.id === job?.created_by;
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete job',
+      message: 'Are you sure you want to delete this job? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await workforceJobService.delete(job.id);
+      if (result === null) return; // makeApiRequest returns null on failure and already toasts the API error
+      toast.success('Job deleted');
+      navigate(webRoutes.workforceJobs);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete job');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <div className='flex py-6'>
@@ -148,6 +172,29 @@ export default function WorkforceJobDetail() {
               Manage jobs you’ve posted and track application
             </p>
         </div>
+        {isJobPoster && (
+          <div className="ml-auto">
+            <MoreOptions className="!w-fit">
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => navigate(webRoutes.workforceJobUpdate.replace(":id", job?.id))}
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                </button>
+              </div>
+            </MoreOptions>
+          </div>
+        )}
       </div>
 
       <div className="bg-white p-3">

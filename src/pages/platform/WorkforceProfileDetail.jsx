@@ -8,24 +8,53 @@ export const meta = () =>
   });
 
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import { webRoutes } from '../../lib/webRoutes';
 import { workforceAPI } from '../../api-services/workforce';
-import { 
-  MapPin, Briefcase, DollarSign, ArrowLeft, User, Edit, Calendar, 
-  Globe, Phone, Mail, ExternalLink, Star, Award, TrendingUp, 
+import { workforceProfileService } from '../../api-services/oilgas';
+import {
+  MapPin, Briefcase, DollarSign, ArrowLeft, User, Edit, Calendar,
+  Globe, Phone, Mail, ExternalLink, Star, Award, TrendingUp,
   CheckCircle, Clock, Users, Building, Plane, Car, Heart,
   Target, Zap, Shield, Gauge, Trophy, BookOpen, MessageCircle,
-  Link as LinkIcon, Camera, MapPin as LocationIcon
+  Link as LinkIcon, Camera, MapPin as LocationIcon, Trash2
 } from 'lucide-react';
 import { useAuth } from '../../context/userContext';
+import MoreOptions from '../../components/MoreOptions';
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 const WorkforceProfileDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const isOwner = Boolean(user && profile && String(profile.user?.id ?? profile.user) === String(user.id));
+
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete profile',
+      message: 'Are you sure you want to delete this profile? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await workforceProfileService.delete(id);
+      if (result === null) return; // makeApiRequest returns null on failure and already toasts the API error
+      toast.success('Profile deleted');
+      navigate(webRoutes.workforceProfiles);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete profile');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Helper functions for formatting
   const formatAvailabilityStatus = (status) => {
@@ -193,9 +222,9 @@ const WorkforceProfileDetail = () => {
               Back to Professionals
             </Link>
             
-            {user && profile && profile.user === user.id && (
+            {isOwner && (
               <div className="flex items-center space-x-3">
-                <Link 
+                <Link
                   to={webRoutes.workforceProfileEdit.replace(':id', id)}
                   className="inline-flex items-center px-4 py-2 rounded-lg bg-gold/80 text-white text-sm font-medium hover:bg-gold transition-all duration-200"
                 >
@@ -206,6 +235,25 @@ const WorkforceProfileDetail = () => {
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Contact
                 </Link>
+                <MoreOptions className="!w-fit">
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => navigate(webRoutes.workforceProfileEdit.replace(':id', id))}
+                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </MoreOptions>
               </div>
             )}
           </div>
@@ -216,10 +264,10 @@ const WorkforceProfileDetail = () => {
         {/* Hero Profile Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
           {/* Cover Photo */}
-          <div className="h-32 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 relative">
+          <div className="h-32 bg-gradient-to-r from-gold via-custom_yellow to-gold relative">
             <div className="absolute inset-0 bg-black/5"></div>
             <div className="absolute bottom-4 right-4">
-              <div className="flex items-center space-x-2 text-white/90 text-sm">
+              <div className="flex items-center space-x-2 text-gray-900/80 text-sm font-medium">
                 <Calendar className="w-4 h-4" />
                 <span>Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
               </div>
@@ -232,10 +280,18 @@ const WorkforceProfileDetail = () => {
               <div className="flex items-start space-x-6">
                 {/* Avatar */}
                 <div className="relative -mt-12">
-                  <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg">
-                    <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center">
-                      <User className="w-12 h-12 text-slate-500" />
-                    </div>
+                  <div className="w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg overflow-hidden">
+                    {profile.user_avatar ? (
+                      <img
+                        src={profile.user_avatar}
+                        alt={profile.user_name || 'Professional'}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center">
+                        <User className="w-12 h-12 text-slate-500" />
+                      </div>
+                    )}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-600 rounded-full border-4 border-white flex items-center justify-center">
                     <CheckCircle className="w-4 h-4 text-white" />

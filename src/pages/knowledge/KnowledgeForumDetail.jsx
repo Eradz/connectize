@@ -22,12 +22,15 @@ import {
   Filter,
   ChevronRight,
   ArrowLeft,
-  User
+  User,
+  Trash2
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { knowledgeForumService } from '../../api-services/oilgas';
 import { searchUsers } from '../../api-services/users';
 import { toast } from 'sonner';
+import MoreOptions from '../../components/MoreOptions';
+import { confirmDialog } from '../../lib/confirm.jsx';
 
 const KnowledgeForumDetail = () => {
   const { slug } = useParams();
@@ -50,8 +53,11 @@ const KnowledgeForumDetail = () => {
   const [memberSearchResults, setMemberSearchResults] = useState([]);
   const [userSearchLoading, setUserSearchLoading] = useState(false);
   const [addingUserId, setAddingUserId] = useState(null);
-  
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const pageSize = 20;
+
+  const isCreator = !!forum?.is_moderator;
 
   useEffect(() => {
     if (slug) {
@@ -189,6 +195,27 @@ const KnowledgeForumDetail = () => {
       return (num / 1000).toFixed(1) + 'K';
     }
     return num.toString();
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await confirmDialog({
+      title: 'Delete forum',
+      message: 'Are you sure you want to delete this forum? This action cannot be undone.',
+      confirmLabel: 'Delete',
+    });
+    if (!confirmed) return;
+    setIsDeleting(true);
+    try {
+      const result = await knowledgeForumService.delete(slug);
+      if (result === null) return;
+      toast.success('Forum deleted');
+      navigate(webRoutes.knowledgeForums);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete forum');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const onTogglePrivacy = async () => {
@@ -358,6 +385,20 @@ const KnowledgeForumDetail = () => {
                     <Plus className="w-4 h-4" />
                     <span>New Topic</span>
                   </Link>
+                )}
+                {isCreator && (
+                  <MoreOptions className="!w-fit">
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex items-center gap-2 text-sm text-red-700 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                      </button>
+                    </div>
+                  </MoreOptions>
                 )}
               </div>
             </div>
