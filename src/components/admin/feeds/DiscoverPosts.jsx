@@ -204,7 +204,11 @@ function DiscoverPosts({
             <div
               key={post.id}
               ref={index === finalArray.length - 1 ? lastPostRef : null}
-              className="w-full"
+              // content-visibility lets the browser skip rendering/layout/paint
+              // for off-screen posts, so scrolling stays fast no matter how many
+              // posts have accumulated. contain-intrinsic-size keeps the
+              // scrollbar stable (auto remembers each post's real height).
+              className="w-full [content-visibility:auto] [contain-intrinsic-size:auto_600px]"
             >
               <DiscoverPostItem
                 hasImage={post?.images?.length > 0}
