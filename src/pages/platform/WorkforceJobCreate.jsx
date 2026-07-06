@@ -128,6 +128,8 @@ const WorkforceJobCreate = () => {
   }, []);
 
  const addSkill = () => {
+
+  console.log(currentSkill.split(',').map(s => s.trim()).filter(s => s));
   const trimmedSkill = currentSkill.trim();
   if (!trimmedSkill) return;
 
@@ -142,7 +144,7 @@ const WorkforceJobCreate = () => {
 
     return {
       ...prev,
-      required_skills_list: [...currentSkills, trimmedSkill]
+      required_skills_list:[ ...new Set([...prev.required_skills_list, ...currentSkill.split(',').map(s => s.trim()).filter(s => s)]) ]
     };
   });
 

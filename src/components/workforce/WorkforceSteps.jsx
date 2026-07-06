@@ -42,7 +42,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       name="title"
                       value={formData.title}
                       onChange={handleTextChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                       placeholder="e.g., Senior Drilling Engineer"
                     />
                   </div>
@@ -53,7 +53,7 @@ import CurrencyPicker from "../CurrencyPicker";
                     </label>
                     {loadingCompanies ? (
                       <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gold mr-2"></div>
                         Loading companies...
                       </div>
                     ) : userCompanies.length === 0 ? (
@@ -65,7 +65,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         name="company_id"
                         value={formData.company_id}
                         onChange={handleTextChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                         required
                       >
                         <option value="">Select Company</option>
@@ -93,7 +93,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         name="location"
                         value={formData.location}
                         onChange={handleTextChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                         placeholder="e.g., Houston, TX or Remote"
                       />
                     </div>
@@ -106,7 +106,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         name="employment_type"
                         value={formData.employment_type}
                         onChange={handleTextChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                       >
                         {employmentTypes.map((type) => (
                           <option key={type.value} value={type.value}>{type.label}</option>
@@ -124,7 +124,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       value={formData.description}
                       onChange={handleTextChange}
                       rows={6}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                       placeholder="Provide a detailed description of the role, responsibilities, and requirements..."
                     />
                   </div>
@@ -137,7 +137,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       name="experience_level"
                       value={formData.experience_level}
                       onChange={handleTextChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                     >
                       {experienceLevels.map((level) => (
                         <option key={level.value} value={level.value}>{level.label}</option>
@@ -164,7 +164,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       name="department"
                       value={formData.department}
                       onChange={handleTextChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                     >
                       <option value="">Select Department</option>
                       {departments.map((dept) => (
@@ -183,13 +183,13 @@ import CurrencyPicker from "../CurrencyPicker";
                         value={currentSkill}
                         onChange={(e) => setCurrentSkill(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Add a required skill (e.g., Drilling Operations)"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
+                        placeholder="Add required skills and separate them with commas (e.g., Drilling Operations, Health & Safety)"
                       />
                       <button
                         type="button"
                         onClick={addSkill}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        className={`px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90 ${currentSkill.length === 0 ? 'hidden' : 'animate-shake'}`}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -198,13 +198,13 @@ import CurrencyPicker from "../CurrencyPicker";
                       {formData.required_skills_list?.map((skill) => (
                         <span
                           key={skill}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                          className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gold/20 text-gold/80"
                         >
                           {skill}
                           <button
                             type="button"
                             onClick={() => removeSkill(skill)}
-                            className="ml-2 hover:text-green-600"
+                            className="ml-2 hover:text-gold"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -223,13 +223,13 @@ import CurrencyPicker from "../CurrencyPicker";
                         value={currentQualification}
                         onChange={(e) => setCurrentQualification(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addQualification())}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                         placeholder="Add a qualification (e.g., Bachelor's in Petroleum Engineering)"
                       />
                       <button
                         type="button"
                         onClick={addQualification}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -261,7 +261,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         name="remote_allowed"
                         checked={formData.remote_allowed}
                         onChange={handleCheckboxChange}
-                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        className="rounded border-gray-300 text-gold focus:ring-gold"
                       />
                       <label htmlFor="remote_allowed" className="ml-2 text-sm font-medium text-gray-700">
                         Remote work allowed
@@ -275,7 +275,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         name="travel_required"
                         checked={formData.travel_required}
                         onChange={handleCheckboxChange}
-                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        className="rounded border-gray-300 text-gold focus:ring-gold"
                       />
                       <label htmlFor="travel_required" className="ml-2 text-sm font-medium text-gray-700">
                         Travel required
@@ -289,7 +289,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         name="security_clearance_required"
                         checked={formData.security_clearance_required}
                         onChange={handleCheckboxChange}
-                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        className="rounded border-gray-300 text-gold focus:ring-gold"
                       />
                       <label htmlFor="security_clearance_required" className="ml-2 text-sm font-medium text-gray-700">
                         Security clearance required
@@ -319,7 +319,7 @@ import CurrencyPicker from "../CurrencyPicker";
                           name="salary_min"
                           value={formData.salary_min}
                           onChange={handleTextChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                           placeholder="Minimum"
                           min="0"
                         />
@@ -330,7 +330,7 @@ import CurrencyPicker from "../CurrencyPicker";
                           name="salary_max"
                           value={formData.salary_max}
                           onChange={handleTextChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                           placeholder="Maximum"
                           min="0"
                         />
@@ -352,13 +352,13 @@ import CurrencyPicker from "../CurrencyPicker";
                         value={currentBenefit}
                         onChange={(e) => setCurrentBenefit(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBenefit())}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                         placeholder="Add a benefit (e.g., Health Insurance, 401k)"
                       />
                       <button
                         type="button"
                         onClick={addBenefit}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -391,7 +391,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       name="application_deadline"
                       value={formData.application_deadline?.split('T')[0]}
                       onChange={handleTextChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                       min={new Date().toISOString().split('T')[0]}
                     />
                   </div>
@@ -405,7 +405,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       name="contact_email"
                       value={formData.contact_email}
                       onChange={handleTextChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                       placeholder="hr@company.com"
                     />
                   </div>
@@ -419,7 +419,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       value={formData.application_instructions}
                       onChange={handleTextChange}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
                       placeholder="Provide specific instructions for how candidates should apply..."
                     />
                   </div>
@@ -492,7 +492,7 @@ import CurrencyPicker from "../CurrencyPicker";
                         {formData.required_skills_list.map((skill) => (
                           <span
                             key={skill}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gold/20 text-gold/80"
                           >
                             {skill}
                           </span>
@@ -535,7 +535,7 @@ import CurrencyPicker from "../CurrencyPicker";
   
                   <div className="flex items-center space-x-4 text-sm">
                     {formData.remote_allowed && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gold/20 text-gold/80">
                         Remote Allowed
                       </span>
                     )}
@@ -554,10 +554,10 @@ import CurrencyPicker from "../CurrencyPicker";
   
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-start space-x-3">
-                    <AlertCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                    <AlertCircle className="w-5 h-5 text-gold mt-0.5" />
                     <div>
                       <h4 className="text-sm font-medium text-green-900">Ready to Publish</h4>
-                      <p className="text-sm text-green-700">
+                      <p className="text-sm text-gold/90">
                         Your job posting will be published and visible to all professionals on the platform.
                         You can edit or unpublish it anytime from your job management dashboard.
                       </p>
