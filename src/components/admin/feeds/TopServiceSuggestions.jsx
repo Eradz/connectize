@@ -15,7 +15,7 @@ import BusinessHubActivities from "./BusinessHubActivities";
 
 const TopServiceSuggestions = () => {
   return (
-    <section className="max-md:container !p-0 lg:p-4 h-fit w-full xl:w-[40%] flex items-start flex-col sm:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:right-0">
+    <section className="max-md:container !p-0 lg:p-4 h-fit w-full xl:w-[40%] flex items-start flex-col sm:flex-col lg:flex-row xl:flex-col shrink-0 gap-4 lg:sticky lg:top-0 lg:self-start lg:max-h-[calc(100vh-4.5rem)] lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <BusinessHubActivities />
 
       <Suggestions />

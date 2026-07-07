@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { BarChart3 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Virtuoso } from "react-virtuoso";
 import { toast } from "sonner";
 import {
   commentOnPost,
@@ -68,6 +69,33 @@ import CommentThread from "../../comments/CommentThread";
 import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import CommentAsSelector from "../../comments/CommentAsSelector";
 import { webRoutes } from "../../../lib/webRoutes";
+
+// Large starting index so Virtuoso can absorb prepended (newly polled) posts
+// by decrementing firstItemIndex without the value ever going negative.
+const FEED_START_INDEX = 1_000_000;
+
+// Rendered by Virtuoso below the list; reads live query state via context.
+const FeedFooter = ({ context }) => {
+  if (!context) return null;
+  if (context.isFetchingNextPage) {
+    return (
+      <div className="flex justify-center py-4">
+        <Spinner size="md" color="blue.500" />
+        <LightParagraph className="ml-2">Loading more posts...</LightParagraph>
+      </div>
+    );
+  }
+  if (!context.hasNextPage && context.hasItems) {
+    return (
+      <div className="text-center py-6">
+        <LightParagraph className="text-gray-500">
+          You&apos;ve reached the end! No more posts to load.
+        </LightParagraph>
+      </div>
+    );
+  }
+  return null;
+};
 
 function DiscoverPosts({
   searchArray,
@@ -123,6 +151,69 @@ function DiscoverPosts({
   const { users: mentionUsers = [] } = useUserSearch({ enabled: !postLoading });
   const { companies: mentionCompanies = [] } = useCompanySearch({ enabled: !postLoading });
 
+  // ── Virtualization (discover / following / trending feeds only) ──
+  // Search and company-profile feeds keep the simple mapped rendering.
+  const isMainFeed = !isSearch && !companyId && !companyName;
+  const virtuosoRootRef = useRef(null);
+  const [scrollParent, setScrollParent] = useState(null);
+
+  // Virtuoso needs the real scrolling ancestor (the AppLayout content div),
+  // since the page — not the list — owns the scroll.
+  useEffect(() => {
+    if (!isMainFeed) return;
+    let el = virtuosoRootRef.current?.parentElement;
+    while (el && el !== document.body) {
+      const overflowY = getComputedStyle(el).overflowY;
+      if (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") {
+        setScrollParent(el);
+        return;
+      }
+      el = el.parentElement;
+    }
+    setScrollParent(null);
+  }, [isMainFeed]);
+
+  // Keep the scroll position anchored when polling prepends new posts to the
+  // top: decrement firstItemIndex by the number of newly prepended items.
+  const [firstItemIndex, setFirstItemIndex] = useState(FEED_START_INDEX);
+  const prevFirstIdRef = useRef(null);
+  const feedKeyRef = useRef(null);
+
+  useEffect(() => {
+    if (!isMainFeed) return;
+    const feedKey = `${feedType}:${companyId || ""}`;
+    const items = finalArray || [];
+    const newFirstId = items[0]?.id ?? null;
+
+    // Reset when the active feed (tab) changes.
+    if (feedKeyRef.current !== feedKey) {
+      feedKeyRef.current = feedKey;
+      prevFirstIdRef.current = newFirstId;
+      setFirstItemIndex(FEED_START_INDEX);
+      return;
+    }
+    const prevFirstId = prevFirstIdRef.current;
+    if (newFirstId != null && prevFirstId != null && newFirstId !== prevFirstId) {
+      const prepended = items.findIndex((p) => p?.id === prevFirstId);
+      if (prepended > 0) setFirstItemIndex((current) => current - prepended);
+    }
+    prevFirstIdRef.current = newFirstId;
+  }, [finalArray, feedType, companyId, isMainFeed]);
+
+  const renderPostItem = useCallback(
+    (_index, post) => (
+      <div className="w-full pb-1.5 md:pb-6">
+        <DiscoverPostItem
+          hasImage={post?.images?.length > 0}
+          postItem={post}
+          mentionUsers={mentionUsers}
+          mentionCompanies={mentionCompanies}
+        />
+      </div>
+    ),
+    [mentionUsers, mentionCompanies]
+  );
+
    // Infinite scroll observer
   useEffect(() => {
     if (isSearch || (companyName && !companyId)) return; // Disable infinite scroll for client-filtered views
@@ -164,7 +255,7 @@ function DiscoverPosts({
       };
 
   return (
-    <section className="w-full space-y-1.5 md:space-y-6 mt-6">
+    <section ref={virtuosoRootRef} className="w-full space-y-1.5 md:space-y-6 mt-6">
       {postLoading ? (
         Array.from({ length: 5 }, (_, index) => (
           <DiscoverPostSkeleton key={index} />
@@ -198,13 +289,36 @@ function DiscoverPosts({
           </div>
         }
         </LightParagraph>
+      ) : isMainFeed && scrollParent ? (
+        <Virtuoso
+          data={finalArray}
+          firstItemIndex={firstItemIndex}
+          computeItemKey={(_index, post) => post?.id ?? _index}
+          itemContent={renderPostItem}
+          endReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          overscan={800}
+          increaseViewportBy={{ top: 400, bottom: 800 }}
+          customScrollParent={scrollParent}
+          context={{
+            isFetchingNextPage,
+            hasNextPage,
+            hasItems: finalArray?.length > 0,
+          }}
+          components={{ Footer: FeedFooter }}
+        />
       ) : (
         <>
           {finalArray?.map((post, index) => (
             <div
               key={post.id}
               ref={index === finalArray.length - 1 ? lastPostRef : null}
-              className="w-full"
+              // content-visibility lets the browser skip rendering/layout/paint
+              // for off-screen posts, so scrolling stays fast no matter how many
+              // posts have accumulated. contain-intrinsic-size keeps the
+              // scrollbar stable (auto remembers each post's real height).
+              className="w-full [content-visibility:auto] [contain-intrinsic-size:auto_600px]"
             >
               <DiscoverPostItem
                 hasImage={post?.images?.length > 0}
