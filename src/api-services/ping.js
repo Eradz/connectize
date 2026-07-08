@@ -11,6 +11,7 @@ export const createPing = async ({
   audience,
   message,
   scheduledAt,
+  targetUserId,
 }) => {
   return makeApiRequest({
     url: "api/pings/",
@@ -21,6 +22,7 @@ export const createPing = async ({
       audience,
       ...(message ? { message } : {}),
       ...(scheduledAt ? { scheduled_at: scheduledAt } : {}),
+      ...(targetUserId ? { target_user_id: targetUserId } : {}),
     },
   });
 };

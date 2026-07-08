@@ -15,7 +15,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { BarChart3, Send } from "lucide-react";
+import { BarChart3, Radio } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Virtuoso } from "react-virtuoso";
@@ -945,13 +945,6 @@ export const DiscoverPostItem = ({
                   navigate(webRoutes.postInsights.replace(":id", postItem?.id))
                 }
               />
-              {activePost?.company?.id && (
-                <ButtonWithTooltipIcon
-                  text="Ping"
-                  IconName={Send}
-                  onClick={() => setShowPingModal(true)}
-                />
-              )}
               <ButtonWithTooltipIcon
                 text="Edit post"
                 IconName={Pencil1Icon}
@@ -1226,6 +1219,14 @@ export const DiscoverPostItem = ({
               // onClick={() => setIsSharing(true)}
             />
           </CustomShareButton>
+
+          {activePost?.company?.id && (
+            <ButtonWithTooltipIcon
+              IconName={Radio}
+              tip="Ping post"
+              onClick={() => setShowPingModal(true)}
+            />
+          )}
         </div>
       </div>
 
