@@ -24,7 +24,8 @@ import {
   Loader2,
   Play,
   Edit,
-  Trash2
+  Trash2,
+  Radio
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -34,6 +35,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
 import MoreOptions from '../../components/MoreOptions';
+import PingButton from '../../components/PingButton';
 import { confirmDialog } from '../../lib/confirm.jsx';
 import { formatCurrency } from '../../utils/currency';
 
@@ -1556,6 +1558,15 @@ const WorkforceEventDetail = () => {
                             <Share2 className="w-4 h-4" />
                             Share Event
                           </button>
+                          <PingButton objectType="event" objectId={event.id} show={isEventCreator}>
+                            <button
+                              type="button"
+                              title="Ping event"
+                              className="flex items-center justify-center rounded-lg bg-white/60 border border-gold/20 hover:bg-white transition-colors duration-200 px-4 py-2.5 text-yellow-800"
+                            >
+                              <Radio className="w-5 h-5" />
+                            </button>
+                          </PingButton>
                           <button
                             type="button"
                             onClick={handleBookmark}

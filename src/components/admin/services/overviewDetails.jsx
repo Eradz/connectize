@@ -9,6 +9,7 @@ import LightParagraph from "../../ParagraphText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import ServiceAdminMain from "./serviceAdminMain";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
+import PingButton from "../../PingButton";
 import { useAuth } from "../../../context/userContext";
 import { getCompanyByIdOrEmail } from "../../../api-services/companies";
 
@@ -96,13 +97,21 @@ export default function OverviewDetails() {
             <BookMarkButton service={service} />
 
             {isUserCompany && (
-              <Link to={`/services/${service.id}?edit=1`} className="ml-5">
-                <ButtonWithTooltipIcon
-                  tip={`Edit Service`}
-                  IconName={Pencil}
+              <div className="ml-5 flex items-center gap-2">
+                <Link to={`/services/${service.id}?edit=1`}>
+                  <ButtonWithTooltipIcon
+                    tip={`Edit Service`}
+                    IconName={Pencil}
+                    iconClassName="!size-8 xs:!size-7"
+                  />
+                </Link>
+                <PingButton
+                  objectType="service"
+                  objectId={service.id}
+                  tip="Ping service"
                   iconClassName="!size-8 xs:!size-7"
                 />
-              </Link>
+              </div>
             )}
           </div>
         </div>

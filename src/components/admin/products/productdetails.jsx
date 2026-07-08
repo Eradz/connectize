@@ -22,6 +22,7 @@ import { useGetCurrentCompany } from "../../../hooks";
 import NewListing from "../listing/newListing";
 import NoPage from "../../NoPage";
 import { ButtonWithTooltipIcon } from "../../ButtonWithTooltipIcon";
+import PingButton from "../../PingButton";
 
 function Productdetails({ product }) {
   const swiperRef = useRef(null);
@@ -152,13 +153,21 @@ function Productdetails({ product }) {
                 <HeadingText>{product.title}</HeadingText>
               </div>
               {isUserCompany && (
-                <Link to={`/products/${product.id}?edit=1`} className="ml-5">
-                  <ButtonWithTooltipIcon
-                    tip={`Edit Product`}
-                    IconName={Pencil}
+                <div className="ml-5 flex items-center gap-2">
+                  <Link to={`/products/${product.id}?edit=1`}>
+                    <ButtonWithTooltipIcon
+                      tip={`Edit Product`}
+                      IconName={Pencil}
+                      iconClassName="!size-8 xs:!size-7"
+                    />
+                  </Link>
+                  <PingButton
+                    objectType="product"
+                    objectId={product.id}
+                    tip="Ping product"
                     iconClassName="!size-8 xs:!size-7"
                   />
-                </Link>
+                </div>
               )}
             </div>
             <h5>{product?.sub_title}</h5>

@@ -1220,7 +1220,7 @@ export const DiscoverPostItem = ({
             />
           </CustomShareButton>
 
-          {activePost?.company?.id && (
+          {isPostOwner && activePost?.company?.id && (
             <ButtonWithTooltipIcon
               IconName={Radio}
               tip="Ping post"

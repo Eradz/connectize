@@ -21,11 +21,13 @@ import {
   Edit,
   BookOpen,
   User2,
-  Trash2
+  Trash2,
+  Radio
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ArticleAuthorByline from '../../components/knowledge/ArticleAuthorByline';
 import MoreOptions from '../../components/MoreOptions';
+import PingButton from '../../components/PingButton';
 import { knowledgeArticleService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { useAuth } from '../../context/userContext';
@@ -281,6 +283,19 @@ const KnowledgeArticleDetail = () => {
                     <span>{article.shares || 0}</span>
                     <p>Shares</p>
                   </button>
+                  <PingButton
+                    objectType="article"
+                    objectId={article.id}
+                    show={article?.company?.id && user?.companies?.includes(article.company.id)}
+                  >
+                    <button
+                      title="Ping article"
+                      className="flex items-center space-x-1 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                    >
+                      <Radio className="h-4 w-4" />
+                      <p>Ping</p>
+                    </button>
+                  </PingButton>
                   <div className="flex items-center space-x-1 text-sm text-gray-600">
                     <Eye className="h-4 w-4" />
                     <span>{article.views || 0}</span>
@@ -364,6 +379,19 @@ const KnowledgeArticleDetail = () => {
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </button>
+                  <PingButton
+                    objectType="article"
+                    objectId={article.id}
+                    show={article?.company?.id && user?.companies?.includes(article.company.id)}
+                  >
+                    <button
+                      title="Ping article"
+                      className="inline-flex items-center px-2 md:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                    >
+                      <Radio className="h-4 w-4 mr-2" />
+                      Ping
+                    </button>
+                  </PingButton>
                 </div>
                 <Link
                   to={webRoutes.knowledgeArticles}
