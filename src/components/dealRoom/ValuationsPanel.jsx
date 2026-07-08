@@ -81,7 +81,7 @@ function formatDate(dateString) {
   });
 }
 
-export default function ValuationsPanel({ dealRoomId }) {
+export default function ValuationsPanel({ dealRoomId, canEdit = false }) {
   const [valuations, setValuations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -365,6 +365,7 @@ export default function ValuationsPanel({ dealRoomId }) {
           >
             <RefreshCw className="h-4 w-4" />
           </button>
+          {canEdit && (
           <button
             onClick={() => {
               resetForm();
@@ -375,6 +376,7 @@ export default function ValuationsPanel({ dealRoomId }) {
             <Plus className="h-4 w-4" />
             <span>New Valuation</span>
           </button>
+          )}
         </div>
       </div>
 
@@ -452,6 +454,7 @@ export default function ValuationsPanel({ dealRoomId }) {
           <p className="text-gray-500 mb-6 max-w-md mx-auto">
             Create your first valuation to track the estimated value of this deal using various methods.
           </p>
+          {canEdit && (
           <button
             onClick={() => {
               resetForm();
@@ -462,6 +465,7 @@ export default function ValuationsPanel({ dealRoomId }) {
             <Plus className="h-4 w-4" />
             <span>Create Valuation</span>
           </button>
+          )}
         </div>
       )}
 
@@ -601,6 +605,8 @@ export default function ValuationsPanel({ dealRoomId }) {
                   </button>
                   
                   <div className="flex items-center gap-2">
+                    {canEdit && (
+                    <>
                     <button
                       onClick={() => toggleFinal(valuation)}
                       className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -629,6 +635,8 @@ export default function ValuationsPanel({ dealRoomId }) {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    </>
+                    )}
                   </div>
                 </div>
               </div>

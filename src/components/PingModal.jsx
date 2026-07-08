@@ -1,8 +1,8 @@
 import clsx from "clsx";
-import { Crown, Search, X } from "lucide-react";
+import { Crown, Lock, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { createPing } from "../api-services/ping";
+import { createPing, getPingEligibility } from "../api-services/ping";
 import { searchUsers } from "../api-services/users";
 import { getUserDisplayName, getUserHandle } from "../lib/userDisplay";
 import ReusableModal from "./custom/ResusableModal";
@@ -47,6 +47,9 @@ export default function PingModal({ isOpen, onClose, objectType, objectId }) {
   const [searching, setSearching] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Whether the premium-only "everyone" audience is available to this user.
+  const [canPingEveryone, setCanPingEveryone] = useState(false);
+
   const reset = () => {
     setAudience("followers");
     setMessage("");
@@ -62,6 +65,30 @@ export default function PingModal({ isOpen, onClose, objectType, objectId }) {
     reset();
     onClose?.();
   };
+
+  // Ask the backend whether the premium "everyone" audience is available so we
+  // can gate it up front instead of surfacing a rejection after sending.
+  useEffect(() => {
+    if (!isOpen || !objectId) return;
+    let active = true;
+    getPingEligibility({ objectType, objectId })
+      .then((res) => {
+        if (active) setCanPingEveryone(!!res?.can_ping_everyone);
+      })
+      .catch(() => {
+        if (active) setCanPingEveryone(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isOpen, objectType, objectId]);
+
+  // If the user had picked "everyone" but isn't eligible, fall back.
+  useEffect(() => {
+    if (!canPingEveryone && audience === "everyone") {
+      setAudience("followers");
+    }
+  }, [canPingEveryone, audience]);
 
   // Debounced user search when the "specific person" audience is active.
   useEffect(() => {
@@ -142,13 +169,17 @@ export default function PingModal({ isOpen, onClose, objectType, objectId }) {
         </p>
 
         <div className="space-y-2">
-          {AUDIENCES.map((a) => (
+          {AUDIENCES.map((a) => {
+            const lockedEveryone = a.premium && !canPingEveryone;
+            return (
             <button
               key={a.key}
               type="button"
-              onClick={() => setAudience(a.key)}
+              disabled={lockedEveryone}
+              onClick={() => !lockedEveryone && setAudience(a.key)}
               className={clsx(
                 "flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left transition",
+                lockedEveryone && "cursor-not-allowed opacity-60",
                 audience === a.key
                   ? "border-gold bg-gold/5"
                   : "border-gray-200 hover:border-gray-300"
@@ -157,19 +188,29 @@ export default function PingModal({ isOpen, onClose, objectType, objectId }) {
               <div className="flex-1">
                 <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
                   {a.label}
-                  {a.premium && (
-                    <Crown
-                      size={14}
-                      className="text-gold"
-                      fill="currentColor"
-                      aria-label="Premium"
-                    />
-                  )}
+                  {a.premium &&
+                    (lockedEveryone ? (
+                      <Lock
+                        size={13}
+                        className="text-gray-400"
+                        aria-label="Premium only"
+                      />
+                    ) : (
+                      <Crown
+                        size={14}
+                        className="text-gold"
+                        fill="currentColor"
+                        aria-label="Premium"
+                      />
+                    ))}
                 </p>
-                <p className="text-xs text-gray-500">{a.desc}</p>
+                <p className="text-xs text-gray-500">
+                  {lockedEveryone ? "Premium plan required" : a.desc}
+                </p>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {audience === "user" && (
