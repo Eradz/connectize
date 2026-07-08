@@ -49,7 +49,9 @@ const PlatformDashboard = () => {
         marketplaceRes,
         subscriptionRes
       ] = await Promise.all([
-        dealRoomService.getAll(1, 5),
+        // Dashboard stats must reflect only the current user's own deals — never
+        // public deals belonging to others (which 'auto' scope would include).
+        dealRoomService.getAll(1, 5, { scope: 'mine' }),
         workforceJobService.getAll(1, 5),
         dealActivityService.getRecentActivities(10),
         aiOpportunityService.getOpportunities(),
