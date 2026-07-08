@@ -15,7 +15,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Radio } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Virtuoso } from "react-virtuoso";
@@ -54,6 +54,7 @@ import ReusableModal from "../../custom/ResusableModal";
 import FormatPostText from "../../FormatPostText";
 import { MarkdownComponent } from "../../MarkDownComponent";
 import MoreOptions from "../../MoreOptions";
+import PingModal from "../../PingModal";
 import LightParagraph from "../../ParagraphText";
 import PDFPreview from "../../PDFPreview";
 import PostImageCollage from "../../PostImageCollage";
@@ -779,6 +780,7 @@ export const DiscoverPostItem = ({
   const [errorMessage, setErrorMessage] = useState(null);
   const [isEditLoading, setIsEditLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [showPingModal, setShowPingModal] = useState(false);
 
   // Show edit/delete if user is the post author OR owns the company that posted
   const isPostOwner = postItem?.user?.id === currentUser?.id || 
@@ -832,6 +834,13 @@ export const DiscoverPostItem = ({
       )}
     >
       {isSinglePost && <SEO title={postTitle} description={activePost?.body} />}
+
+      <PingModal
+        isOpen={showPingModal}
+        onClose={() => setShowPingModal(false)}
+        objectType="post"
+        objectId={postItem?.id}
+      />
 
       {/* Plain repost: compact "{reposter} reposted" attribution header.
           The kebab offers the reposter an "Undo repost" affordance. */}
@@ -1210,6 +1219,14 @@ export const DiscoverPostItem = ({
               // onClick={() => setIsSharing(true)}
             />
           </CustomShareButton>
+
+          {isPostOwner && activePost?.company?.id && (
+            <ButtonWithTooltipIcon
+              IconName={Radio}
+              tip="Ping post"
+              onClick={() => setShowPingModal(true)}
+            />
+          )}
         </div>
       </div>
 

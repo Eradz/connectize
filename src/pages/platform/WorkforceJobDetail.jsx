@@ -22,6 +22,7 @@ import BackArrowButton from "../../components/BackArrowButton";
 import DownloadButton from "../../components/DownloadButton";
 import { useAuth } from "../../context/userContext";
 import MoreOptions from "../../components/MoreOptions";
+import PingButton from "../../components/PingButton";
 import { confirmDialog } from '../../lib/confirm.jsx';
 
 export default function WorkforceJobDetail() {
@@ -173,7 +174,10 @@ export default function WorkforceJobDetail() {
             </p>
         </div>
         {isJobPoster && (
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            {job?.company_name && (
+              <PingButton objectType="job" objectId={job.id} tip="Ping job" />
+            )}
             <MoreOptions className="!w-fit">
               <div className="flex flex-col gap-2">
                 <button

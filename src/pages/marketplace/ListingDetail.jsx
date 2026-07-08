@@ -27,7 +27,8 @@ import {
   MessageCircle,
   AlertCircle,
   Edit,
-  Trash2
+  Trash2,
+  Radio
 } from 'lucide-react';
 import { toast } from 'sonner';
 import marketplaceApi from '../../api-services/marketplace';
@@ -36,6 +37,7 @@ import { webRoutes } from '../../lib/webRoutes';
 import { getCurrencySymbol } from '../../utils/currency';
 import { useAuth } from '../../context/userContext';
 import MoreOptions from '../../components/MoreOptions';
+import PingButton from '../../components/PingButton';
 import { confirmDialog } from '../../lib/confirm.jsx';
 
 const hasListingPrice = (listing) =>
@@ -376,6 +378,18 @@ const ListingDetail = () => {
                 >
                   <Share2 size={20} />
                 </button>
+                <PingButton
+                  objectType="listing"
+                  objectId={listing.id}
+                  show={isCreator || user?.companies?.includes(listing?.seller_company)}
+                >
+                  <button
+                    className="p-2 rounded-full border border-gray-200 hover:bg-gray-50"
+                    title="Ping listing"
+                  >
+                    <Radio size={20} />
+                  </button>
+                </PingButton>
                 {isCreator && (
                   <MoreOptions className="!w-fit">
                     <div className="flex flex-col gap-2">

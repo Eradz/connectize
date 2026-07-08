@@ -615,24 +615,34 @@ export default function DealRoomDetail() {
             </div>
           </div>
           {/* Enhanced Quick Actions and Stats */}
+          {(canEdit || canManageParticipants) && (
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 md:w-[80%] gap-2">
+            {canEdit && (
             <Link to={linkFor("documents")} onClick={() => document.querySelector('input[type="file"]')?.click()} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Upload Document
               <DocumentIcon className="h-4 w-4 ml-2" />
             </Link>
+            )}
+            {canManageParticipants && (
             <button onClick={() => setShowParticipantModal(true)} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Invite Participant
               <UserPlus className="h-4 w-4 ml-2" />
             </button>
+            )}
+            {canEdit && (
             <Link to={linkFor("milestones")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Update Milestones
               <Settings className="h-4 w-4 ml-2" />
             </Link>
+            )}
+            {canEdit && (
             <Link to={linkFor("valuations")} className="flex flex-col-reverse md:flex-row bg-white items-center px-3 py-4 md:py-[10px] rounded-md border text-sm hover:border border-[#D9D9D9]">
               Run Valuation
               <BarChart3 className="h-4 w-4 ml-2" />
             </Link>
+            )}
           </div>
+          )}
           <div className="md:flex mt-6 hidden flex-wrap gap-2">
             {tabs.map((t) => (
               <Link
@@ -727,9 +737,11 @@ export default function DealRoomDetail() {
                       <div className="space-y-4 text-[12px]">
                         <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Title:</span> {deal?.title || `Deal #${id}`}</div>
                         <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D] text-right"><span className="font-medium text-[#212529]">Company:</span> {deal?.company_name || deal?.company?.name || deal?.initiator_name || 'Personal Deal Room'}</div>
+                        {canManageParticipants && (
                         <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Access Code:</span> 
                           {deal?.access_code || "N/A"}
                         </div>
+                        )}
                          <div className="flex justify-between border-b border-[#D9D9D9]/30 text-[#6C757D]"><span className="font-medium text-[#212529]">Type:</span> 
                           <span className="ml-2 capitalize">
                             {deal?.deal_type ? deal.deal_type.replace(/_/g, ' ') : "Not specified"}
