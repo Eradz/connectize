@@ -83,7 +83,12 @@ const ListingDetail = () => {
       setListing(response);
       setInWishlist(Boolean(response.in_wishlist ?? response.is_in_wishlist ?? false));
     } catch (err) {
-      setError('Failed to load listing');
+      const statusCode = err?.status ?? err?.response?.status;
+      setError(
+        statusCode === 404
+          ? 'This listing is no longer available. It may have been removed or unpublished.'
+          : 'Failed to load listing. Please check your connection and try again.'
+      );
       console.error(err);
     } finally {
       setLoading(false);

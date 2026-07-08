@@ -20,7 +20,8 @@ import {
   Send,
   Plus,
   AlertTriangle,
-  Edit
+  Edit,
+  Radio
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
@@ -30,6 +31,7 @@ import ProviderQuoteForm from '../../components/logistics/ProviderQuoteForm';
 import { getSession } from '../../lib/session';
 import { useAuth } from '../../context/userContext';
 import BackArrowButton from '../../components/BackArrowButton';
+import PingButton from '../../components/PingButton';
 
 const LogisticsRequestDetail = () => {
   const navigate = useNavigate();
@@ -355,6 +357,19 @@ const LogisticsRequestDetail = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <PingButton
+                objectType="logistics_request"
+                objectId={request.id}
+                show={userId != null && String(request.requested_by) === String(userId)}
+              >
+                <button
+                  title="Ping request"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center space-x-2"
+                >
+                  <Radio className="w-4 h-4" />
+                  <span>Ping</span>
+                </button>
+              </PingButton>
               {userId != null && String(request.requested_by) === String(userId) && (request.status === 'draft' || request.status === 'posted' || request.status === 'awarded') && (
                 <>
                   <button
