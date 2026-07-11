@@ -84,6 +84,7 @@
     "build": "npm run generate-sitemap && vite build",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
+    "test:seo": "node --test tests/seo-server.test.mjs",
     "release:test": "bash ./scripts/release-test.sh",
     "ios:build": "bash ./scripts/build-ios.sh",
     "ios:build:release": "bash ./scripts/build-ios.sh --release",

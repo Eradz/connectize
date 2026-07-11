@@ -514,6 +514,11 @@ async function buildMetaForPath(requestPath) {
   if (isSingleSegmentDetail(requestPath, ["professionals"], ["create"])) {
     const id = decodeURIComponent(pathSegments[1]);
     const profile = await apiGet(`/api/v1/workforce/profiles/${id}/`);
+    if (profile?.allow_search_indexing !== true) {
+      const error = new Error("Professional profile has not opted into search indexing");
+      error.status = 404;
+      throw error;
+    }
     return extractWorkforceProfileMeta(profile, pageUrl);
   }
 
@@ -531,7 +536,7 @@ async function buildMetaForPath(requestPath) {
 
   if (isSingleSegmentDetail(requestPath, ["bidding", "projects"], ["create"])) {
     const id = decodeURIComponent(pathSegments[2]);
-    const project = requirePublic(await apiGet(`/api/v1/bidding/projects/${id}/`), { explicit: true });
+    const project = requirePublic(await apiGet(`/api/seo/public/tender/${id}/`), { explicit: true });
     return extractBiddingProjectMeta(project, pageUrl);
   }
 
@@ -543,7 +548,7 @@ async function buildMetaForPath(requestPath) {
 
   if (isSingleSegmentDetail(requestPath, ["logistics", "providers"])) {
     const id = decodeURIComponent(pathSegments[2]);
-    const provider = requirePublic(await apiGet(`/api/v1/logistics/providers/${id}/`));
+    const provider = requirePublic(await apiGet(`/api/seo/public/logistics-provider/${id}/`));
     return extractLogisticsProviderMeta(provider, pageUrl);
   }
 

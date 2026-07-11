@@ -91,7 +91,7 @@
     },
     {
       "source": "/sitemap.xml",
-      "destination": "/api/sitemap"
+      "destination": "https://about.connectize.co/sitemap.xml"
     },
     {
       "source": "/((?!assets/).*)",
