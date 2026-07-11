@@ -62,24 +62,36 @@
       "destination": "/api/render-meta?path=/knowledge/tags/$1"
     },
     {
-      "source": "/jobs/(.*)",
-      "destination": "/api/render-meta?path=/jobs/$1"
+      "source": "/workforce/jobs/(.*)",
+      "destination": "/api/render-meta?path=/workforce/jobs/$1"
     },
     {
       "source": "/professionals/(.*)",
       "destination": "/api/render-meta?path=/professionals/$1"
     },
     {
-      "source": "/events/(.*)",
-      "destination": "/api/render-meta?path=/events/$1"
+      "source": "/workforce/events/(.*)",
+      "destination": "/api/render-meta?path=/workforce/events/$1"
     },
     {
       "source": "/marketplace/listing/(.*)",
       "destination": "/api/render-meta?path=/marketplace/listing/$1"
     },
     {
+      "source": "/bidding/projects/(.*)",
+      "destination": "/api/render-meta?path=/bidding/projects/$1"
+    },
+    {
+      "source": "/deal-rooms/(.*)",
+      "destination": "/api/render-meta?path=/deal-rooms/$1"
+    },
+    {
+      "source": "/logistics/providers/(.*)",
+      "destination": "/api/render-meta?path=/logistics/providers/$1"
+    },
+    {
       "source": "/sitemap.xml",
-      "destination": "https://about.connectize.co/sitemap.xml"
+      "destination": "/api/sitemap"
     },
     {
       "source": "/((?!assets/).*)",

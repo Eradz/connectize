@@ -141,6 +141,7 @@ const webRoutes = {
   logisticsBecomeProvider: "/logistics/become-provider",
   logisticsProviderDashboard: "/logistics/provider-dashboard",
   logisticsProviderSettings: "/logistics/provider-settings",
+  logisticsProviderDetail: "/logistics/providers/:id",
 
   inventoryDashboard: "/inventory",
   inventoryItems: "/inventory/items",

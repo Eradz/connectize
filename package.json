@@ -81,7 +81,7 @@
     "dev": "vite",
     "start": "vite preview",
     "predeploy": "npm run build",
-    "build": "vite build",
+    "build": "npm run generate-sitemap && vite build",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "release:test": "bash ./scripts/release-test.sh",

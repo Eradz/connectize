@@ -46,6 +46,26 @@ function truncate(value = "", maxLength = 180) {
   return `${value.slice(0, maxLength - 1).trim()}…`;
 }
 
+function crawlContent(title, description, details = []) {
+  const rows = details
+    .filter(([, value]) => value)
+    .map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(stripHtml(value))}</dd>`)
+    .join("");
+  return `<main data-seo-content="true"><article><h1>${escapeHtml(title)}</h1><p>${escapeHtml(stripHtml(description))}</p>${rows ? `<dl>${rows}</dl>` : ""}</article></main>`;
+}
+
+function requirePublic(record, { explicit = false } = {}) {
+  const status = String(record?.status || "").toLowerCase();
+  const unavailable = record?.is_private || record?.deleted_at || ["draft", "private", "archived", "rejected", "suspended"].includes(status);
+  const explicitlyPublic = record?.is_public === true || record?.visibility === "public" || record?.access_type === "public";
+  if (unavailable || record?.is_public === false || (explicit && !explicitlyPublic)) {
+    const error = new Error("Record is not public");
+    error.status = 404;
+    throw error;
+  }
+  return record;
+}
+
 function absoluteAssetUrl(value) {
   if (!value) return DEFAULT_IMAGE;
   if (/^https?:\/\//i.test(value)) return value;
@@ -107,6 +127,8 @@ function extractPostMeta(post, pageUrl) {
     image,
     url: pageUrl,
     type: "article",
+    contentHtml: crawlContent(`${companyName} post`, body),
+    structuredData: { "@context": "https://schema.org", "@type": "SocialMediaPosting", headline: `${companyName} post`, articleBody: body, url: pageUrl, datePublished: post?.created_at, dateModified: post?.updated_at || post?.created_at },
   };
 }
 
@@ -149,6 +171,8 @@ function extractCompanyMeta(company, pageUrl) {
     image,
     url: pageUrl,
     type: "profile",
+    contentHtml: crawlContent(company?.company_name || "Connectize company", description, [["Industry", company?.industry], ["Location", company?.location || company?.country]]),
+    structuredData: { "@context": "https://schema.org", "@type": "Organization", name: company?.company_name || "Connectize company", description, logo: image, url: pageUrl },
   };
 }
 
@@ -164,6 +188,8 @@ function extractUserMeta(user, pageUrl) {
     image,
     url: pageUrl,
     type: "profile",
+    contentHtml: crawlContent(fullName, description, [["Professional role", user?.role || user?.professional_title]]),
+    structuredData: { "@context": "https://schema.org", "@type": "Person", name: fullName, description, image, url: pageUrl, jobTitle: user?.role || user?.professional_title },
   };
 }
 
@@ -178,6 +204,17 @@ function extractKnowledgeArticleMeta(article, pageUrl) {
     image,
     url: pageUrl,
     type: "article",
+    contentHtml: crawlContent(article?.title || "Knowledge Hub article", description, [["Author", article?.author?.full_name || article?.author_name]]),
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: article?.title || "Connectize Knowledge Hub article",
+      description,
+      image: [image],
+      datePublished: article?.published_at || article?.created_at,
+      dateModified: article?.updated_at || article?.published_at || article?.created_at,
+      mainEntityOfPage: pageUrl,
+    },
   };
 }
 
@@ -248,6 +285,22 @@ function extractWorkforceJobMeta(job, pageUrl) {
     image,
     url: pageUrl,
     type: "website",
+    contentHtml: crawlContent(job?.title || "Job opportunity", description, [["Company", job?.company_name], ["Location", job?.location], ["Employment type", job?.employment_type], ["Application deadline", job?.application_deadline || job?.deadline]]),
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "JobPosting",
+      title: job?.title || "Oil and gas industry opportunity",
+      description: stripHtml(job?.description || job?.description_preview || description),
+      datePosted: job?.created_at || job?.posted_at,
+      validThrough: job?.application_deadline || job?.deadline,
+      employmentType: job?.employment_type,
+      hiringOrganization: {
+        "@type": "Organization",
+        name: job?.company_name || "Connectize employer",
+        ...(job?.company_logo ? { logo: absoluteAssetUrl(job.company_logo) } : {}),
+      },
+      url: pageUrl,
+    },
   };
 }
 
@@ -281,6 +334,24 @@ function extractWorkforceEventMeta(event, pageUrl) {
     image,
     url: pageUrl,
     type: "event",
+    contentHtml: crawlContent(event?.title || "Industry event", description, [["Starts", event?.start_date], ["Ends", event?.end_date], ["Location", event?.location || event?.venue_name]]),
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      name: event?.title || "Connectize industry event",
+      description: stripHtml(event?.description || description),
+      startDate: event?.start_date,
+      endDate: event?.end_date,
+      eventStatus: "https://schema.org/EventScheduled",
+      eventAttendanceMode: event?.is_virtual
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : "https://schema.org/OfflineEventAttendanceMode",
+      ...(event?.is_virtual
+        ? { location: { "@type": "VirtualLocation", url: event?.virtual_url || pageUrl } }
+        : { location: { "@type": "Place", name: event?.venue_name || event?.location || "To be announced" } }),
+      image: [image],
+      url: pageUrl,
+    },
   };
 }
 
@@ -295,6 +366,55 @@ function extractMarketplaceListingMeta(listing, pageUrl) {
     image,
     url: pageUrl,
     type: "product",
+    contentHtml: crawlContent(listing?.title || "Marketplace listing", description, [["Price", listing?.price ? `${listing?.currency || "USD"} ${listing.price}` : null], ["Seller", listing?.seller_company_name]]),
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: listing?.title || "Connectize Marketplace listing",
+      description: stripHtml(listing?.description || description),
+      image: [image],
+      url: pageUrl,
+      ...(listing?.price ? {
+        offers: {
+          "@type": "Offer",
+          price: listing.price,
+          priceCurrency: listing?.currency || "USD",
+          availability: "https://schema.org/InStock",
+          url: pageUrl,
+        },
+      } : {}),
+    },
+  };
+}
+
+function extractBiddingProjectMeta(project, pageUrl) {
+  const title = project?.title || project?.name || "Public tender opportunity";
+  const description = truncate(stripHtml(project?.description || project?.scope_of_work || "View this public bidding opportunity on Connectize."), 200);
+  return {
+    title: `${title} | Connectize Bidding`, description, image: DEFAULT_IMAGE, url: pageUrl, type: "website",
+    contentHtml: crawlContent(title, description, [["Buyer", project?.company_name || project?.buyer_name], ["Deadline", project?.submission_deadline || project?.deadline], ["Status", project?.status]]),
+    structuredData: { "@context": "https://schema.org", "@type": "Offer", name: title, description, url: pageUrl, availabilityEnds: project?.submission_deadline || project?.deadline },
+  };
+}
+
+function extractDealRoomMeta(deal, pageUrl) {
+  const title = deal?.title || deal?.name || "Public business deal";
+  const description = truncate(stripHtml(deal?.description || deal?.summary || "Explore this public business opportunity on Connectize."), 200);
+  return {
+    title: `${title} | Connectize Deals`, description, image: DEFAULT_IMAGE, url: pageUrl, type: "website",
+    contentHtml: crawlContent(title, description, [["Industry", deal?.industry], ["Status", deal?.status]]),
+    structuredData: { "@context": "https://schema.org", "@type": "BusinessEvent", name: title, description, url: pageUrl },
+  };
+}
+
+function extractLogisticsProviderMeta(provider, pageUrl) {
+  const name = provider?.company_name || provider?.name || "Logistics provider";
+  const description = truncate(stripHtml(provider?.description || provider?.service_description || "Find logistics services on Connectize."), 200);
+  const image = absoluteAssetUrl(provider?.logo || provider?.company_logo || DEFAULT_IMAGE);
+  return {
+    title: `${name} | Connectize Logistics`, description, image, url: pageUrl, type: "profile",
+    contentHtml: crawlContent(name, description, [["Services", Array.isArray(provider?.services) ? provider.services.join(", ") : provider?.services], ["Location", provider?.location || provider?.country]]),
+    structuredData: { "@context": "https://schema.org", "@type": "LocalBusiness", name, description, image, url: pageUrl },
   };
 }
 
@@ -307,7 +427,9 @@ async function apiGet(endpoint) {
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${endpoint}`);
+    const error = new Error(`API request failed: ${response.status} ${endpoint}`);
+    error.status = response.status;
+    throw error;
   }
 
   return response.json();
@@ -319,7 +441,7 @@ async function buildMetaForPath(requestPath) {
 
   if (/^\/posts\/[^/]+\/?$/i.test(requestPath)) {
     const id = requestPath.split("/").filter(Boolean)[1];
-    const post = await apiGet(`/api/posts/${id}/`);
+    const post = requirePublic(await apiGet(`/api/posts/${id}/`));
     return extractPostMeta(post, pageUrl);
   }
 
@@ -337,19 +459,19 @@ async function buildMetaForPath(requestPath) {
 
   if (/^\/company\/[^/]+\/?$/i.test(requestPath)) {
     const slug = decodeURIComponent(requestPath.split("/").filter(Boolean)[1]);
-    const company = await apiGet(`/api/companies/${slug}/`);
+    const company = requirePublic(await apiGet(`/api/companies/${slug}/`));
     return extractCompanyMeta(company, pageUrl);
   }
 
   if (/^\/co\/\d+\/?$/i.test(requestPath)) {
     const id = requestPath.split("/").filter(Boolean)[1];
-    const user = await apiGet(`/api/users/${id}`);
+    const user = requirePublic(await apiGet(`/api/users/${id}`));
     return extractUserMeta(user, pageUrl);
   }
 
   if (/^\/co\/[^/]+\/?$/i.test(requestPath)) {
     const slug = decodeURIComponent(requestPath.split("/").filter(Boolean)[1]);
-    const company = await apiGet(`/api/companies/${slug}/`);
+    const company = requirePublic(await apiGet(`/api/companies/${slug}/`));
     return extractCompanyMeta(company, pageUrl);
   }
 
@@ -383,8 +505,8 @@ async function buildMetaForPath(requestPath) {
     return extractKnowledgeTagMeta(tag, pageUrl);
   }
 
-  if (isSingleSegmentDetail(requestPath, ["jobs"], ["create", "saved", "my-posted"])) {
-    const id = decodeURIComponent(pathSegments[1]);
+  if (isSingleSegmentDetail(requestPath, ["workforce", "jobs"], ["create", "saved", "my-posted"])) {
+    const id = decodeURIComponent(pathSegments[2]);
     const job = await apiGet(`/api/v1/workforce/jobs/${id}/`);
     return extractWorkforceJobMeta(job, pageUrl);
   }
@@ -395,8 +517,8 @@ async function buildMetaForPath(requestPath) {
     return extractWorkforceProfileMeta(profile, pageUrl);
   }
 
-  if (isSingleSegmentDetail(requestPath, ["events"], ["create", "my-events", "my-registrations", "my-bookmarks", "earnings"])) {
-    const id = decodeURIComponent(pathSegments[1]);
+  if (isSingleSegmentDetail(requestPath, ["workforce", "events"], ["create", "my-events", "my-registrations", "my-bookmarks", "earnings"])) {
+    const id = decodeURIComponent(pathSegments[2]);
     const event = await apiGet(`/api/v1/workforce/events/${id}/`);
     return extractWorkforceEventMeta(event, pageUrl);
   }
@@ -405,6 +527,24 @@ async function buildMetaForPath(requestPath) {
     const id = decodeURIComponent(pathSegments[2]);
     const listing = await apiGet(`/api/marketplace/listings/${id}/`);
     return extractMarketplaceListingMeta(listing, pageUrl);
+  }
+
+  if (isSingleSegmentDetail(requestPath, ["bidding", "projects"], ["create"])) {
+    const id = decodeURIComponent(pathSegments[2]);
+    const project = requirePublic(await apiGet(`/api/v1/bidding/projects/${id}/`), { explicit: true });
+    return extractBiddingProjectMeta(project, pageUrl);
+  }
+
+  if (isSingleSegmentDetail(requestPath, ["deal-rooms"], ["create", "my-participations"])) {
+    const id = decodeURIComponent(pathSegments[1]);
+    const deal = requirePublic(await apiGet(`/api/v1/deals/deal-rooms/${id}/`), { explicit: true });
+    return extractDealRoomMeta(deal, pageUrl);
+  }
+
+  if (isSingleSegmentDetail(requestPath, ["logistics", "providers"])) {
+    const id = decodeURIComponent(pathSegments[2]);
+    const provider = requirePublic(await apiGet(`/api/v1/logistics/providers/${id}/`));
+    return extractLogisticsProviderMeta(provider, pageUrl);
   }
 
   return {
@@ -440,11 +580,24 @@ function replaceMeta(html, meta) {
     { key: "twitter:image:alt", markup: `<meta name="twitter:image:alt" content="${safeTitle}" />` },
   ];
 
+  if (meta.structuredData) {
+    tags.push({
+      key: "structured-data",
+      markup: `<script type="application/ld+json">${JSON.stringify(meta.structuredData).replace(/</g, "\\u003c")}</script>`,
+    });
+  }
+
   let updatedHtml = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${safeTitle}</title>`);
+
+  if (meta.contentHtml) {
+    updatedHtml = updatedHtml.replace('<div id="root"></div>', `<div id="root">${meta.contentHtml}</div>`);
+  }
 
   for (const tag of tags) {
     const attrPattern = tag.key === "canonical"
       ? /<link\s+rel=["']canonical["'][^>]*>/i
+      : tag.key === "structured-data"
+        ? /<script\s+type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/i
       : new RegExp(`<meta\\s+(?:name|property)=["']${tag.key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*>`, "i");
 
     if (attrPattern.test(updatedHtml)) {
@@ -476,6 +629,12 @@ export default async function handler(req, res) {
     console.error("[render-meta] falling back to default HTML", error);
     const template = await readTemplateHtml();
     res.setHeader("Content-Type", "text/html; charset=utf-8");
+    if (error?.status === 404 || error?.status === 410) {
+      const html = template
+        .replace(/<title>[\s\S]*?<\/title>/i, "<title>Page Not Found | Connectize</title>")
+        .replace(/<\/head>/i, '  <meta name="robots" content="noindex, nofollow" />\n  </head>');
+      return res.status(error.status).send(html);
+    }
     return res.status(200).send(template);
   }
 }

@@ -150,6 +150,11 @@ const logistics = {
     }
   },
 
+  getLogisticsProvider: async (id) => {
+    const response = await api.get(`/api/v1/logistics/providers/${id}/`);
+    return response.data;
+  },
+
   // Get current user's provider profile
   getMyProviderProfile: async (params = {}) => {
     const response = await api.get('/api/v1/logistics/providers/my_profile/', {
