@@ -832,7 +832,9 @@ export const DiscoverPostItem = ({
       className={clsx(
         "w-full max-w-none py-4 px-4 xs:px-6 bg-white rounded-md transition-colors duration-300"
       )}
-    >
+    > 
+    <Link to={webRoutes.singlePost.replace(":id", activePost?.id)}>
+    
       {isSinglePost && <SEO title={postTitle} description={activePost?.body} />}
 
       <PingModal
@@ -1334,6 +1336,7 @@ export const DiscoverPostItem = ({
       />
         </>
       )}
+      </Link>
     </motion.article>
   );
 };

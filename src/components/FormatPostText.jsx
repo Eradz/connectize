@@ -50,7 +50,12 @@ const FormatPostText = ({
             <button
               type="button"
               className="mt-1 text-sm font-semibold text-gold hover:text-custom_yellow transition-colors"
-              onClick={() => setIsExpanded((expanded) => !expanded)}
+              onClick={(e) =>  {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsExpanded((expanded) => !expanded)
+              }
+                }
             >
               {isExpanded ? "View less" : "View more"}
             </button>
