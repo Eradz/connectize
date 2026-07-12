@@ -833,7 +833,6 @@ export const DiscoverPostItem = ({
         "w-full max-w-none py-4 px-4 xs:px-6 bg-white rounded-md transition-colors duration-300"
       )}
     > 
-    <Link to={webRoutes.singlePost.replace(":id", activePost?.id)}>
     
       {isSinglePost && <SEO title={postTitle} description={activePost?.body} />}
 
@@ -1076,6 +1075,7 @@ export const DiscoverPostItem = ({
         </>
       ) : (
         <>
+            <Link to={webRoutes.singlePost.replace(":id", activePost?.id)}>
           <FormatPostText
             text={activePost?.body}
             postId={activePost?.id}
@@ -1083,9 +1083,9 @@ export const DiscoverPostItem = ({
             mentionUsers={postMentionUsers}
             mentionCompanies={postMentionCompanies}
           />
-
+          </Link>
           {activePost?.images?.length > 0 && (
-            <PostImageCollage images={activePost.images} />
+            <PostImageCollage images={activePost.images}/>
           )}
         </>
       )}
@@ -1336,7 +1336,6 @@ export const DiscoverPostItem = ({
       />
         </>
       )}
-      </Link>
     </motion.article>
   );
 };
