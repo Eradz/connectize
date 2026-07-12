@@ -125,6 +125,7 @@ const LogisticsTracking = lazy(() => import("./pages/platform/LogisticsTracking"
 const BecomeProvider = lazy(() => import("./pages/logistics/BecomeProvider"));
 const ProviderDashboard = lazy(() => import("./pages/logistics/ProviderDashboard"));
 const ProviderSettings = lazy(() => import("./pages/logistics/ProviderSettings"));
+const ProviderPublicProfile = lazy(() => import("./pages/logistics/ProviderPublicProfile"));
 const LogisticsTest = lazy(() => import("./pages/test/LogisticsTest"));
 const LogisticsInventoryCreate = lazy(() => import("./pages/platform/LogisticsInventoryCreate"));
 
@@ -409,6 +410,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.logisticsBecomeProvider)} element={<BecomeProvider />} />
           <Route path={removeLeadingSlash(webRoutes.logisticsProviderDashboard)} element={<ProviderDashboard />} />
           <Route path={removeLeadingSlash(webRoutes.logisticsProviderSettings)} element={<ProviderSettings />} />
+          <Route path={removeLeadingSlash(webRoutes.logisticsProviderDetail)} element={<ProviderPublicProfile />} />
           
           {/* Inventory Management */}
           <Route path={removeLeadingSlash(webRoutes.inventoryDashboard)} element={<InventoryDashboard />} />

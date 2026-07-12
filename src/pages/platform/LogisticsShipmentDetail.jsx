@@ -19,7 +19,8 @@ import {
   Plane,
   Ship,
   Info,
-  Trash2
+  Trash2,
+  Radio
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { logisticsAPI } from '../../api-services/logistics';
@@ -28,6 +29,7 @@ import ProviderComparisonSystem from '../../components/logistics/ProviderCompari
 import { useAuth } from '../../context/userContext';
 import { getSession } from '../../lib/session';
 import MoreOptions from '../../components/MoreOptions';
+import PingButton from '../../components/PingButton';
 import { confirmDialog } from '../../lib/confirm.jsx';
 
 const LogisticsShipmentDetail = () => {
@@ -677,6 +679,15 @@ const LogisticsShipmentDetail = () => {
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </button>
+              <PingButton objectType="shipment" objectId={shipment?.id} show={isOwner}>
+                <button
+                  title="Ping shipment"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center"
+                >
+                  <Radio className="w-4 h-4 mr-2" />
+                  Ping
+                </button>
+              </PingButton>
               <button
                 onClick={handleDownload}
                 disabled={!shipment?.id}

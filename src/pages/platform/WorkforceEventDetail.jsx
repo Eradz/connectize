@@ -680,6 +680,18 @@ const WorkforceEventDetail = () => {
                         </p>
                        </Link>
                        {isEventCreator && (
+                         <PingButton objectType="event" objectId={event.id}>
+                           <button
+                             type="button"
+                             title="Ping event"
+                             className="bg-pale_yellow px-4 py-2 rounded-lg hover:bg-gold flex items-center"
+                           >
+                             <Radio className="w-5 h-5 md:mr-2" />
+                             <p className='hidden md:flex'>Ping</p>
+                           </button>
+                         </PingButton>
+                       )}
+                       {isEventCreator && (
                          <MoreOptions className="!w-fit">
                            <div className="flex flex-col gap-2">
                              <button
@@ -1558,15 +1570,6 @@ const WorkforceEventDetail = () => {
                             <Share2 className="w-4 h-4" />
                             Share Event
                           </button>
-                          <PingButton objectType="event" objectId={event.id} show={isEventCreator}>
-                            <button
-                              type="button"
-                              title="Ping event"
-                              className="flex items-center justify-center rounded-lg bg-white/60 border border-gold/20 hover:bg-white transition-colors duration-200 px-4 py-2.5 text-yellow-800"
-                            >
-                              <Radio className="w-5 h-5" />
-                            </button>
-                          </PingButton>
                           <button
                             type="button"
                             onClick={handleBookmark}

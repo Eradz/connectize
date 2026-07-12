@@ -11,6 +11,7 @@ import {
 import { webRoutes } from "../../lib/webRoutes";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
+import PingButton from "../../components/PingButton";
 import { Skeleton } from "../../components/ui/Skeleton";
 import {
   ArrowLeft,
@@ -43,6 +44,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   Search,
+  Radio,
 } from "lucide-react";
 
 class BiddingDetailErrorBoundary extends Component {
@@ -2620,6 +2622,14 @@ function BiddingProjectDetailInner() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {project.is_owner && (
+            <PingButton objectType="bid" objectId={project.id}>
+              <Button variant="outline" size="sm">
+                <Radio className="w-4 h-4 mr-1" />
+                Ping
+              </Button>
+            </PingButton>
+          )}
           {ownerActions.map((a, i) => (
             <Button
               key={i}

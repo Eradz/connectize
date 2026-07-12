@@ -1490,6 +1490,7 @@ export default function DealRoomDetail() {
                               <RefreshCcw className="w-4 h-4 mr-1" />
                               {loading ? 'Loading...' : 'Refresh'}
                             </button>
+                            {canEdit && (
                             <button
                               onClick={() => setShowCreateMilestoneModal(true)}
                               className="flex items-center px-3 py-2 bg-pale_yellow rounded-lg hover:bg-gold disabled:opacity-50 text-sm"
@@ -1497,6 +1498,7 @@ export default function DealRoomDetail() {
                               <Plus className="w-4 h-4 mr-1" />
                               <span className="hidden md:block">{'Add Milestone'}</span>
                             </button>
+                            )}
 
                             </div>
                           </div>
@@ -1512,7 +1514,7 @@ export default function DealRoomDetail() {
                   </div>
                   </div>
                   {milestones.length === 0 ? (
-                    <EmptyMilestones onCreate={() => setShowCreateMilestoneModal(true)} />
+                    <EmptyMilestones onCreate={canEdit ? () => setShowCreateMilestoneModal(true) : undefined} />
                   ) : (
                     milestones.map((m, i) => (
                       <div key={m?.id || i} className="border rounded-lg p-4 hover:border border-[#D9D9D9]">
@@ -1564,6 +1566,7 @@ export default function DealRoomDetail() {
                             )}
                           </div>
                           <div className="flex flex-col items-end space-y-2 ml-4">
+                            {canEdit && (
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => {
@@ -1594,6 +1597,7 @@ export default function DealRoomDetail() {
                                 Complete
                               </button>
                             </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1626,7 +1630,7 @@ export default function DealRoomDetail() {
                 />
               )}
               {active === "valuations" && (
-                <ValuationsPanel dealRoomId={id} />
+                <ValuationsPanel dealRoomId={id} canEdit={canEdit} />
               )}
             </div>
           )}
