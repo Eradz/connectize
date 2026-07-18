@@ -969,7 +969,7 @@ const LogisticsShipmentDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(shipment?.documents || []).map((doc, index) => (
                   <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 line-clamp-1">
                       <div className="p-2 bg-blue-100 rounded-lg">
                         <Download className="w-4 h-4 text-blue-600" />
                       </div>
