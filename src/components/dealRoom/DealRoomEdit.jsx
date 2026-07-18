@@ -4,8 +4,8 @@ import { dealRoomService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast as notify } from 'sonner';
 import { useAuth } from '../../context/userContext';
-import { getCompanyByIdOrEmail } from '../../api-services/companies';
 import CurrencyPicker from '../CurrencyPicker';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 
 export default function DealRoomEdit() {
   const { id } = useParams();
@@ -40,7 +40,7 @@ export default function DealRoomEdit() {
     const fetchCompanies = async () => {
       try {
         setCompaniesLoading(true);
-        const result = await getCompanyByIdOrEmail(null);
+        const result = await getMyActionableCompanies();
         if (!cancelled && Array.isArray(result)) {
           setCompanies(result);
         }

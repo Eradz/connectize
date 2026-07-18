@@ -70,6 +70,7 @@ import CommentThread from "../../comments/CommentThread";
 import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import CommentAsSelector from "../../comments/CommentAsSelector";
 import { webRoutes } from "../../../lib/webRoutes";
+import EditPostModal from "./EditPostModal";
 
 // Large starting index so Virtuoso can absorb prepended (newly polled) posts
 // by decrementing firstItemIndex without the value ever going negative.
@@ -988,7 +989,7 @@ export const DiscoverPostItem = ({
           title={`Edit Post`}
           footerContent={<></>}
         >
-          <Textarea
+          {/* <Textarea
             value={editMessage}
             placeholder="Please enter at least 10 character length of text"
             className="max-h-40 !text-sm placeholder:!text-sm"
@@ -1002,6 +1003,14 @@ export const DiscoverPostItem = ({
               } else if (editMessage.trim().length >= 10) {
                 setErrorMessage(null);
               }
+            }}
+          /> */}
+          <EditPostModal
+            post={postItem}
+            isOpen={isEditing}
+            onClose={() => setIsEditing(false)}
+            onSave={async (payload) => {
+              await editPost(postItem?.id, payload.body, postItem);
             }}
           />
           {errorMessage && (

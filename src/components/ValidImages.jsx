@@ -34,12 +34,12 @@ export default function ValidImages({
                   className="absolute -right-1 -top-1 bg-white !text-[.5rem] !size-6 xs:opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 />
                 <img
-                  src={URL.createObjectURL(image)}
-                  alt={image.name}
+                  src={typeof image === "string" ? image : URL.createObjectURL(image)}
+                  alt={image?.name || `Image ${index + 1}`}
                   className="w-full h-20 object-cover rounded-md shadow"
                 />
                 <p className="text-center mt-1 text-xs font-semibold">
-                  {image.name}
+                  {image?.name || `Image ${index + 1}`}
                 </p>
               </div>
             ))}
