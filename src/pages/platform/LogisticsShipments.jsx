@@ -62,7 +62,6 @@ const LogisticsShipments = () => {
   useEffect(() => {
     // Check authentication before loading data
     const session = getSession();
-    console.log('🔍 Initial session check:', session ? 'Found session' : 'No session');
     
     if (!session) {
       console.warn('❌ No session found, redirecting to login');
@@ -90,10 +89,7 @@ const LogisticsShipments = () => {
         return;
       }
       
-      console.log('🔍 Loading shipments data...');
-      console.log('🔑 Session user:', currentSession?.user);
-      console.log('🔑 User privileges:', { userIsStaff, session: currentSession?.user });
-      
+            
       // Determine scope parameters
       const scopeParams = userIsStaff ? { scope: 'all' } : {};
       
@@ -106,10 +102,6 @@ const LogisticsShipments = () => {
         ordering
       };
 
-      console.log('🔧 Shipments API params:', params);
-      
-      // Test direct API call first to verify authentication
-      console.log('🧪 Testing direct API authentication...');
       try {
         // Use a relative URL so this works in dev (Vite proxy) and avoids URL parsing edge-cases
         const testUrl = `/api/v1/logistics/shipments/?${new URLSearchParams(
@@ -158,7 +150,6 @@ const LogisticsShipments = () => {
       }
       
       const response = await logisticsAPI.getShipments(params);
-      console.log('🚛 Shipments API response:', response);
       
       // api.get returns { data }, DRF pagination returns { results, count }
       const data = response?.data ?? response;

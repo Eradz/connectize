@@ -82,11 +82,7 @@ export default function DealRoomEdit() {
   const loadDeal = async () => {
     try {
       setLoading(true);
-      console.log('Loading deal with ID:', id);
-      console.log('GET URL would be:', `api/v1/deals/deal-rooms/${id}/`);
-      
       const response = await dealRoomService.getById(id);
-      console.log('Deal loaded successfully:', response);
       
       const dealData = response?.data || response;
       
@@ -146,12 +142,8 @@ export default function DealRoomEdit() {
         company: formData.company || null
       };
 
-      console.log('Sending update data:', updateData);
-      console.log('Deal ID:', id);
-      console.log('Update URL would be:', `api/v1/deals/deal-rooms/${id}/`);
 
       const result = await dealRoomService.update(id, updateData);
-      console.log('Update successful, result:', result);
       notify.success('Deal updated successfully');
       navigate(webRoutes.dealRoomDetail.replace(':id', id));
     } catch (error) {

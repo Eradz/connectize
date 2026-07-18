@@ -259,15 +259,15 @@ const LogisticsTracking = () => {
                 disabled={loading}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                <RefreshCw className={`w-4 h-4 md:mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <span className='hidden md:inline-block'>Refresh</span>
               </button>
               <button
                 onClick={() => navigate(webRoutes.logisticsShipmentCreate || '/logistics/shipments/create')}
                 className="bg-gold hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                New Shipment
+                <Plus className="w-4 h-4 md:mr-2" />
+                <span className='hidden md:inline-block'>New Shipment</span>
               </button>
             </div>
           </div>
