@@ -19,7 +19,7 @@ const cspPlugin = () => {
         const cspHeader = [
           "default-src 'self'",
           // Stripe iframes & experiments
-          "frame-src 'self' https://js.stripe.com https://*.stripe.com https://hooks.stripe.com https://accounts.google.com https://app.termly.io",
+          "frame-src 'self' https://js.stripe.com https://*.stripe.com https://hooks.stripe.com https://accounts.google.com https://app.termly.io https://www.googletagmanager.com",
           "child-src 'self' https://js.stripe.com https://*.stripe.com",
           // Scripts (keep js.stripe.com first for clarity)
           "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://js.stripe.com https://*.stripe.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://va.vercel-scripts.com https://accounts.google.com https://apis.google.com https://www.googletagmanager.com https://app.termly.io",
