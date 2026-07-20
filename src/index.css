@@ -507,6 +507,24 @@ a {
   }
 }
 
+.consent-preferences-footer {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  background: #f7f7f7;
+}
+
+.consent-preferences-footer .termly-display-preferences {
+  color: #4b5563;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.consent-preferences-footer .termly-display-preferences:hover,
+.consent-preferences-footer .termly-display-preferences:focus-visible {
+  color: #111827;
+}
+
 /* Tooltip styling */
 .ql-tooltip {
   z-index: 1000;
