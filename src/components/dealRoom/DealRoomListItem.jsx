@@ -12,13 +12,7 @@
 import { Link } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';
 import { shareThis } from '../../lib/utils';
-  
- const formatCompactNumber = (num) => {
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-    return num.toString();
-  };
+import { formatCompactNumber } from '../../utils/formatNumber';
 
     const getDealTypeIcon = (type) => {
     switch (type) {

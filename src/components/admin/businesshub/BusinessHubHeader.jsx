@@ -6,6 +6,7 @@ import StarIcon from "../../../icon/StarIcon"
 import { webRoutes } from "../../../lib/webRoutes";
 import { Link } from "react-router-dom"
 import { Plus } from "lucide-react";
+import { formatCompactNumber } from "../../../utils/formatNumber";
 // Trend Up Icon Component
 const TrendUpIcon = () => (
   <svg
@@ -26,12 +27,6 @@ const TrendUpIcon = () => (
 );
 
 export default function BusinessHubHeader({dashboardData, subscription}) {
-  const formatCompactNumber = (num) => {
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-    return num.toString();
-  };
 
   const stats = [
     { 

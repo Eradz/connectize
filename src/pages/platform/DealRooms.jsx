@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { dealRoomService } from '../../api-services/oilgas';
+import { formatCompactNumber } from "../../utils/formatNumber";
 
 const DealRooms = () => {
   const [dealRooms, setDealRooms] = useState([]);
@@ -96,12 +97,6 @@ const DealRooms = () => {
     }).format(amount);
   };
 
-  const formatCompactNumber = (num) => {
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-    return num.toString();
-  };
 
   const getStatusColor = (status) => {
     switch (status) {

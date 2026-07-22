@@ -6,6 +6,7 @@
 import { Link } from 'react-router-dom';
 import { webRoutes } from '../../lib/webRoutes';
 import { DealIcon } from '../../icon/deal';
+import { formatCompactNumber } from '../../utils/formatNumber';
  
   const getStatusColor = (status) => {
     switch (status) {
@@ -15,13 +16,6 @@ import { DealIcon } from '../../icon/deal';
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
-  };
- const formatCompactNumber = (num) => {
-  if(num === null || num === undefined) return "--";
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-    return num.toString();
   };
 
   export const DealRoomCard = ({ deal }) => (
