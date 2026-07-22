@@ -32,6 +32,7 @@ import {
   aiComplianceService 
 } from '../../api-services/oilgas';
 import SubscriptionCard from '../../components/dashboard/SubscriptionCard';
+import { formatCompactNumber } from '../../utils/formatNumber';
 
 const PlatformDashboard = () => {
   const seoData = getSEOConfig("platformDashboard");
@@ -127,13 +128,6 @@ const PlatformDashboard = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  };
-
-  const formatCompactNumber = (num) => {
-    if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-    return num.toString();
   };
 
   const getTimeAgo = (timestamp) => {
