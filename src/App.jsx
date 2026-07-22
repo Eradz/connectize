@@ -39,6 +39,7 @@ const ProfileLayout = lazy(() => import("./components/profile/layout"));
 const Overview = lazy(() => import("./components/profile/overview"));
 const Profile = lazy(() => import("./components/profile/profile"));
 const CreatePostPage = lazy(() => import("./pages/posts/CreatePostPage"));
+const EditPostPage = lazy(() => import("./pages/posts/EditPostPage"));
 const SuccessPage = lazy(() => import("./pages/authentication/successpage"));
 const BookMark = lazy(() => import("./pages/bookmark"));
 const BlockedUsersPage = lazy(() => import("./pages/blocked-users/index"));
@@ -236,6 +237,7 @@ const removeLeadingSlash = (path) => {
           {/* Public, crawlable post detail — no auth wall so it can be indexed */}
           <Route path="posts/:id" element={<SinglePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.createPost)} element={<CreatePostPage />} />
+          <Route path={removeLeadingSlash(webRoutes.editPost)} element={<EditPostPage />} />
           <Route path={removeLeadingSlash(webRoutes.profile)} element={<Profile />} />
 
           {/* Profile Update Routes */}

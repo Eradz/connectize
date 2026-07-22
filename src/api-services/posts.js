@@ -153,7 +153,7 @@ export const createPost = async (formData, companyId, options = {}) => {
   return post;
 };
 
-export const editPost = async (id, body, postItem) => {
+export const editPost = async (id, body, postItem, options = {}) => {
   const post = await makeApiRequest({
     url: `api/posts/${id}/`,
     method: "PUT",
@@ -161,6 +161,7 @@ export const editPost = async (id, body, postItem) => {
       ...postItem,
       body,
     },
+    onUploadProgress: options.onUploadProgress, 
   });
 
   return post;

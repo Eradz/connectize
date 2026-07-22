@@ -128,7 +128,7 @@ export default function MyListings() {
               className="flex items-center gap-2 bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/90"
             >
               <Plus size={20} />
-              Create Listing
+              <span className="hidden sm:inline">Create Listing</span>
             </Link>
           </div>
         </div>

@@ -4,8 +4,8 @@ import { dealRoomService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { toast as notify } from 'sonner';
 import { useAuth } from '../../context/userContext';
-import { getCompanyByIdOrEmail } from '../../api-services/companies';
 import CurrencyPicker from '../CurrencyPicker';
+import { getMyActionableCompanies } from '../../api-services/representatives';
 
 export default function DealRoomEdit() {
   const { id } = useParams();
@@ -40,7 +40,7 @@ export default function DealRoomEdit() {
     const fetchCompanies = async () => {
       try {
         setCompaniesLoading(true);
-        const result = await getCompanyByIdOrEmail(null);
+        const result = await getMyActionableCompanies();
         if (!cancelled && Array.isArray(result)) {
           setCompanies(result);
         }
@@ -82,11 +82,7 @@ export default function DealRoomEdit() {
   const loadDeal = async () => {
     try {
       setLoading(true);
-      console.log('Loading deal with ID:', id);
-      console.log('GET URL would be:', `api/v1/deals/deal-rooms/${id}/`);
-      
       const response = await dealRoomService.getById(id);
-      console.log('Deal loaded successfully:', response);
       
       const dealData = response?.data || response;
       
@@ -146,12 +142,8 @@ export default function DealRoomEdit() {
         company: formData.company || null
       };
 
-      console.log('Sending update data:', updateData);
-      console.log('Deal ID:', id);
-      console.log('Update URL would be:', `api/v1/deals/deal-rooms/${id}/`);
 
       const result = await dealRoomService.update(id, updateData);
-      console.log('Update successful, result:', result);
       notify.success('Deal updated successfully');
       navigate(webRoutes.dealRoomDetail.replace(':id', id));
     } catch (error) {

@@ -12,9 +12,7 @@ const logistics = {
   getShipmentRequests: async (params = {}) => {
     try {
       const requestParams = cleanParams(params);
-      console.log('🔗 Making requests API call to:', '/api/v1/logistics/requests/', 'with params:', requestParams);
       const response = await api.get('/api/v1/logistics/requests/', { params: requestParams });
-      console.log('📋 Requests API response received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Requests API error:', error);
@@ -45,9 +43,7 @@ const logistics = {
   // Shipments
   getShipments: async (params = {}) => {
     try {
-      console.log('🚛 Making shipments API call with params:', params);
       const response = await api.get('/api/v1/logistics/shipments/', { params });
-      console.log('🚛 Shipments API response received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Shipments API error:', error);
@@ -140,9 +136,7 @@ const logistics = {
   // Logistics Providers
   getLogisticsProviders: async (params = {}) => {
     try {
-      console.log('🏢 Making providers API call with params:', params);
       const response = await api.get('/api/v1/logistics/providers/', { params });
-      console.log('🏢 Providers API response received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Providers API error:', error);
@@ -203,9 +197,7 @@ const logistics = {
   // Inventory Items
   getInventoryItems: async (params = {}) => {
     try {
-      console.log('📦 Making inventory API call with params:', params);
       const response = await api.get('/api/v1/logistics/inventory-items/', { params });
-      console.log('📦 Inventory API response received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Inventory API error:', error);
@@ -215,9 +207,7 @@ const logistics = {
 
   getInventoryItem: async (id) => {
     try {
-      console.log('📦 Fetching single inventory item:', id);
       const response = await api.get(`/api/v1/logistics/inventory-items/${id}/`);
-      console.log('📦 Item data received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error fetching inventory item:', error);
@@ -249,9 +239,7 @@ const logistics = {
   // Inventory Field Choices (for dropdowns)
   getInventoryFieldChoices: async () => {
     try {
-      console.log('📋 Fetching inventory field choices...');
       const response = await api.get('/api/v1/logistics/inventory-items/field_choices/');
-      console.log('📋 Field choices received:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error fetching field choices:', error);
@@ -302,15 +290,12 @@ const logistics = {
   // Export data
   exportShipments: async (format = 'csv', filters = {}) => {
     try {
-      console.log('📥 Exporting shipments with filters:', filters);
       const response = await api.get('/api/v1/logistics/shipments/export/', {
         // NOTE: DRF treats `format=` as content-negotiation in some setups and can return 404.
         // Use a different param name and let the backend treat it as a hint.
         params: { export_format: format, ...filters },
         responseType: 'blob'
       });
-      console.log('📥 Export response:', response);
-      console.log('📥 Export completed, blob size:', response?.data?.size, 'type:', response?.data?.type);
       
       // Check if response or response.data is null/undefined
       if (!response || !response.data) {
@@ -341,11 +326,9 @@ const logistics = {
 
   downloadShipment: async (id) => {
     try {
-      console.log('📥 Downloading shipment:', id);
       const response = await api.get(`/api/v1/logistics/shipments/${id}/download/`, {
         responseType: 'blob'
       });
-      console.log('📥 Shipment download completed, blob size:', response.data?.size);
       return response.data;
     } catch (error) {
       console.error('❌ Shipment download error:', error);
@@ -355,12 +338,10 @@ const logistics = {
 
   exportInventoryItems: async (filters = {}) => {
     try {
-      console.log('📥 Exporting inventory items with filters:', filters);
       const response = await api.get('/api/v1/logistics/inventory-items/export/', {
         params: filters,
         responseType: 'blob'
       });
-      console.log('📥 Export completed successfully');
       return response.data;
     } catch (error) {
       console.error('❌ Export error:', error);
@@ -377,9 +358,7 @@ const logistics = {
   // Calculate rates for a shipment request
   calculateRates: async (requestId, options = {}) => {
     try {
-      console.log('💰 Calculating rates for request:', requestId, 'options:', options);
       const response = await api.post(`/api/v1/logistics/requests/${requestId}/calculate-rates/`, options);
-      console.log('💰 Rates calculated:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Calculate rates error:', error);
@@ -395,12 +374,10 @@ const logistics = {
   // Assign provider to a shipment request
   assignProvider: async (requestId, providerId, serviceCode = null) => {
     try {
-      console.log('🤝 Assigning provider:', providerId, 'to request:', requestId);
       const response = await api.post(`/api/v1/logistics/requests/${requestId}/award-to-provider/`, {
         provider_name: providerId,
         service_code: serviceCode
       });
-      console.log('🤝 Provider assigned:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Assign provider error:', error);

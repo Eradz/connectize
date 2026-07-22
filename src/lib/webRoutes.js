@@ -1,3 +1,5 @@
+import { editPost } from "../api-services/posts";
+
 const webRoutes = {
   acceptRepresentation: "/co/representatives/accept",
   address: "/address",
@@ -21,6 +23,7 @@ const webRoutes = {
   companyInformation: "/company/information",
   companyDocuments: "/company/documents",
   dashboard: "/dashboard",
+  editPost: "/post/:id/edit",
   enterpriseSSOSetup: "/co/settings/enterprise-sso",
   feed: "/",
   feedLayout: "/feed",
