@@ -1,0 +1,110 @@
+.privacy-policy-page {
+  width: 100%;
+  min-width: 0;
+  padding: 2rem 1rem 3rem;
+}
+
+.privacy-policy-document {
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  color: #595959;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.privacy-policy-document,
+.privacy-policy-document * {
+  box-sizing: border-box;
+}
+
+.privacy-policy-document [data-custom-class="body"],
+.privacy-policy-document [data-custom-class="body"] * {
+  background: transparent !important;
+}
+
+.privacy-policy-document [data-custom-class="title"],
+.privacy-policy-document [data-custom-class="title"] * {
+  color: #000 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 26px !important;
+}
+
+.privacy-policy-document [data-custom-class="subtitle"],
+.privacy-policy-document [data-custom-class="subtitle"] * {
+  color: #595959 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 14px !important;
+}
+
+.privacy-policy-document [data-custom-class="heading_1"],
+.privacy-policy-document [data-custom-class="heading_1"] * {
+  color: #000 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 19px !important;
+}
+
+.privacy-policy-document [data-custom-class="heading_2"],
+.privacy-policy-document [data-custom-class="heading_2"] * {
+  color: #000 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 17px !important;
+}
+
+.privacy-policy-document [data-custom-class="body_text"],
+.privacy-policy-document [data-custom-class="body_text"] * {
+  color: #595959 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 14px !important;
+}
+
+.privacy-policy-document [data-custom-class="link"],
+.privacy-policy-document [data-custom-class="link"] * {
+  color: #3030f1 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 14px !important;
+  overflow-wrap: anywhere !important;
+}
+
+.privacy-policy-document a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-policy-document [id] {
+  scroll-margin-top: 1rem;
+}
+
+.privacy-policy-document ul {
+  list-style-type: square;
+  padding-left: 1.5rem;
+}
+
+.privacy-policy-document ul > li > ul {
+  list-style-type: circle;
+}
+
+.privacy-policy-document ul > li > ul > li > ul {
+  list-style-type: square;
+}
+
+.privacy-policy-document ol {
+  padding-left: 1.5rem;
+}
+
+.privacy-policy-document ol li {
+  font-family: Arial, sans-serif;
+}
+
+@media (max-width: 640px) {
+  .privacy-policy-page {
+    padding: 1.5rem 0.25rem 2rem;
+  }
+
+  .privacy-policy-document [data-custom-class="title"],
+  .privacy-policy-document [data-custom-class="title"] * {
+    font-size: 23px !important;
+  }
+}
