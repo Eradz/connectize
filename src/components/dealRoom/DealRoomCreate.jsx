@@ -398,27 +398,6 @@ const StepContent = ({
              <p className="text-gray-800 leading-relaxed">{formData.description}</p>
           </div>
 
-          {/* <div className="pt-4 border-t border-gray-200 flex gap-4">
-            {formData.is_confidential && (
-              <span className="flex items-center text-yellow-700 bg-yellow-100 px-2 py-1 rounded text-xs font-medium">
-                <Lock className="w-3 h-3 mr-1" /> Confidential
-              </span>
-            )}
-            {formData.requires_nda && (
-               <span className="flex items-center text-blue-700 bg-blue-100 px-2 py-1 rounded text-xs font-medium">
-                <FileText className="w-3 h-3 mr-1" /> NDA Required
-              </span>
-            )}
-          </div> */}
-          
-          {/* <div className="pt-4 border-t border-gray-200">
-             <span className="text-gray-500 block mb-2">Participants ({formData.participants.length})</span>
-             <div className="flex flex-wrap gap-2">
-                {formData.participants.map(p => (
-                  <span key={p.email} className="bg-white px-3 py-1 rounded-full text-xs border border-gray-200">{p.email} ({p.role})</span>
-                ))}
-              </div>
-          </div> */}
         </div>
       </div>
     );
@@ -581,10 +560,10 @@ const DealRoomCreate = () => {
         return true;
       
       case 2:
-        if (!formData.estimated_value || parseFloat(formData.estimated_value) <= 0) {
-          toast.error('Please enter a valid estimated value');
-          return false;
-        }
+        // if (!formData.estimated_value || parseFloat(formData.estimated_value) <= 0) {
+        //   toast.error('Please enter a valid estimated value');
+        //   return false;
+        // }
         if (!formData.target_close_date) {
           toast.error('Target close date is required');
           return false;
