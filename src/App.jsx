@@ -234,8 +234,12 @@ const removeLeadingSlash = (path) => {
           <Route path="" element={<FeedLayout />}>
             <Route path="posts/:id/insights" element={<PostInsightsPage />} />
           </Route>
-          {/* Public, crawlable post detail — no auth wall so it can be indexed */}
-          <Route path="posts/:id" element={<SinglePostPage />} />
+          {/* Public, crawlable post detail — no auth wall so it can be indexed,
+              but keep the feed layout (with the right sidebar) so logged-in
+              users don't lose it when opening a post. */}
+          <Route element={<FeedLayout requireAuth={false} />}>
+            <Route path="posts/:id" element={<SinglePostPage />} />
+          </Route>
           <Route path={removeLeadingSlash(webRoutes.createPost)} element={<CreatePostPage />} />
           <Route path={removeLeadingSlash(webRoutes.editPost)} element={<EditPostPage />} />
           <Route path={removeLeadingSlash(webRoutes.profile)} element={<Profile />} />

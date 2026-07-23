@@ -4,10 +4,13 @@ import PageLoading from "../components/PageLoading";
 import useRedirect from "../hooks/useRedirect";
 import { getSession } from "../lib/session";
 
-function FeedLayout() {
+function FeedLayout({ requireAuth = true }) {
   const session = getSession();
-  useRedirect(!session, "/login");
-  if (!session) return <PageLoading text="Getting page ready" />;
+  // Public pages (e.g. the crawlable post detail) keep the feed layout — and
+  // its right sidebar — without forcing a login. The sidebar widgets degrade
+  // gracefully when logged out (they render nothing / "No suggestions").
+  useRedirect(requireAuth && !session, "/login");
+  if (requireAuth && !session) return <PageLoading text="Getting page ready" />;
   return (
     <section className="w-full flex max-xl:flex-col gap-3 lg:justify-between ">
       <section className="w-full xl:w-[58%] shrink-0 space-y-6">
