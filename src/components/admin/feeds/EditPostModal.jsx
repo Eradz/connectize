@@ -198,15 +198,15 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={handleBackdropClick}
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-post-title"
     >
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl bg-white shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-gray-100">
           <h2 id="edit-post-title" className="text-base font-semibold text-gray-900">
             Edit post
           </h2>
@@ -222,13 +222,21 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto px-5 py-4 flex-1">
+        <div className="overflow-y-auto px-4 sm:px-5 py-4 flex-1">
           <div className="flex items-center gap-3 mb-4">
-            <img
-              src={post.user.avatar}
-              alt={post.user.full_name}
-              className="h-10 w-10 rounded-full object-cover bg-gray-100"
-            />
+            {post.user?.avatar ? (
+              <img
+                src={post.user.avatar}
+                alt={post.user.full_name || "User"}
+                className="h-10 w-10 rounded-full object-cover bg-gray-100 shrink-0"
+              />
+            ) : (
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/30 text-sm font-semibold text-dark">
+                {(post.user?.display_name || post.user?.full_name || "U")
+                  .charAt(0)
+                  .toUpperCase()}
+              </span>
+            )}
             <div className="min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
                 {post.user.display_name || post.user.full_name}
@@ -248,15 +256,30 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
               setMessage(e.target.value);
               if (errorMessage) setErrorMessage("");
             }}
-            rows={6}
+            rows={5}
             placeholder="What do you want to share?"
-            className={`w-full resize-none rounded-lg border px-3 py-2.5 text-[15px] leading-relaxed text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-shadow ${
+            className={`w-full resize-y min-h-[120px] sm:min-h-[150px] rounded-lg border px-3 py-2.5 text-[15px] leading-relaxed text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-shadow ${
               errorMessage
                 ? "border-red-300 focus:ring-red-200"
-                : "border-gray-200 focus:ring-indigo-200 focus:border-indigo-300"
+                : "border-gray-200 focus:ring-gold/40 focus:border-gold"
             }`}
           />
-          {errorMessage && <p className="mt-1 text-xs text-red-500">{errorMessage}</p>}
+          <div className="mt-1 flex items-center justify-between gap-2">
+            {errorMessage ? (
+              <p className="text-xs text-red-500">{errorMessage}</p>
+            ) : (
+              <p className="text-xs text-gray-400">
+                {message.trim().length < 10
+                  ? `${10 - message.trim().length} more character${
+                      10 - message.trim().length === 1 ? "" : "s"
+                    } needed`
+                  : " "}
+              </p>
+            )}
+            <span className="shrink-0 text-xs text-gray-400">
+              {message.length}
+            </span>
+          </div>
 
           {/* Images */}
           {totalImageCount > 0 && (
@@ -283,7 +306,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
                     className="relative group rounded-lg overflow-hidden border border-gray-100"
                   >
                     <img src={previewUrl} alt="New attachment" className="h-32 w-full object-cover" />
-                    <span className="absolute bottom-1.5 left-1.5 rounded bg-indigo-600/90 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    <span className="absolute bottom-1.5 left-1.5 rounded bg-gold px-1.5 py-0.5 text-[10px] font-semibold text-dark">
                       New
                     </span>
                     <button
@@ -316,7 +339,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 hover:border-indigo-300 hover:text-indigo-600 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 hover:border-gold hover:text-dark hover:bg-gold/10 transition-colors disabled:opacity-50"
               >
                 <ImagePlus size={16} />
                 Add photo
@@ -338,7 +361,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
             </span>
             <span
               className={`relative h-5 w-9 rounded-full transition-colors ${
-                allowComments ? "bg-indigo-600" : "bg-gray-300"
+                allowComments ? "bg-gold" : "bg-gray-300"
               }`}
             >
               <span
@@ -359,7 +382,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
               <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    uploadProgress.stage === "failed" ? "bg-red-500" : "bg-indigo-600"
+                    uploadProgress.stage === "failed" ? "bg-red-500" : "bg-gold"
                   }`}
                   style={{ width: `${uploadProgress.percent}%` }}
                 />
@@ -369,12 +392,12 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-5 py-4">
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 border-t border-gray-100 px-4 sm:px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+            className="rounded-lg px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
@@ -382,7 +405,7 @@ export default function EditPostModal({ post, isOpen, onClose, onUpdated }) {
             type="button"
             onClick={handleSaveEdit}
             disabled={!canSave}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gold px-5 py-2.5 sm:py-2 text-sm font-semibold text-dark hover:bg-[#E0B533] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading && <Loader2 size={15} className="animate-spin" />}
             {isLoading ? "Saving..." : "Save changes"}

@@ -222,14 +222,6 @@ export default function DealRoomDetail() {
     fetchPermissions();
   }, [id, user]);
 
-  // Load pending join requests for admins when viewing the participants tab.
-  useEffect(() => {
-    if (active === "participants" && canManageParticipants) {
-      fetchJoinRequests();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, active, canManageParticipants]);
-
   // Check if current user has edit privileges (initiator, admin, or edit permission)
   // Uses API permissions if available, falls back to local calculation
   const canEdit = useMemo(() => {
@@ -345,6 +337,14 @@ export default function DealRoomDetail() {
       setJoinActionId(null);
     }
   };
+
+  // Load pending join requests for admins when viewing the participants tab.
+  useEffect(() => {
+    if (active === "participants" && canManageParticipants) {
+      fetchJoinRequests();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, active, canManageParticipants]);
 
   /* Validates milestone creation form */
   const validateMilestoneForm = (formData) => {
