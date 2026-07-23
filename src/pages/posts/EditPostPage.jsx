@@ -95,6 +95,10 @@ function EditPostPage() {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [validImages, setValidImages] = useState([]);
+  // The image URLs the post already had, so we can tell the backend which
+  // existing images were removed (validImages keeps existing URL strings and
+  // newly added File objects together; ValidImages renders both).
+  const [originalImages, setOriginalImages] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [selectedGif, setSelectedGif] = useState("");
@@ -126,6 +130,7 @@ function EditPostPage() {
         }
         setMessage(postData.body ?? "");
         setValidImages(postData.images ?? []);
+        setOriginalImages(postData.images ?? []);
       }
     catch(error){
         notify.error('Failed to load deal details');
@@ -161,7 +166,9 @@ function EditPostPage() {
       .filter(isImageFile)
       .filter(isImageSize);
 
-    setValidImages(validImageFiles);
+    // Append to whatever is already there (existing image URLs + earlier picks)
+    // instead of replacing, so adding an image keeps the current ones.
+    setValidImages((prev) => [...prev, ...validImageFiles]);
 
     if (validImageFiles.length < selectedFiles.length) {
       toast.info(`${unSupportedText} or ${largeFileText}`);
@@ -221,7 +228,16 @@ function EditPostPage() {
       if (selectedCompanyId) {
         formData.append("company", selectedCompanyId);
       }
-      validImages.forEach((image) => formData.append("images", image));
+
+      // Existing images are URL strings; newly added ones are File objects.
+      const keptImageUrls = validImages.filter((img) => typeof img === "string");
+      const newImageFiles = validImages.filter((img) => typeof img !== "string");
+      const removedImageUrls = originalImages.filter(
+        (url) => !keptImageUrls.includes(url)
+      );
+      formData.append("existing_images", JSON.stringify(keptImageUrls));
+      formData.append("removed_images", JSON.stringify(removedImageUrls));
+      newImageFiles.forEach((image) => formData.append("images", image));
       if (selectedGif) formData.append("gif", selectedGif);
 
       setUploadProgress({
@@ -328,6 +344,7 @@ function EditPostPage() {
     mentionCompanies,
     mentionUsers,
     validImages,
+    originalImages,
     selectedGif,
     selectedCompanyId,
     navigate,

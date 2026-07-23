@@ -142,6 +142,10 @@ export default function DealRoomDetail() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteDocumentData, setDeleteDocumentData] = useState(null);
   const [isDeletingDeal, setIsDeletingDeal] = useState(false);
+  // Join workflow: request-to-join for public deals + admin approvals
+  const [joinSubmitting, setJoinSubmitting] = useState(false);
+  const [joinRequests, setJoinRequests] = useState([]);
+  const [joinActionId, setJoinActionId] = useState(null);
   const [editingMilestone, setEditingMilestone] = useState(null);
   const [showDeleteDealModal, setShowDeleteDealModal] = useState(false);
   // Milestone modal state: progress and optional notes
@@ -218,6 +222,14 @@ export default function DealRoomDetail() {
     fetchPermissions();
   }, [id, user]);
 
+  // Load pending join requests for admins when viewing the participants tab.
+  useEffect(() => {
+    if (active === "participants" && canManageParticipants) {
+      fetchJoinRequests();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, active, canManageParticipants]);
+
   // Check if current user has edit privileges (initiator, admin, or edit permission)
   // Uses API permissions if available, falls back to local calculation
   const canEdit = useMemo(() => {
@@ -251,6 +263,88 @@ export default function DealRoomDetail() {
 
   // Check if user can manage participants (admin only)
   const canManageParticipants = canDelete;
+
+  // ── Join workflow ──────────────────────────────────────────────────────
+  // A deal is public when it is not confidential; only public deals accept
+  // self-service join requests.
+  const isPublicDeal = deal ? deal.is_confidential === false : false;
+  const joinStatus = userPermissions.join_status || 'none';
+  const isMember = userPermissions.can_view || userPermissions.is_initiator ||
+    (deal && (deal.initiator === user?.id || deal.initiator_id === user?.id));
+  // Show the request-to-join control for public deals to signed-in non-members.
+  const canRequestJoin = Boolean(
+    user && isPublicDeal && !isMember && joinStatus !== 'approved'
+  );
+
+  const handleRequestJoin = async () => {
+    if (!deal || joinSubmitting) return;
+    setJoinSubmitting(true);
+    try {
+      const res = await dealRoomService.requestJoin(id);
+      setUserPermissions((prev) => ({ ...prev, join_status: 'pending' }));
+      notify.success(
+        res?.detail || "Your request to join has been sent for approval."
+      );
+    } catch (error) {
+      const msg =
+        error?.response?.data?.error ||
+        error?.message ||
+        "Could not send your join request.";
+      notify.error(msg);
+    } finally {
+      setJoinSubmitting(false);
+    }
+  };
+
+  const fetchJoinRequests = async () => {
+    if (!id || !canManageParticipants) return;
+    try {
+      const res = await dealRoomService.getJoinRequests(id);
+      setJoinRequests(Array.isArray(res) ? res : res?.results || []);
+    } catch (error) {
+      console.warn("Could not fetch join requests:", error);
+    }
+  };
+
+  const handleApproveJoin = async (participant) => {
+    setJoinActionId(participant.id);
+    try {
+      await dealRoomService.approveJoin(id, participant.id);
+      setJoinRequests((prev) => prev.filter((r) => r.id !== participant.id));
+      notify.success(
+        `${participant.user_name || participant.user_email || "Participant"} approved`
+      );
+      // Refresh the participants list so the new member appears.
+      try {
+        const listRes = await makeApiRequest({
+          url: `api/v1/deals/participants/`,
+          method: "GET",
+          params: { deal_room: id },
+        });
+        const rows = Array.isArray(listRes) ? listRes : listRes?.results || [];
+        setParticipants(rows);
+      } catch (_) {
+        /* non-fatal */
+      }
+    } catch (error) {
+      notify.error(error?.response?.data?.error || "Could not approve request");
+    } finally {
+      setJoinActionId(null);
+    }
+  };
+
+  const handleRejectJoin = async (participant) => {
+    setJoinActionId(participant.id);
+    try {
+      await dealRoomService.rejectJoin(id, participant.id);
+      setJoinRequests((prev) => prev.filter((r) => r.id !== participant.id));
+      notify.success("Join request declined");
+    } catch (error) {
+      notify.error(error?.response?.data?.error || "Could not decline request");
+    } finally {
+      setJoinActionId(null);
+    }
+  };
 
   /* Validates milestone creation form */
   const validateMilestoneForm = (formData) => {
@@ -593,6 +687,22 @@ export default function DealRoomDetail() {
                 )}
               </div>
              <div className="flex items-center gap-2">
+               {canRequestJoin && (
+                 <button
+                   onClick={handleRequestJoin}
+                   disabled={joinSubmitting || joinStatus === 'pending'}
+                   className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-gold text-white text-sm hover:bg-pale_yellow mb-4 disabled:opacity-60 disabled:cursor-not-allowed"
+                 >
+                   <UserPlus className="w-4 h-4" />
+                   <span className="hidden md:flex">
+                     {joinStatus === 'pending'
+                       ? 'Request Pending'
+                       : joinSubmitting
+                       ? 'Requesting...'
+                       : 'Request to Join'}
+                   </span>
+                 </button>
+               )}
                {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
                 <PencilIcon className= "w-4 h-4"/>
                 <span className="hidden md:flex">
@@ -1383,6 +1493,46 @@ export default function DealRoomDetail() {
               )}
               {active === "participants" && (
                 <div className="space-y-4">
+                  {canManageParticipants && joinRequests.length > 0 && (
+                    <div className="border border-amber-200 bg-amber-50 rounded-lg p-3 space-y-2">
+                      <h4 className="font-semibold text-amber-900 text-sm">
+                        Pending Join Requests ({joinRequests.length})
+                      </h4>
+                      {joinRequests.map((r) => (
+                        <div
+                          key={r.id}
+                          className="flex items-center justify-between bg-white rounded-md border border-amber-100 px-3 py-2"
+                        >
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">
+                              {r.user_name || r.user_email || "User"}
+                            </div>
+                            {r.company_name && (
+                              <div className="text-xs text-gray-500">
+                                on behalf of {r.company_name}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleApproveJoin(r)}
+                              disabled={joinActionId === r.id}
+                              className="px-3 py-1 text-xs rounded bg-gold text-white hover:bg-pale_yellow disabled:opacity-60"
+                            >
+                              {joinActionId === r.id ? "..." : "Approve"}
+                            </button>
+                            <button
+                              onClick={() => handleRejectJoin(r)}
+                              disabled={joinActionId === r.id}
+                              className="px-3 py-1 text-xs rounded border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-60"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {participants.length === 0 ? (
                     <EmptyParticipants onInvite={() => setShowParticipantModal(true)} />
                   ) : (

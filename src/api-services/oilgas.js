@@ -219,6 +219,44 @@ export class DealRoomService extends CrudService {
       params: { format },
     });
   }
+
+  // ── Join workflow ────────────────────────────────────────────────────
+  // Request to join a public deal room. Creates a pending participant that a
+  // deal-room admin must approve. Optionally pass a companyId to request on
+  // behalf of a company the user represents.
+  async requestJoin(dealRoomId, companyId = null) {
+    return makeApiRequest({
+      url: `${this.basePath}${dealRoomId}/request_join/`,
+      method: "POST",
+      data: companyId ? { company: companyId } : {},
+    });
+  }
+
+  // Admin: list pending join requests for a deal room.
+  async getJoinRequests(dealRoomId) {
+    return makeApiRequest({
+      url: `${this.basePath}${dealRoomId}/join_requests/`,
+      method: "GET",
+    });
+  }
+
+  // Admin: approve a pending join request (optionally set role/permission).
+  async approveJoin(dealRoomId, participantId, data = {}) {
+    return makeApiRequest({
+      url: `${this.basePath}${dealRoomId}/approve_join/${participantId}/`,
+      method: "POST",
+      data,
+    });
+  }
+
+  // Admin: reject a pending join request.
+  async rejectJoin(dealRoomId, participantId) {
+    return makeApiRequest({
+      url: `${this.basePath}${dealRoomId}/reject_join/${participantId}/`,
+      method: "POST",
+      data: {},
+    });
+  }
 }
 
 export class DealDocumentService extends CrudService {

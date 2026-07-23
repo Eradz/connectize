@@ -154,14 +154,28 @@ export const createPost = async (formData, companyId, options = {}) => {
 };
 
 export const editPost = async (id, body, postItem, options = {}) => {
+  // When the editor passes a FormData (multipart) it already carries the body,
+  // new image files and the removed_images list. Spreading it would drop all of
+  // that, so send it through untouched — makeApiRequest sets the multipart
+  // boundary for FormData automatically. Plain objects keep the JSON behaviour.
+  const isFormData =
+    typeof FormData !== "undefined" && postItem instanceof FormData;
+
+  let data;
+  if (isFormData) {
+    if (body != null && !postItem.has("body")) {
+      postItem.append("body", body);
+    }
+    data = postItem;
+  } else {
+    data = { ...postItem, body };
+  }
+
   const post = await makeApiRequest({
     url: `api/posts/${id}/`,
     method: "PUT",
-    data: {
-      ...postItem,
-      body,
-    },
-    onUploadProgress: options.onUploadProgress, 
+    data,
+    onUploadProgress: options.onUploadProgress,
   });
 
   return post;
