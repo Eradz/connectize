@@ -268,6 +268,24 @@ export default function DealRoomDetail() {
     user && isPublicDeal && !isMember && joinStatus !== 'approved'
   );
 
+  // Compact, gold-themed request-to-join button reused in the header and on the
+  // Participants tab. Dark text for readability; single line.
+  const renderJoinButton = (extraClass = "") =>
+    canRequestJoin ? (
+      <button
+        onClick={handleRequestJoin}
+        disabled={joinSubmitting || joinStatus === "pending"}
+        className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gold px-3 py-1.5 text-sm font-medium text-dark hover:bg-[#E0B533] transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${extraClass}`}
+      >
+        <UserPlus className="w-4 h-4" />
+        {joinStatus === "pending"
+          ? "Request Pending"
+          : joinSubmitting
+          ? "Requesting..."
+          : "Request to Join"}
+      </button>
+    ) : null;
+
   const handleRequestJoin = async () => {
     if (!deal || joinSubmitting) return;
     setJoinSubmitting(true);
@@ -687,22 +705,7 @@ export default function DealRoomDetail() {
                 )}
               </div>
              <div className="flex items-center gap-2">
-               {canRequestJoin && (
-                 <button
-                   onClick={handleRequestJoin}
-                   disabled={joinSubmitting || joinStatus === 'pending'}
-                   className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-gold text-white text-sm hover:bg-pale_yellow mb-4 disabled:opacity-60 disabled:cursor-not-allowed"
-                 >
-                   <UserPlus className="w-4 h-4" />
-                   <span className="hidden md:flex">
-                     {joinStatus === 'pending'
-                       ? 'Request Pending'
-                       : joinSubmitting
-                       ? 'Requesting...'
-                       : 'Request to Join'}
-                   </span>
-                 </button>
-               )}
+               {renderJoinButton("mb-4")}
                {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
                 <PencilIcon className= "w-4 h-4"/>
                 <span className="hidden md:flex">
@@ -810,7 +813,7 @@ export default function DealRoomDetail() {
               </div>
               }
               {/* Search and Filter Bar */}
-              {(active === "documents" || active === "participants"  ) && (
+              {(active === "documents" || (active === "participants" && isMember)) && (
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -1491,7 +1494,17 @@ export default function DealRoomDetail() {
                   )}
                 </div>
               )}
-              {active === "participants" && (
+              {active === "participants" && !isMember && (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
+                  <p className="max-w-sm text-sm text-gray-500">
+                    Only participants can view the people in this deal room.
+                    {isPublicDeal ? " Request to join to see who's involved." : ""}
+                  </p>
+                  {renderJoinButton()}
+                </div>
+              )}
+
+              {active === "participants" && isMember && (
                 <div className="space-y-4">
                   {canManageParticipants && joinRequests.length > 0 && (
                     <div className="border border-amber-200 bg-amber-50 rounded-lg p-3 space-y-2">
