@@ -146,6 +146,10 @@ export default function DealRoomDetail() {
   const [joinSubmitting, setJoinSubmitting] = useState(false);
   const [joinRequests, setJoinRequests] = useState([]);
   const [joinActionId, setJoinActionId] = useState(null);
+  // Reject-request modal: optional reason + whether the user may reapply.
+  const [rejectModal, setRejectModal] = useState({ open: false, participant: null });
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectAllowReapply, setRejectAllowReapply] = useState(true);
   const [editingMilestone, setEditingMilestone] = useState(null);
   const [showDeleteDealModal, setShowDeleteDealModal] = useState(false);
   // Milestone modal state: progress and optional notes
@@ -261,17 +265,24 @@ export default function DealRoomDetail() {
   // self-service join requests.
   const isPublicDeal = deal ? deal.is_confidential === false : false;
   const joinStatus = userPermissions.join_status || 'none';
+  const canReapply = userPermissions.can_reapply !== false;
+  const rejectionReason = userPermissions.rejection_reason || '';
   const isMember = userPermissions.can_view || userPermissions.is_initiator ||
     (deal && (deal.initiator === user?.id || deal.initiator_id === user?.id));
-  // Show the request-to-join control for public deals to signed-in non-members.
+  // Show the request-to-join control for public deals to signed-in non-members
+  // who haven't been rejected-without-reapply and aren't already pending.
   const canRequestJoin = Boolean(
-    user && isPublicDeal && !isMember && joinStatus !== 'approved'
+    user && isPublicDeal && !isMember &&
+    (joinStatus === 'none' || (joinStatus === 'rejected' && canReapply))
   );
+  // Whether to render the button at all (also true while a request is pending,
+  // so we can show the disabled "Request Pending" state).
+  const showJoinControl = canRequestJoin || (joinStatus === 'pending' && !isMember);
 
   // Compact, gold-themed request-to-join button reused in the header and on the
   // Participants tab. Dark text for readability; single line.
   const renderJoinButton = (extraClass = "") =>
-    canRequestJoin ? (
+    showJoinControl ? (
       <button
         onClick={handleRequestJoin}
         disabled={joinSubmitting || joinStatus === "pending"}
@@ -282,6 +293,8 @@ export default function DealRoomDetail() {
           ? "Request Pending"
           : joinSubmitting
           ? "Requesting..."
+          : joinStatus === "rejected"
+          ? "Request Again"
           : "Request to Join"}
       </button>
     ) : null;
@@ -343,12 +356,31 @@ export default function DealRoomDetail() {
     }
   };
 
-  const handleRejectJoin = async (participant) => {
+  // Open the reject modal to collect an optional reason + reapply choice.
+  const openRejectModal = (participant) => {
+    setRejectReason("");
+    setRejectAllowReapply(true);
+    setRejectModal({ open: true, participant });
+  };
+
+  const closeRejectModal = () => {
+    setRejectModal({ open: false, participant: null });
+    setRejectReason("");
+    setRejectAllowReapply(true);
+  };
+
+  const confirmRejectJoin = async () => {
+    const participant = rejectModal.participant;
+    if (!participant) return;
     setJoinActionId(participant.id);
     try {
-      await dealRoomService.rejectJoin(id, participant.id);
+      await dealRoomService.rejectJoin(id, participant.id, {
+        reason: rejectReason.trim(),
+        canReapply: rejectAllowReapply,
+      });
       setJoinRequests((prev) => prev.filter((r) => r.id !== participant.id));
       notify.success("Join request declined");
+      closeRejectModal();
     } catch (error) {
       notify.error(error?.response?.data?.error || "Could not decline request");
     } finally {
@@ -1508,6 +1540,37 @@ export default function DealRoomDetail() {
                         </div>
                       </div>
                     </>
+                  ) : joinStatus === "rejected" ? (
+                    <>
+                      {/* The requester's own declined record */}
+                      <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left max-w-md">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-sm font-semibold text-red-700">
+                          {(user?.full_name || user?.display_name || user?.email || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.full_name || user?.display_name || user?.email || "You"}
+                          </p>
+                          <span className="inline-block rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                            Request Declined
+                          </span>
+                          {rejectionReason && (
+                            <p className="mt-1.5 text-xs text-gray-600">
+                              Reason: {rejectionReason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {canReapply ? (
+                        renderJoinButton()
+                      ) : (
+                        <p className="max-w-sm text-xs text-gray-500">
+                          The deal room owner is not accepting a new request from you at this time.
+                        </p>
+                      )}
+                    </>
                   ) : (
                     <>
                       <p className="max-w-sm text-sm text-gray-500">
@@ -1551,7 +1614,7 @@ export default function DealRoomDetail() {
                               {joinActionId === r.id ? "..." : "Approve"}
                             </button>
                             <button
-                              onClick={() => handleRejectJoin(r)}
+                              onClick={() => openRejectModal(r)}
                               disabled={joinActionId === r.id}
                               className="px-3 py-1 text-xs rounded border border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-60"
                             >
@@ -1844,6 +1907,71 @@ export default function DealRoomDetail() {
             className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700"
           >
             Delete
+          </button>
+        </div>
+      </Modal>
+
+      {/* Decline Join Request Modal */}
+      <Modal
+        isOpen={rejectModal.open}
+        onClose={closeRejectModal}
+        title="Decline join request"
+        size="md"
+      >
+        <p className="text-sm text-gray-600">
+          Decline{" "}
+          <span className="font-medium text-gray-900">
+            {rejectModal.participant?.user_name ||
+              rejectModal.participant?.user_email ||
+              "this person"}
+          </span>
+          's request to join this deal room.
+        </p>
+        <label className="mt-4 block text-sm font-medium text-gray-700">
+          Reason (optional)
+        </label>
+        <textarea
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          rows={3}
+          placeholder="Let them know why (this is shared with the requester)"
+          className="mt-1 w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold"
+        />
+        <button
+          type="button"
+          onClick={() => setRejectAllowReapply((v) => !v)}
+          className="mt-4 flex w-full items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5 hover:bg-gray-50 transition-colors"
+        >
+          <span className="text-sm text-gray-700 text-left">
+            Allow this person to request again
+          </span>
+          <span
+            className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+              rejectAllowReapply ? "bg-gold" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                rejectAllowReapply ? "translate-x-4" : "translate-x-0.5"
+              }`}
+            />
+          </span>
+        </button>
+        <div className="flex justify-end gap-3 mt-5">
+          <button
+            onClick={closeRejectModal}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmRejectJoin}
+            disabled={joinActionId === rejectModal.participant?.id}
+            className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 disabled:opacity-60"
+          >
+            {joinActionId === rejectModal.participant?.id
+              ? "Declining..."
+              : "Decline request"}
           </button>
         </div>
       </Modal>

@@ -249,12 +249,13 @@ export class DealRoomService extends CrudService {
     });
   }
 
-  // Admin: reject a pending join request.
-  async rejectJoin(dealRoomId, participantId) {
+  // Admin: reject a pending join request, with an optional reason and a flag
+  // controlling whether the user may request to join again.
+  async rejectJoin(dealRoomId, participantId, { reason = "", canReapply = true } = {}) {
     return makeApiRequest({
       url: `${this.basePath}${dealRoomId}/reject_join/${participantId}/`,
       method: "POST",
-      data: {},
+      data: { reason, can_reapply: canReapply },
     });
   }
 }
