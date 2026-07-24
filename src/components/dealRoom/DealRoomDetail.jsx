@@ -681,32 +681,21 @@ export default function DealRoomDetail() {
                       {deal?.company_name || deal?.company?.name || deal?.initiator_name || 'Personal Deal Room'}
                     </p>
                 </div>
-              {deal?.status && (
-                  <div className={`flex items-center mt-4 md:mt-2 md:px-2 md:py-1 justify-center text-xs font-semibold rounded-full  md:w-fit md:h-fit  ${
-                    deal.status === 'active' ? ' border border-green-500 md:bg-green-100 md:text-green-800' :
-                    deal.status === 'pending' ? ' border border-yellow-500 md:bg-yellow-100 md:text-yellow-800' :
-                    deal.status === 'closed' ? ' border border-gray-500 md:bg-gray-100 md:text-gray-800' :
-                    deal.status === 'cancelled' ? ' border border-red-500 md:bg-red-100 md:text-red-800' :
-                    ' border border-gray-500 md:bg-gray-100 md:text-gray-500'
+              </div>
+             <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
+               {deal?.status && (
+                  <div className={`flex items-center px-2.5 py-1 justify-center text-xs font-semibold rounded-full w-fit h-fit border ${
+                    deal.status === 'active' ? 'border-green-500 bg-green-100 text-green-800' :
+                    deal.status === 'pending' ? 'border-yellow-500 bg-yellow-100 text-yellow-800' :
+                    deal.status === 'closed' ? 'border-gray-500 bg-gray-100 text-gray-800' :
+                    deal.status === 'cancelled' ? 'border-red-500 bg-red-100 text-red-800' :
+                    'border-gray-500 bg-gray-100 text-gray-500'
                   }`}>
-                    <div className={`md:hidden block m-[2px] w-3 h-3 rounded-full
-                    ${
-                    deal.status === 'active' ? ' bg-green-500' :
-                    deal.status === 'pending' ? ' bg-yellow-500' :
-                    deal.status === 'closed' ? ' bg-gray-500' :
-                    deal.status === 'cancelled' ? ' bg-red-500' :
-                    ' bg-gray-500'
-                  }`
-                    }></div>
-                    <span className=" hidden md:flex">
                     {deal.status.charAt(0).toUpperCase() + deal.status.slice(1)}
-                    </span>
                   </div>
                 )}
-              </div>
-             <div className="flex items-center gap-2">
-               {renderJoinButton("mb-4")}
-               {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold mb-4">
+               {renderJoinButton()}
+               {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold">
                 <PencilIcon className= "w-4 h-4"/>
                 <span className="hidden md:flex">
                   Edit Deal Room
@@ -716,7 +705,7 @@ export default function DealRoomDetail() {
                  <button
                    onClick={handleDeleteDealRoom}
                    disabled={isDeletingDeal}
-                   className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg border border-red-300 text-red-600 text-sm hover:bg-red-50 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                   className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg border border-red-300 text-red-600 text-sm hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                  >
                    <Trash2 className="w-4 h-4" />
                    <span className="hidden md:flex">
@@ -1495,12 +1484,39 @@ export default function DealRoomDetail() {
                 </div>
               )}
               {active === "participants" && !isMember && (
-                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center">
-                  <p className="max-w-sm text-sm text-gray-500">
-                    Only participants can view the people in this deal room.
-                    {isPublicDeal ? " Request to join to see who's involved." : ""}
-                  </p>
-                  {renderJoinButton()}
+                <div className="flex flex-col items-center justify-center gap-4 py-14 text-center">
+                  {joinStatus === "pending" ? (
+                    <>
+                      <p className="max-w-sm text-sm text-gray-500">
+                        Only participants can view the people in this deal room.
+                        Your request is awaiting approval.
+                      </p>
+                      {/* The requester's own pending record */}
+                      <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/30 text-sm font-semibold text-dark">
+                          {(user?.full_name || user?.display_name || user?.email || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.full_name || user?.display_name || user?.email || "You"}
+                          </p>
+                          <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                            Request Pending
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="max-w-sm text-sm text-gray-500">
+                        Only participants can view the people in this deal room.
+                        {isPublicDeal ? " Request to join to see who's involved." : ""}
+                      </p>
+                      {renderJoinButton()}
+                    </>
+                  )}
                 </div>
               )}
 
