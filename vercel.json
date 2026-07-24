@@ -16,6 +16,18 @@
       ]
     }
   ],
+  "redirects": [
+    {
+      "source": "/signup/login",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/signup/signup",
+      "destination": "/signup",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/.well-known/(.*)",
