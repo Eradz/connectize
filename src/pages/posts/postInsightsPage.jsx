@@ -49,7 +49,6 @@ const toneByType = {
   likes: "text-rose-600 bg-rose-50 border-rose-100",
   comments: "text-blue-600 bg-blue-50 border-blue-100",
   reposts: "text-green-600 bg-green-50 border-green-100",
-  all: "text-gold bg-primary-50 border-primary-200",
 };
 
 const countForTab = (totals = {}, tab) => {
@@ -97,26 +96,6 @@ const stripInsightText = (value = "") => {
 
   return decodeHtmlEntities(withoutTags).replace(/\s+/g, " ").trim();
 };
-
-function MetricCard({ icon: Icon, label, value, tone = "all" }) {
-  return (
-    <div className="flex items-center gap-3 bg-white p-4 sm:p-5">
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${toneByType[tone]}`}
-      >
-        <Icon className="h-4 w-4" aria-hidden="true" />
-      </div>
-      <div className="min-w-0">
-        <p className="truncate text-xs font-semibold uppercase tracking-wide text-gray-500">
-          {label}
-        </p>
-        <p className="mt-1 text-2xl font-bold leading-none text-gray-950">
-          {formatNumber(value || 0)}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function actorHref(actor) {
   if (actor?.type === "user" && actor?.id) return `/co/${actor.id}`;
@@ -349,22 +328,6 @@ function PostInsightsPage() {
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 sm:grid-cols-3">
-        <MetricCard icon={Heart} label="Likes" value={totals.likes} tone="likes" />
-        <MetricCard
-          icon={MessageCircle}
-          label="Comments"
-          value={totals.comments}
-          tone="comments"
-        />
-        <MetricCard
-          icon={Repeat2}
-          label="Reposts"
-          value={totals.reposts}
-          tone="reposts"
-        />
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
