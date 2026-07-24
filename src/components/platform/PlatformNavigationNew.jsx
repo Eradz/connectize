@@ -45,6 +45,23 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+function isPathActive(pathname, href) {
+  if (!href || href === '#') return false;
+
+  const normalize = (value) => value.replace(/\/+$/, '') || '/';
+  const current = normalize(pathname);
+  const target = normalize(href);
+  const candidates = [target, normalize(`/platform${target}`)];
+
+  return candidates.some((candidate) =>
+    current === candidate || current.startsWith(`${candidate}/`)
+  );
+}
+
+function isAnyPathActive(pathname, hrefs) {
+  return hrefs.some((href) => isPathActive(pathname, href));
+}
+
 const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
   const [expandedItems, setExpandedItems] = useState(new Set());
 
@@ -82,10 +99,10 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
     <div className="flex flex-col h-full">
       {/* Platform Logo */}
       <div className="flex items-center mb-6">
-        <div className="bg-gold p-2 rounded-lg mr-3">
-          <Home className="w-6 h-6 text-white" />
+        <div className="bg-primary-50 p-2 rounded-lg mr-3 ring-1 ring-inset ring-primary-200">
+          <Briefcase className="w-5 h-5 text-gold" />
         </div>
-        <span className="text-xl font-bold text-gray-900">Oil & Gas Platform</span>
+        <span className="text-lg font-bold text-gray-900">Business Hub</span>
       </div>
       
       {/* Main Navigation */}
@@ -99,7 +116,7 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
                   className={classNames(
                     'flex-1 flex items-center gap-2 transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded',
                     {
-                      'bg-mid_grey pointer-events-none !text-gold': item.current && !item.locked,
+                      'bg-primary-50 !text-dark ring-1 ring-inset ring-primary-200': item.current && !item.locked,
                       '!text-gray-500': !item.current,
                       'opacity-60': item.locked,
                     }
@@ -123,7 +140,7 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
                   )}
                   {/* Show premium badge for premium features */}
                   {item.isPremium && !item.locked && (
-                    <span className="ml-auto text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full font-medium">
+                    <span className="ml-auto rounded-full border border-primary-200 bg-primary-50 px-1.5 py-0.5 text-[10px] font-semibold text-primary-800">
                       PRO
                     </span>
                   )}
@@ -147,15 +164,24 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
               {/* Submenu */}
               {item.children && item.children.length > 0 && expandedItems.has(item.name) && !item.locked && (
                 <div className="ml-8 mt-2 space-y-1">
-                  {item.children.map((child) => (
+                  {item.children.map((child) => child.disabled ? (
+                    <p
+                      key={child.name}
+                      className="px-2 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-gray-400"
+                    >
+                      {child.name}
+                    </p>
+                  ) : (
                     <Link
                       key={child.name}
-                      to={child.locked ? '/subscription' : child.href}
+                      to={child.locked ? webRoutes.subscriptions : child.href}
                       className={classNames(
-                        'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
+                        'group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors',
                         child.locked 
                           ? 'text-gray-400 hover:bg-gray-50' 
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          : child.current
+                            ? 'bg-white text-dark shadow-sm ring-1 ring-inset ring-gray-200'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       )}
                       title={child.locked ? `Upgrade to access ${child.name}` : child.name}
                     >
@@ -180,7 +206,10 @@ const SidebarContent = React.memo(({ navigation, secondaryNavigation }) => {
               <Link
                 to={item.locked ? '/subscription' : item.href}
                 className={classNames(
-                  'flex items-center gap-2 transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                  'flex items-center gap-2 p-2 py-2.5 !text-sm rounded transition-colors',
+                  item.current
+                    ? 'bg-primary-50 text-dark ring-1 ring-inset ring-primary-200'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
                   { 'opacity-60': item.locked }
                 )}
               >
@@ -239,14 +268,14 @@ const PlatformNavigation = ({ children }) => {
       name: 'Dashboard',
       href: webRoutes.platformDashboard,
       icon: LayoutDashboard,
-      current: location.pathname === webRoutes.platformDashboard
+      current: isPathActive(location.pathname, webRoutes.platformDashboard)
       // No feature requirement - accessible to all
     },
     {
       name: 'Deal Rooms',
       href: webRoutes.dealRooms,
       icon: FileText,
-      current: location.pathname.startsWith('/deals'),
+      current: isPathActive(location.pathname, webRoutes.dealRooms),
       // requiresFeature: 'deal_rooms', // Uncomment to restrict
       // requiresPlan: 'starter',       // Uncomment to require starter+
       children: [
@@ -260,10 +289,12 @@ const PlatformNavigation = ({ children }) => {
       name: 'Workforce',
       href: webRoutes.workforceJobs,
       icon: Users,
-      current: location.pathname.startsWith('/workforce/jobs') || 
-               location.pathname.startsWith('/professionals') || 
-               location.pathname.startsWith('/events') || 
-               location.pathname.startsWith('/applications'),
+      current: isAnyPathActive(location.pathname, [
+        webRoutes.workforceJobs,
+        webRoutes.workforceProfiles,
+        webRoutes.workforceEvents,
+        webRoutes.workforceApplications,
+      ]),
       children: [
         { name: 'Job Marketplace', href: webRoutes.workforceJobs },
         { name: 'Saved Jobs', href: webRoutes.workforceSavedJobs },
@@ -279,7 +310,7 @@ const PlatformNavigation = ({ children }) => {
       name: 'AI Services',
       href: webRoutes.aiDashboard,
       icon: Brain,
-      current: location.pathname.startsWith('/ai'),
+      current: isPathActive(location.pathname, webRoutes.aiDashboard),
       // AI Services typically require professional plan
       // requiresFeature: 'ai_services',
       // requiresPlan: 'professional',
@@ -295,7 +326,7 @@ const PlatformNavigation = ({ children }) => {
       name: 'Inventory',
       href: webRoutes.inventoryDashboard,
       icon: Package,
-      current: location.pathname.startsWith('/inventory'),
+      current: isPathActive(location.pathname, webRoutes.inventoryDashboard),
       children: [
         { name: 'Dashboard', href: webRoutes.inventoryDashboard },
         { name: 'Warehouses', href: webRoutes.inventoryWarehouses },
@@ -309,7 +340,7 @@ const PlatformNavigation = ({ children }) => {
       name: 'Knowledge Hub',
       href: webRoutes.knowledgeHub,
       icon: BookOpen,
-      current: location.pathname.startsWith('/knowledge'),
+      current: isPathActive(location.pathname, webRoutes.knowledgeHub),
       children: [
         { name: 'Dashboard', href: webRoutes.knowledgeHub },
         { name: 'Articles', href: webRoutes.knowledgeArticles },
@@ -323,7 +354,7 @@ const PlatformNavigation = ({ children }) => {
       name: 'Featured Ads',
       href: webRoutes.featuredAds,
       icon: Target,
-      current: location.pathname.startsWith('/ads'),
+      current: isPathActive(location.pathname, webRoutes.featuredAds),
       // requiresPlan: 'starter', // Uncomment to require paid plan
       children: [
         { name: 'Manage Campaigns', href: webRoutes.featuredAds }
@@ -333,13 +364,13 @@ const PlatformNavigation = ({ children }) => {
       name: 'Logistics Hub',
       href: webRoutes.logisticsDashboard,
       icon: Truck,
-      current: location.pathname.startsWith('/logistics'),
+      current: isPathActive(location.pathname, webRoutes.logisticsDashboard),
       children: [
         { name: 'Logistics Overview', href: webRoutes.logisticsDashboard },
         { name: 'Shipment Requests', href: webRoutes.logisticsRequests },
         { name: 'Inventory', href: webRoutes.logisticsInventory },
         { name: 'Shipments', href: webRoutes.logisticsShipments },
-        { name: '─── Provider ───', href: '#', disabled: true },
+        { name: 'Provider', href: '#', disabled: true },
         { name: 'Become a Provider', href: webRoutes.logisticsBecomeProvider },
         { name: 'Provider Dashboard', href: webRoutes.logisticsProviderDashboard }
       ]
@@ -348,7 +379,7 @@ const PlatformNavigation = ({ children }) => {
       name: 'Marketplace',
       href: webRoutes.marketplace,
       icon: Store,
-      current: location.pathname.startsWith('/marketplace'),
+      current: isPathActive(location.pathname, webRoutes.marketplace),
       children: [
         { name: 'Browse Listings', href: webRoutes.marketplace },
         { name: 'My Listings', href: webRoutes.marketplaceMyListings },
@@ -366,7 +397,12 @@ const PlatformNavigation = ({ children }) => {
     
     return rawNavigation.map(item => {
       const hasAccess = hasNavAccess(item);
-      const filteredChildren = item.children?.filter(child => hasNavAccess(child));
+      const filteredChildren = item.children
+        ?.filter(child => hasNavAccess(child))
+        .map(child => ({
+          ...child,
+          current: isPathActive(location.pathname, child.href),
+        }));
       
       return {
         ...item,
@@ -382,14 +418,22 @@ const PlatformNavigation = ({ children }) => {
       // Option 2: Show all items but mark locked ones (better UX)
       return true;
     });
-  }, [rawNavigation, featureLoading, hasFeature, hasMinPlan]);
+  }, [rawNavigation, featureLoading, hasFeature, hasMinPlan, location.pathname]);
 
   const secondaryNavigation = useMemo(() => ([
-    { name: 'Analytics', href: webRoutes.platformAnalytics, icon: BarChart3 },
-    { name: 'Reports', href: webRoutes.platformReports, icon: FileText },
-    { name: 'Settings', href: webRoutes.userSettings, icon: Settings },
-    { name: 'Subscription', href: webRoutes.subscriptions, icon: CreditCard }
-  ]), []);
+    {
+      name: 'Settings',
+      href: webRoutes.settings,
+      icon: Settings,
+      current: isPathActive(location.pathname, webRoutes.settings),
+    },
+    {
+      name: 'Subscription',
+      href: webRoutes.subscriptions,
+      icon: CreditCard,
+      current: isPathActive(location.pathname, webRoutes.subscriptions),
+    }
+  ]), [location.pathname]);
 
   return (
     <main className="bg-background w-full h-screen flex flex-col">
@@ -461,7 +505,7 @@ const PlatformNavigation = ({ children }) => {
         'fixed inset-0 flex z-40 md:hidden'
       )}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white p-4">
           <div className="absolute top-0 right-0 -mr-12 pt-2">
             <button
               className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"

@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 
-const base = "inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed select-none relative overflow-hidden group";
+const base = "relative inline-flex items-center justify-center rounded-lg font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 select-none";
 
 const sizes = {
   xs: "h-7 px-2.5 text-xs",
@@ -12,15 +12,15 @@ const sizes = {
 };
 
 const variants = {
-  primary: "bg-gradient-to-r from-primary-600 to-primary-500 text-gray-900 hover:from-primary-700 hover:to-primary-600 focus:ring-primary-500 shadow-soft hover:shadow-medium transform hover:-translate-y-0.5 active:translate-y-0 disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:transform-none",
-  secondary: "border border-gray-200/60 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md hover:bg-gray-50/80 dark:hover:bg-gray-700/80 focus:ring-gray-300 dark:focus:ring-gray-600 shadow-soft hover:shadow-medium transform hover:-translate-y-0.5 active:translate-y-0",
-  ghost: "bg-transparent hover:bg-gray-100/60 dark:hover:bg-gray-800/60 text-gray-900 dark:text-gray-100 focus:ring-gray-300 dark:focus:ring-gray-600 backdrop-blur-md",
-  outline: "border border-primary-400/60 dark:border-primary-700/60 text-primary-700 dark:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/20 focus:ring-primary-500 backdrop-blur-md",
-  success: "bg-gradient-to-r from-success-600 to-success-500 text-white hover:from-success-700 hover:to-success-600 focus:ring-success-500 shadow-soft hover:shadow-medium transform hover:-translate-y-0.5 active:translate-y-0 disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:transform-none",
-  warning: "bg-gradient-to-r from-warning-600 to-warning-500 text-white hover:from-warning-700 hover:to-warning-600 focus:ring-warning-500 shadow-soft hover:shadow-medium transform hover:-translate-y-0.5 active:translate-y-0 disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:transform-none",
-  danger: "bg-gradient-to-r from-error-600 to-error-500 text-white hover:from-error-700 hover:to-error-600 focus:ring-error-500 shadow-soft hover:shadow-medium transform hover:-translate-y-0.5 active:translate-y-0 disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:transform-none",
-  glass: "glass backdrop-blur-md border-white/20 text-gray-900 dark:text-white hover:bg-white/30 dark:hover:bg-black/30 shadow-soft hover:shadow-medium",
-  minimal: "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 focus:ring-gray-300 dark:focus:ring-gray-600 border-none shadow-none rounded-lg",
+  primary: "bg-primary-500 text-dark hover:bg-custom_yellow focus-visible:ring-primary-500/40",
+  secondary: "border border-gray-200 bg-white text-gray-800 hover:border-gray-300 hover:bg-gray-50 focus-visible:ring-gray-300",
+  ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-300",
+  outline: "border border-primary-300 bg-white text-dark hover:bg-primary-50 focus-visible:ring-primary-500/40",
+  success: "bg-success-600 text-white hover:bg-success-700 focus-visible:ring-success-500/40",
+  warning: "bg-warning-500 text-gray-950 hover:bg-warning-600 focus-visible:ring-warning-500/40",
+  danger: "bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500/40",
+  glass: "border border-gray-200 bg-white/90 text-gray-800 hover:bg-white focus-visible:ring-gray-300",
+  minimal: "bg-transparent text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-300",
 };
 
 const Button = ({ 
@@ -46,9 +46,6 @@ const Button = ({
       disabled={loading || props.disabled}
       {...props}
     >
-      {/* Shimmer effect overlay */}
-      <div className="absolute inset-0 -top-1 -bottom-1 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transform -skew-x-12 group-hover:animate-shimmer transition-opacity duration-700" />
-      
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

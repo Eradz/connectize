@@ -5,16 +5,16 @@ const Card = ({
   className = "", 
   children, 
   variant = "default",
-  hover = true,
+  hover = false,
   padding = "default",
   ...props 
 }) => {
   const variants = {
-    default: "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 shadow-soft",
-    glass: "glass backdrop-blur-md shadow-medium",
+    default: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-soft",
+    glass: "bg-white/90 dark:bg-gray-900/90 border border-gray-200 dark:border-gray-700 shadow-soft",
     elevated: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-medium",
     flat: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700",
-    gradient: "bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 shadow-soft",
+    gradient: "bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-soft",
   };
 
   const paddings = {
@@ -25,10 +25,10 @@ const Card = ({
   };
 
   const cardClasses = clsx(
-    "rounded-2xl transition-all duration-300 animate-in",
+    "rounded-xl transition-colors duration-200",
     variants[variant],
     paddings[padding],
-    hover && "hover:shadow-strong hover:-translate-y-1 hover:scale-[1.02]",
+    hover && "hover:border-gray-300 hover:shadow-medium",
     className
   );
 
@@ -111,7 +111,7 @@ const CardFooter = ({
   };
 
   return (
-    <div className={clsx(variants[variant], "rounded-b-2xl", className)} {...props}>
+    <div className={clsx(variants[variant], "rounded-b-xl", className)} {...props}>
       {children}
     </div>
   );

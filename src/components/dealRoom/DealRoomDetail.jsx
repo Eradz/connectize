@@ -12,6 +12,8 @@ import axios from "axios";
 import { toast as notify } from "sonner";
 import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
+import Badge from "../../components/ui/Badge";
+import Card from "../../components/ui/Card";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyParticipants, EmptyMilestones, EmptySearch } from "../../components/ui/EmptyStates";
 import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, File, X, CloudUpload, RefreshCcw, UploadCloud, CalendarDays, LockOpen, Trash2, Trash, Clock3 } from "lucide-react";
@@ -279,25 +281,36 @@ export default function DealRoomDetail() {
   // so we can show the disabled "Request Pending" state).
   const showJoinControl = canRequestJoin || (joinStatus === 'pending' && !isMember);
 
-  // Compact, gold-themed request-to-join button reused in the header and on the
-  // Participants tab. Dark text for readability; single line.
-  const renderJoinButton = (extraClass = "") =>
-    showJoinControl ? (
+  const renderJoinButton = (extraClass = "") => {
+    if (!showJoinControl) return null;
+
+    if (joinStatus === "pending") {
+      return (
+        <span
+          className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-sm font-semibold text-primary-800 ${extraClass}`}
+          role="status"
+        >
+          <Clock3 className="h-4 w-4 text-gold" aria-hidden="true" />
+          Request pending
+        </span>
+      );
+    }
+
+    return (
       <button
         onClick={handleRequestJoin}
-        disabled={joinSubmitting || joinStatus === "pending"}
-        className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gold px-3 py-1.5 text-sm font-medium text-dark hover:bg-[#E0B533] transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${extraClass}`}
+        disabled={joinSubmitting}
+        className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gold px-3 py-1.5 text-sm font-semibold text-dark transition-colors hover:bg-custom_yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 disabled:cursor-wait disabled:opacity-60 ${extraClass}`}
       >
         <UserPlus className="w-4 h-4" />
-        {joinStatus === "pending"
-          ? "Request Pending"
-          : joinSubmitting
+        {joinSubmitting
           ? "Requesting..."
           : joinStatus === "rejected"
           ? "Request Again"
           : "Request to Join"}
       </button>
-    ) : null;
+    );
+  };
 
   const handleRequestJoin = async () => {
     if (!deal || joinSubmitting) return;
@@ -716,18 +729,19 @@ export default function DealRoomDetail() {
               </div>
              <div className="flex flex-wrap items-center justify-end gap-2 mb-4">
                {deal?.status && (
-                  <div className={`flex items-center px-2.5 py-1 justify-center text-xs font-semibold rounded-full w-fit h-fit border ${
-                    deal.status === 'active' ? 'border-green-500 bg-green-100 text-green-800' :
-                    deal.status === 'pending' ? 'border-yellow-500 bg-yellow-100 text-yellow-800' :
-                    deal.status === 'closed' ? 'border-gray-500 bg-gray-100 text-gray-800' :
-                    deal.status === 'cancelled' ? 'border-red-500 bg-red-100 text-red-800' :
-                    'border-gray-500 bg-gray-100 text-gray-500'
-                  }`}>
+                  <Badge
+                    dot
+                    variant={
+                      deal.status === 'active' ? 'active' :
+                      deal.status === 'pending' ? 'pending' :
+                      deal.status === 'cancelled' ? 'error' : 'inactive'
+                    }
+                  >
                     {deal.status.charAt(0).toUpperCase() + deal.status.slice(1)}
-                  </div>
+                  </Badge>
                 )}
                {renderJoinButton()}
-               {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-white text-sm hover:bg-gold">
+               {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-dark text-sm font-semibold hover:bg-gold">
                 <PencilIcon className= "w-4 h-4"/>
                 <span className="hidden md:flex">
                   Edit Deal Room
@@ -783,7 +797,7 @@ export default function DealRoomDetail() {
                 key={t.key}
                 to={linkFor(t.key)}
                 className={`px-3 py-2 rounded-[100px] text-sm ${
-                  active === t.key ? "bg-gold text-white" : "border border-gray-200 text-gray-700 hover:bg-gray-200"
+                  active === t.key ? "bg-gold text-dark font-semibold" : "border border-gray-200 text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 {t.label}
@@ -798,7 +812,7 @@ export default function DealRoomDetail() {
                   key={t.key}
                   to={linkFor(t.key)}
                   className={`px-3 py-2 rounded-[100px] text-sm ${
-                    active === t.key ? "bg-gold text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    active === t.key ? "bg-gold text-dark font-semibold" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   {t.label}
@@ -1518,20 +1532,14 @@ export default function DealRoomDetail() {
               {active === "participants" && !isMember && (
                 <div className="flex flex-col items-center justify-center gap-4 py-14 text-center">
                   {joinStatus === "pending" ? (
-                    <div
-                      className="w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-soft"
-                      role="status"
-                    >
+                    <Card className="w-full max-w-lg overflow-hidden text-left" padding="none" role="status">
                       <div className="p-5 sm:p-6">
                         <div className="flex items-start gap-4">
                           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary-200 bg-primary-50">
                             <Clock3 className="h-5 w-5 text-gold" aria-hidden="true" />
                           </span>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
-                              <span className="h-2 w-2 rounded-full bg-gold" aria-hidden="true" />
-                              Pending approval
-                            </div>
+                            <Badge variant="pending" dot size="xs">Pending approval</Badge>
                             <h3 className="mt-1.5 text-base font-semibold text-dark">
                               Access request submitted
                             </h3>
@@ -1557,7 +1565,7 @@ export default function DealRoomDetail() {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </Card>
                   ) : joinStatus === "rejected" ? (
                     <>
                       {/* The requester's own declined record */}
@@ -1604,14 +1612,14 @@ export default function DealRoomDetail() {
               {active === "participants" && isMember && (
                 <div className="space-y-4">
                   {canManageParticipants && joinRequests.length > 0 && (
-                    <div className="border border-amber-200 bg-amber-50 rounded-lg p-3 space-y-2">
-                      <h4 className="font-semibold text-amber-900 text-sm">
+                    <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-soft">
+                      <h4 className="font-semibold text-dark text-sm">
                         Pending Join Requests ({joinRequests.length})
                       </h4>
                       {joinRequests.map((r) => (
                         <div
                           key={r.id}
-                          className="flex items-center justify-between bg-white rounded-md border border-amber-100 px-3 py-2"
+                          className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
                         >
                           <div>
                             <div className="font-medium text-gray-900 text-sm">
@@ -1627,7 +1635,7 @@ export default function DealRoomDetail() {
                             <button
                               onClick={() => handleApproveJoin(r)}
                               disabled={joinActionId === r.id}
-                              className="px-3 py-1 text-xs rounded bg-gold text-white hover:bg-pale_yellow disabled:opacity-60"
+                              className="rounded-md bg-gold px-3 py-1 text-xs font-semibold text-dark hover:bg-custom_yellow disabled:opacity-60"
                             >
                               {joinActionId === r.id ? "..." : "Approve"}
                             </button>
@@ -1663,8 +1671,8 @@ export default function DealRoomDetail() {
                           return (
                             <div key={p.id || i} className="flex items-center justify-between p-3 border rounded-lg hover:border border-[#D9D9D9]">
                               <div className="flex items-center space-x-3">
-                                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <span className="text-sm font-medium text-pale_yellow">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50 ring-1 ring-inset ring-primary-200">
+                                  <span className="text-sm font-semibold text-primary-800">
                                     {displayName[0]?.toUpperCase() || "U"}
                                   </span>
                                 </div>

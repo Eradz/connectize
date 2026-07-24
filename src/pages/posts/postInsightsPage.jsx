@@ -9,7 +9,6 @@ export const meta = () =>
 import { Avatar, Spinner } from "@chakra-ui/react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
-  ArrowLeft,
   BarChart3,
   ExternalLink,
   Heart,
@@ -26,6 +25,7 @@ import {
   getPostInsights,
 } from "../../api-services/posts";
 import LightParagraph from "../../components/ParagraphText";
+import PageHeader from "../../components/ui/PageHeader";
 import RichContentText from "../../components/RichContentText";
 import TimeAgo from "../../components/TimeAgo";
 import { formatNumber } from "../../lib/utils";
@@ -247,22 +247,14 @@ function PostInsightsPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-6xl py-5">
-      <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-soft sm:p-5">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-gold">
-            Analytics
-          </p>
-          <h1 className="text-xl font-bold text-gray-950 sm:text-2xl">Post insights</h1>
-          {postPreview ? (
+    <section className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-0">
+      <PageHeader
+        eyebrow="Analytics"
+        title="Post insights"
+        onBack={() => navigate(-1)}
+        surface
+        subtitle={
+          postPreview ? (
             <div className="line-clamp-2 text-sm leading-5 text-gray-500">
               <RichContentText
                 content={insights?.post?.body_preview || ""}
@@ -275,9 +267,10 @@ function PostInsightsPage() {
             <p className="line-clamp-2 text-sm leading-5 text-gray-500">
               No text content
             </p>
-          )}
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
+          )
+        }
+        actions={
+          <>
           <Link
             to={webRoutes.singlePost.replace(":id", id)}
             className="hidden h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 sm:flex"
@@ -299,13 +292,14 @@ function PostInsightsPage() {
               className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
             />
           </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
-      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-base font-bold text-gray-950">Performance overview</h2>
-          <p className="text-sm text-gray-500">Engagement during the selected period</p>
+          <h2 className="text-base font-bold text-gray-950">Engagement period</h2>
+          <p className="text-sm text-gray-500">Choose the activity window to review</p>
         </div>
         <div
           className="flex w-fit items-center gap-1 rounded-lg bg-gray-100 p-1"

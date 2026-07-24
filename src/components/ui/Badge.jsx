@@ -10,7 +10,7 @@ const Badge = ({
   dot = false,
   ...props 
 }) => {
-  const baseStyles = "inline-flex items-center font-medium transition-all duration-200 select-none";
+  const baseStyles = "inline-flex items-center border font-semibold select-none";
   
   const sizes = {
     xs: "px-2 py-0.5 text-xs rounded-md gap-1",
@@ -20,21 +20,25 @@ const Badge = ({
   };
 
   const variants = {
-    default: "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700",
-    primary: "bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 hover:bg-primary-200 dark:hover:bg-primary-900/50 border border-primary-200 dark:border-primary-800",
-    secondary: "bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800",
-    success: "bg-success-100 dark:bg-success-900/30 text-success-800 dark:text-success-200 hover:bg-success-200 dark:hover:bg-success-900/50 border border-success-200 dark:border-success-800",
-    warning: "bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-200 hover:bg-warning-200 dark:hover:bg-warning-900/50 border border-warning-200 dark:border-warning-800",
-    error: "bg-error-100 dark:bg-error-900/30 text-error-800 dark:text-error-200 hover:bg-error-200 dark:hover:bg-error-900/50 border border-error-200 dark:border-error-800",
-    outline: "border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
-    glass: "glass backdrop-blur-md text-gray-900 dark:text-white hover:bg-white/30 dark:hover:bg-black/30",
-    gradient: "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-soft hover:shadow-medium hover:from-primary-600 hover:to-primary-700",
+    default: "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200",
+    primary: "border-primary-200 bg-primary-50 text-primary-800",
+    secondary: "border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300",
+    success: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    warning: "border-amber-200 bg-amber-50 text-amber-700",
+    error: "border-red-200 bg-red-50 text-red-700",
+    outline: "border-gray-300 bg-white text-gray-700 dark:border-gray-600 dark:bg-transparent dark:text-gray-300",
+    glass: "border-gray-200 bg-white/90 text-gray-800",
+    gradient: "border-primary-200 bg-primary-50 text-primary-800",
+    active: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    pending: "border-primary-200 bg-primary-50 text-primary-800",
+    inactive: "border-gray-200 bg-gray-100 text-gray-600",
+    info: "border-blue-200 bg-blue-50 text-blue-700",
     // Legacy support
-    gray: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-    blue: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    green: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-    yellow: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-    red: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+    gray: "border-gray-200 bg-gray-100 text-gray-700",
+    blue: "border-blue-200 bg-blue-50 text-blue-700",
+    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    yellow: "border-amber-200 bg-amber-50 text-amber-700",
+    red: "border-red-200 bg-red-50 text-red-700",
   };
 
   const dotSizes = {
