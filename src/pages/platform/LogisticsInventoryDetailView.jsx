@@ -332,21 +332,10 @@ const handleDelete = async () => {
 </div>
                      <div>
   <label className="block text-xs font-medium text-gray-500 mb-1">Condition</label>
-  <span className="inline-flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-full border-2" style={{
-    borderColor: '#FFC000',
-    background: 'linear-gradient(to right, #FFC000, #FF8400)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text'
-  }}>
-    <span style={{
-      background: 'linear-gradient(to right, #FFC000, #FF8400)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
-    }}>{conditionOptions.find(c => c.value === item.condition)?.label || item.condition}</span>
+  <span className="inline-flex items-center justify-between rounded-full border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-medium text-primary-800">
+    <span>{conditionOptions.find(c => c.value === item.condition)?.label || item.condition}</span>
     <div className="flex items-center space-x-1 ml-2">
-      <GradientCheckIcon gradientId="condition-gradient" startColor="#FFC000" endColor="#FF8400" />
+      <GradientCheckIcon gradientId="condition-gradient" startColor="#F1C644" endColor="#F1C644" />
     </div>
   </span>
 </div>

@@ -146,7 +146,7 @@ const EnterpriseError = ({ error, onRetry }) => {
         
         <button 
           onClick={onRetry}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-custom_yellow transition-colors"
+          className="w-full bg-gold text-dark py-2 px-4 rounded-md hover:bg-custom_yellow transition-colors"
         >
           Retry Connection
         </button>
@@ -191,7 +191,7 @@ const EnterpriseAccessRequired = () => {
         <div className="space-y-3">
           <button 
             onClick={handleUpgrade}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-custom_yellow transition-colors"
+            className="w-full bg-gold text-dark py-2 px-4 rounded-md hover:bg-custom_yellow transition-colors"
           >
             Upgrade to Enterprise
           </button>

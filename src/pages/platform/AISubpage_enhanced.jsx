@@ -393,7 +393,7 @@ export default function AISubpage() {
                 placeholder={`Search ${section.replace('ai-', '')}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               />
             </div>
             
@@ -402,7 +402,7 @@ export default function AISubpage() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 {section === "ai-matching" && (
@@ -436,7 +436,7 @@ export default function AISubpage() {
                   <button
                     onClick={() => handleAIAction('optimize')}
                     disabled={aiProcessing}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
                     {aiProcessing && processingAction === 'optimize' ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />
@@ -466,7 +466,7 @@ export default function AISubpage() {
                   <button
                     onClick={() => handleAIAction('scan')}
                     disabled={aiProcessing}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
                     {aiProcessing && processingAction === 'scan' ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />

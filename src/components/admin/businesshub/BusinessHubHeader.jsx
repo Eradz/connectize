@@ -141,7 +141,7 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
               <CardIcon />
             </div>
             <p className="text-xs text-gray-500 mb-1">Subscription</p>
-            <p className="text-2xl font-bold bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-transparent bg-clip-text mb-1">
+            <p className="mb-1 text-2xl font-bold text-gold">
               {subscription?.plan?.name || subscription?.plan_name || 'Free'}
             </p>
             <p className="text-xs text-gray-400">

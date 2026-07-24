@@ -410,7 +410,7 @@ const AdminWorkforce = () => {
                     setSelectedItems([]);
                   }
                 }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -453,7 +453,7 @@ const AdminWorkforce = () => {
                       setSelectedItems(selectedItems.filter(id => id !== job.id));
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4">
@@ -574,7 +574,7 @@ const AdminWorkforce = () => {
                     setSelectedItems([]);
                   }
                 }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -614,7 +614,7 @@ const AdminWorkforce = () => {
                       setSelectedItems(selectedItems.filter(id => id !== profile.id));
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4">
@@ -738,7 +738,7 @@ const AdminWorkforce = () => {
                     setSelectedItems([]);
                   }
                 }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -775,7 +775,7 @@ const AdminWorkforce = () => {
                       setSelectedItems(selectedItems.filter(id => id !== application.id));
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4">
@@ -978,7 +978,7 @@ const AdminWorkforce = () => {
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 placeholder-gray-500"
+                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 placeholder-gray-500"
               />
             </div>
           </div>
@@ -986,7 +986,7 @@ const AdminWorkforce = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+              className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
             >
               <option value="all">All Status</option>
               {activeTab === 'jobs' && (
@@ -1039,7 +1039,7 @@ const AdminWorkforce = () => {
 
       {/* Bulk Actions */}
       {selectedItems.length > 0 && (
-        <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-2xl p-6 shadow-xl">
+        <div className="backdrop-blur-xl bg-gold/20 border border-blue-300/30 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center justify-between">
             <span className="text-blue-800 font-semibold">
               {selectedItems.length} item(s) selected
@@ -1185,7 +1185,7 @@ const AdminWorkforce = () => {
                                activeTab === 'profiles' ? { professional_title: e.target.value } :
                                { notes: e.target.value })
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                           required
                         />
                       </div>
@@ -1202,7 +1202,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.description || ''}
                                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="4"
                                   required
                                 />
@@ -1212,7 +1212,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.responsibilities || ''}
                                   onChange={(e) => setFormData({ ...formData, responsibilities: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="3"
                                   placeholder="Key responsibilities and duties..."
                                 />
@@ -1229,7 +1229,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.job_type || ''}
                                   onChange={(e) => setFormData({ ...formData, job_type: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   required
                                 >
                                   <option value="">Select Job Type</option>
@@ -1243,7 +1243,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.experience_level || ''}
                                   onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   required
                                 >
                                   <option value="">Select Experience Level</option>
@@ -1257,7 +1257,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.priority || 'normal'}
                                   onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 >
                                   <option value="low">Low Priority</option>
                                   <option value="normal">Normal Priority</option>
@@ -1272,7 +1272,7 @@ const AdminWorkforce = () => {
                                   min="0"
                                   value={formData.min_years_experience || ''}
                                   onChange={(e) => setFormData({ ...formData, min_years_experience: parseInt(e.target.value) || 0 })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 />
                               </div>
                             </div>
@@ -1288,7 +1288,7 @@ const AdminWorkforce = () => {
                                   type="text"
                                   value={formData.location || ''}
                                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   required
                                 />
                               </div>
@@ -1298,7 +1298,7 @@ const AdminWorkforce = () => {
                                   type="text"
                                   value={formData.work_arrangement || ''}
                                   onChange={(e) => setFormData({ ...formData, work_arrangement: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="e.g., Hybrid, Fully Remote, On-site"
                                 />
                               </div>
@@ -1337,7 +1337,7 @@ const AdminWorkforce = () => {
                                   type="number"
                                   value={formData.salary_min || ''}
                                   onChange={(e) => setFormData({ ...formData, salary_min: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="50000"
                                 />
                               </div>
@@ -1347,7 +1347,7 @@ const AdminWorkforce = () => {
                                   type="number"
                                   value={formData.salary_max || ''}
                                   onChange={(e) => setFormData({ ...formData, salary_max: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="100000"
                                 />
                               </div>
@@ -1372,7 +1372,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.benefits || ''}
                                   onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="3"
                                   placeholder="Health insurance, dental, vision, 401k, PTO..."
                                 />
@@ -1382,7 +1382,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.bonus_structure || ''}
                                   onChange={(e) => setFormData({ ...formData, bonus_structure: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="2"
                                   placeholder="Annual bonus, performance bonus, equity..."
                                 />
@@ -1399,7 +1399,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.education_requirements || ''}
                                   onChange={(e) => setFormData({ ...formData, education_requirements: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="2"
                                   placeholder="Bachelor's degree in Engineering, relevant field..."
                                 />
@@ -1413,7 +1413,7 @@ const AdminWorkforce = () => {
                                     ...formData, 
                                     certifications_required: e.target.value.split(',').map(cert => cert.trim()).filter(cert => cert)
                                   })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="PMP, Six Sigma, PE License (comma-separated)"
                                 />
                               </div>
@@ -1426,7 +1426,7 @@ const AdminWorkforce = () => {
                                     ...formData, 
                                     languages_required: e.target.value.split(',').map(lang => lang.trim()).filter(lang => lang)
                                   })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="English, Spanish, Arabic (comma-separated)"
                                 />
                               </div>
@@ -1443,7 +1443,7 @@ const AdminWorkforce = () => {
                                   type="datetime-local"
                                   value={formData.application_deadline || ''}
                                   onChange={(e) => setFormData({ ...formData, application_deadline: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 />
                               </div>
                               <div>
@@ -1453,7 +1453,7 @@ const AdminWorkforce = () => {
                                   min="1"
                                   value={formData.max_applications || ''}
                                   onChange={(e) => setFormData({ ...formData, max_applications: parseInt(e.target.value) || null })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="Leave empty for unlimited"
                                 />
                               </div>
@@ -1494,7 +1494,7 @@ const AdminWorkforce = () => {
                                   ...formData, 
                                   tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag)
                                 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 placeholder="oil-and-gas, offshore, drilling, engineering (comma-separated)"
                               />
                             </div>
@@ -1513,7 +1513,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.summary || ''}
                                   onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="4"
                                   placeholder="Brief professional summary highlighting key expertise and experience..."
                                   required
@@ -1524,7 +1524,7 @@ const AdminWorkforce = () => {
                                 <textarea
                                   value={formData.achievements || ''}
                                   onChange={(e) => setFormData({ ...formData, achievements: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   rows="3"
                                   placeholder="Key achievements, awards, recognitions..."
                                 />
@@ -1543,7 +1543,7 @@ const AdminWorkforce = () => {
                                   min="0"
                                   value={formData.years_of_experience || ''}
                                   onChange={(e) => setFormData({ ...formData, years_of_experience: parseInt(e.target.value) || 0 })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   required
                                 />
                               </div>
@@ -1552,7 +1552,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.availability_status || 'available'}
                                   onChange={(e) => setFormData({ ...formData, availability_status: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 >
                                   <option value="available">Available</option>
                                   <option value="busy">Busy</option>
@@ -1574,7 +1574,7 @@ const AdminWorkforce = () => {
                                   step="0.01"
                                   value={formData.hourly_rate || ''}
                                   onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="150.00"
                                 />
                               </div>
@@ -1637,7 +1637,7 @@ const AdminWorkforce = () => {
                                   type="text"
                                   value={formData.current_location || ''}
                                   onChange={(e) => setFormData({ ...formData, current_location: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="Houston, TX, USA"
                                   required
                                 />
@@ -1650,7 +1650,7 @@ const AdminWorkforce = () => {
                                   max="100"
                                   value={formData.travel_percentage || ''}
                                   onChange={(e) => setFormData({ ...formData, travel_percentage: parseInt(e.target.value) || null })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="25"
                                 />
                               </div>
@@ -1691,7 +1691,7 @@ const AdminWorkforce = () => {
                                   ...formData, 
                                   preferred_work_environments: e.target.value.split(',').map(env => env.trim()).filter(env => env)
                                 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 placeholder="Offshore, Onshore, Office, Remote, Field (comma-separated)"
                               />
                             </div>
@@ -1704,7 +1704,7 @@ const AdminWorkforce = () => {
                                   ...formData, 
                                   shift_preferences: e.target.value.split(',').map(shift => shift.trim()).filter(shift => shift)
                                 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 placeholder="Day shift, Night shift, Rotating, 24/7 (comma-separated)"
                               />
                             </div>
@@ -1720,7 +1720,7 @@ const AdminWorkforce = () => {
                                   type="url"
                                   value={formData.portfolio_url || ''}
                                   onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="https://portfolio.example.com"
                                 />
                               </div>
@@ -1730,7 +1730,7 @@ const AdminWorkforce = () => {
                                   type="url"
                                   value={formData.linkedin_url || ''}
                                   onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="https://linkedin.com/in/username"
                                 />
                               </div>
@@ -1750,7 +1750,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.job_posting || ''}
                                   onChange={(e) => setFormData({ ...formData, job_posting: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   required
                                 >
                                   <option value="">Select Job Posting</option>
@@ -1766,7 +1766,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.applicant || ''}
                                   onChange={(e) => setFormData({ ...formData, applicant: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   required
                                 >
                                   <option value="">Select Applicant</option>
@@ -1783,7 +1783,7 @@ const AdminWorkforce = () => {
                               <textarea
                                 value={formData.cover_letter || ''}
                                 onChange={(e) => setFormData({ ...formData, cover_letter: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 rows="6"
                                 placeholder="Cover letter content..."
                                 required
@@ -1795,7 +1795,7 @@ const AdminWorkforce = () => {
                                 type="url"
                                 value={formData.portfolio_url || ''}
                                 onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 placeholder="https://portfolio.example.com"
                               />
                             </div>
@@ -1810,7 +1810,7 @@ const AdminWorkforce = () => {
                                 <select
                                   value={formData.status || 'submitted'}
                                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 >
                                   <option value="submitted">Submitted</option>
                                   <option value="under_review">Under Review</option>
@@ -1831,7 +1831,7 @@ const AdminWorkforce = () => {
                                   step="0.01"
                                   value={formData.ai_match_score || ''}
                                   onChange={(e) => setFormData({ ...formData, ai_match_score: e.target.value })}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                   placeholder="85.5"
                                 />
                               </div>
@@ -1841,7 +1841,7 @@ const AdminWorkforce = () => {
                               <textarea
                                 value={formData.review_notes || ''}
                                 onChange={(e) => setFormData({ ...formData, review_notes: e.target.value })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                                 rows="4"
                                 placeholder="Internal review notes, feedback, interview notes..."
                               />
@@ -1887,7 +1887,7 @@ const AdminWorkforce = () => {
                         </button>
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-custom_yellow"
+                          className="px-4 py-2 bg-gold text-dark rounded hover:bg-custom_yellow"
                         >
                           {modalType === 'create' ? 'Create' : 'Save'}
                         </button>

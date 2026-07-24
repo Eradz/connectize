@@ -380,7 +380,7 @@ const KnowledgeForumDetail = () => {
                 {(forum.is_public || forum.is_member) && (
                   <Link
                     to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                    className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
+                    className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
                   >
                     <Plus className="w-4 h-4" />
                     <span>New Topic</span>
@@ -439,7 +439,7 @@ const KnowledgeForumDetail = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 />
               </div>
             </div>
@@ -447,7 +447,7 @@ const KnowledgeForumDetail = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-primary-500/30 focus:border-primary-500"
               >
                 <option value="latest">Latest Activity</option>
                 <option value="popular">Most Popular</option>
@@ -455,7 +455,7 @@ const KnowledgeForumDetail = () => {
               </select>
               <button
                 onClick={handleSearch}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
               >
                 <Search className="w-4 h-4" />
                 <span>Search</span>
@@ -511,7 +511,7 @@ const KnowledgeForumDetail = () => {
                             type="button"
                             onClick={() => onAddPlatformMember(user)}
                             disabled={addingUserId === user.id}
-                            className="shrink-0 bg-gold text-white px-3 py-2 rounded text-sm disabled:opacity-60"
+                            className="shrink-0 bg-gold text-dark px-3 py-2 rounded text-sm disabled:opacity-60"
                           >
                             {addingUserId === user.id ? 'Adding...' : 'Add Member'}
                           </button>
@@ -535,7 +535,7 @@ const KnowledgeForumDetail = () => {
                     placeholder="Optional message"
                     className="w-full border rounded px-3 py-2"
                   />
-                  <button type="submit" className="bg-gold text-white px-4 py-2 rounded">Send Invite</button>
+                  <button type="submit" className="bg-gold text-dark px-4 py-2 rounded">Send Invite</button>
                 </div>
               </form>
               <div className="p-6 border-t">
@@ -620,7 +620,7 @@ const KnowledgeForumDetail = () => {
               {(forum.is_public || forum.is_member) && (
                 <Link
                   to={webRoutes.knowledgeForumTopicCreate?.replace(':forumSlug', forum.slug) || '#'}
-                  className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
+                  className="inline-flex items-center bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Start First Topic
@@ -726,7 +726,7 @@ const KnowledgeForumDetail = () => {
                           onClick={() => setCurrentPage(pageNum)}
                           className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded ${
                             pageNum === currentPage
-                              ? 'bg-gold text-white'
+                              ? 'bg-gold text-dark'
                               : 'border border-gray-300 hover:bg-gray-100'
                           }`}
                         >

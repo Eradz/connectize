@@ -154,14 +154,14 @@ const KnowledgeSearch = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch(e)}
-                  className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                  className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-lg"
                 />
               </div>
               
               <select
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               >
                 <option value="all">All Content</option>
                 <option value="articles">Articles Only</option>
@@ -203,7 +203,7 @@ const KnowledgeSearch = () => {
                     setSortBy(e.target.value);
                     if (searchTerm.trim()) performSearch();
                   }}
-                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="relevance">Sort by Relevance</option>
                   <option value="date">Sort by Date</option>
@@ -338,7 +338,7 @@ const KnowledgeSearch = () => {
                     setSortBy(e.target.value);
                     if (searchTerm.trim()) performSearch();
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="relevance">Sort by Relevance</option>
                   <option value="date">Sort by Date</option>

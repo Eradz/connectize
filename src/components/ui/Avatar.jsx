@@ -33,10 +33,9 @@ const Avatar = ({
   };
 
   const avatarClasses = clsx(
-    "relative inline-flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-white dark:border-gray-900 shadow-soft transition-all duration-200 hover:shadow-medium",
+    "relative inline-flex items-center justify-center overflow-hidden border-2 border-white bg-primary-50 text-dark shadow-soft dark:border-gray-900 dark:bg-gray-800",
     sizes[size],
     shapes[shape],
-    "group",
     className
   );
 
@@ -53,7 +52,7 @@ const Avatar = ({
     <img 
       src={src} 
       alt={alt} 
-      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+      className="w-full h-full object-cover"
       {...props}
     />
   ) : (

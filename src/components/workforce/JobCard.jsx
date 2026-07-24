@@ -209,7 +209,7 @@ return(
           <div className="flex items-center justify-between md:justify-normal space-x-2 text-[12px]">
             <Link
               to={webRoutes.workforceJobApply.replace(':id', job.id)}
-              className="bg-custom_yellow text-white  text-center p-2 rounded-lg hover:bg-gold transition-colors font-medium w-[50%] md:w-fit"
+              className="bg-custom_yellow text-dark  text-center p-2 rounded-lg hover:bg-gold transition-colors font-medium w-[50%] md:w-fit"
             >
               Apply Now
             </Link>

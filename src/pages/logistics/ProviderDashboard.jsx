@@ -210,7 +210,7 @@ const ProviderDashboard = () => {
           <p className="text-gray-600 mb-4">Register as a logistics provider to access this dashboard</p>
           <button
             onClick={() => navigate('/logistics/become-provider')}
-            className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow"
+            className="px-6 py-3 bg-gold text-dark rounded-lg hover:bg-custom_yellow"
           >
             Become a Provider
           </button>
@@ -357,7 +357,7 @@ const ProviderDashboard = () => {
               </Link>
               <Link
                 to="/logistics/requests"
-                className="flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow"
+                className="flex items-center gap-2 px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow"
               >
                 <Search className="w-4 h-4" />
                 Find Shipments
@@ -674,7 +674,7 @@ const ProviderDashboard = () => {
                     <div className="flex flex-col items-end gap-2">
                       <Link
                         to={`/logistics/requests/${quote.request}`}
-                        className="flex items-center gap-2 px-4 py-2 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
+                        className="flex items-center gap-2 px-4 py-2 text-sm bg-gold text-dark rounded-lg hover:bg-custom_yellow"
                       >
                         <Eye className="w-4 h-4" />
                         View Details
@@ -699,7 +699,7 @@ const ProviderDashboard = () => {
                   <p className="text-gray-500 mb-4">Submit competitive quotes to win shipment contracts</p>
                   <Link
                     to="/logistics/requests"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow"
                   >
                     <Search className="w-4 h-4" />
                     Browse Requests
@@ -790,7 +790,7 @@ const ProviderDashboard = () => {
                         </Link>
                         <button
                           onClick={() => handleSubmitQuote(request.id)}
-                          className="flex items-center gap-1 px-4 py-2 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
+                          className="flex items-center gap-1 px-4 py-2 text-sm bg-gold text-dark rounded-lg hover:bg-custom_yellow"
                         >
                           <Send className="w-4 h-4" />
                           Submit Quote
@@ -853,7 +853,7 @@ const ProviderDashboard = () => {
                   <p className="text-gray-500 mb-4">Start quoting on shipment requests to win jobs</p>
                   <Link
                     to="/logistics/requests"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow"
                   >
                     <Search className="w-4 h-4" />
                     Browse Requests

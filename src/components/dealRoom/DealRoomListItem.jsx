@@ -96,7 +96,7 @@ export const DealRoomListItem = ({ deal }) => (
             </button>
             <Link
               to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-              className="bg-pale_yellow  text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
+              className="bg-pale_yellow  text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
             >
               View Details
             </Link>

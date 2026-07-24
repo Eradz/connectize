@@ -173,7 +173,7 @@ const KnowledgeTopicCreate = () => {
                 value={form.title}
                 onChange={onInputChange}
                 placeholder="Enter a descriptive title for your topic"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500 text-lg"
                 required
               />
             </div>
@@ -205,7 +205,7 @@ const KnowledgeTopicCreate = () => {
                     name="is_pinned"
                     checked={form.is_pinned}
                     onChange={onInputChange}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                   />
                   <label htmlFor="is_pinned" className="ml-3 text-sm text-gray-700">
                     Pin this topic (requires moderator privileges)

@@ -265,7 +265,7 @@ export default function Marketplace() {
             handleAddToCart(listing);
           }}
           disabled={!listing.is_in_stock && hasListingPrice(listing)}
-          className="w-full mt-3 py-2 md:spx-4 bg-gold text-white rounded-lg text-sm font-medium hover:bg-gold/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1 md:gap-2"
+          className="w-full mt-3 py-2 md:spx-4 bg-gold text-dark rounded-lg text-sm font-medium hover:bg-gold/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-1 md:gap-2"
         >
           <ShoppingCart size={16} />
           <span className="text-sm md:text-base">{hasListingPrice(listing) ? "Add to Cart" : "View Details"}</span>
@@ -452,7 +452,7 @@ export default function Marketplace() {
               
               <button
                 onClick={fetchListings}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/90"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-gold/90"
               >
                 Apply Filters
               </button>

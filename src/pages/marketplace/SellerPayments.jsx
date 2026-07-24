@@ -350,7 +350,7 @@ const SellerPayments = () => {
                   href={onboardingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+                  className="inline-flex items-center px-5 py-2.5 bg-gold hover:bg-custom_yellow text-dark rounded-lg font-medium transition-colors shadow-sm"
                 >
                   Open Stripe
                   <ExternalLink className="w-4 h-4 ml-2" />

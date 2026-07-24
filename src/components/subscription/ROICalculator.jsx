@@ -184,7 +184,7 @@ const ROICalculator = ({ plan, currentPlan, onClose }) => {
                       onChange={(e) => setTeamSize(parseInt(e.target.value) || 1)}
                       min="1"
                       max="1000"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     />
                   </div>
                   
@@ -198,7 +198,7 @@ const ROICalculator = ({ plan, currentPlan, onClose }) => {
                       onChange={(e) => setAvgSalary(parseInt(e.target.value) || 0)}
                       min="0"
                       step="1000"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -220,7 +220,7 @@ const ROICalculator = ({ plan, currentPlan, onClose }) => {
                     onChange={(e) => setTimeHours(parseInt(e.target.value) || 0)}
                     min="0"
                     max="40"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Time saved through automation, better tools, and streamlined processes
@@ -245,7 +245,7 @@ const ROICalculator = ({ plan, currentPlan, onClose }) => {
                         type="checkbox"
                         checked={currentTools.some(t => t.name === tool.name)}
                         onChange={() => handleToolToggle(tool)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                       />
                       <span className="text-sm text-gray-700">{tool.name}</span>
                       <span className="text-xs text-gray-500">${tool.cost}/mo</span>
@@ -270,7 +270,7 @@ const ROICalculator = ({ plan, currentPlan, onClose }) => {
                     onChange={(e) => setBusinessGrowth(parseInt(e.target.value) || 0)}
                     min="0"
                     max="100"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Estimated productivity boost from better tools and insights

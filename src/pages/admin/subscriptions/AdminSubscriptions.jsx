@@ -359,7 +359,7 @@ const AdminSubscriptions = () => {
                     setSelectedItems([]);
                   }
                 }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -396,7 +396,7 @@ const AdminSubscriptions = () => {
                       setSelectedItems(selectedItems.filter(id => id !== subscription.id));
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4">
@@ -740,7 +740,7 @@ const AdminSubscriptions = () => {
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 placeholder-gray-500"
+                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 placeholder-gray-500"
               />
             </div>
           </div>
@@ -750,7 +750,7 @@ const AdminSubscriptions = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
                 >
                   <option value="all">All Status</option>
                   <option value="active">Active</option>
@@ -761,7 +761,7 @@ const AdminSubscriptions = () => {
                 <select
                   value={planFilter}
                   onChange={(e) => setPlanFilter(e.target.value)}
-                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
                 >
                   <option value="all">All Plans</option>
                   <option value="starter">Starter</option>
@@ -783,7 +783,7 @@ const AdminSubscriptions = () => {
 
       {/* Bulk Actions */}
       {selectedItems.length > 0 && activeTab === 'subscriptions' && (
-        <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-2xl p-6 shadow-xl">
+        <div className="backdrop-blur-xl bg-gold/20 border border-blue-300/30 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center justify-between">
             <span className="text-blue-800 font-semibold">
               {selectedItems.length} subscription(s) selected
@@ -897,7 +897,7 @@ const AdminSubscriptions = () => {
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <button onClick={()=>setShowCreateSubscriptionModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
-                    <button onClick={()=>handleCreateSubscription(newSubscription)} className="px-4 py-2 rounded-lg bg-blue-600 text-white">Create</button>
+                    <button onClick={()=>handleCreateSubscription(newSubscription)} className="px-4 py-2 rounded-lg bg-gold text-dark">Create</button>
                   </div>
                 </div>
               </div>
@@ -1043,7 +1043,7 @@ const AdminSubscriptions = () => {
                   </section>
                   <div className="flex justify-end gap-2 sticky bottom-0 bg-white pt-4">
                     <button onClick={()=>setShowCreatePlanModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
-                    <button onClick={()=>handleCreatePlan(newPlan)} className="px-4 py-2 rounded-lg bg-blue-600 text-white">Create Plan</button>
+                    <button onClick={()=>handleCreatePlan(newPlan)} className="px-4 py-2 rounded-lg bg-gold text-dark">Create Plan</button>
                   </div>
                 </div>
               </div>
@@ -1074,7 +1074,7 @@ const AdminSubscriptions = () => {
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <button onClick={()=>setEditingSubscription(null)} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                    <button onClick={async ()=>{ await handleEditSubscription(editingSubscription.id, editingSubscriptionData); setEditingSubscription(null); }} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm">Save</button>
+                    <button onClick={async ()=>{ await handleEditSubscription(editingSubscription.id, editingSubscriptionData); setEditingSubscription(null); }} className="px-4 py-2 rounded-lg bg-gold text-dark text-sm">Save</button>
                   </div>
                 </div>
               </div>
@@ -1195,7 +1195,7 @@ const AdminSubscriptions = () => {
                 </section>
                 <div className="flex justify-end gap-2 sticky bottom-0 bg-white pt-4">
                   <button onClick={()=>{setEditingPlan(null); setEditingPlanData(null);}} className="px-4 py-2 rounded-lg border text-sm">Cancel</button>
-                  <button onClick={async ()=>{ await handleEditPlan(editingPlan.id, editingPlanData); setEditingPlan(null); setEditingPlanData(null); }} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm">Save Changes</button>
+                  <button onClick={async ()=>{ await handleEditPlan(editingPlan.id, editingPlanData); setEditingPlan(null); setEditingPlanData(null); }} className="px-4 py-2 rounded-lg bg-gold text-dark text-sm">Save Changes</button>
                 </div>
               </div>
             </div>

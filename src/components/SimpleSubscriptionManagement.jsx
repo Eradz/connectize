@@ -125,7 +125,7 @@ const SimpleSubscriptionManagement = () => {
                       <div key={plan} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <h4 className="font-semibold text-lg">{plan}</h4>
                         <p className="text-gray-600 text-sm">Features for {plan.toLowerCase()} users</p>
-                        <button className="mt-3 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-custom_yellow">
+                        <button className="mt-3 w-full bg-gold text-dark py-2 px-4 rounded hover:bg-custom_yellow">
                           {plan === 'Enterprise' ? 'Current Plan' : 'Upgrade'}
                         </button>
                       </div>
@@ -177,7 +177,7 @@ const SimpleSubscriptionManagement = () => {
                         <span>73%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '73%' }}></div>
+                        <div className="bg-gold h-2 rounded-full" style={{ width: '73%' }}></div>
                       </div>
                     </div>
                     <div>
@@ -231,7 +231,7 @@ const SimpleSubscriptionManagement = () => {
               <div className="flex flex-wrap gap-4">
                 <button 
                   onClick={() => navigate('/subscriptions')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-custom_yellow"
+                  className="bg-gold text-dark px-4 py-2 rounded hover:bg-custom_yellow"
                 >
                   Back to Dashboard
                 </button>

@@ -241,7 +241,7 @@ const EditListing = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -255,7 +255,7 @@ const EditListing = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={5}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
 
@@ -288,7 +288,7 @@ const EditListing = () => {
                   name="condition"
                   value={formData.condition}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 >
                   {conditions.map(cond => (
                     <option key={cond.value} value={cond.value}>{cond.label}</option>
@@ -312,7 +312,7 @@ const EditListing = () => {
                 name="currency"
                 value={formData.currency}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 {SUPPORTED_CURRENCIES.map(curr => (
                   <option key={curr.code} value={curr.code}>
@@ -333,7 +333,7 @@ const EditListing = () => {
                 onChange={handleInputChange}
                 min={isService ? "0" : "0.01"}
                 step="0.01"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required={!isService}
               />
               {isService && (
@@ -354,7 +354,7 @@ const EditListing = () => {
                 value={formData.quantity_available}
                 onChange={handleInputChange}
                 min="0"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
             )}
@@ -367,7 +367,7 @@ const EditListing = () => {
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 {statuses.map(status => (
                   <option key={status.value} value={status.value}>{status.label}</option>
@@ -391,7 +391,7 @@ const EditListing = () => {
               value={formData.location}
               onChange={handleInputChange}
               placeholder="e.g., Houston, TX"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             />
           </div>
         </div>
@@ -479,7 +479,7 @@ const EditListing = () => {
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-3 bg-gold text-dark rounded-xl font-semibold hover:bg-custom_yellow transition flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? (
               <>

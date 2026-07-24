@@ -230,7 +230,7 @@ const InventoryDashboard = () => {
             <div className="flex items-center space-x-3">
               <Link
                 to={webRoutes.inventoryItemCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Item</span>
@@ -332,7 +332,7 @@ const InventoryDashboard = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     />
                   </div>
                 </div>
@@ -340,7 +340,7 @@ const InventoryDashboard = () => {
                   <select
                     value={selectedWarehouse}
                     onChange={(e) => setSelectedWarehouse(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-primary-500/30 focus:border-primary-500"
                   >
                     <option value="">All Warehouses</option>
                     {warehouses.map(warehouse => (
@@ -350,7 +350,7 @@ const InventoryDashboard = () => {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-primary-500/30 focus:border-primary-500"
                   >
                     <option value="">All Categories</option>
                     {categories.map(category => (
@@ -360,7 +360,7 @@ const InventoryDashboard = () => {
                   <select
                     value={selectedFilter}
                     onChange={(e) => setSelectedFilter(e.target.value)}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-primary-500/30 focus:border-primary-500"
                   >
                     <option value="all">All Items</option>
                     <option value="low_stock">Low Stock</option>
@@ -369,7 +369,7 @@ const InventoryDashboard = () => {
                   </select>
                   <button
                     onClick={handleSearch}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
+                    className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center space-x-2"
                   >
                     <Filter className="w-4 h-4" />
                     <span>Filter</span>
@@ -449,7 +449,7 @@ const InventoryDashboard = () => {
                     <div className="mt-6">
                       <Link
                         to={webRoutes.inventoryItemCreate}
-                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
+                        className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-custom_yellow"
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Item

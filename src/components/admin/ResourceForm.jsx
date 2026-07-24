@@ -56,7 +56,7 @@ const ResourceForm = ({ title, fields, initialValues = {}, onSubmit, onCancel, s
               type="checkbox"
               checked={!!values[f.name]}
               onChange={(e) => handleChange(f.name, e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-2"
+              className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded mr-2"
             />
             <span>{f.label}</span>
           </label>

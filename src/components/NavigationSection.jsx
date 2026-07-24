@@ -164,9 +164,9 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
             to={item.to}
             onClick={() => toggleNav(false)}
             className={clsx(
-              "flex-1 flex gap-2 items-center transition-all duration-300 p-2 py-2.5 rounded-md",
+              "flex-1 flex gap-2 items-center rounded-lg p-2 py-2.5 transition-colors",
               {
-                "bg-blue-50 text-blue-700": isActive,
+                "bg-primary-50 text-dark ring-1 ring-inset ring-primary-200": isActive,
                 "text-gray-600 hover:bg-gray-50 hover:text-gray-900": !isActive,
               }
             )}
@@ -202,7 +202,12 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 <Link
                   to={subItem.to}
                   onClick={() => toggleNav(false)}
-                  className="block p-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md transition-colors"
+                  className={clsx(
+                    "block rounded-md p-2 text-sm transition-colors",
+                    pathname === subItem.to || pathname.startsWith(`${subItem.to}/`)
+                      ? "bg-primary-50 font-semibold text-dark"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  )}
                 >
                   {subItem.name}
                 </Link>
@@ -224,10 +229,9 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                 onClick={() => toggleNav(false)}
                 className={clsx(
-                  "flex items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm flex-col text-xs xs:text-[.65rem] relative",
+                  "relative flex min-w-12 flex-col items-center rounded-lg p-2 py-2 text-xs transition-colors xs:text-[.65rem]",
                   {
-                    "bg-mid_grey pointer-events-none": isActive,
-                    "!text-gold rounded": isActive,
+                    "bg-primary-50 !text-dark": isActive,
                     "!text-gray-500": !isActive,
                   }
                 )}
@@ -236,18 +240,17 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   IconName={icon}
                   tip={name}
                   iconClassName={clsx(
-                    "hover:!text-gold text-xl !size-[25px] md:!size-5 lg:!size-4",
+                    "text-xl !size-[25px] md:!size-5 lg:!size-4",
                     {
                       "!text-gold rounded": isActive,
                       "!text-gray-500": !isActive,
-                      "!text-white": !isActive && isSmallNavigation,
                     }
                   )}
                 />
-                <span className="text-white text-[9px]">{name}</span>
+                <span className="text-[9px] text-current">{name}</span>
                 {name === "Messages" && totalUnreadMessages > 0 && (
                   <Badge 
-                    className="absolute top-0 right-0 !text-[.5rem] !text-white !bg-gold"
+                    className="absolute right-0 top-0 !bg-gold !text-[.5rem] !text-dark"
                     fontSize="xs"
                   >
                     {totalUnreadMessages}
@@ -276,8 +279,8 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                 "flex flex-col items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded"
               )}
             >
-              <BusinessHub fill={pathname.startsWith(webRoutes.platformDashboard) ? '#f1c644' : '#ffffff'} width={25} height={25} />
-              <span className="text-white text-[9px]">Business hub</span>
+              <BusinessHub fill={pathname.startsWith(webRoutes.platformDashboard) ? '#f1c644' : '#828282'} width={25} height={25} />
+              <span className="text-[9px] text-gray-500">Business hub</span>
             </Link>
         </li>
       </ul>
@@ -297,10 +300,9 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                   to={name === "Profile" ? `/co/${currentUser?.id}` : to}
                   onClick={() => toggleNav(false)}
                   className={clsx(
-                    "flex gap-2 items-center transition-all active:scale-90 duration-300 p-2 py-2.5 xs:hover:!text-mid_grey !text-sm rounded relative",
+                    "relative flex items-center gap-2 rounded-lg p-2 py-2.5 !text-sm transition-colors",
                     {
-                      "bg-mid_grey pointer-events-none": isActive,
-                      "!text-gold": isActive,
+                      "bg-primary-50 !text-dark ring-1 ring-inset ring-primary-200": isActive,
                       "!text-gray-500": !isActive,
                     }
                   )}
@@ -309,11 +311,10 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                     IconName={icon}
                     tip={name}
                     iconClassName={clsx(
-                      "hover:!text-gold text-xl !size-5 lg:!size-4",
+                      "text-xl !size-5 lg:!size-4",
                       {
                         "!text-gold": isActive,
                         "!text-gray-500": !isActive,
-                        "!text-white": !isActive && isSmallNavigation,
                       }
                     )}
                   />
@@ -345,9 +346,9 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
 
       {/* Hub Section */}
       <div className="">
-        <div className={`${expandedSections.has('hub') ? 'bg-background ' : ''} flex items-center justify-between p-2 h-full rounded-t-lg` }>
+        <div className={`${expandedSections.has('hub') ? 'bg-gray-50 ' : ''} flex items-center justify-between p-2 h-full rounded-lg` }>
           <h3 className={` text-sm font-semibold flex items-center gap-2 `}>
-            <BusinessHub className="w-4 h-4 text-blue-600" />
+            <BusinessHub className="w-4 h-4 text-gold" />
             Business Hub
           </h3>
           <button
@@ -373,9 +374,9 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
 
       {/* Admin Section - Only show for admin users */}
       {isAdmin && (
-        <div className="bg-gold/10 rounded-lg p-2 shadow-sm border border-gold/30">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gold flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-dark flex items-center gap-2">
               <Shield className="w-4 h-4 text-gold" />
               Admin
             </h3>
@@ -403,10 +404,10 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                       to={item.to}
                       onClick={() => toggleNav(false)}
                       className={clsx(
-                        "flex gap-2 items-center transition-all duration-300 p-2 py-2.5 rounded-md",
+                        "flex gap-2 items-center p-2 py-2.5 rounded-md transition-colors",
                         {
-                          "bg-gold/20 text-gold": isActive,
-                          "text-gold/70 hover:bg-gold/10 hover:text-gold": !isActive,
+                          "bg-primary-50 text-dark ring-1 ring-inset ring-primary-200": isActive,
+                          "text-gray-600 hover:bg-white hover:text-dark": !isActive,
                         }
                       )}
                     >
@@ -416,7 +417,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                       <div className="flex-1 min-w-0">
                         <span className="text-sm font-medium block truncate">{item.name}</span>
                         {item.description && (
-                          <span className="text-xs text-gold/60 block truncate">{item.description}</span>
+                          <span className="text-xs text-gray-500 block truncate">{item.description}</span>
                         )}
                       </div>
                     </Link>

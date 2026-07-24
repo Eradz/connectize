@@ -455,7 +455,7 @@ const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) =
                   <Button 
                     onClick={handleRenewSubscription}
                     disabled={renewalLoading}
-                    className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000] text-white w-full sm:w-auto"
+                    className="w-full bg-gold text-dark hover:bg-custom_yellow sm:w-auto"
                   >
                     {renewalLoading ? (
                       <>
@@ -472,7 +472,7 @@ const BillingManagement = ({ setActiveTab, onUpdatePaymentMethod, activeTab }) =
                 ) : (
                   <Button 
                     onClick={handleAddPaymentMethod}
-                    className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000] text-white w-full sm:w-auto"
+                    className="w-full bg-gold text-dark hover:bg-custom_yellow sm:w-auto"
                   >
                     <CreditCard className="h-4 w-4 mr-2" />
                     Add Payment Method

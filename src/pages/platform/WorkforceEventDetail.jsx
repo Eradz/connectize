@@ -1095,7 +1095,7 @@ const WorkforceEventDetail = () => {
                                   <button
                                     type="button"
                                     onClick={loadParticipants}
-                                    className="px-4 py-2 bg-gold hover:bg-yellow-600 text-white rounded-md text-sm"
+                                    className="px-4 py-2 bg-gold hover:bg-yellow-600 text-dark rounded-md text-sm"
                                   >Retry Load Participants</button>
                                 </div>
                               )}
@@ -1420,7 +1420,7 @@ const WorkforceEventDetail = () => {
                       {event.max_attendees && (
                         <div className="w-full bg-gray-100 rounded-full h-[7px] shadow-inner">
                           <div
-                            className="bg-gradient-to-r from-[#FFC000] to-[#FF8400] h-[7px] rounded-full transition-all duration-500 shadow-sm"
+                            className="h-[7px] rounded-full bg-gold transition-all duration-500"
                             style={{
                               width: `${Math.min(event.attendees_count / event.max_attendees * 100, 100)}%`
                             }}
@@ -1591,13 +1591,13 @@ const WorkforceEventDetail = () => {
                               type="button"
                               onClick={handleRegister}
                               disabled={isRegistering || (event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees)}
-                              className="w-[50%] bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] 
+                              className="w-[50%] rounded-lg bg-gold text-dark hover:bg-custom_yellow
                                       disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 p-2 
                                       flex items-center justify-center text-sm shadow-md"
                             >
                               {isRegistering ? (
                                 <>
-                                  <div className="animate-spin rounded-full h-5 w-5 lg:h-6 lg:w-6 border-2 border-white border-t-transparent mr-2 lg:mr-3"></div>
+                                  <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-dark border-t-transparent lg:mr-3 lg:h-6 lg:w-6"></div>
                                   Registering...
                                 </>
                               ) : (
@@ -1786,7 +1786,7 @@ const WorkforceEventDetail = () => {
                                 type="button"
                                 onClick={handleRegister}
                                 disabled={isRegistering || (event.max_attendees && event.attendees_count != null && event.attendees_count >= event.max_attendees)}
-                                className="w-full bg-gradient-to-r from-[#FFC000] to-[#FF8400] text-white font-semibold py-3 px-6 rounded-lg hover:from-[#FF8400] hover:to-[#FFC000] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-gold px-6 py-3 font-semibold text-dark transition-colors hover:bg-custom_yellow disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 {isRegistering ? (
                                   <>

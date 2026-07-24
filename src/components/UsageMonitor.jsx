@@ -248,7 +248,7 @@ const UsageMonitor = ({
               <h4 className="text-sm font-medium text-blue-700">Need more resources?</h4>
               <p className="text-sm text-blue-600">Upgrade your plan for higher limits and additional features.</p>
             </div>
-            <button className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-custom_yellow transition-colors">
+            <button className="inline-flex items-center px-3 py-2 bg-gold text-dark text-sm rounded-lg hover:bg-custom_yellow transition-colors">
               <TrendingUp className="w-4 h-4 mr-1" />
               Upgrade Plan
             </button>

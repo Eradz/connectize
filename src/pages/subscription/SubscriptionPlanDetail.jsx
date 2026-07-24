@@ -34,7 +34,7 @@ const CardContent = ({ children, className = "", ...props }) => (
 
 const Button = ({ children, className = "", variant = "default", disabled = false, onClick, ...props }) => {
   const variants = {
-    default: "bg-blue-600 text-white hover:bg-custom_yellow",
+    default: "bg-gold text-dark hover:bg-custom_yellow",
     outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
   };
   return (
@@ -399,8 +399,7 @@ const SubscriptionPlanDetail = () => {
                   <button 
                     onClick={handlePlanChangeClick}
                     disabled={upgrading || upgradeSuccess}
-                    className="w-full text-white py-3 rounded-lg font-medium flex items-center justify-center transition-colors text-sm shadow-sm hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-                    style={{ background: 'linear-gradient(to right, #FFC000, #FF8400)' }}
+                    className="flex w-full items-center justify-center rounded-lg bg-gold py-3 text-sm font-medium text-dark transition-colors hover:bg-custom_yellow disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {upgrading ? (
                       <>
@@ -590,8 +589,7 @@ const SubscriptionPlanDetail = () => {
               </button>
               <button
                 onClick={handleConfirmPlanChange}
-                className={`flex-1 px-4 py-3 text-white rounded-lg font-medium transition-colors ${isUpgrade() ? '' : 'bg-gray-600 hover:bg-gray-700'}`}
-                style={isUpgrade() ? { background: 'linear-gradient(to right, #FFC000, #FF8400)' } : {}}
+                className={`flex-1 rounded-lg px-4 py-3 font-medium transition-colors ${isUpgrade() ? 'bg-gold text-dark hover:bg-custom_yellow' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
               >
                 {isUpgrade() ? 'Confirm & Pay' : 'Confirm Change'}
               </button>

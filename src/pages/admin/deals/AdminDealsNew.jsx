@@ -66,7 +66,7 @@ const AdminDeals = () => {
         <div className="flex space-x-3">
           <button
             onClick={() => window.location.href = '/admin/deals/analytics'}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+            className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
           >
             <BriefcaseIcon className="w-4 h-4 mr-2" />
             Analytics
@@ -84,7 +84,7 @@ const AdminDeals = () => {
                 placeholder="Search deal rooms..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
               />
             </div>
           </div>
@@ -92,7 +92,7 @@ const AdminDeals = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>

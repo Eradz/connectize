@@ -628,7 +628,7 @@ const SubscriptionDashboard = () => {
                         ? 'bg-gray-400 text-white cursor-not-allowed'
                         : isUpgrade
                           ? 'bg-green-600 text-white hover:bg-green-700'
-                          : 'bg-blue-600 text-white hover:bg-custom_yellow'
+                          : 'bg-gold text-dark hover:bg-custom_yellow'
                     }`}
                   >
                     {processingPlan === plan.id ? (
@@ -760,7 +760,7 @@ const SubscriptionDashboard = () => {
                 setSelectedPlanForROI(current?.plan);
                 setShowROICalculator(true);
               }}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-custom_yellow transition-colors flex items-center"
+              className="bg-gold text-dark px-6 py-3 rounded-lg hover:bg-custom_yellow transition-colors flex items-center"
             >
               <Calculator className="w-5 h-5 mr-2" />
               Open ROI Calculator

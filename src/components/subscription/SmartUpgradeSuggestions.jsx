@@ -74,7 +74,7 @@ const SmartUpgradeSuggestions = ({ opportunities, recommendations, currentPlan, 
     switch (urgency) {
       case 'high': return 'bg-red-500';
       case 'medium': return 'bg-orange-500';
-      case 'low': return 'bg-blue-500';
+      case 'low': return 'bg-gold';
       default: return 'bg-gray-500';
     }
   };
@@ -296,7 +296,7 @@ const SmartUpgradeSuggestions = ({ opportunities, recommendations, currentPlan, 
           </p>
           
           <div className="flex justify-center space-x-3">
-            <button className="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+            <button className="bg-gold text-dark px-6 py-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors">
               Compare Plans
             </button>
             <button className="bg-white text-purple-600 border border-purple-600 px-6 py-2 rounded-lg font-medium hover:bg-purple-50 transition-colors">

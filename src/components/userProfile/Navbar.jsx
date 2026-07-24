@@ -56,7 +56,7 @@ const Navbar = () => {
           className="w-full min-h-16 flex items-center bg-white z-[99999] ios-safe-top"
           style={{ 
             backgroundColor: '#ffffff',
-            borderBottom: '2px solid #f1c644',
+            borderBottom: '1px solid #f1c644',
           }}
         >
           <section
@@ -100,10 +100,10 @@ const Navbar = () => {
       </Headroom>
 
       <motion.nav
-        className="md:hidden bg-mid_grey fixed bottom-0 left-0 w-full z-[99999] ios-safe-bottom"
+        className="fixed bottom-0 left-0 z-[99999] w-full bg-white shadow-[0_-2px_12px_rgba(0,0,0,0.08)] md:hidden ios-safe-bottom"
         style={{
-          borderTop: '2px solid #f1c644',
-          backgroundColor: '#373737',
+          borderTop: '1px solid #e5e7eb',
+          backgroundColor: '#ffffff',
         }}
         // initial={{ y: 0 }}
         // animate={{ y: 100 }} // showBottomNav ? 0 :

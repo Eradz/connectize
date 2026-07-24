@@ -152,7 +152,7 @@ const EnhancedSubscriptionDashboard = () => {
             Choose a plan to unlock Connectize's powerful business features
           </p>
           <Button 
-            className="bg-blue-600 hover:bg-custom_yellow"
+            className="bg-gold hover:bg-custom_yellow"
             onClick={() => setActiveTab('plans')}
           >
             View Plans
@@ -515,7 +515,7 @@ const EnhancedSubscriptionDashboard = () => {
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-blue-600 text-white">Most Popular</Badge>
+                    <Badge className="bg-gold text-dark">Most Popular</Badge>
                   </div>
                 )}
                 
@@ -574,7 +574,7 @@ const EnhancedSubscriptionDashboard = () => {
                       className={`w-full ${
                         plan.plan_type === subscription?.plan?.plan_type 
                           ? 'bg-gray-300 text-gray-600' 
-                          : 'bg-blue-600 hover:bg-custom_yellow'
+                          : 'bg-gold hover:bg-custom_yellow'
                       }`}
                       disabled={plan.plan_type === subscription?.plan?.plan_type}
                     >

@@ -378,7 +378,7 @@ export default function CreateWarehouse() {
                   onClick={() => toggleArrayItem("security_features", feat.label)}
                   className={`px-3 py-1.5 rounded-full text-sm border transition ${
                     formData.security_features.includes(feat.label)
-                      ? "bg-gold text-white border-gold"
+                      ? "bg-gold text-dark border-gold"
                       : "bg-white text-gray-700 border-gray-300 hover:border-gold"
                   }`}
                 >
@@ -418,7 +418,7 @@ export default function CreateWarehouse() {
                   onClick={() => toggleArrayItem("certifications", cert.label)}
                   className={`px-3 py-1.5 rounded-full text-sm border transition ${
                     formData.certifications.includes(cert.label)
-                      ? "bg-gold text-white border-gold"
+                      ? "bg-gold text-dark border-gold"
                       : "bg-white text-gray-700 border-gray-300 hover:border-gold"
                   }`}
                 >
@@ -509,7 +509,7 @@ export default function CreateWarehouse() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-gold/90 disabled:bg-gray-300 flex items-center gap-2"
+                  className="px-6 py-3 bg-gold text-dark rounded-lg hover:bg-gold/90 disabled:bg-gray-300 flex items-center gap-2"
                 >         
                   {loading ? (
                     <>

@@ -82,7 +82,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                   id='DealRoomTitle'
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="e.g., North Sea Asset Acquisition"
                 />
               </div>
@@ -97,7 +97,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       placeholder="Provide a detailed description of the deal..."
                     />
                   </div>
@@ -112,7 +112,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                       type="text"
                       value={formData.location}
                       onChange={(e) => handleInputChange('location', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       placeholder="e.g., North Sea, Gulf of Mexico, West Africa"
                     />
                   </div>
@@ -128,7 +128,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                       onClick={() => handleInputChange('deal_type', type.value)}
                       className={`px-2 py-4 border-2 rounded-lg cursor-pointer transition-colors ${
                         formData.deal_type === type.value
-                          ? 'border-pale_yellow  bg-gradient-to-br to-[#FFC000] from-[#FF8400] '
+                          ? 'border-primary-500 bg-primary-50 ring-1 ring-primary-500/20'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -161,7 +161,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                     type="number"
                     value={formData.estimated_value}
                     onChange={(e) => handleInputChange('estimated_value', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="0"
                     min="0"
                     step="1000"
@@ -181,7 +181,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                   type="date"
                   value={formData.target_close_date}
                   onChange={(e) => handleInputChange('target_close_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
@@ -196,13 +196,13 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                     value={currentTag}
                     onChange={(e) => addTag(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="Add tags (e.g., offshore, drilling, upstream)"
                   />
                   <button
                     type="button"
                     onClick={addTag}
-                    className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-custom_yellow"
+                    className="px-4 py-2 bg-pale_yellow text-dark rounded-lg hover:bg-custom_yellow"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -249,7 +249,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                         type="checkbox"
                         checked={formData.is_confidential}
                         onChange={(e) => handleInputChange('is_confidential', e.target.checked)}
-                        className="rounded border-gray-300 text-pale_yellow focus:ring-blue-500"
+                        className="rounded border-gray-300 text-pale_yellow focus:ring-primary-500/30"
                       />
                     </label>
                   </div>
@@ -269,7 +269,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                         type="checkbox"
                         checked={formData.requires_nda}
                         onChange={(e) => handleInputChange('requires_nda', e.target.checked)}
-                        className="rounded border-gray-300 text-pale_yellow focus:ring-blue-500"
+                        className="rounded border-gray-300 text-pale_yellow focus:ring-primary-500/30"
                       />
                     </label>
                   </div>
@@ -287,13 +287,13 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                       type="email"
                       value={currentParticipant.email}
                       onChange={(e) => setCurrentParticipant(prev => ({ ...prev, email: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       placeholder="participant@company.com"
                     />
                     <select
                       value={currentParticipant.role}
                       onChange={(e) => setCurrentParticipant(prev => ({ ...prev, role: e.target.value }))}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     >
                       {participantRoles.map((role) => (
                         <option key={role.value} value={role.value}>{role.label}</option>
@@ -302,7 +302,7 @@ export const StepContent = ({currentStep, formData, handleInputChange, dealTypes
                     <button
                       type="button"
                       onClick={addParticipant}
-                      className="px-4 py-2 bg-pale_yellow text-white rounded-lg hover:bg-custom_yellow"
+                      className="px-4 py-2 bg-pale_yellow text-dark rounded-lg hover:bg-custom_yellow"
                     >
                       <Plus className="w-4 h-4" />
                     </button>

@@ -88,7 +88,7 @@ const UpgradeModal = ({ plans, currentPlan, onClose }) => {
               <button
                 onClick={handleUpgrade}
                 disabled={!selectedPlan || isProcessing}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isProcessing ? 'Processing...' : 'Upgrade Plan'}
               </button>
@@ -226,7 +226,7 @@ const CreateCampaignModal = ({ onClose }) => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="Enter campaign name"
                 />
               </div>
@@ -241,7 +241,7 @@ const CreateCampaignModal = ({ onClose }) => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="Describe your campaign"
                 />
               </div>
@@ -257,7 +257,7 @@ const CreateCampaignModal = ({ onClose }) => {
                     name="budget"
                     value={formData.budget}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="1000"
                   />
                 </div>
@@ -270,7 +270,7 @@ const CreateCampaignModal = ({ onClose }) => {
                     name="campaign_type"
                     value={formData.campaign_type}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                   >
                     <option value="featured">Featured Ad</option>
                     <option value="banner">Banner Ad</option>
@@ -291,7 +291,7 @@ const CreateCampaignModal = ({ onClose }) => {
                     name="start_date"
                     value={formData.start_date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                   />
                 </div>
 
@@ -304,7 +304,7 @@ const CreateCampaignModal = ({ onClose }) => {
                     name="end_date"
                     value={formData.end_date}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                   />
                 </div>
               </div>
@@ -319,7 +319,7 @@ const CreateCampaignModal = ({ onClose }) => {
                   name="target_audience"
                   value={formData.target_audience}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="e.g., Young professionals, Tech enthusiasts"
                 />
               </div>
@@ -336,7 +336,7 @@ const CreateCampaignModal = ({ onClose }) => {
               <button
                 onClick={handleCreate}
                 disabled={!formData.name || !formData.budget || isCreating}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isCreating ? 'Creating...' : 'Create Campaign'}
               </button>
@@ -407,9 +407,9 @@ const UsageMetric = ({ metric }) => {
   const isNearLimit = percentage > 80;
   
   const colorClasses = {
-    blue: 'bg-blue-600',
+    blue: 'bg-gold',
     green: 'bg-green-600',
-    purple: 'bg-purple-600'
+    purple: 'bg-gold'
   };
 
   return (

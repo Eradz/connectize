@@ -28,7 +28,7 @@ function Sidebar() {
   return (
     <nav
       className={clsx(
-        "max-md:hidden bg-white rounded-md py-4 px-2 shrink-0 max-w-[300px] w-[27%] max-h-[97vh] scrollbar-hidden max-md:!py-6 max-md:shadow md:sticky md:top-2 overflow-y-auto space-y-4",
+        "max-md:hidden shrink-0 max-w-[300px] w-[27%] max-h-[97vh] space-y-4 overflow-y-auto rounded-xl border border-gray-200 bg-white px-2 py-4 shadow-soft scrollbar-hidden max-md:!py-6 max-md:shadow md:sticky md:top-2",
         { "h-[97vh]": !isMessagesRoute, "h-full": isMessagesRoute }
       )}
     >

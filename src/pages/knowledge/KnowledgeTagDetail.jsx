@@ -157,7 +157,7 @@ const KnowledgeTagDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen  flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#FFC000]"></div>
+        <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -171,7 +171,7 @@ const KnowledgeTagDetail = () => {
           <p className="text-gray-600 mb-6">The tag you're looking for doesn't exist.</p>
           <Link
             to={webRoutes.knowledgeHub}
-            className="inline-flex items-center px-6 py-3 bg-[#FFC000] text-gray-900 font-semibold rounded-lg hover:bg-[#FFD43B] transition-colors"
+            className="inline-flex items-center rounded-lg bg-gold px-6 py-3 font-semibold text-dark transition-colors hover:bg-custom_yellow"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Knowledge Hub
@@ -195,7 +195,7 @@ const KnowledgeTagDetail = () => {
             </button>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 bg-[#FFC000] rounded-lg">
+                <div className="rounded-lg bg-gold p-3">
                   <Tag className="w-6 h-6 text-gray-900" />
                 </div>
                 <h1 className="text-4xl font-bold text-gray-900 capitalize">
@@ -231,7 +231,7 @@ const KnowledgeTagDetail = () => {
                 placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent"
+                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
             <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ const KnowledgeTagDetail = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFC000] focus:border-transparent bg-white"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/30"
               >
                 <option value="recent">Most Recent</option>
                 <option value="popular">Most Popular</option>
@@ -284,13 +284,13 @@ const KnowledgeTagDetail = () => {
                 <div className="p-6">
                   {/* Category Badge */}
                   {article.category_name && (
-                    <span className="inline-block px-3 py-1 bg-[#FFC000]/10 text-[#FFC000] text-xs font-medium rounded-full mb-3">
+                    <span className="mb-3 inline-block rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-800">
                       {article.category_name}
                     </span>
                   )}
 
                   {/* Title */}
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#FFC000] transition-colors">
+                  <h3 className="mb-2 line-clamp-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-primary-800">
                     {article.title}
                   </h3>
 

@@ -449,7 +449,7 @@ const OrderConfirmation = () => {
         </Link>
         <Link
           to="/marketplace"
-          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+          className="px-6 py-3 bg-gold text-dark rounded-xl font-semibold hover:bg-custom_yellow transition flex items-center gap-2"
         >
           Continue Shopping
           <ChevronRight size={18} />

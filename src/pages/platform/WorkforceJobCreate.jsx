@@ -355,7 +355,7 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
                             <button
                                 onClick={nextStep}
                                 disabled={userCompanies.length === 0}
-                                className="flex items-center px-8 py-3 bg-gold text-white rounded-lg font-semibold hover:bg-gold/90 transition-all flex-1"
+                                className="flex items-center px-8 py-3 bg-gold text-dark rounded-lg font-semibold hover:bg-gold/90 transition-all flex-1"
                             >
                                 Next <ChevronRight className="w-4 h-4 ml-2" />
                             </button>
@@ -413,7 +413,7 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
                                 <button
                                     onClick={nextStep}
                                     disabled={userCompanies.length === 0}
-                                    className="flex items-center px-8 py-3 bg-gold text-white rounded-lg font-semibold hover:bg-gold/90 transition-all"
+                                    className="flex items-center px-8 py-3 bg-gold text-dark rounded-lg font-semibold hover:bg-gold/90 transition-all"
                                 >
                                     Next <ChevronRight className="w-4 h-4 ml-2" />
                                 </button>

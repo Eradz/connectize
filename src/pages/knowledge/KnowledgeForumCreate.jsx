@@ -193,18 +193,8 @@ const KnowledgeForumCreate = () => {
                   name="is_public"
                   checked={form.is_public}
                   onChange={onChange}
-                  className="h-4 w-4 rounded appearance-none focus:ring-2 focus:ring-[#F1C644] focus:ring-offset-2 cursor-pointer"
-                  style={{
-                    border: '2px solid',
-                    borderImage: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%) 1',
-                    background: form.is_public ? 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)' : 'white'
-                  }}
+                  className="h-4 w-4 cursor-pointer rounded border-gray-300 text-gold focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-2"
                 />
-                {form.is_public && (
-                  <svg className="absolute left-0.5 top-0.5 w-3 h-3 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                )}
               </div>
               <label className="ml-2 text-sm text-gray-700">
                 Public forum (visible to all user)
@@ -218,18 +208,8 @@ const KnowledgeForumCreate = () => {
                   name="is_moderated"
                   checked={form.is_moderated}
                   onChange={onChange}
-                  className="h-4 w-4 rounded appearance-none focus:ring-2 focus:ring-[#F1C644] focus:ring-offset-2 cursor-pointer"
-                  style={{
-                    border: '2px solid',
-                    borderImage: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%) 1',
-                    background: form.is_moderated ? 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)' : 'white'
-                  }}
+                  className="h-4 w-4 cursor-pointer rounded border-gray-300 text-gold focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-2"
                 />
-                {form.is_moderated && (
-                  <svg className="absolute left-0.5 top-0.5 w-3 h-3 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                )}
               </div>
               <label className="ml-2 text-sm text-gray-700">
                 Moderated forum (post require approval)

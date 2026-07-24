@@ -36,7 +36,7 @@ const CurrencyPicker = ({ value, onChange, label = 'Currency', className = '' })
             onClick={() => onChange(code)}
             className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
               value === code
-                ? 'bg-gold text-white border-gold'
+                ? 'bg-gold text-dark border-gold'
                 : 'bg-white text-gray-700 border-gray-200 hover:border-gold'
             }`}
           >
@@ -45,7 +45,7 @@ const CurrencyPicker = ({ value, onChange, label = 'Currency', className = '' })
         ))}
         {/* Show the selected currency as a chip when it isn't a popular one */}
         {value && !POPULAR_CURRENCIES.includes(value) && (
-          <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-white text-sm font-medium">
+          <span className="px-3 py-1.5 rounded-full border border-gold bg-gold text-dark text-sm font-medium">
             {value}
           </span>
         )}

@@ -228,7 +228,7 @@ export default function DealRoomEdit() {
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="px-4 py-2 rounded-lg bg-gold text-white text-sm hover:bg-custom_yellow disabled:opacity-60"
+                className="px-4 py-2 rounded-lg bg-gold text-dark text-sm hover:bg-custom_yellow disabled:opacity-60"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -251,7 +251,7 @@ export default function DealRoomEdit() {
                   <select
                     value={formData.company}
                     onChange={(e) => handleInputChange('company', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent bg-white"
                   >
                     <option value="">Select a company</option>
                     {companies.map((company) => (
@@ -279,7 +279,7 @@ export default function DealRoomEdit() {
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="Enter deal title"
                   required
                 />
@@ -293,7 +293,7 @@ export default function DealRoomEdit() {
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={4}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="Describe the deal, its objectives, and key details"
                 />
               </div>
@@ -305,7 +305,7 @@ export default function DealRoomEdit() {
                 <select
                   value={formData.deal_type}
                   onChange={(e) => handleInputChange('deal_type', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   {dealTypes.map(type => (
                     <option key={type.value} value={type.value}>
@@ -322,7 +322,7 @@ export default function DealRoomEdit() {
                 <select
                   value={formData.status}
                   onChange={(e) => handleInputChange('status', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   {dealStatuses.map(status => (
                     <option key={status.value} value={status.value}>
@@ -343,7 +343,7 @@ export default function DealRoomEdit() {
                   type="text"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="Location or region"
                 />
               </div>
@@ -361,7 +361,7 @@ export default function DealRoomEdit() {
                     type="text"
                     value={formData.estimated_value}
                     onChange={(e) => handleInputChange('estimated_value', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="0"
                     inputMode="decimal"
                   />
@@ -383,7 +383,7 @@ export default function DealRoomEdit() {
                     type="date"
                     value={formData.target_close_date}
                     onChange={(e) => handleInputChange('target_close_date', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -399,7 +399,7 @@ export default function DealRoomEdit() {
                     id="is_confidential"
                     checked={formData.is_confidential}
                     onChange={(e) => handleInputChange('is_confidential', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                   />
                   <label htmlFor="is_confidential" className="ml-2 block text-sm text-gray-900">
                     Mark as confidential deal
@@ -412,7 +412,7 @@ export default function DealRoomEdit() {
                     id="requires_nda"
                     checked={formData.requires_nda}
                     onChange={(e) => handleInputChange('requires_nda', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                   />
                   <label htmlFor="requires_nda" className="ml-2 block text-sm text-gray-900">
                     Require NDA for participants
@@ -432,7 +432,7 @@ export default function DealRoomEdit() {
               <button
                 type="submit"
                 disabled={(companies.length === 0)  || saving}
-                className="px-6 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow disabled:opacity-60"
+                className="px-6 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-60"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

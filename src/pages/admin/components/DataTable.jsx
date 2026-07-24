@@ -437,7 +437,7 @@ const DataTable = ({
                     }}
                     className={`px-3 py-1 text-sm border rounded ${
                       effectivePage === page
-                        ? 'bg-blue-600 text-white border-blue-600'
+                        ? 'bg-gold text-dark border-blue-600'
                         : 'border-gray-300 hover:bg-gray-100'
                     }`}
                   >

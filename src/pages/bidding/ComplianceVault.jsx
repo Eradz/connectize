@@ -504,7 +504,7 @@ export default function ComplianceVault() {
               {isUploadCompanyLocked ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                  <div className="inline-flex rounded-full bg-gold px-3 py-1.5 text-sm font-medium text-white">
+                  <div className="inline-flex rounded-full bg-gold px-3 py-1.5 text-sm font-medium text-dark">
                     {getCompanyName(uploadForm.company) || "Selected company"}
                   </div>
                 </div>

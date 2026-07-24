@@ -82,7 +82,7 @@ const ProductsManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Products Management</h1>
           <p className="text-gray-600">Manage and monitor all platform products</p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors">
+        <button className="inline-flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors">
           <PlusIcon className="h-5 w-5 mr-2" />
           Add New Product
         </button>
@@ -156,7 +156,7 @@ const ProductsManagement = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search products by title, description, or company..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
               />
             </div>
           </div>
@@ -164,7 +164,7 @@ const ProductsManagement = () => {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
@@ -174,7 +174,7 @@ const ProductsManagement = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>

@@ -181,7 +181,7 @@ const OngoingEvents = ({searchTerm, handleSearchChange, setShowFilters, showFilt
                               onClick={(e) => handleBookmark(currentEvent.id, e)}
                               className={`p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center border border-white/30 ${
                                 currentEvent.is_bookmarked
-                                  ? 'bg-gold text-white'
+                                  ? 'bg-gold text-dark'
                                   : 'bg-pale_yellow hover:bg-white/30'
                               }`}
                             >

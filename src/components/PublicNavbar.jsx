@@ -24,7 +24,7 @@ const PublicNavbar = () => (
         </Link>
         <Link
           to={webRoutes.signup}
-          className="rounded-full bg-gold px-4 py-2 text-sm font-semibold text-white transition hover:bg-custom_yellow"
+          className="rounded-full bg-gold px-4 py-2 text-sm font-semibold text-dark transition hover:bg-custom_yellow"
         >
           Sign up
         </Link>

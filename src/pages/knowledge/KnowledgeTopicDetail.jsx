@@ -517,7 +517,7 @@ const KnowledgeTopicDetail = () => {
                     <button
                       type="submit"
                       disabled={submittingReply || !replyContent.trim()}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {submittingReply ? 'Posting...' : 'Post Reply'}
                     </button>
@@ -548,7 +548,7 @@ const KnowledgeTopicDetail = () => {
               <p className="text-gray-600 mb-4">Be the first to reply to this topic.</p>
               <button
                 onClick={() => setShowReplyForm(true)}
-                className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
+                className="inline-flex items-center bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 <Reply className="w-4 h-4 mr-2" />
                 Post First Reply
@@ -698,7 +698,7 @@ const KnowledgeTopicDetail = () => {
                           onClick={() => setCurrentPage(pageNum)}
                           className={`px-3 py-1 text-sm rounded ${
                             pageNum === currentPage
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-gold text-dark'
                               : 'border border-gray-300 hover:bg-gray-100'
                           }`}
                         >
@@ -726,7 +726,7 @@ const KnowledgeTopicDetail = () => {
           <div className="mt-6 text-center">
             <button
               onClick={() => setShowReplyForm(true)}
-              className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-custom_yellow"
+              className="inline-flex items-center bg-gold text-dark px-6 py-3 rounded-lg hover:bg-custom_yellow"
             >
               <Reply className="w-5 h-5 mr-2" />
               Reply to Topic

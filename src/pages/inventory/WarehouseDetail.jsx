@@ -105,7 +105,7 @@ const WarehouseDetail = () => {
             <div className="flex gap-2">
               <Link
                 to={`/inventory/warehouses/${id}/edit`}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                className="flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow text-sm"
               >
                 <Edit className="w-4 h-4 mr-2" /> Edit
               </Link>
@@ -135,7 +135,7 @@ const WarehouseDetail = () => {
             <div className="flex items-center gap-3">
               <p className="text-2xl font-bold text-gray-900">{capacityUsed}%</p>
               <div className="flex-1 bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${Math.min(capacityUsed, 100)}%` }} />
+                <div className="bg-gold h-2 rounded-full" style={{ width: `${Math.min(capacityUsed, 100)}%` }} />
               </div>
             </div>
           </div>

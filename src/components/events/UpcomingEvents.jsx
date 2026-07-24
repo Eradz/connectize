@@ -166,7 +166,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                          onClick={(e) => handleBookmark(event.id, e)}
                          className={`p-2 rounded-lg transition-colors ${
                            event.is_bookmarked 
-                             ? 'bg-gold text-white' 
+                             ? 'bg-gold text-dark'
                              : 'bg-pale_yellow text-gray-700 hover:bg-gold'
                          }`}
                        >
@@ -238,7 +238,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                   <div className="rounded-b-xl flex space-x-2 h-[12%] py-3 px-2 border-t border-gray-300">
                       <Link
                         to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
-                        className="flex-1 bg-pale_yellow text-white text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
+                        className="flex-1 bg-pale_yellow text-dark text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         View Details
@@ -287,7 +287,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                                            onClick={(e) => handleBookmark(event.id, e)}
                                            className={`p-2 rounded-lg transition-colors ${
                                              event.is_bookmarked 
-                                               ? 'bg-gold text-white' 
+                                               ? 'bg-gold text-dark'
                                                : 'bg-pale_yellow text-gray-700 hover:bg-gold'
                                            }`}
                                          >
@@ -358,7 +358,7 @@ const UpcomingEvents = ({filteredEvents}) => {
                                     <div className="rounded-b-xl flex space-x-2 h-[12%] py-3 px-2 border-t border-gray-300">
                                         <Link
                                           to={`${webRoutes.workforceEventDetail.replace(':id', event.id)}`}
-                                          className="flex-1 bg-pale_yellow text-white text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
+                                          className="flex-1 bg-pale_yellow text-dark text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
                                         >
                                           <Eye className="w-4 h-4 mr-1" />
                                           View Details

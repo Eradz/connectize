@@ -620,7 +620,7 @@ const LogisticsShipmentDetail = () => {
           <div className="mt-6">
             <Link
               to={webRoutes.logisticsDashboard}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-custom_yellow"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Logistics
@@ -690,7 +690,7 @@ const LogisticsShipmentDetail = () => {
               <button
                 onClick={handleDownload}
                 disabled={!shipment?.id}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
               </button>

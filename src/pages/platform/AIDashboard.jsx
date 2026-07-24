@@ -167,7 +167,7 @@ const AIDashboard = () => {
               </Link>
               <Link
                 to={webRoutes.aiInsights}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Lightbulb className="w-4 h-4 mr-2" />
                 AI Insights
@@ -284,7 +284,7 @@ const AIDashboard = () => {
             <div className="mt-6 pt-4 border-t border-gray-100">
               <Link
                 to={webRoutes.aiMatching}
-                className="w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium block"
+                className="w-full bg-gold text-dark text-center py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium block"
               >
                 Configure Matching
               </Link>

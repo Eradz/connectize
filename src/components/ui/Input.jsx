@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 import clsx from "clsx";
 
-const baseStyles = "w-full px-4 py-3 rounded-xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-gray-700 placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 shadow-soft focus:shadow-medium";
+const baseStyles = "w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 transition-colors hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500";
 
 const Input = forwardRef(({ 
   className = "", 
@@ -13,8 +13,8 @@ const Input = forwardRef(({
 }, ref) => {
   const inputClasses = clsx(
     baseStyles,
-    error && "border-error-500 focus:ring-error-500 bg-error-50/50 dark:bg-error-900/20",
-    success && "border-success-500 focus:ring-success-500 bg-success-50/50 dark:bg-success-900/20",
+    error && "border-error-500 focus:border-error-500 focus:ring-error-500/20",
+    success && "border-success-500 focus:border-success-500 focus:ring-success-500/20",
     Icon && "pl-11",
     RightIcon && "pr-11",
     className
@@ -50,8 +50,8 @@ const Select = forwardRef(({
     baseStyles,
     "appearance-none bg-no-repeat bg-right bg-[length:20px] cursor-pointer",
     "bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27M6 8l4 4 4-4%27/%3e%3c/svg%3e')]",
-    error && "border-error-500 focus:ring-error-500 bg-error-50/50 dark:bg-error-900/20",
-    success && "border-success-500 focus:ring-success-500 bg-success-50/50 dark:bg-success-900/20",
+    error && "border-error-500 focus:border-error-500 focus:ring-error-500/20",
+    success && "border-success-500 focus:border-success-500 focus:ring-success-500/20",
     className
   );
 
@@ -73,8 +73,8 @@ const Textarea = forwardRef(({
   const textareaClasses = clsx(
     baseStyles,
     "resize-y min-h-[100px]",
-    error && "border-error-500 focus:ring-error-500 bg-error-50/50 dark:bg-error-900/20",
-    success && "border-success-500 focus:ring-success-500 bg-success-50/50 dark:bg-success-900/20",
+    error && "border-error-500 focus:border-error-500 focus:ring-error-500/20",
+    success && "border-success-500 focus:border-success-500 focus:ring-success-500/20",
     className
   );
 

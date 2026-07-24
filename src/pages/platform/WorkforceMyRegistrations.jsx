@@ -331,7 +331,7 @@ const WorkforceMyRegistrations = () => {
             </p>
             <Link
               to={webRoutes.workforceEvents}
-              className="inline-flex items-center bg-gold text-white px-6 py-3 rounded-lg hover:bg-custom_yellow transition-colors"
+              className="inline-flex items-center bg-gold text-dark px-6 py-3 rounded-lg hover:bg-custom_yellow transition-colors"
             >
               Explore Events
             </Link>
@@ -462,7 +462,7 @@ const WorkforceMyRegistrations = () => {
                   <div className="rounded-b-xl flex justify-end space-x-2 py-3 px-2 border-t border-gray-300">
                       <Link
                         to={`${webRoutes.workforceEventDetail.replace(':id', registration?.event?.id)}`}
-                        className="bg-pale_yellow text-white text-center py-2 rounded-lg px-2 hover:bg-gold transition-colors flex items-center justify-center"
+                        className="bg-pale_yellow text-dark text-center py-2 rounded-lg px-2 hover:bg-gold transition-colors flex items-center justify-center"
                       >
                         <Eye className="w-4 h-4 mr-1" />
                         View Event Details

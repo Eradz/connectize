@@ -524,7 +524,7 @@ const WorkforceEvents = () => {
                       <input
                         type="text"
                         placeholder="Search events by title, organizer, or topic..."
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={searchTerm}
                         onChange={handleSearchChange}
                       />
@@ -546,7 +546,7 @@ const WorkforceEvents = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Event Type</label>
                       <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={filters.type}
                         onChange={(e) => handleFilterChange('type', e.target.value)}
                       >
@@ -566,7 +566,7 @@ const WorkforceEvents = () => {
                       <input
                         type="text"
                         placeholder="City, venue name..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={filters.location}
                         onChange={(e) => handleFilterChange('location', e.target.value)}
                       />
@@ -574,7 +574,7 @@ const WorkforceEvents = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
                       <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={filters.format}
                         onChange={(e) => handleFilterChange('format', e.target.value)}
                       >
@@ -586,7 +586,7 @@ const WorkforceEvents = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
                       <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={filters.date}
                         onChange={(e) => handleFilterChange('date', e.target.value)}
                       >
@@ -599,7 +599,7 @@ const WorkforceEvents = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
                       <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={filters.price}
                         onChange={(e) => handleFilterChange('price', e.target.value)}
                       >
@@ -626,7 +626,7 @@ const WorkforceEvents = () => {
               <p className="text-gray-600 mb-6">There are no events happening right now. Check back soon or browse upcoming events!</p>
               <button
                 onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
-                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
+                className="inline-flex items-center bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 View Upcoming Events
@@ -652,7 +652,7 @@ const WorkforceEvents = () => {
               <p className="text-gray-600 mb-6">There are no scheduled events in the future. Check back later or create your own event!</p>
               <Link
                 to={webRoutes.workforceEventCreate}
-                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
+                className="inline-flex items-center bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create an Event
@@ -678,7 +678,7 @@ const WorkforceEvents = () => {
               <p className="text-gray-600 mb-6">You haven't attended any events recently. Explore upcoming events to get started!</p>
               <button
                 onClick={() => { setActiveTab('upcoming'); scrollToId('upcoming'); }}
-                className="inline-flex items-center bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
+                className="inline-flex items-center bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors"
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 Browse Events
@@ -700,7 +700,7 @@ const WorkforceEvents = () => {
             <div className="mt-6">
               <button
                 onClick={clearFilters}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 Clear all filters
               </button>

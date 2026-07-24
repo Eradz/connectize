@@ -145,7 +145,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="e.g drilling  bits - PDC 8.5 inch"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -160,7 +160,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.sku}
                   onChange={handleInputChange}
                   placeholder="DRL-001-USER1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -173,7 +173,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 >
                   <option value="">Select a category</option>
                   {categoryOptions.map(cat => (
@@ -191,7 +191,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   name="unit"
                   value={formData.unit}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 >
                   {unitOptions.map(unit => (
                     <option key={unit.id} value={unit.value}>{unit.label}</option>
@@ -208,7 +208,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 >
                   {statusOptions.map(status => (
                     <option key={status.value} value={status.value}>{status.label}</option>
@@ -227,7 +227,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.location}
                   onChange={handleInputChange}
                   placeholder="Bay A-3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -242,7 +242,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.supplier}
                   onChange={handleInputChange}
                   placeholder="e.g baker's Hughes"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -257,7 +257,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.current_stock}
                   onChange={handleInputChange}
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -272,7 +272,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.minimum_stock}
                   onChange={handleInputChange}
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -287,7 +287,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   value={formData.maximum_stock}
                   onChange={handleInputChange}
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -304,7 +304,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   min="0"
                   step="0.01"
                   placeholder="15000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 />
               </div>
 
@@ -316,7 +316,7 @@ const InventoryModal = ({ isOpen, onClose, itemId = null, onSave, currentData = 
                   name="currency"
                   value={formData.currency}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
                 >
                   {currencyOptions.map((currency) => (
                     <option key={currency} value={currency}>{currency}</option>

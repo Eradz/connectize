@@ -224,7 +224,7 @@ export const SearchTab = () => {
                   className={clsx(
                     "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0",
                     isActive
-                      ? "bg-gold text-white shadow-sm"
+                      ? "bg-gold text-dark shadow-sm"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   )}
                 >

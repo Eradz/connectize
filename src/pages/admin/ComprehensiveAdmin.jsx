@@ -795,7 +795,7 @@ const AdminLogin = () => {
                 type="email"
                 value={credentials.email}
                 onChange={(e) => setCredentials({...credentials, email: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent transition-colors"
                 placeholder="Enter your email"
                 required
                 disabled={submitting}
@@ -811,7 +811,7 @@ const AdminLogin = () => {
                 type="password"
                 value={credentials.password}
                 onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent transition-colors"
                 placeholder="Enter your password"
                 required
                 disabled={submitting}
@@ -825,7 +825,7 @@ const AdminLogin = () => {
                   type="checkbox"
                   checked={credentials.remember}
                   onChange={(e) => setCredentials({...credentials, remember: e.target.checked})}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                   disabled={submitting}
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>

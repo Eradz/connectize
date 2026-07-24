@@ -336,7 +336,7 @@ const AdminContentManagement = () => {
               </div>
               <div className="flex items-center md:col-span-1">
                 <label className="flex items-center">
-                  <input type="checkbox" checked={postForm.allow_comments} onChange={(e) => setPostForm({ ...postForm, allow_comments: e.target.checked })} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <input type="checkbox" checked={postForm.allow_comments} onChange={(e) => setPostForm({ ...postForm, allow_comments: e.target.checked })} className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded" />
                   <span className="ml-2 text-sm text-gray-700">Allow Comments</span>
                 </label>
               </div>
@@ -490,7 +490,7 @@ const AdminContentManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left">
-                    <input type="checkbox" checked={selectedItems.length === processedData.length && processedData.length > 0} onChange={handleSelectAll} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                    <input type="checkbox" checked={selectedItems.length === processedData.length && processedData.length > 0} onChange={handleSelectAll} className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded" />
                   </th>
                   {activeTab === 'posts' && (
                     <>
@@ -525,7 +525,7 @@ const AdminContentManagement = () => {
                 {processedData.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                      <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded" />
                     </td>
                     {activeTab === 'posts' && (
                       <>

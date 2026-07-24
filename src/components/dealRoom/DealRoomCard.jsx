@@ -78,7 +78,7 @@ import { formatCompactNumber } from '../../utils/formatNumber';
           </div>
           <Link
             to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-            className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold transition-colors text-[12px]"
+            className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-gold transition-colors text-[12px]"
           >
             View Details
           </Link>

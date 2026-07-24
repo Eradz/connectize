@@ -136,7 +136,7 @@ export default function Cart() {
             <p className="text-gray-400 mb-6">Looks like you haven't added any items yet</p>
             <Link
               to="/marketplace"
-              className="inline-flex items-center gap-2 bg-gold text-white px-6 py-3 rounded-lg hover:bg-gold/90"
+              className="inline-flex items-center gap-2 bg-gold text-dark px-6 py-3 rounded-lg hover:bg-gold/90"
             >
               <ShoppingBag size={20} />
               Start Shopping
@@ -262,7 +262,7 @@ export default function Cart() {
                 
                 <button
                   onClick={() => navigate('/marketplace/checkout')}
-                  className="w-full mt-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="w-full mt-6 py-3 bg-gold text-dark rounded-lg font-semibold hover:bg-custom_yellow transition-colors"
                 >
                   Proceed to Checkout
                 </button>

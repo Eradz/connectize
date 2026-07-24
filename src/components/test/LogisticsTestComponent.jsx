@@ -50,7 +50,7 @@ const LogisticsTestComponent = () => {
         </div>
         <button 
           onClick={() => window.location.reload()} 
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-custom_yellow"
+          className="mt-4 rounded-lg bg-gold px-4 py-2 font-medium text-dark hover:bg-custom_yellow"
         >
           Retry
         </button>

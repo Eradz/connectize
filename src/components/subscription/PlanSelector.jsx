@@ -303,7 +303,7 @@ const PlanCard = ({ plan, currentPlan, onSelectPlan, isPopular = false }) => {
     <Card className={`relative h-full ${isPopular ? 'ring-2 ring-blue-500' : ''} ${isCurrentPlan ? 'ring-2 ring-green-500' : ''}`}>
       {isPopular && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <Badge className="bg-blue-500 text-white px-4 py-1">
+          <Badge className="bg-gold text-dark px-4 py-1">
             <Star className="h-3 w-3 mr-1" />
             Most Popular
           </Badge>
@@ -365,7 +365,7 @@ const PlanCard = ({ plan, currentPlan, onSelectPlan, isPopular = false }) => {
           ) : (
             <Button 
               onClick={() => onSelectPlan(plan)}
-              className={`w-full ${isUpgrade ? 'bg-blue-600 hover:bg-custom_yellow' : ''}`}
+              className={`w-full ${isUpgrade ? 'bg-gold hover:bg-custom_yellow' : ''}`}
               variant={isDowngrade ? 'outline' : 'default'}
             >
               {isUpgrade && <ArrowRight className="h-4 w-4 mr-2" />}

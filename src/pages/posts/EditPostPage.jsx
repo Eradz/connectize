@@ -544,7 +544,7 @@ function EditPostPage() {
               <button
                 onClick={handleCreatePost}
                 disabled={isLoading || message.trim().length < 10}
-                className="px-6 py-2.5 bg-gold hover:bg-custom_yellow disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full font-semibold transition-all duration-300 text-sm"
+                className="px-6 py-2.5 bg-gold hover:bg-custom_yellow disabled:bg-gray-300 disabled:cursor-not-allowed text-dark rounded-full font-semibold transition-all duration-300 text-sm"
               >
                 {isLoading ? "Updating..." : "Post"}
               </button>

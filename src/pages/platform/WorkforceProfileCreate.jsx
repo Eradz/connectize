@@ -152,7 +152,7 @@ const WorkforceProfileCreate = () => {
                   value={formData.professional_title}
                   onChange={(e) => handleInputChange('professional_title', e.target.value)}
                   placeholder="e.g., Senior Petroleum Engineer"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -167,7 +167,7 @@ const WorkforceProfileCreate = () => {
                   onChange={(e) => handleInputChange('years_of_experience', e.target.value)}
                   min="0"
                   max="50"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -181,7 +181,7 @@ const WorkforceProfileCreate = () => {
                   value={formData.current_location}
                   onChange={(e) => handleInputChange('current_location', e.target.value)}
                   placeholder="e.g., Houston, Texas"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -193,7 +193,7 @@ const WorkforceProfileCreate = () => {
                 <select
                   value={formData.availability_status}
                   onChange={(e) => handleInputChange('availability_status', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   {availabilityOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -214,7 +214,7 @@ const WorkforceProfileCreate = () => {
                   min="0"
                   step="0.01"
                   placeholder="e.g., 150.00"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
 
@@ -229,7 +229,7 @@ const WorkforceProfileCreate = () => {
                   min="0"
                   max="100"
                   placeholder="e.g., 25"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -242,7 +242,7 @@ const WorkforceProfileCreate = () => {
                   id="willing_to_relocate"
                   checked={formData.willing_to_relocate}
                   onChange={(e) => handleInputChange('willing_to_relocate', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                 />
                 <label htmlFor="willing_to_relocate" className="ml-2 text-sm text-gray-700">
                   Willing to relocate
@@ -255,7 +255,7 @@ const WorkforceProfileCreate = () => {
                   id="willing_to_travel"
                   checked={formData.willing_to_travel}
                   onChange={(e) => handleInputChange('willing_to_travel', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                 />
                 <label htmlFor="willing_to_travel" className="ml-2 text-sm text-gray-700">
                   Willing to travel
@@ -284,7 +284,7 @@ const WorkforceProfileCreate = () => {
                         id={`employment_${type}`}
                         checked={formData.preferred_employment_types.includes(type)}
                         onChange={(e) => handleArrayChange('preferred_employment_types', type, e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                       />
                       <label htmlFor={`employment_${type}`} className="ml-2 text-sm text-gray-700 capitalize">
                         {type.replace('_', ' ')}
@@ -306,7 +306,7 @@ const WorkforceProfileCreate = () => {
                         id={`env_${env}`}
                         checked={formData.preferred_work_environments.includes(env)}
                         onChange={(e) => handleArrayChange('preferred_work_environments', env, e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                       />
                       <label htmlFor={`env_${env}`} className="ml-2 text-sm text-gray-700 capitalize">
                         {env}
@@ -328,7 +328,7 @@ const WorkforceProfileCreate = () => {
                         id={`shift_${shift}`}
                         checked={formData.shift_preferences.includes(shift)}
                         onChange={(e) => handleArrayChange('shift_preferences', shift, e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                       />
                       <label htmlFor={`shift_${shift}`} className="ml-2 text-sm text-gray-700 capitalize">
                         {shift.replace('_', ' ')}
@@ -357,7 +357,7 @@ const WorkforceProfileCreate = () => {
                   onChange={(e) => handleInputChange('summary', e.target.value)}
                   placeholder="Describe your professional background, expertise, and what makes you unique..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
 
@@ -370,7 +370,7 @@ const WorkforceProfileCreate = () => {
                   onChange={(e) => handleInputChange('achievements', e.target.value)}
                   placeholder="List your major accomplishments, awards, certifications..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
 
@@ -384,7 +384,7 @@ const WorkforceProfileCreate = () => {
                     value={formData.portfolio_url}
                     onChange={(e) => handleInputChange('portfolio_url', e.target.value)}
                     placeholder="https://your-portfolio.com"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                 </div>
 
@@ -397,7 +397,7 @@ const WorkforceProfileCreate = () => {
                     value={formData.linkedin_url}
                     onChange={(e) => handleInputChange('linkedin_url', e.target.value)}
                     placeholder="https://linkedin.com/in/your-profile"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -435,7 +435,7 @@ const WorkforceProfileCreate = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gold/80 text-white rounded-lg hover:bg-gold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+              className="px-6 py-3 bg-gold/80 text-dark rounded-lg hover:bg-gold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
             >
               {loading ? (
                 <>

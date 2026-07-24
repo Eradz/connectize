@@ -222,7 +222,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
             onClick={() => step > s.num && setStep(s.num)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition ${
               step === s.num
-                ? "bg-blue-600 text-white"
+                ? "bg-gold text-dark"
                 : step > s.num
                 ? "bg-green-100 text-green-600 cursor-pointer"
                 : "bg-gray-100 text-gray-400"
@@ -261,7 +261,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.first_name}
                 onChange={(e) => handleAddressChange('first_name', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -271,7 +271,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.last_name}
                 onChange={(e) => handleAddressChange('last_name', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -281,7 +281,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.street}
                 onChange={(e) => handleAddressChange('street', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -291,7 +291,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.city}
                 onChange={(e) => handleAddressChange('city', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -301,7 +301,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.state}
                 onChange={(e) => handleAddressChange('state', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -311,7 +311,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.postal_code}
                 onChange={(e) => handleAddressChange('postal_code', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -321,7 +321,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="text"
                 value={shippingAddress.country}
                 onChange={(e) => handleAddressChange('country', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                 required
               />
             </div>
@@ -331,7 +331,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
                 type="tel"
                 value={shippingAddress.phone}
                 onChange={(e) => handleAddressChange('phone', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
           </div>
@@ -410,7 +410,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
           <button
             type="button"
             onClick={() => validateAddress() && setStep(2)}
-            className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+            className="w-full mt-6 py-3 bg-gold text-dark rounded-xl font-semibold hover:bg-custom_yellow transition"
           >
             Continue to Payment
           </button>
@@ -462,7 +462,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
           <button
             type="button"
             onClick={() => setStep(3)}
-            className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+            className="flex-1 py-3 bg-gold text-dark rounded-xl font-semibold hover:bg-custom_yellow transition"
           >
             Review Order
           </button>
@@ -512,7 +512,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
               value={buyerNotes}
               onChange={(e) => setBuyerNotes(e.target.value)}
               placeholder="Special instructions for your order..."
-              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               rows={3}
             />
           </div>
@@ -553,7 +553,7 @@ function CheckoutFormInner({ cart, onSuccess }) {
             <button
               type="submit"
               disabled={loading || !stripe}
-              className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition"
+              className="flex-1 py-3 bg-gold text-dark rounded-xl font-semibold hover:bg-custom_yellow disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition"
             >
               {loading ? (
                 <>

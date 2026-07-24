@@ -111,7 +111,7 @@ export default function RepRoleInput({ user }) {
     <>
       <button
         onClick={handleOpen}
-        className="flex items-center gap-1.5 px-4 py-1.5 bg-gold text-white text-sm font-semibold rounded-full hover:bg-gold/80 active:scale-95 transition-all duration-200"
+        className="flex items-center gap-1.5 px-4 py-1.5 bg-gold text-dark text-sm font-semibold rounded-full hover:bg-gold/80 active:scale-95 transition-all duration-200"
       >
         <PlusIcon />
         Assign
@@ -279,7 +279,7 @@ export default function RepRoleInput({ user }) {
           <button
             onClick={handleAssign}
             disabled={!canAssign}
-            className="flex-[2] py-2.5 text-sm font-semibold text-white bg-gold rounded-xl hover:bg-gold/80 disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="flex-[2] py-2.5 text-sm font-semibold text-dark bg-gold rounded-xl hover:bg-gold/80 disabled:bg-gray-200 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
           >
             {isSubmitting ? <Spinner size="xs" /> : "Assign Role & Invite"}
           </button>

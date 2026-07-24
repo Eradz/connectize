@@ -247,7 +247,7 @@ const LogisticsRequestList = () => {
             </p>
             <button
               onClick={() => navigate(webRoutes.logisticsRequestCreate)}
-              className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-yellow-500 inline-flex items-center space-x-2 font-medium"
+              className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-yellow-500 inline-flex items-center space-x-2 font-medium"
             >
               <Plus className="w-4 h-4" />
               <span>Create Request</span>

@@ -183,7 +183,7 @@ const SubscriptionTab = ({
           </div>
           <button
             onClick={() => setShowUpgradeModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors"
+            className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
           >
             Upgrade Plan
           </button>
@@ -276,7 +276,7 @@ const AdvertisingTab = ({ campaigns, dashboardMetrics, isLoading }) => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
           >
             <option value="all">All Campaigns</option>
             <option value="active">Active</option>
@@ -288,7 +288,7 @@ const AdvertisingTab = ({ campaigns, dashboardMetrics, isLoading }) => {
         
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors"
+          className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
         >
           Create Campaign
         </button>
@@ -327,7 +327,7 @@ const AnalyticsTab = ({ usageAnalytics, dashboardMetrics, dateRange, isLoading }
           <select
             value={chartType}
             onChange={(e) => setChartType(e.target.value)}
-            className="block w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500/30 focus:border-primary-500"
           >
             <option value="line">Line Chart</option>
             <option value="bar">Bar Chart</option>

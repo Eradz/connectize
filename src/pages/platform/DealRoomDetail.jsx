@@ -461,7 +461,7 @@ export default function DealRoomDetail() {
             <div className="flex space-x-2">
               <Link to={webRoutes.dealRooms} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50">Back to Deals</Link>
               {canAdmin && (
-                <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-custom_yellow">Edit Deal Room</Link>
+                <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="px-4 py-2 rounded-lg bg-gold text-dark text-sm hover:bg-custom_yellow">Edit Deal Room</Link>
               )}
             </div>
           </div>
@@ -515,7 +515,7 @@ export default function DealRoomDetail() {
                 key={t.key}
                 to={linkFor(t.key)}
                 className={`px-3 py-2 rounded-md text-sm ${
-                  active === t.key ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  active === t.key ? "bg-gold text-dark" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {t.label}
@@ -552,14 +552,14 @@ export default function DealRoomDetail() {
                       placeholder={`Search ${active}...`}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     />
                   </div>
                   {active === "participants" && (
                     <select
                       value={filterRole}
                       onChange={(e) => setFilterRole(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
                     >
                       <option value="all">All Roles</option>
                       {roleOptions.map(r => (
@@ -685,7 +685,7 @@ export default function DealRoomDetail() {
                       <div className="space-y-2">
                         {deal.recent_activities.slice(0, 3).map((activity, index) => (
                           <div key={activity.id || index} className="flex items-start space-x-3 text-sm">
-                            <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            <div className="flex-shrink-0 w-2 h-2 bg-gold rounded-full mt-2"></div>
                             <div className="flex-1 min-w-0">
                               <p className="text-gray-900">{activity.description}</p>
                               <p className="text-gray-500 text-xs">
@@ -819,7 +819,7 @@ export default function DealRoomDetail() {
                         <span>({(newDocFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                       </div>
                     )}
-                    <button disabled={docUploading} className="self-start bg-blue-600 text-white px-4 py-2 rounded hover:bg-custom_yellow disabled:opacity-60">
+                    <button disabled={docUploading} className="self-start bg-gold text-dark px-4 py-2 rounded hover:bg-custom_yellow disabled:opacity-60">
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                   </form>
@@ -1081,7 +1081,7 @@ export default function DealRoomDetail() {
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                   <div 
-                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                    className="bg-gold h-2 rounded-full transition-all duration-300"
                                     style={{ width: `${m.progress}%` }}
                                   ></div>
                                 </div>
@@ -1201,7 +1201,7 @@ export default function DealRoomDetail() {
               value={milestoneForm.notes}
               onChange={(e) => setMilestoneForm(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Add notes about completion..."
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
               rows={3}
             />
           </div>
@@ -1215,7 +1215,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-custom_yellow"
+              className="px-4 py-2 bg-gold text-dark rounded hover:bg-custom_yellow"
             >
               {Number(milestoneForm.progress) >= 100 ? 'Mark Complete' : 'Save Progress'}
             </button>
@@ -1335,7 +1335,7 @@ export default function DealRoomDetail() {
                   setUserSearch(v);
                 }}
                 placeholder="Type a name or email..."
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
                 autoComplete="off"
               />
               {userSearch && (userResults?.length > 0 || userSearching) && (
@@ -1379,7 +1379,7 @@ export default function DealRoomDetail() {
             <select
               value={participantForm.role}
               onChange={(e) => setParticipantForm(prev => ({ ...prev, role: e.target.value }))}
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 capitalize"
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30 capitalize"
             >
               {roleOptions.map(r => (
                 <option key={r.value} value={r.value} className="capitalize">{r.label}</option>
@@ -1393,7 +1393,7 @@ export default function DealRoomDetail() {
             <select
               value={participantForm.permission_level}
               onChange={(e) => setParticipantForm(prev => ({ ...prev, permission_level: e.target.value }))}
-              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
             >
               {permissionOptions.map(p => (
                 <option key={p.value} value={p.value}>{p.label}</option>
@@ -1410,7 +1410,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-custom_yellow"
+              className="px-4 py-2 bg-gold text-dark rounded hover:bg-custom_yellow"
             >
               Send Invitation
             </button>

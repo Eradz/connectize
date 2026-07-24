@@ -151,7 +151,7 @@ const Form = ({
               type="checkbox"
               checked={formData[field.name] || false}
               onChange={(e) => handleChange(field.name, e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
               disabled={loading}
             />
             <span className="text-sm text-gray-700 dark:text-gray-200">{field.label}</span>
@@ -164,7 +164,7 @@ const Form = ({
             onChange={(e) => handleChange(field.name, e.target.files[0])}
             accept={field.accept}
             disabled={loading}
-            className={`w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors[field.name] ? 'border-red-500' : ''}`}
+            className={`w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30 ${errors[field.name] ? 'border-red-500' : ''}`}
           />
         );
       case 'date':

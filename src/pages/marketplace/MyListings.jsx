@@ -125,7 +125,7 @@ export default function MyListings() {
             </Link>
             <Link
               to={webRoutes.marketplaceCreateListing}
-              className="flex items-center gap-2 bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/90"
+              className="flex items-center gap-2 bg-gold text-dark px-4 py-2 rounded-lg hover:bg-gold/90"
             >
               <Plus size={20} />
               <span className="hidden sm:inline">Create Listing</span>
@@ -209,7 +209,7 @@ export default function MyListings() {
             <p className="text-gray-400 mb-6">Create your first listing to start selling</p>
             <Link
               to="/marketplace/create-listing"
-              className="inline-flex items-center gap-2 bg-gold text-white px-6 py-3 rounded-lg hover:bg-gold/90"
+              className="inline-flex items-center gap-2 bg-gold text-dark px-6 py-3 rounded-lg hover:bg-gold/90"
             >
               <Plus size={20} />
               Create Your First Listing

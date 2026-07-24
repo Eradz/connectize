@@ -666,7 +666,7 @@ const LogisticsHubDashboard = () => {
                           <p className="text-gray-500 text-sm mb-4">You don't have any recent shipments yet</p>
                           <button 
                             onClick={() => setActiveTab('shipments')}
-                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Create Shipment</span>
@@ -714,7 +714,7 @@ const LogisticsHubDashboard = () => {
                           <p className="text-gray-500 text-sm mb-4">You don't have any recent shipment requests yet</p>
                           <Link 
                             to={webRoutes.createShipmentRequest}
-                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
                           >
                             <Plus className="w-4 h-4" />
                             <span>Create Request</span>
@@ -789,7 +789,7 @@ const LogisticsHubDashboard = () => {
                           <p className="text-gray-500 text-xs mb-3">All inventory levels are healthy</p>
                           <button 
                             onClick={() => setActiveTab('inventory')}
-                            className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                            className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
                           >
                             <Eye className="w-3 h-3" />
                             <span>View Inventory</span>
@@ -1113,13 +1113,7 @@ const LogisticsHubDashboard = () => {
                 </Link>
               { request.requested_by == user.id &&  <Link
                   to={webRoutes.logisticsRequestEdit.replace(":id", request.id)}
-                  className="flex-1 flex items-center justify-center space-x-1 p-2 font-medium rounded-lg transition-all hover:opacity-90 relative bg-white text-xs"
-                  style={{ 
-                    border: '2px solid transparent',
-                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
-                    backgroundOrigin: 'border-box',
-                    backgroundClip: 'padding-box, border-box'
-                  }}
+                  className="relative flex flex-1 items-center justify-center space-x-1 rounded-lg border border-gray-300 bg-white p-2 text-xs font-medium text-primary-800 transition-colors hover:border-primary-500 hover:bg-primary-50"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g clipPath="url(#clip0_1655_9103)">
@@ -1127,20 +1121,15 @@ const LogisticsHubDashboard = () => {
                     </g>
                     <defs>
                       <linearGradient id="paint0_linear_1655_9103" x1="0" y1="7.02514" x2="13.949" y2="7.02514" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#FFC000"/>
-                        <stop offset="1" stopColor="#FF8400"/>
+                        <stop stopColor="#F1C644"/>
+                        <stop offset="1" stopColor="#F1C644"/>
                       </linearGradient>
                       <clipPath id="clip0_1655_9103">
                         <rect width="14" height="14" fill="white"/>
                       </clipPath>
                     </defs>
                   </svg>
-                  <span style={{
-                    background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}>Edit</span>
+                  <span>Edit</span>
                 </Link>}
               </div>
             </div>
@@ -1216,7 +1205,7 @@ const LogisticsHubDashboard = () => {
                                       </span>
                                       <Link
                                         to={webRoutes.logisticsInventoryDetail.replace(':id', item.id)}
-                                        className="w-fit text-center px-3 py-2 bg-gold text-white rounded text-sm hover:bg-yellow-600"
+                                        className="w-fit text-center px-3 py-2 bg-gold text-dark rounded text-sm hover:bg-yellow-600"
                                       >
                                         View Details
                                       </Link>
@@ -1266,14 +1255,14 @@ const LogisticsHubDashboard = () => {
                                   {searchQuery && (
                                     <button
                                       onClick={() => setSearchQuery('')}
-                                      className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
+                                      className="inline-flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-yellow-600 text-sm"
                                     >
                                       <Search className="w-4 h-4 mr-2" /> Clear Search
                                     </button>
                                   )}
                                   <Link
                                     to={webRoutes.logisticsInventoryCreate || webRoutes.logisticsInventory}
-                                    className="inline-flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-yellow-600 text-sm"
+                                    className="inline-flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-yellow-600 text-sm"
                                   >
                                     <Plus className="w-4 h-4 mr-2" /> Add Inventory
                                   </Link>
@@ -1283,7 +1272,7 @@ const LogisticsHubDashboard = () => {
                                         localStorage.setItem('force_inventory_scope_all','1');
                                         loadDashboardData();
                                       }}
-                                      className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                                      className="inline-flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow text-sm"
                                     >
                                       View All (Staff)
                                     </button>
@@ -1303,7 +1292,7 @@ const LogisticsHubDashboard = () => {
                             Real-time shipment tracking will be displayed here
                           </p>
                           <div className="mt-6">
-                            <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-yellow-600">
+                            <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-yellow-600">
                               <MapPin className="w-4 h-4 mr-2" />
                               View Map
                             </button>

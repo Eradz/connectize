@@ -25,7 +25,7 @@ const Progress = ({
   const variants = {
     default: {
       bg: "bg-gray-200 dark:bg-gray-700",
-      fill: "bg-primary-600 dark:bg-primary-500",
+      fill: "bg-primary-500",
     },
     success: {
       bg: "bg-gray-200 dark:bg-gray-700",
@@ -41,7 +41,7 @@ const Progress = ({
     },
     gradient: {
       bg: "bg-gray-200 dark:bg-gray-700",
-      fill: "bg-gradient-to-r from-primary-500 to-primary-600",
+      fill: "bg-primary-500",
     },
   };
 
@@ -106,7 +106,7 @@ const CircularProgress = ({
   };
 
   const variants = {
-    default: "stroke-primary-600 dark:stroke-primary-500",
+    default: "stroke-primary-500",
     success: "stroke-success-600 dark:stroke-success-500",
     warning: "stroke-warning-600 dark:stroke-warning-500",
     error: "stroke-error-600 dark:stroke-error-500",

@@ -223,14 +223,14 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
               placeholder="Search activities..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500/30"
             />
           </div>
           
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="hidden md:block bg-white px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="hidden md:block bg-white px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500/30"
             >
               {activityTypes.map(type => (
                 <option key={type.value} value={type.value}>{type.label}</option>
@@ -239,7 +239,7 @@ const ActivityTimeline = ({ activities, onRefresh, loading }) => {
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-[30%] md:hidden bg-white px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="w-[30%] md:hidden bg-white px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500/30"
             >
               {smallActivityTypes.map(type => (
                 <option key={type.value} value={type.value}>{type.label}</option>

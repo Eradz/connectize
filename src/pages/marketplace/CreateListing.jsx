@@ -477,7 +477,7 @@ export default function CreateListing() {
                     className="w-full h-full object-cover rounded-lg"
                   />
                   {index === 0 && (
-                    <span className="absolute bottom-0 left-0 right-0 bg-gold text-white text-xs text-center py-0.5 rounded-b-lg">
+                    <span className="absolute bottom-0 left-0 right-0 bg-gold text-dark text-xs text-center py-0.5 rounded-b-lg">
                       Primary
                     </span>
                   )}
@@ -766,7 +766,7 @@ export default function CreateListing() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-gold/90 disabled:bg-gray-300 flex items-center gap-2"
+                  className="px-6 py-3 bg-gold text-dark rounded-lg hover:bg-gold/90 disabled:bg-gray-300 flex items-center gap-2"
                 >
                   {loading ? (
                     <>

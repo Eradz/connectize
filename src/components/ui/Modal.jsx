@@ -29,8 +29,8 @@ const Modal = ({
 
   const variants = {
     default: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700",
-    glass: "glass backdrop-blur-xl border-white/20",
-    elevated: "bg-white dark:bg-gray-900 shadow-strong",
+    glass: "bg-white/95 dark:bg-gray-900/95 border border-gray-200 dark:border-gray-700",
+    elevated: "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-medium",
   };
 
   useEffect(() => {
@@ -57,14 +57,14 @@ const Modal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+        className="absolute inset-0 bg-black/50 transition-opacity duration-200"
         onClick={closeOnOverlay ? onClose : undefined}
       />
       
       {/* Modal */}
       <div 
         className={clsx(
-          "relative w-full rounded-2xl transition-all duration-300 transform animate-fadeIn max-h-[90vh] overflow-y-scroll scrollbar-hidden",
+          "relative max-h-[90vh] w-full overflow-y-auto rounded-xl shadow-medium scrollbar-hidden",
           sizes[size],
           variants[variant],
           className
@@ -74,9 +74,9 @@ const Modal = ({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-2 border-b border-gray-200/60 dark:border-gray-700/60">
+          <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
             {title && (
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white font-display">
+              <h3 className="text-lg font-semibold text-gray-950 dark:text-white">
                 {title}
               </h3>
             )}
@@ -84,19 +84,19 @@ const Modal = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="!p-2 !h-8 border border-[#F8F9FA] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="!h-8 !px-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
                 onClick={onClose}
               >
                 {/* <span className="sr-only">Close</span> */}
                 <CloseIcon size={20} />
-                <span className="">Close</span>
+                <span className="sr-only">Close</span>
               </Button>
             )}
           </div>
         )}
         
         {/* Content */}
-        <div className="p-3">
+        <div className="p-5">
           {children}
         </div>
       </div>
@@ -119,7 +119,7 @@ const ModalBody = ({ children, className = "" }) => (
 );
 
 const ModalFooter = ({ children, className = "" }) => (
-  <div className={clsx("px-6 py-4 border-t border-gray-200/60 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/50 rounded-b-2xl", className)}>
+  <div className={clsx("rounded-b-xl border-t border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800", className)}>
     {children}
   </div>
 );

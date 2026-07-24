@@ -55,7 +55,7 @@ const SubscriptionDebug = () => {
           <button 
             onClick={runDebugTests}
             disabled={loading}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            className="rounded-lg bg-gold px-4 py-2 font-medium text-dark hover:bg-custom_yellow disabled:opacity-50"
           >
             {loading ? 'Running...' : 'Run Debug Tests'}
           </button>

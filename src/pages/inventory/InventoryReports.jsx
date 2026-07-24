@@ -107,7 +107,7 @@ const InventoryReports = () => {
             </div>
             <Link
               to="/inventory/reports/create"
-              className="bg-blue-600 hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+              className="bg-gold hover:bg-custom_yellow text-dark px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <Plus className="h-5 w-5" />
               <span>Generate Report</span>
@@ -125,14 +125,14 @@ const InventoryReports = () => {
                 placeholder="Search reports..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               />
             </div>
             
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
             >
               <option value="">All Report Types</option>
               <option value="stock_levels">Stock Levels</option>
@@ -315,7 +315,7 @@ const InventoryReports = () => {
               <div className="mt-6">
                 <Link
                   to="/inventory/reports/create"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-custom_yellow"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Generate Report

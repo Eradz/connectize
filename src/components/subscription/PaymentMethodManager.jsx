@@ -245,7 +245,7 @@ export const CompactCardForm = ({ onSuccess, onError, loading, setLoading, onCan
         {/* Card Front */}
         <div className="relative bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-2xl p-5 shadow-2xl overflow-hidden aspect-[1.586/1]">
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#FFC000]/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#F1C644]/20 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-[#FF8400]/15 to-transparent rounded-full translate-y-1/2 -translate-x-1/2" />
           
           {/* Chip */}
@@ -266,7 +266,7 @@ export const CompactCardForm = ({ onSuccess, onError, loading, setLoading, onCan
           
           {/* Card Number */}
           <div className="mt-10 mb-4">
-            <div className={`bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border transition-all ${focused === 'number' ? 'border-[#FFC000] ring-1 ring-[#FFC000]/50' : 'border-white/20'}`}>
+            <div className={`bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border transition-all ${focused === 'number' ? 'border-[#F1C644] ring-1 ring-[#F1C644]/50' : 'border-white/20'}`}>
               <CardNumberElement 
                 options={{ 
                   style: elementStyle, 
@@ -288,13 +288,13 @@ export const CompactCardForm = ({ onSuccess, onError, loading, setLoading, onCan
                 placeholder="YOUR NAME"
                 value={cardholderName}
                 onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
-                className="w-full bg-transparent text-white text-sm font-medium tracking-wider placeholder:text-white/30 focus:outline-none border-b border-white/20 focus:border-[#FFC000] pb-1 transition-colors"
+                className="w-full bg-transparent text-white text-sm font-medium tracking-wider placeholder:text-white/30 focus:outline-none border-b border-white/20 focus:border-[#F1C644] pb-1 transition-colors"
                 required
               />
             </div>
             <div className="w-20">
               <span className="text-[10px] text-white/50 uppercase tracking-widest block mb-1">Expires</span>
-              <div className={`bg-white/10 rounded px-2 py-1 border transition-all ${focused === 'expiry' ? 'border-[#FFC000]' : 'border-transparent'}`}>
+              <div className={`bg-white/10 rounded px-2 py-1 border transition-all ${focused === 'expiry' ? 'border-[#F1C644]' : 'border-transparent'}`}>
                 <CardExpiryElement 
                   options={{ style: elementStyle }}
                   onFocus={() => setFocused('expiry')}
@@ -314,7 +314,7 @@ export const CompactCardForm = ({ onSuccess, onError, loading, setLoading, onCan
         <div className="mt-3 flex items-center gap-3">
           <div className="flex-1">
             <label className="text-xs text-gray-500 mb-1 block">Security Code (CVV)</label>
-            <div className={`h-10 border rounded-lg px-3 flex items-center bg-white transition-all ${focused === 'cvc' ? 'border-[#FFC000] ring-1 ring-[#FFC000]/30' : 'border-gray-300'}`}>
+            <div className={`h-10 border rounded-lg px-3 flex items-center bg-white transition-all ${focused === 'cvc' ? 'border-[#F1C644] ring-1 ring-[#F1C644]/30' : 'border-gray-300'}`}>
               <CardCvcElement 
                 options={{ 
                   style: {
@@ -339,7 +339,7 @@ export const CompactCardForm = ({ onSuccess, onError, loading, setLoading, onCan
               type="submit"
               disabled={!stripe || loading || !cardholderName.trim()}
               size="sm"
-              className="bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000] text-white px-5"
+              className="bg-gold px-5 text-dark hover:bg-custom_yellow"
             >
               {loading ? (
                 <>
@@ -469,7 +469,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
         <Button 
           type="submit"
           disabled={!stripe || loading || !cardholderName.trim()}
-          className="w-fit ml-auto bg-gray-300 hover:bg-gold hover: to-[#FFC000]  hover:from-[#FF8400] text-white"
+          className="ml-auto w-fit bg-gold text-dark hover:bg-custom_yellow"
         >
           {loading ? (
             <>
@@ -491,7 +491,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
             type="text"
             placeholder="Barry White"
             value={cardholderName}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-transparent transition-all"
             onChange={(e) => setCardholderName(e.target.value)}
             required
           />
@@ -574,7 +574,7 @@ export const CardForm = ({ onSuccess, onError, loading, setLoading }) => {
         <Button 
           type="submit"
           disabled={!stripe || loading || !cardholderName.trim()}
-          className="w-full ml-auto bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:bg-gold hover:to-[#FFC000]  hover:from-[#FF8400] text-white"
+          className="ml-auto w-full bg-gold text-dark hover:bg-custom_yellow"
         >
           {loading ? (
             <>
@@ -906,10 +906,10 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
                     onClick={handleRenewSubscription}
                     disabled={renewalLoading || !paymentMethods.length}
                     size="sm"
-                    className={`w-full ${isPeriodExpired() 
-                      ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
-                      : 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000]'
-                    } text-white`}
+                    className={`w-full ${isPeriodExpired()
+                      ? 'bg-red-600 text-white hover:bg-red-700'
+                      : 'bg-gold text-dark hover:bg-custom_yellow'
+                    }`}
                   >
                     {renewalLoading ? (
                       <>
@@ -989,7 +989,7 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
                   setCardToReplace(null);
                   setShowAddCard(true);
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-[#FFC000] hover:bg-amber-50 transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:border-[#F1C644] hover:bg-amber-50 transition-colors text-sm font-medium"
               >
                 <Plus className="h-4 w-4" />
                 Add Card
@@ -1110,10 +1110,10 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
                   <Button 
                     onClick={handleRenewSubscription}
                     disabled={renewalLoading || !paymentMethods.length}
-                    className={`${isPeriodExpired() 
-                      ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
-                      : 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] hover:from-[#FF8400] hover:to-[#FFC000]'
-                    } text-white`}
+                    className={`${isPeriodExpired()
+                      ? 'bg-red-600 text-white hover:bg-red-700'
+                      : 'bg-gold text-dark hover:bg-custom_yellow'
+                    }`}
                   >
                     {renewalLoading ? (
                       <>
@@ -1151,7 +1151,7 @@ const PaymentMethodManager = ({ subscription, onUpdate }) => {
                 setShowReplaceCard(true);
               }}
               variant="outline"
-              className="flex items-center gap-2 border-gray-300 hover:border-[#FFC000] hover:bg-amber-50"
+              className="flex items-center gap-2 border-gray-300 hover:border-[#F1C644] hover:bg-amber-50"
             >
               <Plus className="h-4 w-4" />
               Add Card

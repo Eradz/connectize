@@ -203,7 +203,7 @@ const WorkforceMyEvents = () => {
               </div>
               <Link
                 to={webRoutes.workforceEventCreate}
-                className="mt-4 sm:mt-0 inline-flex items-center bg-gold text-white p-3 sm:px-6 sm:py-3 rounded-lg hover:bg-slate-700 transition-colors"
+                className="mt-4 sm:mt-0 inline-flex items-center bg-gold text-dark p-3 sm:px-6 sm:py-3 rounded-lg hover:bg-slate-700 transition-colors"
               >
                 <Plus className="w-5 h-5 sm:mr-2" />
                 <span className="hidden sm:inline">Create Event</span>
@@ -267,7 +267,7 @@ const WorkforceMyEvents = () => {
             </p>
             <Link
               to={webRoutes.workforceEventCreate}
-              className="inline-flex items-center bg-gold text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center bg-gold text-dark px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" />
               Create Your First Event
@@ -447,7 +447,7 @@ const WorkforceMyEvents = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => downloadRegistrations(selectedEvent)}
-                  className="flex items-center px-3 py-2 text-sm bg-gold text-white rounded-lg hover:bg-slate-700 transition-colors"
+                  className="flex items-center px-3 py-2 text-sm bg-gold text-dark rounded-lg hover:bg-slate-700 transition-colors"
                   disabled={registrations.length === 0}
                 >
                   <Download className="w-4 h-4 mr-1" />

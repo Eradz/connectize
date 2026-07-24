@@ -332,7 +332,7 @@ const InventoryDashboardWidget = ({ className = "" }) => {
                       <div className={`w-2 h-2 rounded-full mr-3 ${
                         movement.type === 'receipt' ? 'bg-green-500' :
                         movement.type === 'issue' ? 'bg-red-500' :
-                        'bg-blue-500'
+                        'bg-gold'
                       }`}></div>
                       <div>
                         <p className="text-sm font-medium text-gray-900">{movement.item_name}</p>
@@ -370,7 +370,7 @@ const InventoryDashboardWidget = ({ className = "" }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button
               onClick={() => navigate(webRoutes.logisticsInventoryCreate)}
-              className="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-custom_yellow text-white rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center justify-center px-4 py-3 bg-gold hover:bg-custom_yellow text-dark rounded-lg text-sm font-medium transition-colors"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Item

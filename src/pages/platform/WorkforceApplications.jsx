@@ -225,7 +225,7 @@ const WorkforceApplications = () => {
       case 'shortlisted': return 'bg-cyan-100 text-cyan-800';
       case 'interview_scheduled': return 'bg-purple-100 text-purple-800';
       case 'offer_made': return 'bg-green-100 text-green-800';
-      case 'hired': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent';
+      case 'hired': return 'bg-emerald-50 text-emerald-700';
       case 'rejected': return 'bg-red-100 text-red-800';
       case 'withdrawn': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -238,7 +238,7 @@ const WorkforceApplications = () => {
       case 'shortlisted': return 'bg-cyan-100';
       case 'interview_scheduled': return 'bg-purple-100';
       case 'offer_made': return 'bg-green-100';
-      case 'hired': return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent';
+      case 'hired': return 'bg-emerald-50';
       case 'rejected': return 'bg-red-100';
       case 'withdrawn': return 'bg-gray-100';
       default: return 'bg-gray-100';
@@ -337,7 +337,7 @@ const WorkforceApplications = () => {
               </button>
               <Link
                 to={webRoutes.workforceJobs}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Find Jobs
@@ -415,7 +415,7 @@ const WorkforceApplications = () => {
                       <input
                         type="text"
                         placeholder="Search applications by job title, company, or location..."
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         value={searchTerm}
                         onChange={handleSearchChange}
                       />
@@ -436,7 +436,7 @@ const WorkforceApplications = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                         <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           value={filters.status}
                           onChange={(e) => handleFilterChange('status', e.target.value)}
                         >
@@ -454,7 +454,7 @@ const WorkforceApplications = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
                         <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           value={filters.jobType}
                           onChange={(e) => handleFilterChange('jobType', e.target.value)}
                         >
@@ -468,7 +468,7 @@ const WorkforceApplications = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Applied</label>
                         <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           value={filters.dateRange}
                           onChange={(e) => handleFilterChange('dateRange', e.target.value)}
                         >
@@ -481,7 +481,7 @@ const WorkforceApplications = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Salary Range</label>
                         <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           value={filters.salary}
                           onChange={(e) => handleFilterChange('salary', e.target.value)}
                         >
@@ -662,7 +662,7 @@ const WorkforceApplications = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.workforceJobs}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow"
               >
                 Browse Jobs
               </Link>

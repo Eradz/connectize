@@ -143,7 +143,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
         <h3 className="text-lg font-semibold text-gray-900">Skills & Expertise</h3>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+          className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
           disabled={loading}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -164,7 +164,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
                 <select
                   value={newSkill.skill}
                   onChange={(e) => setNewSkill(prev => ({ ...prev, skill: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
                   required
                 >
                   <option value="">Select a skill...</option>
@@ -179,7 +179,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
                   type="text"
                   value={newSkill.skill}
                   onChange={(e) => setNewSkill(prev => ({ ...prev, skill: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
                   placeholder="Enter skill name manually..."
                   required
                 />
@@ -198,7 +198,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
               <select
                 value={newSkill.proficiency_level}
                 onChange={(e) => setNewSkill(prev => ({ ...prev, proficiency_level: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
               >
                 {proficiencyLevels.map(level => (
                   <option key={level.value} value={level.value}>
@@ -218,7 +218,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
                 max="50"
                 value={newSkill.years_of_experience}
                 onChange={(e) => setNewSkill(prev => ({ ...prev, years_of_experience: parseInt(e.target.value) || 0 }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
 
@@ -230,7 +230,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
                 type="date"
                 value={newSkill.last_used}
                 onChange={(e) => setNewSkill(prev => ({ ...prev, last_used: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
 
@@ -254,7 +254,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
                 <textarea
                   value={newSkill.certification_details}
                   onChange={(e) => setNewSkill(prev => ({ ...prev, certification_details: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30"
                   rows={3}
                   placeholder="Certification name, issuing organization, date, etc."
                 />
@@ -272,7 +272,7 @@ const SkillsManager = ({ profileId, initialSkills = [], onSkillsUpdate = () => {
             </button>
             <button
               onClick={handleAddSkill}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow flex items-center"
+              className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow flex items-center"
               disabled={loading}
             >
               {loading ? 'Adding...' : (

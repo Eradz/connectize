@@ -489,7 +489,7 @@ const ListingDetail = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={addingToCart}
-                  className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-1 bg-gold text-dark py-3 px-6 rounded-xl font-semibold hover:bg-custom_yellow transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <ShoppingCart size={20} />
                   {addingToCart ? 'Adding...' : 'Add to Cart'}

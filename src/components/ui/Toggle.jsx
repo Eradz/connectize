@@ -34,7 +34,7 @@ const Toggle = ({
   const variants = {
     default: {
       switch: checked 
-        ? "bg-primary-600 dark:bg-primary-500" 
+        ? "bg-primary-500"
         : "bg-gray-200 dark:bg-gray-700",
       thumb: "bg-white shadow-soft",
     },
@@ -68,7 +68,7 @@ const Toggle = ({
   };
 
   const toggleClasses = clsx(
-    "relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+    "relative inline-flex flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-2",
     selectedSize.switch,
     selectedVariant.switch,
     disabled && "opacity-50 cursor-not-allowed",
@@ -76,7 +76,7 @@ const Toggle = ({
   );
 
   const thumbClasses = clsx(
-    "pointer-events-none inline-block rounded-full transform ring-0 transition-all duration-200 ease-in-out",
+    "pointer-events-none inline-block rounded-full transform ring-0 transition-transform duration-200",
     selectedSize.thumb,
     selectedVariant.thumb,
     checked ? selectedSize.translate : "translate-x-0"

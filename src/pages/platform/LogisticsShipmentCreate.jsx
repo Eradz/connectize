@@ -589,7 +589,7 @@ const renderStepIndicator = () => (
                     <select
                       value={selectedCompanyId}
                       onChange={(e) => setSelectedCompanyId(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     >
                       <option value="">Personal (no company)</option>
                       {availableCompanies.map((c) => (
@@ -607,7 +607,7 @@ const renderStepIndicator = () => (
                     <select
                       value={formData.cargo_type}
                       onChange={(e) => handleInputChange(null, 'cargo_type', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     >
                       <option value="">Select cargo type</option>
@@ -624,7 +624,7 @@ const renderStepIndicator = () => (
                     <select
                       value={formData.priority}
                       onChange={(e) => handleInputChange(null, 'priority', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     >
                       <option value="standard">Standard</option>
                       <option value="urgent">Urgent</option>
@@ -655,21 +655,8 @@ const renderStepIndicator = () => (
                         id="dangerous_goods"
                         checked={formData.dangerous_goods}
                         onChange={(e) => handleInputChange(null, 'dangerous_goods', e.target.checked)}
-                        className="h-5 w-5 rounded border-2 appearance-none cursor-pointer focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
-                        style={{
-                          borderColor: '#D1D5DB',
-                          background: formData.dangerous_goods ? 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)' : 'white'
-                        }}
+                        className="h-5 w-5 cursor-pointer rounded border-gray-300 text-gold focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-2"
                       />
-                      {formData.dangerous_goods && (
-                        <svg 
-                          className="absolute top-0 left-0 w-5 h-5 pointer-events-none" 
-                          fill="white"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                        </svg>
-                      )}
                     </div>
                     <label htmlFor="dangerous_goods" className="ml-3 text-base text-gray-700 cursor-pointer">
                       This shipment contains dangerous goods
@@ -677,21 +664,10 @@ const renderStepIndicator = () => (
                   </div>
 
                   {formData.dangerous_goods && (
-                    <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                    <div className="rounded-lg border border-amber-300 bg-amber-50 p-4">
                       <div className="flex items-start">
                         <AlertTriangle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0" />
-                        <p 
-                          className="text-sm font-medium"
-                          style={{
-                            color: '#FF8400',
-                            background: 'linear-gradient(135deg, #FFC000 0%, #FF8400 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            MozBackgroundClip: 'text',
-                            MozTextFillColor: 'transparent'
-                          }}
-                        >
+                        <p className="text-sm font-medium text-amber-800">
                           Dangerous Goods Require Special Handling And Documentation. Additional Fees May Apply.
                         </p>
                       </div>
@@ -721,7 +697,7 @@ const renderStepIndicator = () => (
                       type="text"
                       value={formData.origin.name}
                       onChange={(e) => handleInputChange('origin', 'name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     />
                   </div>
@@ -732,7 +708,7 @@ const renderStepIndicator = () => (
                       type="text"
                       value={formData.origin.address}
                       onChange={(e) => handleInputChange('origin', 'address', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     />
                   </div>
@@ -744,7 +720,7 @@ const renderStepIndicator = () => (
                         type="text"
                         value={formData.origin.city}
                         onChange={(e) => handleInputChange('origin', 'city', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -753,7 +729,7 @@ const renderStepIndicator = () => (
                         type="text"
                         value={formData.origin.country}
                         onChange={(e) => handleInputChange('origin', 'country', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -764,7 +740,7 @@ const renderStepIndicator = () => (
                       type="text"
                       value={formData.origin.contact_name}
                       onChange={(e) => handleInputChange('origin', 'contact_name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     />
                   </div>
@@ -776,7 +752,7 @@ const renderStepIndicator = () => (
                         type="tel"
                         value={formData.origin.contact_phone}
                         onChange={(e) => handleInputChange('origin', 'contact_phone', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -785,7 +761,7 @@ const renderStepIndicator = () => (
                         type="email"
                         value={formData.origin.contact_email}
                         onChange={(e) => handleInputChange('origin', 'contact_email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -804,7 +780,7 @@ const renderStepIndicator = () => (
                       type="text"
                       value={formData.destination.name}
                       onChange={(e) => handleInputChange('destination', 'name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     />
                   </div>
@@ -815,7 +791,7 @@ const renderStepIndicator = () => (
                       type="text"
                       value={formData.destination.address}
                       onChange={(e) => handleInputChange('destination', 'address', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     />
                   </div>
@@ -827,7 +803,7 @@ const renderStepIndicator = () => (
                         type="text"
                         value={formData.destination.city}
                         onChange={(e) => handleInputChange('destination', 'city', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -836,7 +812,7 @@ const renderStepIndicator = () => (
                         type="text"
                         value={formData.destination.country}
                         onChange={(e) => handleInputChange('destination', 'country', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -847,7 +823,7 @@ const renderStepIndicator = () => (
                       type="text"
                       value={formData.destination.contact_name}
                       onChange={(e) => handleInputChange('destination', 'contact_name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       required
                     />
                   </div>
@@ -859,7 +835,7 @@ const renderStepIndicator = () => (
                         type="tel"
                         value={formData.destination.contact_phone}
                         onChange={(e) => handleInputChange('destination', 'contact_phone', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -868,7 +844,7 @@ const renderStepIndicator = () => (
                         type="email"
                         value={formData.destination.contact_email}
                         onChange={(e) => handleInputChange('destination', 'contact_email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -916,7 +892,7 @@ const renderStepIndicator = () => (
                           type="text"
                           value={item.description}
                           onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           required
                         />
                       </div>
@@ -928,7 +904,7 @@ const renderStepIndicator = () => (
                           min="1"
                           value={item.quantity}
                           onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                         />
                       </div>
 
@@ -939,7 +915,7 @@ const renderStepIndicator = () => (
                           step="0.1"
                           value={item.weight}
                           onChange={(e) => handleItemChange(index, 'weight', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           required
                         />
                       </div>
@@ -953,7 +929,7 @@ const renderStepIndicator = () => (
                             placeholder="Length"
                             value={item.dimensions.length}
                             onChange={(e) => handleItemChange(index, 'dimensions.length', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           />
                           <input
                             type="number"
@@ -961,7 +937,7 @@ const renderStepIndicator = () => (
                             placeholder="Width"
                             value={item.dimensions.width}
                             onChange={(e) => handleItemChange(index, 'dimensions.width', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           />
                           <input
                             type="number"
@@ -969,7 +945,7 @@ const renderStepIndicator = () => (
                             placeholder="Height"
                             value={item.dimensions.height}
                             onChange={(e) => handleItemChange(index, 'dimensions.height', e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           />
                         </div>
                       </div>
@@ -980,7 +956,7 @@ const renderStepIndicator = () => (
                           type="number"
                           value={item.value}
                           onChange={(e) => handleItemChange(index, 'value', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           required
                         />
                       </div>
@@ -991,7 +967,7 @@ const renderStepIndicator = () => (
                           type="text"
                           value={item.commodity_code}
                           onChange={(e) => handleItemChange(index, 'commodity_code', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                           placeholder="HS/HTS Code"
                         />
                       </div>
@@ -1015,7 +991,7 @@ const renderStepIndicator = () => (
                   <select
                     value={formData.shipping_method}
                     onChange={(e) => handleInputChange(null, 'shipping_method', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     required
                   >
                     <option value="">Select shipping method</option>
@@ -1034,7 +1010,7 @@ const renderStepIndicator = () => (
                   <select
                     value={formData.preferred_carrier}
                     onChange={(e) => handleInputChange(null, 'preferred_carrier', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   >
                     <option value="">No preference</option>
                     <option value="global_logistics">Global Logistics Solutions</option>
@@ -1053,7 +1029,7 @@ const renderStepIndicator = () => (
                     value={formData.pickup_date}
                     onChange={(e) => handleInputChange(null, 'pickup_date', e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     required
                   />
                 </div>
@@ -1067,7 +1043,7 @@ const renderStepIndicator = () => (
                     value={formData.requested_delivery_date}
                     onChange={(e) => handleInputChange(null, 'requested_delivery_date', e.target.value)}
                     min={formData.pickup_date || new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     required
                   />
                 </div>
@@ -1081,7 +1057,7 @@ const renderStepIndicator = () => (
                   value={formData.special_instructions}
                   onChange={(e) => handleInputChange(null, 'special_instructions', e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="Any special handling requirements, delivery instructions, or other notes..."
                 />
               </div>
@@ -1097,7 +1073,7 @@ const renderStepIndicator = () => (
                     step="0.01"
                     value={formData.budget_min}
                     onChange={(e) => handleInputChange(null, 'budget_min', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="Optional"
                   />
                 </div>
@@ -1110,7 +1086,7 @@ const renderStepIndicator = () => (
                     step="0.01"
                     value={formData.budget_max}
                     onChange={(e) => handleInputChange(null, 'budget_max', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="Optional"
                   />
                 </div>
@@ -1127,7 +1103,7 @@ const renderStepIndicator = () => (
                     id="insurance_required"
                     checked={formData.insurance_required}
                     onChange={(e) => handleInputChange(null, 'insurance_required', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                   />
                   <label htmlFor="insurance_required" className="ml-2 text-sm text-gray-900">
                     Cargo insurance required

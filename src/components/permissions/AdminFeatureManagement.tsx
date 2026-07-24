@@ -221,7 +221,7 @@ export const AdminFeatureManagement: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900">Feature Management</h2>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-custom_yellow"
+              className="rounded-lg bg-gold px-4 py-2 font-medium text-dark hover:bg-custom_yellow"
             >
               Create Feature
             </button>
@@ -237,14 +237,14 @@ export const AdminFeatureManagement: React.FC = () => {
                 placeholder="Search features..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               />
             </div>
             <div>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 <option value="all">All Categories</option>
                 {FEATURE_CATEGORIES.map((category) => (
@@ -489,7 +489,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
                 value={formData.feature_code}
                 onChange={(e) => handleInputChange('feature_code', e.target.value)}
                 disabled={isEdit}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30 ${
                   errors.feature_code ? 'border-red-300' : 'border-gray-300'
                 } ${isEdit ? 'bg-gray-100' : ''}`}
                 placeholder="e.g., advanced_analytics"
@@ -507,7 +507,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
                 type="text"
                 value={formData.feature_name}
                 onChange={(e) => handleInputChange('feature_name', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30 ${
                   errors.feature_name ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder="e.g., Advanced Analytics"
@@ -525,7 +525,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
             <textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30 ${
                 errors.description ? 'border-red-300' : 'border-gray-300'
               }`}
               rows={3}
@@ -544,7 +544,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
               <select
                 value={formData.feature_category}
                 onChange={(e) => handleInputChange('feature_category', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 {FEATURE_CATEGORIES.map((category) => (
                   <option key={category} value={category}>
@@ -561,7 +561,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
               <select
                 value={formData.access_level}
                 onChange={(e) => handleInputChange('access_level', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 {ACCESS_LEVELS.map((level) => (
                   <option key={level} value={level}>
@@ -578,7 +578,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
               <select
                 value={formData.minimum_plan}
                 onChange={(e) => handleInputChange('minimum_plan', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 {PLAN_TYPES.map((plan) => (
                   <option key={plan} value={plan}>
@@ -612,7 +612,7 @@ const FeatureFormModal: React.FC<FeatureFormModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-custom_yellow disabled:opacity-50"
+              className="rounded-lg bg-gold px-4 py-2 font-medium text-dark hover:bg-custom_yellow disabled:opacity-50"
             >
               {isSubmitting ? 'Saving...' : 'Save Feature'}
             </button>

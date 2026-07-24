@@ -616,7 +616,7 @@ const LogisticsInventoryEnhanced = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search items, SKU, manufacturer..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -625,7 +625,7 @@ const LogisticsInventoryEnhanced = () => {
                       <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       >
                         <option value="all">All Categories</option>
                         {industryCategories.map(cat => (
@@ -638,7 +638,7 @@ const LogisticsInventoryEnhanced = () => {
                       <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       >
                         <option value="all">All Status</option>
                         {statusOptions.map(status => (
@@ -651,7 +651,7 @@ const LogisticsInventoryEnhanced = () => {
                       <select
                         value={selectedCondition}
                         onChange={(e) => setSelectedCondition(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       >
                         <option value="all">All Conditions</option>
                         {conditionOptions.map(condition => (
@@ -664,7 +664,7 @@ const LogisticsInventoryEnhanced = () => {
                       <select
                         value={selectedWarehouse}
                         onChange={(e) => setSelectedWarehouse(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       >
                         <option value="all">All Warehouses</option>
                         {warehouses.map(wh => (
@@ -686,7 +686,7 @@ const LogisticsInventoryEnhanced = () => {
                           setSortBy(field);
                           setSortOrder(order);
                         }}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                       >
                         <option value="name-asc">Name A-Z</option>
                         <option value="name-desc">Name Z-A</option>

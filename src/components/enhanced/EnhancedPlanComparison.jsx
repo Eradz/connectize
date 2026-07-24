@@ -356,7 +356,7 @@ const EnhancedPlanComparison = () => {
           <Card key={plan.id} className="relative">
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-blue-600 text-white">Recommended</Badge>
+                <Badge className="bg-gold text-dark">Recommended</Badge>
               </div>
             )}
             
@@ -396,7 +396,7 @@ const EnhancedPlanComparison = () => {
                 </div>
               )}
 
-              <Button className="w-full bg-blue-600 hover:bg-custom_yellow">
+              <Button className="w-full bg-gold hover:bg-custom_yellow">
                 Choose {plan.name}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>

@@ -432,7 +432,7 @@ const AdminAnalyticsReports = () => {
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
           >
             <option value="24h">Last 24 Hours</option>
             <option value="7d">Last 7 Days</option>
@@ -442,7 +442,7 @@ const AdminAnalyticsReports = () => {
           
           <button
             onClick={() => loadAnalytics()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors flex items-center"
+            className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors flex items-center"
           >
             <ArrowPathIcon className="w-4 h-4 mr-2" aria-hidden="true" />
             Refresh

@@ -156,7 +156,7 @@ export default function KnowledgeForumMembers() {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Search members"
-                className="w-full border rounded-lg pl-10 pr-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border rounded-lg pl-10 pr-3 py-2 focus:ring-primary-500/30 focus:border-primary-500"
               />
             </div>
           </div>

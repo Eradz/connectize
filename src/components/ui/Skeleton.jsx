@@ -3,7 +3,7 @@ import React from "react";
 export function Skeleton({ className = "", width, height, ...props }) {
   return (
     <div
-      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      className={`animate-pulse rounded-md bg-gray-200 ${className}`}
       style={{ width, height }}
       {...props}
     />
@@ -26,7 +26,7 @@ export function SkeletonText({ lines = 3, className = "" }) {
 
 export function SkeletonCard({ className = "" }) {
   return (
-    <div className={`p-4 border rounded-lg space-y-3 ${className}`}>
+    <div className={`space-y-3 rounded-xl border border-gray-200 bg-white p-4 ${className}`}>
       <div className="flex items-center space-x-3">
         <Skeleton className="h-10 w-10 rounded-full" />
         <div className="space-y-1">
@@ -43,7 +43,7 @@ export function SkeletonList({ count = 5, className = "" }) {
   return (
     <div className={`space-y-3 ${className}`}>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-3 border rounded">
+        <div key={i} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
           <div className="flex items-center space-x-3">
             <Skeleton className="h-8 w-8 rounded" />
             <div className="space-y-1">

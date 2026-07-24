@@ -1194,7 +1194,7 @@ const WorkforceEventCreate = () => {
                     <button
                       type="submit"
                       disabled={loading || loadingEvent}
-                      className="w-full group relative px-6 py-4 bg-gold text-white font-semibold rounded-xl hover:bg-yellow-500 focus:outline-none focus:ring-4 focus:ring-gold/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full group relative px-6 py-4 bg-gold text-dark font-semibold rounded-xl hover:bg-yellow-500 focus:outline-none focus:ring-4 focus:ring-gold/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       {loading ? (
                         <div className="flex items-center justify-center space-x-2">

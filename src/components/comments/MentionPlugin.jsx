@@ -87,7 +87,7 @@ function MentionTypeahead({ users, onSelect, position, searchTerm }) {
             className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
             onClick={() => onSelect(user)}
           >
-            <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-white text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-dark text-xs font-bold">
               {displayName
                 .split(/\s+/)
                 .map((part) => part[0])

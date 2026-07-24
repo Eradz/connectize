@@ -463,7 +463,7 @@ const AdminDeals = () => {
                     setSelectedItems([]);
                   }
                 }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -500,7 +500,7 @@ const AdminDeals = () => {
                       setSelectedItems(selectedItems.filter(id => id !== deal.id));
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4">
@@ -575,7 +575,7 @@ const AdminDeals = () => {
                     setSelectedItems([]);
                   }
                 }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -615,7 +615,7 @@ const AdminDeals = () => {
                       setSelectedItems(selectedItems.filter(id => id !== participant.id));
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4">
@@ -927,7 +927,7 @@ const AdminDeals = () => {
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={handleSearch}
-                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 placeholder-gray-500"
+                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 placeholder-gray-500"
               />
             </div>
           </div>
@@ -935,7 +935,7 @@ const AdminDeals = () => {
             <select
               value={statusFilter}
               onChange={handleStatusFilter}
-              className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+              className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
             >
               <option value="all">All Status</option>
               <option value="draft">Draft</option>

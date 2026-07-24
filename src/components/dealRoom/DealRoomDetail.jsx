@@ -1194,7 +1194,7 @@ export default function DealRoomDetail() {
                         <span>({(newDocFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                       </div>
                     )}
-                    <button disabled={docUploading} className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-gold/80 disabled:opacity-60">
+                    <button disabled={docUploading} className="self-start bg-gold text-dark px-4 py-2 rounded hover:bg-gold/80 disabled:opacity-60">
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                   </form>
@@ -1378,7 +1378,7 @@ export default function DealRoomDetail() {
                     )}
                     <div className="flex justify-between">
 
-                    <button disabled={docUploading} className="self-start bg-gold text-white px-4 py-2 rounded hover:bg-gold/80 disabled:opacity-60">
+                    <button disabled={docUploading} className="self-start bg-gold text-dark px-4 py-2 rounded hover:bg-gold/80 disabled:opacity-60">
                       {docUploading ? "Uploading..." : "Upload"}
                     </button>
                     <button disabled={docUploading} onClick={()=> setUploadSomeDocument(false)} className="self-start bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500 disabled:opacity-60">
@@ -2147,7 +2147,7 @@ export default function DealRoomDetail() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-pale_yellow text-white rounded hover:bg-gold"
+              className="px-4 py-2 bg-pale_yellow text-dark rounded hover:bg-gold"
             >
               {Number(milestoneForm.progress) >= 100 ? 'Mark Complete' : 'Save Progress'}
             </button>
@@ -2303,7 +2303,7 @@ export default function DealRoomDetail() {
                     type="date"
                     value={createMilestoneForm.due_date}
                     onChange={(e) => setCreateMilestoneForm(prev => ({ ...prev, due_date: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                 </div>
           </div>

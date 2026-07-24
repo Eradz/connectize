@@ -52,7 +52,7 @@ export default function EnterpriseSSOButton({ onSSODetected }) {
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleCheck()}
         placeholder="you@company.com"
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30"
         autoFocus
       />
       <div className="flex gap-2">

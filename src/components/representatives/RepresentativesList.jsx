@@ -218,7 +218,7 @@ const RepsTile = ({
                 <button
                   onClick={savePermissions}
                   disabled={saving}
-                  className="px-4 py-1.5 bg-gold text-white text-sm rounded-md hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  className="px-4 py-1.5 bg-gold text-dark text-sm rounded-md hover:opacity-90 disabled:opacity-50 transition-opacity"
                 >
                   {saving ? "Saving…" : "Save"}
                 </button>

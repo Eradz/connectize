@@ -166,7 +166,7 @@ const PlatformDashboard = () => {
             <div className="flex space-x-3">
               <Link
                 to={webRoutes.dealRoomCreate}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Deal Room
@@ -476,7 +476,7 @@ const PlatformDashboard = () => {
                     <td className="py-4 px-4">
                       <div className="flex items-center">
                         <div className="w-full bg-gray-200 rounded-full h-2 mr-3">
-                          <div className="bg-blue-600 h-2 rounded-full" style={{width: '65%'}}></div>
+                          <div className="bg-gold h-2 rounded-full" style={{width: '65%'}}></div>
                         </div>
                         <span className="text-sm text-gray-600">65%</span>
                       </div>

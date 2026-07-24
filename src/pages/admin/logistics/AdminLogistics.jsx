@@ -407,7 +407,7 @@ const AdminLogistics = () => {
                 type="checkbox"
                 checked={selectedItems.length === requests.length && requests.length > 0}
                 onChange={(e) => handleSelectAll(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -438,7 +438,7 @@ const AdminLogistics = () => {
                   type="checkbox"
                   checked={selectedItems.includes(request.id)}
                   onChange={(e) => handleSelectItem(request.id, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -523,7 +523,7 @@ const AdminLogistics = () => {
                 type="checkbox"
                 checked={selectedItems.length === shipments.length && shipments.length > 0}
                 onChange={(e) => handleSelectAll(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -563,7 +563,7 @@ const AdminLogistics = () => {
                   type="checkbox"
                   checked={selectedItems.includes(shipment.id)}
                   onChange={(e) => handleSelectItem(shipment.id, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -656,7 +656,7 @@ const AdminLogistics = () => {
                 type="checkbox"
                 checked={selectedItems.length === inventory.length && inventory.length > 0}
                 onChange={(e) => handleSelectAll(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -687,7 +687,7 @@ const AdminLogistics = () => {
                   type="checkbox"
                   checked={selectedItems.includes(item.id)}
                   onChange={(e) => handleSelectItem(item.id, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -754,7 +754,7 @@ const AdminLogistics = () => {
                 type="checkbox"
                 checked={selectedItems.length === providers.length && providers.length > 0}
                 onChange={(e) => handleSelectAll(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
               />
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -791,7 +791,7 @@ const AdminLogistics = () => {
                   type="checkbox"
                   checked={selectedItems.includes(provider.id)}
                   onChange={(e) => handleSelectItem(provider.id, e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -979,7 +979,7 @@ const AdminLogistics = () => {
                   placeholder={`Search ${activeTab}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 placeholder-gray-500"
+                  className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 placeholder-gray-500"
                 />
               </div>
             </div>
@@ -988,7 +988,7 @@ const AdminLogistics = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
@@ -1011,7 +1011,7 @@ const AdminLogistics = () => {
 
         {/* Bulk Actions */}
         {selectedItems.length > 0 && (
-          <div className="backdrop-blur-xl bg-blue-500/20 border border-blue-300/30 rounded-2xl p-6 mb-6 shadow-xl">
+          <div className="backdrop-blur-xl bg-gold/20 border border-blue-300/30 rounded-2xl p-6 mb-6 shadow-xl">
             <div className="flex items-center justify-between">
               <span className="text-blue-800 font-semibold">
                 {selectedItems.length} item(s) selected
@@ -1130,7 +1130,7 @@ const AdminLogistics = () => {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`px-3 py-2 text-sm rounded-lg ${
                         pageNum === currentPage
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-gold text-dark'
                           : 'bg-white border border-gray-300 hover:bg-gray-50'
                       }`}
                     >
@@ -1330,7 +1330,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -1339,7 +1339,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.cargo_type}
                   onChange={(e) => handleInputChange('cargo_type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 >
                   {cargoTypes.map(type => (
@@ -1354,7 +1354,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="3"
                 required
               />
@@ -1365,7 +1365,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.origin_address}
                 onChange={(e) => handleInputChange('origin_address', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="2"
                 required
               />
@@ -1378,7 +1378,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.origin_contact_name}
                   onChange={(e) => handleInputChange('origin_contact_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1387,7 +1387,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="email"
                   value={formData.origin_contact_email}
                   onChange={(e) => handleInputChange('origin_contact_email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1396,7 +1396,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="tel"
                   value={formData.origin_contact_phone}
                   onChange={(e) => handleInputChange('origin_contact_phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1406,7 +1406,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.destination_address}
                 onChange={(e) => handleInputChange('destination_address', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="2"
                 required
               />
@@ -1419,7 +1419,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.destination_contact_name}
                   onChange={(e) => handleInputChange('destination_contact_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1428,7 +1428,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="email"
                   value={formData.destination_contact_email}
                   onChange={(e) => handleInputChange('destination_contact_email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1437,7 +1437,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="tel"
                   value={formData.destination_contact_phone}
                   onChange={(e) => handleInputChange('destination_contact_phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1454,7 +1454,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                     min="0"
                     value={formData.weight}
                     onChange={(e) => handleInputChange('weight', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="e.g., 25.5"
                   />
                   <p className="text-xs text-gray-500 mt-1">Total weight in metric tons</p>
@@ -1467,7 +1467,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                     min="0"
                     value={formData.volume}
                     onChange={(e) => handleInputChange('volume', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     placeholder="e.g., 12.5"
                   />
                   <p className="text-xs text-gray-500 mt-1">Total volume in cubic meters</p>
@@ -1488,7 +1488,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                         const newDimensions = { ...formData.dimensions, length: parseFloat(e.target.value) || 0 };
                         handleInputChange('dimensions', newDimensions);
                       }}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500/30 focus:border-transparent"
                       placeholder="12.0"
                     />
                   </div>
@@ -1503,7 +1503,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                         const newDimensions = { ...formData.dimensions, width: parseFloat(e.target.value) || 0 };
                         handleInputChange('dimensions', newDimensions);
                       }}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500/30 focus:border-transparent"
                       placeholder="2.5"
                     />
                   </div>
@@ -1518,7 +1518,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                         const newDimensions = { ...formData.dimensions, height: parseFloat(e.target.value) || 0 };
                         handleInputChange('dimensions', newDimensions);
                       }}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500/30 focus:border-transparent"
                       placeholder="3.0"
                     />
                   </div>
@@ -1530,7 +1530,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                         const newDimensions = { ...formData.dimensions, unit: e.target.value };
                         handleInputChange('dimensions', newDimensions);
                       }}
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500/30 focus:border-transparent"
                     >
                       <option value="meters">Meters</option>
                       <option value="feet">Feet</option>
@@ -1556,7 +1556,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="datetime-local"
                   value={formData.pickup_date_requested}
                   onChange={(e) => handleInputChange('pickup_date_requested', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -1566,7 +1566,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="datetime-local"
                   value={formData.delivery_date_requested}
                   onChange={(e) => handleInputChange('delivery_date_requested', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -1578,7 +1578,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.urgency}
                   onChange={(e) => handleInputChange('urgency', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="standard">Standard</option>
                   <option value="urgent">Urgent</option>
@@ -1595,7 +1595,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                     type="checkbox"
                     checked={formData.allow_bids}
                     onChange={(e) => handleInputChange('allow_bids', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                   />
                   <span className="text-sm font-medium text-gray-700">Allow Bids</span>
                 </label>
@@ -1610,7 +1610,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.budget_min}
                   onChange={(e) => handleInputChange('budget_min', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1620,7 +1620,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.budget_max}
                   onChange={(e) => handleInputChange('budget_max', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1630,7 +1630,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.special_requirements}
                 onChange={(e) => handleInputChange('special_requirements', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="3"
                 placeholder="Any special handling instructions, insurance requirements, etc..."
               />
@@ -1648,7 +1648,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.request}
                   onChange={(e) => handleInputChange('request', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="ShipmentRequest UUID"
                 />
               </div>
@@ -1658,7 +1658,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.provider}
                   onChange={(e) => handleInputChange('provider', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   placeholder="LogisticsProvider UUID"
                 />
               </div>
@@ -1675,7 +1675,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <select
                 value={formData.status}
                 onChange={(e) => handleInputChange('status', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               >
                 <option value="preparing">Preparing</option>
                 <option value="picked_up">Picked Up</option>
@@ -1694,7 +1694,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="datetime-local"
                   value={formData.actual_pickup_date}
                   onChange={(e) => handleInputChange('actual_pickup_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1703,7 +1703,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="datetime-local"
                   value={formData.actual_delivery_date}
                   onChange={(e) => handleInputChange('actual_delivery_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1714,7 +1714,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 type="text"
                 value={formData.current_location}
                 onChange={(e) => handleInputChange('current_location', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 placeholder="Current shipment location"
               />
             </div>
@@ -1727,7 +1727,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   min="0"
                   value={formData.delays_count}
                   onChange={(e) => handleInputChange('delays_count', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1738,7 +1738,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   min="0"
                   value={formData.total_delay_hours}
                   onChange={(e) => handleInputChange('total_delay_hours', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1748,7 +1748,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.delivery_notes}
                 onChange={(e) => handleInputChange('delivery_notes', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="3"
                 placeholder="Any delivery notes or special instructions..."
               />
@@ -1766,7 +1766,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -1776,7 +1776,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.sku}
                   onChange={(e) => handleInputChange('sku', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -1787,7 +1787,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="3"
               />
             </div>
@@ -1798,7 +1798,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.category}
                   onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="drilling_equipment">Drilling Equipment</option>
                   <option value="pipe_tubing">Pipes & Tubing</option>
@@ -1823,7 +1823,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.current_stock}
                   onChange={(e) => handleInputChange('current_stock', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -1832,7 +1832,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.unit}
                   onChange={(e) => handleInputChange('unit', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="pcs">Pieces</option>
                   <option value="ft">Feet</option>
@@ -1858,7 +1858,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.unit_cost}
                   onChange={(e) => handleInputChange('unit_cost', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1868,7 +1868,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.last_purchase_price}
                   onChange={(e) => handleInputChange('last_purchase_price', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1878,7 +1878,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.average_cost}
                   onChange={(e) => handleInputChange('average_cost', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1889,7 +1889,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.status}
                   onChange={(e) => handleInputChange('status', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="available">Available</option>
                   <option value="reserved">Reserved</option>
@@ -1905,7 +1905,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.condition}
                   onChange={(e) => handleInputChange('condition', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 >
                   <option value="new">New</option>
                   <option value="excellent">Excellent</option>
@@ -1924,7 +1924,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.warehouse}
                   onChange={(e) => handleInputChange('warehouse', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1933,7 +1933,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1942,7 +1942,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.bin_location}
                   onChange={(e) => handleInputChange('bin_location', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1955,7 +1955,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.minimum_stock}
                   onChange={(e) => handleInputChange('minimum_stock', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1965,7 +1965,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.maximum_stock}
                   onChange={(e) => handleInputChange('maximum_stock', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1975,7 +1975,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   step="0.01"
                   value={formData.reorder_point}
                   onChange={(e) => handleInputChange('reorder_point', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -1987,7 +1987,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.supplier}
                   onChange={(e) => handleInputChange('supplier', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -1996,7 +1996,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.supplier_part_number}
                   onChange={(e) => handleInputChange('supplier_part_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -2008,7 +2008,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.manufacturer}
                   onChange={(e) => handleInputChange('manufacturer', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -2017,7 +2017,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.manufacturer_part_number}
                   onChange={(e) => handleInputChange('manufacturer_part_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -2028,7 +2028,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 type="date"
                 value={formData.last_counted}
                 onChange={(e) => handleInputChange('last_counted', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               />
             </div>
 
@@ -2037,7 +2037,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={Array.isArray(formData.serial_numbers) ? formData.serial_numbers.join(', ') : ''}
                 onChange={(e) => handleInputChange('serial_numbers', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="2"
                 placeholder="SN001, SN002, SN003..."
               />
@@ -2055,7 +2055,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                     handleInputChange('specifications', e.target.value);
                   }
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="4"
                 placeholder='{"pressure_rating": "5000 PSI", "material": "Carbon Steel", "temperature_range": "-20°C to 150°C"}'
               />
@@ -2073,7 +2073,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.company_name}
                   onChange={(e) => handleInputChange('company_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -2083,7 +2083,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.contact_person}
                   onChange={(e) => handleInputChange('contact_person', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -2095,7 +2095,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -2105,7 +2105,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -2115,7 +2115,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="2"
               />
             </div>
@@ -2127,7 +2127,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="text"
                   value={formData.license_number}
                   onChange={(e) => handleInputChange('license_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -2136,7 +2136,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                 <select
                   value={formData.coverage_type}
                   onChange={(e) => handleInputChange('coverage_type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 >
                   <option value="local">Local</option>
@@ -2156,7 +2156,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   min="0"
                   value={formData.fleet_size}
                   onChange={(e) => handleInputChange('fleet_size', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -2167,7 +2167,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   min="0"
                   value={formData.warehouse_capacity}
                   onChange={(e) => handleInputChange('warehouse_capacity', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -2178,7 +2178,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   min="0"
                   value={formData.insurance_coverage}
                   onChange={(e) => handleInputChange('insurance_coverage', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   required
                 />
               </div>
@@ -2194,7 +2194,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   max="100"
                   value={formData.on_time_delivery_rate}
                   onChange={(e) => handleInputChange('on_time_delivery_rate', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               <div>
@@ -2206,7 +2206,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   max="5"
                   value={formData.safety_rating}
                   onChange={(e) => handleInputChange('safety_rating', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </div>
@@ -2230,7 +2230,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                           handleInputChange('service_types', formData.service_types.filter(s => s !== service));
                         }
                       }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                     />
                     <span className="text-sm text-gray-700 capitalize">{service.replace('_', ' ')}</span>
                   </label>
@@ -2243,7 +2243,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={Array.isArray(formData.service_regions) ? formData.service_regions.join(', ') : ''}
                 onChange={(e) => handleInputChange('service_regions', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="2"
                 placeholder="e.g., Lagos State, Rivers State, Abuja FCT..."
               />
@@ -2254,7 +2254,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
               <textarea
                 value={Array.isArray(formData.certifications) ? formData.certifications.join(', ') : ''}
                 onChange={(e) => handleInputChange('certifications', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="2"
                 placeholder="e.g., ISO 9001, HAZMAT Certified, DOT Licensed..."
               />
@@ -2272,7 +2272,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                     handleInputChange('vehicle_types', e.target.value);
                   }
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 rows="3"
                 placeholder='{"trucks": 25, "trailers": 30, "tankers": 10, "cranes": 5}'
               />
@@ -2284,7 +2284,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
                   type="checkbox"
                   checked={formData.is_active}
                   onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                 />
                 <span className="text-sm font-medium text-gray-700">Active Provider</span>
               </label>
@@ -2312,7 +2312,7 @@ const LogisticsForm = ({ type, initialData, onSave, onCancel }) => {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm font-medium text-dark bg-gold border border-transparent rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="flex items-center">

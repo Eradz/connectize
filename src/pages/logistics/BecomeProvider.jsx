@@ -341,7 +341,7 @@ const BecomeProvider = () => {
           <div className="flex gap-4 justify-center flex-wrap">
             <Link
               to={webRoutes.logisticsProviderDashboard}
-              className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors font-medium"
+              className="px-6 py-3 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors font-medium"
             >
               Go to Provider Dashboard
             </Link>
@@ -371,7 +371,7 @@ const BecomeProvider = () => {
           <div className="flex gap-4 justify-center flex-wrap">
             <Link
               to={webRoutes.logisticsProviderDashboard}
-              className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors font-medium"
+              className="px-6 py-3 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors font-medium"
             >
               Go to Provider Dashboard
             </Link>
@@ -424,7 +424,7 @@ const BecomeProvider = () => {
         <div className="text-center">
           <Link
             to="/login?redirect=/logistics/become-provider"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors font-medium text-lg"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors font-medium text-lg"
           >
             Sign In to Get Started
             <ArrowRight className="w-5 h-5" />
@@ -462,7 +462,7 @@ const BecomeProvider = () => {
           </p>
           <Link
             to="/company/create"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors font-medium"
           >
             Create Company Profile
             <ArrowRight className="w-5 h-5" />
@@ -494,7 +494,7 @@ const BecomeProvider = () => {
               const company = userCompanies.find(c => String(getCompanyId(c)) === e.target.value);
               setSelectedCompany(company || null);
             }}
-            className="w-full max-w-md px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full max-w-md px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
           >
             <option value="">Select a company...</option>
             {userCompanies.map((company) => (
@@ -512,7 +512,7 @@ const BecomeProvider = () => {
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                 currentStep >= step.num 
-                  ? 'bg-gold text-white' 
+                  ? 'bg-gold text-dark'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
               }`}>
                 {currentStep > step.num ? <CheckCircle className="w-5 h-5" /> : step.num}
@@ -610,7 +610,7 @@ const BecomeProvider = () => {
                   onChange={(e) => setNewRegion(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRegion())}
                   placeholder="e.g., Texas, Gulf Coast, Southeast US"
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                 />
                 <button
                   type="button"
@@ -658,7 +658,7 @@ const BecomeProvider = () => {
                   min="1"
                   value={formData.fleet_size}
                   onChange={(e) => setFormData(prev => ({ ...prev, fleet_size: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="Number of vehicles"
                 />
               </div>
@@ -672,7 +672,7 @@ const BecomeProvider = () => {
                   type="number"
                   value={formData.warehouse_capacity}
                   onChange={(e) => setFormData(prev => ({ ...prev, warehouse_capacity: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="e.g., 50000"
                 />
               </div>
@@ -685,7 +685,7 @@ const BecomeProvider = () => {
                   type="text"
                   value={formData.license_number}
                   onChange={(e) => setFormData(prev => ({ ...prev, license_number: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="e.g., MC-123456"
                 />
               </div>
@@ -734,7 +734,7 @@ const BecomeProvider = () => {
                 type="number"
                 value={formData.insurance_coverage}
                 onChange={(e) => setFormData(prev => ({ ...prev, insurance_coverage: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                 placeholder="e.g., 1000000"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Enter your cargo/liability insurance coverage amount</p>
@@ -761,7 +761,7 @@ const BecomeProvider = () => {
             <button
               type="button"
               onClick={nextStep}
-              className="flex items-center gap-2 px-6 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors font-medium"
+              className="flex items-center gap-2 px-6 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors font-medium"
             >
               Continue
               <ArrowRight className="w-5 h-5" />

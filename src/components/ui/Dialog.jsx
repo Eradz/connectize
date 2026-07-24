@@ -42,8 +42,8 @@ const DialogContent = ({ className = '', children }) => {
   if (!open) return null;
   return (
     <div className={clsx('fixed inset-0 z-50 flex items-center justify-center', className)}>
-      <div className="fixed inset-0 bg-black/40" onClick={() => setOpen(false)} />
-      <div className="relative z-10 bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-lg w-full mx-4">
+      <div className="fixed inset-0 bg-black/50" onClick={() => setOpen(false)} />
+      <div className="relative z-10 mx-4 w-full max-w-lg rounded-xl border border-gray-200 bg-white shadow-medium dark:border-gray-700 dark:bg-gray-900">
         {children}
       </div>
     </div>

@@ -71,7 +71,7 @@ const SubscriptionCard = ({
           <p className="text-gray-600 mb-4">Choose a plan to get started with premium features.</p>
           <button
             onClick={() => setShowPlans(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
           >
             View Plans
           </button>
@@ -215,7 +215,7 @@ const SubscriptionCard = ({
                       }`}>
                         {plan.plan_type === 'professional' && (
                           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                            <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                            <span className="bg-gold text-dark px-3 py-1 rounded-full text-xs font-medium">
                               Most Popular
                             </span>
                           </div>
@@ -276,7 +276,7 @@ const SubscriptionCard = ({
                                   ? 'bg-green-600 text-white hover:bg-green-700'
                                   : isDowngrade
                                     ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-                                    : 'bg-blue-600 text-white hover:bg-custom_yellow'
+                                    : 'bg-gold text-dark hover:bg-custom_yellow'
                             }`}
                           >
                             {isCurrent ? 'Current Plan' : isUpgrade ? 'Upgrade' : isDowngrade ? 'Downgrade' : 'Select Plan'}

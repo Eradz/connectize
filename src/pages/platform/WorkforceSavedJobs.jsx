@@ -84,7 +84,7 @@ const WorkforceSavedJobs = () => {
             </div>
           <Link
             to={webRoutes.workforceJobs}
-            className="bg-gold text-white md:px-4 py-2 text-[14px] rounded-lg hover:bg-gold/80 flex items-center md:gap-2"
+            className="bg-gold text-dark md:px-4 py-2 text-[14px] rounded-lg hover:bg-gold/80 flex items-center md:gap-2"
           >
             <Briefcase className="w-4 h-4 md:flex hidden" />
             <span className="hidden md:flex">Browse All Jobs</span>
@@ -107,7 +107,7 @@ const WorkforceSavedJobs = () => {
             <p className="mt-1 text-sm text-gray-500">{error}</p>
             <button
               onClick={loadSavedJobs}
-              className="mt-4 px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/80"
+              className="mt-4 px-4 py-2 bg-gold text-dark rounded-lg hover:bg-gold/80"
             >
               Try Again
             </button>
@@ -122,7 +122,7 @@ const WorkforceSavedJobs = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.workforceJobs}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-gold/80"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-gold/80"
               >
                 <Briefcase className="w-4 h-4 mr-2" />
                 Browse Jobs

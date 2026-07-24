@@ -201,7 +201,7 @@ const UsersManagement = () => {
                         setSelectedUsers([]);
                       }
                     }}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                   />
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -275,7 +275,7 @@ const UsersManagement = () => {
                             setSelectedUsers(selectedUsers.filter(id => id !== user.id));
                           }
                         }}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                       />
                     </td>
                     <td className="px-6 py-4">

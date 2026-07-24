@@ -488,7 +488,7 @@ const EnhancedMultiProviderIntegration = ({ shipmentRequest, onSuccess }) => {
 
                     {/* Selection Indicator */}
                     {selectedProvider === provider.provider_name && (
-                      <div className="bg-blue-600 rounded-full p-1 mt-2">
+                      <div className="bg-gold rounded-full p-1 mt-2">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -575,7 +575,7 @@ const EnhancedMultiProviderIntegration = ({ shipmentRequest, onSuccess }) => {
       <button
         onClick={handleProviderSubmit}
         disabled={loading || !selectedProvider || calculatingRates || !isAuthenticated}
-        className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+        className="w-full px-4 py-3 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
       >
         {!isAuthenticated ? (
           <>

@@ -403,7 +403,7 @@ const LogisticsShipments = () => {
               </button>
               <Link
                 to={webRoutes.logisticsShipmentCreate}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Shipment
@@ -565,7 +565,7 @@ const LogisticsShipments = () => {
                 <div className="mt-6">
                   <Link
                     to={webRoutes.logisticsShipmentCreate}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-custom_yellow"
+                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-custom_yellow"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Shipment
@@ -809,7 +809,7 @@ const LogisticsShipments = () => {
                       onClick={() => setCurrentPage(pageNum)}
                       className={`px-3 py-2 rounded-lg text-sm ${
                         currentPage === pageNum
-                          ? 'bg-gold text-white hover:bg-custom_yellow'
+                          ? 'bg-gold text-dark hover:bg-custom_yellow'
                           : 'border border-gray-300 hover:bg-gray-50'
                       }`}
                     >

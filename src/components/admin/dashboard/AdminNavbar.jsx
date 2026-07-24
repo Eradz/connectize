@@ -69,7 +69,7 @@ const AdminNavbar = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search users, companies, products..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500"
             />
           </form>
         </div>
@@ -77,7 +77,7 @@ const AdminNavbar = () => {
         {/* Right side - Notifications and User Menu */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <Link to="/admin/notifications" className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg" aria-label="Notifications">
+          <Link to="/admin/notifications" className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 rounded-lg" aria-label="Notifications">
             <BellIcon className="h-6 w-6" />
             {Number(unreadNotificationsCount) > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-600 text-white text-[10px] leading-none rounded-full">
@@ -89,7 +89,7 @@ const AdminNavbar = () => {
           {/* Quick Actions */}
           <Link
             to="/admin/settings"
-            className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+            className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 rounded-lg"
           >
             <Cog6ToothIcon className="h-6 w-6" />
           </Link>

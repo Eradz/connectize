@@ -377,7 +377,7 @@ function StageTabs({ stages, selectedStageId, onSelect }) {
                   isCompleted
                     ? "bg-green-500 text-white"
                     : isActive
-                      ? "bg-blue-500 text-white"
+                      ? "bg-gold text-dark"
                       : "bg-gray-200 text-gray-500"
                 }`}
               >

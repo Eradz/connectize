@@ -113,7 +113,7 @@ const SubscriptionManagementSystem = () => {
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Data</h3>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button onClick={fetchAllData} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow">
+          <button onClick={fetchAllData} className="w-full px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow">
             Try Again
           </button>
         </div>
@@ -991,7 +991,7 @@ const SubscriptionManagementSystem = () => {
                           <input
                             type="text"
                             value={cardDetails.name}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                             onChange={(e)=> setCardDetails((prev)=> ({...prev, name: e.target.value}))}
                           />
                         </div>
@@ -1002,7 +1002,7 @@ const SubscriptionManagementSystem = () => {
                           <input
                             type="text"
                             value={cardDetails.expiry}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                             onChange={(e)=> setCardDetails((prev)=> ({...prev, expiry: e.target.value}))}
                           />
                         </div>
@@ -1018,7 +1018,7 @@ const SubscriptionManagementSystem = () => {
                             <input
                               type="text"
                               value={cardDetails.number}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent pr-12"
                               onChange={(e)=> setCardDetails((prev)=> ({...prev, number: e.target.value}))}
                             />
                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -1045,7 +1045,7 @@ const SubscriptionManagementSystem = () => {
                           <input
                             type="text"
                             value={cardDetails.cvc}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                             onChange={(e)=> setCardDetails((prev)=> ({...prev, cvc: e.target.value}))}
                           />
                         </div>

@@ -333,7 +333,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                 <select
                   value={selectedCompanyId}
                   onChange={(e) => setSelectedCompanyId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 >
                   <option value="">Personal (no company)</option>
                   {availableCompanies.map((c) => (
@@ -352,7 +352,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                 type="text"
                 value={requestData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 placeholder="e.g., Oil Shipment to Lagos Port"
                 required
               />
@@ -366,7 +366,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
               <textarea
                 value={requestData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 rows="3"
                 placeholder="Provide additional context about your shipment request"
               />
@@ -380,7 +380,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
               <select
                 value={requestData.cargo_type}
                 onChange={(e) => handleInputChange('cargo_type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 required
               >
                 <option value="">Select cargo type</option>
@@ -404,7 +404,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
               <textarea
                 value={requestData.origin_address}
                 onChange={(e) => handleInputChange('origin_address', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 rows="3"
                 placeholder="Enter complete pickup address including city, state, and country"
                 required
@@ -419,7 +419,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
               <textarea
                 value={requestData.destination_address}
                 onChange={(e) => handleInputChange('destination_address', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 rows="3"
                 placeholder="Enter complete delivery address including city, state, and country"
                 required
@@ -436,7 +436,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                   type="date"
                   value={requestData.pickup_date_requested}
                   onChange={(e) => handleInputChange('pickup_date_requested', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                   min={new Date().toISOString().split('T')[0]}
                   required
                 />
@@ -449,7 +449,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                   type="date"
                   value={requestData.delivery_date_requested}
                   onChange={(e) => handleInputChange('delivery_date_requested', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                   min={requestData.pickup_date_requested}
                 />
               </div>
@@ -473,7 +473,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                   step="0.01"
                   value={requestData.weight}
                   onChange={(e) => handleInputChange('weight', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="0.00"
                   required
                 />
@@ -487,7 +487,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                   step="0.01"
                   value={requestData.volume}
                   onChange={(e) => handleInputChange('volume', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                   placeholder="0.00"
                   required
                 />
@@ -501,7 +501,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-gold text-white rounded-lg hover:bg-custom_yellow"
+                  className="flex items-center space-x-1 px-3 py-1 text-sm bg-gold text-dark rounded-lg hover:bg-custom_yellow"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Item</span>
@@ -532,7 +532,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         type="text"
                         value={item.description}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="Describe the item"
                         required
                       />
@@ -547,7 +547,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         min="1"
                         value={item.quantity}
                         onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         required
                       />
                     </div>
@@ -561,7 +561,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         step="0.01"
                         value={item.weight}
                         onChange={(e) => handleItemChange(index, 'weight', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="0.00"
                       />
                     </div>
@@ -575,7 +575,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         step="0.01"
                         value={item.dimensions.length}
                         onChange={(e) => handleItemDimensionChange(index, 'length', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="0.00"
                       />
                     </div>
@@ -589,7 +589,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         step="0.01"
                         value={item.dimensions.width}
                         onChange={(e) => handleItemDimensionChange(index, 'width', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="0.00"
                       />
                     </div>
@@ -603,7 +603,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         step="0.01"
                         value={item.dimensions.height}
                         onChange={(e) => handleItemDimensionChange(index, 'height', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="0.00"
                       />
                     </div>
@@ -617,7 +617,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                         step="0.01"
                         value={item.value}
                         onChange={(e) => handleItemChange(index, 'value', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="0.00"
                       />
                     </div>
@@ -645,7 +645,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                     step="0.01"
                     value={requestData.budget_min}
                     onChange={(e) => handleInputChange('budget_min', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Minimum budget"
                     required
                   />
@@ -657,7 +657,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                     step="0.01"
                     value={requestData.budget_max}
                     onChange={(e) => handleInputChange('budget_max', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Maximum budget"
                     required
                   />
@@ -674,7 +674,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
               <select
                 value={requestData.urgency}
                 onChange={(e) => handleInputChange('urgency', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
               >
                 {/* <option value="low">Low - Cost effective, flexible timing</option> */}
                 <option value="standard">Standard - Balanced cost and speed</option>
@@ -691,7 +691,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                   id="insurance_required"
                   checked={requestData.insurance_required}
                   onChange={(e) => handleInputChange('insurance_required', e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-primary-500/30"
                 />
                 <label htmlFor="insurance_required" className="text-sm font-medium text-gray-700">
                   Require cargo insurance
@@ -708,7 +708,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                     step="0.01"
                     value={requestData.insurance_value}
                     onChange={(e) => handleInputChange('insurance_value', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Total insured value"
                   />
                 </div>
@@ -723,7 +723,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                   type="checkbox"
                   checked={!!requestData.allow_bids}
                   onChange={(e) => handleInputChange('allow_bids', e.target.checked)}
-                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-primary-500/30"
                 />
                 <div>
                   <label htmlFor="allow_bids" className="text-sm font-medium text-gray-700">
@@ -744,7 +744,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
               <textarea
                 value={requestData.special_requirements}
                 onChange={(e) => handleInputChange('special_requirements', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                 rows="4"
                 placeholder="Any special handling requirements, delivery instructions, or notes..."
               />
@@ -759,21 +759,21 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                     type="text"
                     value={requestData.origin_contact_name}
                     onChange={(e) => handleNestedInputChange('origin_contact_name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Contact name"
                   />
                   <input
                     type="tel"
                     value={requestData.origin_contact_phone}
                     onChange={(e) => handleNestedInputChange('origin_contact_phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Phone number"
                   />
                   <input
                     type="email"
                     value={requestData.origin_contact_email}
                     onChange={(e) => handleNestedInputChange('origin_contact_email', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Email address"
                   />
                 </div>
@@ -786,21 +786,21 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                     type="text"
                     value={requestData.destination_contact_name}
                     onChange={(e) => handleNestedInputChange('destination_contact_name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Contact name"
                   />
                   <input
                     type="tel"
                     value={requestData.destination_contact_phone}
                     onChange={(e) => handleNestedInputChange('destination_contact_phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Phone number"
                   />
                   <input
                     type="email"
                     value={requestData.destination_contact_email}
                     onChange={(e) => handleNestedInputChange('destination_contact_email', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Email address"
                   />
                 </div>
@@ -926,9 +926,9 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
           <div
             className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium 
               ${ currentStep > step.id 
-                  ? 'bg-gold border-gold text-white'
+                  ? 'bg-gold border-gold text-dark'
                   : currentStep === step.id
-                  ? 'bg-gold border-gold text-white'
+                  ? 'bg-gold border-gold text-dark'
                   : 'bg-white border-gray-300 text-gray-400'
               }`}
           >
@@ -959,7 +959,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
                 currentStep > step.id 
                   ? 'bg-green-600 border-green-600 text-white'
                   : currentStep === step.id
-                  ? 'bg-gold border-gold text-white'
+                  ? 'bg-gold border-gold text-dark'
                   : 'bg-white border-gray-300 text-gray-400'
               }`}>
                 {currentStep > step.id ? (
@@ -1010,7 +1010,7 @@ const EnhancedShipmentRequestFlow = ({ onRequestCreated, onShipmentAssigned, isE
           <button
             onClick={nextStep}
             disabled={!validateStep(currentStep)}
-            className="px-6 py-3 bg-gold text-white rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+            className="px-6 py-3 bg-gold text-dark rounded-lg hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             <span>Next</span>
             <ArrowRight className="w-4 h-4" />

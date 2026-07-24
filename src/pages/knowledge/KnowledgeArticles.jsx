@@ -352,14 +352,14 @@ const KnowledgeArticles = () => {
                   placeholder="Search Articles"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
               
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-[196px]"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent w-[196px]"
               >
                 <option value="">All Categories</option>
                 {categories.map((c) => (
@@ -378,7 +378,7 @@ const KnowledgeArticles = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-[149px]"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent w-[149px]"
               >
                 <option value="">All Status</option>
                 <option value="published">Published</option>
@@ -485,7 +485,7 @@ const KnowledgeArticles = () => {
               <button
                 onClick={loadMoreArticles}
                 disabled={loadingMore}
-                className="px-6 py-2 bg-custom_yellow text-white rounded-lg font-semibold hover:bg-gold disabled:opacity-60"
+                className="px-6 py-2 bg-custom_yellow text-dark rounded-lg font-semibold hover:bg-gold disabled:opacity-60"
               >
                 {loadingMore ? 'Loading...' : 'Load More Articles'}
               </button>
@@ -502,7 +502,7 @@ const KnowledgeArticles = () => {
               <div className="mt-6">
                 <Link
                   to="/knowledge/articles/create"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold/80 hover:bg-gold"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold/80 hover:bg-gold"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Article
@@ -723,7 +723,7 @@ const KnowledgeArticles = () => {
                   <button
                     onClick={loadMoreArticles}
                     disabled={loadingMore}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
+                    className="px-6 py-2 bg-gold text-dark rounded-lg font-semibold hover:bg-custom_yellow disabled:opacity-60"
                   >
                     {loadingMore ? 'Loading...' : 'Load More Articles'}
                   </button>

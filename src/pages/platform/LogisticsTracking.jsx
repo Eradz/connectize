@@ -264,7 +264,7 @@ const LogisticsTracking = () => {
               </button>
               <button
                 onClick={() => navigate(webRoutes.logisticsShipmentCreate || '/logistics/shipments/create')}
-                className="bg-gold hover:bg-custom_yellow text-white px-4 py-2 rounded-lg flex items-center"
+                className="bg-gold hover:bg-custom_yellow text-dark px-4 py-2 rounded-lg flex items-center"
               >
                 <Plus className="w-4 h-4 md:mr-2" />
                 <span className='hidden md:inline-block'>New Shipment</span>
@@ -411,7 +411,7 @@ const LogisticsTracking = () => {
               {shipments.length === 0 && (
                 <button
                   onClick={() => navigate(webRoutes.logisticsRequestCreate || '/logistics/requests/create')}
-                  className="bg-gold hover:bg-custom_yellow text-white px-6 py-2.5 rounded-lg inline-flex items-center font-medium"
+                  className="bg-gold hover:bg-custom_yellow text-dark px-6 py-2.5 rounded-lg inline-flex items-center font-medium"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Create Shipment Request
@@ -464,7 +464,7 @@ const LogisticsTracking = () => {
                       )}
                       <button
                         onClick={() => navigate(`/logistics/shipments/${item.shipment_id}`)}
-                        className="flex items-center px-4 py-2 bg-gold text-white rounded-lg hover:bg-custom_yellow transition-colors"
+                        className="flex items-center px-4 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow transition-colors"
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         Details

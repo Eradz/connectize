@@ -197,7 +197,7 @@ const Orders = () => {
                   value={reviewData.title}
                   onChange={(e) => setReviewData({ ...reviewData, title: e.target.value })}
                   placeholder="Sum up your experience"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                 />
               </div>
               
@@ -209,7 +209,7 @@ const Orders = () => {
                   onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
                   placeholder="Share your experience with this product..."
                   rows={4}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                 />
               </div>
               
@@ -217,7 +217,7 @@ const Orders = () => {
               <button
                 onClick={submitReview}
                 disabled={!reviewData.comment.trim() || submittingReview}
-                className="w-full py-3 bg-gold text-white rounded-lg font-semibold hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="w-full py-3 bg-gold text-dark rounded-lg font-semibold hover:bg-custom_yellow disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {submittingReview ? 'Submitting...' : 'Submit Review'}
               </button>
@@ -256,7 +256,7 @@ const Orders = () => {
             onClick={() => setStatusFilter(tab.value)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
               statusFilter === tab.value
-                ? 'bg-gold text-white'
+                ? 'bg-gold text-dark'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -277,7 +277,7 @@ const Orders = () => {
           </p>
           <Link
             to="/marketplace"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-white rounded-xl font-semibold hover:bg-custom_yellow transition"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-dark rounded-xl font-semibold hover:bg-custom_yellow transition"
           >
             Start Shopping
           </Link>

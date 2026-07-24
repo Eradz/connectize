@@ -302,7 +302,7 @@ const WorkforceJobs = () => {
               </Link>
               <Link
                 to={webRoutes.workforceJobCreate}
-                className="bg-gold text-white px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
+                className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-gold/20 flex items-center"
               >
                 <Plus className="w-4 h-4 md:mr-2" />
                 <span className="hidden md:flex">
@@ -402,7 +402,7 @@ const WorkforceJobs = () => {
                 placeholder="Search jobs by title, skills, or company..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
               />
             </div>
           </form>
@@ -411,7 +411,7 @@ const WorkforceJobs = () => {
             <select
               value={filterLocation}
               onChange={(e) => setFilterLocation(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
             >
               <option value="all">All Locations</option>
               {Array.isArray(uniqueLocations) && uniqueLocations.map((location) => (
@@ -424,7 +424,7 @@ const WorkforceJobs = () => {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
             >
               <option value="all">All Job Types</option>
               {Array.isArray(uniqueJobTypes) && uniqueJobTypes.map((jobType) => (
@@ -437,7 +437,7 @@ const WorkforceJobs = () => {
             <select
               value={filterExperience}
               onChange={(e) => setFilterExperience(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
             >
               <option value="all">All Experience</option>
               {Array.isArray(uniqueExperienceLevels) && uniqueExperienceLevels.map((experienceLevel) => (
@@ -450,7 +450,7 @@ const WorkforceJobs = () => {
             <select
               value={filterSalaryRange}
               onChange={(e) => setFilterSalaryRange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
             >
               <option value="all">All Salaries</option>
               <option value="50000-80000">$50K - $80K</option>
@@ -462,7 +462,7 @@ const WorkforceJobs = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent text-sm"
             >
               <option value="created_at">Newest First</option>
               <option value="salary_max">Highest Salary</option>
@@ -497,7 +497,7 @@ const WorkforceJobs = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.workforceJobCreate}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gold hover:bg-gold/20"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-gold/20"
               >
                 <Plus className="w-4 h-4 mr-2" />
                  Create Job

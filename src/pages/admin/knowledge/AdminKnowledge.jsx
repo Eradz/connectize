@@ -580,7 +580,7 @@ const AdminKnowledge = () => {
                 placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 placeholder-gray-500"
+                className="pl-10 pr-4 py-3 w-full bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 placeholder-gray-500"
               />
             </div>
           </div>
@@ -590,7 +590,7 @@ const AdminKnowledge = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
                 >
                   <option value="all">All Status</option>
                   <option value="draft">Draft</option>
@@ -600,7 +600,7 @@ const AdminKnowledge = () => {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 text-gray-700"
+                  className="px-4 py-3 bg-white/50 backdrop-blur-xl border border-white/30 rounded-xl focus:ring-2 focus:ring-primary-500/30/50 focus:border-primary-500/50 transition-all duration-200 text-gray-700"
                 >
                   <option value="all">All Categories</option>
                   {categories.map(category => (
@@ -1062,7 +1062,7 @@ const AdminKnowledge = () => {
                         type="text"
                         value={formData.title || ''}
                         onChange={(e) => handleFormChange('title', e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.title ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter article title"
@@ -1079,7 +1079,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.category || ''}
                         onChange={(e) => handleFormChange('category', e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.category ? 'border-red-300' : 'border-gray-300'
                         }`}
                       >
@@ -1100,7 +1100,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.article_type || 'news'}
                         onChange={(e) => handleFormChange('article_type', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       >
                         <option value="news">News</option>
                         <option value="insight">Insight</option>
@@ -1117,7 +1117,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.status || 'draft'}
                         onChange={(e) => handleFormChange('status', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       >
                         <option value="draft">Draft</option>
                         <option value="review">Under Review</option>
@@ -1134,7 +1134,7 @@ const AdminKnowledge = () => {
                         value={formData.excerpt || ''}
                         onChange={(e) => handleFormChange('excerpt', e.target.value)}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="Brief summary of the article"
                       />
                     </div>
@@ -1147,7 +1147,7 @@ const AdminKnowledge = () => {
                         value={formData.content || ''}
                         onChange={(e) => handleFormChange('content', e.target.value)}
                         rows={8}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.content ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Article content (Markdown supported)"
@@ -1168,7 +1168,7 @@ const AdminKnowledge = () => {
                           const selectedTags = Array.from(e.target.selectedOptions, option => option.value);
                           handleFormChange('tags', selectedTags);
                         }}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         size="4"
                       >
                         {tags.map(tag => (
@@ -1186,7 +1186,7 @@ const AdminKnowledge = () => {
                         type="text"
                         value={formData.slug || ''}
                         onChange={(e) => handleFormChange('slug', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="article-url-slug"
                       />
                       <p className="text-xs text-gray-500 mt-1">Leave empty to auto-generate from title</p>
@@ -1198,7 +1198,7 @@ const AdminKnowledge = () => {
                           type="checkbox"
                           checked={formData.is_featured || false}
                           onChange={(e) => handleFormChange('is_featured', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                         />
                         <span className="ml-2 text-sm text-gray-700">Featured article</span>
                       </label>
@@ -1212,7 +1212,7 @@ const AdminKnowledge = () => {
                         value={formData.meta_description || ''}
                         onChange={(e) => handleFormChange('meta_description', e.target.value)}
                         rows={2}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="SEO description (max 160 characters)"
                         maxLength="160"
                       />
@@ -1236,7 +1236,7 @@ const AdminKnowledge = () => {
                         type="text"
                         value={formData.name || ''}
                         onChange={(e) => handleFormChange('name', e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.name ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter forum name"
@@ -1253,7 +1253,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.category || ''}
                         onChange={(e) => handleFormChange('category', e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.category ? 'border-red-300' : 'border-gray-300'
                         }`}
                       >
@@ -1274,7 +1274,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.required_plan || ''}
                         onChange={(e) => handleFormChange('required_plan', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       >
                         <option value="">No requirement (public forum)</option>
                         {subscriptionPlans.map(plan => (
@@ -1296,7 +1296,7 @@ const AdminKnowledge = () => {
                         value={formData.description || ''}
                         onChange={(e) => handleFormChange('description', e.target.value)}
                         rows={4}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.description ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Describe what this forum is about"
@@ -1312,7 +1312,7 @@ const AdminKnowledge = () => {
                           type="checkbox"
                           checked={formData.is_public !== undefined ? formData.is_public : true}
                           onChange={(e) => handleFormChange('is_public', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                         />
                         <span className="ml-2 text-sm text-gray-700">Public forum (visible to all users)</span>
                       </label>
@@ -1322,7 +1322,7 @@ const AdminKnowledge = () => {
                           type="checkbox"
                           checked={formData.is_moderated || false}
                           onChange={(e) => handleFormChange('is_moderated', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                         />
                         <span className="ml-2 text-sm text-gray-700">Moderated forum (posts require approval)</span>
                       </label>
@@ -1343,7 +1343,7 @@ const AdminKnowledge = () => {
                         type="text"
                         value={formData.name || ''}
                         onChange={(e) => handleFormChange('name', e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 ${
                           formErrors.name ? 'border-red-300' : 'border-gray-300'
                         }`}
                         placeholder="Enter category name"
@@ -1361,7 +1361,7 @@ const AdminKnowledge = () => {
                         type="number"
                         value={formData.sort_order || 0}
                         onChange={(e) => handleFormChange('sort_order', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         min="0"
                       />
                     </div>
@@ -1381,7 +1381,7 @@ const AdminKnowledge = () => {
                           type="text"
                           value={formData.color || '#3B82F6'}
                           onChange={(e) => handleFormChange('color', e.target.value)}
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                           placeholder="#3B82F6"
                         />
                       </div>
@@ -1395,7 +1395,7 @@ const AdminKnowledge = () => {
                         type="text"
                         value={formData.icon || ''}
                         onChange={(e) => handleFormChange('icon', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="📚"
                         maxLength="2"
                       />
@@ -1409,7 +1409,7 @@ const AdminKnowledge = () => {
                         value={formData.description || ''}
                         onChange={(e) => handleFormChange('description', e.target.value)}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="Describe this category"
                       />
                     </div>
@@ -1420,7 +1420,7 @@ const AdminKnowledge = () => {
                           type="checkbox"
                           checked={formData.is_active !== undefined ? formData.is_active : true}
                           onChange={(e) => handleFormChange('is_active', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-gold focus:ring-primary-500/30 border-gray-300 rounded"
                         />
                         <span className="ml-2 text-sm text-gray-700">Active category</span>
                       </label>
@@ -1446,7 +1446,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.action_taken || 'approve'}
                         onChange={(e) => handleFormChange('action_taken', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       >
                         <option value="approve">Approve Content</option>
                         <option value="reject">Reject Content</option>
@@ -1462,7 +1462,7 @@ const AdminKnowledge = () => {
                       <select
                         value={formData.content_type || 'article'}
                         onChange={(e) => handleFormChange('content_type', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       >
                         <option value="article">Article</option>
                         <option value="forum_post">Forum Post</option>
@@ -1478,7 +1478,7 @@ const AdminKnowledge = () => {
                         type="text"
                         value={formData.content_id || ''}
                         onChange={(e) => handleFormChange('content_id', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="UUID of the content to moderate"
                       />
                     </div>
@@ -1523,7 +1523,7 @@ const AdminKnowledge = () => {
                         value={formData.moderator_notes || ''}
                         onChange={(e) => handleFormChange('moderator_notes', e.target.value)}
                         rows={4}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         placeholder="Internal notes for other moderators"
                       />
                     </div>
@@ -1544,7 +1544,7 @@ const AdminKnowledge = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center"
+                  className="flex items-center rounded-lg bg-gold px-6 py-3 text-dark transition-colors hover:bg-custom_yellow disabled:cursor-not-allowed disabled:bg-gray-300"
                 >
                   {submitting ? (
                     <>

@@ -281,7 +281,7 @@ const KnowledgeCategoryDetail = () => {
                     placeholder={`Search ${category.name}`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   />
                 </div>
 
@@ -294,7 +294,7 @@ const KnowledgeCategoryDetail = () => {
                     navigate(`/knowledge/categories/${e.target.value}`);
                   }
                 }}
-                className="w-[30%] px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                className="w-[30%] px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent">
                   <option value="all">All Categories</option>
                   {categories?.map((cat) => (
                     <option key={cat.id} value={cat.slug}>
@@ -347,7 +347,7 @@ const KnowledgeCategoryDetail = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Link
                     to={webRoutes.knowledgeArticleCreate}
-                    className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors"
+                    className="inline-flex items-center gap-2 bg-gold text-dark px-4 py-2 rounded-lg font-medium hover:bg-custom_yellow transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Write Article

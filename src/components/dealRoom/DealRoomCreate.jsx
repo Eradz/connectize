@@ -245,7 +245,7 @@ const StepContent = ({
             />
             <button 
               onClick={() => addTag()}
-              className="px-4 bg-gold text-white rounded-lg hover:bg-pale_yellow"
+              className="px-4 bg-gold text-dark rounded-lg hover:bg-pale_yellow"
             >
               <Plus/>
             </button>

@@ -13,9 +13,9 @@ const Textarea = forwardRef(({
   ...props 
 }, ref) => {
   const variants = {
-    default: 'border-gray-300 focus:border-blue-500 focus:ring-blue-500',
-    error: 'border-red-300 focus:border-red-500 focus:ring-red-500',
-    success: 'border-green-300 focus:border-green-500 focus:ring-green-500',
+    default: 'border-gray-300 focus:border-primary-500 focus:ring-primary-500/20',
+    error: 'border-red-300 focus:border-red-500 focus:ring-red-500/20',
+    success: 'border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20',
   };
 
   const sizes = {
@@ -25,8 +25,8 @@ const Textarea = forwardRef(({
   };
 
   const textareaClasses = clsx(
-    'form-textarea block w-full rounded-xl border transition-all duration-200',
-    'bg-white focus:outline-none focus:ring-2 focus:ring-opacity-50',
+    'form-textarea block w-full rounded-lg border transition-colors duration-200',
+    'bg-white text-gray-900 focus:outline-none focus:ring-2',
     'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
     'placeholder-gray-400',
     'resize-y',

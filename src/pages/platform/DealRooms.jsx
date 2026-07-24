@@ -194,7 +194,7 @@ const DealRooms = () => {
           </div>
           <Link
             to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
+            className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
           >
             View Details
           </Link>
@@ -267,7 +267,7 @@ const DealRooms = () => {
             </button>
             <Link
               to={webRoutes.dealRoomDetail.replace(':id', deal.id)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
+              className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow transition-colors text-sm font-medium"
             >
               View Details
             </Link>
@@ -289,7 +289,7 @@ const DealRooms = () => {
             </div>
             <Link
               to={webRoutes.dealRoomCreate}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
+              className="bg-gold text-dark px-4 py-2 rounded-lg hover:bg-custom_yellow flex items-center"
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Deal Room
@@ -310,7 +310,7 @@ const DealRooms = () => {
                   placeholder="Search deal rooms..."
                   value={searchTerm}
                   onChange={handleSearchInputChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
             </form>
@@ -319,7 +319,7 @@ const DealRooms = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -333,7 +333,7 @@ const DealRooms = () => {
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               >
                 <option value="all">All Types</option>
                 <option value="acquisition">Acquisition</option>
@@ -346,7 +346,7 @@ const DealRooms = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
               >
                 <option value="created_at">Newest First</option>
                 <option value="estimated_value">Highest Value</option>
@@ -357,13 +357,13 @@ const DealRooms = () => {
               <div className="flex border border-gray-300 rounded-lg">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                  className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-gold text-dark' : 'text-gray-600 hover:bg-gray-50'}`}
                 >
                   Grid
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                  className={`px-3 py-2 ${viewMode === 'list' ? 'bg-gold text-dark' : 'text-gray-600 hover:bg-gray-50'}`}
                 >
                   List
                 </button>
@@ -387,7 +387,7 @@ const DealRooms = () => {
             <div className="mt-6">
               <Link
                 to={webRoutes.dealRoomCreate}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-custom_yellow"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-dark bg-gold hover:bg-custom_yellow"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Deal Room

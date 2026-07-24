@@ -310,7 +310,7 @@ const KnowledgeArticleEdit = () => {
                     <button
                       type="button"
                       onClick={addTag}
-                      className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90"
+                      className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-gold/90"
                     >
                       <Plus className="w-4 h-4" />
                     </button>

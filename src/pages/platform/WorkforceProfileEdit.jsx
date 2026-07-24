@@ -199,7 +199,7 @@ const WorkforceProfileEdit = () => {
                     name="professional_title"
                     value={formData.professional_title}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="e.g., Senior Petroleum Engineer"
                     required
                   />
@@ -214,7 +214,7 @@ const WorkforceProfileEdit = () => {
                     name="years_of_experience"
                     value={formData.years_of_experience}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                     min="0"
                     max="50"
                     required
@@ -230,7 +230,7 @@ const WorkforceProfileEdit = () => {
                     name="current_location"
                     value={formData.current_location}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="e.g., Houston, TX"
                     required
                   />
@@ -244,7 +244,7 @@ const WorkforceProfileEdit = () => {
                     name="availability_status"
                     value={formData.availability_status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                   >
                     {availabilityOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -272,7 +272,7 @@ const WorkforceProfileEdit = () => {
                     name="hourly_rate"
                     value={formData.hourly_rate}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="0.00"
                     step="0.01"
                     min="0"
@@ -305,7 +305,7 @@ const WorkforceProfileEdit = () => {
                           type="checkbox"
                           checked={formData.preferred_employment_types.includes(option.value)}
                           onChange={() => handleMultiSelect('preferred_employment_types', option.value)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                         />
                         <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                       </label>
@@ -324,7 +324,7 @@ const WorkforceProfileEdit = () => {
                           type="checkbox"
                           checked={formData.preferred_work_environments.includes(option.value)}
                           onChange={() => handleMultiSelect('preferred_work_environments', option.value)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                         />
                         <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                       </label>
@@ -343,7 +343,7 @@ const WorkforceProfileEdit = () => {
                           type="checkbox"
                           checked={formData.shift_preferences.includes(option.value)}
                           onChange={() => handleMultiSelect('shift_preferences', option.value)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                         />
                         <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                       </label>
@@ -358,7 +358,7 @@ const WorkforceProfileEdit = () => {
                       name="willing_to_relocate"
                       checked={formData.willing_to_relocate}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                     />
                     <span className="ml-2 text-sm text-gray-700">Willing to Relocate</span>
                   </label>
@@ -369,7 +369,7 @@ const WorkforceProfileEdit = () => {
                       name="willing_to_travel"
                       checked={formData.willing_to_travel}
                       onChange={handleInputChange}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-gray-300 text-gold focus:ring-primary-500/30"
                     />
                     <span className="ml-2 text-sm text-gray-700">Willing to Travel</span>
                   </label>
@@ -384,7 +384,7 @@ const WorkforceProfileEdit = () => {
                         name="travel_percentage"
                         value={formData.travel_percentage}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                         min="0"
                         max="100"
                         placeholder="0-100%"
@@ -412,7 +412,7 @@ const WorkforceProfileEdit = () => {
                     value={formData.summary}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="Describe your professional background, expertise, and what makes you unique..."
                     required
                   />
@@ -427,7 +427,7 @@ const WorkforceProfileEdit = () => {
                     value={formData.achievements}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                     placeholder="List your major accomplishments, awards, or notable projects..."
                   />
                 </div>
@@ -442,7 +442,7 @@ const WorkforceProfileEdit = () => {
                       name="portfolio_url"
                       value={formData.portfolio_url}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       placeholder="https://yourportfolio.com"
                     />
                   </div>
@@ -456,7 +456,7 @@ const WorkforceProfileEdit = () => {
                       name="linkedin_url"
                       value={formData.linkedin_url}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
                       placeholder="https://linkedin.com/in/yourprofile"
                     />
                   </div>
@@ -489,7 +489,7 @@ const WorkforceProfileEdit = () => {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-custom_yellow focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-2 bg-gold text-dark rounded-lg hover:bg-custom_yellow focus:ring-2 focus:ring-primary-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : 'Save Changes'}

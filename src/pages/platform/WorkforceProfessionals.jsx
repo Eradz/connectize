@@ -397,7 +397,7 @@ const WorkforceProfessionals = () => {
                 ) : (
                   <Link
                     to={webRoutes.workforceProfileCreate}
-                    className="bg-pale_yellow text-white px-4 py-2 rounded-lg hover:bg-gold flex items-center"
+                    className="bg-pale_yellow text-dark px-4 py-2 rounded-lg hover:bg-gold flex items-center"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create Profile
@@ -428,7 +428,7 @@ const WorkforceProfessionals = () => {
                 <input
                   type="text"
                   placeholder="Search professionals by name, title, company, or skills..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
@@ -451,7 +451,7 @@ const WorkforceProfessionals = () => {
                   <input
                     type="text"
                     placeholder="City, Country"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     value={filters.location}
                     onChange={(e) => handleFilterChange('location', e.target.value)}
                   />
@@ -459,7 +459,7 @@ const WorkforceProfessionals = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Experience</label>
                   <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     value={filters.experience}
                     onChange={(e) => handleFilterChange('experience', e.target.value)}
                   >
@@ -475,7 +475,7 @@ const WorkforceProfessionals = () => {
                   <input
                     type="text"
                     placeholder="Enter skill"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     value={filters.skills}
                     onChange={(e) => handleFilterChange('skills', e.target.value)}
                   />
@@ -483,7 +483,7 @@ const WorkforceProfessionals = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
                   <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     value={filters.availability}
                     onChange={(e) => handleFilterChange('availability', e.target.value)}
                   >
@@ -496,7 +496,7 @@ const WorkforceProfessionals = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Verification</label>
                   <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                     value={filters.verification}
                     onChange={(e) => handleFilterChange('verification', e.target.value)}
                   >
@@ -706,7 +706,7 @@ const WorkforceProfessionals = () => {
                 <div className="flex space-x-2 pt-3 border-t-2 border-[#00000033]/20 h-[15%]">
                   <Link
                     to={`${webRoutes.workforceProfileDetail.replace(':id', professional.id)}`}
-                    className="w-[50%] bg-custom_yellow text-white text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
+                    className="w-[50%] bg-custom_yellow text-dark text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
                   >
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile

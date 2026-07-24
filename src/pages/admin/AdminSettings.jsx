@@ -495,7 +495,7 @@ const AdminSettings = () => {
           onChange={(e) => handleSettingChange('dataRetentionDays', parseInt(e.target.value))}
           min="30"
           max="3650"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500"
         />
       </div>
       

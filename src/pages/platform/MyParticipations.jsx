@@ -96,7 +96,7 @@ export default function MyParticipations() {
           placeholder="Search participations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
         />
       </div>
 
@@ -131,7 +131,7 @@ export default function MyParticipations() {
             </p>
             <Link
               to={webRoutes.dealRooms}
-              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gold hover:bg-gold/20"
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-dark bg-gold hover:bg-gold/20"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               Invite participants

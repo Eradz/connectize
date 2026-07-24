@@ -189,7 +189,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       <button
                         type="button"
                         onClick={addSkill}
-                        className={`px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90 ${currentSkill.length === 0 ? 'hidden' : 'animate-shake'}`}
+                        className={`px-4 py-2 bg-gold text-dark rounded-lg hover:bg-gold/90 ${currentSkill.length === 0 ? 'hidden' : 'animate-shake'}`}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -229,7 +229,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       <button
                         type="button"
                         onClick={addQualification}
-                        className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90"
+                        className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-gold/90"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -358,7 +358,7 @@ import CurrencyPicker from "../CurrencyPicker";
                       <button
                         type="button"
                         onClick={addBenefit}
-                        className="px-4 py-2 bg-gold text-white rounded-lg hover:bg-gold/90"
+                        className="px-4 py-2 bg-gold text-dark rounded-lg hover:bg-gold/90"
                       >
                         <Plus className="w-4 h-4" />
                       </button>

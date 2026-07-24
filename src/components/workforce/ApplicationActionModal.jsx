@@ -134,7 +134,7 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
                   onChange={(e) => handleInputChange('cover_letter', e.target.value)}
                   placeholder="Enter your cover letter"
                   rows={5}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent resize-none"
                 />
               </div>
 
@@ -148,7 +148,7 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
                   value={formData.portfolio_link}
                   onChange={(e) => handleInputChange('portfolio_link', e.target.value)}
                   placeholder="https://example.com/portfolio"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent"
                 />
               </div>
 
@@ -162,7 +162,7 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
                   onChange={(e) => handleInputChange('additional_info', e.target.value)}
                   placeholder="Any additional information you'd like to add"
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500/30 focus:border-transparent resize-none"
                 />
               </div>
             </div>
@@ -299,7 +299,7 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
                 <button
                   onClick={handleSaveChanges}
                   disabled={loading}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-gold text-dark hover:bg-custom_yellow rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   {loading ? 'Saving...' : 'Save Changes'}
@@ -327,7 +327,7 @@ function getStatusColor(status) {
     case 'offer_made':
       return 'bg-green-100 text-green-800';
     case 'hired':
-      return 'bg-gradient-to-br from-[#FFC000] to-[#FF8400] text-transparent bg-clip-text';
+      return 'bg-emerald-50 text-emerald-700';
     case 'rejected':
       return 'bg-red-100 text-red-800';
     case 'withdrawn':

@@ -119,7 +119,7 @@ const WorkforceMyBookmarks = () => {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <BookmarkCheck className="w-8 h-8 text-[#FFC000]" />
+                <BookmarkCheck className="h-8 w-8 text-gold" />
                 My Bookmarked Events
               </h1>
               <p className="text-gray-600 mt-1">
@@ -141,7 +141,7 @@ const WorkforceMyBookmarks = () => {
             </p>
             <Link
               to={webRoutes.workforceEvents}
-              className="inline-flex items-center px-6 py-3 bg-[#FFC000] text-gray-900 font-semibold rounded-lg hover:bg-[#FFD43B] transition-colors"
+              className="inline-flex items-center rounded-lg bg-gold px-6 py-3 font-semibold text-dark transition-colors hover:bg-custom_yellow"
             >
               Browse Events
             </Link>
@@ -171,7 +171,7 @@ const WorkforceMyBookmarks = () => {
                     className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors group"
                     title="Remove bookmark"
                   >
-                    <BookmarkCheck className="w-5 h-5 text-[#FFC000] group-hover:text-red-500" />
+                    <BookmarkCheck className="h-5 w-5 text-gold group-hover:text-red-500" />
                   </button>
                 </div>
 
@@ -242,7 +242,7 @@ const WorkforceMyBookmarks = () => {
                   {/* Action Button */}
                   <Link
                     to={webRoutes.workforceEventDetail.replace(':id', event.id)}
-                    className="block w-full bg-[#FFC000] text-center text-gray-900 font-semibold py-3 rounded-lg hover:bg-[#FFD43B] transition-colors"
+                    className="block w-full rounded-lg bg-gold py-3 text-center font-semibold text-dark transition-colors hover:bg-custom_yellow"
                   >
                     <div className="flex items-center justify-center">
                       <Eye className="w-4 h-4 mr-2" />

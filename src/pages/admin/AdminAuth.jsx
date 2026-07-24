@@ -78,7 +78,7 @@ const AdminAuth = () => {
               <div className="mt-4 space-x-2">
                 <button
                   onClick={handleCheckSession}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-custom_yellow"
+                  className="px-4 py-2 bg-gold text-dark rounded-md hover:bg-custom_yellow"
                 >
                   Refresh Session
                 </button>
@@ -105,7 +105,7 @@ const AdminAuth = () => {
                     value={tokens}
                     onChange={(e) => setTokens(e.target.value)}
                     placeholder='{"access": "your-access-token", "refresh": "your-refresh-token"}'
-                    className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                   />
                 </div>
                 <button
@@ -136,13 +136,13 @@ const AdminAuth = () => {
                 <div className="space-x-4">
                   <a
                     href="/admin/knowledge"
-                    className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 inline-block"
+                    className="px-4 py-2 bg-gold text-dark rounded-md hover:bg-custom_yellow inline-block"
                   >
                     Knowledge Hub Admin
                   </a>
                   <a
                     href="/admin/logistics"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 inline-block"
+                    className="px-4 py-2 bg-gold text-dark rounded-md hover:bg-custom_yellow inline-block"
                   >
                     Logistics Admin
                   </a>
