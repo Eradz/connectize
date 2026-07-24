@@ -1518,31 +1518,46 @@ export default function DealRoomDetail() {
               {active === "participants" && !isMember && (
                 <div className="flex flex-col items-center justify-center gap-4 py-14 text-center">
                   {joinStatus === "pending" ? (
-                    <>
-                      <p className="max-w-sm text-sm text-gray-500">
-                        Only participants can view the people in this deal room.
-                        Your request is awaiting approval.
-                      </p>
-                      {/* The requester's own pending record */}
-                      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-soft">
-                        <div className="flex items-center gap-3.5">
-                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-800 ring-1 ring-inset ring-primary-200">
-                            {(user?.full_name || user?.display_name || user?.email || "U")
-                              .charAt(0)
-                              .toUpperCase()}
+                    <div
+                      className="w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-soft"
+                      role="status"
+                    >
+                      <div className="p-5 sm:p-6">
+                        <div className="flex items-start gap-4">
+                          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary-200 bg-primary-50">
+                            <Clock3 className="h-5 w-5 text-gold" aria-hidden="true" />
                           </span>
-                          <div className="min-w-0 flex-1 text-left">
-                            <p className="truncate text-sm font-semibold text-[#212529]">
-                              {user?.full_name || user?.display_name || user?.email || "You"}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-600">
+                              <span className="h-2 w-2 rounded-full bg-gold" aria-hidden="true" />
+                              Pending approval
+                            </div>
+                            <h3 className="mt-1.5 text-base font-semibold text-dark">
+                              Access request submitted
+                            </h3>
+                            <p className="mt-1.5 text-sm leading-6 text-gray-500">
+                              Only approved participants can view the people in this deal room.
+                              The deal room owner will review your request.
                             </p>
-                            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-800">
-                              <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-                              Request Pending
-                            </span>
                           </div>
                         </div>
                       </div>
-                    </>
+                      <div className="flex items-center gap-3 border-t border-gray-100 bg-gray-50 px-5 py-3.5 sm:px-6">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-dark ring-1 ring-inset ring-gray-200">
+                          {(user?.full_name || user?.display_name || user?.email || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                            Requested by
+                          </p>
+                          <p className="truncate text-sm font-semibold text-dark">
+                            {user?.full_name || user?.display_name || user?.email || "You"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   ) : joinStatus === "rejected" ? (
                     <>
                       {/* The requester's own declined record */}
