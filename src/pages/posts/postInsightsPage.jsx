@@ -11,6 +11,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   BarChart3,
+  ExternalLink,
   Heart,
   Lock,
   MessageCircle,
@@ -28,6 +29,7 @@ import LightParagraph from "../../components/ParagraphText";
 import RichContentText from "../../components/RichContentText";
 import TimeAgo from "../../components/TimeAgo";
 import { formatNumber } from "../../lib/utils";
+import { webRoutes } from "../../lib/webRoutes";
 
 const periods = [
   { key: "7d", label: "7D" },
@@ -47,7 +49,7 @@ const toneByType = {
   likes: "text-rose-600 bg-rose-50 border-rose-100",
   comments: "text-blue-600 bg-blue-50 border-blue-100",
   reposts: "text-green-600 bg-green-50 border-green-100",
-  all: "text-gray-900 bg-gray-50 border-gray-100",
+  all: "text-primary-800 bg-primary-50 border-primary-200",
 };
 
 const countForTab = (totals = {}, tab) => {
@@ -98,18 +100,18 @@ const stripInsightText = (value = "") => {
 
 function MetricCard({ icon: Icon, label, value, tone = "all" }) {
   return (
-    <div className="flex min-h-[92px] items-center gap-3 rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex items-center gap-3 bg-white p-4 sm:p-5">
       <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${toneByType[tone]}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${toneByType[tone]}`}
       >
-        <Icon className="h-4 w-4" />
+        <Icon className="h-4 w-4" aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="text-2xl font-bold leading-none text-gray-950">
-          {formatNumber(value || 0)}
-        </p>
-        <p className="mt-1 truncate text-sm font-semibold text-gray-500">
+        <p className="truncate text-xs font-semibold uppercase tracking-wide text-gray-500">
           {label}
+        </p>
+        <p className="mt-1 text-2xl font-bold leading-none text-gray-950">
+          {formatNumber(value || 0)}
         </p>
       </div>
     </div>
@@ -135,7 +137,7 @@ function ActorRow({ item }) {
     item.type === "like" ? Heart : item.type === "comment" ? MessageCircle : Repeat2;
 
   const content = (
-    <div className="flex gap-3 rounded-lg border border-gray-200 bg-white p-3 transition hover:border-gray-300">
+    <div className="group flex gap-3 p-4 transition-colors hover:bg-gray-50 sm:px-5">
       <Avatar
         size="md"
         name={item.actor?.name || "Deleted account"}
@@ -154,8 +156,9 @@ function ActorRow({ item }) {
           </div>
           <span
             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${tone}`}
+            aria-label={`${item.type} activity`}
           >
-            <Icon className="h-3.5 w-3.5" />
+            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
           </span>
         </div>
         {preview ? (
@@ -191,6 +194,7 @@ function PostInsightsPage() {
   const {
     data: actorPages,
     isLoading: actorsLoading,
+    isFetching: actorsFetching,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
@@ -216,6 +220,7 @@ function PostInsightsPage() {
     [actorPages]
   );
   const totals = insights?.totals || {};
+  const isRefreshing = insightsFetching || actorsFetching;
   const postPreview = useMemo(
     () => stripInsightText(insights?.post?.body_preview || ""),
     [insights?.post?.body_preview]
@@ -263,18 +268,21 @@ function PostInsightsPage() {
   }
 
   return (
-    <section className="w-full py-5">
-      <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+    <section className="mx-auto w-full max-w-6xl py-5">
+      <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-soft sm:p-5">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-800 hover:border-gray-300"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
           aria-label="Go back"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-gray-950">Post insights</h1>
+          <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-primary-800">
+            Analytics
+          </p>
+          <h1 className="text-xl font-bold text-gray-950 sm:text-2xl">Post insights</h1>
           {postPreview ? (
             <div className="line-clamp-2 text-sm leading-5 text-gray-500">
               <RichContentText
@@ -290,39 +298,60 @@ function PostInsightsPage() {
             </p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            refetchInsights();
-            refetchActors();
-          }}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-800 hover:border-gray-300"
-          aria-label="Refresh insights"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${insightsFetching ? "animate-spin" : ""}`}
-          />
-        </button>
-      </div>
-
-      <div className="mb-4 flex flex-wrap gap-2">
-        {periods.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => setPeriod(item.key)}
-            className={`h-9 min-w-16 rounded-lg border px-4 text-sm font-bold ${
-              period === item.key
-                ? "border-[#F1C644] bg-[#F1C644] text-gray-950"
-                : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
-            }`}
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            to={webRoutes.singlePost.replace(":id", id)}
+            className="hidden h-10 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 sm:flex"
           >
-            {item.label}
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            View post
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              refetchInsights();
+              refetchActors();
+            }}
+            disabled={isRefreshing}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 disabled:cursor-wait disabled:opacity-60"
+            aria-label={isRefreshing ? "Refreshing insights" : "Refresh insights"}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
           </button>
-        ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-2">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-base font-bold text-gray-950">Performance overview</h2>
+          <p className="text-sm text-gray-500">Engagement during the selected period</p>
+        </div>
+        <div
+          className="flex w-fit items-center gap-1 rounded-lg bg-gray-100 p-1"
+          role="group"
+          aria-label="Insights period"
+        >
+          {periods.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setPeriod(item.key)}
+              aria-pressed={period === item.key}
+              className={`h-8 min-w-14 rounded-md px-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/40 ${
+                period === item.key
+                  ? "bg-primary-500 text-gray-950 shadow-sm"
+                  : "text-gray-500 hover:bg-white hover:text-gray-800"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 lg:grid-cols-4">
         <MetricCard
           icon={BarChart3}
           label="Engagements"
@@ -344,63 +373,104 @@ function PostInsightsPage() {
         />
       </div>
 
-      <div className="mt-3 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-600">
-        <Users className="h-4 w-4" />
-        {formatNumber(totals.unique_actors || 0)} engaged accounts
+      <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+        <Users className="h-4 w-4 text-gray-600" aria-hidden="true" />
+        <span className="font-semibold text-gray-800">
+          {formatNumber(totals.unique_actors || 0)} engaged accounts
+        </span>
+        <span className="hidden sm:inline">in this period</span>
       </div>
 
-      <div className="sticky top-0 z-10 mt-5 flex gap-2 overflow-x-auto border-b border-gray-200 bg-gray-50/95 py-2 backdrop-blur">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const selected = activeTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex h-10 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-bold ${
-                selected
-                  ? "border-[#F1C644] bg-[#FFFAB7] text-gray-950"
-                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {tab.label} {formatNumber(countForTab(totals, tab.key))}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-3 space-y-2">
-        {actorsLoading ? (
-          <div className="flex justify-center py-10">
-            <Spinner color="#F1C644" />
+      <div className="mt-7 overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-4 sm:px-5">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-gray-950">Engagement activity</h2>
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
+                {formatNumber(countForTab(totals, activeTab))}
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm text-gray-500">See who interacted with this post</p>
           </div>
-        ) : actors.length ? (
-          actors.map((actor) => <ActorRow key={actor.id} item={actor} />)
-        ) : (
-          <div className="rounded-lg border border-gray-200 bg-white px-4 py-12 text-center">
-            <BarChart3 className="mx-auto h-8 w-8 text-gray-400" />
-            <h2 className="mt-3 text-base font-bold text-gray-950">No activity yet</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              New likes, comments, and reposts will appear here.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {hasNextPage ? (
-        <div className="mt-4 flex justify-center">
-          <button
-            type="button"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-800 hover:border-gray-300 disabled:opacity-60"
+          <Link
+            to={webRoutes.singlePost.replace(":id", id)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 sm:hidden"
+            aria-label="View post"
           >
-            {isFetchingNextPage ? "Loading..." : "Load more"}
-          </button>
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          </Link>
         </div>
-      ) : null}
+
+        <div
+          className="flex gap-1 overflow-x-auto border-b border-gray-200 bg-gray-50 p-2 sm:px-4"
+          role="tablist"
+          aria-label="Engagement type"
+        >
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const selected = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/40 ${
+                  selected
+                    ? "bg-white text-gray-950 shadow-sm ring-1 ring-inset ring-gray-200"
+                    : "text-gray-500 hover:bg-white/70 hover:text-gray-800"
+                }`}
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                {tab.label}
+                <span className={selected ? "text-primary-800" : "text-gray-400"}>
+                  {formatNumber(countForTab(totals, tab.key))}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="divide-y divide-gray-100">
+          {actorsLoading ? (
+            <div className="space-y-1 p-3" aria-label="Loading engagement activity">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="flex animate-pulse items-center gap-3 px-1 py-3">
+                  <div className="h-12 w-12 rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-40 rounded bg-gray-200" />
+                    <div className="h-3 w-64 max-w-full rounded bg-gray-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : actors.length ? (
+            actors.map((actor) => <ActorRow key={actor.id} item={actor} />)
+          ) : (
+            <div className="px-4 py-12 text-center">
+              <BarChart3 className="mx-auto h-8 w-8 text-gray-400" aria-hidden="true" />
+              <h3 className="mt-3 text-base font-bold text-gray-950">No activity yet</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                New likes, comments, and reposts will appear here.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {hasNextPage ? (
+          <div className="flex justify-center border-t border-gray-100 p-4">
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500/40 disabled:cursor-wait disabled:opacity-60"
+            >
+              {isFetchingNextPage ? "Loading..." : "Load more activity"}
+            </button>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
