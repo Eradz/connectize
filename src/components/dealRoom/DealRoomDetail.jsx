@@ -14,7 +14,7 @@ import ActivityTimeline from './ActivityTimeline';
 import Modal from "../../components/ui/Modal";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyParticipants, EmptyMilestones, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, File, X, CloudUpload, RefreshCcw, UploadCloud, CalendarDays, LockOpen, Trash2, Trash } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, File, X, CloudUpload, RefreshCcw, UploadCloud, CalendarDays, LockOpen, Trash2, Trash, Clock3 } from "lucide-react";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
@@ -1524,19 +1524,22 @@ export default function DealRoomDetail() {
                         Your request is awaiting approval.
                       </p>
                       {/* The requester's own pending record */}
-                      <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/30 text-sm font-semibold text-dark">
-                          {(user?.full_name || user?.display_name || user?.email || "U")
-                            .charAt(0)
-                            .toUpperCase()}
-                        </span>
-                        <div className="text-left">
-                          <p className="text-sm font-medium text-gray-900">
-                            {user?.full_name || user?.display_name || user?.email || "You"}
-                          </p>
-                          <span className="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                            Request Pending
+                      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-soft">
+                        <div className="flex items-center gap-3.5">
+                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-800 ring-1 ring-inset ring-primary-200">
+                            {(user?.full_name || user?.display_name || user?.email || "U")
+                              .charAt(0)
+                              .toUpperCase()}
                           </span>
+                          <div className="min-w-0 flex-1 text-left">
+                            <p className="truncate text-sm font-semibold text-[#212529]">
+                              {user?.full_name || user?.display_name || user?.email || "You"}
+                            </p>
+                            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-primary-50 px-2.5 py-1 text-xs font-medium text-primary-800">
+                              <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                              Request Pending
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </>
