@@ -49,7 +49,7 @@ const toneByType = {
   likes: "text-rose-600 bg-rose-50 border-rose-100",
   comments: "text-blue-600 bg-blue-50 border-blue-100",
   reposts: "text-green-600 bg-green-50 border-green-100",
-  all: "text-primary-800 bg-primary-50 border-primary-200",
+  all: "text-gold bg-primary-50 border-primary-200",
 };
 
 const countForTab = (totals = {}, tab) => {
@@ -279,7 +279,7 @@ function PostInsightsPage() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-primary-800">
+          <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-gold">
             Analytics
           </p>
           <h1 className="text-xl font-bold text-gray-950 sm:text-2xl">Post insights</h1>
@@ -351,13 +351,7 @@ function PostInsightsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 lg:grid-cols-4">
-        <MetricCard
-          icon={BarChart3}
-          label="Engagements"
-          value={totals.engagements}
-          tone="all"
-        />
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 sm:grid-cols-3">
         <MetricCard icon={Heart} label="Likes" value={totals.likes} tone="likes" />
         <MetricCard
           icon={MessageCircle}
@@ -374,10 +368,11 @@ function PostInsightsPage() {
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
-        <Users className="h-4 w-4 text-gray-600" aria-hidden="true" />
-        <span className="font-semibold text-gray-800">
-          {formatNumber(totals.unique_actors || 0)} engaged accounts
+        <Users className="h-4 w-4 text-gold" aria-hidden="true" />
+        <span className="font-bold text-gold">
+          {formatNumber(totals.unique_actors || 0)}
         </span>
+        <span className="font-semibold text-gray-800">engaged accounts</span>
         <span className="hidden sm:inline">in this period</span>
       </div>
 
@@ -386,7 +381,7 @@ function PostInsightsPage() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-gray-950">Engagement activity</h2>
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
+              <span className="rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-gold">
                 {formatNumber(countForTab(totals, activeTab))}
               </span>
             </div>
@@ -422,9 +417,12 @@ function PostInsightsPage() {
                     : "text-gray-500 hover:bg-white/70 hover:text-gray-800"
                 }`}
               >
-                <Icon className="h-4 w-4" aria-hidden="true" />
+                <Icon
+                  className={`h-4 w-4 ${selected ? "text-gold" : ""}`}
+                  aria-hidden="true"
+                />
                 {tab.label}
-                <span className={selected ? "text-primary-800" : "text-gray-400"}>
+                <span className={selected ? "text-gold" : "text-gray-400"}>
                   {formatNumber(countForTab(totals, tab.key))}
                 </span>
               </button>
