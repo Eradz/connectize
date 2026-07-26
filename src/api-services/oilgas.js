@@ -1168,6 +1168,13 @@ export class KnowledgeForumPostService extends CrudService {
       method: "GET",
     });
   }
+
+  async getThread(postId) {
+    return makeApiRequest({
+      url: `${this.basePath}${postId}/thread/`,
+      method: "GET",
+    });
+  }
 }
 
 export class KnowledgeModerationService extends CrudService {

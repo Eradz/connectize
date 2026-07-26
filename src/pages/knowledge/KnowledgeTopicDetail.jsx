@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   MessageSquare,
   User,
@@ -17,7 +18,8 @@ import {
   Edit,
   Trash2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ExternalLink
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
 import { knowledgeForumTopicService, knowledgeForumPostService } from '../../api-services/oilgas';
@@ -28,14 +30,13 @@ import { useAuth } from '../../context/userContext';
 import { confirmDialog } from '../../lib/confirm.jsx';
 
 const KnowledgeTopicDetail = () => {
-  const { slug } = useParams();
+  const { slug, postId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const [topic, setTopic] = useState(null);
+  const [topicState, setTopic] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [postsLoading, setPostsLoading] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [submittingReply, setSubmittingReply] = useState(false);
@@ -51,68 +52,73 @@ const KnowledgeTopicDetail = () => {
 
   const pageSize = 20;
 
-  const isCreator = user?.id && topic?.author?.id === user.id;
-
-  useEffect(() => {
-    if (slug) {
-      loadTopic();
-      loadPosts();
-    }
-  }, [slug, currentPage]);
-
-  const loadTopic = async () => {
-    try {
+  const topicQuery = useQuery({
+    queryKey: ['knowledge', 'topic', slug],
+    queryFn: async () => {
       const response = await knowledgeForumTopicService.getById(slug);
-      const topicData = response?.data || response;
-      setTopic(topicData);
-      
-      // Initialize topic like state
-      setTopicLiked(topicData.is_liked || false);
-      setTopicLikes(topicData.likes_count || 0);
-      
-    } catch (error) {
-      console.error('Error loading topic:', error);
-      toast.error('Failed to load topic');
-      navigate(webRoutes.knowledgeForums);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response?.data || response;
+    },
+    enabled: Boolean(slug),
+    staleTime: 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
 
-  const loadPosts = async () => {
-    if (!slug) return;
-    
-    setPostsLoading(true);
-    try {
-      const params = {
+  const postsQuery = useQuery({
+    queryKey: ['knowledge', 'topic', slug, 'posts', currentPage],
+    queryFn: async () => {
+      const response = await knowledgeForumTopicService.getPosts(slug, {
         page: currentPage,
         page_size: pageSize,
         ordering: 'created_at'
-      };
-      
-      const response = await knowledgeForumTopicService.getPosts(slug, params);
-      const data = response?.data || response;
-      const postsData = data?.results || [];
-      
-      setPosts(postsData);
-      setTotalPosts(data?.total || 0);
-      
-      // Initialize liked posts from the backend data
-      const likedPostIds = new Set();
-      postsData.forEach(post => {
-        if (post.is_liked) {
-          likedPostIds.add(post.id);
-        }
       });
-      setLikedPosts(prev => new Set([...prev, ...likedPostIds]));
-      
-    } catch (error) {
-      console.error('Error loading posts:', error);
-      toast.error('Failed to load posts');
-    } finally {
-      setPostsLoading(false);
+      const data = response?.data || response;
+      return { results: data?.results || [], total: data?.total || 0 };
+    },
+    enabled: Boolean(slug),
+    staleTime: 45 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+
+  const threadQuery = useQuery({
+    queryKey: ['knowledge', 'forum-post', postId, 'thread'],
+    queryFn: async () => {
+      const response = await knowledgeForumPostService.getThread(postId);
+      return response?.data || response;
+    },
+    enabled: Boolean(postId),
+    staleTime: 45 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: 1,
+  });
+
+  const topic = topicState || topicQuery.data || null;
+  const loading = topicQuery.isLoading && !topic;
+  const postsLoading = postsQuery.isLoading && posts.length === 0;
+  const isCreator = user?.id && topic?.author?.id === user.id;
+
+  useEffect(() => {
+    if (!topicQuery.data) return;
+    setTopic(topicQuery.data);
+    setTopicLiked(topicQuery.data.is_liked || false);
+    setTopicLikes(topicQuery.data.likes_count || 0);
+  }, [topicQuery.data]);
+
+  useEffect(() => {
+    if (!postsQuery.data) return;
+    setPosts(postsQuery.data.results);
+    setTotalPosts(postsQuery.data.total);
+    const likedPostIds = postsQuery.data.results.filter(post => post.is_liked).map(post => post.id);
+    setLikedPosts(previous => new Set([...previous, ...likedPostIds]));
+  }, [postsQuery.data]);
+
+  useEffect(() => {
+    if (topicQuery.isError) {
+      toast.error('Failed to load topic');
+      navigate(webRoutes.knowledgeForums);
     }
-  };
+  }, [navigate, topicQuery.isError]);
 
   const handleDelete = async () => {
     const confirmed = await confirmDialog({
@@ -174,7 +180,17 @@ const KnowledgeTopicDetail = () => {
       setReplyContent('');
       setShowReplyForm(false);
       setReplyingToPost(null);
-      loadPosts(); // Reload posts to show the new reply
+      await queryClient.invalidateQueries({
+        queryKey: ['knowledge', 'topic', slug],
+        exact: true,
+      });
+      await postsQuery.refetch();
+      if (postId) {
+        await queryClient.invalidateQueries({
+          queryKey: ['knowledge', 'forum-post', postId],
+          exact: true,
+        });
+      }
     } catch (error) {
       console.error('Error posting reply:', error);
       toast.error('Failed to post reply');
@@ -242,8 +258,15 @@ const KnowledgeTopicDetail = () => {
 
   const loadNestedReplies = async (postId) => {
     try {
-      const response = await knowledgeForumPostService.getReplies(postId);
-      const replies = response?.data || response || [];
+      const replies = await queryClient.fetchQuery({
+        queryKey: ['knowledge', 'forum-post', postId, 'replies'],
+        queryFn: async () => {
+          const response = await knowledgeForumPostService.getReplies(postId);
+          return response?.data || response || [];
+        },
+        staleTime: 45 * 1000,
+        gcTime: 10 * 60 * 1000,
+      });
       
       setNestedReplies(prev => ({
         ...prev,
@@ -277,6 +300,13 @@ const KnowledgeTopicDetail = () => {
       }
     }
     setExpandedReplies(newExpanded);
+  };
+
+  const replyUrl = (replyId) => `/knowledge/topics/${slug}/replies/${replyId}`;
+
+  const openReply = (replyId) => {
+    navigate(replyUrl(replyId));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const formatDate = (dateString) => {
@@ -474,6 +504,131 @@ const KnowledgeTopicDetail = () => {
           </div>
         </div>
 
+        {postId && (
+          <section className="mb-6 rounded-xl border border-light_grey bg-white shadow-sm" aria-labelledby="selected-reply-heading">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-light_grey px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-custom_grey">Reply thread</p>
+                <h2 id="selected-reply-heading" className="mt-1 text-lg font-semibold text-dark">
+                  Selected conversation
+                </h2>
+              </div>
+              <Link
+                to={`/knowledge/topics/${slug}`}
+                className="inline-flex min-h-10 items-center gap-2 rounded-full border border-light_grey px-4 text-sm font-medium text-dark hover:border-gold hover:bg-background"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                All conversations
+              </Link>
+            </div>
+
+            {threadQuery.isLoading ? (
+              <div className="animate-pulse space-y-4 p-5">
+                <div className="h-14 rounded-lg bg-gray-100" />
+                <div className="h-40 rounded-xl bg-gray-100" />
+                <div className="h-20 rounded-lg bg-gray-100" />
+              </div>
+            ) : threadQuery.isError || !threadQuery.data ? (
+              <div className="p-6 text-center">
+                <MessageSquare className="mx-auto mb-3 h-10 w-10 text-custom_grey" />
+                <p className="font-medium text-dark">This reply is unavailable.</p>
+                <p className="mt-1 text-sm text-custom_grey">It may have been removed or you may not have access.</p>
+              </div>
+            ) : (
+              <div className="p-5">
+                {threadQuery.data.ancestors?.length > 0 && (
+                  <div className="mb-5 space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-custom_grey">Conversation context</p>
+                    {threadQuery.data.ancestors.map((ancestor) => (
+                      <button
+                        key={ancestor.id}
+                        type="button"
+                        onClick={() => openReply(ancestor.id)}
+                        className="flex w-full items-start gap-3 rounded-lg border border-light_grey bg-background p-3 text-left hover:border-gold"
+                      >
+                        <span className="mt-1 h-8 w-1 shrink-0 rounded-full bg-gold" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold text-dark">
+                            {`${ancestor.author?.first_name || ''} ${ancestor.author?.last_name || ''}`.trim() || 'Connectize member'}
+                          </span>
+                          <span className="mt-1 block truncate text-sm text-custom_grey">{ancestor.content}</span>
+                        </span>
+                        <ChevronRight className="mt-2 h-4 w-4 shrink-0 text-custom_grey" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <article
+                  id={`reply-${threadQuery.data.post.id}`}
+                  className="scroll-mt-24 overflow-hidden rounded-xl border border-gold bg-white"
+                >
+                  <div className="flex">
+                    <div className="w-1.5 shrink-0 bg-gold" />
+                    <div className="min-w-0 flex-1 p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h3 className="font-semibold text-dark">
+                            {`${threadQuery.data.post.author?.first_name || ''} ${threadQuery.data.post.author?.last_name || ''}`.trim() || 'Connectize member'}
+                          </h3>
+                          <p className="mt-1 text-sm text-custom_grey">{formatDate(threadQuery.data.post.created_at)}</p>
+                        </div>
+                        <a
+                          href={replyUrl(threadQuery.data.post.id)}
+                          aria-label="Permanent link to this reply"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-custom_grey hover:bg-background hover:text-dark"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                      <p className="mt-4 whitespace-pre-wrap text-dark">{threadQuery.data.post.content}</p>
+                      {topic.status !== 'locked' && (
+                        <button
+                          type="button"
+                          onClick={() => handleReplyToPost(threadQuery.data.post)}
+                          className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full bg-gold px-4 text-sm font-semibold text-dark hover:bg-custom_yellow"
+                        >
+                          <Reply className="h-4 w-4" />
+                          Reply here
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+
+                <div className="mt-5">
+                  <h3 className="mb-3 font-semibold text-dark">
+                    Direct responses ({threadQuery.data.post.replies_count || 0})
+                  </h3>
+                  {threadQuery.data.replies?.length ? (
+                    <div className="space-y-2">
+                      {threadQuery.data.replies.map((reply) => (
+                        <button
+                          key={reply.id}
+                          type="button"
+                          onClick={() => openReply(reply.id)}
+                          className="flex w-full items-center gap-3 rounded-lg border border-light_grey p-4 text-left hover:border-gold hover:bg-background"
+                        >
+                          <MessageSquare className="h-5 w-5 shrink-0 text-gold" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-dark">
+                              {`${reply.author?.first_name || ''} ${reply.author?.last_name || ''}`.trim() || 'Connectize member'}
+                            </span>
+                            <span className="mt-1 block truncate text-sm text-custom_grey">{reply.content}</span>
+                          </span>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-custom_grey" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="rounded-lg bg-background p-4 text-sm text-custom_grey">No direct responses yet.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Reply Form */}
         {showReplyForm && (
           <div className="bg-white rounded-lg shadow-sm border mb-6">
@@ -537,9 +692,18 @@ const KnowledgeTopicDetail = () => {
           </div>
           
           {postsLoading ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Loading replies...</p>
+            <div className="animate-pulse divide-y divide-light_grey" aria-label="Loading conversations">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="flex gap-4 p-6">
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 w-1/3 rounded bg-gray-200" />
+                    <div className="h-3 w-1/4 rounded bg-gray-100" />
+                    <div className="h-4 w-full rounded bg-gray-100" />
+                    <div className="h-4 w-4/5 rounded bg-gray-100" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : posts.length === 0 ? (
             <div className="p-8 text-center">
@@ -557,7 +721,11 @@ const KnowledgeTopicDetail = () => {
           ) : (
             <div className="divide-y divide-gray-200">
               {posts.map((post, index) => (
-                <div key={post.id} className="p-6">
+                <div
+                  key={post.id}
+                  id={`reply-${post.id}`}
+                  className={`scroll-mt-24 p-6 ${postId === String(post.id) ? 'border-l-4 border-gold bg-gold/5' : ''}`}
+                >
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
                       <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
@@ -572,9 +740,15 @@ const KnowledgeTopicDetail = () => {
                           </h4>
                           <p className="text-sm text-gray-500">{formatDate(post.created_at)}</p>
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <button
+                          type="button"
+                          onClick={() => openReply(post.id)}
+                          className="inline-flex min-h-10 items-center gap-1 rounded-full px-3 text-sm text-custom_grey hover:bg-background hover:text-dark"
+                          aria-label={`Open reply ${index + 1}`}
+                        >
                           #{index + 1}
-                        </div>
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                       <div className="prose max-w-none">
                         <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
@@ -622,7 +796,11 @@ const KnowledgeTopicDetail = () => {
                       {expandedReplies.has(post.id) && nestedReplies[post.id] && (
                         <div className="mt-4 ml-6 border-l-2 border-gray-200 pl-6 space-y-4">
                           {nestedReplies[post.id].map((reply) => (
-                            <div key={reply.id} className="bg-gray-50 rounded-lg p-4">
+                            <div
+                              key={reply.id}
+                              id={`reply-${reply.id}`}
+                              className={`scroll-mt-24 rounded-lg border p-4 ${postId === String(reply.id) ? 'border-gold bg-gold/5' : 'border-transparent bg-background'}`}
+                            >
                               <div className="flex items-start space-x-3">
                                 <div className="flex-shrink-0">
                                   <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
@@ -630,11 +808,19 @@ const KnowledgeTopicDetail = () => {
                                   </div>
                                 </div>
                                 <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-2">
+                                  <div className="mb-2 flex items-center gap-2">
                                     <h5 className="text-sm font-medium text-gray-900">
                                       {reply.author?.first_name} {reply.author?.last_name}
                                     </h5>
                                     <span className="text-xs text-gray-500">{formatDate(reply.created_at)}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => openReply(reply.id)}
+                                      className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full text-custom_grey hover:bg-white hover:text-dark"
+                                      aria-label="Open reply thread"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                    </button>
                                   </div>
                                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{reply.content}</p>
                                   <div className="flex items-center space-x-3 mt-2">

@@ -121,6 +121,7 @@ const webRoutes = {
   knowledgeForumMembers: "/knowledge/forums/:slug/members",
   knowledgeTopics: "/knowledge/topics",
   knowledgeForumTopicDetail: "/knowledge/topics/:slug",
+  knowledgeForumReplyDetail: "/knowledge/topics/:slug/replies/:postId",
   knowledgeForumTopicCreate: "/knowledge/forums/:forumSlug/topics/create",
   knowledgeForumTopicEdit: "/knowledge/topics/:slug/edit",
   knowledgeCategories: "/knowledge/categories",
