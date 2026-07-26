@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Link, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 
 // Enhanced API Helper (similar to original makeApiRequest)
 const makeApiRequest = async (endpoint, options = {}) => {
@@ -358,7 +359,7 @@ const AdminDashboardStep7 = () => {
     <div style={{ padding: '1.5rem' }}>
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-          Welcome back, {user?.username}!
+          Welcome back, {getUserDisplayName(user)}!
         </h1>
         <p style={{ color: '#6b7280' }}>
           Here's what's happening with your platform today.
@@ -454,7 +455,7 @@ const AdminDashboardStep7 = () => {
                   borderBottom: '1px solid #f3f4f6'
                 }}>
                   <div>
-                    <p style={{ fontWeight: '500' }}>{user.username}</p>
+                    <p style={{ fontWeight: '500' }}>{getUserDisplayName(user)}</p>
                     <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{user.email}</p>
                   </div>
                   <span style={{
@@ -588,7 +589,7 @@ const AdminUsersStep7 = () => {
               {filteredUsers.map((user, index) => (
                 <tr key={user.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                   <td style={{ padding: '0.75rem' }}>{user.id}</td>
-                  <td style={{ padding: '0.75rem' }}>{user.username}</td>
+                  <td style={{ padding: '0.75rem' }}>{getUserHandle(user) || 'user'}</td>
                   <td style={{ padding: '0.75rem' }}>{user.email}</td>
                   <td style={{ padding: '0.75rem' }}>
                     <span style={{
@@ -680,7 +681,7 @@ const AdminWithApiHelpers = () => {
           <div style={{ borderTop: '1px solid #374151', paddingTop: '1rem' }}>
             <div style={{ marginBottom: '1rem' }}>
               <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>Logged in as:</p>
-              <p style={{ fontWeight: '500' }}>{user?.username}</p>
+              <p style={{ fontWeight: '500' }}>{getUserDisplayName(user)}</p>
             </div>
             <button
               onClick={logout}

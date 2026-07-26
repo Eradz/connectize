@@ -1,4 +1,5 @@
 import { Avatar, Badge } from "@chakra-ui/react";
+import { getUserDisplayName, getUserHandle } from "../../../lib/userDisplay";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { getAssociatedPeopleForCompany } from "../../../api-services/companies";
@@ -94,11 +95,7 @@ export function SuggestionList({
         ) : (
           users?.map((user) => {
             const {
-              first_name,
-              last_name,
-              full_name,
               avatar,
-              username,
               email,
               id,
               connection_type,
@@ -108,7 +105,8 @@ export function SuggestionList({
             } = user;
 
             // email is null for privacy now; prefer the @handle
-            const hashtag = username ? `@${username}` : email;
+            const handle = getUserHandle(user);
+            const hashtag = handle ? `@${handle}` : email;
 
             return (
               <SuggestionListItem
@@ -117,7 +115,7 @@ export function SuggestionList({
                 hashtag={hashtag}
                 user={user}
                 id={id}
-                full_name={full_name || `${first_name || ''} ${last_name || ''}`.trim()}
+                full_name={getUserDisplayName(user)}
                 connectionType={connection_type}
                 isMutual={is_mutual}
                 suggestionReasons={suggestion_reasons}

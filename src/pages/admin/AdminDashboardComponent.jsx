@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 import { useAuth, useAdminData } from './ComprehensiveAdmin';
 import { 
   UsersIcon, 
@@ -335,13 +336,14 @@ const AdminDashboard = () => {
           </div>
           <div className="space-y-3">
             {(users || []).slice(0, 5).map((u) => {
-              const displayName = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username || u.email || 'Unknown user';
-              const userSuffix = u.username ? ` (${u.username})` : '';
+              const displayName = getUserDisplayName(u);
+              const handle = getUserHandle(u);
+              const userSuffix = handle ? ` (@${handle})` : '';
               return (
                 <Link key={u.id} to={`/admin/users/${u.id}`} className="flex items-center space-x-3 hover:bg-gray-50/50 rounded-lg p-3 group transition-colors" aria-label={`View ${displayName}`}>
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-soft">
                     <span className="text-white text-sm font-bold">
-                      {u.first_name?.[0] || u.username?.[0] || 'U'}
+                      {displayName[0] || 'U'}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">

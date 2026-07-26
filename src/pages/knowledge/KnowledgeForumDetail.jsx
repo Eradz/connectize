@@ -31,6 +31,7 @@ import { searchUsers } from '../../api-services/users';
 import { toast } from 'sonner';
 import MoreOptions from '../../components/MoreOptions';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import { getUserDisplayName } from '../../lib/userDisplay';
 
 const KnowledgeForumDetail = () => {
   const { slug } = useParams();
@@ -503,7 +504,7 @@ const KnowledgeForumDetail = () => {
                         <div key={user.id} className="px-4 py-3 flex items-center justify-between gap-3">
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-gray-900 truncate">
-                              {[user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || 'Connectize user'}
+                              {getUserDisplayName(user)}
                             </div>
                             <div className="text-xs text-gray-500 truncate">{user.email}</div>
                           </div>

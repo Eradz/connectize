@@ -9,6 +9,12 @@ import { Textarea } from '../../components/ui/Input';
 import { getMessagesForUser as getMessages, markMessageAsRead, bulkDeleteMessages, updateMessage } from '../../api-services/messaging';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import { getUserDisplayName } from '../../lib/userDisplay';
+
+const getMessageUserName = (user, fallbackName, fallback = 'Unknown') => {
+  if (user) return getUserDisplayName({ ...user, name: fallbackName });
+  return fallbackName || fallback;
+};
 
 const AdminMessagesManagement = () => {
   const [messages, setMessages] = useState([]);
@@ -84,15 +90,12 @@ const AdminMessagesManagement = () => {
             !message.is_read ? 'bg-blue-100' : 'bg-gray-100'
           }`}>
             <span className="text-sm font-medium">
-              {message.sender?.first_name?.[0] || message.sender?.username?.[0] || message.sender_name?.[0] || '?'}
+              {getMessageUserName(message.sender, message.sender_name, '?')[0]}
             </span>
           </div>
           <div>
             <div className={`font-medium ${!message.is_read ? 'text-gray-900' : 'text-gray-600'}`}>
-              {message.sender?.first_name && message.sender?.last_name 
-                ? `${message.sender.first_name} ${message.sender.last_name}`
-                : message.sender?.username || message.sender?.email || message.sender_name || 'Unknown'
-              }
+              {getMessageUserName(message.sender, message.sender_name)}
             </div>
             <div className="text-sm text-gray-500">
               {message.sender?.email || message.sender_email || ''}
@@ -113,10 +116,7 @@ const AdminMessagesManagement = () => {
       render: (message) => (
         <div>
           <div className="font-medium text-gray-900">
-            {message.recipient?.first_name && message.recipient?.last_name 
-              ? `${message.recipient.first_name} ${message.recipient.last_name}`
-              : message.recipient?.username || message.recipient?.email || message.recipient_name || 'Unknown'
-            }
+            {getMessageUserName(message.recipient, message.recipient_name)}
           </div>
           <div className="text-sm text-gray-500">
             {message.recipient?.email || message.recipient_email || ''}
@@ -367,9 +367,7 @@ const AdminMessagesManagement = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
                 <div className="text-sm text-gray-900">
-                  {selectedMessage.sender?.first_name && selectedMessage.sender?.last_name
-                    ? `${selectedMessage.sender.first_name} ${selectedMessage.sender.last_name}`
-                    : selectedMessage.sender?.username || selectedMessage.sender_name || 'Unknown'}
+                  {getMessageUserName(selectedMessage.sender, selectedMessage.sender_name)}
                 </div>
                 <div className="text-xs text-gray-500">
                   {selectedMessage.sender?.email || selectedMessage.sender_email || ''}
@@ -378,9 +376,7 @@ const AdminMessagesManagement = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
                 <div className="text-sm text-gray-900">
-                  {selectedMessage.recipient?.first_name && selectedMessage.recipient?.last_name
-                    ? `${selectedMessage.recipient.first_name} ${selectedMessage.recipient.last_name}`
-                    : selectedMessage.recipient?.username || selectedMessage.recipient_name || 'Unknown'}
+                  {getMessageUserName(selectedMessage.recipient, selectedMessage.recipient_name)}
                 </div>
                 <div className="text-xs text-gray-500">
                   {selectedMessage.recipient?.email || selectedMessage.recipient_email || ''}

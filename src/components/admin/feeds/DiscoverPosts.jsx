@@ -71,6 +71,7 @@ import LexicalCommentEditor from "../../comments/LexicalCommentEditor";
 import CommentAsSelector from "../../comments/CommentAsSelector";
 import { webRoutes } from "../../../lib/webRoutes";
 import EditPostModal from "./EditPostModal";
+import { getUserDisplayName, getUserHandle } from "../../../lib/userDisplay";
 
 // Large starting index so Virtuoso can absorb prepended (newly polled) posts
 // by decrementing firstItemIndex without the value ever going negative.
@@ -897,7 +898,7 @@ export const DiscoverPostItem = ({
         <section className="flex xs:items-center gap-2">
           <Avatar
             name={
-              activePost?.company?.company_name || activePost?.user?.first_name
+              activePost?.company?.company_name || getUserDisplayName(activePost?.user)
             }
             size="sm"
             src={
@@ -912,10 +913,7 @@ export const DiscoverPostItem = ({
             <CompanyName
               name={
                 activePost?.company?.company_name ||
-                activePost?.user?.full_name ||
-                `${activePost?.user?.first_name || ""} ${
-                  activePost?.user?.last_name || ""
-                }`.trim()
+                getUserDisplayName(activePost?.user)
               }
               verified={
                 activePost?.company?.verified ??
@@ -929,7 +927,7 @@ export const DiscoverPostItem = ({
             <small className="text-gray-400 lowercase shrink-0">
               {activePost?.user && (
                 <Link to={`/co/${activePost?.user?.id}`}>
-                  @{activePost?.user?.first_name}{" "}
+                  @{getUserHandle(activePost.user) || "user"}{" "}
                 </Link>
               )}
               • <TimeAgo time={activePost?.date_created} />

@@ -19,6 +19,7 @@ import { largeFileText, unSupportedText } from "../../components/admin/listing/n
 import SEO from "../../components/SEO";
 import { getSEOConfig } from "../../lib/seoConfig";
 import { appendMentionIdsToFormData, extractMentionIdsFromText } from "../../utils/mentionPayload";
+import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 
 const imageTypes = [
   "image/jpeg",
@@ -362,14 +363,14 @@ function CreatePostPage() {
             <div className="flex items-center gap-4">
               <img
                 src={currentUser?.avatar || "/default-avatar.png"}
-                alt={`${currentUser?.first_name} ${currentUser?.last_name}`}
+                alt={getUserDisplayName(currentUser)}
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div>
                 <p className="font-semibold text-gray-900">
-                  {currentUser?.first_name} {currentUser?.last_name}
+                  {getUserDisplayName(currentUser)}
                 </p>
-                <p className="text-sm text-gray-500">@{currentUser?.username || "user"}</p>
+                <p className="text-sm text-gray-500">@{getUserHandle(currentUser) || "user"}</p>
               </div>
             </div>
           </div>

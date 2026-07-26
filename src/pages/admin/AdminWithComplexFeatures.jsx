@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, useMemo, useCallback } from 'react';
 import { Link, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { getUserDisplayName, getUserHandle } from '../../lib/userDisplay';
 
 // Simulate external libraries with complex patterns
 const createFormValidator = (rules) => {
@@ -36,7 +37,8 @@ const DataProcessor = {
   transformUserData: (users) => {
     return users.map(user => ({
       ...user,
-      displayName: `${user.username} (${user.email})`,
+      displayName: getUserDisplayName(user),
+      displayHandle: getUserHandle(user),
       statusColor: user.is_active ? '#10b981' : '#ef4444',
       lastActive: new Date().toLocaleDateString(),
       permissions: user.is_staff ? ['admin', 'write', 'read'] : ['read']
@@ -552,7 +554,7 @@ const AdminDashboardStep8 = () => {
     <div style={{ padding: '1.5rem' }}>
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-          Welcome back, {user?.username}!
+          Welcome back, {getUserDisplayName(user)}!
         </h1>
         <p style={{ color: '#6b7280' }}>
           Enterprise admin dashboard with advanced features
@@ -961,7 +963,7 @@ const AdminUsersStep8 = () => {
                   <td style={{ padding: '0.75rem' }}>
                     <div>
                       <div style={{ fontWeight: '500' }}>{user.displayName}</div>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>@{user.username}</div>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>@{user.displayHandle || 'user'}</div>
                     </div>
                   </td>
                   <td style={{ padding: '0.75rem' }}>{user.email}</td>
@@ -1087,7 +1089,7 @@ const AdminWithComplexFeatures = () => {
         <div style={{ borderTop: '1px solid #374151', paddingTop: '1rem' }}>
           <div style={{ marginBottom: '1rem' }}>
             <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>Logged in as:</p>
-            <p style={{ fontWeight: '500' }}>{user?.username}</p>
+            <p style={{ fontWeight: '500' }}>{getUserDisplayName(user)}</p>
             <p style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{user?.email}</p>
           </div>
           <button

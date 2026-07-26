@@ -34,11 +34,42 @@ export function deriveNameFromEmail(email) {
  */
 export function deriveUsernameFromEmail(email) {
   const local = String(email || "").split("@")[0];
-  const base = local
+  let base = cleanHandle(local);
+  if (!base || GENERIC_EMAIL_LOCALS.has(base)) {
+    const domain = String(email || "").split("@")[1] || "";
+    base = cleanHandle(domain.split(".")[0]) || base;
+  }
+  return base || "user";
+}
+
+const GENERIC_EMAIL_LOCALS = new Set([
+  "info", "admin", "administrator", "sales", "contact", "contactus",
+  "hello", "hi", "support", "team", "office", "mail", "email", "webmail",
+  "noreply", "no-reply", "donotreply", "marketing", "hr", "careers",
+  "career", "jobs", "help", "helpdesk", "service", "services", "enquiries",
+  "enquiry", "inquiries", "inquiry", "accounts", "account", "billing",
+  "finance", "general", "company", "business",
+]);
+
+const cleanHandle = (value) =>
+  String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9._-]/g, "")
     .replace(/^[._-]+|[._-]+$/g, "");
-  return base || "user";
+
+/** Legacy accounts were often assigned `info`, `info2`, `info_3`, etc. */
+export const isPlaceholderUsername = (value) =>
+  /^info(?:[._-]?\d+)?$/i.test(String(value || "").trim());
+
+/** Build the same compact, lowercase name-based handle used by the backend. */
+export function deriveUsernameFromName(user) {
+  if (!user) return "";
+  const explicitName = `${user.first_name || ""} ${user.last_name || ""}`.trim();
+  const name =
+    explicitName || user.full_name || user.display_name || user.name || user.user_name || "";
+  return cleanHandle(String(name).replace(/[._-]/g, ""));
 }
 
 const isEmailLike = (value) => String(value || "").includes("@");
@@ -62,10 +93,19 @@ export function getUserDisplayName(user) {
   const displayName = String(user.display_name || "").trim();
   if (displayName && !isEmailLike(displayName)) return displayName;
 
+  const alternateName = String(user.name || user.user_name || "").trim();
+  if (
+    alternateName &&
+    !isEmailLike(alternateName) &&
+    !isPlaceholderUsername(alternateName)
+  ) {
+    return alternateName;
+  }
+
   if (user.email) return deriveNameFromEmail(user.email);
 
   const username = String(user.username || "").trim();
-  if (username) {
+  if (username && !isPlaceholderUsername(username)) {
     return isEmailLike(username) ? deriveNameFromEmail(username) : username;
   }
 
@@ -74,13 +114,24 @@ export function getUserDisplayName(user) {
 
 /**
  * Resolve the user's handle/username, never falling back to the raw email.
- * Order: backend username -> username derived from email.
+ * Order: valid backend username -> full-name handle for legacy placeholders ->
+ * username derived from email.
  */
 export function getUserHandle(user) {
   if (!user) return "";
 
   const username = String(user.username || "").trim();
-  if (username && !isEmailLike(username)) return username;
+  if (username && user.username_customized && !isEmailLike(username)) {
+    return username;
+  }
+  if (username && !isEmailLike(username) && !isPlaceholderUsername(username)) {
+    return username;
+  }
+
+  if (!username || isPlaceholderUsername(username)) {
+    const nameHandle = deriveUsernameFromName(user);
+    if (nameHandle) return nameHandle;
+  }
 
   if (user.email) return deriveUsernameFromEmail(user.email);
 

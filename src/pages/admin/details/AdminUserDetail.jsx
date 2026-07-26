@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAdminData } from '../ComprehensiveAdmin';
+import { getUserDisplayName } from '../../../lib/userDisplay';
 
 const AdminUserDetail = () => {
   const { id } = useParams();
@@ -19,7 +20,7 @@ const AdminUserDetail = () => {
   if (loading.userDetail && !user) return <div className="p-6">Loading user...</div>;
   if (errors.userDetail && !user) return <div className="p-6 text-red-600">Failed to load user.</div>;
 
-  const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || user?.username || user?.email;
+  const displayName = getUserDisplayName(user);
 
   return (
     <div className="space-y-6">

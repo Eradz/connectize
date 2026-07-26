@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAdminData, useAuth } from '../ComprehensiveAdmin';
+import { getUserDisplayName } from '../../../lib/userDisplay';
 
 const AdminNotificationDetail = () => {
   const { id } = useParams();
@@ -193,7 +194,7 @@ const AdminNotificationDetail = () => {
                   <p className="text-sm text-gray-500 mb-1">Recipient</p>
                   {recipient ? (
                     <Link to={`/admin/users/${recipient.id}`} className="text-blue-600 hover:underline">
-                      {recipient.first_name || recipient.username || `User #${recipient.id}`}
+                      {getUserDisplayName(recipient) || `User #${recipient.id}`}
                     </Link>
                   ) : (
                     <span className="text-gray-700">{typeof notification.user === 'number' ? `User #${notification.user}` : '—'}</span>
@@ -203,7 +204,7 @@ const AdminNotificationDetail = () => {
                   <p className="text-sm text-gray-500 mb-1">Sender</p>
                   {sender ? (
                     <Link to={`/admin/users/${sender.id}`} className="text-blue-600 hover:underline">
-                      {sender.first_name || sender.username || `User #${sender.id}`}
+                      {getUserDisplayName(sender) || `User #${sender.id}`}
                     </Link>
                   ) : (
                     <span className="text-gray-700">{typeof notification.sender === 'number' ? `User #${notification.sender}` : '—'}</span>

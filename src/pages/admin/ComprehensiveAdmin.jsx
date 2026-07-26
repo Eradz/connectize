@@ -42,6 +42,7 @@ import AdminKnowledge from './knowledge/AdminKnowledge';
 import AdminSubscriptions from './subscriptions/AdminSubscriptions';
 import AdminAuth from './AdminAuth';
 import { getSession, setSession, removeSession } from '../../lib/session';
+import { getUserDisplayName } from '../../lib/userDisplay';
 
 const ADMIN_SESSION_PERSIST_DAYS = 730;
 const ADMIN_SESSION_TEMP_DAYS = 1 / 3;
@@ -1181,13 +1182,13 @@ const AdminLayout = ({ children }) => {
               >
                 <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-medium">
                   <span className="text-white text-sm font-bold">
-                    {user?.first_name?.[0] || user?.username?.[0] || 'A'}
+                    {getUserDisplayName(user)[0] || 'A'}
                   </span>
                 </div>
                 {sidebarOpen && (
                   <div className="ml-3 flex-1">
                     <p className="text-sm font-medium text-gray-900">
-                      {user?.first_name} {user?.last_name}
+                      {getUserDisplayName(user)}
                     </p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
@@ -1231,7 +1232,7 @@ const AdminLayout = ({ children }) => {
                   Admin Dashboard
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Welcome back, {user?.first_name || user?.username}
+                  Welcome back, {getUserDisplayName(user)}
                 </p>
               </div>
               
@@ -1301,7 +1302,7 @@ const AdminProfile = () => {
   return (
     <div className="space-y-2">
       <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
-      <p className="text-gray-600">Logged in as {user?.email || user?.username}</p>
+      <p className="text-gray-600">Logged in as {user?.email || getUserDisplayName(user)}</p>
     </div>
   );
 };

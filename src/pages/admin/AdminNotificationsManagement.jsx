@@ -8,6 +8,17 @@ import { NotificationIcon, EmailIcon, SettingsIcon, CalendarIcon } from "../../c
 import { getNotificationsForUser as getNotifications, markNotificationAsRead, deleteNotification, createNotification } from '../../api-services/notifications';
 import { makeApiRequest } from '../../lib/helpers';
 import { confirmDialog } from '../../lib/confirm.jsx';
+import { getUserDisplayName } from '../../lib/userDisplay';
+
+const getNotificationRecipientName = (notification) => {
+  if (notification.recipient) {
+    return getUserDisplayName({
+      ...notification.recipient,
+      name: notification.recipient_name,
+    });
+  }
+  return notification.recipient_name || 'All Users';
+};
 
 const AdminNotificationsManagement = () => {
   const [notifications, setNotifications] = useState([]);
@@ -92,10 +103,7 @@ const AdminNotificationsManagement = () => {
       render: (notification) => (
         <div>
           <div className="font-medium text-gray-900">
-            {notification.recipient?.first_name && notification.recipient?.last_name 
-              ? `${notification.recipient.first_name} ${notification.recipient.last_name}`
-              : notification.recipient?.username || notification.recipient_name || 'All Users'
-            }
+            {getNotificationRecipientName(notification)}
           </div>
           <div className="text-sm text-gray-500">
             {notification.recipient?.email || notification.recipient_email || ''}
@@ -497,10 +505,7 @@ const AdminNotificationsManagement = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Recipient</label>
               <div className="text-sm text-gray-900">
-                {selectedNotification.recipient?.first_name && selectedNotification.recipient?.last_name 
-                  ? `${selectedNotification.recipient.first_name} ${selectedNotification.recipient.last_name}`
-                  : selectedNotification.recipient?.username || selectedNotification.recipient_name || 'All Users'
-                }
+                {getNotificationRecipientName(selectedNotification)}
               </div>
               <div className="text-xs text-gray-500">
                 {selectedNotification.recipient?.email || selectedNotification.recipient_email || ''}
