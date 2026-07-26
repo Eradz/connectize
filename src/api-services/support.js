@@ -7,7 +7,8 @@ export const sendSupportMessage = async ({email,full_name,message,subject,images
       method: "POST",
       data: images? {email,full_name,message,subject,images}: {email,full_name,message,subject},
       resetForm,
-      contentType: "multipart/form-data",
+      contentType: images ? "multipart/form-data" : "application/json",
+      type: "public",
     });
   
     if(result?.id){

@@ -1,6 +1,7 @@
 import { editPost } from "../api-services/posts";
 
 const webRoutes = {
+  accountDeletion: "/account-deletion",
   acceptRepresentation: "/co/representatives/accept",
   address: "/address",
   aiDashboard: "/ai",

@@ -72,6 +72,7 @@ const SettingsPage = lazy(() => import("./pages/settings"));
 const EnterpriseSSOSetupPage = lazy(() => import("./pages/settings/EnterpriseSSOSetup"));
 const PrivacyPolicy = lazy(() => import("./pages/terms&policies/policy"));
 const TermsAndConditions = lazy(() => import("./pages/terms&policies/terms"));
+const AccountDeletionPage = lazy(() => import("./pages/account-deletion"));
 
 // Admin
 const ComprehensiveAdmin = lazy(() => import("./pages/admin/ComprehensiveAdmin"));
@@ -627,6 +628,7 @@ const removeLeadingSlash = (path) => {
   {/* Keep original terms routes for compatibility */}
   <Route path={webRoutes.termsAndConditions} element={<TermsAndConditions />} />
   <Route path={webRoutes.privacyPolicy} element={<PrivacyPolicy />} />
+  <Route path={webRoutes.accountDeletion} element={<AccountDeletionPage />} />
         
   {/* Legacy alias for old /platform/* paths */}
   <Route path="/platform/*" element={<LegacyPlatformRedirect />} />

@@ -21,6 +21,7 @@ const publicRoutes = [
   "/logistics",
   "/logistics/requests",
   "/support",
+  "/account-deletion",
   "/privacy-policy",
   "/terms-and-conditions",
 ];

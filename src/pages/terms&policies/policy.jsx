@@ -1,4 +1,6 @@
 import { createSEO } from "../../components/SEO";
+import { Link } from "react-router-dom";
+import { webRoutes } from "../../lib/webRoutes";
 import privacyPolicyHtml from "./privacy-policy.html?raw";
 import "./privacy-policy.css";
 
@@ -22,6 +24,18 @@ const PrivacyPolicy = () => (
     <h1 id="privacy-policy-title" className="sr-only">
       Connectize Privacy Policy
     </h1>
+    <aside className="mx-auto mt-6 max-w-4xl rounded-xl border border-light_grey bg-white p-5 shadow-soft">
+      <h2 className="text-lg font-semibold text-dark">Account and data deletion</h2>
+      <p className="mt-2 text-sm leading-6 text-custom_grey">
+        You can request permanent deletion of your Connectize account and its associated data without signing in.
+      </p>
+      <Link
+        to={webRoutes.accountDeletion}
+        className="mt-4 inline-flex rounded-lg bg-gold px-4 py-2.5 text-sm font-semibold text-dark transition hover:bg-custom_yellow focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
+      >
+        Request account deletion
+      </Link>
+    </aside>
     <article
       className="privacy-policy-document"
       dangerouslySetInnerHTML={{ __html: policyMarkup }}
