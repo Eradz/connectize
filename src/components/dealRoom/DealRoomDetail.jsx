@@ -16,11 +16,12 @@ import Badge from "../../components/ui/Badge";
 import Card from "../../components/ui/Card";
 import { SkeletonList, SkeletonCard } from "../../components/ui/Skeleton";
 import { EmptyParticipants, EmptyMilestones, EmptySearch } from "../../components/ui/EmptyStates";
-import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, File, X, CloudUpload, RefreshCcw, UploadCloud, CalendarDays, LockOpen, Trash2, Trash, Clock3 } from "lucide-react";
+import { Search, Download, Eye, UserPlus, Plus, Settings, FileText, BarChart3, PencilIcon, ArrowLeft, File, X, CloudUpload, RefreshCcw, UploadCloud, CalendarDays, LockOpen, Trash2, Trash, Clock3, Radio } from "lucide-react";
 import Scroll from "../Scroll";
 import { DocumentIcon } from "../ui/ModernIcon";
 import RefreshButton from "../RefreshButton";
 import ValuationsPanel from "./ValuationsPanel";
+import PingButton from "../PingButton";
 import { useAuth } from "../../context/userContext";
 import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
 import { confirmDialog } from "../../lib/confirm.jsx";
@@ -741,6 +742,21 @@ export default function DealRoomDetail() {
                   </Badge>
                 )}
                {renderJoinButton()}
+               {deal?.company && (
+                 <PingButton
+                   objectType="deal_room"
+                   objectId={deal.id}
+                   show={deal?.initiator === user?.id || user?.companies?.includes(deal?.company?.id ?? deal?.company)}
+                 >
+                   <button
+                     className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg border border-gray-200 text-dark text-sm font-semibold hover:bg-gray-50"
+                     title="Ping deal room"
+                   >
+                     <Radio className="w-4 h-4" />
+                     <span className="hidden md:flex">Ping</span>
+                   </button>
+                 </PingButton>
+               )}
                {deal?.initiator === user?.id &&  <Link to={webRoutes.dealRoomEdit.replace(":id", id)} className="flex gap-1 text-[16px] items-center px-4 py-2 rounded-lg bg-pale_yellow text-dark text-sm font-semibold hover:bg-gold">
                 <PencilIcon className= "w-4 h-4"/>
                 <span className="hidden md:flex">
