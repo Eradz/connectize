@@ -14,7 +14,11 @@ export default function PlatformModules({dashboardData}) {
       icon: <DealIcon/>,
       title: "Deal Rooms",
       description: "Secure collaboration spaces for M&A and partnerships",
-      link: `${dashboardData.dealRooms.count} active`,
+      link: dashboardData.dealRooms.count > 0
+        ? `${dashboardData.dealRooms.count} active`
+        : (dashboardData.publicDeals?.count || 0) > 0
+          ? `${dashboardData.publicDeals.count} public to join`
+          : `0 active`,
       bgColor: "bg-yellow-50",
       to: webRoutes.dealRooms
     },

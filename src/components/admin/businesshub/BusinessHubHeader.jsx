@@ -41,14 +41,14 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
       label: "Active Room Deals", 
       value: dashboardData.dealRooms.count, 
       icon: <DealIcon />, 
-      sublabel: `${dashboardData.dealRooms.count} active`,
-      bgColor: "bg-[#FFF9E6]"
-    },
-    { 
-      label: "Public Deals", 
-      value: dashboardData.publicDeals?.count || 0, 
-      icon: <DealIcon />, 
-      sublabel: `${dashboardData.publicDeals?.count || 0} public`,
+      sublabel: dashboardData.dealRooms.count > 0
+        ? `${dashboardData.dealRooms.count} active`
+        : (dashboardData.publicDeals?.count || 0) > 0
+          ? `${dashboardData.publicDeals.count} public to join`
+          : `0 active`,
+      sublabelClassName: dashboardData.dealRooms.count === 0 && (dashboardData.publicDeals?.count || 0) > 0
+        ? "text-[#CA8A04] font-semibold"
+        : "text-gray-400",
       bgColor: "bg-[#FFF9E6]"
     },
     { 
@@ -124,7 +124,7 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
           {stats.map((stat, index) => (
             <div 
               key={index} 
@@ -137,7 +137,7 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
               <p className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</p>
               <div className="flex items-center gap-1">
                 {stat.showTrend && <TrendUpIcon />}
-                <p className="text-xs text-gray-400">{stat.sublabel}</p>
+                <p className={`text-xs ${stat.sublabelClassName || 'text-gray-400'}`}>{stat.sublabel}</p>
               </div>
             </div>
           ))}
