@@ -41,7 +41,7 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
       label: "Active Room Deals", 
       value: dashboardData.dealRooms.count, 
       icon: <DealIcon />, 
-      sublabel: `${dashboardData.dealRooms.data.filter(d => d.status === 'active').length} active`,
+      sublabel: `${dashboardData.dealRooms.count} active`,
       bgColor: "bg-[#FFF9E6]"
     },
     { 

@@ -66,7 +66,7 @@ const PlatformDashboard = () => {
         complianceRes,
         adsSummaryRes
       ] = await Promise.all([
-        dealRoomService.getAll(1, 5),
+        dealRoomService.getAll(1, 5, { scope: 'mine', status: 'active' }),
         workforceJobService.getAll(1, 5),
         dealActivityService.getRecentActivities(10),
         aiOpportunityService.getOpportunities(),
@@ -210,7 +210,7 @@ const PlatformDashboard = () => {
                 <p className="text-sm font-medium text-gray-600">Active Deal Rooms</p>
                 <p className="text-2xl font-bold text-gray-900">{dashboardData.dealRooms.count}</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {dashboardData.dealRooms.data.filter(d => d.status === 'active').length} active
+                  {dashboardData.dealRooms.count} active
                 </p>
               </div>
               <div className="bg-green-100 p-3 rounded-lg">
