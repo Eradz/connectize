@@ -1,23 +1,21 @@
 import { jsPDF } from "jspdf";
 
-export const generatePDF = (
+export const createPDFDocument = (
   title,
   body,
-  images = [],
-  save = false,
-  saveTitle = `Connectize-post-${new Date().toISOString()}.pdf`
+  images = []
 ) => {
   const doc = new jsPDF();
   let yOffset = 10;
 
   // Title
-  doc.setFont("Nunito", "bold");
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text(title, 10, yOffset);
   yOffset += 10;
 
   // Set Body
-  doc.setFont("Nunito", "normal");
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
   const textHeight = doc.splitTextToSize(body, 180);
   doc.text(textHeight, 10, yOffset);
@@ -32,6 +30,18 @@ export const generatePDF = (
     doc.addImage(image, "JPEG", 10, yOffset, 100, 50);
     yOffset += 55;
   });
+
+  return doc;
+};
+
+export const generatePDF = (
+  title,
+  body,
+  images = [],
+  save = false,
+  saveTitle = `Connectize-post-${new Date().toISOString()}.pdf`
+) => {
+  const doc = createPDFDocument(title, body, images);
 
   // Convert to Blob URL for preview
   const pdfBlob = doc.output("blob");

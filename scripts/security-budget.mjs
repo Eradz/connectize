@@ -1,9 +1,9 @@
 import { spawnSync } from 'node:child_process';
 
 const budgets = {
-  critical: 2,
-  high: 9,
-  total: 15,
+  critical: 0,
+  high: 6,
+  total: 8,
 };
 
 const audit = spawnSync('npm', ['audit', '--omit=dev', '--json'], {

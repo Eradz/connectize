@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactECharts from 'echarts-for-react';
+import EChart from './EChart';
 import LightParagraph from "../../ParagraphText";
 import { Divider } from "@chakra-ui/react";
 
@@ -53,7 +53,7 @@ export default function Chart() {
           <h2 className="font-semibold text-2xl">5,987.37</h2>
         </div>
         <Divider />
-        <ReactECharts option={option} />
+        <EChart option={option} />
       </div>
 
       <div className="bg-white p-3 rounded-md w-full">
@@ -62,7 +62,7 @@ export default function Chart() {
           <h2 className="font-semibold text-2xl">5,987.34</h2>
         </div>
         <Divider />
-        <ReactECharts option={option} />
+        <EChart option={option} />
       </div>
     </section>
   );

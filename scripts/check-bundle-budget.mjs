@@ -5,8 +5,8 @@ import { gzipSync } from 'node:zlib';
 const assetsDirectory = 'build/client/assets';
 const htmlPath = 'build/client/index.html';
 const budgets = {
-  totalRawBytes: 7_430_000,
-  totalGzipBytes: 2_045_000,
+  totalRawBytes: 7_000_000,
+  totalGzipBytes: 1_920_000,
   startupRawBytes: 1_760_000,
   startupGzipBytes: 575_000,
   largestRawBytes: 1_150_000,

@@ -1,5 +1,5 @@
 import React from "react";
-import ReactECharts from "echarts-for-react";
+import EChart from "./EChart";
 import HeadingText from "../../HeadingText";
 import LightParagraph from "../../ParagraphText";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
@@ -58,7 +58,7 @@ function Trends() {
           <LightParagraph>Market Trend Analysis</LightParagraph>
           <h2 className="font-semibold text-2xl">12,589k</h2>
         </div>
-        <ReactECharts option={option} />
+        <EChart option={option} />
       </div>
     </section>
   );
