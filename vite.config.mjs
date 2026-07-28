@@ -120,9 +120,6 @@ export default defineConfig({
           vendor: ["react", "react-dom", "react-router-dom"],
           ui: ["@chakra-ui/react"],
           query: ["@tanstack/react-query"],
-          charts: [
-            "recharts",
-          ],
         },
       },
     },

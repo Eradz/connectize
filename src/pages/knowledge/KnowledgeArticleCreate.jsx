@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ReactQuill from '../../components/form/LazyReactQuill';
 import { knowledgeArticleService, knowledgeCategoryService } from '../../api-services/oilgas';
 import { webRoutes } from '../../lib/webRoutes';
 import { ArrowLeft, ChevronRight } from 'lucide-react';

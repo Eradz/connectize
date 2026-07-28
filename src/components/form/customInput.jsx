@@ -8,13 +8,12 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import ReactQuill from "react-quill";
+import ReactQuill from "./LazyReactQuill";
 import { ImageIcon } from "../../icon";
 import FormikErrorResponse from "./formError";
 import { Eye, EyeOff } from "lucide-react";
 
 import { motion } from "framer-motion";
-import "react-quill/dist/quill.snow.css";
 import { capitalizeFirst } from "../../lib/utils";
 import { MarkdownComponent } from "../MarkDownComponent";
 import CurrencyPicker from "../CurrencyPicker";

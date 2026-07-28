@@ -3,10 +3,8 @@ import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import SEO from "./components/SEO";
 import { webRoutes } from "./lib/webRoutes";
 import AppLayout from "./pages/AppLayout";
-import BiddingProjectDetail from "./pages/bidding/BiddingProjectDetail";
 import FeedLayout from "./pages/FeedLayout";
 import GlobalPrefetch from "./components/GlobalPrefetch";
-import AuthLayout from "./pages/authentication/AuthLayout";
 import ConfirmResetPassword from "./pages/authentication/confirmPasswordReset";
 import Login from "./pages/authentication/login";
 import ReactivationPage from "./pages/authentication/reactivation";
@@ -30,6 +28,8 @@ const PageLoader = () => (
 );
 
 // Lazy-loaded page components
+const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
+const BiddingProjectDetail = lazy(() => import("./pages/bidding/BiddingProjectDetail"));
 const NotificationItem = lazy(() => import("./components/notifications").then(m => ({ default: m.NotificationItem })));
 const Address = lazy(() => import("./components/profile/address"));
 const Bio = lazy(() => import("./components/profile/bio"));

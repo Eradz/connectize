@@ -1,71 +1,39 @@
-# Getting Started with Create React App
-<!-- "homepage": "https://lekiaanonim.github.io/Connectize-Frontend", -->
-<!-- "deploy": "gh-pages -d build", -->
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Connectize Frontend
 
-## Available Scripts
+Web application for the Connectize platform. The application uses React 18, React Router 7, Vite 7, TanStack Query, Tailwind CSS, and Capacitor.
 
-In the project directory, you can run:
+## Requirements
 
-### `npm start`
+- Node.js 20
+- npm
+- The NEM API for workflows that require backend data
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Setup
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm ci
+npm run dev
+```
 
-### `npm test`
+The development server uses `http://localhost:3000` and proxies `/api` requests to `http://localhost:8000`.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Verification
 
-### `npm run build`
+```bash
+npm run test:seo
+npm run build
+npm run check:bundle
+npm run security:budget
+npm run quality
+npm run test:e2e
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+`npm run quality` runs deterministic SEO tests, a production build, and bundle-size budgets. Dependency and bundle budgets are ratchets: lower them after improvements so regressions cannot restore removed debt.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Production Output
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The production application is emitted to `build/client`. Vercel deployment behavior and response headers are defined in `vercel.json`.
 
-### `npm run eject`
+## Reliability Program
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment.
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+See [docs/RELIABILITY_PROGRAM.md](docs/RELIABILITY_PROGRAM.md) for current baselines, CI gates, residual risks, and the staged remediation plan.
