@@ -45,6 +45,13 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
       bgColor: "bg-[#FFF9E6]"
     },
     { 
+      label: "Public Deals", 
+      value: dashboardData.publicDeals?.count || 0, 
+      icon: <DealIcon />, 
+      sublabel: `${dashboardData.publicDeals?.count || 0} public`,
+      bgColor: "bg-[#FFF9E6]"
+    },
+    { 
       label: "Active Jobs", 
       value: dashboardData.jobs.count, 
       icon: <BriefCaseIcon />, 
@@ -117,7 +124,7 @@ export default function BusinessHubHeader({dashboardData, subscription}) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
           {stats.map((stat, index) => (
             <div 
               key={index} 

@@ -17,6 +17,7 @@ import RecentDealRooms from '../../components/admin/businesshub/RecentDealRooms'
 const PlatformDashboard = () => {
   const [dashboardData, setDashboardData] = useState({
     dealRooms: { count: 0, value: 0, data: [] },
+    publicDeals: { count: 0 },
     jobs: { count: 0, data: [] },
     activities: { count: 0, data: [] },
     opportunities: { count: 0, data: [] },
@@ -41,18 +42,21 @@ const PlatformDashboard = () => {
     try {
       const [
         dealRoomsRes,
+        publicDealsRes,
         jobsRes,
         activitiesRes,
         opportunitiesRes,
         complianceRes,
-        adsSummaryRes,
+        eventsRes,
         marketplaceRes,
         subscriptionRes
       ] = await Promise.all([
-        // Dashboard stats must reflect only the current user's own deals — never
-        // public deals belonging to others (which 'auto' scope would include).
-        dealRoomService.getAll(1, 5, { scope: 'mine' }),
+        // Dashboard stats must reflect only the current user's own ACTIVE deals —
+        // never public deals belonging to others, and never inactive/draft deals.
         dealRoomService.getAll(1, 5, { scope: 'mine', status: 'active' }),
+        // Public deals count: platform-wide, non-confidential active deal rooms
+        // (separate from the user's own 'mine' scoped stats above).
+        dealRoomService.getAll(1, 1, { scope: 'public', status: 'active' }).catch(() => ({ count: 0 })),
         workforceJobService.getAll(1, 5),
         dealActivityService.getRecentActivities(10),
         aiOpportunityService.getOpportunities(),
@@ -71,6 +75,9 @@ const PlatformDashboard = () => {
           count: dealRoomsRes?.count || 0,
           value: totalDealValue,
           data: dealRoomsRes?.results || []
+        },
+        publicDeals: {
+          count: publicDealsRes?.count || 0
         },
         jobs: {
           count: jobsRes?.count || 0,
@@ -99,15 +106,9 @@ const PlatformDashboard = () => {
           activeUsers: 1248, // Mock data
           completedDeals: 23 // Mock data
         },
-        // ads: {
-        //   active: adsSummaryRes?.active_campaigns || 0,
-        //   impressions: adsSummaryRes?.impressions || 0,
-        //   clicks: adsSummaryRes?.clicks || 0,
-        //   spent: adsSummaryRes?.spent || 0,
-        // },
         events: {
-          count: adsSummaryRes?.count || 0,
-          data: adsSummaryRes?.results || []
+          count: eventsRes?.count || 0,
+          data: eventsRes?.results || []
         }
       });
 
