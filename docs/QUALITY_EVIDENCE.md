@@ -11,6 +11,7 @@ The `Frontend quality` workflow runs on every push and pull request to `main`. I
 - Exit status for security, SEO, PDF, build, and bundle checks
 - Production vulnerability counts and enforced budgets
 - Total, startup, and largest JavaScript payload measurements
+- Scoped line, statement, function, and branch coverage for the production modules exercised by the SEO and PDF tests
 
 Generate equivalent local evidence with the workflow commands followed by:
 
@@ -38,7 +39,8 @@ These are Git-verifiable budget and current-output figures. A lowered ceiling is
 | Browser behavior | Critical workflows pass Chromium, Firefox, and WebKit | Not enforced in quality CI | Open |
 | Accessibility | Automated WCAG checks plus keyboard workflow tests | Not enforced | Open |
 | Field performance | Core Web Vitals SLOs from production telemetry | Not recorded in this repository | Open |
-| Coverage | Critical workflow and changed-code coverage thresholds | Not enforced | Open |
+| Scoped coverage | `api/render-meta.js` and `src/lib/generatePDF.js` cannot regress | 42.69% lines/statements, 41.17% functions, 50% branches | Enforced baseline |
+| Application coverage | React application and changed-code thresholds | React component suite is not active | Open |
 
 ## Audit rules
 
@@ -47,5 +49,6 @@ These are Git-verifiable budget and current-output figures. A lowered ceiling is
 3. Preserve raw reports with the manifest; hashes make later alteration detectable.
 4. Treat missing reports, missing exit records, or nonzero exits as failed evidence.
 5. Platform migrations such as React Router 8 and React 19 require separate compatibility evidence.
+6. Never describe scoped server/PDF coverage as whole-application coverage; activate the React component suite before publishing that metric.
 
 This evidence demonstrates the listed controls. It does not prove production availability, user-perceived performance, accessibility, or operational recovery without their corresponding external measurements.

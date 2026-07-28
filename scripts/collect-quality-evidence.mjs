@@ -12,6 +12,8 @@ const reportPaths = {
   seo: 'reports/quality/seo.log',
   pdf: 'reports/quality/pdf.log',
   build: 'reports/quality/build.log',
+  coverage: 'reports/quality/coverage.json',
+  coverageLog: 'reports/quality/coverage.log',
 };
 
 const evidenceErrors = [];
@@ -48,6 +50,7 @@ const commandPassed = (name, fallbackPath) => {
 
 const security = tryReadJson('security', reportPaths.security);
 const bundle = tryReadJson('bundle', reportPaths.bundle);
+const coverage = tryReadJson('coverage', reportPaths.coverage);
 const commit = run('git', ['rev-parse', 'HEAD']);
 const branch = process.env.GITHUB_REF_NAME || run('git', ['branch', '--show-current']);
 const workingTreeStatus = run('git', ['status', '--porcelain']);
@@ -83,12 +86,16 @@ const evidence = {
     pdfTests: commandPassed('pdf', reportPaths.pdf),
     productionBuild: commandPassed('build', reportPaths.build),
     bundleBudget: bundle !== null && commandPassed('bundle', reportPaths.bundle),
+    scopedCoverageBudget: coverage !== null && commandPassed('coverage', reportPaths.coverage),
   },
   metrics: {
     vulnerabilities: security?.metrics ?? null,
     vulnerabilityBudgets: security?.budgets ?? null,
     bundle: bundle?.metrics ?? null,
     bundleBudgets: bundle?.budgets ?? null,
+    scopedCoverage: coverage?.metrics ?? null,
+    scopedCoverageBudgets: coverage?.budgets ?? null,
+    scopedCoverageFiles: coverage?.scope ?? null,
   },
   reports: availableReports,
   errors: evidenceErrors,

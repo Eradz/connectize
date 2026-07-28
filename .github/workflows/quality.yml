@@ -52,6 +52,15 @@ jobs:
           code=${PIPESTATUS[0]}
           echo "$code" > reports/quality/pdf.exit
           exit "$code"
+      - name: Enforce scoped coverage budget
+        run: |
+          set +e
+          node scripts/coverage-budget.mjs > reports/quality/coverage.json 2> reports/quality/coverage.log
+          code=$?
+          cat reports/quality/coverage.json
+          cat reports/quality/coverage.log >&2
+          echo "$code" > reports/quality/coverage.exit
+          exit "$code"
       - name: Build production application
         run: |
           set +e

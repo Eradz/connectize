@@ -3,6 +3,7 @@
 [![Quality CI](https://github.com/LekiaAnonim/Connectize-Frontend/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/LekiaAnonim/Connectize-Frontend/actions/workflows/quality.yml)
 [![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
+[![Scoped coverage](https://img.shields.io/badge/scoped_coverage-42.69%25-yellow)](docs/QUALITY_EVIDENCE.md)
 [![Quality evidence](https://img.shields.io/badge/quality-evidence-0969DA)](docs/QUALITY_EVIDENCE.md)
 
 Web application for the Connectize platform. The application uses React 18, React Router 7, Vite 7, TanStack Query, Tailwind CSS, and Capacitor.
@@ -26,6 +27,7 @@ The development server uses `http://localhost:3000` and proxies `/api` requests 
 
 ```bash
 npm run test:seo
+npm run test:coverage
 npm run build
 npm run check:bundle
 npm run security:budget
