@@ -27,11 +27,55 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Prepare evidence directory
+        run: mkdir -p reports/quality
       - name: Enforce dependency risk budget
-        run: npm run security:budget
+        run: |
+          set +e
+          node scripts/security-budget.mjs > reports/quality/security.json 2> reports/quality/security.stderr.log
+          code=$?
+          cat reports/quality/security.json
+          cat reports/quality/security.stderr.log >&2
+          echo "$code" > reports/quality/security.exit
+          exit "$code"
       - name: Run SEO behavior tests
-        run: npm run test:seo
+        run: |
+          set +e
+          npm run test:seo 2>&1 | tee reports/quality/seo.log
+          code=${PIPESTATUS[0]}
+          echo "$code" > reports/quality/seo.exit
+          exit "$code"
+      - name: Run PDF behavior tests
+        run: |
+          set +e
+          npm run test:pdf 2>&1 | tee reports/quality/pdf.log
+          code=${PIPESTATUS[0]}
+          echo "$code" > reports/quality/pdf.exit
+          exit "$code"
       - name: Build production application
-        run: npm run build
+        run: |
+          set +e
+          npm run build 2>&1 | tee reports/quality/build.log
+          code=${PIPESTATUS[0]}
+          echo "$code" > reports/quality/build.exit
+          exit "$code"
       - name: Enforce bundle budgets
-        run: npm run check:bundle
+        run: |
+          set +e
+          node scripts/check-bundle-budget.mjs > reports/quality/bundle.json 2> reports/quality/bundle.stderr.log
+          code=$?
+          cat reports/quality/bundle.json
+          cat reports/quality/bundle.stderr.log >&2
+          echo "$code" > reports/quality/bundle.exit
+          exit "$code"
+      - name: Create quality evidence manifest
+        if: always()
+        run: npm run evidence:collect -- reports/quality/evidence.json
+      - name: Retain quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-quality-evidence-${{ github.sha }}
+          path: reports/quality
+          if-no-files-found: error
+          retention-days: 90

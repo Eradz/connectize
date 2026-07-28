@@ -85,6 +85,7 @@
     "test:pdf": "node --test tests/pdf-generation.test.mjs",
     "test:seo": "node --test tests/seo-server.test.mjs",
     "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "evidence:collect": "node scripts/collect-quality-evidence.mjs",
     "security:budget": "node scripts/security-budget.mjs",
     "quality": "npm run security:budget && npm run test:seo && npm run test:pdf && npm run build && npm run check:bundle",
     "release:test": "bash ./scripts/release-test.sh",
