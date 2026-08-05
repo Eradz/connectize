@@ -16,6 +16,7 @@ import { CircleTitleSubtitleSkeleton } from "../feeds/TopServiceSuggestions";
 import ReusableModal from "../../custom/ResusableModal";
 import { useState } from "react";
 import { usePageination } from "../../../hooks/usePagination";
+import CreateCompanyInvite from "../../CreateCompanyInvite";
 
 function Sidebar() {
   const { user: currentUser, loading } = useAuth();
@@ -37,6 +38,7 @@ function Sidebar() {
       ) : (
         <CircleTitleSubtitleSkeleton />
       )}
+      {currentUser?.user_type === "company" && currentUser?.companies?.length < 1 && <CreateCompanyInvite />}
       <NavigationSection />
     </nav>
   );

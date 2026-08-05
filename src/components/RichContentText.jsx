@@ -197,12 +197,12 @@ const createMarkdownOptions = (mentionUsers = [], mentionCompanies = []) => ({
       ),
     },
     p: {
-      component: ({ children, ...props }) => (
-        <p {...props} className="mb-1 last:mb-0 whitespace-pre-wrap">
-          {renderInlineChildren(children, mentionUsers, mentionCompanies)}
-        </p>
-      ),
-    },
+  component: ({ children, ...props }) => (
+    <p {...props} className="mb-1 last:mb-0 whitespace-pre-wrap">
+      {renderInlineChildren(children, mentionUsers, mentionCompanies)}
+    </p>
+  ),
+},
     strong: {
       component: ({ children, ...props }) => (
         <strong {...props} className="font-semibold text-inherit">
@@ -353,7 +353,14 @@ export default function RichContentText({
   mentionCompanies = [],
 }) {
   const rawContent = typeof content === "string" ? content : String(content ?? "");
-  const trimmedContent = rawContent.trimStart();
+  const normalizedContent = rawContent
+  .replace(/\r\n/g, "</br>") // Windows line endings
+  .replace(/\u00A0/g, " ")           // nbsp -> normal space
+  .split("\n")
+  .map((line) => line.trimEnd())     // strip trailing spaces so "blank" lines are truly empty
+  .join("\n")
+  .replace(/\n{3,}/g, "\n\n");    
+  const trimmedContent = normalizedContent.trimStart();
   const isHtml = hasHtml(trimmedContent);
   const safeHtml = useMemo(
     () => (isHtml ? linkifyHtml(trimmedContent, mentionUsers, mentionCompanies) : ""),
@@ -369,7 +376,6 @@ export default function RichContentText({
   );
 
   if (!trimmedContent) return null;
-
   return (
     <div className={clsx("rich-content-text w-full break-words", className)}>
       {isHtml ? (
