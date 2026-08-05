@@ -376,7 +376,6 @@ export default function RichContentText({
   );
 
   if (!trimmedContent) return null;
-  console.log("Safe Markdown:", safeMarkdown);
   return (
     <div className={clsx("rich-content-text w-full break-words", className)}>
       {isHtml ? (
