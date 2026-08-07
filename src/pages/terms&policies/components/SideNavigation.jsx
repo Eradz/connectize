@@ -23,7 +23,7 @@ export default function SideNavigation({
       <button
         type="button"
         aria-label={isOpen ? "Close sections" : "Open sections"}
-        className="md:hidden sticky top-0 inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-200 bg-white text-sm text-gray-700"
+        className="md:hidden sticky top-0 inline-flex items-center gap-2 px-3 py-2 rounded-sm border border-[#DFD9C8] bg-[#FCFAF5] text-sm text-[#3E4A61]"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span aria-hidden="true" className="inline-flex flex-col gap-[3px]">
@@ -33,16 +33,21 @@ export default function SideNavigation({
         </span>
         <span>Sections</span>
       </button>
+
       <nav
-        className={`md:w-full md:h-full pr-4 md:border-r sticky left-0 top-0 ${
-          isOpen ? "w-[130px] h-full border-r" : "w-0 h-0"
+        className={`md:w-full md:h-full pr-6 md:border-r md:border-[#DFD9C8] sticky left-0 top-0 ${
+          isOpen ? "w-[220px] h-full border-r border-[#DFD9C8]" : "w-0 h-0"
         } overflow-hidden transition-[width] md:transition-none duration-300`}
       >
-        <ul>
+        <div className="hidden md:block font-mono text-[11px] tracking-[0.12em] uppercase text-[#7A561F] mb-4 pt-1">
+          On this page
+        </div>
+        <ul className="flex flex-col md:flex-row gap-1.5 md:justify-between text-[14px] ">
           {array[0].details?.map((item, index) => {
             return (
               <NavItemLi
                 key={index}
+                index={index}
                 heading={item.heading}
                 activeSection={formattedActiveSection}
                 setActiveSection={setActiveSection}
@@ -56,21 +61,39 @@ export default function SideNavigation({
   );
 }
 
-const NavItemLi = ({ heading, activeSection, setActiveSection, setIsOpen }) => {
+const NavItemLi = ({
+  index,
+  heading,
+  activeSection,
+  setActiveSection,
+  setIsOpen,
+}) => {
   const formattedHeading = heading.replace(/\s+/g, "-").toLowerCase();
+  const isActive = activeSection === formattedHeading;
+  const number = String(index + 1).padStart(2, "0");
+
   return (
-    <li className="mb-2">
+    <li className="mb-1">
       <NavLink
         to={`#${formattedHeading}`}
-        className={`block p-2 rounded-md text-gray-700 hover:!bg-gold text-xs ${
-          activeSection === formattedHeading ? "font-semibold !bg-gold" : ""
+        className={`flex items-baseline gap-2.5 py-2 px-2.5 rounded-sm text-[14px] border-l-2 transition-colors duration-150 ${
+          isActive
+            ? "font-medium text-[#12203A] bg-gold border-l-[#9C6F2E]"
+            : "text-[#6E7688] border-l-transparent hover:text-[#12203A] hover:bg-[#E9E4D6]"
         }`}
         onClick={() => {
           setActiveSection(formattedHeading);
           setIsOpen(false);
         }}
       >
-        {heading}
+        <span
+          className={`font-mono text-[11px] shrink-0 ${
+            isActive ? "text-[#7A561F]" : "text-[#DFD9C8]"
+          }`}
+        >
+          {number}
+        </span>
+        <span>{heading}</span>
       </NavLink>
     </li>
   );
