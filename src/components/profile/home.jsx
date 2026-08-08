@@ -22,13 +22,20 @@ import {
   roleKey,
 } from "../../lib/data";
 import { customFormikFieldValidator } from "../../lib/utils";
+import { looksLikeBusinessName, BUSINESS_NAME_WARNING } from "../../lib/businessNameHeuristic";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
 
 const validationSchema = Yup.object().shape({
-  first_name: Yup.string().trim().optional(),
-  last_name: Yup.string().trim().optional(),
+  first_name: Yup.string()
+    .trim()
+    .optional()
+    .test("not-business-name", BUSINESS_NAME_WARNING, (value) => !looksLikeBusinessName(value)),
+  last_name: Yup.string()
+    .trim()
+    .optional()
+    .test("not-business-name", BUSINESS_NAME_WARNING, (value) => !looksLikeBusinessName(value)),
   role: Yup.string().trim().optional(),
   gender: Yup.string().trim().optional(),
   age: Yup.string()
@@ -96,6 +103,18 @@ function Home() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Surface the "looks like a company name" warning as the user types,
+  // rather than waiting for blur (Formik's default touched trigger).
+  useEffect(() => {
+    if (formik.values.first_name) formik.setFieldTouched("first_name", true, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.first_name]);
+
+  useEffect(() => {
+    if (formik.values.last_name) formik.setFieldTouched("last_name", true, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.last_name]);
 
   const fields = [
     {
