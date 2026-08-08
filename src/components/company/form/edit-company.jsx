@@ -2,14 +2,26 @@ import { Button } from "@chakra-ui/react";
 import { getCountries } from "@loophq/country-state-list";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { FilePlus, FileText } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as Yup from "yup";
-import { editCompanyInformation, getCompanyCategories, normalizeWebsite } from "../../../api-services/companies";
+import {
+  editCompanyInformation,
+  getCompanyCategories,
+  normalizeWebsite,
+  uploadCompanyVerificationDocument,
+} from "../../../api-services/companies";
 import Form from "../../form";
 import ProfileSection from "../../userProfile/profile-section";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const VERIFICATION_STATUS_LABELS = {
+  verified: { label: "Verified", className: "bg-green-100 text-green-800" },
+  rejected: { label: "Rejected", className: "bg-red-100 text-red-800" },
+  pending: { label: "Pending Review", className: "bg-gray-100 text-gray-800" },
+};
 
 // Fallback used only if the backend categories can't be loaded.
 const FALLBACK_COMPANY_CATEGORIES = [
@@ -63,11 +75,39 @@ export default function EditCompanyForm({ company }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const verificationFileInputRef = useRef(null);
+  const queryClient = useQueryClient();
 
   const formik = useFormik({
     initialValues,
     validationSchema,
   });
+
+  const verificationStatus = company?.verification_status || "pending";
+  const statusInfo =
+    VERIFICATION_STATUS_LABELS[verificationStatus] || VERIFICATION_STATUS_LABELS.pending;
+
+  const handleUploadVerificationDocument = async (event) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (!file || !company?.company_name) return;
+
+    setUploadingDoc(true);
+    const toastId = toast.loading("Uploading verification document");
+
+    try {
+      await uploadCompanyVerificationDocument(company.company_name, file);
+      await queryClient.invalidateQueries({ queryKey: ["myCompanies"] });
+      toast.success("Verification document uploaded — it's now pending review", {
+        id: toastId,
+      });
+    } catch (err) {
+      toast.error("Failed to upload verification document", { id: toastId });
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -190,6 +230,59 @@ export default function EditCompanyForm({ company }) {
 
   return (
     <ProfileSection title="">
+      <div className="mb-6 rounded-md border border-gray-100 bg-background p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-base font-semibold text-gray-900">Business Verification</p>
+            <p className="text-sm text-gray-500">
+              {verificationStatus === "verified"
+                ? "Your company is verified."
+                : "Upload your CAC certificate or equivalent registration proof for review."}
+            </p>
+          </div>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo.className}`}>
+            {statusInfo.label}
+          </span>
+        </div>
+
+        {verificationStatus === "rejected" && company?.rejection_reason && (
+          <p className="mt-3 text-sm text-red-600">
+            <strong>Reason:</strong> {company.rejection_reason}
+          </p>
+        )}
+
+        {verificationStatus !== "verified" && (
+          <>
+            <input
+              ref={verificationFileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+              onChange={handleUploadVerificationDocument}
+            />
+            <button
+              type="button"
+              disabled={uploadingDoc}
+              onClick={() => verificationFileInputRef.current?.click()}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-gold bg-gold/10 px-4 py-3 text-sm font-semibold text-gray-900 transition-all duration-300 hover:bg-gold/20 disabled:opacity-60"
+            >
+              {company?.verification_document ? (
+                <FileText className="size-5" />
+              ) : (
+                <FilePlus className="size-5" />
+              )}
+              <span>
+                {uploadingDoc
+                  ? "Uploading..."
+                  : company?.verification_document
+                    ? "Re-upload Verification Document"
+                    : "Upload Verification Document"}
+              </span>
+            </button>
+          </>
+        )}
+      </div>
+
       <Form
         formik={formik}
         status={"none"}

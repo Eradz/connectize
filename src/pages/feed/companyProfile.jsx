@@ -571,7 +571,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
           <h2 className="text-lg font-bold">Summary</h2>
           {isCurrentUser && (
             <Link
-              to={`/company/${editCompanyName}/edit`}
+              to={webRoutes.companyEditProfile.replace(":company", editCompanyName)}
               aria-label="Edit summary"
               className="text-gray-500 hover:text-black"
             >
@@ -592,7 +592,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
           <h2 className="text-lg font-bold">ABOUT</h2>
           {isCurrentUser && (
             <Link
-              to={`/company/${editCompanyName}/edit`}
+              to={webRoutes.companyEditProfile.replace(":company", editCompanyName)}
               aria-label="Edit company information"
               className="text-gray-500 hover:text-black"
             >
