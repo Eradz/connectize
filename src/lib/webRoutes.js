@@ -38,6 +38,7 @@ const webRoutes = {
   knowledgeHub: "/knowledge-hub",
   login: "/login",
   logisticsDashboard: "/logistics-hub",
+  manageEmails: "/co/settings/manage-emails",
   market: "/market",
   messages: "/messages",
   messagesRoom: "/messages/:room_name",
