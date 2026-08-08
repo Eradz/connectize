@@ -44,6 +44,7 @@ const SuccessPage = lazy(() => import("./pages/authentication/successpage"));
 const BookMark = lazy(() => import("./pages/bookmark"));
 const BlockedUsersPage = lazy(() => import("./pages/blocked-users/index"));
 const BlockedCompaniesPage = lazy(() => import("./pages/blocked-companies/index"));
+const ConnectionsPage = lazy(() => import("./pages/connections/index"));
 const CompaniesPage = lazy(() => import("./pages/companies"));
 const CreateCompany = lazy(() => import("./pages/company"));
 const CompanyDocuments = lazy(() => import("./pages/company/CompanyDocuments"));
@@ -303,7 +304,8 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.settings)} element={<SettingsPage />} />
           <Route path={removeLeadingSlash(webRoutes.enterpriseSSOSetup)} element={<EnterpriseSSOSetupPage />} />
           <Route path={removeLeadingSlash(webRoutes.userProfile)} element={<UserProfile />} />
-          
+          <Route path={removeLeadingSlash(webRoutes.userConnections)} element={<ConnectionsPage />} />
+
           {/* Company-specific routes with "co" prefix */}
           <Route path={removeLeadingSlash(webRoutes.bookmarks)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />

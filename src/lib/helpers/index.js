@@ -2,6 +2,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { getSession, removeSession, setSession } from "../session";
 import { queryClient } from "../utils";
+import { createProfileCompletionRedirect } from "../profileCompletion";
 
 // Constants
 export const REGISTER_EMAIL_KEY = "register_email";
@@ -68,6 +69,12 @@ let accessTokenExpiry = null;
 let sessionVersion = 0;
 
 let retries = 0;
+
+export const redirectToProfileCompletion = createProfileCompletionRedirect({
+  notify: (message, options) => toast.error(message, options),
+  navigate: (url) => window.location.assign(url),
+  schedule: (callback, delay) => window.setTimeout(callback, delay),
+});
 
 // Clear token cache - call this after login or when session changes
 export function clearTokenCache() {
@@ -328,6 +335,11 @@ export async function makeApiRequest({
       return;
     }
     const errorCode = error?.response?.data?.code;
+
+    if (errorCode === "profile_incomplete") {
+      redirectToProfileCompletion(error.response.data);
+      return null;
+    }
 
     if (errorCode === "token_not_valid") {
       // Retry after refreshing token

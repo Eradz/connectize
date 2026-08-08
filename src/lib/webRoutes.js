@@ -68,6 +68,7 @@ const webRoutes = {
   subscriptions: "/subscriptions",
   termsAndConditions: "/terms-and-conditions",
   userProfile: "/co/:userId",
+  userConnections: "/co/:userId/connections",
   verifyAccount: "/verify-account",
 
   // Workforce Marketplace
