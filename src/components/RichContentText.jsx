@@ -198,7 +198,7 @@ const createMarkdownOptions = (mentionUsers = [], mentionCompanies = []) => ({
     },
     p: {
   component: ({ children, ...props }) => (
-    <p {...props} className="mb-1 last:mb-0 whitespace-pre-wrap">
+    <p {...props} className="mb-3 last:mb-0 leading-relaxed whitespace-pre-wrap">
       {renderInlineChildren(children, mentionUsers, mentionCompanies)}
     </p>
   ),
@@ -219,21 +219,21 @@ const createMarkdownOptions = (mentionUsers = [], mentionCompanies = []) => ({
     },
     h1: {
       component: ({ children, ...props }) => (
-        <p {...props} className="mb-1 text-lg font-semibold text-inherit">
+        <p {...props} className="mb-3 text-lg font-semibold text-inherit">
           {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
     },
     h2: {
       component: ({ children, ...props }) => (
-        <p {...props} className="mb-1 text-base font-semibold text-inherit">
+        <p {...props} className="mb-3 text-base font-semibold text-inherit">
           {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
     },
     h3: {
       component: ({ children, ...props }) => (
-        <p {...props} className="mb-1 font-semibold text-inherit">
+        <p {...props} className="mb-3 font-semibold text-inherit">
           {renderInlineChildren(children, mentionUsers, mentionCompanies)}
         </p>
       ),
@@ -380,7 +380,7 @@ export default function RichContentText({
     <div className={clsx("rich-content-text w-full break-words", className)}>
       {isHtml ? (
         <div
-          className="space-y-1 [&_a]:text-gold [&_a]:font-semibold [&_a]:transition-colors [&_a:hover]:text-custom_yellow [&_em]:italic [&_i]:italic [&_strong]:font-semibold [&_b]:font-semibold [&_p]:mb-1 [&_p:last-child]:mb-0"
+          className="[&_a]:text-gold [&_a]:font-semibold [&_a]:transition-colors [&_a:hover]:text-custom_yellow [&_em]:italic [&_i]:italic [&_strong]:font-semibold [&_b]:font-semibold [&_p]:mb-3 [&_p]:leading-relaxed [&_p:last-child]:mb-0"
           dangerouslySetInnerHTML={{ __html: safeHtml }}
         />
       ) : (
