@@ -89,7 +89,7 @@ export function SuggestionList({
             {isCompany
               ? "No people associated yet"
               : associated
-              ? "No connections yet"
+              ? "No connectizers yet"
               : "No suggestions available"}
           </LightParagraph>
         ) : (

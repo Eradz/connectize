@@ -36,8 +36,6 @@ const DiscoverFeed = () => {
   useEffect(() => {
     setUser(currentUser);
   }, [currentUser, setUser]);
-
-  console.log("currentUser", currentUser);
   return (
     <section className="">
       <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">

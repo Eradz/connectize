@@ -40,16 +40,6 @@ export default function ConnectButton({
       setHasConnected(!!isInFollowingList);
     } else {
       setHasConnected(currentUser?.company_followings?.includes(id) || false);
-      // const followingList = currentCompany?.followers
-      //   ?.flatMap((follower) => [
-      //     follower.company_follower.id,
-      //     follower.user_follower.id,
-      //   ])
-      //   .filter(Boolean);
-      // if (followingList) {
-      //   const isConnected = followingList.includes(currentUser?.id);
-      //   setHasConnected(isConnected);
-      // }
     }
   }, [currentUser, currentCompany, id, type]);
 
