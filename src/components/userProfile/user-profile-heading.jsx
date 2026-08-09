@@ -27,6 +27,7 @@ export default function UserProfileHeadings({
   full_name,
   display_name,
   username,
+  connection_status,
 }) {
   const { user: currentUser } = useAuth();
   const [cachedConnections, setCachedConnections] = useState(followers_count);
@@ -57,8 +58,12 @@ export default function UserProfileHeadings({
           {verified && <VerifiedIcon />}
         </div>
         <div className="flex flex-wrap gap-2">
-          <StatsText text={`${formatNumber(following_count)} /following`} />
-          <StatsText text={`${formatNumber(cachedConnections)} /connections`} />
+          <Link to={`${webRoutes.userConnections.replace(":userId", id)}?tab=following`}>
+            <StatsText text={`${formatNumber(following_count)} /following`} />
+          </Link>
+          <Link to={`${webRoutes.userConnections.replace(":userId", id)}?tab=followers`}>
+            <StatsText text={`${formatNumber(cachedConnections)} /connections`} />
+          </Link>
           {company && (
             <div className="flex items-center gap-1.5 text-sm">
               <Avatar size="xs" name={company} className={clsx(avatarStyle)} />
@@ -82,6 +87,7 @@ export default function UserProfileHeadings({
             setCachedConnections={setCachedConnections}
             first_name={displayName}
             slug={id}
+            connection_status={connection_status}
           />
           <BlockUserButton
             userId={id}

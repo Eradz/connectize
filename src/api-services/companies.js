@@ -185,6 +185,20 @@ export const createCompany = async (data, resetForm) => {
     }
   }
 
+  if (data.verification_document) {
+    try {
+      await uploadCompanyVerificationDocument(
+        companyNameForUpload,
+        data.verification_document
+      );
+    } catch (e) {
+      console.error("Verification document upload failed:", e);
+      toast.error(
+        "Company created, but the verification document failed to upload. Please try again from your company settings."
+      );
+    }
+  }
+
   resetForm?.();
   toast.success(`${companyNameForUpload || data.company_name || "Company"} was created successfully`);
 
@@ -306,6 +320,28 @@ export const createCompanyDocument = async (data) => {
   }
 
   return companyDocument;
+};
+
+export const uploadCompanyVerificationDocument = async (companyName, file) => {
+  const company = String(companyName || "").trim();
+
+  if (!company) {
+    throw new Error("Company is required");
+  }
+
+  if (!file) {
+    throw new Error("Verification document file is required");
+  }
+
+  const formData = new FormData();
+  formData.append("verification_document", file);
+
+  return makeApiRequest({
+    url: `api/companies/${encodeURIComponent(company)}/`,
+    method: "PATCH",
+    data: formData,
+    contentType: "multipart/form-data",
+  });
 };
 
 export const getOrCreateCompanyDocumentTypes = async (type, name) => {

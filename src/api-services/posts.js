@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { makeApiRequest } from "../lib/helpers";
+import { appendMentionIdsToFormData } from "../utils/mentionPayload";
 
 /**
  * Get all posts (Discover feed) - all published posts
@@ -202,8 +203,24 @@ export const likePost = async (id, data, hasLikedPost) => {
 
 export const repostPost = async (
   id,
-  { comment = "", companyId = null, mentions = [], companyMentions = [] } = {}
+  { comment = "", companyId = null, mentions = [], companyMentions = [], images = [] } = {}
 ) => {
+  if (images.length > 0) {
+    const formData = new FormData();
+    formData.append("comment", comment);
+    appendMentionIdsToFormData(formData, { mentions, companyMentions });
+    if (companyId) formData.append("company_id", companyId);
+    images.forEach((image) => formData.append("images", image));
+
+    const result = await makeApiRequest({
+      url: `api/posts/${id}/repost/`,
+      method: "POST",
+      data: formData,
+      contentType: "multipart/form-data",
+    });
+    return result;
+  }
+
   const result = await makeApiRequest({
     url: `api/posts/${id}/repost/`,
     method: "POST",

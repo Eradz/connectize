@@ -38,6 +38,7 @@ const webRoutes = {
   knowledgeHub: "/knowledge-hub",
   login: "/login",
   logisticsDashboard: "/logistics-hub",
+  manageEmails: "/co/settings/manage-emails",
   market: "/market",
   messages: "/messages",
   messagesRoom: "/messages/:room_name",
@@ -68,6 +69,7 @@ const webRoutes = {
   subscriptions: "/subscriptions",
   termsAndConditions: "/terms-and-conditions",
   userProfile: "/co/:userId",
+  userConnections: "/co/:userId/connections",
   verifyAccount: "/verify-account",
 
   // Workforce Marketplace

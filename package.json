@@ -84,6 +84,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:pdf": "node --test tests/pdf-generation.test.mjs",
     "test:seo": "node --test tests/seo-server.test.mjs",
+    "test:profile-completion": "node --test tests/profile-completion.test.mjs",
     "test:coverage": "node scripts/coverage-budget.mjs",
     "check:bundle": "node scripts/check-bundle-budget.mjs",
     "evidence:collect": "node scripts/collect-quality-evidence.mjs",

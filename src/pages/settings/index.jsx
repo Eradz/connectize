@@ -206,6 +206,14 @@ const SettingsPage = () => {
             />
               <Input value={user?.email ?? ""} placeholder="Email" className="mt-2" readOnly />
           </section>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => navigate(webRoutes.manageEmails)}
+          >
+            Manage Emails
+          </Button>
         </section>
 
         {/* Change Password Section */}

@@ -15,7 +15,7 @@ import {
 import { HeartIcon, Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { BarChart3, Radio } from "lucide-react";
+import { BarChart3, ImagePlus, Radio } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Virtuoso } from "react-virtuoso";
@@ -57,6 +57,9 @@ import MoreOptions from "../../MoreOptions";
 import PingModal from "../../PingModal";
 import LightParagraph from "../../ParagraphText";
 import PostImageCollage from "../../PostImageCollage";
+import ValidImages from "../../ValidImages";
+import { isImageFile, isImageSize } from "../../../utils/imageUpload";
+import { largeFileText, unSupportedText } from "../listing/newListing";
 import { avatarStyle, ConJoinedImages } from "../../ResponsiveNav";
 import SEO from "../../SEO";
 import TimeAgo from "../../TimeAgo";
@@ -75,6 +78,7 @@ import { getUserDisplayName, getUserHandle } from "../../../lib/userDisplay";
 // Large starting index so Virtuoso can absorb prepended (newly polled) posts
 // by decrementing firstItemIndex without the value ever going negative.
 const FEED_START_INDEX = 1_000_000;
+const MAX_QUOTE_IMAGES = 4;
 
 // Rendered by Virtuoso below the list; reads live query state via context.
 const FeedFooter = ({ context }) => {
@@ -619,6 +623,8 @@ export const DiscoverPostItem = ({
   const [quoteContent, setQuoteContent] = useState(createEmptyCommentContent);
   const [quoteEditorKey, setQuoteEditorKey] = useState(0);
   const [isQuoteSubmitting, setIsQuoteSubmitting] = useState(false);
+  const [quoteImages, setQuoteImages] = useState([]);
+  const quoteFileInputRef = useRef(null);
   const [showRepostersModal, setShowRepostersModal] = useState(false);
   const {
     isOpen: isRepostMenuOpen,
@@ -653,7 +659,7 @@ export const DiscoverPostItem = ({
     queryClient.invalidateQueries({ queryKey: ["reposts", activePost?.id] });
   };
 
-  const handleRepost = async (quote = "", mentions = [], companyMentions = []) => {
+  const handleRepost = async (quote = "", mentions = [], companyMentions = [], images = []) => {
     onRepostMenuClose();
     setRepostLoading(true);
     setReposted(true);
@@ -664,6 +670,7 @@ export const DiscoverPostItem = ({
         comment: quote,
         mentions,
         companyMentions,
+        images,
       });
       if (result === null) {
         setReposted(false);
@@ -736,6 +743,22 @@ export const DiscoverPostItem = ({
     }
   };
 
+  const handleQuoteImageChange = (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    const remainingSlots = Math.max(0, MAX_QUOTE_IMAGES - quoteImages.length);
+    const validImageFiles = selectedFiles
+      .filter(isImageFile)
+      .filter(isImageSize)
+      .slice(0, remainingSlots);
+
+    setQuoteImages((prev) => [...prev, ...validImageFiles]);
+
+    if (validImageFiles.length < selectedFiles.length) {
+      toast.info(`${unSupportedText} or ${largeFileText}`);
+    }
+    event.target.value = "";
+  };
+
   const handleQuoteRepost = async () => {
     if (!quoteContent.plainText?.trim()) return;
     setIsQuoteSubmitting(true);
@@ -746,12 +769,14 @@ export const DiscoverPostItem = ({
     const success = await handleRepost(
       quoteContent.plainText.trim(),
       quoteContent.mentions || [],
-      quoteContent.companyMentions || []
+      quoteContent.companyMentions || [],
+      quoteImages
     );
     setIsQuoteSubmitting(false);
     if (success) {
       setQuoteContent(createEmptyCommentContent());
       setQuoteEditorKey((key) => key + 1);
+      setQuoteImages([]);
       setShowQuoteModal(false);
     }
   };
@@ -761,6 +786,7 @@ export const DiscoverPostItem = ({
     if (!showQuoteModal) {
       setQuoteContent(createEmptyCommentContent());
       setQuoteEditorKey((key) => key + 1);
+      setQuoteImages([]);
     }
   }, [showQuoteModal]);
 
@@ -1071,6 +1097,12 @@ export const DiscoverPostItem = ({
             />
           </div>
 
+          {/* This repost's own attached images - distinct from the
+              original post's images shown inside the embed below */}
+          {postItem?.images?.length > 0 && (
+            <PostImageCollage images={postItem.images} />
+          )}
+
           {/* The original post embedded as a bordered child card (or the
               deleted-original notice when the parent no longer exists) */}
           <ParentPostEmbed
@@ -1271,6 +1303,32 @@ export const DiscoverPostItem = ({
           users={quoteMentionUsers}
           companies={quoteMentionCompanies}
         />
+
+        <ValidImages setValidImages={setQuoteImages} validImages={quoteImages} />
+
+        {quoteImages.length < MAX_QUOTE_IMAGES && (
+          <div className="mt-3">
+            <input
+              ref={quoteFileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleQuoteImageChange}
+            />
+            <button
+              type="button"
+              onClick={() => quoteFileInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 hover:border-gold hover:text-dark hover:bg-gold/10 transition-colors"
+            >
+              <ImagePlus size={16} />
+              Add photo
+              <span className="text-xs text-gray-400">
+                ({quoteImages.length}/{MAX_QUOTE_IMAGES})
+              </span>
+            </button>
+          </div>
+        )}
 
         {/* Preview of the post being reposted (the parent for plain reposts) */}
         <div className="mt-3 border border-gray-200 rounded-lg p-3 bg-gray-50">

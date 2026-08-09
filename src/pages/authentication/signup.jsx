@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import { authenticationService } from "../../api-services/authentication";
 import Form from "../../components/form";
@@ -47,9 +47,12 @@ const validationSchema = Yup.object().shape({
 
 function Signup() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get("invite_token");
+  const invitedEmail = searchParams.get("email");
 
   const formValues = {
-    email: "",
+    email: invitedEmail || "",
     password: "",
     confirmPassword: "",
     isChecked: false,
@@ -65,6 +68,7 @@ function Signup() {
           username: email,
           password1: password,
           password2: confirmPassword,
+          ...(inviteToken ? { invite_token: inviteToken } : {}),
         },
         url: "registration",
         resetForm,

@@ -73,6 +73,10 @@ export function checkFileSize(value) {
 }
 
 export const validationSchema = Yup.object().shape({
+  verification_document: Yup.mixed()
+    .nullable()
+    .test("file-size", largeFileText, checkFileSize)
+    .test("file-format", unSupportedText, checkFileFormat),
   company_documents: Yup.array().of(
     Yup.object().shape({
       file: Yup.mixed()
@@ -116,6 +120,7 @@ export function getInitialValues() {
 
     // company documents
     company_documents: [],
+    verification_document: null,
   };
 }
 
@@ -153,6 +158,7 @@ const getCompanyRouteSegment = (company, fallbackName) => {
 
 const CompanyDocuments = () => {
   const fileInputRef = useRef(null);
+  const verificationFileInputRef = useRef(null);
   const navigate = useNavigate();
 
   const formiks = useContext(FormikCtx);
@@ -180,6 +186,23 @@ const CompanyDocuments = () => {
   ) || CUSTOM_DOCUMENT_TYPE;
 
   const companyDocuments = formik?.values?.company_documents || [];
+  const verificationDocument = formik?.values?.verification_document || null;
+  const verificationDocumentError = formik?.touched?.verification_document
+    ? formik?.errors?.verification_document
+    : "";
+
+  const handleSelectVerificationDocument = (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    formik.setFieldValue("verification_document", file);
+    formik.setFieldTouched("verification_document", true, false);
+    event.currentTarget.value = "";
+  };
+
+  const removeVerificationDocument = () => {
+    formik.setFieldValue("verification_document", null);
+    formik.setFieldTouched("verification_document", true, false);
+  };
 
   const handleSelectDocuments = (event) => {
     const selectedFiles = Array.from(event.currentTarget.files || []);
@@ -246,6 +269,7 @@ const CompanyDocuments = () => {
       ...formiks.companyInfoFormik.values,
       ...formik.values,
       company_documents: companyDocumentsForUpload,
+      verification_document: formik.values.verification_document,
     });
 
     if (newCompany) {
@@ -279,6 +303,58 @@ const CompanyDocuments = () => {
       </div>
 
       <div className="space-y-4">
+        <div className="rounded-md border border-gray-100 bg-background p-4">
+          <p className="text-base font-semibold text-gray-900">Business Verification Document</p>
+          <p className="text-sm text-gray-500">
+            Upload your CAC certificate or equivalent business registration proof. This isn't required
+            to create your company, but it's reviewed by our team to grant your verified badge — you can
+            also upload it later from your company settings.
+          </p>
+
+          <input
+            ref={verificationFileInputRef}
+            type="file"
+            className="hidden"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+            onChange={handleSelectVerificationDocument}
+          />
+
+          {verificationDocument ? (
+            <div className="mt-4 flex items-start gap-3 rounded-md border border-gray-100 bg-white p-4 shadow-sm">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-gold/15 text-gold">
+                <FileText className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-gray-900">
+                  {verificationDocument.name}
+                </p>
+                <p className="text-xs text-gray-500">{formatFileSize(verificationDocument.size)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={removeVerificationDocument}
+                className="flex size-9 shrink-0 items-center justify-center rounded-md border border-red-100 text-red-500 transition-all duration-300 hover:bg-red-50"
+                aria-label="Remove verification document"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => verificationFileInputRef.current?.click()}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-gold bg-gold/10 px-4 py-4 text-sm font-semibold text-gray-900 transition-all duration-300 hover:bg-gold/20"
+            >
+              <FilePlus className="size-5" />
+              <span>Upload Verification Document</span>
+            </button>
+          )}
+
+          {verificationDocumentError && (
+            <p className="mt-2 text-xs text-red-500">{verificationDocumentError}</p>
+          )}
+        </div>
+
         <div className="flex flex-col gap-3 rounded-md border border-gray-100 bg-background p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-base font-semibold text-gray-900">Company Documents</p>

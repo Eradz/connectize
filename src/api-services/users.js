@@ -118,7 +118,7 @@ export const updateCurrentUserInfo = async (values) => {
     formData.append("avatar", values.image);
 
     return await makeApiRequest({
-      url: `api/users/${currentUser.id}/`,
+      url: `api/current-user/`,
       contentType: "multipart/form-data",
       method: "PATCH",
       data: formData,
@@ -126,7 +126,7 @@ export const updateCurrentUserInfo = async (values) => {
   }
 
   return await makeApiRequest({
-    url: `api/users/${currentUser.id}/`,
+    url: `api/current-user/`,
     method: "PATCH",
     data: profileData,
   });
@@ -208,6 +208,24 @@ export const logOutCurrentUser = async () => {
     type: "logout"
   });
   if (success) goToLogin();
+};
+
+export const getUserFollowers = async (id) => {
+  const response = await makeApiRequest({
+    url: `api/users/${id}/followers/`,
+    method: "GET",
+  });
+
+  return response?.results ?? response ?? [];
+};
+
+export const getUserFollowing = async (id) => {
+  const response = await makeApiRequest({
+    url: `api/users/${id}/following/`,
+    method: "GET",
+  });
+
+  return response?.results ?? response ?? [];
 };
 
 export const connectWithUser = async (id, hasConnected) => {

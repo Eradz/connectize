@@ -20,6 +20,7 @@ import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
 import { EventsSection, ProfileAboutList } from "./userProfile";
 import BlockCompanyButton from "../../components/moderation/BlockCompanyButton";
+import InviteCompanyModal from "../../components/company/InviteCompanyModal";
 import ReportModal from "../../components/moderation/ReportModal";
 import { Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
 import Scroll from "../../components/Scroll";
@@ -103,6 +104,7 @@ const CompanyProfile = React.memo(() => {
   const { company: companyName } = useParams();
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState("Activities");
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
   const companyDisplayName = company?.company_name || companyName;
@@ -268,7 +270,21 @@ const CompanyProfile = React.memo(() => {
       <div className="mt-12 mb-2 flex gap-2 overflow-x-auto scrollbar-hidden px-2">
         {currentUser?.email === company?.profile &&
           currentUser?.user_type === CompanyUserType && (
-            <ManageRepresentativesLink main />
+            <>
+              <ManageRepresentativesLink main />
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(true)}
+                className="border border-gold hover:bg-gold/10 transition-colors text-sm font-medium py-2 px-4 rounded-full whitespace-nowrap"
+              >
+                Invite a Company
+              </button>
+              <InviteCompanyModal
+                isOpen={showInviteModal}
+                onClose={() => setShowInviteModal(false)}
+                companySlug={company?.slug}
+              />
+            </>
           )}
         {stats.map((text, index) => (
           <StatsText key={index} text={text} />
@@ -571,7 +587,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
           <h2 className="text-lg font-bold">Summary</h2>
           {isCurrentUser && (
             <Link
-              to={`/company/${editCompanyName}/edit`}
+              to={webRoutes.companyEditProfile.replace(":company", editCompanyName)}
               aria-label="Edit summary"
               className="text-gray-500 hover:text-black"
             >
@@ -592,7 +608,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
           <h2 className="text-lg font-bold">ABOUT</h2>
           {isCurrentUser && (
             <Link
-              to={`/company/${editCompanyName}/edit`}
+              to={webRoutes.companyEditProfile.replace(":company", editCompanyName)}
               aria-label="Edit company information"
               className="text-gray-500 hover:text-black"
             >

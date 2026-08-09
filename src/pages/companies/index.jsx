@@ -249,7 +249,7 @@ export const CompaniesArray = ({
     <section
       className={`grid grid-cols-1 ${
         isSearch
-          ? "md:grid-cols-2"
+          ? "md:grid-cols-2 xl:grid-cols-3"
           : "sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3"
       } gap-6`}
     >
@@ -259,9 +259,8 @@ export const CompaniesArray = ({
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             key={index}
-            className={clsx("p-2 rounded-md flex flex-col", {
-              "bg-white": !isSearch,
-              "bg-background": isSearch,
+            className={clsx("p-2 rounded-md flex flex-col bg-white", {
+              border: isSearch,
             })}
           >
             <div className="flex flex-col gap-4 items-center">

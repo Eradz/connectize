@@ -44,6 +44,7 @@ const SuccessPage = lazy(() => import("./pages/authentication/successpage"));
 const BookMark = lazy(() => import("./pages/bookmark"));
 const BlockedUsersPage = lazy(() => import("./pages/blocked-users/index"));
 const BlockedCompaniesPage = lazy(() => import("./pages/blocked-companies/index"));
+const ConnectionsPage = lazy(() => import("./pages/connections/index"));
 const CompaniesPage = lazy(() => import("./pages/companies"));
 const CreateCompany = lazy(() => import("./pages/company"));
 const CompanyDocuments = lazy(() => import("./pages/company/CompanyDocuments"));
@@ -70,6 +71,7 @@ const ServiceAdmin = lazy(() => import("./pages/service/serviceAdmin"));
 const ServiceOverView = lazy(() => import("./pages/service/serviceOverview"));
 const SettingsPage = lazy(() => import("./pages/settings"));
 const EnterpriseSSOSetupPage = lazy(() => import("./pages/settings/EnterpriseSSOSetup"));
+const ManageEmailsPage = lazy(() => import("./pages/settings/ManageEmails"));
 const PrivacyPolicy = lazy(() => import("./pages/terms&policies/policy"));
 const TermsAndConditions = lazy(() => import("./pages/terms&policies/terms"));
 const AccountDeletionPage = lazy(() => import("./pages/account-deletion"));
@@ -302,8 +304,10 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.servicesDetail)} element={<ServiceOverView />} />
           <Route path={removeLeadingSlash(webRoutes.settings)} element={<SettingsPage />} />
           <Route path={removeLeadingSlash(webRoutes.enterpriseSSOSetup)} element={<EnterpriseSSOSetupPage />} />
+          <Route path={removeLeadingSlash(webRoutes.manageEmails)} element={<ManageEmailsPage />} />
           <Route path={removeLeadingSlash(webRoutes.userProfile)} element={<UserProfile />} />
-          
+          <Route path={removeLeadingSlash(webRoutes.userConnections)} element={<ConnectionsPage />} />
+
           {/* Company-specific routes with "co" prefix */}
           <Route path={removeLeadingSlash(webRoutes.bookmarks)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />
@@ -606,6 +610,7 @@ const removeLeadingSlash = (path) => {
           <Route path="services/:id" element={<ServiceOverView />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="settings/enterprise-sso" element={<EnterpriseSSOSetupPage />} />
+          <Route path="settings/manage-emails" element={<ManageEmailsPage />} />
           <Route path="user/:userId" element={<UserProfile />} />
         </Route>
 

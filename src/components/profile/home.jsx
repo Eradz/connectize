@@ -8,7 +8,7 @@ export const meta = () =>
   });
 
 import { useFormik } from "formik";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as Yup from "yup";
 import Form from "../../components/form";
 
@@ -22,42 +22,73 @@ import {
   roleKey,
 } from "../../lib/data";
 import { customFormikFieldValidator } from "../../lib/utils";
+import {
+  looksLikeBusinessName,
+  fetchBusinessNameMarkers,
+  BUSINESS_NAME_WARNING,
+} from "../../lib/businessNameHeuristic";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
 
-const validationSchema = Yup.object().shape({
-  first_name: Yup.string().trim().optional(),
-  last_name: Yup.string().trim().optional(),
-  role: Yup.string().trim().optional(),
-  gender: Yup.string().trim().optional(),
-  age: Yup.string()
-    .optional()
-    .test("compare-age", "You have to be at least 16 years", function (value) {
-      if (!value) return true;
-      const inputDate = new Date(value);
-
-      const today = new Date();
-      const seventeenYearsAgo = new Date();
-
-      seventeenYearsAgo.setFullYear(today.getFullYear() - 16);
-
-      today.setHours(0, 0, 0, 0);
-      seventeenYearsAgo.setHours(0, 0, 0, 0);
-      inputDate.setHours(0, 0, 0, 0);
-
-      // Check that the date is not today, not 17 years ago, and not in the future
-      return (
-        inputDate.getTime() !== today.getTime() &&
-        inputDate.getTime() !== seventeenYearsAgo.getTime() &&
-        inputDate <= today &&
-        inputDate < seventeenYearsAgo
-      );
-    }),
-});
-
 function Home() {
   const { user: currentUser } = useAuth();
+
+  // Populated from GET /api/auth/business-name-markers/ so admin-added
+  // markers apply to the live "looks like a company name" check without a
+  // deploy. The Yup .test() closures below read this ref at validation
+  // time, so updating it doesn't require rebuilding the schema.
+  const extraMarkersRef = useRef([]);
+
+  useEffect(() => {
+    fetchBusinessNameMarkers().then((markers) => {
+      extraMarkersRef.current = markers;
+    });
+  }, []);
+
+  const validationSchema = useMemo(
+    () =>
+      Yup.object().shape({
+        first_name: Yup.string()
+          .trim()
+          .optional()
+          .test("not-business-name", BUSINESS_NAME_WARNING, (value) =>
+            !looksLikeBusinessName(value, extraMarkersRef.current)
+          ),
+        last_name: Yup.string()
+          .trim()
+          .optional()
+          .test("not-business-name", BUSINESS_NAME_WARNING, (value) =>
+            !looksLikeBusinessName(value, extraMarkersRef.current)
+          ),
+        role: Yup.string().trim().optional(),
+        gender: Yup.string().trim().optional(),
+        age: Yup.string()
+          .optional()
+          .test("compare-age", "You have to be at least 16 years", function (value) {
+            if (!value) return true;
+            const inputDate = new Date(value);
+
+            const today = new Date();
+            const seventeenYearsAgo = new Date();
+
+            seventeenYearsAgo.setFullYear(today.getFullYear() - 16);
+
+            today.setHours(0, 0, 0, 0);
+            seventeenYearsAgo.setHours(0, 0, 0, 0);
+            inputDate.setHours(0, 0, 0, 0);
+
+            // Check that the date is not today, not 17 years ago, and not in the future
+            return (
+              inputDate.getTime() !== today.getTime() &&
+              inputDate.getTime() !== seventeenYearsAgo.getTime() &&
+              inputDate <= today &&
+              inputDate < seventeenYearsAgo
+            );
+          }),
+      }),
+    []
+  );
 
   const initialValues = {
     first_name:
@@ -96,6 +127,18 @@ function Home() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Surface the "looks like a company name" warning as the user types,
+  // rather than waiting for blur (Formik's default touched trigger).
+  useEffect(() => {
+    if (formik.values.first_name) formik.setFieldTouched("first_name", true, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.first_name]);
+
+  useEffect(() => {
+    if (formik.values.last_name) formik.setFieldTouched("last_name", true, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.last_name]);
 
   const fields = [
     {

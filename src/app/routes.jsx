@@ -42,6 +42,7 @@ export default [
     route(webRoutes.analysis, "../pages/market/analysis.jsx"),
     route(webRoutes.blockedUsers, "../pages/blocked-users/index.jsx"),
     route(webRoutes.blockedCompanies, "../pages/blocked-companies/index.jsx"),
+    route(webRoutes.userConnections, "../pages/connections/index.jsx"),
     route(webRoutes.bookmarks, "../pages/bookmark/index.jsx"),
     route(webRoutes.companies, "../pages/companies/index.jsx"),
 
@@ -73,6 +74,7 @@ export default [
     //
     route(webRoutes.settings, "../pages/settings/index.jsx"),
     route(webRoutes.enterpriseSSOSetup, "../pages/settings/EnterpriseSSOSetup.jsx"),
+    route(webRoutes.manageEmails, "../pages/settings/ManageEmails.jsx"),
     route(webRoutes.userProfile, "../pages/feed/userProfile.jsx"),
     route(webRoutes.support, "../pages/support/Support.jsx"),
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getSession } from "../lib/session";
+import { redirectToProfileCompletion } from "../lib/helpers";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -23,6 +24,16 @@ marketplaceApi.interceptors.request.use((config) => {
   
   return config;
 });
+
+marketplaceApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.data?.code === "profile_incomplete") {
+      redirectToProfileCompletion(error.response.data);
+    }
+    return Promise.reject(error);
+  },
+);
 
 // ==================== LISTINGS ====================
 
