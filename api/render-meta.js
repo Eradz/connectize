@@ -13,6 +13,14 @@ const TEMPLATE_CANDIDATES = [
   path.join(__dirname, "..", "index.html"),
 ];
 
+// This rewrite exists purely so link-preview/search crawlers (which don't
+// execute JS) see real title/OG tags and a text snapshot instead of an
+// empty #root. Real browsers must get the pristine SPA shell - injecting
+// unstyled content into #root for them causes a flash before React mounts
+// and replaces it.
+const BOT_USER_AGENT_PATTERN =
+  /bot|facebookexternalhit|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot|discordbot|pinterest|redditbot|embedly|quora link preview|showyoubot|outbrain|vkshare|w3c_validator|baiduspider|yandex|duckduckbot|applebot|skypeuripreview/i;
+
 async function readTemplateHtml() {
   for (const candidate of TEMPLATE_CANDIDATES) {
     try {
@@ -618,13 +626,21 @@ function replaceMeta(html, meta) {
 
 export default async function handler(req, res) {
   const requestPath = typeof req.query.path === "string" ? req.query.path : "/";
+  const userAgent = req.headers["user-agent"] || "";
+  const isBot = BOT_USER_AGENT_PATTERN.test(userAgent);
 
   try {
-    const [template, meta] = await Promise.all([
-      readTemplateHtml(),
-      buildMetaForPath(requestPath),
-    ]);
+    const template = await readTemplateHtml();
 
+    if (!isBot) {
+      // Real visitor: serve the untouched SPA shell. The app sets its own
+      // title/meta tags client-side once it mounts.
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=3600");
+      return res.status(200).send(template);
+    }
+
+    const meta = await buildMetaForPath(requestPath);
     const html = replaceMeta(template, meta);
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");

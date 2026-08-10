@@ -54,7 +54,7 @@ const normalizeListResponse = (response) => {
 
 export default function UserProfile() {
   const { userId } = useParams();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('about');
   const [activeEventTab, setActiveEventTab] = useState('created');
   const [activeDealTab, setActiveDealTab] = useState('created');
@@ -194,7 +194,7 @@ export default function UserProfile() {
     [paramUser]
   );
 
-  if (isLoading) return <PageLoading hasLogo={false} />;
+  if (authLoading || isLoading) return <PageLoading hasLogo={false} />;
   if (!paramUser) return (
     <section className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-3">
       <DotLottieReact
