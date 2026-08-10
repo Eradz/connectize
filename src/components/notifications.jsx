@@ -451,7 +451,7 @@ const NotificationTile = memo(({ notification, index }) => {
     .join(" ") || senderData?.email || "";
   const companyName = companyData?.company_name || senderData?.company_name || "";
   const avatarUrl = resolveMediaUrl(
-    senderData?.avatar || companyData?.logo || senderData?.logo
+    companyData?.logo || senderData?.avatar || senderData?.logo
   );
   const visual = NOTIFICATION_VISUALS[notification?.notification_type] || NOTIFICATION_VISUALS.default;
   const TypeIcon = visual.Icon;
