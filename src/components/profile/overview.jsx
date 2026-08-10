@@ -54,7 +54,6 @@ function Overview() {
    */
   const ctx = useOutletContext();
 
-  console.log("ctx", ctx);
   // Redirect if condition fails
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 4),
@@ -73,6 +72,7 @@ function Overview() {
 
   const validationSchema = Yup.object().shape({
     image: Yup.mixed()
+      .nullable()
       .optional()
       .test(
         "file-size",
