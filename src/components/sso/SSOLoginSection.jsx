@@ -54,7 +54,9 @@ export default function SSOLoginSection() {
           />
         )}
 
-        <EnterpriseSSOButton onSSODetected={handleSSODetected} />
+        {providers?.enterprise_sso && (
+          <EnterpriseSSOButton onSSODetected={handleSSODetected} />
+        )}
       </div>
 
       {error && (
