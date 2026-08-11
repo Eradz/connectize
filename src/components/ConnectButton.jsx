@@ -16,6 +16,14 @@ const STATUS_LABELS = {
   connected: "Unfollow",
 };
 
+// This is a mutual-follow state machine, so the next state after a click is
+// always deterministic — no need to wait on the network to know it.
+const USER_OPTIMISTIC_NEXT_STATUS = {
+  none: "pending_outgoing",
+  pending_incoming: "connected",
+  connected: "pending_incoming",
+};
+
 export default function ConnectButton({
   id,
   slug = "",
@@ -56,17 +64,53 @@ export default function ConnectButton({
     ? "connected"
     : "none";
 
+  // Match only the single-profile query shape (["users", <id>]) — a broader
+  // match on queryKey[0] === "users" would also catch cached user *lists*
+  // (search/suggestions), whose value is an array, and `typeof [] ===
+  // "object"` would let the patch below silently corrupt it.
+  const isSingleUserQuery = (query) =>
+    Array.isArray(query.queryKey) &&
+    query.queryKey.length === 2 &&
+    query.queryKey[0] === "users" &&
+    String(query.queryKey[1]) === String(slug);
+
+  const patchUserCache = (patch) =>
+    queryClient.setQueriesData({ predicate: isSingleUserQuery }, (old) =>
+      old && typeof old === "object" && !Array.isArray(old) ? { ...old, ...patch } : old
+    );
+
   const handleConnect = async () => {
-    // isSubmitting guards against rapid re-clicks: `status` only reflects the
-    // backend's real state once the invalidated query below refetches, so
-    // without this a user clicking repeatedly before that refetch lands would
-    // fire a POST per click (the backend dedupes via get_or_create, but each
-    // extra click was still driving the old, unconditional local increment).
+    // isSubmitting guards against rapid re-clicks/double submission while the
+    // confirming request is in flight, even though the label already flips
+    // optimistically below.
     if (!slug || isSubmitting) return;
     if (status === "pending_outgoing") return;
 
     const isUnfollowing = status === "connected";
     setIsSubmitting(true);
+
+    // Optimistic update, snapshotted so it can be rolled back on failure.
+    // Waiting for the server before showing anything was what made this feel
+    // slow — the transition is deterministic, so show the end state now and
+    // reconcile (or revert) once the request actually resolves.
+    const previousEntries =
+      type === "users" ? queryClient.getQueriesData({ predicate: isSingleUserQuery }) : [];
+    setCachedConnections?.((prev) => prev + (isUnfollowing ? -1 : 1));
+
+    if (type === "users") {
+      const optimisticStatus = USER_OPTIMISTIC_NEXT_STATUS[status];
+      setHasConnected(optimisticStatus === "connected");
+      if (optimisticStatus) {
+        patchUserCache({
+          connection_status: optimisticStatus,
+          follow_status: optimisticStatus,
+          is_following: optimisticStatus !== "none",
+          is_connected: optimisticStatus === "connected",
+        });
+      }
+    } else {
+      setHasConnected(!isUnfollowing);
+    }
 
     try {
       const response =
@@ -74,52 +118,31 @@ export default function ConnectButton({
           ? await connectWithUser(slug, isUnfollowing)
           : await connectWithCompany(slug, isUnfollowing);
 
-      // Reconcile with the backend's authoritative count instead of trusting
-      // the optimistic guess — the response already carries the real value.
+      // Reconcile with the backend's authoritative values in case they ever
+      // differ from the optimistic guess (e.g. the relationship changed from
+      // another tab in between).
       if (typeof response?.followers_count === "number") {
         setCachedConnections?.(response.followers_count);
-      } else {
-        setCachedConnections?.((prev) => prev + (isUnfollowing ? -1 : 1));
       }
-      setHasConnected(response?.connection_status === "connected" || !isUnfollowing);
-
-      // The displayed `status` prefers the `connection_status` prop, which
-      // comes from a react-query cache this component doesn't own. Waiting on
-      // an invalidated refetch to come back was too slow/unreliable for an
-      // "immediate" button flip, so write the mutation's own authoritative
-      // response straight into the cache — synchronous, no network round trip
-      // needed before the UI reflects it. Still invalidate in the background
-      // afterward for eventual consistency with anything else this doesn't cover.
       if (type === "users" && response?.connection_status) {
-        // Match only the single-profile query shape (["users", <id>]) — a
-        // broader match on queryKey[0] === "users" would also catch cached
-        // user *lists* (search/suggestions), whose value is an array, and
-        // `typeof [] === "object"` would let the spread below silently
-        // corrupt that array into a garbage object.
-        const isSingleUserQuery = (query) =>
-          Array.isArray(query.queryKey) &&
-          query.queryKey.length === 2 &&
-          query.queryKey[0] === "users" &&
-          String(query.queryKey[1]) === String(slug);
-
-        queryClient.setQueriesData({ predicate: isSingleUserQuery }, (old) =>
-          old && typeof old === "object" && !Array.isArray(old)
-            ? {
-                ...old,
-                connection_status: response.connection_status,
-                follow_status: response.connection_status,
-                is_following: response.is_following ?? old.is_following,
-                is_connected: response.is_connected ?? old.is_connected,
-                followers_count: response.followers_count ?? old.followers_count,
-                following_count: response.following_count ?? old.following_count,
-              }
-            : old
-        );
+        setHasConnected(response.connection_status === "connected");
+        patchUserCache({
+          connection_status: response.connection_status,
+          follow_status: response.connection_status,
+          is_following: response.is_following,
+          is_connected: response.is_connected,
+          followers_count: response.followers_count,
+          following_count: response.following_count,
+        });
         queryClient.invalidateQueries({ predicate: isSingleUserQuery });
-      } else {
-        await queryClient.invalidateQueries({ queryKey: ["myCompanies"] });
+      } else if (type !== "users") {
+        queryClient.invalidateQueries({ queryKey: ["myCompanies"] });
       }
     } catch (error) {
+      // Roll back the optimistic update — the request actually failed.
+      setCachedConnections?.((prev) => prev + (isUnfollowing ? 1 : -1));
+      setHasConnected(isUnfollowing);
+      previousEntries.forEach(([key, value]) => queryClient.setQueryData(key, value));
       toast.error("Something went wrong — please try again");
     } finally {
       setIsSubmitting(false);
