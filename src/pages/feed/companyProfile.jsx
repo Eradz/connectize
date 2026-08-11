@@ -33,6 +33,7 @@ import { dealRoomService } from "../../api-services/oilgas";
 import { listingService } from "../../api-services/marketplace";
 import CreatePost from "../../components/admin/feeds/CreatePost";
 import DiscoverPosts from "../../components/admin/feeds/DiscoverPosts";
+import RegistryVerificationBadge from "../../components/company/RegistryVerificationBadge";
 import { PostCard } from "../../components/admin/feeds/DiscoverPostTabs";
 import PrimaryButton from "../../components/PrimaryButton";
 import { ProductListCard } from "../../components/admin/markets/newlyListed";
@@ -598,9 +599,11 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
           )}
         </div>
         <p className="text-sm text-gray-600 leading-relaxed">
-          {company?.about || "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatu"}
+          {company?.about || "No summary added yet."}
         </p>
       </div>
+
+      <RegistryVerificationBadge company={company} editable={isCurrentUser} />
 
       {/* About Section */}
       <div className="bg-white border rounded-lg p-4">
@@ -629,7 +632,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
             <div>
               <p className="text-xs text-gray-500 mb-1">Location :</p>
               <p className="text-sm text-gray-800">
-                {company?.office_address || "2972 Westheimer Rd."}<br/>
+                {company?.office_address || "No office address added yet."}<br/>
                 {[company?.city, company?.state, company?.country]
                   .filter(Boolean)
                   .filter(
@@ -639,7 +642,7 @@ const ProductSidebar = React.memo(({ company, companyName }) => {
                           other.trim().toLowerCase() === part.trim().toLowerCase()
                       ) === index
                   )
-                  .join(", ") || "Santa Ana, Illinois"}
+                  .join(", ") || "No location added yet."}
               </p>
             </div>
           </div>
