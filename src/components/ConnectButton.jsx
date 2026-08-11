@@ -81,15 +81,41 @@ export default function ConnectButton({
       } else {
         setCachedConnections?.((prev) => prev + (isUnfollowing ? -1 : 1));
       }
-      setHasConnected(!isUnfollowing);
+      setHasConnected(response?.connection_status === "connected" || !isUnfollowing);
 
       // The displayed `status` prefers the `connection_status` prop, which
-      // comes from a react-query cache this component doesn't own — without
-      // invalidating it, that prop stays stale until a hard refresh.
-      if (type === "users") {
-        await queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "users",
-        });
+      // comes from a react-query cache this component doesn't own. Waiting on
+      // an invalidated refetch to come back was too slow/unreliable for an
+      // "immediate" button flip, so write the mutation's own authoritative
+      // response straight into the cache — synchronous, no network round trip
+      // needed before the UI reflects it. Still invalidate in the background
+      // afterward for eventual consistency with anything else this doesn't cover.
+      if (type === "users" && response?.connection_status) {
+        // Match only the single-profile query shape (["users", <id>]) — a
+        // broader match on queryKey[0] === "users" would also catch cached
+        // user *lists* (search/suggestions), whose value is an array, and
+        // `typeof [] === "object"` would let the spread below silently
+        // corrupt that array into a garbage object.
+        const isSingleUserQuery = (query) =>
+          Array.isArray(query.queryKey) &&
+          query.queryKey.length === 2 &&
+          query.queryKey[0] === "users" &&
+          String(query.queryKey[1]) === String(slug);
+
+        queryClient.setQueriesData({ predicate: isSingleUserQuery }, (old) =>
+          old && typeof old === "object" && !Array.isArray(old)
+            ? {
+                ...old,
+                connection_status: response.connection_status,
+                follow_status: response.connection_status,
+                is_following: response.is_following ?? old.is_following,
+                is_connected: response.is_connected ?? old.is_connected,
+                followers_count: response.followers_count ?? old.followers_count,
+                following_count: response.following_count ?? old.following_count,
+              }
+            : old
+        );
+        queryClient.invalidateQueries({ predicate: isSingleUserQuery });
       } else {
         await queryClient.invalidateQueries({ queryKey: ["myCompanies"] });
       }
