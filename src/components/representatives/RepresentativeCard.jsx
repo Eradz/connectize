@@ -49,6 +49,7 @@ export default function RepresentativeCard({ user, company, role }) {
             first_name={user?.first_name}
             id={user?.id}
             slug={user?.id}
+            connection_status={user?.connection_status}
           />
         )}
       </div>
