@@ -15,6 +15,7 @@ export const meta = () =>
   });
 
 import Form from "../../components/form";
+import RegistryNamePreview from "../../components/company/RegistryNamePreview";
 import StepButton from "../../components/profile/StepButton";
 import SaveDraftButton from "../../components/profile/SaveDraftButton";
 import { FormikCtx } from "./context";
@@ -211,6 +212,7 @@ const CreateCompany = () => {
         inputArray={listingFields}
         hasButton={false}
       />
+      <RegistryNamePreview companyName={formik.values.company_name} />
       <div className="flex justify-between my-6">
         <div></div>
         <div className="flex items-center gap-3">

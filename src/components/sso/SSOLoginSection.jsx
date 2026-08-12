@@ -57,10 +57,10 @@ export default function SSOLoginSection({accountType}) {
             onError={setError}
           />
         )}
-        </div>
-      ) 
-    }
-    {( (pathname.includes("/signup") && accountType === "company") || pathname.includes("/login")) && <EnterpriseSSOButton onSSODetected={handleSSODetected} />}
+
+        {providers?.enterprise_sso && (
+          <EnterpriseSSOButton onSSODetected={handleSSODetected} />
+        )}
       </div>
 
       {error && (

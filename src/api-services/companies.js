@@ -441,6 +441,43 @@ export const getAssociatedPeopleForCompany = async ({ slug, companyId }) => {
   return people.slice(0, 10);
 };
 
+/**
+ * Check a candidate company name against the Nigeria oil & gas registry.
+ * Doesn't touch any Company row - safe to call on every keystroke (debounced).
+ * Returns { confidence: "exact"|"fuzzy"|"none", match: {...}|null, suggestions: [...] }.
+ */
+export const verifyRegistryName = async (companyName) => {
+  const name = String(companyName || "").trim();
+  if (!name) return { confidence: "none", match: null, suggestions: [] };
+
+  return makeApiRequest({
+    url: `api/companies/verify-registry-name/`,
+    method: "POST",
+    data: { company_name: name },
+  });
+};
+
+/**
+ * Confirm a registry match/suggestion for an existing company. Pass registryCompanyId
+ * to confirm a specific suggestion (e.g. the user picked the 2nd of 3 candidates)
+ * instead of whichever one was auto-attached on save.
+ */
+export const confirmRegistryMatch = async (slug, registryCompanyId) => {
+  return makeApiRequest({
+    url: `api/companies/${slug}/confirm-registry-match/`,
+    method: "POST",
+    data: registryCompanyId ? { registry_company_id: registryCompanyId } : {},
+  });
+};
+
+/** Reject the current registry match/suggestion ("that's not us"). */
+export const clearRegistryMatch = async (slug) => {
+  return makeApiRequest({
+    url: `api/companies/${slug}/clear-registry-match/`,
+    method: "POST",
+  });
+};
+
 export const connectWithCompany = async (slug, hasConnected) => {
   if (hasConnected) {
     return await makeApiRequest({

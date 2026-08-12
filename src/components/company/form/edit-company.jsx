@@ -14,6 +14,7 @@ import {
   uploadCompanyVerificationDocument,
 } from "../../../api-services/companies";
 import Form from "../../form";
+import RegistryVerificationBadge from "../RegistryVerificationBadge";
 import ProfileSection from "../../userProfile/profile-section";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -282,6 +283,8 @@ export default function EditCompanyForm({ company }) {
           </>
         )}
       </div>
+
+      <RegistryVerificationBadge company={company} />
 
       <Form
         formik={formik}
