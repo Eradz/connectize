@@ -449,9 +449,9 @@ const ParentPostEmbed = ({
         <CompanyName
           name={authorName || "Unknown"}
           verified={
-            parentPost?.company?.verified ??
-            parentPost?.company?.verify ??
-            parentPost?.user?.verified
+            parentPost?.company
+              ? parentPost.company.verified
+              : parentPost?.user?.verified
           }
           company={!!parentPost?.company}
           userId={parentPost?.user?.id}
@@ -941,9 +941,9 @@ export const DiscoverPostItem = ({
                 getUserDisplayName(activePost?.user)
               }
               verified={
-                activePost?.company?.verified ??
-                activePost?.company?.verify ??
-                activePost?.user?.verified
+                activePost?.company
+                  ? activePost.company.verified
+                  : activePost?.user?.verified
               }
               company={!!activePost?.company?.slug}
               userId={activePost?.user?.id}
