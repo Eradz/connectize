@@ -55,14 +55,26 @@ export default function ConnectButton({
     }
   }, [currentUser, currentCompany, id, type]);
 
-  // Prefer the backend's authoritative status; fall back to the client-side
-  // derivation above when it's absent (e.g. company connections, which don't
-  // yet report connection_status).
-  const status = KNOWN_STATUSES.includes(connection_status)
-    ? connection_status
-    : hasConnected
-    ? "connected"
-    : "none";
+  // `status` is real state, not re-derived from `connection_status` on every
+  // render — some callers (e.g. the representatives list) source that prop
+  // from a query that never gets invalidated/patched after a connect action,
+  // so re-deriving from it each render would instantly stomp the optimistic
+  // update in handleConnect below, right back to the stale "none". Instead,
+  // only resync from the prop when it actually changes value (a real refetch
+  // landed), which never fires again once it's stuck at a stale value.
+  const [status, setStatus] = useState(() =>
+    KNOWN_STATUSES.includes(connection_status)
+      ? connection_status
+      : hasConnected
+      ? "connected"
+      : "none"
+  );
+
+  useEffect(() => {
+    if (KNOWN_STATUSES.includes(connection_status)) {
+      setStatus(connection_status);
+    }
+  }, [connection_status]);
 
   // Match only the single-profile query shape (["users", <id>]) — a broader
   // match on queryKey[0] === "users" would also catch cached user *lists*
@@ -87,6 +99,7 @@ export default function ConnectButton({
     if (status === "pending_outgoing") return;
 
     const isUnfollowing = status === "connected";
+    const previousStatus = status;
     setIsSubmitting(true);
 
     // Optimistic update, snapshotted so it can be rolled back on failure.
@@ -101,6 +114,7 @@ export default function ConnectButton({
       const optimisticStatus = USER_OPTIMISTIC_NEXT_STATUS[status];
       setHasConnected(optimisticStatus === "connected");
       if (optimisticStatus) {
+        setStatus(optimisticStatus);
         patchUserCache({
           connection_status: optimisticStatus,
           follow_status: optimisticStatus,
@@ -110,6 +124,7 @@ export default function ConnectButton({
       }
     } else {
       setHasConnected(!isUnfollowing);
+      setStatus(isUnfollowing ? "none" : "connected");
     }
 
     try {
@@ -126,6 +141,7 @@ export default function ConnectButton({
       }
       if (type === "users" && response?.connection_status) {
         setHasConnected(response.connection_status === "connected");
+        setStatus(response.connection_status);
         patchUserCache({
           connection_status: response.connection_status,
           follow_status: response.connection_status,
@@ -142,6 +158,7 @@ export default function ConnectButton({
       // Roll back the optimistic update — the request actually failed.
       setCachedConnections?.((prev) => prev + (isUnfollowing ? 1 : -1));
       setHasConnected(isUnfollowing);
+      setStatus(previousStatus);
       previousEntries.forEach(([key, value]) => queryClient.setQueryData(key, value));
       toast.error("Something went wrong — please try again");
     } finally {
