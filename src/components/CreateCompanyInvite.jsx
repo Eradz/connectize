@@ -12,8 +12,8 @@ const CreateCompanyInvite = () => {
               <CreateCompanyIcon/>
               <div className="flex items-center justify-between">
                 <span className="text-white text-[10px]">
-                  <p>{user.user_type === "company" ? "Create a Company" : "Update your Profile"}</p>
-                  <p>{user.user_type === "company" ? "Are you a company? click here to switch to a company account." : "Complete your user profile to get access to more features."}</p>
+                  <p>{user?.user_type === "company" ? "Create a Company" : "Update your Profile"}</p>
+                  <p>{user?.user_type === "company" ? "Are you a company? click here to switch to a company account." : "Complete your user profile to get access to more features."}</p>
                 </span>
                 <ArrowRightIcon color="#ffffff" />
               </div>

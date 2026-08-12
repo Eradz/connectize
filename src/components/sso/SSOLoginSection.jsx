@@ -9,7 +9,7 @@ import EnterpriseSSOButton, { startEnterpriseSSOFlow } from "./EnterpriseSSOButt
  * Renders all available SSO login buttons.
  * Fetches provider availability from the backend on mount.
  */
-export default function SSOLoginSection({accountType}) {
+export default function SSOLoginSection({accountType = "user"}) {
   const [providers, setProviders] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,7 +62,7 @@ export default function SSOLoginSection({accountType}) {
         </div>
       ) 
     }
-    {( (pathname.includes("/signup") && accountType === "company") || pathname.includes("/login")) && providers?.enterprise_sso && (
+    {((pathname.includes("/signup") && accountType === "company") || pathname.includes("/login")) && providers?.enterprise_sso && (
           <EnterpriseSSOButton onSSODetected={handleSSODetected} />
         )}
       </div>
