@@ -58,7 +58,11 @@ export default function SSOLoginSection({accountType}) {
           />
         )}
 
-        {providers?.enterprise_sso && (
+        
+        </div>
+      ) 
+    }
+    {( (pathname.includes("/signup") && accountType === "company") || pathname.includes("/login")) && providers?.enterprise_sso && (
           <EnterpriseSSOButton onSSODetected={handleSSODetected} />
         )}
       </div>
