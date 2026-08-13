@@ -611,7 +611,16 @@ const PeopleGrid = ({ users, navigate }) => {
                 <small className="text-gray-400 line-clamp-1">@{handle}</small>
               )}
             </div>
-            <ConnectButton first_name={displayName} id={user?.id} />
+            {/* The card itself navigates on click - stop that here so Connect doesn't
+                also trigger a navigation away mid-request. */}
+            <div onClick={(e) => e.stopPropagation()}>
+              <ConnectButton
+                first_name={displayName}
+                id={user?.id}
+                slug={user?.id}
+                connection_status={user?.connection_status}
+              />
+            </div>
           </motion.div>
         );
       })}
