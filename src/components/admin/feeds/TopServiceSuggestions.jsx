@@ -93,7 +93,7 @@ export function SuggestionList({
               : "No suggestions available"}
           </LightParagraph>
         ) : (
-          users?.map((user) => {
+          [thisUser, ...users]?.map((user) => {
             const {
               avatar,
               email,
@@ -119,7 +119,7 @@ export function SuggestionList({
                 connectionType={connection_type}
                 isMutual={is_mutual}
                 suggestionReasons={suggestion_reasons}
-                role={role}
+                role={thisUser?.id === id ? "Owner" : role}
                 associated={associated}
               />
             );

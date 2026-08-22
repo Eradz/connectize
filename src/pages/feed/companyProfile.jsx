@@ -1,15 +1,10 @@
-import { LocationOnOutlined } from "@mui/icons-material";
-import { EnvelopeClosedIcon, GlobeIcon, DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { EnvelopeClosedIcon, GlobeIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Reviews from "../../components/admin/feeds/reviews";
-import Summary from "../../components/admin/feeds/summary";
 import { SuggestionList } from "../../components/admin/feeds/TopServiceSuggestions";
-import ListedProducts from "../../components/admin/products/listedProducts";
-import NoPage from "../../components/NoPage";
 import PageLoading from "../../components/PageLoading";
-import LightParagraph from "../../components/ParagraphText";
 import SEO, { createSEO } from "../../components/SEO";
 import { getSEOConfig } from "../../lib/seoConfig";
 import Header from "../../components/userProfile/header";
@@ -17,12 +12,9 @@ import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
 import { usePollCurrentCompany } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
-import { capitalizeFirst, formatNumber } from "../../lib/utils";
-import { EventsSection, ProfileAboutList } from "./userProfile";
-import BlockCompanyButton from "../../components/moderation/BlockCompanyButton";
+import { formatNumber } from "../../lib/utils";
+import { EventsSection } from "./userProfile";
 import InviteCompanyModal from "../../components/company/InviteCompanyModal";
-import ReportModal from "../../components/moderation/ReportModal";
-import { Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
 import Scroll from "../../components/Scroll";
 import { webRoutes } from "../../lib/webRoutes";
 import { workforceAPI } from "../../api-services/workforce";
@@ -140,7 +132,6 @@ const CompanyProfile = React.memo(() => {
                 setLoading(true);
                 const response = await workforceAPI.getJobs();
                 const data = normalizeListResponse(response).filter(job => job?.company_name == companyDisplayName);
-                console.log("Filtered jobs:", data);
                 setApplications(data);
             // No separate filtered state; derived via useMemo
               } catch (error) {
