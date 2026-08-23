@@ -63,6 +63,7 @@ const NotFound = lazy(() => import("./pages/not-found"));
 const PostInsightsPage = lazy(() => import("./pages/posts/postInsightsPage"));
 const SinglePostPage = lazy(() => import("./pages/posts/singlePostPage"));
 const RepresentativesPage = lazy(() => import("./pages/representatives"));
+const ConnectizersPage = lazy(() => import("./pages/connectizers"));
 const AcceptRepresentation = lazy(() => import("./pages/representatives/AcceptRepresentation"));
 const AssignRepresentative = lazy(() => import("./pages/representatives/AssignRepresentative"));
 const Search = lazy(() => import("./pages/search"));
@@ -311,6 +312,7 @@ const removeLeadingSlash = (path) => {
           {/* Company-specific routes with "co" prefix */}
           <Route path={removeLeadingSlash(webRoutes.bookmarks)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />
+          <Route path={removeLeadingSlash(webRoutes.connectizers)} element={<ConnectizersPage />} />
           <Route path={removeLeadingSlash(webRoutes.assignRepresentative)} element={<AssignRepresentative />} />
           <Route path={removeLeadingSlash(webRoutes.blockedUsers)} element={<BlockedUsersPage />} />
           <Route path={removeLeadingSlash(webRoutes.blockedCompanies)} element={<BlockedCompaniesPage />} />

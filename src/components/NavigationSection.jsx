@@ -112,7 +112,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   }, [pathname]); // Remove expandedHubItems and expandedSections from dependencies to prevent loops
 
   const navigators = useMemo(
-    () => (isSmallNavigation ? feedNavItems.filter((navItem, index)=> navItem.name === "Home" || navItem.name === "Representatives" || navItem.name === "Companies" || navItem.name === "Market" ) : feedNavItems.filter((navItem) => navItem.name != "Market")),
+    () => (isSmallNavigation ? feedNavItems.filter((navItem, index)=> navItem.name === "Home" || navItem.name === "Connectizers" || navItem.name === "Companies" || navItem.name === "Market" ) : feedNavItems.filter((navItem) => navItem.name != "Market")),
     [isSmallNavigation]
   );
 

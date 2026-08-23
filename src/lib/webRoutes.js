@@ -54,6 +54,7 @@ const webRoutes = {
   reactivateAccount: "/reactivate-account",
   representatives: "/co/representatives",
   representative: "/representatives",
+  connectizers: "/connectizers",
   representativeManage: "/co/representatives/manage",
   resetPassword: "/reset-password",
   search: "/search",

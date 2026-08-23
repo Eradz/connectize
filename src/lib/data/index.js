@@ -44,8 +44,8 @@ export const feedNavItems = [
     smallNavigation: true,
   },
   {
-    name: "Representatives",
-    to: webRoutes.representatives,
+    name: "Connectizers",
+    to: webRoutes.connectizers,
     icon: UserGroup,
     smallNavigation: true,
   },
