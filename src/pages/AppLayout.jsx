@@ -7,6 +7,7 @@ import {
   useNavigation,
 } from "react-router-dom";
 import Sidebar from "../components/admin/markets/sidebar";
+import ProfileCompletionBanner from "../components/ProfileCompletionBanner";
 import Navbar from "../components/userProfile/Navbar";
 import PublicNavbar from "../components/PublicNavbar";
 import TrialBanner from "../components/TrialBanner";
@@ -52,6 +53,11 @@ const AppLayout = () => {
               "w-full xl:w-[968px] h-full mx-auto overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
               isMessagesRoute ? "overflow-hidden" : "overflow-auto pb-14 lg:pb-0"
             )}>
+            {/* Renders nothing once the profile has a first and last name.
+                Mounted here rather than in FeedLayout so it also shows on pages
+                that sit outside the feed - Connectizers especially, where the
+                connect action the profile gate blocks actually lives. */}
+            <ProfileCompletionBanner />
             <Outlet />
           </div>
         </section>

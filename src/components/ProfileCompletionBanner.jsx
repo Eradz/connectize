@@ -15,10 +15,18 @@ import { PROFILE_COMPLETION_ROUTE } from "../lib/profileCompletion";
 export default function ProfileCompletionBanner() {
   const { user } = useAuth();
 
-  // Only hide when the API has positively said the profile is complete. An older
-  // response without the field leaves this undefined, and prompting on a maybe
-  // beats letting the next write fail silently.
-  if (!user || user.is_profile_complete !== false) return null;
+  if (!user) return null;
+
+  // Prefer the API's own flag, since it is the same value the gate enforces. But
+  // fall back to the names themselves when the flag is missing - a user object
+  // cached from before that field existed would otherwise hide the banner from
+  // exactly the people who need it.
+  const incomplete =
+    user.is_profile_complete === false ||
+    (user.is_profile_complete === undefined &&
+      (!user.first_name?.trim() || !user.last_name?.trim()));
+
+  if (!incomplete) return null;
 
   return (
     <section

@@ -26,6 +26,7 @@ import * as Yup from "yup";
 import { getCountries } from "@loophq/country-state-list";
 import useRedirect from "../../hooks/useRedirect";
 import { useAuth } from "../../context/userContext";
+import { webRoutes } from "../../lib/webRoutes";
 
 const validationSchema = Yup.object().shape({
   nationality: Yup.string().trim().optional(),
@@ -41,7 +42,7 @@ function Address() {
 
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 2),
-    "/contact"
+    webRoutes.profileWizardContact
   );
 
   const initialValues = {

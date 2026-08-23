@@ -1,4 +1,8 @@
-export const PROFILE_COMPLETION_ROUTE = "/update-profile/overview";
+// The wizard's first step (home.jsx) is where first_name and last_name are
+// entered, so that is where someone told to "complete your profile" needs to go.
+// /update-profile/overview is the final review step and redirects away when the
+// earlier steps are unfinished.
+export const PROFILE_COMPLETION_ROUTE = "/update-profile";
 export const PROFILE_COMPLETION_MESSAGE =
   "Complete your first and last name before creating or responding to content.";
 

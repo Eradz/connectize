@@ -23,6 +23,7 @@ import Form from "../form";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
+import { webRoutes } from "../../lib/webRoutes";
 
 const validationSchema = Yup.object().shape({
   bio: Yup.string().trim().optional(),
@@ -55,7 +56,7 @@ function Bio() {
   const { user: currentUser } = useAuth();
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 3),
-    "/address"
+    webRoutes.profileWizardAddress
   );
   const formValues = {
     bio: currentUser?.bio || localStorage.getItem(bioKey) || "",

@@ -51,6 +51,16 @@ const webRoutes = {
   productListing: "/products/listing",
   profile: "/profile",
   profileUpdate: "/update-profile",
+  // Full paths for the multi-step profile wizard. The `home`, `bio`, `address`,
+  // `contact` and `overview` keys are only the child segments App.jsx registers
+  // under `/update-profile`; navigating to those directly lands on a route that
+  // does not exist (e.g. "/bio" fell through to the company-slug catch-all and
+  // rendered "Company not found").
+  profileWizardStart: "/update-profile",
+  profileWizardContact: "/update-profile/contact",
+  profileWizardAddress: "/update-profile/address",
+  profileWizardBio: "/update-profile/bio",
+  profileWizardOverview: "/update-profile/overview",
   reactivateAccount: "/reactivate-account",
   representatives: "/co/representatives",
   representative: "/representatives",

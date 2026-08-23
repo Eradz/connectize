@@ -35,6 +35,7 @@ import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
 import { useOutletContext } from "react-router-dom";
+import { webRoutes } from "../../lib/webRoutes";
 
 const FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const SUPPORTED_FORMATS = [
@@ -58,7 +59,7 @@ function Overview() {
   // Redirect if condition fails
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 4),
-    "/bio"
+    webRoutes.profileWizardBio
   );
 
   useRedirect(!getLocalData(first_nameKey), `/co/${currentUser?.id}`);
