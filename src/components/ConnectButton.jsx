@@ -133,6 +133,15 @@ export default function ConnectButton({
           ? await connectWithUser(slug, isUnfollowing)
           : await connectWithCompany(slug, isUnfollowing);
 
+      // A successful connect always returns a payload. Anything falsy means the
+      // request did not actually go through - makeApiRequest swallows some
+      // failures and resolves with null rather than throwing - and leaving the
+      // optimistic flip in place there would show "Requested" for a connection
+      // that was never saved. Fall through to the rollback below instead.
+      if (!response) {
+        throw new Error("Connect request did not complete");
+      }
+
       // Reconcile with the backend's authoritative values in case they ever
       // differ from the optimistic guess (e.g. the relationship changed from
       // another tab in between).
