@@ -46,6 +46,7 @@ const webRoutes = {
   notFound: "*",
   notifications: "/notifications",
   profileViews: "/profile-views",
+  myStats: "/my-activity",
   overview: "/overview",
   privacyPolicy: "/privacy-policy",
   productDetails: "/products/:id",

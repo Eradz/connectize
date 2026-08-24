@@ -32,7 +32,7 @@ import { getProfileViewsSummary, reportView, VIEW_TARGETS } from "../../api-serv
 import { VerifiedIcon } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatPhoneNumber, ensureUrlProtocol, getTopicsDisplay } from "../../lib/utils";
-import { Calendar, Briefcase, Eye, FileText } from "lucide-react";
+import { BarChart3, Calendar, Briefcase, Eye, FileText } from "lucide-react";
 import { workforceAPI } from "../../api-services/workforce";
 import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard";
 import { dealRoomService, workforceService } from "../../api-services/oilgas";
@@ -296,24 +296,33 @@ export default function UserProfile() {
             because gating it on having views makes a brand new feature
             undiscoverable until someone happens to visit you. */}
         {currentUser?.id === Number(userId) && (
-          <Link
-            to={webRoutes.profileViews}
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
-          >
-            <Eye className="size-4 shrink-0" />
-            <span>
-              {profileViewsSummary?.unique_viewers > 0
-                ? `${profileViewsSummary.unique_viewers} ${
-                    profileViewsSummary.unique_viewers === 1 ? "person" : "people"
-                  } viewed your profile`
-                : "See who viewed your profile"}
-            </span>
-            {profileViewsSummary?.unseen_count > 0 && (
-              <span className="rounded-full bg-gold px-2 py-0.5 text-[.6rem] font-bold text-dark">
-                {profileViewsSummary.unseen_count} new
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <Link
+              to={webRoutes.profileViews}
+              className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
+            >
+              <Eye className="size-4 shrink-0" />
+              <span>
+                {profileViewsSummary?.unique_viewers > 0
+                  ? `${profileViewsSummary.unique_viewers} ${
+                      profileViewsSummary.unique_viewers === 1 ? "person" : "people"
+                    } viewed your profile`
+                  : "See who viewed your profile"}
               </span>
-            )}
-          </Link>
+              {profileViewsSummary?.unseen_count > 0 && (
+                <span className="rounded-full bg-gold px-2 py-0.5 text-[.6rem] font-bold text-dark">
+                  {profileViewsSummary.unseen_count} new
+                </span>
+              )}
+            </Link>
+            <Link
+              to={webRoutes.myStats}
+              className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
+            >
+              <BarChart3 className="size-4 shrink-0" />
+              <span>See your activity</span>
+            </Link>
+          </div>
         )}
 
         {currentUser &&

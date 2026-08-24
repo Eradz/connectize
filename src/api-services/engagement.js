@@ -152,3 +152,24 @@ export const getMyEngagement = async ({ days = 30 } = {}) => {
     return null;
   }
 };
+
+/**
+ * The combined "your activity" stats report: reach, audience, content and
+ * activity, each with a `sufficient` flag rather than a bare number.
+ *
+ * Deliberately not caught here - see getProfileViews for why an empty/zeroed
+ * fallback on failure is worse than letting the caller know the request
+ * failed. A page of confident zeros reads as "nothing has happened", not
+ * "we could not reach the server".
+ *
+ * @param {boolean} [includeSeries] pull the optional daily trend for metrics
+ *   that support one. Costs more on the backend, so off by default - ask for
+ *   it only where you will render a chart.
+ */
+export const getMyStats = async ({ days = 30, includeSeries = false } = {}) => {
+  return makeApiRequest({
+    url: "api/engagement/me/stats/",
+    method: "GET",
+    params: { days, ...(includeSeries ? { series: "true" } : {}) },
+  });
+};

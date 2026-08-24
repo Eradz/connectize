@@ -32,6 +32,7 @@ const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
 const BiddingProjectDetail = lazy(() => import("./pages/bidding/BiddingProjectDetail"));
 const NotificationItem = lazy(() => import("./components/notifications").then(m => ({ default: m.NotificationItem })));
 const ProfileViewsList = lazy(() => import("./components/profileViews/ProfileViewsList"));
+const MyStats = lazy(() => import("./components/myStats/MyStats"));
 const Address = lazy(() => import("./components/profile/address"));
 const Bio = lazy(() => import("./components/profile/bio"));
 const Contact = lazy(() => import("./components/profile/contact"));
@@ -278,6 +279,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.companies)} element={<CompaniesPage />} />
           <Route path={removeLeadingSlash(webRoutes.notifications)} element={<NotificationItem />} />
           <Route path={removeLeadingSlash(webRoutes.profileViews)} element={<ProfileViewsList />} />
+          <Route path={removeLeadingSlash(webRoutes.myStats)} element={<MyStats />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
           <Route path={removeLeadingSlash(webRoutes.market)} element={<Market />} />
@@ -600,6 +602,7 @@ const removeLeadingSlash = (path) => {
           <Route path="companies" element={<CompaniesPage />} />
           <Route path="notifications" element={<NotificationItem />} />
           <Route path="profile-views" element={<ProfileViewsList />} />
+          <Route path="my-activity" element={<MyStats />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
           <Route path="market" element={<Market />} />
