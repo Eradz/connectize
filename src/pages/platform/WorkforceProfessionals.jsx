@@ -604,8 +604,8 @@ const WorkforceProfessionals = () => {
                     // above); a DM room is keyed on user ids, so this needs .user or it
                     // opens a conversation with whoever happens to hold that user id.
                     to={`/messages/?room_name=room_${user?.id}_${professional?.user}`}
-                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center"
+                    title={`Message ${professionalName}`}
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
@@ -736,11 +736,10 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <Link 
+                  <Link
                     to={`/messages/?room_name=room_${user?.id}_${professional?.user}`}
-                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="w-[50%] flex items-center justify-center bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
-                    title="Send connection request"
+                    title={`Message ${professionalName}`}
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
