@@ -15,6 +15,7 @@ import { getSEOConfig } from "../../lib/seoConfig";
 import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
+import { reportView, VIEW_TARGETS } from "../../api-services/engagement";
 import { usePollCurrentCompany } from "../../hooks/usePolling";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
@@ -109,6 +110,14 @@ const CompanyProfile = React.memo(() => {
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
   const companyDisplayName = company?.company_name || companyName;
+
+  // Record the company-page view for the owner's "who viewed you" list.
+  // Fire-and-forget, de-duplicated server-side, skipped for your own company.
+  useEffect(() => {
+    if (!company?.id) return;
+    if (currentUser?.id && String(company?.profile) === String(currentUser.id)) return;
+    reportView(VIEW_TARGETS.company, company.id, "web_company");
+  }, [company?.id, company?.profile, currentUser?.id]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registrations, setRegistrations] = useState([]);

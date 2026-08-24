@@ -28,6 +28,7 @@ import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import UserProfileHeadings from "../../components/userProfile/user-profile-heading";
 import { useAuth } from "../../context/userContext";
+import { reportView, VIEW_TARGETS } from "../../api-services/engagement";
 import { VerifiedIcon } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatPhoneNumber, ensureUrlProtocol, getTopicsDisplay } from "../../lib/utils";
@@ -55,6 +56,18 @@ const normalizeListResponse = (response) => {
 export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser, loading: authLoading } = useAuth();
+
+  // Record that this profile was viewed, so it can show up in the owner's
+  // "who viewed you" list. Only the client knows a profile page was opened, so
+  // without this the feature has no data at all.
+  //
+  // Fire-and-forget, de-duplicated server-side (repeat views by the same person
+  // inside a window count once), and skipped when viewing your own profile.
+  useEffect(() => {
+    if (!userId || !currentUser?.id) return;
+    if (String(userId) === String(currentUser.id)) return;
+    reportView(VIEW_TARGETS.user, userId, "web_profile");
+  }, [userId, currentUser?.id]);
   const [activeTab, setActiveTab] = useState('about');
   const [activeEventTab, setActiveEventTab] = useState('created');
   const [activeDealTab, setActiveDealTab] = useState('created');
