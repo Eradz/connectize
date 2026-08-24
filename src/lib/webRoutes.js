@@ -45,6 +45,7 @@ const webRoutes = {
   newsFeed: "/",
   notFound: "*",
   notifications: "/notifications",
+  profileViews: "/profile-views",
   overview: "/overview",
   privacyPolicy: "/privacy-policy",
   productDetails: "/products/:id",
