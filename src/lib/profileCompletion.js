@@ -26,3 +26,10 @@ export function createProfileCompletionRedirect({ notify, navigate, schedule }) 
     return true;
   };
 }
+// The interceptors that call createProfileCompletionRedirect still reject/rethrow,
+// so callers with their own catch-all error toast would report the same 403 twice -
+// once as the actionable "Complete profile" prompt, once as a generic failure. Use
+// this to skip the generic branch for an error the redirect already surfaced.
+export function isProfileIncompleteError(error) {
+  return error?.response?.data?.code === "profile_incomplete";
+}
