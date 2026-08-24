@@ -23,6 +23,10 @@ import LightParagraph from "../../components/ParagraphText";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
+    // Keyboards and paste readily add a trailing space, and Yup's email test
+    // rejects whitespace - so a perfectly good address came back as "Invalid
+    // Email Address". Casting trims it before the test runs.
+    .trim()
     .email("Invalid Email Address")
     .required("Fill in a valid email address"),
 });
