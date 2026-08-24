@@ -100,16 +100,15 @@ export const getProfileViews = async ({
   offset = 0,
   days = 30,
 } = {}) => {
-  try {
-    return await makeApiRequest({
-      url: "api/engagement/profile-views/",
-      method: "GET",
-      params: { limit, offset, days },
-    });
-  } catch (error) {
-    console.error("Failed to fetch profile views:", error);
-    return { results: [], total: 0, unseen_count: 0, has_more: false };
-  }
+  // Deliberately *not* caught. Returning an empty list on failure made a
+  // backend outage render as "No one has viewed you yet" - which is not an
+  // empty state, it is a false statement about other people's behaviour. The
+  // caller distinguishes "nothing to show" from "could not load".
+  return makeApiRequest({
+    url: "api/engagement/profile-views/",
+    method: "GET",
+    params: { limit, offset, days },
+  });
 };
 
 /**

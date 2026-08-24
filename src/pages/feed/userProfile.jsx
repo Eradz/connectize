@@ -28,11 +28,11 @@ import Header from "../../components/userProfile/header";
 import ProfileSection from "../../components/userProfile/profile-section";
 import UserProfileHeadings from "../../components/userProfile/user-profile-heading";
 import { useAuth } from "../../context/userContext";
-import { reportView, VIEW_TARGETS } from "../../api-services/engagement";
+import { getProfileViewsSummary, reportView, VIEW_TARGETS } from "../../api-services/engagement";
 import { VerifiedIcon } from "../../icon";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatPhoneNumber, ensureUrlProtocol, getTopicsDisplay } from "../../lib/utils";
-import { Calendar, Briefcase, FileText } from "lucide-react";
+import { Calendar, Briefcase, Eye, FileText } from "lucide-react";
 import { workforceAPI } from "../../api-services/workforce";
 import ApplicationJobsCard from "../../components/workforce/ApplicationJobsCard";
 import { dealRoomService, workforceService } from "../../api-services/oilgas";
@@ -68,6 +68,14 @@ export default function UserProfile() {
     if (String(userId) === String(currentUser.id)) return;
     reportView(VIEW_TARGETS.user, userId, "web_profile");
   }, [userId, currentUser?.id]);
+
+  // Powers the "who viewed you" link below, on your own profile only.
+  const { data: profileViewsSummary } = useQuery({
+    queryKey: ["profile-views-summary"],
+    queryFn: () => getProfileViewsSummary({ days: 30 }),
+    enabled: currentUser?.id === Number(userId),
+    staleTime: 60_000,
+  });
   const [activeTab, setActiveTab] = useState('about');
   const [activeEventTab, setActiveEventTab] = useState('created');
   const [activeDealTab, setActiveDealTab] = useState('created');
@@ -283,6 +291,30 @@ export default function UserProfile() {
 
       <section className="mt-8 container !px-0 space-y-6">
         <UserProfileHeadings {...paramUser} />
+
+        {/* Who viewed you - only on your own profile. Shown even at zero,
+            because gating it on having views makes a brand new feature
+            undiscoverable until someone happens to visit you. */}
+        {currentUser?.id === Number(userId) && (
+          <Link
+            to={webRoutes.profileViews}
+            className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
+          >
+            <Eye className="size-4 shrink-0" />
+            <span>
+              {profileViewsSummary?.unique_viewers > 0
+                ? `${profileViewsSummary.unique_viewers} ${
+                    profileViewsSummary.unique_viewers === 1 ? "person" : "people"
+                  } viewed your profile`
+                : "See who viewed your profile"}
+            </span>
+            {profileViewsSummary?.unseen_count > 0 && (
+              <span className="rounded-full bg-gold px-2 py-0.5 text-[.6rem] font-bold text-dark">
+                {profileViewsSummary.unseen_count} new
+              </span>
+            )}
+          </Link>
+        )}
 
         {currentUser &&
           currentUser?.companies?.length < 1 &&

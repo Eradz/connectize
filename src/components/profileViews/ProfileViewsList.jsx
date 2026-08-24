@@ -10,14 +10,16 @@ export const meta = () =>
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Eye, UserRound } from "lucide-react";
+import { Eye, TriangleAlert, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   getProfileViews,
   markProfileViewsSeen,
 } from "../../api-services/engagement";
+import { useAuth } from "../../context/userContext";
 import { timeAgo } from "../../lib/utils";
+import { webRoutes } from "../../lib/webRoutes";
 import HeadingText from "../HeadingText";
 import PageLoading from "../PageLoading";
 
@@ -79,33 +81,90 @@ function ViewerRow({ row }) {
 }
 
 /**
- * Empty state carries the one action that changes it. Most people will land
- * here with nothing to show, so "no views yet" on its own would be a dead end.
+ * A failed request is not an empty list. Saying "no one viewed you" when we
+ * simply could not reach the server is a factual claim about other people's
+ * behaviour that we have no basis for.
  */
-function EmptyState() {
+function ErrorState({ onRetry }) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+      <TriangleAlert className="size-10 text-gray-300" />
+      <p className="font-semibold text-dark">Couldn&rsquo;t load your viewers</p>
+      <p className="max-w-sm text-sm text-gray-600">
+        This is a connection problem, not an empty list - we don&rsquo;t know who
+        viewed you right now.
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-1 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-dark hover:bg-opacity-70"
+      >
+        Try again
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Empty state carries an action - but only one that is actually true for this
+ * user. Telling someone with a finished profile to "complete my profile" is
+ * both wrong and faintly insulting, so the advice is chosen from what is
+ * genuinely missing.
+ *
+ * Note the gap being checked is a photo and a job title, not
+ * `is_profile_complete`: that flag only requires a first and last name, so it
+ * says nothing about whether a profile is worth finding.
+ */
+function EmptyState({ missingPhoto, missingTitle }) {
+  const needsProfileWork = missingPhoto || missingTitle;
+
+  const missingBits = [
+    missingPhoto ? "a photo" : null,
+    missingTitle ? "a job title" : null,
+  ].filter(Boolean);
+
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
       <Eye className="size-10 text-gray-300" />
       <p className="font-semibold text-dark">No one has viewed you yet</p>
-      <p className="max-w-sm text-sm text-gray-600">
-        Profiles with a photo and a job title get viewed far more often. Adding
-        yours is the quickest way to get found.
-      </p>
-      <Link
-        to="/update-profile"
-        className="mt-1 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-dark hover:bg-opacity-70"
-      >
-        Complete my profile
-      </Link>
+
+      {needsProfileWork ? (
+        <>
+          <p className="max-w-sm text-sm text-gray-600">
+            Profiles with a photo and a job title get viewed far more often.
+            Yours is missing {missingBits.join(" and ")}.
+          </p>
+          <Link
+            to="/update-profile"
+            className="mt-1 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-dark hover:bg-opacity-70"
+          >
+            Add {missingBits.join(" and ")}
+          </Link>
+        </>
+      ) : (
+        <>
+          <p className="max-w-sm text-sm text-gray-600">
+            Views will show up here as people find you in search, the feed and
+            company pages. Following people and posting makes that happen sooner.
+          </p>
+          <Link
+            to={webRoutes.connectizers}
+            className="mt-1 rounded-full bg-gold px-5 py-2 text-sm font-semibold text-dark hover:bg-opacity-70"
+          >
+            Browse Connectizers
+          </Link>
+        </>
+      )}
     </div>
   );
 }
 
 export default function ProfileViewsList() {
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuth();
   const [days, setDays] = useState(30);
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["profile-views", days],
     queryFn: () => getProfileViews({ limit: PAGE_SIZE, offset: 0, days }),
   });
@@ -181,8 +240,13 @@ export default function ProfileViewsList() {
       )}
 
       <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white">
-        {rows.length === 0 ? (
-          <EmptyState />
+        {isError ? (
+          <ErrorState onRetry={refetch} />
+        ) : rows.length === 0 ? (
+          <EmptyState
+            missingPhoto={!currentUser?.avatar}
+            missingTitle={!String(currentUser?.role || "").trim()}
+          />
         ) : (
           rows.map((row) => <ViewerRow key={row.viewer?.id} row={row} />)
         )}
