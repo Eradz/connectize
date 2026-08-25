@@ -110,6 +110,22 @@ export default function MessageArea() {
 
   useEffect(() => () => clearTimeout(highlightTimer.current), []);
 
+  // Drag-to-reply is enabled only on touch-primary devices.
+  //
+  // framer-motion's drag captures pointer events on the element it is applied
+  // to, which means a mouse drag across a bubble never starts a text
+  // selection - so enabling it everywhere broke selecting and copying a
+  // message, which matters far more than a shortcut. On a desktop the hover
+  // Reply button already makes the action discoverable, so drag buys nothing
+  // there and costs copy/paste. On a touchscreen there is no hover, selection
+  // is a long-press rather than a drag, and swipe is the expected gesture.
+  const [isTouchDevice] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches
+  );
+
   // Bubbles carried no DOM id, so there was nothing to scroll to. Keyed by
   // String(id) because ids arrive as both numbers (server) and strings
   // (optimistic temp ids).
@@ -296,7 +312,7 @@ export default function MessageArea() {
                         // covers touch and mouse from the same handler.
                         // Vertical drag is left alone so the thread still
                         // scrolls normally on a touchscreen.
-                        {...(canReply
+                        {...(canReply && isTouchDevice
                           ? {
                               drag: "x",
                               dragDirectionLock: true,
@@ -314,7 +330,9 @@ export default function MessageArea() {
                         className={clsx(
                           "group w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
                           is_current_user && "ml-auto flex-row-reverse",
-                          canReply && "cursor-grab active:cursor-grabbing"
+                          canReply &&
+                            isTouchDevice &&
+                            "cursor-grab active:cursor-grabbing"
                         )}
                       >
                         <Link to={`/co/${sender_info?.id}`} className="h-fit">
@@ -360,7 +378,7 @@ export default function MessageArea() {
                           )}
                         <div
                           className={clsx(
-                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col transition-shadow",
+                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col transition-shadow select-text",
                             // Your own messages carry the brand accent and
                             // the other person's are neutral - the convention
                             // in every mainstream messenger, and what the
