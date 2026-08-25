@@ -264,6 +264,15 @@ export default function MessageArea() {
                       : sender_info;
                     const senderName = getUserDisplayName(senderUser);
 
+                    // Optimistic and errored messages have no server id for
+                    // a reply to point at. This store mints pending ids with
+                    // uuidv4(), so the flag is the reliable test, not an id
+                    // prefix.
+                    const canReply =
+                      message?.id != null &&
+                      !message?.error &&
+                      !message?.optimistic;
+
                     const msgDate = new Date(message.timestamp);
 
                     const hourFmt = converthourTo12hrFormat(
@@ -281,9 +290,31 @@ export default function MessageArea() {
                         }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        // Swipe/drag to reply, matching the mobile gesture.
+                        // framer-motion already wraps every bubble, so this is
+                        // its drag support rather than a new dependency, and it
+                        // covers touch and mouse from the same handler.
+                        // Vertical drag is left alone so the thread still
+                        // scrolls normally on a touchscreen.
+                        {...(canReply
+                          ? {
+                              drag: "x",
+                              dragDirectionLock: true,
+                              dragConstraints: { left: 0, right: 0 },
+                              dragElastic: 0.25,
+                              onDragEnd: (_event, info) => {
+                                // Either direction, so it works the same on
+                                // your own messages and theirs.
+                                if (Math.abs(info.offset.x) > 60) {
+                                  setReplyingTo(message);
+                                }
+                              },
+                            }
+                          : {})}
                         className={clsx(
                           "group w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
-                          is_current_user && "ml-auto flex-row-reverse"
+                          is_current_user && "ml-auto flex-row-reverse",
+                          canReply && "cursor-grab active:cursor-grabbing"
                         )}
                       >
                         <Link to={`/co/${sender_info?.id}`} className="h-fit">
@@ -304,9 +335,7 @@ export default function MessageArea() {
                             pending ids (addOptimisticMessage), so a prefix
                             check would miss them and send a UUID where the
                             backend expects an integer message id. */}
-                        {message?.id != null &&
-                          !message?.error &&
-                          !message?.optimistic && (
+                        {canReply && (
                             <button
                               type="button"
                               onClick={() => setReplyingTo(message)}
@@ -339,7 +368,7 @@ export default function MessageArea() {
                             // the same conversation looked like two different
                             // products side by side.
                             is_current_user
-                              ? "bg-gold/90 text-dark"
+                              ? "bg-pale_yellow text-dark"
                               : "bg-white",
                             // Flashed after a jump so it is obvious which
                             // message was meant - scrolling alone leaves the
