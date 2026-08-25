@@ -143,6 +143,18 @@ export default function MessageControl() {
       const messageData = {
         recipient: Number(openedMessage?.other_user?.id),
         sender: Number(currentUser?.id),
+        // MessageArea decides which side a bubble sits on from
+        // `is_current_user` with no fallback, and the optimistic message did
+        // not set it - so your own message appeared on the recipient's side
+        // and jumped across once the server echoed it back. sender_info comes
+        // along too, or the avatar and name are blank for that moment.
+        is_current_user: true,
+        sender_info: {
+          id: currentUser?.id,
+          first_name: currentUser?.first_name,
+          last_name: currentUser?.last_name,
+          avatar: currentUser?.avatar,
+        },
         content:
           message.trim().length < 1
             ? audioBlob

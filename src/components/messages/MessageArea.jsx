@@ -266,7 +266,10 @@ export default function MessageArea() {
 
                     const msgDate = new Date(message.timestamp);
 
-                    const hourFmt = converthourTo12hrFormat(msgDate.getHours());
+                    const hourFmt = converthourTo12hrFormat(
+                      msgDate.getHours(),
+                      msgDate.getMinutes()
+                    );
 
                     return (
                       <motion.div
@@ -329,9 +332,15 @@ export default function MessageArea() {
                         <div
                           className={clsx(
                             "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col transition-shadow",
+                            // Your own messages carry the brand accent and
+                            // the other person's are neutral - the convention
+                            // in every mainstream messenger, and what the
+                            // mobile app already did. Web had it inverted, so
+                            // the same conversation looked like two different
+                            // products side by side.
                             is_current_user
-                              ? "bg-white"
-                              : "bg-custom_yellow/30",
+                              ? "bg-gold/90 text-dark"
+                              : "bg-white",
                             // Flashed after a jump so it is obvious which
                             // message was meant - scrolling alone leaves the
                             // user hunting.
@@ -350,9 +359,23 @@ export default function MessageArea() {
                               onClick={() =>
                                 jumpToMessage(message.reply_to_preview.id)
                               }
-                              className="mb-1.5 w-full text-left border-l-[3px] border-gold bg-black/[.04] rounded px-2 py-1 hover:bg-black/[.07] transition-colors"
+                              className={clsx(
+                                "mb-1.5 w-full text-left border-l-[3px] rounded px-2 py-1 transition-colors",
+                                // A gold rule on a gold bubble is invisible,
+                                // so the accent flips with the surface.
+                                is_current_user
+                                  ? "border-dark/40 bg-dark/[.08] hover:bg-dark/[.13]"
+                                  : "border-gold bg-black/[.04] hover:bg-black/[.07]"
+                              )}
                             >
-                              <span className="block text-[.65rem] font-bold text-[#7a6320] truncate">
+                              <span
+                                className={clsx(
+                                  "block text-[.65rem] font-bold truncate",
+                                  is_current_user
+                                    ? "text-dark/80"
+                                    : "text-[#7a6320]"
+                                )}
+                              >
                                 {message.reply_to_preview.sender_id ===
                                 currentUser?.id
                                   ? "You"
@@ -361,7 +384,10 @@ export default function MessageArea() {
                               </span>
                               <span
                                 className={clsx(
-                                  "block text-[.7rem] text-gray-600 line-clamp-2",
+                                  "block text-[.7rem] line-clamp-2",
+                                  is_current_user
+                                    ? "text-dark/75"
+                                    : "text-gray-600",
                                   message.reply_to_preview.is_deleted &&
                                     "italic opacity-75"
                                 )}
@@ -385,7 +411,14 @@ export default function MessageArea() {
                               </span>
                             </div>
                           )}
-                          <p className="text-gray-700 hover:text-gray-900 transition-all duration-300 whitespace-pre-wrap break-words">
+                          <p
+                            className={clsx(
+                              "transition-all duration-300 whitespace-pre-wrap break-words",
+                              is_current_user
+                                ? "text-dark"
+                                : "text-gray-700 hover:text-gray-900"
+                            )}
+                          >
                             {linkifyText(message?.content.substring(0, readMoreLimit))}
                             {message?.content.length > readMoreLimit && (
                               <>
@@ -432,9 +465,7 @@ export default function MessageArea() {
                               {/* <TimeAgo time={message.timestamp} />,{" "} */}
                               {/* {message.timestamp}{" "} */}
 
-                              {`${hourFmt.hour}:${msgDate.getMinutes()} ${
-                                hourFmt.meridiem
-                              }`}
+                              {`${hourFmt.hour}:${hourFmt.minute} ${hourFmt.meridiem}`}
                             </small>
                             {message?.optimistic ? (
                               <CheckboxIcon className="size-3.5  text-gray-300" />

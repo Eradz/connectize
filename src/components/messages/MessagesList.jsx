@@ -191,12 +191,15 @@ const MessagesListTile = React.memo(({ message, currentUserId }) => {
 
   const msgDate = new Date(msgToDisplay?.timestamp);
   const dateTimeAgo = timeAgo(msgDate, "day");
-  const hourFmt = converthourTo12hrFormat(msgDate.getHours());
+  const hourFmt = converthourTo12hrFormat(
+    msgDate.getHours(),
+    msgDate.getMinutes()
+  );
 
   // if it's today, set to `6:20 PM` otherwise set to `02/12/2024`
   let dateToDisplay =
     dateTimeAgo == "Today"
-      ? `${hourFmt.hour}:${msgDate.getMinutes()} ${hourFmt.meridiem}`
+      ? `${hourFmt.hour}:${hourFmt.minute} ${hourFmt.meridiem}`
       : `${getMonthFromNumber(
           msgDate.getMonth()
         )} ${msgDate.getDate()}, ${msgDate.getFullYear()}`;
