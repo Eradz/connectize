@@ -27,6 +27,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../../context/userContext";
 import { useMessagesStore } from "../../stores/messagesStore";
+import { getUserDisplayName } from "../../lib/userDisplay";
 import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { largeFileText } from "../admin/listing/newListing";
 import CustomErrorMessage from "../CustomErrorMessage";
@@ -52,6 +53,8 @@ export default function MessageControl() {
     state.messages[room_name]?.at(-1)
   );
   const openedMessage = useMessagesStore((state) => state.openedMessage);
+  const replyingTo = useMessagesStore((state) => state.replyingTo);
+  const clearReplyingTo = useMessagesStore((state) => state.clearReplyingTo);
   const loading = useMessagesStore((state) => state.loading);
 
   const [message, setMessage] = useState("");
@@ -117,6 +120,7 @@ export default function MessageControl() {
       formData.append("recipient", recipientId);
       formData.append("sender", currentUser?.id);
       formData.append("content", message);
+      if (replyingTo?.id) formData.append("reply_to", String(replyingTo.id));
       if (audioBlob) {
         if (message.trim().length < 1)
           formData.append("content", "Audio conversation");
@@ -149,7 +153,28 @@ export default function MessageControl() {
             : message,
         images: validImages?.map((image) => URL.createObjectURL(image)) || [],
         audio: audioBlob ? URL.createObjectURL(audioBlob) : null,
+        // Mirrors the server's reply_to_preview shape so the optimistic bubble
+        // renders the quote identically. Without it the quote disappears for
+        // the round-trip and comes back, which reads as a glitch.
+        reply_to: replyingTo?.id ?? null,
+        reply_to_preview: replyingTo
+          ? {
+              id: replyingTo.id,
+              sender_id: replyingTo?.sender_info?.id ?? null,
+              sender_name: getUserDisplayName(replyingTo?.sender_info) || null,
+              is_deleted: false,
+              content: replyingTo?.content ?? "",
+              has_attachment: Boolean(
+                replyingTo?.images?.length || replyingTo?.audio_file
+              ),
+            }
+          : null,
       };
+
+      // Cleared at send, not on success: a failed send leaves an error bubble
+      // the user retries from, and leaving the bar armed would silently attach
+      // this quote to whatever they type next.
+      clearReplyingTo();
 
       setMessage("");
       setValidImages([]);
@@ -171,6 +196,8 @@ export default function MessageControl() {
     openedMessage?.other_user?.id,
     validImages,
     sendMessage,
+    replyingTo,
+    clearReplyingTo,
   ]);
 
   const handleInputChange = useCallback((e) => {
@@ -247,6 +274,35 @@ export default function MessageControl() {
           header="Attachment"
         />
       )}
+      {/* What you are replying to. Sits directly above the composer so the
+          context stays visible while typing. */}
+      {replyingTo && (
+        <div className="flex items-center gap-2 mb-1 px-2 py-1.5 bg-gray-50 border-l-[3px] border-gold rounded">
+          <div className="flex-1 min-w-0">
+            <p className="text-[.65rem] font-bold text-[#7a6320]">
+              Replying to{" "}
+              {replyingTo?.sender_info?.id === currentUser?.id
+                ? "yourself"
+                : getUserDisplayName(replyingTo?.sender_info) || "them"}
+            </p>
+            <p className="text-xs text-gray-600 truncate">
+              {replyingTo?.content?.trim() ||
+                (replyingTo?.images?.length || replyingTo?.audio_file
+                  ? "Attachment"
+                  : "")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={clearReplyingTo}
+            aria-label="Cancel reply"
+            className="text-gray-400 hover:text-gray-700 shrink-0 px-1"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       <section className="flex items-end gap-2">
         {showEmojiPicker && renderEmojiGifPickers}
         <ChooseAttachment handleFileChange={handleFileChange} />

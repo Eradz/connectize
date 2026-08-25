@@ -62,6 +62,21 @@ export const useMessagesStore = create((set, get) => ({
   lastMessagesLoading: false,
 
   /**
+   * The message currently being replied to, or null.
+   *
+   * Lives here rather than in either component because the two halves of the
+   * interaction are siblings: MessageArea owns the "Reply" affordance on a
+   * bubble, MessageControl owns the composer that has to show and send it
+   * (see pages/messages/messaging.jsx). Lifting it into the page would mean
+   * prop-drilling through both.
+   * @type {null | Record<string, any>}
+   */
+  replyingTo: null,
+
+  setReplyingTo: (message) => set({ replyingTo: message || null }),
+  clearReplyingTo: () => set({ replyingTo: null }),
+
+  /**
    *
    * @param {{room_name:string}} params
    */
@@ -183,6 +198,12 @@ export const useMessagesStore = create((set, get) => ({
 
   setOpenedMessage: async (message, room_name) => {
     console.log("🔍 setOpenedMessage called with:", { message, room_name });
+
+    // Drop any pending quote when the conversation changes. Carrying it over
+    // would attach a quote from the previous chat to the next message, and the
+    // backend rejects a reply_to outside the conversation - so the user would
+    // just see the send fail with nothing on screen explaining why.
+    if (get().replyingTo) set({ replyingTo: null });
 
     // If we have a specific message, set it directly
     if (message) {

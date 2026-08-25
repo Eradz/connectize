@@ -101,6 +101,34 @@ export default function MessageArea() {
 
   const [readMoreLimit, setReadMoreLimit] = useState(300);
 
+  // ── Reply-to ──────────────────────────────────────────────────────────
+  const setReplyingTo = useMessagesStore((state) => state.setReplyingTo);
+  // Which message to flash after jumping to it. Cleared on a timer so the
+  // highlight is a hint, not a permanent selection.
+  const [highlightedId, setHighlightedId] = useState(null);
+  const highlightTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(highlightTimer.current), []);
+
+  // Bubbles carried no DOM id, so there was nothing to scroll to. Keyed by
+  // String(id) because ids arrive as both numbers (server) and strings
+  // (optimistic temp ids).
+  const messageRefs = useRef({});
+
+  const jumpToMessage = (messageId) => {
+    if (messageId == null) return;
+    const node = messageRefs.current[String(messageId)];
+    if (!node) {
+      // The quoted message is real but not in the rendered window. Better to
+      // say nothing happened than to scroll somewhere arbitrary.
+      return;
+    }
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(String(messageId));
+    clearTimeout(highlightTimer.current);
+    highlightTimer.current = setTimeout(() => setHighlightedId(null), 1800);
+  };
+
   const scrollSavedList = useRef({});
 
   const groupMessagesByDate = (messages) => {
@@ -243,10 +271,15 @@ export default function MessageArea() {
                     return (
                       <motion.div
                         key={message?.id || index}
+                        ref={(node) => {
+                          if (message?.id == null) return;
+                          if (node) messageRefs.current[String(message.id)] = node;
+                          else delete messageRefs.current[String(message.id)];
+                        }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={clsx(
-                          "w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
+                          "group w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
                           is_current_user && "ml-auto flex-row-reverse"
                         )}
                       >
@@ -258,17 +291,100 @@ export default function MessageArea() {
                             className={avatarStyle}
                           />
                         </Link>
+
+                        {/* Reply affordance. Hidden until hover to keep the
+                            thread clean, but focusable so it is reachable
+                            without a pointer. Suppressed for optimistic and
+                            failed sends, which have no server id yet for a
+                            reply to point at. Guarded on `optimistic` rather
+                            than an id prefix: this store uses uuidv4() for
+                            pending ids (addOptimisticMessage), so a prefix
+                            check would miss them and send a UUID where the
+                            backend expects an integer message id. */}
+                        {message?.id != null &&
+                          !message?.error &&
+                          !message?.optimistic && (
+                            <button
+                              type="button"
+                              onClick={() => setReplyingTo(message)}
+                              title="Reply"
+                              aria-label="Reply to this message"
+                              className="self-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-gray-400 hover:text-gold shrink-0"
+                            >
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="9 17 4 12 9 7" />
+                                <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                              </svg>
+                            </button>
+                          )}
                         <div
                           className={clsx(
-                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col",
+                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col transition-shadow",
                             is_current_user
                               ? "bg-white"
-                              : "bg-custom_yellow/30"
+                              : "bg-custom_yellow/30",
+                            // Flashed after a jump so it is obvious which
+                            // message was meant - scrolling alone leaves the
+                            // user hunting.
+                            highlightedId === String(message?.id) &&
+                              "ring-2 ring-gold"
                           )}
                         >
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
                             {is_current_user ? "You" : senderName}
                           </h1>
+
+                          {/* The message this one replies to. Click to jump. */}
+                          {message?.reply_to_preview && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                jumpToMessage(message.reply_to_preview.id)
+                              }
+                              className="mb-1.5 w-full text-left border-l-[3px] border-gold bg-black/[.04] rounded px-2 py-1 hover:bg-black/[.07] transition-colors"
+                            >
+                              <span className="block text-[.65rem] font-bold text-[#7a6320] truncate">
+                                {message.reply_to_preview.sender_id ===
+                                currentUser?.id
+                                  ? "You"
+                                  : message.reply_to_preview.sender_name ||
+                                    "Unknown"}
+                              </span>
+                              <span
+                                className={clsx(
+                                  "block text-[.7rem] text-gray-600 line-clamp-2",
+                                  message.reply_to_preview.is_deleted &&
+                                    "italic opacity-75"
+                                )}
+                              >
+                                {message.reply_to_preview.is_deleted
+                                  ? "Message deleted"
+                                  : message.reply_to_preview.content ||
+                                    (message.reply_to_preview.has_attachment
+                                      ? "Attachment"
+                                      : "")}
+                              </span>
+                            </button>
+                          )}
+
+                          {/* Quoted message was hard-deleted: reply_to survives
+                              with a null preview (SET_NULL server-side). */}
+                          {!message?.reply_to_preview && message?.reply_to && (
+                            <div className="mb-1.5 border-l-[3px] border-gray-300 bg-black/[.04] rounded px-2 py-1">
+                              <span className="block text-[.7rem] italic text-gray-500">
+                                Message unavailable
+                              </span>
+                            </div>
+                          )}
                           <p className="text-gray-700 hover:text-gray-900 transition-all duration-300 whitespace-pre-wrap break-words">
                             {linkifyText(message?.content.substring(0, readMoreLimit))}
                             {message?.content.length > readMoreLimit && (
