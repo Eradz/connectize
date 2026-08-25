@@ -17,6 +17,8 @@ import ProfileSection from "../../components/userProfile/profile-section";
 import { useAuth } from "../../context/userContext";
 import { reportView, VIEW_TARGETS } from "../../api-services/engagement";
 import { usePollCurrentCompany } from "../../hooks/usePolling";
+import { useGetActionableCompanies } from "../../hooks";
+import { BarChart3 } from "lucide-react";
 import { CompanyUserType } from "../../lib/helpers/types";
 import { capitalizeFirst, formatNumber } from "../../lib/utils";
 import { EventsSection, ProfileAboutList } from "./userProfile";
@@ -110,6 +112,12 @@ const CompanyProfile = React.memo(() => {
 
   const { data: company, isLoading } = usePollCurrentCompany(companyName);
   const companyDisplayName = company?.company_name || companyName;
+
+  // The owner always has this permission implicitly; a representative needs
+  // it granted explicitly. Same endpoint already used to gate "Create
+  // listing", "Post job" etc. elsewhere in the app - see useGetActionableCompanies.
+  const { data: analyticsCompanies = [] } = useGetActionableCompanies("company_view_analytics");
+  const canViewCompanyActivity = analyticsCompanies.some((c) => c.id === company?.id);
 
   // Record the company-page view for the owner's "who viewed you" list.
   // Fire-and-forget, de-duplicated server-side, skipped for your own company.
@@ -296,6 +304,18 @@ const CompanyProfile = React.memo(() => {
               />
             </>
           )}
+        {canViewCompanyActivity && (
+          <Link
+            to={webRoutes.companyActivity.replace(
+              ":company",
+              companyName || company?.slug || company?.company_name || company?.id
+            )}
+            className="flex items-center gap-1.5 border border-gray-200 hover:bg-gray-50 transition-colors text-sm font-medium py-2 px-4 rounded-full whitespace-nowrap"
+          >
+            <BarChart3 className="size-4" />
+            Company activity
+          </Link>
+        )}
         {stats.map((text, index) => (
           <StatsText key={index} text={text} />
         ))}

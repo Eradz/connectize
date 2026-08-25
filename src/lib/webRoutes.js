@@ -20,6 +20,7 @@ const webRoutes = {
   businessHub: "/business-hub",
   company: "/:company",
   companyEditProfile: "/:company/edit-profile",
+  companyActivity: "/:company/activity",
   createPost: "/post/create",
   companies: "/companies",
   confirmResetPassword: "/confirm-reset-password",

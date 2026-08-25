@@ -152,13 +152,6 @@ export default function MyStats() {
         </div>
       ) : (
         <>
-          {data?.observed_days < 3 && (
-            <p className="mx-4 rounded-xl bg-gold/10 px-4 py-3 text-sm text-dark">
-              We only started counting your activity {data.observed_days <= 0 ? "today" : `${data.observed_days} day${data.observed_days === 1 ? "" : "s"} ago`}.
-              Most numbers below will fill in over the next couple of weeks.
-            </p>
-          )}
-
           {data?.sections?.map((section) => (
             <div key={section.section} className="px-4">
               <div className="mb-2">
@@ -176,15 +169,6 @@ export default function MyStats() {
               </div>
             </div>
           ))}
-
-          {data?.next_milestone && (
-            <p className="mx-4 rounded-xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-600">
-              Next step toward getting the most out of Connectize:{" "}
-              <span className="font-semibold text-dark">
-                {data.next_milestone.replaceAll("_", " ")}
-              </span>
-            </p>
-          )}
         </>
       )}
     </section>

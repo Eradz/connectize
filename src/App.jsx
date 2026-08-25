@@ -54,6 +54,7 @@ const CompanyInformation = lazy(() => import("./pages/company/CompanyInformation
 const EditCompanyPage = lazy(() => import("./pages/company/edit"));
 const CompanyLayout = lazy(() => import("./pages/company/layout"));
 const CompanyProfile = lazy(() => import("./pages/feed/companyProfile"));
+const CompanyActivity = lazy(() => import("./pages/feed/companyActivity"));
 const NewsFeed = lazy(() => import("./pages/feed/newsFeed"));
 const UserProfile = lazy(() => import("./pages/feed/userProfile"));
 const Analysis = lazy(() => import("./pages/market/analysis"));
@@ -282,6 +283,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.myStats)} element={<MyStats />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="company/:company/activity" element={<CompanyActivity />} />
           <Route path={removeLeadingSlash(webRoutes.market)} element={<Market />} />
           
           {/* Marketplace Routes */}
@@ -323,6 +325,7 @@ const removeLeadingSlash = (path) => {
           <Route path="co/:userId" element={<UserProfile />} />
           <Route path="co/:company" element={<CompanyProfile />} />
           <Route path="co/company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="co/:company/activity" element={<CompanyActivity />} />
           <Route path={removeLeadingSlash(webRoutes.coNotifications)} element={<NotificationItem />} />
           
           {/* Knowledge Hub Routes */}
@@ -451,6 +454,7 @@ const removeLeadingSlash = (path) => {
           {/* Direct company routes (for URLs like /Connectize) - Must be last to avoid conflicts */}
           <Route path=":company" element={<CompanyProfile />} />
           <Route path=":company/edit" element={<CompanyProfile />} />
+          <Route path=":company/activity" element={<CompanyActivity />} />
         </Route>
 
   {/* Oil & Gas Platform Routes */}
@@ -605,6 +609,7 @@ const removeLeadingSlash = (path) => {
           <Route path="my-activity" element={<MyStats />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="company/:company/activity" element={<CompanyActivity />} />
           <Route path="market" element={<Market />} />
           <Route path="messages" element={<MessagesLayout />} />
           <Route path="products/:id" element={<Product />} />

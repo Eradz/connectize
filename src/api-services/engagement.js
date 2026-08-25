@@ -173,3 +173,21 @@ export const getMyStats = async ({ days = 30, includeSeries = false } = {}) => {
     params: { days, ...(includeSeries ? { series: "true" } : {}) },
   });
 };
+
+/**
+ * Company-level analytics: reach, audience, content, hiring, tenders,
+ * marketplace and reputation, plus a `highlights` object (top post, top
+ * listing). Restricted server-side to the company's owner or a
+ * representative with the `company_view_analytics` permission - a 403 here
+ * means the caller should not have been shown the entry point at all, not
+ * that this call should retry.
+ *
+ * Deliberately not caught here, same reasoning as getMyStats.
+ */
+export const getCompanyStats = async (companyId, { days = 30, includeSeries = false } = {}) => {
+  return makeApiRequest({
+    url: `api/engagement/companies/${companyId}/stats/`,
+    method: "GET",
+    params: { days, ...(includeSeries ? { series: "true" } : {}) },
+  });
+};
