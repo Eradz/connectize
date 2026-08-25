@@ -496,7 +496,7 @@ export default function MessageArea() {
                             }
                           : {})}
                         className={clsx(
-                          "group w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
+                          "group relative w-full max-w-[400px] p-1 pt-4 pb-3 flex gap-2.5 max-sm:px-4 max-xs:px-2",
                           is_current_user && "ml-auto flex-row-reverse",
                           canReply &&
                             isTouchDevice &&
@@ -846,6 +846,70 @@ export default function MessageArea() {
                             )}
                           </div>
                         </div>
+                        {/* Message actions.
+                            Absolutely positioned under the bubble rather than
+                            beside it. As flex siblings these three buttons
+                            reserved roughly 60px of the row's max-w-[400px]
+                            whether or not you were hovering, so every bubble
+                            was permanently narrower to make room for controls
+                            that were invisible most of the time. Out of flow
+                            they cost no layout at all, and sitting below keeps
+                            them clear of the text. */}
+                        {(canReply || canEditMessage(message)) &&
+                          editingId !== message.id && (
+                            <div
+                              className={clsx(
+                                "absolute -bottom-1 z-10 flex items-center gap-2 rounded-full bg-white/95 px-2 py-1 shadow-sm opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100",
+                                is_current_user ? "right-11" : "left-11"
+                              )}
+                            >
+                              {canReply && (
+                                <button
+                                  type="button"
+                                  onClick={() => setReplyingTo(message)}
+                                  title="Reply"
+                                  aria-label="Reply to this message"
+                                  className="text-gray-400 hover:text-gold"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9 17 4 12 9 7" />
+                                    <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                                  </svg>
+                                </button>
+                              )}
+                              {canReply && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setForwardTargets([]);
+                                    setForwardingMessage(message);
+                                  }}
+                                  title="Forward"
+                                  aria-label="Forward this message"
+                                  className="text-gray-400 hover:text-gold"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="15 17 20 12 15 7" />
+                                    <path d="M4 18v-2a4 4 0 0 1 4-4h12" />
+                                  </svg>
+                                </button>
+                              )}
+                              {canEditMessage(message) && (
+                                <button
+                                  type="button"
+                                  onClick={() => beginEdit(message)}
+                                  title="Edit"
+                                  aria-label="Edit this message"
+                                  className="text-gray-400 hover:text-gold"
+                                >
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          )}
                       </motion.div>
                     );
                   })}
