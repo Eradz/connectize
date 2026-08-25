@@ -512,89 +512,6 @@ export default function MessageArea() {
                           />
                         </Link>
 
-                        {/* Reply affordance. Hidden until hover to keep the
-                            thread clean, but focusable so it is reachable
-                            without a pointer. Suppressed for optimistic and
-                            failed sends, which have no server id yet for a
-                            reply to point at. Guarded on `optimistic` rather
-                            than an id prefix: this store uses uuidv4() for
-                            pending ids (addOptimisticMessage), so a prefix
-                            check would miss them and send a UUID where the
-                            backend expects an integer message id. */}
-                        {canEditMessage(message) && editingId !== message.id && (
-                          <button
-                            type="button"
-                            onClick={() => beginEdit(message)}
-                            title="Edit"
-                            aria-label="Edit this message"
-                            className="self-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-gray-400 hover:text-gold shrink-0"
-                          >
-                            <svg
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M12 20h9" />
-                              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                            </svg>
-                          </button>
-                        )}
-
-                        {canReply && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setForwardTargets([]);
-                              setForwardingMessage(message);
-                            }}
-                            title="Forward"
-                            aria-label="Forward this message"
-                            className="self-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-gray-400 hover:text-gold shrink-0"
-                          >
-                            <svg
-                              width="15"
-                              height="15"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="15 17 20 12 15 7" />
-                              <path d="M4 18v-2a4 4 0 0 1 4-4h12" />
-                            </svg>
-                          </button>
-                        )}
-
-                        {canReply && (
-                            <button
-                              type="button"
-                              onClick={() => setReplyingTo(message)}
-                              title="Reply"
-                              aria-label="Reply to this message"
-                              className="self-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-gray-400 hover:text-gold shrink-0"
-                            >
-                              <svg
-                                width="15"
-                                height="15"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <polyline points="9 17 4 12 9 7" />
-                                <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
-                              </svg>
-                            </button>
-                          )}
                         <div
                           className={clsx(
                             "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col transition-shadow select-text",
@@ -859,8 +776,13 @@ export default function MessageArea() {
                           editingId !== message.id && (
                             <div
                               className={clsx(
-                                "absolute -bottom-1 z-10 flex items-center gap-2 rounded-full bg-white/95 px-2 py-1 shadow-sm opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100",
-                                is_current_user ? "right-11" : "left-11"
+                                // Subtle: no pill, no shadow. A floating
+                                // white capsule read as a control panel
+                                // hovering over the thread. Sitting flush
+                                // under the bubble on its own side, out of
+                                // flow, it stays out of the way until wanted.
+                                "absolute -bottom-0.5 z-10 flex items-center gap-3 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100",
+                                is_current_user ? "right-12" : "left-12"
                               )}
                             >
                               {canReply && (
@@ -869,7 +791,7 @@ export default function MessageArea() {
                                   onClick={() => setReplyingTo(message)}
                                   title="Reply"
                                   aria-label="Reply to this message"
-                                  className="text-gray-400 hover:text-gold"
+                                  className="text-gray-300 hover:text-gold transition-colors"
                                 >
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="9 17 4 12 9 7" />
@@ -886,7 +808,7 @@ export default function MessageArea() {
                                   }}
                                   title="Forward"
                                   aria-label="Forward this message"
-                                  className="text-gray-400 hover:text-gold"
+                                  className="text-gray-300 hover:text-gold transition-colors"
                                 >
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="15 17 20 12 15 7" />
@@ -900,7 +822,7 @@ export default function MessageArea() {
                                   onClick={() => beginEdit(message)}
                                   title="Edit"
                                   aria-label="Edit this message"
-                                  className="text-gray-400 hover:text-gold"
+                                  className="text-gray-300 hover:text-gold transition-colors"
                                 >
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M12 20h9" />
