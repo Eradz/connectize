@@ -614,11 +614,30 @@ export const VoiceNotePlayer = ({ audioURL, className, trashOnClick }) => {
   );
 };
 
+// `accept` per control, mirroring what the backend allows
+// (chat/attachments.py). Without it the picker offered every file on the
+// machine - including video, which the server rejects - so the only way to
+// discover a file was unsupported was to try sending it.
+//
+// This is a convenience, not the control: the endpoint validates
+// independently, because an accept attribute is trivially bypassed.
+const IMAGE_ACCEPT =
+  "image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,image/bmp,image/tiff";
+const DOCUMENT_ACCEPT = [
+  ".pdf,application/pdf",
+  ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".txt,.csv,.rtf,.md,text/plain,text/csv",
+  ".zip,application/zip",
+  IMAGE_ACCEPT,
+].join(",");
+
 const iconButtons = [
-  { Icon: CameraIcon, tip: "camera", label: "Camera" },
-  { Icon: ImageIcon, tip: "image", label: "Image" },
-  { Icon: FileIcon, tip: "document", label: "Document" },
-  { Icon: MusicNote, tip: "audio", label: "Audio" },
+  { Icon: CameraIcon, tip: "camera", label: "Camera", accept: IMAGE_ACCEPT },
+  { Icon: ImageIcon, tip: "image", label: "Image", accept: IMAGE_ACCEPT },
+  { Icon: FileIcon, tip: "document", label: "Document", accept: DOCUMENT_ACCEPT },
+  { Icon: MusicNote, tip: "audio", label: "Audio", accept: "audio/*" },
   { Icon: PersonIcon, tip: "profile", label: "Contact" },
 ];
 
@@ -637,6 +656,7 @@ export const ChooseAttachment = ({ handleFileChange }) => {
             key={idx}
             name={icons.tip}
             id={icons.tip}
+            accept={icons.accept}
             multiple
             hidden
             onChange={handleFileChange}
