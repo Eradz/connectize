@@ -322,7 +322,12 @@ export default function MessageArea() {
   return (
     <section
       ref={chatContainerRef}
-      className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-16 md:pb-4 relative scroll-smooth"
+      // md:pb-10, not pb-4: the per-message action bar is absolutely
+      // positioned just below its row, so on the last message it hung into the
+      // old 16px of padding and collided with the composer. The extra room is
+      // only needed at the end of the thread, but padding the container is
+      // simpler than special-casing the final row.
+      className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-16 md:pb-10 relative scroll-smooth"
     >
       {/* Forward picker. Existing conversations rather than the whole address
           book: it is the common case, and the backend caps a forward at 10
