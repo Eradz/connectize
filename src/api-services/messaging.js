@@ -47,6 +47,22 @@ export const messageUser = async (formData) => {
   return message;
 };
 
+/**
+ * Forward a message's content into other conversations.
+ *
+ * The backend only forwards a message from a conversation you are already part
+ * of, and copies attachments rather than sharing them (MessageViewSet.forward).
+ * Partial failures come back keyed by recipient id in `errors`.
+ */
+export const forwardMessage = async (messageId, recipientIds) => {
+  return await makeApiRequest({
+    url: `api/messages/${messageId}/forward/`,
+    method: "POST",
+    data: { recipients: recipientIds },
+    contentType: "application/json",
+  });
+};
+
 export const markMessageAsRead = async (room_name) => {
   const message = await makeApiRequest({
     url: "api/messages/mark-all-as-read/",

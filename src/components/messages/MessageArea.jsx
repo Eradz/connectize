@@ -9,7 +9,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
 import { useAuth } from "../../context/userContext";
 import { toast } from "sonner";
-import { updateMessage } from "../../api-services/messaging";
+import { forwardMessage, updateMessage } from "../../api-services/messaging";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
 import { getUserDisplayName } from "../../lib/userDisplay";
@@ -119,6 +119,45 @@ export default function MessageArea() {
   // still wins - the client just shows an action that errors, rather than
   // silently permitting something.
   const EDIT_WINDOW_MS = 15 * 60 * 1000;
+
+  // Forwarding. Targets are your existing conversations (lastMessages), which
+  // is the common case and avoids a contact picker; the backend caps one
+  // forward at 10 recipients regardless.
+  const [forwardingMessage, setForwardingMessage] = useState(null);
+  const [forwardTargets, setForwardTargets] = useState([]);
+  const [forwardSending, setForwardSending] = useState(false);
+  const lastMessages = useMessagesStore((state) => state.lastMessages);
+
+  const toggleForwardTarget = (userId) =>
+    setForwardTargets((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+
+  const submitForward = async () => {
+    if (!forwardingMessage || forwardTargets.length === 0) return;
+    setForwardSending(true);
+    try {
+      const result = await forwardMessage(forwardingMessage.id, forwardTargets);
+      const failed = Object.entries(result?.errors || {});
+      setForwardingMessage(null);
+      setForwardTargets([]);
+      if (failed.length) {
+        // Named rather than swallowed: reaching three of four and reporting
+        // success is worse than saying which one missed.
+        toast.warning(
+          `Sent to ${result.forwarded?.length ?? 0}. Could not send to ${failed.length}.`
+        );
+      } else {
+        toast.success(`Forwarded to ${result.forwarded?.length ?? 0}.`);
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.detail || "Could not forward the message"
+      );
+    } finally {
+      setForwardSending(false);
+    }
+  };
 
   const [editingId, setEditingId] = useState(null);
   const [editDraft, setEditDraft] = useState("");
@@ -285,6 +324,76 @@ export default function MessageArea() {
       ref={chatContainerRef}
       className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-16 md:pb-4 relative scroll-smooth"
     >
+      {/* Forward picker. Existing conversations rather than the whole address
+          book: it is the common case, and the backend caps a forward at 10
+          recipients anyway. */}
+      {forwardingMessage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setForwardingMessage(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-semibold text-dark">Forward to</h3>
+              <button
+                type="button"
+                onClick={() => setForwardingMessage(null)}
+                className="text-gray-400 hover:text-dark"
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <p className="mb-3 line-clamp-2 rounded bg-gray-50 p-2 text-xs text-gray-600">
+              {forwardingMessage.content || "Attachment"}
+            </p>
+            <div className="max-h-64 overflow-y-auto">
+              {(lastMessages || []).length === 0 && (
+                <p className="py-4 text-center text-sm text-gray-500">
+                  No other conversations to forward to yet.
+                </p>
+              )}
+              {(lastMessages || []).map((chat) => {
+                const other = chat?.other_user;
+                if (!other?.id || other.id === currentUser?.id) return null;
+                const selected = forwardTargets.includes(other.id);
+                return (
+                  <label
+                    key={other.id}
+                    className="flex cursor-pointer items-center gap-2 border-b border-gray-100 py-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleForwardTarget(other.id)}
+                      className="accent-gold"
+                    />
+                    <span className="truncate text-dark">
+                      {getUserDisplayName(other)}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              disabled={forwardTargets.length === 0 || forwardSending}
+              onClick={submitForward}
+              className="mt-3 w-full rounded-full bg-gold py-2 text-sm font-semibold text-dark disabled:opacity-50"
+            >
+              {forwardSending
+                ? "Forwarding..."
+                : forwardTargets.length
+                  ? `Forward to ${forwardTargets.length}`
+                  : "Select someone"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <SkeletonChatMessages />
       ) : messages?.length <= 0 ? (
@@ -437,6 +546,33 @@ export default function MessageArea() {
                         )}
 
                         {canReply && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForwardTargets([]);
+                              setForwardingMessage(message);
+                            }}
+                            title="Forward"
+                            aria-label="Forward this message"
+                            className="self-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-gray-400 hover:text-gold shrink-0"
+                          >
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="15 17 20 12 15 7" />
+                              <path d="M4 18v-2a4 4 0 0 1 4-4h12" />
+                            </svg>
+                          </button>
+                        )}
+
+                        {canReply && (
                             <button
                               type="button"
                               onClick={() => setReplyingTo(message)}
@@ -481,6 +617,34 @@ export default function MessageArea() {
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
                             {is_current_user ? "You" : senderName}
                           </h1>
+
+                          {/* Marks content that came from another
+                              conversation. Without it a forward looks like
+                              something the sender wrote. Deliberately unnamed
+                              source - see Message.is_forwarded. */}
+                          {message?.is_forwarded && (
+                            <span
+                              className={clsx(
+                                "mb-1 flex items-center gap-1 text-[.65rem] italic",
+                                is_current_user ? "text-dark/60" : "text-gray-500"
+                              )}
+                            >
+                              <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="15 17 20 12 15 7" />
+                                <path d="M4 18v-2a4 4 0 0 1 4-4h12" />
+                              </svg>
+                              Forwarded
+                            </span>
+                          )}
 
                           {/* The message this one replies to. Click to jump. */}
                           {message?.reply_to_preview && (
