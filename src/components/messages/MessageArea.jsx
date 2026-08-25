@@ -8,6 +8,8 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
 import { useAuth } from "../../context/userContext";
+import { toast } from "sonner";
+import { updateMessage } from "../../api-services/messaging";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
 import { getUserDisplayName } from "../../lib/userDisplay";
@@ -103,12 +105,69 @@ export default function MessageArea() {
 
   // ── Reply-to ──────────────────────────────────────────────────────────
   const setReplyingTo = useMessagesStore((state) => state.setReplyingTo);
+  const applyEditedMessage = useMessagesStore((state) => state.applyEditedMessage);
   // Which message to flash after jumping to it. Cleared on a timer so the
   // highlight is a hint, not a permanent selection.
   const [highlightedId, setHighlightedId] = useState(null);
   const highlightTimer = useRef(null);
 
   useEffect(() => () => clearTimeout(highlightTimer.current), []);
+
+  // Mirrors MESSAGE_EDIT_WINDOW in chat/views.py. Duplicated deliberately:
+  // the server is the authority, but offering an Edit button that always
+  // fails is worse than not offering it. If the two ever drift the server
+  // still wins - the client just shows an action that errors, rather than
+  // silently permitting something.
+  const EDIT_WINDOW_MS = 15 * 60 * 1000;
+
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
+  const canEditMessage = (message) =>
+    message?.is_current_user &&
+    message?.id != null &&
+    !message?.optimistic &&
+    !message?.error &&
+    Date.now() - new Date(message.timestamp).getTime() < EDIT_WINDOW_MS;
+
+  const beginEdit = (message) => {
+    setEditingId(message.id);
+    setEditDraft(message.content || "");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditDraft("");
+  };
+
+  const saveEdit = async (message) => {
+    const next = editDraft.trim();
+    if (!next) {
+      toast.info("A message cannot be emptied. Delete it instead.");
+      return;
+    }
+    if (next === message.content) {
+      cancelEdit();
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const updated = await updateMessage(message.id, { content: next });
+      applyEditedMessage(updated);
+      cancelEdit();
+    } catch (error) {
+      // The 15-minute window and the sender-only rule are enforced server
+      // side, so surface what it said rather than guessing.
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.response?.data?.content ||
+          "Could not edit the message"
+      );
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   // Drag-to-reply is enabled only on touch-primary devices.
   //
@@ -353,6 +412,30 @@ export default function MessageArea() {
                             pending ids (addOptimisticMessage), so a prefix
                             check would miss them and send a UUID where the
                             backend expects an integer message id. */}
+                        {canEditMessage(message) && editingId !== message.id && (
+                          <button
+                            type="button"
+                            onClick={() => beginEdit(message)}
+                            title="Edit"
+                            aria-label="Edit this message"
+                            className="self-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-gray-400 hover:text-gold shrink-0"
+                          >
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 20h9" />
+                              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                            </svg>
+                          </button>
+                        )}
+
                         {canReply && (
                             <button
                               type="button"
@@ -458,6 +541,44 @@ export default function MessageArea() {
                               </span>
                             </div>
                           )}
+                          {editingId === message.id ? (
+                            <div className="flex flex-col gap-1.5">
+                              <textarea
+                                autoFocus
+                                rows={2}
+                                value={editDraft}
+                                onChange={(e) => setEditDraft(e.target.value)}
+                                onKeyDown={(e) => {
+                                  // Enter saves, Shift+Enter newlines, Escape
+                                  // abandons - matching the composer.
+                                  if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    saveEdit(message);
+                                  } else if (e.key === "Escape") {
+                                    cancelEdit();
+                                  }
+                                }}
+                                className="w-full min-w-[200px] resize-y rounded border border-dark/20 bg-white/70 p-1.5 text-sm text-dark outline-none focus:border-dark/40"
+                              />
+                              <div className="flex items-center gap-2 text-[.7rem]">
+                                <button
+                                  type="button"
+                                  disabled={editSaving}
+                                  onClick={() => saveEdit(message)}
+                                  className="font-semibold text-dark disabled:opacity-50"
+                                >
+                                  {editSaving ? "Saving..." : "Save"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={cancelEdit}
+                                  className="text-dark/60 hover:text-dark"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
                           <p
                             className={clsx(
                               "transition-all duration-300 whitespace-pre-wrap break-words",
@@ -481,6 +602,7 @@ export default function MessageArea() {
                               </>
                             )}
                           </p>
+                          )}
 
                           {message.audio_file && (
                             <VoiceNotePlayer audioURL={message.audio_file} />
@@ -514,6 +636,21 @@ export default function MessageArea() {
 
                               {`${hourFmt.hour}:${hourFmt.minute} ${hourFmt.meridiem}`}
                             </small>
+                            {/* Without this a rewritten message is
+                                indistinguishable from the original, which is
+                                the whole reason the backend records it. */}
+                            {message?.is_edited && (
+                              <small
+                                className="shrink-0 italic"
+                                title={
+                                  message.edited_at
+                                    ? `Edited ${new Date(message.edited_at).toLocaleString()}`
+                                    : "Edited"
+                                }
+                              >
+                                edited
+                              </small>
+                            )}
                             {message?.optimistic ? (
                               <CheckboxIcon className="size-3.5  text-gray-300" />
                             ) : message?.error ? (

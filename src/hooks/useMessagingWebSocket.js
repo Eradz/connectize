@@ -13,6 +13,7 @@ const useMessagingWebSocket = ({ enabled = true } = {}) => {
   // const room_name = searchParams.get("room_name")
 
   const addRealtimeMessage = useMessagesStore((s) => s.addRealtimeMessage);
+  const applyEditedMessage = useMessagesStore((s) => s.applyEditedMessage);
   const updateLastMessages = useMessagesStore((s) => s.updateLastMessages);
   const openedMessage = useMessagesStore((s) => s.openedMessage);
   const setOpenedMessage = useMessagesStore((s) => s.setOpenedMessage);
@@ -27,6 +28,27 @@ const useMessagingWebSocket = ({ enabled = true } = {}) => {
   });
 
   function handleNewMessage(event) {
+    // An edit made by either party, on any device. Handled before the
+    // new-message branch because it shares eventType `chat_message` and would
+    // otherwise be dropped, leaving this client showing the old text
+    // indefinitely - the two sides of the conversation then disagree about
+    // what was said, which is exactly what the backend broadcast exists to
+    // prevent.
+    if (
+      event.eventName === "message_edited" &&
+      event.eventType === "chat_message"
+    ) {
+      const edited = event.payload?.message;
+      if (edited?.id) {
+        applyEditedMessage(edited);
+        updateLastMessages({
+          ...edited,
+          room_name: event.roomId || edited.room_name,
+        });
+      }
+      return;
+    }
+
     if (
       event.eventName !== "message_received" ||
       event.eventType !== "chat_message"

@@ -73,6 +73,36 @@ export const useMessagesStore = create((set, get) => ({
    */
   replyingTo: null,
 
+  /**
+   * Replace a message in place after it was edited.
+   *
+   * Used by the editor and by the `message_edited` socket event, so an edit
+   * made on another device lands the same way as one made here. Matched on id
+   * across every room rather than a room argument, because the socket payload
+   * is a message and the sender may not have that conversation open.
+   */
+  applyEditedMessage: (updated) => {
+    if (!updated?.id) return;
+    set((state) => {
+      const next = {};
+      let changed = false;
+      for (const [room, list] of Object.entries(state.messages || {})) {
+        let roomChanged = false;
+        const mapped = (list || []).map((msg) => {
+          if (String(msg?.id) !== String(updated.id)) return msg;
+          roomChanged = true;
+          // Merge rather than replace: the socket payload is the lightweight
+          // serializer and may carry fewer fields than what is cached.
+          return { ...msg, ...updated };
+        });
+        next[room] = roomChanged ? mapped : list;
+        changed = changed || roomChanged;
+      }
+      if (!changed) return {};
+      return { messages: next };
+    });
+  },
+
   setReplyingTo: (message) => set({ replyingTo: message || null }),
   clearReplyingTo: () => set({ replyingTo: null }),
 
