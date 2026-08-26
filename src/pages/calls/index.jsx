@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/userContext";
 import { Button } from "@chakra-ui/react";
 import ScheduleCallModal from "../../components/calls/ScheduleCallModal";
@@ -24,6 +25,7 @@ import RescheduleCallModal from "../../components/calls/RescheduleCallModal";
  */
 export default function CallsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rescheduling, setRescheduling] = useState(null);
   // Two lists, not one. A finished call is a record of a conversation that
   // happened - who, when, and whether it connected - and until now that
@@ -121,6 +123,9 @@ export default function CallsPage() {
               key={call.room_token}
               call={call}
               selfId={user?.id}
+              onOpen={(chosen) =>
+                navigate(`/messages/calls/${chosen.room_token}`)
+              }
               /* A finished call has nothing left to act on. */
               onReschedule={scope === "upcoming" ? setRescheduling : undefined}
               onAddPeople={scope === "upcoming" ? setAddingTo : undefined}

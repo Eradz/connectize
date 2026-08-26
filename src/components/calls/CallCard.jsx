@@ -100,6 +100,9 @@ function FaceStack({ people }) {
 export default function CallCard({
   call,
   selfId,
+  /** Opens the call's own page. The card can only show a count; the detail
+   *  says which people are still to answer, which is the actionable half. */
+  onOpen,
   onReschedule,
   onAddPeople,
   compact = false,
@@ -137,7 +140,10 @@ export default function CallCard({
     <article className="rounded-lg border border-gray-200 bg-white p-3 flex gap-3 items-start">
       <FaceStack people={other ? [other] : others} />
 
-      <div className="flex-1 min-w-0">
+      <div
+        className={`flex-1 min-w-0 ${onOpen ? "cursor-pointer" : ""}`}
+        onClick={onOpen ? () => onOpen(call) : undefined}
+      >
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-semibold text-sm text-gray-900 truncate">
             {[other?.first_name, other?.last_name].filter(Boolean).join(" ") ||

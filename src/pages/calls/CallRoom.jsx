@@ -13,6 +13,7 @@ import { getCall } from "../../api-services/calls";
 import useCallSignaling from "../../hooks/useCallSignaling";
 import { useAuth } from "../../context/userContext";
 import CallCard from "../../components/calls/CallCard";
+import CallParticipants from "../../components/calls/CallParticipants";
 
 /**
  * The call itself.
@@ -290,6 +291,8 @@ export default function CallRoom() {
         {/* The card runs its own accept/decline/cancel mutations, so it is
             actionable here without being handed anything. */}
         <CallCard call={call} selfId={user?.id} />
+        <CallParticipants call={call} selfId={user?.id} />
+
         {call.can_join ? (
           <Button
             className="!bg-gold !text-black"
