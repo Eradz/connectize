@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -78,6 +78,83 @@ const STATUS_COPY = {
   refused: "This call can't be joined right now.",
   failed: "The call could not be connected.",
 };
+
+
+/**
+ * Lets the self view be dragged out of the way.
+ *
+ * It sits over the other person's face, and which corner is "out of the way"
+ * depends on where they are standing - so this is a real need rather than a
+ * flourish. Position is held as an offset from the resting corner and clamped
+ * to the stage, so the tile can never be dragged somewhere it cannot be
+ * dragged back from.
+ *
+ * Pointer events rather than mouse/touch pairs, and pointer capture so a fast
+ * drag that leaves the tile keeps tracking instead of stopping dead.
+ */
+function useDraggable(stageRef) {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const dragState = useRef(null);
+
+  const clamp = useCallback(
+    (next) => {
+      const stage = stageRef.current;
+      const tile = dragState.current?.tile;
+      if (!stage || !tile) return next;
+
+      const bounds = stage.getBoundingClientRect();
+      const size = tile.getBoundingClientRect();
+      // The tile rests at bottom-right, so travel is negative-only: left and
+      // up from where it starts.
+      const minX = -(bounds.width - size.width - 16 * 2);
+      const minY = -(bounds.height - size.height - 16 * 2);
+      return {
+        x: Math.min(0, Math.max(minX, next.x)),
+        y: Math.min(0, Math.max(minY, next.y)),
+      };
+    },
+    [stageRef],
+  );
+
+  const onPointerDown = useCallback(
+    (event) => {
+      const tile = event.currentTarget;
+      tile.setPointerCapture?.(event.pointerId);
+      dragState.current = {
+        tile,
+        startX: event.clientX,
+        startY: event.clientY,
+        origin: offset,
+      };
+    },
+    [offset],
+  );
+
+  const onPointerMove = useCallback(
+    (event) => {
+      const drag = dragState.current;
+      if (!drag) return;
+      event.preventDefault();
+      setOffset(
+        clamp({
+          x: drag.origin.x + (event.clientX - drag.startX),
+          y: drag.origin.y + (event.clientY - drag.startY),
+        }),
+      );
+    },
+    [clamp],
+  );
+
+  const onPointerUp = useCallback((event) => {
+    dragState.current?.tile?.releasePointerCapture?.(event.pointerId);
+    dragState.current = null;
+  }, []);
+
+  return {
+    offset,
+    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
+  };
+}
 
 const LOBBY_HEADING = {
   proposed: "Call invitation",
@@ -211,10 +288,12 @@ function LiveCall({ call, selfId, onLeave, self }) {
   // error reads as though you are connected, and invites fiddling with a call
   // that is not going to happen.
   const isDeadEnd = ["failed", "refused", "window_closed"].includes(status);
+  const stageRef = useRef(null);
+  const selfView = useDraggable(stageRef);
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex flex-col z-50">
-      <div className="flex-1 relative grid place-items-center">
+      <div ref={stageRef} className="flex-1 relative grid place-items-center">
         {showRemoteVideo ? (
           <Video
             stream={remoteStream}
@@ -242,7 +321,13 @@ function LiveCall({ call, selfId, onLeave, self }) {
         )}
 
         {isVideo && localStream && (
-          <div className="absolute bottom-4 right-4 w-32 aspect-[3/4] rounded-lg border border-white/20 overflow-hidden bg-gray-800">
+          <div
+            {...selfView.handlers}
+            style={{
+              transform: `translate(${selfView.offset.x}px, ${selfView.offset.y}px)`,
+            }}
+            className="absolute bottom-4 right-4 w-32 aspect-[3/4] rounded-lg border border-white/20 overflow-hidden bg-gray-800 cursor-grab active:cursor-grabbing touch-none select-none"
+          >
             {isCameraOff ? (
               <AvatarTile person={self} size="sm" className="w-full h-full" />
             ) : (
