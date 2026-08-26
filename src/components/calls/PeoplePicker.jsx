@@ -68,14 +68,21 @@ export default function PeoplePicker({
         const found = await searchUsers(trimmed);
         if (cancelled) return;
         setResults(
-          (found || []).map((person) => ({
-            id: person.id,
-            name:
-              [person.first_name, person.last_name].filter(Boolean).join(" ") ||
-              person.email ||
-              "Connectize user",
-            avatar: person.avatar ?? null,
-          }))
+          (found || [])
+            // A person we cannot identify cannot be invited. The mobile
+            // search helper does not insist on an id, and rendering a result
+            // without one produced a list with undefined keys.
+            .filter((person) => person?.id)
+            .map((person) => ({
+              id: person.id,
+              name:
+                [person.first_name, person.last_name]
+                  .filter(Boolean)
+                  .join(" ") ||
+                person.email ||
+                "Connectize user",
+              avatar: person.avatar ?? null,
+            }))
         );
       } catch {
         if (!cancelled) setResults([]);
