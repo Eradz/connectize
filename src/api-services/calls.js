@@ -75,6 +75,20 @@ export const rescheduleCall = async (roomToken, { scheduledStart, durationMinute
     },
   });
 
+/**
+ * Ask people who have not answered to answer.
+ *
+ * With no ids, everyone still outstanding; with ids, just those. One call
+ * rather than two, because "remind everyone" is the same act as "remind these
+ * three" with a different selection.
+ */
+export const remindParticipants = async (roomToken, userIds) =>
+  makeApiRequest({
+    url: `${CALLS_URL}${roomToken}/remind/`,
+    method: "POST",
+    data: userIds?.length ? { user_ids: userIds } : {},
+  });
+
 /** Invite more people to a call that already exists. */
 export const addParticipants = async (roomToken, invitees) =>
   makeApiRequest({

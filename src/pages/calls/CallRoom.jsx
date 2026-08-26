@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ChevronLeftRounded } from "@mui/icons-material";
 import { webRoutes } from "../../lib/webRoutes";
 import { Button, Spinner } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   MicOffRounded,
   MicRounded,
@@ -11,7 +11,7 @@ import {
   VideocamRounded,
   CallEndRounded,
 } from "@mui/icons-material";
-import { getCall } from "../../api-services/calls";
+import { getCall, remindParticipants } from "../../api-services/calls";
 import useCallSignaling from "../../hooks/useCallSignaling";
 import { useAuth } from "../../context/userContext";
 import CallCard from "../../components/calls/CallCard";
@@ -256,6 +256,7 @@ export default function CallRoom() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [joined, setJoined] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: call, isLoading, refetch } = useQuery({
     queryKey: ["calls", roomToken],
@@ -263,6 +264,14 @@ export default function CallRoom() {
     // The join window opens and closes on its own, so a card left open on
     // screen has to notice without the user reloading.
     refetchInterval: joined ? false : 30_000,
+  });
+
+  const remind = useMutation({
+    mutationFn: (userIds) => remindParticipants(roomToken, userIds),
+    onSettled: () => {
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ["calls"] });
+    },
   });
 
   if (isLoading) {
@@ -306,7 +315,12 @@ export default function CallRoom() {
         {/* The card runs its own accept/decline/cancel mutations, so it is
             actionable here without being handed anything. */}
         <CallCard call={call} selfId={user?.id} />
-        <CallParticipants call={call} selfId={user?.id} />
+        <CallParticipants
+          call={call}
+          selfId={user?.id}
+          busy={remind.isPending}
+          onRemind={(ids) => remind.mutate(ids)}
+        />
 
         {call.can_join ? (
           <Button
