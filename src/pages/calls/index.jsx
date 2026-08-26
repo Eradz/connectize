@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ChevronLeftRounded } from "@mui/icons-material";
+import { webRoutes } from "../../lib/webRoutes";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@chakra-ui/react";
 import { listCalls } from "../../api-services/calls";
@@ -28,6 +31,16 @@ export default function CallsPage() {
   return (
     <div className="max-w-2xl mx-auto p-4 flex flex-col gap-4">
       <header>
+        {/* The page was reachable and not leavable: it is a full route rather
+            than a panel inside Messages, so without this the only way out was
+            the browser's own back button. */}
+        <Link
+          to={webRoutes.messages}
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-2"
+        >
+          <ChevronLeftRounded fontSize="small" />
+          <span>Messages</span>
+        </Link>
         <h1 className="text-lg font-semibold text-gray-900">Calls</h1>
         <p className="text-sm text-gray-500">
           Calls are booked and confirmed by both sides — nothing rings

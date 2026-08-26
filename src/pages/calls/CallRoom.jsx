@@ -76,6 +76,7 @@ const STATUS_COPY = {
   ended: "Call ended.",
   window_closed: "The call's time is up.",
   refused: "This call can't be joined right now.",
+  failed: "The call could not be connected.",
 };
 
 export default function CallRoom() {
@@ -169,6 +170,10 @@ function LiveCall({ call, selfId, onLeave, self }) {
   // and both are different from an audio call - but all three want a face
   // rather than a black rectangle.
   const showRemoteVideo = isVideo && remoteStream && !peerState.cameraOff;
+  // States a call cannot come back from. Offering mute and camera under an
+  // error reads as though you are connected, and invites fiddling with a call
+  // that is not going to happen.
+  const isDeadEnd = ["failed", "refused", "window_closed"].includes(status);
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex flex-col z-50">
@@ -217,6 +222,16 @@ function LiveCall({ call, selfId, onLeave, self }) {
       </div>
 
       <div className="flex items-center justify-center gap-4 py-6 bg-black/40">
+        {isDeadEnd ? (
+          <button
+            type="button"
+            onClick={onLeave}
+            className="px-7 py-3 rounded-full bg-white/10 text-white hover:bg-white/20"
+          >
+            Close
+          </button>
+        ) : (
+          <>
         <button
           type="button"
           onClick={toggleMute}
@@ -248,6 +263,8 @@ function LiveCall({ call, selfId, onLeave, self }) {
         >
           <CallEndRounded />
         </button>
+          </>
+        )}
       </div>
     </div>
   );

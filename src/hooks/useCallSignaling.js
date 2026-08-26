@@ -38,6 +38,9 @@ export const CLOSE_CODES = {
   4425: { key: "too_early", message: "This call hasn't started yet." },
 };
 
+/** How long to wait for the room to answer before calling it a failure. */
+const JOIN_TIMEOUT_MS = 15000;
+
 const MEDIA_FOR = {
   audio: { audio: true, video: false },
   video: { audio: true, video: true },
@@ -51,6 +54,15 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
   const [peerState, setPeerState] = useState({ muted: false, cameraOff: false });
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+
+  // Mirrors `status` so callbacks can read it synchronously. The close
+  // handler has to know how far the call got before deciding what a closure
+  // means.
+  const statusRef = useRef("idle");
+  const applyStatus = useCallback((next) => {
+    statusRef.current = next;
+    setStatus(next);
+  }, []);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -101,7 +113,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
     teardownRef.current = teardown;
 
     async function start() {
-      setStatus("joining");
+      applyStatus("joining");
       setError(null);
 
       const details = await joinCall(roomToken);
@@ -109,7 +121,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       if (!details) {
         // The server refused and has already explained why in a toast; the
         // page re-reads the call to show the reason in place.
-        setStatus("refused");
+        applyStatus("refused");
         return;
       }
 
@@ -126,7 +138,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
               " for this call."
             : "No microphone was available."
         );
-        setStatus("failed");
+        applyStatus("failed");
         return;
       }
       if (cancelled) {
@@ -145,12 +157,12 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
         if (event.candidate) send("ice_candidate", { candidate: event.candidate });
       };
       peer.onconnectionstatechange = () => {
-        if (peer.connectionState === "connected") setStatus("connected");
+        if (peer.connectionState === "connected") applyStatus("connected");
         if (peer.connectionState === "failed") {
           // Reached when even the relay could not carry the media. Nothing
           // the user can do about it, so say so rather than spinning.
           setError("Could not connect. Your network may be blocking calls.");
-          setStatus("failed");
+          applyStatus("failed");
         }
       };
 
@@ -159,6 +171,16 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
         `access_token.${token}`,
       ]);
       socketRef.current = socket;
+
+      // A socket that neither opens nor closes leaves no event to react to,
+      // and the screen would sit on "Joining…" indefinitely.
+      const joinTimer = setTimeout(() => {
+        if (statusRef.current === "joining") {
+          setError("Could not reach the call. Check your connection and try again.");
+          applyStatus("failed");
+          teardown();
+        }
+      }, JOIN_TIMEOUT_MS);
 
       const makeOffer = async () => {
         const offer = await peer.createOffer();
@@ -187,7 +209,8 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
 
         switch (message.event) {
           case "joined": {
-            setStatus(message.peerPresent ? "connecting" : "waiting");
+            clearTimeout(joinTimer);
+            applyStatus(message.peerPresent ? "connecting" : "waiting");
             if (message.peerPresent) {
               const other = details.call?.other_party?.id;
               if (shouldOffer(other)) await makeOffer();
@@ -195,7 +218,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
             break;
           }
           case "peer_joined": {
-            setStatus("connecting");
+            applyStatus("connecting");
             if (shouldOffer(message.fromUserId)) await makeOffer();
             break;
           }
@@ -235,11 +258,11 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
           case "hangup":
           case "peer_left": {
             setRemoteStream(null);
-            setStatus(message.event === "hangup" ? "ended" : "waiting");
+            applyStatus(message.event === "hangup" ? "ended" : "waiting");
             break;
           }
           case "window_closed": {
-            setStatus("window_closed");
+            applyStatus("window_closed");
             break;
           }
           default:
@@ -248,14 +271,23 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       };
 
       socket.onclose = (event) => {
+        clearTimeout(joinTimer);
         const known = CLOSE_CODES[event.code];
         if (known) {
           setError(known.message);
-          setStatus(known.key);
-        } else if (peerRef.current) {
-          setStatus((current) =>
-            current === "connected" || current === "connecting" ? "ended" : current
-          );
+          applyStatus(known.key);
+        } else if (
+          statusRef.current === "connected" ||
+          statusRef.current === "connecting"
+        ) {
+          applyStatus("ended");
+        } else {
+          // Closed before the call ever got going. This branch used to leave
+          // the status untouched, so an unrecognised close - a plain 1006,
+          // say - left the screen on "Joining…" for ever, with the socket
+          // already torn down and no way back.
+          setError("Lost the connection before the call could start.");
+          applyStatus("failed");
         }
         teardown();
       };

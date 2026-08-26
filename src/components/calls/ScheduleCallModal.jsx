@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Input, Select, Textarea } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { webRoutes } from "../../lib/webRoutes";
 import ReusableModal from "../custom/ResusableModal";
 import { proposeCall } from "../../api-services/calls";
 
@@ -32,6 +34,7 @@ function defaultStart() {
 
 export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [start, setStart] = useState(() => toLocalInputValue(defaultStart()));
   const [duration, setDuration] = useState(30);
   const [kind, setKind] = useState("video");
@@ -55,6 +58,9 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
       queryClient.invalidateQueries({ queryKey: ["calls"] });
       toast.success("Invitation sent. They'll need to accept it.");
       onClose();
+      // Land on the diary. Sending an invitation and being returned to the
+      // conversation gives no sign the booking exists anywhere.
+      navigate(webRoutes.calls);
     },
   });
 
