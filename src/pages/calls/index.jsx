@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import useCallCandidates from "../../hooks/useCallCandidates";
 import { Link } from "react-router-dom";
 import { ChevronLeftRounded } from "@mui/icons-material";
 import { webRoutes } from "../../lib/webRoutes";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@chakra-ui/react";
 import { addParticipants, listCalls } from "../../api-services/calls";
-import { getMessagesForUser } from "../../api-services/messaging";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import ReusableModal from "../../components/custom/ResusableModal";
 import { toast } from "sonner";
@@ -30,32 +30,10 @@ export default function CallsPage() {
   const [addingTo, setAddingTo] = useState(null);
   const queryClient = useQueryClient();
 
-  // Candidates are the people already in your conversations - a call is a
-  // conversation that got serious, so this is both the right set and one you
-  // have already paid for.
-  const { data: conversations } = useQuery({
-    queryKey: ["calls", "call-candidates"],
-    queryFn: () => getMessagesForUser({ page_size: 50 }),
-    enabled: Boolean(addingTo),
-  });
-
-  const candidates = useMemo(() => {
-    const rows = conversations?.results ?? conversations ?? [];
-    const already = new Set(
-      (addingTo?.participants || []).map((p) => p.user?.id)
-    );
-    const seen = new Map();
-    rows.forEach((row) => {
-      const person = row?.other_user;
-      if (!person?.id || seen.has(person.id) || already.has(person.id)) return;
-      seen.set(
-        person.id,
-        [person.first_name, person.last_name].filter(Boolean).join(" ") ||
-          "Connectize user"
-      );
-    });
-    return Array.from(seen, ([id, label]) => ({ id, label }));
-  }, [conversations, addingTo]);
+  const candidates = useCallCandidates(
+    Boolean(addingTo),
+    (addingTo?.participants || []).map((p) => p.user?.id).filter(Boolean)
+  );
 
   const addPeople = useMutation({
     mutationFn: (userId) => addParticipants(addingTo.room_token, [userId]),

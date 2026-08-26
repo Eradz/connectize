@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input, Select, Textarea } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import ReusableModal from "../custom/ResusableModal";
-import { proposeCall } from "../../api-services/calls";
+import { proposeCall, MAX_CALL_PARTICIPANTS } from "../../api-services/calls";
+import useCallCandidates from "../../hooks/useCallCandidates";
 
 /**
  * Propose a call to the person you are talking to.
@@ -39,13 +40,32 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
   const [duration, setDuration] = useState(30);
   const [kind, setKind] = useState("video");
   const [topic, setTopic] = useState("");
+  // The person whose chat this was opened from starts selected; the rest of
+  // the list is there so a two-person call can become a three-person one
+  // without leaving the conversation.
+  const [selected, setSelected] = useState([]);
+  const candidates = useCallCandidates(isOpen);
+
+  useEffect(() => {
+    if (isOpen) setSelected(otherUser?.id ? [otherUser.id] : []);
+  }, [isOpen, otherUser?.id]);
+
+  const room = MAX_CALL_PARTICIPANTS - 1 - selected.length;
+  const toggle = (id) =>
+    setSelected((current) =>
+      current.includes(id)
+        ? current.filter((existing) => existing !== id)
+        : room <= 0
+          ? current
+          : [...current, id]
+    );
 
   const earliest = useMemo(() => toLocalInputValue(new Date()), []);
 
   const { mutate, isPending } = useMutation({
     mutationFn: () =>
       proposeCall({
-        invitee: otherUser?.id,
+        invitees: selected,
         // The input is local wall-clock; the API is UTC throughout.
         scheduledStart: new Date(start).toISOString(),
         durationMinutes: Number(duration),
@@ -64,20 +84,57 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
     },
   });
 
-  const name = [otherUser?.first_name, otherUser?.last_name]
-    .filter(Boolean)
-    .join(" ");
+  const chosen = candidates.filter((person) => selected.includes(person.id));
+  const name =
+    chosen.length === 1
+      ? chosen[0].name
+      : [otherUser?.first_name, otherUser?.last_name].filter(Boolean).join(" ");
+  const heading =
+    selected.length > 1
+      ? `Propose a call with ${selected.length} people`
+      : name
+        ? `Propose a call with ${name}`
+        : "Propose a call";
 
   return (
     <ReusableModal
       isOpen={isOpen}
       onClose={onClose}
-      title={name ? `Propose a call with ${name}` : "Propose a call"}
+      title={heading}
       primaryText={isPending ? "Sending…" : "Send invitation"}
       primaryAction={() => mutate()}
-      disabled={isPending || !start || !otherUser?.id}
+      disabled={isPending || !start || selected.length === 0}
     >
       <div className="flex flex-col gap-4">
+        {candidates.length > 0 && (
+          <div className="text-sm">
+            <span className="font-semibold text-gray-800">
+              Who{room <= 0 ? " — that's a full call" : ""}
+            </span>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {candidates.map((person) => {
+                const isOn = selected.includes(person.id);
+                const isFull = !isOn && room <= 0;
+                return (
+                  <button
+                    key={person.id}
+                    type="button"
+                    disabled={isFull}
+                    onClick={() => toggle(person.id)}
+                    className={`text-xs px-3 py-1.5 rounded-full border disabled:opacity-40 ${
+                      isOn
+                        ? "bg-gold border-gold text-black font-semibold"
+                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    {person.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <label className="text-sm">
           <span className="font-semibold text-gray-800">When</span>
           <Input
@@ -137,9 +194,9 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
         </label>
 
         <p className="text-xs text-gray-500">
-          They'll get an invitation to accept. Neither of you can join until
-          you've both agreed on the time — and you'll both be reminded ten
-          minutes before.
+          {selected.length > 1
+            ? `All ${selected.length} get an invitation. Everyone answers for themselves, and the call goes ahead with whoever accepts.`
+            : "They'll get an invitation to accept. Neither of you can join until you've both agreed on the time — and you'll both be reminded ten minutes before."}
         </p>
       </div>
     </ReusableModal>

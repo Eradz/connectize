@@ -17,6 +17,10 @@ import { makeApiRequest } from "../lib/helpers/index";
  * than only after a failed click.
  */
 
+/** Mirrors calls.models.MAX_PARTICIPANTS. Media is a peer-to-peer mesh, so
+ *  this is a real ceiling rather than a policy number. */
+export const MAX_CALL_PARTICIPANTS = 4;
+
 const CALLS_URL = "api/calls/";
 
 export const listCalls = async (params) => {
