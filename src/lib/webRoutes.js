@@ -41,6 +41,8 @@ const webRoutes = {
   logisticsDashboard: "/logistics-hub",
   manageEmails: "/co/settings/manage-emails",
   market: "/market",
+  calls: "/messages/calls",
+  callRoom: "/messages/calls/:callId",
   messages: "/messages",
   messagesRoom: "/messages/:room_name",
   newsFeed: "/",

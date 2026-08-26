@@ -62,6 +62,8 @@ const Listing = lazy(() => import("./pages/market/listing"));
 const Market = lazy(() => import("./pages/market/market"));
 const Product = lazy(() => import("./pages/market/product"));
 const MessagesLayout = lazy(() => import("./pages/messages/layout"));
+const CallsPage = lazy(() => import("./pages/calls/index"));
+const CallRoom = lazy(() => import("./pages/calls/CallRoom"));
 const NotFound = lazy(() => import("./pages/not-found"));
 const PostInsightsPage = lazy(() => import("./pages/posts/postInsightsPage"));
 const SinglePostPage = lazy(() => import("./pages/posts/singlePostPage"));
@@ -299,6 +301,8 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.marketplaceSellerOrders)} element={<SellerOrders />} />
           <Route path="marketplace/seller-payments" element={<SellerPayments />} />
           
+          <Route path={removeLeadingSlash(webRoutes.calls)} element={<CallsPage />} />
+          <Route path={removeLeadingSlash(webRoutes.callRoom)} element={<CallRoom />} />
           <Route path={removeLeadingSlash(webRoutes.messages)} element={<MessagesLayout />} />
           <Route path={removeLeadingSlash(webRoutes.productDetails)} element={<Product />} />
           <Route path={removeLeadingSlash(webRoutes.productListing)} element={<Listing />} />

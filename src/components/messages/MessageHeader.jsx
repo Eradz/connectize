@@ -11,6 +11,7 @@ import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
 import { CircleTitleSubtitleSkeleton } from "../admin/feeds/TopServiceSuggestions";
 import { useAuth } from "../../context/userContext";
 import { getUserDisplayName } from "../../lib/userDisplay";
+import ScheduleCallModal from "../calls/ScheduleCallModal";
 
 function MessageHeader() {
   const { user: currentUser } = useAuth();
@@ -23,6 +24,7 @@ function MessageHeader() {
   const setOpenedMessage = useMessagesStore((state) => state.setOpenedMessage);
 
   const [isLoadingOpenedMessage, setIsLoadingOpenedMessage] = useState(false);
+  const [isSchedulingCall, setIsSchedulingCall] = useState(false);
 
   // console.log({ openedMessage });
   const otherUser = openedMessage?.other_user || null;
@@ -105,7 +107,23 @@ function MessageHeader() {
         )}
       </div>
 
-      {/* <ButtonWithTooltipIcon IconName={PhoneOutlined} tip="Call" /> */}
+      {/* "Schedule a call", not "Call": pressing this rings nobody. It sends
+          an invitation the other party has to accept before either side can
+          connect. Hidden when there is no one to invite, or when the thread
+          is with yourself. */}
+      {otherUser?.id && !isSentToSelf && (
+        <ButtonWithTooltipIcon
+          IconName={PhoneOutlined}
+          tip="Schedule a call"
+          onClick={() => setIsSchedulingCall(true)}
+        />
+      )}
+
+      <ScheduleCallModal
+        isOpen={isSchedulingCall}
+        onClose={() => setIsSchedulingCall(false)}
+        otherUser={otherUser}
+      />
     </header>
   );
 }
