@@ -209,13 +209,30 @@ const LOBBY_HEADING = {
  * screen is worse than either alone.
  */
 function cannotJoinReason(call) {
+  const outstanding = call.awaiting_response_from?.length ?? 0;
+
   switch (call.status) {
     case "accepted":
-      return call.join_blocked_reason === "window_closed"
-        ? "This call's time has passed. Book another to talk again."
-        : "You'll be able to join five minutes before it starts, and you'll be reminded ten minutes before.";
+      if (call.join_blocked_reason === "window_closed") {
+        return "This call's time has passed. Book another to talk again.";
+      }
+      // Your own answer first: a confirmed call you have not accepted is
+      // waiting on *you*, and telling you when it opens instead is unhelpful.
+      if (call.my_response === "invited") {
+        return "Accept the invitation and you can join when it starts.";
+      }
+      if (call.my_response === "declined") {
+        return "You declined this call.";
+      }
+      return "You'll be able to join five minutes before it starts, and you'll be reminded ten minutes before.";
     case "proposed":
-      return "Both of you need to accept before this call can go ahead.";
+      if (call.my_response === "invited") {
+        return "Accept the invitation and you can join when it starts.";
+      }
+      // Said "both of you" on a call of four, which was simply untrue.
+      return outstanding === 1
+        ? "Waiting for the other person to accept."
+        : `Waiting for ${outstanding} people to accept.`;
     case "declined":
       return "This call was declined.";
     case "cancelled":
@@ -270,7 +287,9 @@ export default function CallRoom() {
         <h1 className="text-lg font-semibold text-gray-900">
           {LOBBY_HEADING[call.status] || "Call"}
         </h1>
-        <CallCard call={call} />
+        {/* The card runs its own accept/decline/cancel mutations, so it is
+            actionable here without being handed anything. */}
+        <CallCard call={call} selfId={user?.id} />
         {call.can_join ? (
           <Button
             className="!bg-gold !text-black"

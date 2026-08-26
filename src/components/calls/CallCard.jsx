@@ -63,15 +63,60 @@ function formatWhen(value) {
       });
 }
 
-export default function CallCard({ call, onReschedule, onAddPeople, compact = false }) {
+/**
+ * The people on a call, as faces.
+ *
+ * Up to three overlapping avatars. A group call used to show a single letter
+ * taken from the concatenated names - a circle with an "L" in it, which
+ * identified nobody. Real photographs are the fastest way to know whose call
+ * this is, and they are already loaded.
+ */
+function FaceStack({ people }) {
+  const shown = people.slice(0, 3);
+  const extra = people.length - shown.length;
+  const size = shown.length > 1 ? "28px" : "40px";
+
+  if (shown.length === 0) {
+    return <Avatar width="40px" height="40px" />;
+  }
+
+  return (
+    <div className="flex items-center shrink-0">
+      {shown.map((person, index) => (
+        <Avatar
+          key={person.id}
+          src={person.avatar}
+          name={[person.first_name, person.last_name].filter(Boolean).join(" ")}
+          width={size}
+          height={size}
+          className={index > 0 ? "-ml-2.5 ring-2 ring-white" : ""}
+        />
+      ))}
+      {extra > 0 && <span className="ml-1 text-[11px] text-gray-500">+{extra}</span>}
+    </div>
+  );
+}
+
+export default function CallCard({
+  call,
+  selfId,
+  onReschedule,
+  onAddPeople,
+  compact = false,
+}) {
   const queryClient = useQueryClient();
   const other = call?.other_party;
   const participants = call?.participants || [];
   const isGroup = participants.length > 2;
   // Two people reads as a name; more reads as a list, because "Prosper +2"
   // tells you nothing about who the other two are.
-  const groupNames = participants
-    .map((p) => p.user?.first_name)
+  // Everyone but you. A group call has no single "other party", so the card
+  // shows the faces of the people you would be talking to.
+  const others = participants
+    .map((p) => p.user)
+    .filter((person) => person && person.id !== selfId);
+  const groupNames = others
+    .map((person) => person.first_name)
     .filter(Boolean)
     .join(", ");
 
@@ -90,12 +135,7 @@ export default function CallCard({ call, onReschedule, onAddPeople, compact = fa
 
   return (
     <article className="rounded-lg border border-gray-200 bg-white p-3 flex gap-3 items-start">
-      <Avatar
-        src={other?.avatar}
-        name={[other?.first_name, other?.last_name].filter(Boolean).join(" ")}
-        width="40px"
-        height="40px"
-      />
+      <FaceStack people={other ? [other] : others} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">

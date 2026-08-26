@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../../context/userContext";
 import { Button } from "@chakra-ui/react";
 import ScheduleCallModal from "../../components/calls/ScheduleCallModal";
 import useCallCandidates from "../../hooks/useCallCandidates";
@@ -22,6 +23,7 @@ import RescheduleCallModal from "../../components/calls/RescheduleCallModal";
  * gone. Without a list, the invitation goes with it.
  */
 export default function CallsPage() {
+  const { user } = useAuth();
   const [rescheduling, setRescheduling] = useState(null);
   // Two lists, not one. A finished call is a record of a conversation that
   // happened - who, when, and whether it connected - and until now that
@@ -118,6 +120,7 @@ export default function CallsPage() {
             <CallCard
               key={call.room_token}
               call={call}
+              selfId={user?.id}
               /* A finished call has nothing left to act on. */
               onReschedule={scope === "upcoming" ? setRescheduling : undefined}
               onAddPeople={scope === "upcoming" ? setAddingTo : undefined}
