@@ -172,7 +172,9 @@ function PeerTile({ peer, isVideo }) {
         <Video stream={peer.stream} className="w-full h-full object-cover" />
       ) : (
         <div className="text-center text-white/80 px-4">
-          <AvatarTile person={peer.person} className="mb-3" />
+          <GoldHalo className="mb-3">
+            <AvatarTile person={peer.person} />
+          </GoldHalo>
           <p className="font-semibold">{name || "Connectize user"}</p>
           {!peer.stream && (
             <p className="text-xs mt-1 text-white/50">
@@ -190,6 +192,57 @@ function PeerTile({ peer, isVideo }) {
         {peer.muted && <MicOffRounded fontSize="inherit" />}
       </div>
     </div>
+  );
+}
+
+/**
+ * A gold halo behind a face, for when there is no video.
+ *
+ * The alternative considered was a gold field - the whole screen in brand
+ * colour. Two things against it: white text on `#F1C644` measures about
+ * 1.6:1, well under the 4.5:1 body text needs, so a timer or a name on it is
+ * hard to read; and gold is an accent in this app, so a gold surface makes
+ * the white controls the highest-contrast objects on screen and the eye goes
+ * to the buttons rather than the person.
+ *
+ * A soft radial puts the warmth exactly where attention should be - behind
+ * the face - while the stage stays near-black so video, when it arrives,
+ * supplies the colour itself.
+ */
+function GoldHalo({ children, className = "" }) {
+  return (
+    <div className={`relative grid place-items-center ${className}`}>
+      <div
+        aria-hidden
+        className="absolute inset-0 -m-12 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(241,198,68,0.16) 0%, rgba(241,198,68,0.06) 45%, transparent 70%)",
+        }}
+      />
+      {children}
+    </div>
+  );
+}
+
+/** Elapsed time, so people know how far into a booked hour they are. */
+function CallTimer({ since }) {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(tick);
+  }, []);
+
+  const seconds = Math.max(0, Math.floor((now - since) / 1000));
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const pad = (value) => String(value).padStart(2, "0");
+
+  return (
+    <span className="tabular-nums">
+      {hours > 0 ? `${hours}:${pad(minutes % 60)}` : minutes}:{pad(seconds % 60)}
+    </span>
   );
 }
 
@@ -356,6 +409,7 @@ function LiveCall({ call, selfId, onLeave, self }) {
     localStream,
     remoteStreams,
     peerStates,
+    connectedAt,
     isMuted,
     isCameraOff,
     toggleMute,
@@ -405,11 +459,18 @@ function LiveCall({ call, selfId, onLeave, self }) {
           )}
         </div>
 
-        {notice && (
-          <p className="absolute top-4 left-4 text-sm text-white/80 bg-black/40 px-3 py-1 rounded">
-            {notice}
-          </p>
-        )}
+        <div className="absolute top-4 left-4 flex items-center gap-1.5">
+          {connectedAt !== null && (
+            <span className="text-sm text-white/75 bg-black/40 px-3 py-1 rounded">
+              <CallTimer since={connectedAt} />
+            </span>
+          )}
+          {notice && (
+            <span className="text-sm text-white/80 bg-black/40 px-3 py-1 rounded">
+              {notice}
+            </span>
+          )}
+        </div>
 
         {isVideo && localStream && (
           <div

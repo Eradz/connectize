@@ -54,6 +54,10 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
   const [remoteStreams, setRemoteStreams] = useState([]);
   //: peerId -> { muted, cameraOff }
   const [peerStates, setPeerStates] = useState({});
+  // Set once, on the first connection. Not reset when a peer drops and
+  // rejoins - the meeting has been running since it started, and a timer that
+  // restarts mid-call is worse than none.
+  const [connectedAt, setConnectedAt] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
 
@@ -186,7 +190,10 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
           }
         };
         pc.onconnectionstatechange = () => {
-          if (pc.connectionState === "connected") applyStatus("connected");
+          if (pc.connectionState === "connected") {
+            applyStatus("connected");
+            setConnectedAt((current) => current ?? Date.now());
+          }
           if (pc.connectionState === "failed") {
             // One peer failing is not the call failing when there are three
             // of you, so drop that connection and leave the rest alone.
@@ -387,6 +394,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       localStream,
       remoteStreams,
       peerStates,
+      connectedAt,
       isMuted,
       isCameraOff,
       toggleMute,
@@ -394,7 +402,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       hangUp,
     }),
     [
-      status, error, localStream, remoteStreams, peerStates,
+      status, error, localStream, remoteStreams, peerStates, connectedAt,
       isMuted, isCameraOff, toggleMute, toggleCamera, hangUp,
     ]
   );
