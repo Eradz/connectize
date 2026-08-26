@@ -34,7 +34,7 @@ export default function RescheduleCallModal({ call, isOpen, onClose }) {
 
   const { mutate, isPending } = useMutation({
     mutationFn: () =>
-      rescheduleCall(call.id, {
+      rescheduleCall(call.room_token, {
         scheduledStart: new Date(start).toISOString(),
         durationMinutes: Number(duration),
       }),

@@ -24,8 +24,9 @@ export const listCalls = async (params) => {
   return res?.results ?? res ?? [];
 };
 
-export const getCall = async (callId) =>
-  makeApiRequest({ url: `${CALLS_URL}${callId}/`, method: "GET" });
+/** Calls are addressed by `room_token`, never by a sequential id. */
+export const getCall = async (roomToken) =>
+  makeApiRequest({ url: `${CALLS_URL}${roomToken}/`, method: "GET" });
 
 export const proposeCall = async ({
   invitee,
@@ -46,22 +47,22 @@ export const proposeCall = async ({
     },
   });
 
-export const acceptCall = async (callId) =>
-  makeApiRequest({ url: `${CALLS_URL}${callId}/accept/`, method: "POST" });
+export const acceptCall = async (roomToken) =>
+  makeApiRequest({ url: `${CALLS_URL}${roomToken}/accept/`, method: "POST" });
 
-export const declineCall = async (callId, reason = "") =>
+export const declineCall = async (roomToken, reason = "") =>
   makeApiRequest({
-    url: `${CALLS_URL}${callId}/decline/`,
+    url: `${CALLS_URL}${roomToken}/decline/`,
     method: "POST",
     data: { reason },
   });
 
-export const cancelCall = async (callId) =>
-  makeApiRequest({ url: `${CALLS_URL}${callId}/cancel/`, method: "POST" });
+export const cancelCall = async (roomToken) =>
+  makeApiRequest({ url: `${CALLS_URL}${roomToken}/cancel/`, method: "POST" });
 
-export const rescheduleCall = async (callId, { scheduledStart, durationMinutes }) =>
+export const rescheduleCall = async (roomToken, { scheduledStart, durationMinutes }) =>
   makeApiRequest({
-    url: `${CALLS_URL}${callId}/reschedule/`,
+    url: `${CALLS_URL}${roomToken}/reschedule/`,
     method: "POST",
     data: {
       scheduled_start: scheduledStart,
@@ -77,5 +78,5 @@ export const rescheduleCall = async (callId, { scheduledStart, durationMinutes }
  * through the socket too. TURN credentials are short-lived and minted per
  * join; they are not cached.
  */
-export const joinCall = async (callId) =>
-  makeApiRequest({ url: `${CALLS_URL}${callId}/join/`, method: "POST" });
+export const joinCall = async (roomToken) =>
+  makeApiRequest({ url: `${CALLS_URL}${roomToken}/join/`, method: "POST" });

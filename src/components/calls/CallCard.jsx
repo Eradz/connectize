@@ -70,9 +70,9 @@ export default function CallCard({ call, onReschedule, compact = false }) {
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["calls"] });
 
-  const accept = useMutation({ mutationFn: () => acceptCall(call.id), onSuccess: invalidate });
-  const decline = useMutation({ mutationFn: () => declineCall(call.id), onSuccess: invalidate });
-  const cancel = useMutation({ mutationFn: () => cancelCall(call.id), onSuccess: invalidate });
+  const accept = useMutation({ mutationFn: () => acceptCall(call.room_token), onSuccess: invalidate });
+  const decline = useMutation({ mutationFn: () => declineCall(call.room_token), onSuccess: invalidate });
+  const cancel = useMutation({ mutationFn: () => cancelCall(call.room_token), onSuccess: invalidate });
 
   const busy = accept.isPending || decline.isPending || cancel.isPending;
   const isOpen = !["declined", "cancelled", "expired", "completed", "missed"].includes(
@@ -121,7 +121,7 @@ export default function CallCard({ call, onReschedule, compact = false }) {
           {call.can_join && (
             <Button
               as={Link}
-              to={`/messages/calls/${call.id}`}
+              to={`/messages/calls/${call.room_token}`}
               size="sm"
               className="!bg-gold !text-black !text-xs"
             >

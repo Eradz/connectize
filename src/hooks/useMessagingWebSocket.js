@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import useWebSocket from "./useWebSocket";
 import { useMessagesStore } from "../stores/messagesStore";
 import { useAuth } from "../context/userContext";
@@ -27,7 +28,20 @@ const useMessagingWebSocket = ({ enabled = true } = {}) => {
     enabled: enabled && Boolean(currentUser?.id),
   });
 
+  const queryClient = useQueryClient();
+
   function handleNewMessage(event) {
+    // A call was proposed, accepted, declined, cancelled or moved. Invalidate
+    // rather than patch: half of what a call card shows ("is it my turn",
+    // "can I join") is an answer to who is asking, so the server recomputes it
+    // per viewer. Without this, accepting a call left the other person looking
+    // at "Awaiting a reply" until they thought to reload - and that agreement
+    // is the one thing the feature exists to communicate.
+    if (event.eventType === "call_update") {
+      queryClient.invalidateQueries({ queryKey: ["calls"] });
+      return;
+    }
+
     // An edit made by either party, on any device. Handled before the
     // new-message branch because it shares eventType `chat_message` and would
     // otherwise be dropped, leaving this client showing the old text

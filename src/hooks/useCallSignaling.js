@@ -43,7 +43,7 @@ const MEDIA_FOR = {
   video: { audio: true, video: true },
 };
 
-export default function useCallSignaling(callId, { kind = "video", selfId } = {}) {
+export default function useCallSignaling(roomToken, { kind = "video", selfId } = {}) {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState(null);
   const [localStream, setLocalStream] = useState(null);
@@ -85,7 +85,7 @@ export default function useCallSignaling(callId, { kind = "video", selfId } = {}
   );
 
   useEffect(() => {
-    if (!callId) return undefined;
+    if (!roomToken) return undefined;
 
     let cancelled = false;
 
@@ -104,7 +104,7 @@ export default function useCallSignaling(callId, { kind = "video", selfId } = {}
       setStatus("joining");
       setError(null);
 
-      const details = await joinCall(callId);
+      const details = await joinCall(roomToken);
       if (cancelled) return;
       if (!details) {
         // The server refused and has already explained why in a toast; the
@@ -267,7 +267,7 @@ export default function useCallSignaling(callId, { kind = "video", selfId } = {}
       cancelled = true;
       teardown();
     };
-  }, [callId, kind, selfId, send, stopLocalMedia]);
+  }, [roomToken, kind, selfId, send, stopLocalMedia]);
 
   const toggleMute = useCallback(() => {
     const next = !isMuted;

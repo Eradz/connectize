@@ -48,14 +48,14 @@ const STATUS_COPY = {
 };
 
 export default function CallRoom() {
-  const { callId } = useParams();
+  const { roomToken } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [joined, setJoined] = useState(false);
 
   const { data: call, isLoading, refetch } = useQuery({
-    queryKey: ["calls", callId],
-    queryFn: () => getCall(callId),
+    queryKey: ["calls", roomToken],
+    queryFn: () => getCall(roomToken),
     // The join window opens and closes on its own, so a card left open on
     // screen has to notice without the user reloading.
     refetchInterval: joined ? false : 30_000,
@@ -129,7 +129,7 @@ function LiveCall({ call, selfId, onLeave }) {
     toggleMute,
     toggleCamera,
     hangUp,
-  } = useCallSignaling(call.id, { kind: call.kind, selfId });
+  } = useCallSignaling(call.room_token, { kind: call.kind, selfId });
 
   const isVideo = call.kind === "video";
   const notice = error || STATUS_COPY[status];

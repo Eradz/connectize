@@ -15,10 +15,14 @@ import RescheduleCallModal from "../../components/calls/RescheduleCallModal";
  */
 export default function CallsPage() {
   const [rescheduling, setRescheduling] = useState(null);
+  // Two lists, not one. A finished call is a record of a conversation that
+  // happened - who, when, and whether it connected - and until now that
+  // history was written to the database and shown to nobody.
+  const [scope, setScope] = useState("upcoming");
 
-  const { data: upcoming = [], isLoading } = useQuery({
-    queryKey: ["calls", "upcoming"],
-    queryFn: () => listCalls({ scope: "upcoming" }),
+  const { data: calls = [], isLoading } = useQuery({
+    queryKey: ["calls", scope],
+    queryFn: () => listCalls({ scope }),
   });
 
   return (
@@ -31,21 +35,41 @@ export default function CallsPage() {
         </p>
       </header>
 
+      <div className="flex gap-2">
+        {["upcoming", "past"].map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => setScope(option)}
+            className={`text-xs px-3 py-1.5 rounded-full border ${
+              scope === option
+                ? "bg-gold border-gold text-black font-semibold"
+                : "border-gray-200 text-gray-600 hover:border-gray-300"
+            }`}
+          >
+            {option === "upcoming" ? "Upcoming" : "History"}
+          </button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="grid place-items-center py-10">
           <Spinner />
         </div>
-      ) : upcoming.length === 0 ? (
+      ) : calls.length === 0 ? (
         <p className="text-sm text-gray-500 py-8 text-center">
-          Nothing scheduled. Open a conversation to propose a call.
+          {scope === "upcoming"
+            ? "Nothing scheduled. Open a conversation to propose a call."
+            : "No calls yet."}
         </p>
       ) : (
         <div className="flex flex-col gap-3">
-          {upcoming.map((call) => (
+          {calls.map((call) => (
             <CallCard
-              key={call.id}
+              key={call.room_token}
               call={call}
-              onReschedule={setRescheduling}
+              /* A finished call has nothing left to act on. */
+              onReschedule={scope === "upcoming" ? setRescheduling : undefined}
             />
           ))}
         </div>
