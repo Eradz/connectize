@@ -41,7 +41,11 @@ const webRoutes = {
   logisticsDashboard: "/logistics-hub",
   manageEmails: "/co/settings/manage-emails",
   market: "/market",
-  calls: "/messages/calls",
+  // A view inside Messages rather than a page of its own: the
+  // conversation list is the context you came from, and losing it to see
+  // your diary is disorienting. The call *room* is still a full page -
+  // being on a call is not a browsing task.
+  calls: "/messages?view=calls",
   callRoom: "/messages/calls/:roomToken",
   messages: "/messages",
   messagesRoom: "/messages/:room_name",

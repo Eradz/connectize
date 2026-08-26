@@ -1,10 +1,9 @@
 import { useState } from "react";
+import { Button } from "@chakra-ui/react";
+import ScheduleCallModal from "../../components/calls/ScheduleCallModal";
 import useCallCandidates from "../../hooks/useCallCandidates";
 import PeoplePicker from "../../components/calls/PeoplePicker";
 import { MAX_CALL_PARTICIPANTS } from "../../api-services/calls";
-import { Link } from "react-router-dom";
-import { ChevronLeftRounded } from "@mui/icons-material";
-import { webRoutes } from "../../lib/webRoutes";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@chakra-ui/react";
 import { addParticipants, listCalls } from "../../api-services/calls";
@@ -31,6 +30,7 @@ export default function CallsPage() {
   //: Set when the picker is being used to grow an existing call.
   const [addingTo, setAddingTo] = useState(null);
   const [toAdd, setToAdd] = useState([]);
+  const [scheduling, setScheduling] = useState(false);
   const queryClient = useQueryClient();
 
   const candidates = useCallCandidates(
@@ -67,23 +67,22 @@ export default function CallsPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto p-4 flex flex-col gap-4">
-      <header>
-        {/* The page was reachable and not leavable: it is a full route rather
-            than a panel inside Messages, so without this the only way out was
-            the browser's own back button. */}
-        <Link
-          to={webRoutes.messages}
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 mb-2"
+    <div className="p-4 flex flex-col gap-4">
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-gray-900">Calls</h1>
+          <p className="text-sm text-gray-500">
+            Calls are booked and confirmed by both sides — nothing rings
+            unannounced.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          className="!bg-gold !text-black !text-xs shrink-0"
+          onClick={() => setScheduling(true)}
         >
-          <ChevronLeftRounded fontSize="small" />
-          <span>Messages</span>
-        </Link>
-        <h1 className="text-lg font-semibold text-gray-900">Calls</h1>
-        <p className="text-sm text-gray-500">
-          Calls are booked and confirmed by both sides — nothing rings
-          unannounced.
-        </p>
+          Schedule a call
+        </Button>
       </header>
 
       <div className="flex gap-2">
@@ -153,6 +152,13 @@ export default function CallsPage() {
           goes ahead with whoever accepts.
         </p>
       </ReusableModal>
+
+      {/* No `otherUser`: from here you search for whoever you want, rather
+          than starting from the person whose chat you happened to be in. */}
+      <ScheduleCallModal
+        isOpen={scheduling}
+        onClose={() => setScheduling(false)}
+      />
 
       <RescheduleCallModal
         call={rescheduling}
