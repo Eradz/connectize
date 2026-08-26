@@ -37,6 +37,37 @@ function Video({ stream, muted, className }) {
   );
 }
 
+/**
+ * Stands in for a camera that is off.
+ *
+ * A black rectangle is indistinguishable from a broken connection - the whole
+ * question a caller is asking at that moment is "is this working?". A face
+ * answers it.
+ */
+function AvatarTile({ person, size = "lg", className = "" }) {
+  const name = [person?.first_name, person?.last_name].filter(Boolean).join(" ");
+  const initial = (name || "?").trim().charAt(0).toUpperCase();
+  const dimensions = size === "lg" ? "w-28 h-28 text-4xl" : "w-12 h-12 text-lg";
+
+  return (
+    <div className={`grid place-items-center ${className}`}>
+      {person?.avatar ? (
+        <img
+          src={person.avatar}
+          alt={name}
+          className={`${dimensions} rounded-full object-cover border border-white/20`}
+        />
+      ) : (
+        <div
+          className={`${dimensions} rounded-full grid place-items-center bg-white/10 text-white font-semibold border border-white/20`}
+        >
+          {initial}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const STATUS_COPY = {
   joining: "Joining…",
   waiting: "Waiting for them to join…",
@@ -109,6 +140,7 @@ export default function CallRoom() {
     <LiveCall
       call={call}
       selfId={user?.id}
+      self={user}
       onLeave={() => {
         setJoined(false);
         refetch();
@@ -117,7 +149,7 @@ export default function CallRoom() {
   );
 }
 
-function LiveCall({ call, selfId, onLeave }) {
+function LiveCall({ call, selfId, onLeave, self }) {
   const {
     status,
     error,
@@ -133,17 +165,22 @@ function LiveCall({ call, selfId, onLeave }) {
 
   const isVideo = call.kind === "video";
   const notice = error || STATUS_COPY[status];
+  // Their camera being off is not the same as their video not having arrived,
+  // and both are different from an audio call - but all three want a face
+  // rather than a black rectangle.
+  const showRemoteVideo = isVideo && remoteStream && !peerState.cameraOff;
 
   return (
     <div className="fixed inset-0 bg-gray-900 flex flex-col z-50">
       <div className="flex-1 relative grid place-items-center">
-        {remoteStream && isVideo ? (
+        {showRemoteVideo ? (
           <Video
             stream={remoteStream}
             className="w-full h-full object-cover"
           />
         ) : (
           <div className="text-center text-white/80 px-6">
+            <AvatarTile person={call.other_party} className="mb-4" />
             <p className="text-lg font-semibold">
               {[call.other_party?.first_name, call.other_party?.last_name]
                 .filter(Boolean)
@@ -157,20 +194,22 @@ function LiveCall({ call, selfId, onLeave }) {
         )}
 
         {/* Audio still has to be attached to an element to play, even with
-            nothing to show. */}
-        {remoteStream && !isVideo && (
+            nothing to show - including while their camera is off. */}
+        {remoteStream && !showRemoteVideo && (
           <Video stream={remoteStream} className="hidden" />
         )}
 
         {isVideo && localStream && (
-          <Video
-            stream={localStream}
-            muted
-            className="absolute bottom-4 right-4 w-32 rounded-lg border border-white/20 object-cover"
-          />
+          <div className="absolute bottom-4 right-4 w-32 aspect-[3/4] rounded-lg border border-white/20 overflow-hidden bg-gray-800">
+            {isCameraOff ? (
+              <AvatarTile person={self} size="sm" className="w-full h-full" />
+            ) : (
+              <Video stream={localStream} muted className="w-full h-full object-cover" />
+            )}
+          </div>
         )}
 
-        {remoteStream && isVideo && notice && (
+        {showRemoteVideo && notice && (
           <p className="absolute top-4 left-4 text-sm text-white/80 bg-black/40 px-3 py-1 rounded">
             {notice}
           </p>
