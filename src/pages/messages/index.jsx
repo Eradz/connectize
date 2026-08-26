@@ -2,7 +2,8 @@ import { Avatar, useDisclosure } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { VideoCameraOutlined } from "@ant-design/icons";
 import { getAllUsers } from "../../api-services/users";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
@@ -70,7 +71,19 @@ export default function MessagesPage() {
 
   return (
     <>
-      <HeadingText heading="sub-heading">Messages</HeadingText>
+      <div className="flex items-center justify-between gap-2">
+        <HeadingText heading="sub-heading">Messages</HeadingText>
+        {/* The calls page had no way in: the only entry point was the button
+            inside a conversation, so a booking you had already made was
+            unreachable unless you remembered which chat you made it from. */}
+        <Link
+          to={webRoutes.calls}
+          className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 shrink-0"
+        >
+          <VideoCameraOutlined />
+          <span>Calls</span>
+        </Link>
+      </div>
       <MessagesList />
       {/* <CustomTabs
         tabsHeading={["Recent Chats", "Favorites"]}
