@@ -1,5 +1,7 @@
 import { useState } from "react";
 import useCallCandidates from "../../hooks/useCallCandidates";
+import PeoplePicker from "../../components/calls/PeoplePicker";
+import { MAX_CALL_PARTICIPANTS } from "../../api-services/calls";
 import { Link } from "react-router-dom";
 import { ChevronLeftRounded } from "@mui/icons-material";
 import { webRoutes } from "../../lib/webRoutes";
@@ -28,6 +30,7 @@ export default function CallsPage() {
   const [scope, setScope] = useState("upcoming");
   //: Set when the picker is being used to grow an existing call.
   const [addingTo, setAddingTo] = useState(null);
+  const [toAdd, setToAdd] = useState([]);
   const queryClient = useQueryClient();
 
   const candidates = useCallCandidates(
@@ -35,13 +38,26 @@ export default function CallsPage() {
     (addingTo?.participants || []).map((p) => p.user?.id).filter(Boolean)
   );
 
+  const addRoom =
+    MAX_CALL_PARTICIPANTS - (addingTo?.participants?.length || 0) - toAdd.length;
+
+  const toggleToAdd = (person) =>
+    setToAdd((current) =>
+      current.some((chosen) => chosen.id === person.id)
+        ? current.filter((chosen) => chosen.id !== person.id)
+        : addRoom <= 0
+          ? current
+          : [...current, person]
+    );
+
   const addPeople = useMutation({
-    mutationFn: (userId) => addParticipants(addingTo.room_token, [userId]),
+    mutationFn: (ids) => addParticipants(addingTo.room_token, ids),
     onSuccess: (updated) => {
       if (!updated) return;
       queryClient.invalidateQueries({ queryKey: ["calls"] });
       toast.success("They've been invited. They'll need to accept.");
       setAddingTo(null);
+      setToAdd([]);
     },
   });
 
@@ -113,30 +129,25 @@ export default function CallsPage() {
 
       <ReusableModal
         isOpen={Boolean(addingTo)}
-        onClose={() => setAddingTo(null)}
+        onClose={() => {
+          setAddingTo(null);
+          setToAdd([]);
+        }}
         title="Who else should join?"
-        footerContent={<></>}
+        primaryText={
+          addPeople.isPending ? "Inviting…" : `Invite${toAdd.length ? ` ${toAdd.length}` : ""}`
+        }
+        primaryAction={() => addPeople.mutate(toAdd.map((person) => person.id))}
+        disabled={addPeople.isPending || toAdd.length === 0}
       >
-        {candidates.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            Nobody left to add from your conversations.
-          </p>
-        ) : (
-          <ul className="flex flex-col">
-            {candidates.map((person) => (
-              <li key={person.id}>
-                <button
-                  type="button"
-                  disabled={addPeople.isPending}
-                  onClick={() => addPeople.mutate(person.id)}
-                  className="w-full text-left px-2 py-2 text-sm rounded hover:bg-gray-50 disabled:opacity-50"
-                >
-                  {person.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <PeoplePicker
+          recent={candidates}
+          selected={toAdd}
+          room={addRoom}
+          onToggle={toggleToAdd}
+          label="Add"
+        />
+
         <p className="text-xs text-gray-500 mt-3">
           A call holds four people. Everyone answers for themselves, and it
           goes ahead with whoever accepts.

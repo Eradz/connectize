@@ -7,6 +7,7 @@ import { webRoutes } from "../../lib/webRoutes";
 import ReusableModal from "../custom/ResusableModal";
 import { proposeCall, MAX_CALL_PARTICIPANTS } from "../../api-services/calls";
 import useCallCandidates from "../../hooks/useCallCandidates";
+import PeoplePicker from "./PeoplePicker";
 
 /**
  * Propose a call to the person you are talking to.
@@ -43,21 +44,37 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
   // The person whose chat this was opened from starts selected; the rest of
   // the list is there so a two-person call can become a three-person one
   // without leaving the conversation.
+  // People, not just ids, so a searched name survives being chosen even
+  // though it is not in the recent list.
   const [selected, setSelected] = useState([]);
   const candidates = useCallCandidates(isOpen);
 
   useEffect(() => {
-    if (isOpen) setSelected(otherUser?.id ? [otherUser.id] : []);
+    if (!isOpen) return;
+    setSelected(
+      otherUser?.id
+        ? [
+            {
+              id: otherUser.id,
+              name:
+                [otherUser.first_name, otherUser.last_name]
+                  .filter(Boolean)
+                  .join(" ") || "Connectize user",
+              avatar: otherUser.avatar ?? null,
+            },
+          ]
+        : []
+    );
   }, [isOpen, otherUser?.id]);
 
   const room = MAX_CALL_PARTICIPANTS - 1 - selected.length;
-  const toggle = (id) =>
+  const toggle = (person) =>
     setSelected((current) =>
-      current.includes(id)
-        ? current.filter((existing) => existing !== id)
+      current.some((chosen) => chosen.id === person.id)
+        ? current.filter((chosen) => chosen.id !== person.id)
         : room <= 0
           ? current
-          : [...current, id]
+          : [...current, person]
     );
 
   const earliest = useMemo(() => toLocalInputValue(new Date()), []);
@@ -65,7 +82,7 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
   const { mutate, isPending } = useMutation({
     mutationFn: () =>
       proposeCall({
-        invitees: selected,
+        invitees: selected.map((person) => person.id),
         // The input is local wall-clock; the API is UTC throughout.
         scheduledStart: new Date(start).toISOString(),
         durationMinutes: Number(duration),
@@ -84,10 +101,9 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
     },
   });
 
-  const chosen = candidates.filter((person) => selected.includes(person.id));
   const name =
-    chosen.length === 1
-      ? chosen[0].name
+    selected.length === 1
+      ? selected[0].name
       : [otherUser?.first_name, otherUser?.last_name].filter(Boolean).join(" ");
   const heading =
     selected.length > 1
@@ -106,34 +122,12 @@ export default function ScheduleCallModal({ isOpen, onClose, otherUser }) {
       disabled={isPending || !start || selected.length === 0}
     >
       <div className="flex flex-col gap-4">
-        {candidates.length > 0 && (
-          <div className="text-sm">
-            <span className="font-semibold text-gray-800">
-              Who{room <= 0 ? " — that's a full call" : ""}
-            </span>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {candidates.map((person) => {
-                const isOn = selected.includes(person.id);
-                const isFull = !isOn && room <= 0;
-                return (
-                  <button
-                    key={person.id}
-                    type="button"
-                    disabled={isFull}
-                    onClick={() => toggle(person.id)}
-                    className={`text-xs px-3 py-1.5 rounded-full border disabled:opacity-40 ${
-                      isOn
-                        ? "bg-gold border-gold text-black font-semibold"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300"
-                    }`}
-                  >
-                    {person.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <PeoplePicker
+          recent={candidates}
+          selected={selected}
+          room={room}
+          onToggle={toggle}
+        />
 
         <label className="text-sm">
           <span className="font-semibold text-gray-800">When</span>
