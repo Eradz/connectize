@@ -63,9 +63,17 @@ function formatWhen(value) {
       });
 }
 
-export default function CallCard({ call, onReschedule, compact = false }) {
+export default function CallCard({ call, onReschedule, onAddPeople, compact = false }) {
   const queryClient = useQueryClient();
   const other = call?.other_party;
+  const participants = call?.participants || [];
+  const isGroup = participants.length > 2;
+  // Two people reads as a name; more reads as a list, because "Prosper +2"
+  // tells you nothing about who the other two are.
+  const groupNames = participants
+    .map((p) => p.user?.first_name)
+    .filter(Boolean)
+    .join(", ");
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["calls"] });
@@ -93,6 +101,7 @@ export default function CallCard({ call, onReschedule, compact = false }) {
         <div className="flex items-center gap-2 flex-wrap">
           <p className="font-semibold text-sm text-gray-900 truncate">
             {[other?.first_name, other?.last_name].filter(Boolean).join(" ") ||
+              groupNames ||
               "Connectize user"}
           </p>
           <span
@@ -108,6 +117,11 @@ export default function CallCard({ call, onReschedule, compact = false }) {
           {formatWhen(call.scheduled_start)} · {call.duration_minutes} min ·{" "}
           {call.kind === "audio" ? "Audio" : "Video"}
         </p>
+        {isGroup && (
+          <p className="text-xs text-gray-500">
+            {call.accepted_count} of {participants.length} confirmed
+          </p>
+        )}
         {call.topic && (
           <p className="text-xs text-gray-500 truncate">{call.topic}</p>
         )}
@@ -156,6 +170,17 @@ export default function CallCard({ call, onReschedule, compact = false }) {
 
           {isOpen && !compact && (
             <>
+              {onAddPeople && call.can_add_people && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="!text-xs"
+                  isDisabled={busy}
+                  onClick={() => onAddPeople(call)}
+                >
+                  Add people
+                </Button>
+              )}
               {onReschedule && (
                 <Button
                   size="sm"

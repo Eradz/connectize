@@ -156,6 +156,40 @@ function useDraggable(stageRef) {
   };
 }
 
+/** One other person: their video, or their face when there is no video. */
+function PeerTile({ peer, isVideo }) {
+  const showVideo = isVideo && peer.stream && !peer.cameraOff;
+  const name = [peer.person?.first_name, peer.person?.last_name]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div className="relative rounded-lg overflow-hidden bg-gray-800 grid place-items-center min-h-[8rem]">
+      {showVideo ? (
+        <Video stream={peer.stream} className="w-full h-full object-cover" />
+      ) : (
+        <div className="text-center text-white/80 px-4">
+          <AvatarTile person={peer.person} className="mb-3" />
+          <p className="font-semibold">{name || "Connectize user"}</p>
+          {!peer.stream && (
+            <p className="text-xs mt-1 text-white/50">
+              {peer.invite === "accepted" ? "Not here yet" : "Hasn't replied"}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Audio plays whether or not there is a picture. */}
+      {peer.stream && !showVideo && <Video stream={peer.stream} className="hidden" />}
+
+      <div className="absolute bottom-2 left-2 flex items-center gap-2 text-xs text-white bg-black/40 px-2 py-1 rounded">
+        <span>{name || "Connectize user"}</span>
+        {peer.muted && <MicOffRounded fontSize="inherit" />}
+      </div>
+    </div>
+  );
+}
+
 const LOBBY_HEADING = {
   proposed: "Call invitation",
   accepted: "Your call",
@@ -269,8 +303,8 @@ function LiveCall({ call, selfId, onLeave, self }) {
     status,
     error,
     localStream,
-    remoteStream,
-    peerState,
+    remoteStreams,
+    peerStates,
     isMuted,
     isCameraOff,
     toggleMute,
@@ -280,44 +314,50 @@ function LiveCall({ call, selfId, onLeave, self }) {
 
   const isVideo = call.kind === "video";
   const notice = error || STATUS_COPY[status];
-  // Their camera being off is not the same as their video not having arrived,
-  // and both are different from an audio call - but all three want a face
-  // rather than a black rectangle.
-  const showRemoteVideo = isVideo && remoteStream && !peerState.cameraOff;
-  // States a call cannot come back from. Offering mute and camera under an
-  // error reads as though you are connected, and invites fiddling with a call
-  // that is not going to happen.
   const isDeadEnd = ["failed", "refused", "window_closed"].includes(status);
   const stageRef = useRef(null);
   const selfView = useDraggable(stageRef);
 
+  // Everyone on the call except us, whether or not their media has arrived.
+  // Driving the grid from the *booking* rather than from the streams means a
+  // person who has not connected yet still has a tile with their name on it,
+  // instead of appearing from nowhere when their video lands.
+  const others = (call.participants || [])
+    .filter((p) => p.user?.id !== selfId && p.status !== "declined")
+    .map((p) => {
+      const media = remoteStreams.find((r) => Number(r.userId) === p.user.id);
+      const state = peerStates[p.user.id] || {};
+      return {
+        person: p.user,
+        invite: p.status,
+        stream: media?.stream || null,
+        muted: Boolean(state.muted),
+        cameraOff: Boolean(state.cameraOff),
+      };
+    });
+
+  // Two people is a face filling the screen; more is a grid. Same components
+  // either way, only the layout differs.
+  const columns = others.length > 1 ? "grid-cols-2" : "grid-cols-1";
+
   return (
     <div className="fixed inset-0 bg-gray-900 flex flex-col z-50">
-      <div ref={stageRef} className="flex-1 relative grid place-items-center">
-        {showRemoteVideo ? (
-          <Video
-            stream={remoteStream}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="text-center text-white/80 px-6">
-            <AvatarTile person={call.other_party} className="mb-4" />
-            <p className="text-lg font-semibold">
-              {[call.other_party?.first_name, call.other_party?.last_name]
-                .filter(Boolean)
-                .join(" ")}
-            </p>
-            {notice && <p className="text-sm mt-2 text-white/60">{notice}</p>}
-            {peerState.muted && (
-              <p className="text-xs mt-1 text-white/50">They're muted</p>
-            )}
-          </div>
-        )}
+      <div ref={stageRef} className="flex-1 relative p-2">
+        <div className={`grid ${columns} gap-2 w-full h-full`}>
+          {others.map((peer) => (
+            <PeerTile key={peer.person.id} peer={peer} isVideo={isVideo} />
+          ))}
+          {others.length === 0 && (
+            <div className="grid place-items-center text-white/70">
+              <p>No one else is on this call.</p>
+            </div>
+          )}
+        </div>
 
-        {/* Audio still has to be attached to an element to play, even with
-            nothing to show - including while their camera is off. */}
-        {remoteStream && !showRemoteVideo && (
-          <Video stream={remoteStream} className="hidden" />
+        {notice && (
+          <p className="absolute top-4 left-4 text-sm text-white/80 bg-black/40 px-3 py-1 rounded">
+            {notice}
+          </p>
         )}
 
         {isVideo && localStream && (
@@ -334,12 +374,6 @@ function LiveCall({ call, selfId, onLeave, self }) {
               <Video stream={localStream} muted className="w-full h-full object-cover" />
             )}
           </div>
-        )}
-
-        {showRemoteVideo && notice && (
-          <p className="absolute top-4 left-4 text-sm text-white/80 bg-black/40 px-3 py-1 rounded">
-            {notice}
-          </p>
         )}
       </div>
 

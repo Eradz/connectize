@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeftRounded } from "@mui/icons-material";
 import { webRoutes } from "../../lib/webRoutes";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@chakra-ui/react";
-import { listCalls } from "../../api-services/calls";
+import { addParticipants, listCalls } from "../../api-services/calls";
+import { getMessagesForUser } from "../../api-services/messaging";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import ReusableModal from "../../components/custom/ResusableModal";
+import { toast } from "sonner";
 import CallCard from "../../components/calls/CallCard";
 import RescheduleCallModal from "../../components/calls/RescheduleCallModal";
 
@@ -22,6 +26,46 @@ export default function CallsPage() {
   // happened - who, when, and whether it connected - and until now that
   // history was written to the database and shown to nobody.
   const [scope, setScope] = useState("upcoming");
+  //: Set when the picker is being used to grow an existing call.
+  const [addingTo, setAddingTo] = useState(null);
+  const queryClient = useQueryClient();
+
+  // Candidates are the people already in your conversations - a call is a
+  // conversation that got serious, so this is both the right set and one you
+  // have already paid for.
+  const { data: conversations } = useQuery({
+    queryKey: ["calls", "call-candidates"],
+    queryFn: () => getMessagesForUser({ page_size: 50 }),
+    enabled: Boolean(addingTo),
+  });
+
+  const candidates = useMemo(() => {
+    const rows = conversations?.results ?? conversations ?? [];
+    const already = new Set(
+      (addingTo?.participants || []).map((p) => p.user?.id)
+    );
+    const seen = new Map();
+    rows.forEach((row) => {
+      const person = row?.other_user;
+      if (!person?.id || seen.has(person.id) || already.has(person.id)) return;
+      seen.set(
+        person.id,
+        [person.first_name, person.last_name].filter(Boolean).join(" ") ||
+          "Connectize user"
+      );
+    });
+    return Array.from(seen, ([id, label]) => ({ id, label }));
+  }, [conversations, addingTo]);
+
+  const addPeople = useMutation({
+    mutationFn: (userId) => addParticipants(addingTo.room_token, [userId]),
+    onSuccess: (updated) => {
+      if (!updated) return;
+      queryClient.invalidateQueries({ queryKey: ["calls"] });
+      toast.success("They've been invited. They'll need to accept.");
+      setAddingTo(null);
+    },
+  });
 
   const { data: calls = [], isLoading } = useQuery({
     queryKey: ["calls", scope],
@@ -83,10 +127,43 @@ export default function CallsPage() {
               call={call}
               /* A finished call has nothing left to act on. */
               onReschedule={scope === "upcoming" ? setRescheduling : undefined}
+              onAddPeople={scope === "upcoming" ? setAddingTo : undefined}
             />
           ))}
         </div>
       )}
+
+      <ReusableModal
+        isOpen={Boolean(addingTo)}
+        onClose={() => setAddingTo(null)}
+        title="Who else should join?"
+        footerContent={<></>}
+      >
+        {candidates.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            Nobody left to add from your conversations.
+          </p>
+        ) : (
+          <ul className="flex flex-col">
+            {candidates.map((person) => (
+              <li key={person.id}>
+                <button
+                  type="button"
+                  disabled={addPeople.isPending}
+                  onClick={() => addPeople.mutate(person.id)}
+                  className="w-full text-left px-2 py-2 text-sm rounded hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {person.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="text-xs text-gray-500 mt-3">
+          A call holds four people. Everyone answers for themselves, and it
+          goes ahead with whoever accepts.
+        </p>
+      </ReusableModal>
 
       <RescheduleCallModal
         call={rescheduling}

@@ -30,6 +30,7 @@ export const getCall = async (roomToken) =>
 
 export const proposeCall = async ({
   invitee,
+  invitees,
   scheduledStart,
   durationMinutes = 30,
   kind = "video",
@@ -39,7 +40,7 @@ export const proposeCall = async ({
     url: CALLS_URL,
     method: "POST",
     data: {
-      invitee,
+      invitees: invitees ?? (invitee ? [invitee] : []),
       scheduled_start: scheduledStart,
       duration_minutes: durationMinutes,
       kind,
@@ -68,6 +69,14 @@ export const rescheduleCall = async (roomToken, { scheduledStart, durationMinute
       scheduled_start: scheduledStart,
       ...(durationMinutes ? { duration_minutes: durationMinutes } : {}),
     },
+  });
+
+/** Invite more people to a call that already exists. */
+export const addParticipants = async (roomToken, invitees) =>
+  makeApiRequest({
+    url: `${CALLS_URL}${roomToken}/participants/`,
+    method: "POST",
+    data: { invitees },
   });
 
 /**

@@ -50,8 +50,10 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState(null);
   const [localStream, setLocalStream] = useState(null);
-  const [remoteStream, setRemoteStream] = useState(null);
-  const [peerState, setPeerState] = useState({ muted: false, cameraOff: false });
+  //: peerId -> MediaStream, as an array for rendering.
+  const [remoteStreams, setRemoteStreams] = useState([]);
+  //: peerId -> { muted, cameraOff }
+  const [peerStates, setPeerStates] = useState({});
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
 
@@ -65,19 +67,23 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
   }, []);
 
   const socketRef = useRef(null);
-  const peerRef = useRef(null);
+  //: peerId -> { pc, pending } . Media is a mesh: three people means three
+  //: connections, four means six. Everything below is keyed by who it is with.
+  const peersRef = useRef(new Map());
   const localStreamRef = useRef(null);
   // Candidates can arrive before the remote description is set, and adding
   // one then throws. They are held here and flushed once the description
   // lands - without this the connection works on a fast network and fails
   // intermittently on a slow one, which is the worst way for it to fail.
-  const pendingCandidatesRef = useRef([]);
   const teardownRef = useRef(() => {});
 
-  const send = useCallback((event, payload = {}) => {
+  const send = useCallback((event, payload = {}, toUserId = null) => {
     const socket = socketRef.current;
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ event, payload }));
+      // `toUserId` is what keeps a room of four from three people answering
+      // one offer. Null means everyone, which is right for hangup and
+      // media_state.
+      socket.send(JSON.stringify({ event, payload, toUserId }));
     }
   }, []);
 
@@ -100,15 +106,17 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
     if (!roomToken) return undefined;
 
     let cancelled = false;
+    let joinTimer;
 
     const teardown = () => {
+      if (joinTimer) clearTimeout(joinTimer);
       socketRef.current?.close();
       socketRef.current = null;
-      peerRef.current?.close();
-      peerRef.current = null;
-      pendingCandidatesRef.current = [];
+      peersRef.current.forEach(({ pc }) => pc.close());
+      peersRef.current.clear();
       stopLocalMedia();
-      setRemoteStream(null);
+      setRemoteStreams([]);
+      setPeerStates({});
     };
     teardownRef.current = teardown;
 
@@ -148,22 +156,61 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       localStreamRef.current = stream;
       setLocalStream(stream);
 
-      const peer = new RTCPeerConnection({ iceServers: details.iceServers });
-      peerRef.current = peer;
-      stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+      /**
+       * One connection per peer, made on demand.
+       *
+       * Everything that used to be a single object is now keyed by who it is
+       * with: the connection, the queued candidates, the remote stream. That
+       * is the whole of what makes a mesh different from a pair.
+       */
+      const peerFor = (peerId) => {
+        const existing = peersRef.current.get(peerId);
+        if (existing) return existing;
 
-      peer.ontrack = (event) => setRemoteStream(event.streams[0]);
-      peer.onicecandidate = (event) => {
-        if (event.candidate) send("ice_candidate", { candidate: event.candidate });
+        const pc = new RTCPeerConnection({ iceServers: details.iceServers });
+        const entry = { pc, pending: [] };
+        peersRef.current.set(peerId, entry);
+
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+        pc.ontrack = (event) => {
+          const incoming = event.streams[0];
+          setRemoteStreams((current) => [
+            ...current.filter((r) => r.userId !== peerId),
+            { userId: peerId, stream: incoming },
+          ]);
+        };
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            send("ice_candidate", { candidate: event.candidate }, peerId);
+          }
+        };
+        pc.onconnectionstatechange = () => {
+          if (pc.connectionState === "connected") applyStatus("connected");
+          if (pc.connectionState === "failed") {
+            // One peer failing is not the call failing when there are three
+            // of you, so drop that connection and leave the rest alone.
+            dropPeer(peerId);
+            if (peersRef.current.size === 0) {
+              setError("Could not connect. Your network may be blocking calls.");
+              applyStatus("failed");
+            }
+          }
+        };
+        return entry;
       };
-      peer.onconnectionstatechange = () => {
-        if (peer.connectionState === "connected") applyStatus("connected");
-        if (peer.connectionState === "failed") {
-          // Reached when even the relay could not carry the media. Nothing
-          // the user can do about it, so say so rather than spinning.
-          setError("Could not connect. Your network may be blocking calls.");
-          applyStatus("failed");
-        }
+
+      const dropPeer = (peerId) => {
+        const entry = peersRef.current.get(peerId);
+        if (!entry) return;
+        entry.pc.close();
+        peersRef.current.delete(peerId);
+        setRemoteStreams((current) => current.filter((r) => r.userId !== peerId));
+        setPeerStates((current) => {
+          const next = { ...current };
+          delete next[peerId];
+          return next;
+        });
       };
 
       const token = getSession()?.tokens?.access;
@@ -182,18 +229,21 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
         }
       }, JOIN_TIMEOUT_MS);
 
-      const makeOffer = async () => {
-        const offer = await peer.createOffer();
-        await peer.setLocalDescription(offer);
-        send("offer", { sdp: peer.localDescription });
+      const makeOffer = async (peerId) => {
+        const { pc } = peerFor(peerId);
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        send("offer", { sdp: pc.localDescription }, peerId);
       };
 
-      const flushCandidates = async () => {
-        const queued = pendingCandidatesRef.current;
-        pendingCandidatesRef.current = [];
+      const flushCandidates = async (peerId) => {
+        const entry = peersRef.current.get(peerId);
+        if (!entry) return;
+        const queued = entry.pending;
+        entry.pending = [];
         for (const candidate of queued) {
           try {
-            await peer.addIceCandidate(candidate);
+            await entry.pc.addIceCandidate(candidate);
           } catch {
             // A candidate that no longer applies is not fatal; ICE will use
             // the others.
@@ -201,47 +251,55 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
         }
       };
 
-      // Lower id offers. See the note at the top of this file.
+      // Lower id offers. Applied per pair rather than once: in a room of
+      // three, each pair settles who calls whom on its own, which is what
+      // stops two people offering to each other simultaneously.
       const shouldOffer = (peerId) => Number(selfId) < Number(peerId);
 
       socket.onmessage = async (raw) => {
         const message = JSON.parse(raw.data);
+        const from = message.fromUserId;
 
         switch (message.event) {
           case "joined": {
             clearTimeout(joinTimer);
-            applyStatus(message.peerPresent ? "connecting" : "waiting");
-            if (message.peerPresent) {
-              const other = details.call?.other_party?.id;
-              if (shouldOffer(other)) await makeOffer();
+            const present = message.peers || [];
+            applyStatus(present.length ? "connecting" : "waiting");
+            // Offer to everyone already here that we out-rank.
+            for (const peerId of present) {
+              if (shouldOffer(peerId)) await makeOffer(peerId);
             }
             break;
           }
           case "peer_joined": {
             applyStatus("connecting");
-            if (shouldOffer(message.fromUserId)) await makeOffer();
+            if (shouldOffer(from)) await makeOffer(from);
             break;
           }
           case "offer": {
-            await peer.setRemoteDescription(message.payload.sdp);
-            await flushCandidates();
-            const answer = await peer.createAnswer();
-            await peer.setLocalDescription(answer);
-            send("answer", { sdp: peer.localDescription });
+            const { pc } = peerFor(from);
+            await pc.setRemoteDescription(message.payload.sdp);
+            await flushCandidates(from);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            send("answer", { sdp: pc.localDescription }, from);
             break;
           }
           case "answer": {
-            await peer.setRemoteDescription(message.payload.sdp);
-            await flushCandidates();
+            const entry = peersRef.current.get(from);
+            if (!entry) break;
+            await entry.pc.setRemoteDescription(message.payload.sdp);
+            await flushCandidates(from);
             break;
           }
           case "ice_candidate": {
+            const entry = peerFor(from);
             const candidate = message.payload.candidate;
-            if (!peer.remoteDescription) {
-              pendingCandidatesRef.current.push(candidate);
+            if (!entry.pc.remoteDescription) {
+              entry.pending.push(candidate);
             } else {
               try {
-                await peer.addIceCandidate(candidate);
+                await entry.pc.addIceCandidate(candidate);
               } catch {
                 /* stale candidate */
               }
@@ -249,16 +307,23 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
             break;
           }
           case "media_state": {
-            setPeerState({
-              muted: Boolean(message.payload.muted),
-              cameraOff: Boolean(message.payload.cameraOff),
-            });
+            setPeerStates((current) => ({
+              ...current,
+              [from]: {
+                muted: Boolean(message.payload.muted),
+                cameraOff: Boolean(message.payload.cameraOff),
+              },
+            }));
             break;
           }
           case "hangup":
           case "peer_left": {
-            setRemoteStream(null);
-            applyStatus(message.event === "hangup" ? "ended" : "waiting");
+            dropPeer(from);
+            // Only the last person leaving ends the call. With three of you,
+            // one hanging up is someone leaving the room, not the end.
+            if (peersRef.current.size === 0) {
+              applyStatus(message.event === "hangup" ? "ended" : "waiting");
+            }
             break;
           }
           case "window_closed": {
@@ -320,8 +385,8 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       status,
       error,
       localStream,
-      remoteStream,
-      peerState,
+      remoteStreams,
+      peerStates,
       isMuted,
       isCameraOff,
       toggleMute,
@@ -329,7 +394,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       hangUp,
     }),
     [
-      status, error, localStream, remoteStream, peerState,
+      status, error, localStream, remoteStreams, peerStates,
       isMuted, isCameraOff, toggleMute, toggleCamera, hangUp,
     ]
   );
