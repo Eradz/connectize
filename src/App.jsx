@@ -62,7 +62,6 @@ const Listing = lazy(() => import("./pages/market/listing"));
 const Market = lazy(() => import("./pages/market/market"));
 const Product = lazy(() => import("./pages/market/product"));
 const MessagesLayout = lazy(() => import("./pages/messages/layout"));
-const CallRoom = lazy(() => import("./pages/calls/CallRoom"));
 const NotFound = lazy(() => import("./pages/not-found"));
 const PostInsightsPage = lazy(() => import("./pages/posts/postInsightsPage"));
 const SinglePostPage = lazy(() => import("./pages/posts/singlePostPage"));
@@ -305,7 +304,13 @@ const removeLeadingSlash = (path) => {
             path="messages/calls"
             element={<Navigate to={webRoutes.calls} replace />}
           />
-          <Route path={removeLeadingSlash(webRoutes.callRoom)} element={<CallRoom />} />
+          {/* Rendered inside the messages layout, so the conversation list
+              stays put. The live call is a fixed overlay and still fills the
+              screen once you join. */}
+          <Route
+            path={removeLeadingSlash(webRoutes.callRoom)}
+            element={<MessagesLayout />}
+          />
           <Route path={removeLeadingSlash(webRoutes.messages)} element={<MessagesLayout />} />
           <Route path={removeLeadingSlash(webRoutes.productDetails)} element={<Product />} />
           <Route path={removeLeadingSlash(webRoutes.productListing)} element={<Listing />} />

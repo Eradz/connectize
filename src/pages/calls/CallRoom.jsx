@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ChevronLeftRounded } from "@mui/icons-material";
+import { webRoutes } from "../../lib/webRoutes";
 import { Button, Spinner } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -273,10 +275,14 @@ export default function CallRoom() {
 
   if (!call) {
     return (
-      <div className="max-w-lg mx-auto p-6 text-center">
+      <div className="p-6 text-center">
         <p className="text-gray-700">This call is no longer available.</p>
-        <Button className="mt-3" size="sm" onClick={() => navigate("/messages")}>
-          Back to messages
+        <Button
+          className="mt-3"
+          size="sm"
+          onClick={() => navigate(webRoutes.calls)}
+        >
+          Back to calls
         </Button>
       </div>
     );
@@ -284,7 +290,16 @@ export default function CallRoom() {
 
   if (!joined) {
     return (
-      <div className="max-w-lg mx-auto p-4 flex flex-col gap-4">
+      <div className="p-4 flex flex-col gap-4">
+        {/* The detail is reached from the diary and from notifications, and
+            had no way out of either. */}
+        <Link
+          to={webRoutes.calls}
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 w-fit"
+        >
+          <ChevronLeftRounded fontSize="small" />
+          <span>Calls</span>
+        </Link>
         <h1 className="text-lg font-semibold text-gray-900">
           {LOBBY_HEADING[call.status] || "Call"}
         </h1>
