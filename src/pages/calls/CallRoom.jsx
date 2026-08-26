@@ -79,6 +79,47 @@ const STATUS_COPY = {
   failed: "The call could not be connected.",
 };
 
+const LOBBY_HEADING = {
+  proposed: "Call invitation",
+  accepted: "Your call",
+  declined: "Call declined",
+  cancelled: "Call cancelled",
+  expired: "Invitation expired",
+  completed: "Call finished",
+  missed: "Call missed",
+};
+
+/**
+ * Why Join is unavailable, in words that match the status on the card.
+ *
+ * This used to say "Both of you need to accept before this call can go ahead"
+ * for every status that was not `accepted` - so a finished call was labelled
+ * "Finished" and then told you to accept it. Two contradictory claims on one
+ * screen is worse than either alone.
+ */
+function cannotJoinReason(call) {
+  switch (call.status) {
+    case "accepted":
+      return call.join_blocked_reason === "window_closed"
+        ? "This call's time has passed. Book another to talk again."
+        : "You'll be able to join five minutes before it starts, and you'll be reminded ten minutes before.";
+    case "proposed":
+      return "Both of you need to accept before this call can go ahead.";
+    case "declined":
+      return "This call was declined.";
+    case "cancelled":
+      return "This call was cancelled.";
+    case "expired":
+      return "This invitation expired unanswered.";
+    case "completed":
+      return "This call has already taken place. Book another to talk again.";
+    case "missed":
+      return "Nobody joined this call in time. Book another to talk again.";
+    default:
+      return "This call cannot be joined.";
+  }
+}
+
 export default function CallRoom() {
   const { roomToken } = useParams();
   const navigate = useNavigate();
@@ -116,7 +157,7 @@ export default function CallRoom() {
     return (
       <div className="max-w-lg mx-auto p-4 flex flex-col gap-4">
         <h1 className="text-lg font-semibold text-gray-900">
-          {call.status === "accepted" ? "Your call" : "Call invitation"}
+          {LOBBY_HEADING[call.status] || "Call"}
         </h1>
         <CallCard call={call} />
         {call.can_join ? (
@@ -127,11 +168,7 @@ export default function CallRoom() {
             Join now
           </Button>
         ) : (
-          <p className="text-sm text-gray-500">
-            {call.status === "accepted"
-              ? "You'll be able to join five minutes before it starts, and you'll be reminded ten minutes before."
-              : "Both of you need to accept before this call can go ahead."}
-          </p>
+          <p className="text-sm text-gray-500">{cannotJoinReason(call)}</p>
         )}
       </div>
     );
