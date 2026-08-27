@@ -70,6 +70,14 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
     setStatus(next);
   }, []);
 
+  // Our own user id. Seeded from the prop, then corrected by the server's
+  // 'joined' payload, so negotiation never depends on the auth context having
+  // resolved by the time the socket opens.
+  const selfIdRef = useRef(selfId);
+  useEffect(() => {
+    if (selfId !== undefined) selfIdRef.current = selfId;
+  }, [selfId]);
+
   const socketRef = useRef(null);
   //: peerId -> { pc, pending } . Media is a mesh: three people means three
   //: connections, four means six. Everything below is keyed by who it is with.
@@ -261,7 +269,24 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       // Lower id offers. Applied per pair rather than once: in a room of
       // three, each pair settles who calls whom on its own, which is what
       // stops two people offering to each other simultaneously.
-      const shouldOffer = (peerId) => Number(selfId) < Number(peerId);
+      //
+      // Read from `selfIdRef`, filled in by the 'joined' event, rather than
+      // from the `selfId` prop. The prop can still be undefined when the
+      // socket opens, and then `Number(undefined) < Number(peerId)` is
+      // `NaN < n` - false - so this side silently never offered. If the other
+      // side held the higher id it did not offer either, and both sat on
+      // "Connecting…" with no error to show for it.
+      const shouldOffer = (peerId) => {
+        const mine = Number(selfIdRef.current);
+        const theirs = Number(peerId);
+        if (!Number.isFinite(mine) || !Number.isFinite(theirs)) {
+          // Better to offer than to deadlock: a duplicate offer is
+          // recoverable, a room where nobody offers is not.
+          console.warn("[calls] offering without a known id", { mine, theirs });
+          return true;
+        }
+        return mine < theirs;
+      };
 
       socket.onmessage = async (raw) => {
         const message = JSON.parse(raw.data);
@@ -270,6 +295,11 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
         switch (message.event) {
           case "joined": {
             clearTimeout(joinTimer);
+            // The server tells us who it thinks we are, and it arrives before
+            // any peer event, so every offer decision is made with a real id.
+            if (Number.isFinite(Number(message.userId))) {
+              selfIdRef.current = Number(message.userId);
+            }
             const present = message.peers || [];
             applyStatus(present.length ? "connecting" : "waiting");
             // Offer to everyone already here that we out-rank.
@@ -371,7 +401,8 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
       cancelled = true;
       teardown();
     };
-  }, [roomToken, kind, selfId, send, stopLocalMedia]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomToken, kind, send, stopLocalMedia]);
 
   const toggleMute = useCallback(() => {
     const next = !isMuted;

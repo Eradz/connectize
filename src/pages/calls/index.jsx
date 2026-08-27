@@ -68,6 +68,15 @@ export default function CallsPage() {
   const { data: calls = [], isLoading } = useQuery({
     queryKey: ["calls", scope],
     queryFn: () => listCalls({ scope }),
+    // `can_join` and `join_blocked_reason` are computed server-side against
+    // the clock: a call is "too_early" until five minutes before it starts,
+    // and then joinable. Fetched once, the card never notices that moment
+    // arriving - the Join button simply does not appear, and the only thing
+    // that brought it in was some unrelated mutation invalidating the list.
+    // That is why accepting appeared to need two clicks: the second click's
+    // refetch was doing the work, not the accept.
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 
   return (
