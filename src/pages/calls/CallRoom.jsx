@@ -334,8 +334,13 @@ export default function CallRoom() {
           {LOBBY_HEADING[call.status] || "Call"}
         </h1>
         {/* The card runs its own accept/decline/cancel mutations, so it is
-            actionable here without being handed anything. */}
-        <CallCard call={call} selfId={user?.id} />
+            actionable here without being handed anything.
+
+            Without its Join button, though: it links to this very page, so
+            here it was a second gold button directly above "Join now" that
+            navigated to the URL already open and appeared to do nothing.
+            Entering the call is what "Join now" below is for. */}
+        <CallCard call={call} selfId={user?.id} showJoin={false} />
         <CallParticipants
           call={call}
           selfId={user?.id}

@@ -106,6 +106,14 @@ export default function CallCard({
   onReschedule,
   onAddPeople,
   compact = false,
+  /** Whether to offer the Join button.
+   *
+   *  Off inside the call room's own lobby, which is the page this button
+   *  links to: there it rendered a second, identical-looking Join directly
+   *  above the real one, and clicking it navigated to the URL already open -
+   *  so it did nothing at all. The list is the place this button belongs,
+   *  because there it is the only way in. */
+  showJoin = true,
 }) {
   const queryClient = useQueryClient();
   const other = call?.other_party;
@@ -178,7 +186,7 @@ export default function CallCard({
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {busy && <Spinner size="sm" />}
 
-          {call.can_join && (
+          {call.can_join && showJoin && (
             <Button
               as={Link}
               to={`/messages/calls/${call.room_token}`}
