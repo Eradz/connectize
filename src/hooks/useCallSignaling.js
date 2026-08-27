@@ -41,6 +41,24 @@ export const CLOSE_CODES = {
 /** How long to wait for the room to answer before calling it a failure. */
 const JOIN_TIMEOUT_MS = 15000;
 
+/**
+ * How long to sit in "connecting" before giving up on media.
+ *
+ * Signalling succeeding and media never arriving is the failure this bounds:
+ * both sides see each other, neither gets a picture, and the screen said
+ * "Connecting…" indefinitely because `connectionState` never reached either
+ * "connected" or "failed". ICE usually declares failure itself in 30-40s, so
+ * this sits past that and only catches the case where nothing resolves.
+ */
+const MEDIA_TIMEOUT_MS = 45000;
+
+/** Whether the server actually gave us a relay, or only STUN. */
+const hasTurn = (iceServers) =>
+  (iceServers || []).some((server) => {
+    const urls = Array.isArray(server?.urls) ? server.urls : [server?.urls];
+    return urls.some((url) => String(url || "").startsWith("turn"));
+  });
+
 const MEDIA_FOR = {
   audio: { audio: true, video: false },
   video: { audio: true, video: true },
@@ -119,9 +137,11 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
 
     let cancelled = false;
     let joinTimer;
+    let mediaTimer;
 
     const teardown = () => {
       if (joinTimer) clearTimeout(joinTimer);
+      if (mediaTimer) clearTimeout(mediaTimer);
       socketRef.current?.close();
       socketRef.current = null;
       peersRef.current.forEach(({ pc }) => pc.close());
@@ -143,6 +163,16 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
         // page re-reads the call to show the reason in place.
         applyStatus("refused");
         return;
+      }
+
+      if (!hasTurn(details.iceServers)) {
+        // Not fatal - plenty of connections are made on STUN alone - but it is
+        // the first thing to check when a call will not connect, and otherwise
+        // invisible from the client.
+        console.warn(
+          "[calls] no TURN relay was offered; a direct path is the only " +
+            "option, so connections behind strict or carrier NAT will fail"
+        );
       }
 
       let stream;
@@ -197,8 +227,15 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
             send("ice_candidate", { candidate: event.candidate }, peerId);
           }
         };
+        pc.oniceconnectionstatechange = () => {
+          // The only window onto why a call is not connecting, and the
+          // difference between "checking for ever" and "failed" is the whole
+          // diagnosis.
+          console.log("[calls] ice", peerId, pc.iceConnectionState);
+        };
         pc.onconnectionstatechange = () => {
           if (pc.connectionState === "connected") {
+            disarmMediaTimeout();
             applyStatus("connected");
             setConnectedAt((current) => current ?? Date.now());
           }
@@ -213,6 +250,33 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
           }
         };
         return entry;
+      };
+
+      /**
+       * Bound the wait for media once we know someone is in the room.
+       *
+       * Reaching "connecting" means signalling worked. If no connection then
+       * reaches "connected", this screen used to sit there for ever - which is
+       * what a call with no TURN relay looks like from the browser.
+       */
+      const armMediaTimeout = () => {
+        if (mediaTimer) return;
+        mediaTimer = setTimeout(() => {
+          if (statusRef.current === "connecting") {
+            setError(
+              "Could not establish a connection. Your network may be blocking calls."
+            );
+            applyStatus("failed");
+            teardown();
+          }
+        }, MEDIA_TIMEOUT_MS);
+      };
+
+      const disarmMediaTimeout = () => {
+        if (mediaTimer) {
+          clearTimeout(mediaTimer);
+          mediaTimer = undefined;
+        }
       };
 
       const dropPeer = (peerId) => {
@@ -302,6 +366,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
             }
             const present = message.peers || [];
             applyStatus(present.length ? "connecting" : "waiting");
+            if (present.length) armMediaTimeout();
             // Offer to everyone already here that we out-rank.
             for (const peerId of present) {
               if (shouldOffer(peerId)) await makeOffer(peerId);
@@ -310,6 +375,7 @@ export default function useCallSignaling(roomToken, { kind = "video", selfId } =
           }
           case "peer_joined": {
             applyStatus("connecting");
+            armMediaTimeout();
             if (shouldOffer(from)) await makeOffer(from);
             break;
           }
