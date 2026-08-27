@@ -159,7 +159,18 @@ function useDraggable(stageRef) {
   };
 }
 
-/** One other person: their video, or their face when there is no video. */
+/** One other person: their video, or their face when there is no video.
+ *
+ * The frame is fitted, not cropped. `object-cover` fills the tile and throws
+ * away whatever does not fit, which is fine for a small square thumbnail but
+ * ruinous here: a phone sends a portrait track, the stage on a laptop is wide
+ * landscape, and covering a wide box with a tall frame scales it until the
+ * width fits and crops away everything but a thin horizontal band. The caller
+ * disappears and you are left looking at their ceiling.
+ *
+ * `object-contain` shows the whole frame and pillarboxes the remainder against
+ * the tile's own dark background, which is what every other call client does.
+ */
 function PeerTile({ peer, isVideo }) {
   const showVideo = isVideo && peer.stream && !peer.cameraOff;
   const name = [peer.person?.first_name, peer.person?.last_name]
@@ -169,7 +180,7 @@ function PeerTile({ peer, isVideo }) {
   return (
     <div className="relative rounded-lg overflow-hidden bg-gray-800 grid place-items-center min-h-[8rem]">
       {showVideo ? (
-        <Video stream={peer.stream} className="w-full h-full object-cover" />
+        <Video stream={peer.stream} className="w-full h-full object-contain" />
       ) : (
         <div className="text-center text-white/80 px-4">
           <AvatarTile person={peer.person} className="mb-3" />
