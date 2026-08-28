@@ -404,6 +404,46 @@ function LiveCall({ call, selfId, onLeave, self }) {
   const isVideo = call.kind === "video";
   const notice = error || STATUS_COPY[status];
   const isDeadEnd = ["failed", "refused", "window_closed"].includes(status);
+
+  // Leaving this page tears the socket down, so browser Back hung up on
+  // someone mid-conversation with no warning - the same way the Android back
+  // gesture did. Two different exits need covering and neither catches the
+  // other: beforeunload handles a refresh, a tab close or a link out of the
+  // app, and it cannot ask a question; a popstate sentinel handles Back within
+  // the app, and it can.
+  //
+  // A sentinel rather than react-router's useBlocker because this app mounts
+  // <BrowserRouter>, not a data router, and useBlocker throws without one.
+  useEffect(() => {
+    if (isDeadEnd) return undefined;
+
+    const warn = (event) => {
+      event.preventDefault();
+      // Modern browsers ignore the text and show their own wording; returning
+      // a value is still what triggers the prompt.
+      event.returnValue = "";
+      return "";
+    };
+    window.addEventListener("beforeunload", warn);
+
+    // One extra history entry to absorb the first Back press.
+    window.history.pushState({ inCall: true }, "");
+    const onPopState = () => {
+      if (window.confirm("Leave this call? The other person will be told you left.")) {
+        hangUp();
+        onLeave();
+        return;
+      }
+      // Stay: put the entry back, or the next Back would leave unguarded.
+      window.history.pushState({ inCall: true }, "");
+    };
+    window.addEventListener("popstate", onPopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [isDeadEnd, hangUp, onLeave]);
   const stageRef = useRef(null);
   const selfView = useDraggable(stageRef);
 
