@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import useWebSocket from "./useWebSocket";
 import { useMessagesStore } from "../stores/messagesStore";
 import { useAuth } from "../context/userContext";
@@ -13,6 +14,7 @@ const useMessagingWebSocket = ({ enabled = true } = {}) => {
   // const room_name = searchParams.get("room_name")
 
   const addRealtimeMessage = useMessagesStore((s) => s.addRealtimeMessage);
+  const applyEditedMessage = useMessagesStore((s) => s.applyEditedMessage);
   const updateLastMessages = useMessagesStore((s) => s.updateLastMessages);
   const openedMessage = useMessagesStore((s) => s.openedMessage);
   const setOpenedMessage = useMessagesStore((s) => s.setOpenedMessage);
@@ -26,7 +28,41 @@ const useMessagingWebSocket = ({ enabled = true } = {}) => {
     enabled: enabled && Boolean(currentUser?.id),
   });
 
+  const queryClient = useQueryClient();
+
   function handleNewMessage(event) {
+    // A call was proposed, accepted, declined, cancelled or moved. Invalidate
+    // rather than patch: half of what a call card shows ("is it my turn",
+    // "can I join") is an answer to who is asking, so the server recomputes it
+    // per viewer. Without this, accepting a call left the other person looking
+    // at "Awaiting a reply" until they thought to reload - and that agreement
+    // is the one thing the feature exists to communicate.
+    if (event.eventType === "call_update") {
+      queryClient.invalidateQueries({ queryKey: ["calls"] });
+      return;
+    }
+
+    // An edit made by either party, on any device. Handled before the
+    // new-message branch because it shares eventType `chat_message` and would
+    // otherwise be dropped, leaving this client showing the old text
+    // indefinitely - the two sides of the conversation then disagree about
+    // what was said, which is exactly what the backend broadcast exists to
+    // prevent.
+    if (
+      event.eventName === "message_edited" &&
+      event.eventType === "chat_message"
+    ) {
+      const edited = event.payload?.message;
+      if (edited?.id) {
+        applyEditedMessage(edited);
+        updateLastMessages({
+          ...edited,
+          room_name: event.roomId || edited.room_name,
+        });
+      }
+      return;
+    }
+
     if (
       event.eventName !== "message_received" ||
       event.eventType !== "chat_message"

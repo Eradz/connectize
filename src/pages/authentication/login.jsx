@@ -21,6 +21,10 @@ export const meta = () =>
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
+    // Keyboards and paste readily add a trailing space, and Yup's email test
+    // rejects whitespace - so a perfectly good address came back as "Invalid
+    // Email Address". Casting trims it before the test runs.
+    .trim()
     .email("Invalid Email Address")
     .required("Fill in a valid email address"),
   password: Yup.string()
@@ -63,7 +67,7 @@ function Login() {
     onSubmit: async ({ email, password }, { resetForm }) => {
       try {
         console.log("🔐 Starting login process...");
-        const success = await loginUser({ email, password, resetForm });
+        const success = await loginUser({ email: email.trim(), password, resetForm });
         console.log("Login result:", success);
 
         if (success) {

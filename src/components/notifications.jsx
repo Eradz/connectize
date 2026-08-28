@@ -11,8 +11,10 @@ import { Badge } from "@chakra-ui/react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import {
+  AtSign,
   Bell,
   BookOpen,
+  Building2,
   Bookmark,
   BriefcaseBusiness,
   CalendarCheck,
@@ -40,10 +42,14 @@ import {
   Tag,
   Trash2,
   TriangleAlert,
+  Phone,
+  Repeat2,
+  Target,
   Trophy,
   Truck,
   UserPlus,
   Users,
+  UsersRound,
 } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -62,7 +68,7 @@ import { NotificationsSkeleton } from "./skeletons/notification";
 import TimeAgo from "./TimeAgo";
 const NOTIFICATION_VISUALS = {
   like: { Icon: Heart, icon: "text-rose-600", surface: "bg-rose-50", badge: "bg-rose-500", label: "Like" },
-  mention: { Icon: Users, icon: "text-violet-600", surface: "bg-violet-50", badge: "bg-violet-500", label: "Mention" },
+  mention: { Icon: AtSign, icon: "text-violet-600", surface: "bg-violet-50", badge: "bg-violet-500", label: "Mention" },
   comment: { Icon: MessageSquare, icon: "text-blue-600", surface: "bg-blue-50", badge: "bg-blue-500", label: "Comment" },
   reply: { Icon: Reply, icon: "text-violet-600", surface: "bg-violet-50", badge: "bg-violet-500", label: "Reply" },
   follow: { Icon: UserPlus, icon: "text-emerald-600", surface: "bg-emerald-50", badge: "bg-emerald-500", label: "Follow" },
@@ -106,6 +112,25 @@ const NOTIFICATION_VISUALS = {
   compliance_rejected: { Icon: CircleX, icon: "text-red-600", surface: "bg-red-50", badge: "bg-red-500", label: "Compliance" },
   ping: { Icon: Radio, icon: "text-primary-800", surface: "bg-primary-50", badge: "bg-gold", label: "Ping" },
   warning: { Icon: TriangleAlert, icon: "text-amber-700", surface: "bg-amber-50", badge: "bg-amber-500", label: "Warning" },
+  // Added with the push expansion. Everything below this line previously
+  // rendered as a generic bell labelled "Notification", including the four
+  // bidding types the engine has always emitted.
+  network_post: { Icon: UsersRound, icon: "text-emerald-700", surface: "bg-emerald-50", badge: "bg-emerald-600", label: "Network" },
+  network_activity: { Icon: UsersRound, icon: "text-slate-700", surface: "bg-slate-100", badge: "bg-slate-600", label: "Network" },
+  new_company: { Icon: Building2, icon: "text-violet-700", surface: "bg-violet-50", badge: "bg-violet-600", label: "New company" },
+  company_verified: { Icon: ShieldCheck, icon: "text-emerald-700", surface: "bg-emerald-50", badge: "bg-emerald-600", label: "Company verified" },
+  company_rejected: { Icon: TriangleAlert, icon: "text-amber-700", surface: "bg-amber-50", badge: "bg-amber-500", label: "Verification" },
+  repost: { Icon: Repeat2, icon: "text-teal-700", surface: "bg-teal-50", badge: "bg-teal-600", label: "Repost" },
+  addendum_issued: { Icon: FilePenLine, icon: "text-blue-700", surface: "bg-blue-50", badge: "bg-blue-600", label: "Addendum" },
+  job_match: { Icon: Target, icon: "text-amber-700", surface: "bg-amber-50", badge: "bg-amber-500", label: "Job match" },
+  tender_match: { Icon: Target, icon: "text-amber-700", surface: "bg-amber-50", badge: "bg-amber-500", label: "Tender match" },
+  listing_match: { Icon: Target, icon: "text-amber-700", surface: "bg-amber-50", badge: "bg-amber-500", label: "Listing match" },
+  call_scheduled: { Icon: Phone, icon: "text-teal-700", surface: "bg-teal-50", badge: "bg-teal-600", label: "Call proposed" },
+  call_accepted: { Icon: Phone, icon: "text-emerald-700", surface: "bg-emerald-50", badge: "bg-emerald-600", label: "Call accepted" },
+  call_declined: { Icon: CircleX, icon: "text-red-600", surface: "bg-red-50", badge: "bg-red-500", label: "Call declined" },
+  call_cancelled: { Icon: CircleX, icon: "text-red-600", surface: "bg-red-50", badge: "bg-red-500", label: "Call cancelled" },
+  call_rescheduled: { Icon: ClockAlert, icon: "text-amber-700", surface: "bg-amber-50", badge: "bg-amber-500", label: "Call moved" },
+  call_reminder: { Icon: Phone, icon: "text-teal-700", surface: "bg-teal-50", badge: "bg-teal-600", label: "Call soon" },
   default: { Icon: Bell, icon: "text-primary-800", surface: "bg-primary-50", badge: "bg-gold", label: "Notification" },
 };
 
@@ -113,6 +138,7 @@ const NOTIFICATION_FILTERS = [
   { key: "all", label: "All" },
   { key: "unread", label: "Unread" },
   { key: "social", label: "Social" },
+  { key: "network", label: "Network" },
   { key: "business", label: "Business Hub" },
   { key: "deals", label: "Deals" },
   { key: "workforce", label: "Workforce" },
@@ -120,7 +146,11 @@ const NOTIFICATION_FILTERS = [
   { key: "logistics", label: "Logistics" },
 ];
 
-const SOCIAL_TYPES = new Set(["like", "mention", "comment", "reply", "follow", "bookmark", "favorite", "messaging", "connection", "connection_request", "connection_accepted"]);
+const SOCIAL_TYPES = new Set(["like", "mention", "comment", "reply", "repost", "follow", "bookmark", "favorite", "messaging", "connection", "connection_request", "connection_accepted"]);
+// Activity from people you follow, kept separate from Social: one is about your
+// own content, the other about everyone else's, and mixing them makes the
+// "someone replied to me" notifications impossible to find.
+const NETWORK_TYPES = new Set(["network_post", "network_activity", "new_company"]);
 const DEAL_TYPES = new Set(["deal_room", "deal_document", "deal_milestone"]);
 const WORKFORCE_TYPES = new Set(["job_application", "event_update"]);
 const MARKETPLACE_TYPES = new Set(["marketplace", "order_placed", "order_confirmed", "order_shipped", "order_delivered", "order_cancelled"]);
@@ -163,6 +193,7 @@ const filterNotifications = (notifications, filter) => {
   if (filter === "all") return notifications;
   if (filter === "unread") return notifications.filter((item) => !isNotificationRead(item?.is_read));
   if (filter === "social") return notifications.filter((item) => SOCIAL_TYPES.has(item?.notification_type));
+  if (filter === "network") return notifications.filter((item) => NETWORK_TYPES.has(item?.notification_type));
   if (filter === "business") return notifications.filter((item) => BUSINESS_TYPES.has(item?.notification_type));
   if (filter === "deals") return notifications.filter((item) => DEAL_TYPES.has(item?.notification_type));
   if (filter === "workforce") return notifications.filter((item) => WORKFORCE_TYPES.has(item?.notification_type));

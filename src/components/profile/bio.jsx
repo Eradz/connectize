@@ -23,60 +23,40 @@ import Form from "../form";
 import HeadingText from "../HeadingText";
 import LightParagraph from "../ParagraphText";
 import StepButton from "./StepButton";
-import { BUSINESS_NAME_WARNING, fetchBusinessNameMarkers, looksLikeBusinessName } from "../../lib/businessNameHeuristic";
+import { webRoutes } from "../../lib/webRoutes";
 
-const BUSINESS_BIO_WARNING = "This looks like a company name. Please enter your own name here — " +
-  "you can create a company profile after completing your profile.";
-
-  
-  function Bio() {
-  // Populated from GET /api/auth/business-name-markers/ so admin-added
-   // markers apply to the live "looks like a company name" check without a
-   // deploy. The Yup .test() closures below read this ref at validation
-   // time, so updating it doesn't require rebuilding the schema.
-   const extraMarkersRef = useRef([]);
- 
-   useEffect(() => {
-     fetchBusinessNameMarkers().then((markers) => {
-       extraMarkersRef.current = markers;
-     });
-   }, []);
- 
- const validationSchema = Yup.object().shape({
-   bio: Yup.string().trim().optional()
-   .test("not-business-bio", BUSINESS_NAME_WARNING, (value) =>
-   !looksLikeBusinessName(value, extraMarkersRef.current)
-     ),
-   website_url: Yup.string()
-     .trim()
-     .transform((value) => {
-       // Transform happens first: auto-add https:// if no protocol is present
-       if (!value) return value;
-       if (!/^https?:\/\//i.test(value)) {
-         return `https://${value}`;
-       }
-       return value;
-     })
-     .test('is-valid-url', 'Invalid url - please enter a valid website (e.g., example.com)', function(value) {
-       if (!value || value.trim() === '') return true; // Allow empty (optional field)
-       
-       // At this point, value should have protocol from transform
-       try {
-         const url = new URL(value);
-         // Check that it's at least a valid domain structure
-         return url.hostname.includes('.');
-       } catch {
-         return false;
-       }
-     }),
-   social_media_url: Yup.string().trim().optional(),
- });
+const validationSchema = Yup.object().shape({
+  bio: Yup.string().trim().optional(),
+  website_url: Yup.string()
+    .trim()
+    .transform((value) => {
+      // Transform happens first: auto-add https:// if no protocol is present
+      if (!value) return value;
+      if (!/^https?:\/\//i.test(value)) {
+        return `https://${value}`;
+      }
+      return value;
+    })
+    .test('is-valid-url', 'Invalid url - please enter a valid website (e.g., example.com)', function(value) {
+      if (!value || value.trim() === '') return true; // Allow empty (optional field)
+      
+      // At this point, value should have protocol from transform
+      try {
+        const url = new URL(value);
+        // Check that it's at least a valid domain structure
+        return url.hostname.includes('.');
+      } catch {
+        return false;
+      }
+    }),
+  social_media_url: Yup.string().trim().optional(),
+});
 
 
   const { user: currentUser } = useAuth();
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 3),
-    "/address"
+    webRoutes.profileWizardAddress
   );
   const formValues = {
     bio: currentUser?.bio || localStorage.getItem(bioKey) || "",

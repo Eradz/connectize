@@ -2,7 +2,7 @@ import MessagingPage from "../messages/messaging";
 
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import clsx from "clsx";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import HeadingText from "../../components/HeadingText";
 import LightParagraph from "../../components/ParagraphText";
@@ -11,6 +11,8 @@ import { useAuth } from "../../context/userContext";
 import { getUserDisplayName } from "../../lib/userDisplay";
 
 import MessagesPage from "../messages";
+import CallsPage from "../calls";
+import CallRoom from "../calls/CallRoom";
 
 export const meta = () =>
   createSEO({
@@ -20,6 +22,15 @@ export const meta = () =>
 export default function MessagesLayout() {
   const [searchParams] = useSearchParams();
   const room_name = searchParams.get("room_name");
+  // Calls are a view of the right-hand pane, like a conversation is. Making
+  // them a page of their own took the conversation list away to show you your
+  // diary, which is the context you came from.
+  const showingCalls = searchParams.get("view") === "calls";
+  // A specific call, from /messages/calls/<token>. It is a browsing task like
+  // a conversation is - you are reading who has accepted - so it belongs in
+  // the pane. Joining puts a fixed overlay over everything, which is where
+  // the full screen actually earns itself.
+  const { roomToken } = useParams();
   const { user: currentUser, loading } = useAuth();
   const firstDisplayName = getUserDisplayName(currentUser).split(/\s+/)[0];
 
@@ -34,7 +45,7 @@ export default function MessagesLayout() {
         className={clsx(
           "lg:max-w-[300px] min-w-[250px] xl:max-w-[400px] w-full 2xl:max-w-[500px] space-y-6 bg-white h-full p-4 rounded-md overflow-hidden",
           {
-            "max-lg:hidden": room_name,
+            "max-lg:hidden": room_name || showingCalls || roomToken,
           }
         )}
       >
@@ -44,11 +55,19 @@ export default function MessagesLayout() {
         className={clsx(
           "w-full flex-1 h-97vh h-full border border-gray-100 rounded-md",
           {
-            "max-lg:hidden": !room_name,
+            "max-lg:hidden": !room_name && !showingCalls && !roomToken,
           }
         )}
       >
-        {room_name ? (
+        {roomToken ? (
+          <section className="bg-white rounded-md h-full overflow-y-auto">
+            <CallRoom />
+          </section>
+        ) : showingCalls ? (
+          <section className="bg-white rounded-md h-full overflow-y-auto">
+            <CallsPage />
+          </section>
+        ) : room_name ? (
           <MessagingPage />
         ) : (
           <section className="flex items-center justify-center min-h-full bg-white rounded-md">

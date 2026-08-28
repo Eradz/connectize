@@ -2,7 +2,9 @@ import { Avatar, useDisclosure } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { VideoCameraOutlined } from "@ant-design/icons";
+import { listCalls } from "../../api-services/calls";
 import { getAllUsers } from "../../api-services/users";
 import { CircleTitleSubtitleSkeleton } from "../../components/admin/feeds/TopServiceSuggestions";
 import { CreateNewLink } from "../../components/admin/markets/carousel";
@@ -68,9 +70,45 @@ export default function MessagesPage() {
     );
   }, [users, username, currentUser?.id]);
 
+  // Calls this user still owes an answer on. Polled so a call booked while
+  // this page is open shows up, and stops showing once answered elsewhere.
+  const { data: pendingCalls = [] } = useQuery({
+    queryKey: ["calls", "pending"],
+    queryFn: () => listCalls({ scope: "pending" }),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+  const pendingCallCount = pendingCalls.length;
+
   return (
     <>
-      <HeadingText heading="sub-heading">Messages</HeadingText>
+      <div className="flex items-center justify-between gap-2">
+        <HeadingText heading="sub-heading">Messages</HeadingText>
+        {/* The calls page had no way in: the only entry point was the button
+            inside a conversation, so a booking you had already made was
+            unreachable unless you remembered which chat you made it from. */}
+        <Link
+          to={webRoutes.calls}
+          className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 shrink-0"
+          aria-label={
+            pendingCallCount > 0
+              ? `Calls, ${pendingCallCount} awaiting your reply`
+              : "Calls"
+          }
+        >
+          <VideoCameraOutlined />
+          <span>Calls</span>
+          {/* Without this the link looked identical whether or not someone was
+              waiting on your answer, so a proposal sat unanswered until they
+              chased it another way - and the feature only works if two people
+              agree a time. */}
+          {pendingCallCount > 0 && (
+            <span className="ml-0.5 min-w-5 h-5 px-1.5 grid place-items-center rounded-full bg-gold text-black text-xs font-semibold">
+              {pendingCallCount}
+            </span>
+          )}
+        </Link>
+      </div>
       <MessagesList />
       {/* <CustomTabs
         tabsHeading={["Recent Chats", "Favorites"]}

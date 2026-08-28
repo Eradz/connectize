@@ -31,6 +31,8 @@ const PageLoader = () => (
 const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
 const BiddingProjectDetail = lazy(() => import("./pages/bidding/BiddingProjectDetail"));
 const NotificationItem = lazy(() => import("./components/notifications").then(m => ({ default: m.NotificationItem })));
+const ProfileViewsList = lazy(() => import("./components/profileViews/ProfileViewsList"));
+const MyStats = lazy(() => import("./components/myStats/MyStats"));
 const Address = lazy(() => import("./components/profile/address"));
 const Bio = lazy(() => import("./components/profile/bio"));
 const Contact = lazy(() => import("./components/profile/contact"));
@@ -52,6 +54,7 @@ const CompanyInformation = lazy(() => import("./pages/company/CompanyInformation
 const EditCompanyPage = lazy(() => import("./pages/company/edit"));
 const CompanyLayout = lazy(() => import("./pages/company/layout"));
 const CompanyProfile = lazy(() => import("./pages/feed/companyProfile"));
+const CompanyActivity = lazy(() => import("./pages/feed/companyActivity"));
 const NewsFeed = lazy(() => import("./pages/feed/newsFeed"));
 const UserProfile = lazy(() => import("./pages/feed/userProfile"));
 const Analysis = lazy(() => import("./pages/market/analysis"));
@@ -63,6 +66,7 @@ const NotFound = lazy(() => import("./pages/not-found"));
 const PostInsightsPage = lazy(() => import("./pages/posts/postInsightsPage"));
 const SinglePostPage = lazy(() => import("./pages/posts/singlePostPage"));
 const RepresentativesPage = lazy(() => import("./pages/representatives"));
+const ConnectizersPage = lazy(() => import("./pages/connectizers"));
 const AcceptRepresentation = lazy(() => import("./pages/representatives/AcceptRepresentation"));
 const AssignRepresentative = lazy(() => import("./pages/representatives/AssignRepresentative"));
 const Search = lazy(() => import("./pages/search"));
@@ -275,8 +279,11 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.bookmark)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.companies)} element={<CompaniesPage />} />
           <Route path={removeLeadingSlash(webRoutes.notifications)} element={<NotificationItem />} />
+          <Route path={removeLeadingSlash(webRoutes.profileViews)} element={<ProfileViewsList />} />
+          <Route path={removeLeadingSlash(webRoutes.myStats)} element={<MyStats />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="company/:company/activity" element={<CompanyActivity />} />
           <Route path={removeLeadingSlash(webRoutes.market)} element={<Market />} />
           
           {/* Marketplace Routes */}
@@ -292,6 +299,18 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.marketplaceSellerOrders)} element={<SellerOrders />} />
           <Route path="marketplace/seller-payments" element={<SellerPayments />} />
           
+          {/* Calls live inside Messages now; this keeps older links working. */}
+          <Route
+            path="messages/calls"
+            element={<Navigate to={webRoutes.calls} replace />}
+          />
+          {/* Rendered inside the messages layout, so the conversation list
+              stays put. The live call is a fixed overlay and still fills the
+              screen once you join. */}
+          <Route
+            path={removeLeadingSlash(webRoutes.callRoom)}
+            element={<MessagesLayout />}
+          />
           <Route path={removeLeadingSlash(webRoutes.messages)} element={<MessagesLayout />} />
           <Route path={removeLeadingSlash(webRoutes.productDetails)} element={<Product />} />
           <Route path={removeLeadingSlash(webRoutes.productListing)} element={<Listing />} />
@@ -311,12 +330,14 @@ const removeLeadingSlash = (path) => {
           {/* Company-specific routes with "co" prefix */}
           <Route path={removeLeadingSlash(webRoutes.bookmarks)} element={<BookMark />} />
           <Route path={removeLeadingSlash(webRoutes.representatives)} element={<RepresentativesPage />} />
+          <Route path={removeLeadingSlash(webRoutes.connectizers)} element={<ConnectizersPage />} />
           <Route path={removeLeadingSlash(webRoutes.assignRepresentative)} element={<AssignRepresentative />} />
           <Route path={removeLeadingSlash(webRoutes.blockedUsers)} element={<BlockedUsersPage />} />
           <Route path={removeLeadingSlash(webRoutes.blockedCompanies)} element={<BlockedCompaniesPage />} />
           <Route path="co/:userId" element={<UserProfile />} />
           <Route path="co/:company" element={<CompanyProfile />} />
           <Route path="co/company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="co/:company/activity" element={<CompanyActivity />} />
           <Route path={removeLeadingSlash(webRoutes.coNotifications)} element={<NotificationItem />} />
           
           {/* Knowledge Hub Routes */}
@@ -445,6 +466,7 @@ const removeLeadingSlash = (path) => {
           {/* Direct company routes (for URLs like /Connectize) - Must be last to avoid conflicts */}
           <Route path=":company" element={<CompanyProfile />} />
           <Route path=":company/edit" element={<CompanyProfile />} />
+          <Route path=":company/activity" element={<CompanyActivity />} />
         </Route>
 
   {/* Oil & Gas Platform Routes */}
@@ -595,8 +617,11 @@ const removeLeadingSlash = (path) => {
           <Route path="bookmarks" element={<BookMark />} />
           <Route path="companies" element={<CompaniesPage />} />
           <Route path="notifications" element={<NotificationItem />} />
+          <Route path="profile-views" element={<ProfileViewsList />} />
+          <Route path="my-activity" element={<MyStats />} />
           <Route path="company/:company" element={<CompanyProfile />} />
           <Route path="company/:company/edit" element={<EditCompanyPage />} />
+          <Route path="company/:company/activity" element={<CompanyActivity />} />
           <Route path="market" element={<Market />} />
           <Route path="messages" element={<MessagesLayout />} />
           <Route path="products/:id" element={<Product />} />

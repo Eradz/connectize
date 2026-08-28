@@ -27,6 +27,7 @@ import {
   User
 } from 'lucide-react';
 import { webRoutes } from '../../lib/webRoutes';
+import { formatAvailabilityLabel } from '../../lib/workforceStatus';
 import { workforceAPI } from '../../api-services/workforce';
 import { workforceProfileService } from '../../api-services/oilgas';
 import { toast } from 'sonner';
@@ -536,17 +537,22 @@ const WorkforceProfessionals = () => {
                       alt={professionalName}
                       className="w-12 h-12 rounded-full object-cover"
                     />
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">{professionalName}</h3>
-                      <p className="text-xs text-gray-600">{professional.professional_title || 'No title specified'}</p>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{professionalName}</h3>
+                      <p
+                        className="text-xs text-gray-600 line-clamp-2"
+                        title={professional.professional_title || 'No title specified'}
+                      >
+                        {professional.professional_title || 'No title specified'}
+                      </p>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                    professional.availability_status === 'available' 
-                      ? 'bg-green-100 text-green-800' 
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    professional.availability_status === 'available'
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {professional.availability_status || 'Unknown'}
+                    {formatAvailabilityLabel(professional.availability_status)}
                   </span>
                 </div>
 
@@ -593,10 +599,13 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <Link 
-                   to={`/messages/?room_name=room_${user?.id}_${professional.id}`}
-                    // onClick={() => handleConnectWithProfessional(professional.id)}
+                  <Link
+                    // professional.id is the workforce *profile* id (see View Profile
+                    // above); a DM room is keyed on user ids, so this needs .user or it
+                    // opens a conversation with whoever happens to hold that user id.
+                    to={`/messages/?room_name=room_${user?.id}_${professional?.user}`}
                     className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg font-medium text-sm flex items-center justify-center"
+                    title={`Message ${professionalName}`}
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message
@@ -617,39 +626,55 @@ const WorkforceProfessionals = () => {
 
             return (
             <div key={professional.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow w-[32%] mb-2">
-              <div className="px-2 py-6 h-full">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4 h-[20%]">
-                  <div className="flex items-start space-x-3">
+              {/* Percentage-height bands (20/65/15) used to divide this card, which
+                  clipped nothing and simply overflowed onto the next band when a
+                  professional_title ran long. Flex column instead: each band takes the
+                  height it needs and the body absorbs the slack, so the action row
+                  still lines up across a row of cards. */}
+              <div className="px-2 py-6 h-full flex flex-col">
+                {/* Header. Avatar and badges share the top row; the name and title get
+                    the card's full width on the rows below. Sitting them beside the
+                    badge left roughly a third of the card for text, which wrapped long
+                    titles into a narrow ragged column and broke words mid-syllable. */}
+                <div className="mb-4">
+                  <div className="flex items-start justify-between gap-2">
                     <img
                       src={professional.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(professionalName)}&background=F1C644&color=white`}
                       alt={professionalName}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
                     />
                     {/* <div className='rounded-full border-2 border-black'>
                       <User fill='#6D8FAF' className="w-10 h-10 text-[#6D8FAF]" />
                     </div> */}
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{professionalName}</h3>
-                      <p className="text-sm text-gray-600">{professional.professional_title || 'No title specified'}</p>
+                    <div className="flex flex-col items-end space-y-1 shrink-0">
+                      {(professional.is_verified || professional.verification_status === 'verified') && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <CheckCircle className="w-3 h-3 inline mr-1" />Verified
+                        </span>
+                      )}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        professional.availability_status === 'available'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {formatAvailabilityLabel(professional.availability_status)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end space-y-1">
-                    {(professional.is_verified || professional.verification_status === 'verified') && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <CheckCircle className="w-3 h-3 inline mr-1" />Verified
-                      </span>
-                    )}
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                      professional.availability_status === 'available' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {professional.availability_status || 'Unknown'}
-                    </span>
-                  </div>
+                  <h3 className="font-semibold text-gray-900 mt-3 line-clamp-1" title={professionalName}>
+                    {professionalName}
+                  </h3>
+                  {/* Two lines then ellipsis. Titles here are user-entered and can run to
+                      several pipe-separated roles; the full text is in the tooltip and on
+                      the profile page, so the card does not need to carry all of it. */}
+                  <p
+                    className="text-sm text-gray-600 line-clamp-2"
+                    title={professional.professional_title || 'No title specified'}
+                  >
+                    {professional.professional_title || 'No title specified'}
+                  </p>
                 </div>
-                <div className="h-[65%]">
+                <div className="flex-1">
                  {/* Skills */}
                 <div className="mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-2">Key Skills</p>
@@ -703,7 +728,7 @@ const WorkforceProfessionals = () => {
 
                     </div>
                 {/* Actions */}
-                <div className="flex space-x-2 pt-3 border-t-2 border-[#00000033]/20 h-[15%]">
+                <div className="flex space-x-2 pt-3 border-t-2 border-[#00000033]/20">
                   <Link
                     to={`${webRoutes.workforceProfileDetail.replace(':id', professional.id)}`}
                     className="w-[50%] bg-custom_yellow text-dark text-center py-2 rounded-lg hover:bg-gold transition-colors flex items-center justify-center"
@@ -711,11 +736,10 @@ const WorkforceProfessionals = () => {
                     <User2 className="w-4 h-4 mr-1" />
                     View Profile
                   </Link>
-                  <Link 
+                  <Link
                     to={`/messages/?room_name=room_${user?.id}_${professional?.user}`}
-                    // onClick={() => handleConnectWithProfessional(professional.id)}
                     className="w-[50%] flex items-center justify-center bg-pale_yellow text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"
-                    title="Send connection request"
+                    title={`Message ${professionalName}`}
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
                     Message

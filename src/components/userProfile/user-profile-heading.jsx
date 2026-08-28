@@ -1,5 +1,5 @@
-import { Avatar, Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
-import { DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Avatar, Button, Menu, MenuButton, MenuList, MenuItem, IconButton } from "@chakra-ui/react";
+import { ChatBubbleIcon, DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { VerifiedIcon } from "../../icon";
 import { formatNumber } from "../../lib/utils";
 import { StatsText } from "../../pages/feed/companyProfile";
@@ -89,6 +89,19 @@ export default function UserProfileHeadings({
             slug={id}
             connection_status={connection_status}
           />
+          {/* Room names are built as room_<viewer>_<other> everywhere else that opens a
+              DM (Favorites, RoomName, the workforce profile), so reuse that shape rather
+              than inventing one the messages page would not recognise. */}
+          <Button
+            as={Link}
+            to={`${webRoutes.messages}/?room_name=room_${currentUser?.id}_${id}`}
+            size="sm"
+            variant="outline"
+            leftIcon={<ChatBubbleIcon />}
+            className="!text-sm"
+          >
+            Message
+          </Button>
           <BlockUserButton
             userId={id}
             userName={displayName}

@@ -20,6 +20,7 @@ const webRoutes = {
   businessHub: "/business-hub",
   company: "/:company",
   companyEditProfile: "/:company/edit-profile",
+  companyActivity: "/:company/activity",
   createPost: "/post/create",
   companies: "/companies",
   confirmResetPassword: "/confirm-reset-password",
@@ -40,20 +41,39 @@ const webRoutes = {
   logisticsDashboard: "/logistics-hub",
   manageEmails: "/co/settings/manage-emails",
   market: "/market",
+  // A view inside Messages rather than a page of its own: the
+  // conversation list is the context you came from, and losing it to see
+  // your diary is disorienting. The call *room* is still a full page -
+  // being on a call is not a browsing task.
+  calls: "/messages?view=calls",
+  callRoom: "/messages/calls/:roomToken",
   messages: "/messages",
   messagesRoom: "/messages/:room_name",
   newsFeed: "/",
   notFound: "*",
   notifications: "/notifications",
+  profileViews: "/profile-views",
+  myStats: "/my-activity",
   overview: "/overview",
   privacyPolicy: "/privacy-policy",
   productDetails: "/products/:id",
   productListing: "/products/listing",
   profile: "/profile",
   profileUpdate: "/update-profile",
+  // Full paths for the multi-step profile wizard. The `home`, `bio`, `address`,
+  // `contact` and `overview` keys are only the child segments App.jsx registers
+  // under `/update-profile`; navigating to those directly lands on a route that
+  // does not exist (e.g. "/bio" fell through to the company-slug catch-all and
+  // rendered "Company not found").
+  profileWizardStart: "/update-profile",
+  profileWizardContact: "/update-profile/contact",
+  profileWizardAddress: "/update-profile/address",
+  profileWizardBio: "/update-profile/bio",
+  profileWizardOverview: "/update-profile/overview",
   reactivateAccount: "/reactivate-account",
   representatives: "/co/representatives",
   representative: "/representatives",
+  connectizers: "/connectizers",
   representativeManage: "/co/representatives/manage",
   resetPassword: "/reset-password",
   search: "/search",

@@ -15,6 +15,25 @@ export const getAllUsers = async () => {
   return results?.filter((user) => user?.first_name && user?.last_name);
 };
 
+/**
+ * Everyone on the platform, for the Connectizers directory.
+ *
+ * Ordering (people you have no relationship with first, then alphabetically) is
+ * done by the server on purpose - sorting a paginated list client-side would let
+ * a name that belongs on page 1 turn up on page 3.
+ */
+export const getConnectizers = async (params, returnFullRes = false) => {
+  const { results, next, count } = await makeApiRequest({
+    url: `api/users/connectizers/`,
+    method: "GET",
+    params,
+  });
+
+  if (returnFullRes) return { data: results, next, count };
+
+  return results;
+};
+
 export const searchUsers = async (query) => {
   const normalizedQuery = query?.trim?.();
 

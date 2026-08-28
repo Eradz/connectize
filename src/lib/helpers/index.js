@@ -338,7 +338,7 @@ export async function makeApiRequest({
 
     if (errorCode === "profile_incomplete") {
       redirectToProfileCompletion(error.response.data);
-      return null;
+      throw error;
     }
 
     if (errorCode === "token_not_valid") {

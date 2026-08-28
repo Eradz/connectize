@@ -62,6 +62,51 @@ export const useMessagesStore = create((set, get) => ({
   lastMessagesLoading: false,
 
   /**
+   * The message currently being replied to, or null.
+   *
+   * Lives here rather than in either component because the two halves of the
+   * interaction are siblings: MessageArea owns the "Reply" affordance on a
+   * bubble, MessageControl owns the composer that has to show and send it
+   * (see pages/messages/messaging.jsx). Lifting it into the page would mean
+   * prop-drilling through both.
+   * @type {null | Record<string, any>}
+   */
+  replyingTo: null,
+
+  /**
+   * Replace a message in place after it was edited.
+   *
+   * Used by the editor and by the `message_edited` socket event, so an edit
+   * made on another device lands the same way as one made here. Matched on id
+   * across every room rather than a room argument, because the socket payload
+   * is a message and the sender may not have that conversation open.
+   */
+  applyEditedMessage: (updated) => {
+    if (!updated?.id) return;
+    set((state) => {
+      const next = {};
+      let changed = false;
+      for (const [room, list] of Object.entries(state.messages || {})) {
+        let roomChanged = false;
+        const mapped = (list || []).map((msg) => {
+          if (String(msg?.id) !== String(updated.id)) return msg;
+          roomChanged = true;
+          // Merge rather than replace: the socket payload is the lightweight
+          // serializer and may carry fewer fields than what is cached.
+          return { ...msg, ...updated };
+        });
+        next[room] = roomChanged ? mapped : list;
+        changed = changed || roomChanged;
+      }
+      if (!changed) return {};
+      return { messages: next };
+    });
+  },
+
+  setReplyingTo: (message) => set({ replyingTo: message || null }),
+  clearReplyingTo: () => set({ replyingTo: null }),
+
+  /**
    *
    * @param {{room_name:string}} params
    */
@@ -183,6 +228,12 @@ export const useMessagesStore = create((set, get) => ({
 
   setOpenedMessage: async (message, room_name) => {
     console.log("🔍 setOpenedMessage called with:", { message, room_name });
+
+    // Drop any pending quote when the conversation changes. Carrying it over
+    // would attach a quote from the previous chat to the next message, and the
+    // backend rejects a reply_to outside the conversation - so the user would
+    // just see the send fail with nothing on screen explaining why.
+    if (get().replyingTo) set({ replyingTo: null });
 
     // If we have a specific message, set it directly
     if (message) {

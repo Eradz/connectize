@@ -8,6 +8,8 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { usePollMessages } from "../../hooks/usePolling";
 import { useAuth } from "../../context/userContext";
+import { toast } from "sonner";
+import { forwardMessage, updateMessage } from "../../api-services/messaging";
 import { useMessagesStore } from "../../stores/messagesStore";
 import { baseURL } from "../../lib/helpers";
 import { getUserDisplayName } from "../../lib/userDisplay";
@@ -101,6 +103,146 @@ export default function MessageArea() {
 
   const [readMoreLimit, setReadMoreLimit] = useState(300);
 
+  // ── Reply-to ──────────────────────────────────────────────────────────
+  const setReplyingTo = useMessagesStore((state) => state.setReplyingTo);
+  const applyEditedMessage = useMessagesStore((state) => state.applyEditedMessage);
+  // Which message to flash after jumping to it. Cleared on a timer so the
+  // highlight is a hint, not a permanent selection.
+  const [highlightedId, setHighlightedId] = useState(null);
+  const highlightTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(highlightTimer.current), []);
+
+  // Mirrors MESSAGE_EDIT_WINDOW in chat/views.py. Duplicated deliberately:
+  // the server is the authority, but offering an Edit button that always
+  // fails is worse than not offering it. If the two ever drift the server
+  // still wins - the client just shows an action that errors, rather than
+  // silently permitting something.
+  const EDIT_WINDOW_MS = 15 * 60 * 1000;
+
+  // Forwarding. Targets are your existing conversations (lastMessages), which
+  // is the common case and avoids a contact picker; the backend caps one
+  // forward at 10 recipients regardless.
+  const [forwardingMessage, setForwardingMessage] = useState(null);
+  const [forwardTargets, setForwardTargets] = useState([]);
+  const [forwardSending, setForwardSending] = useState(false);
+  const lastMessages = useMessagesStore((state) => state.lastMessages);
+
+  const toggleForwardTarget = (userId) =>
+    setForwardTargets((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+
+  const submitForward = async () => {
+    if (!forwardingMessage || forwardTargets.length === 0) return;
+    setForwardSending(true);
+    try {
+      const result = await forwardMessage(forwardingMessage.id, forwardTargets);
+      const failed = Object.entries(result?.errors || {});
+      setForwardingMessage(null);
+      setForwardTargets([]);
+      if (failed.length) {
+        // Named rather than swallowed: reaching three of four and reporting
+        // success is worse than saying which one missed.
+        toast.warning(
+          `Sent to ${result.forwarded?.length ?? 0}. Could not send to ${failed.length}.`
+        );
+      } else {
+        toast.success(`Forwarded to ${result.forwarded?.length ?? 0}.`);
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.detail || "Could not forward the message"
+      );
+    } finally {
+      setForwardSending(false);
+    }
+  };
+
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
+  const canEditMessage = (message) =>
+    message?.is_current_user &&
+    message?.id != null &&
+    !message?.optimistic &&
+    !message?.error &&
+    Date.now() - new Date(message.timestamp).getTime() < EDIT_WINDOW_MS;
+
+  const beginEdit = (message) => {
+    setEditingId(message.id);
+    setEditDraft(message.content || "");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditDraft("");
+  };
+
+  const saveEdit = async (message) => {
+    const next = editDraft.trim();
+    if (!next) {
+      toast.info("A message cannot be emptied. Delete it instead.");
+      return;
+    }
+    if (next === message.content) {
+      cancelEdit();
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const updated = await updateMessage(message.id, { content: next });
+      applyEditedMessage(updated);
+      cancelEdit();
+    } catch (error) {
+      // The 15-minute window and the sender-only rule are enforced server
+      // side, so surface what it said rather than guessing.
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.response?.data?.content ||
+          "Could not edit the message"
+      );
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // Drag-to-reply is enabled only on touch-primary devices.
+  //
+  // framer-motion's drag captures pointer events on the element it is applied
+  // to, which means a mouse drag across a bubble never starts a text
+  // selection - so enabling it everywhere broke selecting and copying a
+  // message, which matters far more than a shortcut. On a desktop the hover
+  // Reply button already makes the action discoverable, so drag buys nothing
+  // there and costs copy/paste. On a touchscreen there is no hover, selection
+  // is a long-press rather than a drag, and swipe is the expected gesture.
+  const [isTouchDevice] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(pointer: coarse)").matches
+  );
+
+  // Bubbles carried no DOM id, so there was nothing to scroll to. Keyed by
+  // String(id) because ids arrive as both numbers (server) and strings
+  // (optimistic temp ids).
+  const messageRefs = useRef({});
+
+  const jumpToMessage = (messageId) => {
+    if (messageId == null) return;
+    const node = messageRefs.current[String(messageId)];
+    if (!node) {
+      // The quoted message is real but not in the rendered window. Better to
+      // say nothing happened than to scroll somewhere arbitrary.
+      return;
+    }
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(String(messageId));
+    clearTimeout(highlightTimer.current);
+    highlightTimer.current = setTimeout(() => setHighlightedId(null), 1800);
+  };
+
   const scrollSavedList = useRef({});
 
   const groupMessagesByDate = (messages) => {
@@ -180,8 +322,83 @@ export default function MessageArea() {
   return (
     <section
       ref={chatContainerRef}
-      className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-16 md:pb-4 relative scroll-smooth"
+      // md:pb-10, not pb-4: the per-message action bar is absolutely
+      // positioned just below its row, so on the last message it hung into the
+      // old 16px of padding and collided with the composer. The extra room is
+      // only needed at the end of the thread, but padding the container is
+      // simpler than special-casing the final row.
+      className="chat-container flex-1 overflow-y-auto scrollbar-hidden flex flex-col gap-y-2 pb-16 md:pb-10 relative scroll-smooth"
     >
+      {/* Forward picker. Existing conversations rather than the whole address
+          book: it is the common case, and the backend caps a forward at 10
+          recipients anyway. */}
+      {forwardingMessage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setForwardingMessage(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg bg-white p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-semibold text-dark">Forward to</h3>
+              <button
+                type="button"
+                onClick={() => setForwardingMessage(null)}
+                className="text-gray-400 hover:text-dark"
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <p className="mb-3 line-clamp-2 rounded bg-gray-50 p-2 text-xs text-gray-600">
+              {forwardingMessage.content || "Attachment"}
+            </p>
+            <div className="max-h-64 overflow-y-auto">
+              {(lastMessages || []).length === 0 && (
+                <p className="py-4 text-center text-sm text-gray-500">
+                  No other conversations to forward to yet.
+                </p>
+              )}
+              {(lastMessages || []).map((chat) => {
+                const other = chat?.other_user;
+                if (!other?.id || other.id === currentUser?.id) return null;
+                const selected = forwardTargets.includes(other.id);
+                return (
+                  <label
+                    key={other.id}
+                    className="flex cursor-pointer items-center gap-2 border-b border-gray-100 py-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleForwardTarget(other.id)}
+                      className="accent-gold"
+                    />
+                    <span className="truncate text-dark">
+                      {getUserDisplayName(other)}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              disabled={forwardTargets.length === 0 || forwardSending}
+              onClick={submitForward}
+              className="mt-3 w-full rounded-full bg-gold py-2 text-sm font-semibold text-dark disabled:opacity-50"
+            >
+              {forwardSending
+                ? "Forwarding..."
+                : forwardTargets.length
+                  ? `Forward to ${forwardTargets.length}`
+                  : "Select someone"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <SkeletonChatMessages />
       ) : messages?.length <= 0 ? (
@@ -236,18 +453,59 @@ export default function MessageArea() {
                       : sender_info;
                     const senderName = getUserDisplayName(senderUser);
 
+                    // Optimistic and errored messages have no server id for
+                    // a reply to point at. This store mints pending ids with
+                    // uuidv4(), so the flag is the reliable test, not an id
+                    // prefix.
+                    const canReply =
+                      message?.id != null &&
+                      !message?.error &&
+                      !message?.optimistic;
+
                     const msgDate = new Date(message.timestamp);
 
-                    const hourFmt = converthourTo12hrFormat(msgDate.getHours());
+                    const hourFmt = converthourTo12hrFormat(
+                      msgDate.getHours(),
+                      msgDate.getMinutes()
+                    );
 
                     return (
                       <motion.div
                         key={message?.id || index}
+                        ref={(node) => {
+                          if (message?.id == null) return;
+                          if (node) messageRefs.current[String(message.id)] = node;
+                          else delete messageRefs.current[String(message.id)];
+                        }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
+                        // Swipe/drag to reply, matching the mobile gesture.
+                        // framer-motion already wraps every bubble, so this is
+                        // its drag support rather than a new dependency, and it
+                        // covers touch and mouse from the same handler.
+                        // Vertical drag is left alone so the thread still
+                        // scrolls normally on a touchscreen.
+                        {...(canReply && isTouchDevice
+                          ? {
+                              drag: "x",
+                              dragDirectionLock: true,
+                              dragConstraints: { left: 0, right: 0 },
+                              dragElastic: 0.25,
+                              onDragEnd: (_event, info) => {
+                                // Either direction, so it works the same on
+                                // your own messages and theirs.
+                                if (Math.abs(info.offset.x) > 60) {
+                                  setReplyingTo(message);
+                                }
+                              },
+                            }
+                          : {})}
                         className={clsx(
-                          "w-full max-w-[400px] p-1 pt-4 flex gap-2.5 max-sm:px-4 max-xs:px-2",
-                          is_current_user && "ml-auto flex-row-reverse"
+                          "group relative w-full max-w-[400px] p-1 pt-4 pb-3 flex gap-2.5 max-sm:px-4 max-xs:px-2",
+                          is_current_user && "ml-auto flex-row-reverse",
+                          canReply &&
+                            isTouchDevice &&
+                            "cursor-grab active:cursor-grabbing"
                         )}
                       >
                         <Link to={`/co/${sender_info?.id}`} className="h-fit">
@@ -258,18 +516,163 @@ export default function MessageArea() {
                             className={avatarStyle}
                           />
                         </Link>
+
                         <div
                           className={clsx(
-                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col",
+                            "!shrink-0 !w-fit !max-w-[80%] xs:text-sm rounded-md p-3 pt-1 flex flex-col transition-shadow select-text",
+                            // Your own messages carry the brand accent and
+                            // the other person's are neutral - the convention
+                            // in every mainstream messenger, and what the
+                            // mobile app already did. Web had it inverted, so
+                            // the same conversation looked like two different
+                            // products side by side.
                             is_current_user
-                              ? "bg-white"
-                              : "bg-custom_yellow/30"
+                              ? "bg-pale_yellow text-dark"
+                              : "bg-white",
+                            // Flashed after a jump so it is obvious which
+                            // message was meant - scrolling alone leaves the
+                            // user hunting.
+                            highlightedId === String(message?.id) &&
+                              "ring-2 ring-gold"
                           )}
                         >
                           <h1 className="mb-1 font-semibold capitalize text-gray-400 text-[.7rem]">
                             {is_current_user ? "You" : senderName}
                           </h1>
-                          <p className="text-gray-700 hover:text-gray-900 transition-all duration-300 whitespace-pre-wrap break-words">
+
+                          {/* Marks content that came from another
+                              conversation. Without it a forward looks like
+                              something the sender wrote. Deliberately unnamed
+                              source - see Message.is_forwarded. */}
+                          {message?.is_forwarded && (
+                            <span
+                              className={clsx(
+                                "mb-1 flex items-center gap-1 text-[.65rem] italic",
+                                is_current_user ? "text-dark/60" : "text-gray-500"
+                              )}
+                            >
+                              <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="15 17 20 12 15 7" />
+                                <path d="M4 18v-2a4 4 0 0 1 4-4h12" />
+                              </svg>
+                              Forwarded
+                            </span>
+                          )}
+
+                          {/* The message this one replies to. Click to jump. */}
+                          {message?.reply_to_preview && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                jumpToMessage(message.reply_to_preview.id)
+                              }
+                              className={clsx(
+                                "mb-1.5 w-full text-left border-l-[3px] rounded px-2 py-1 transition-colors",
+                                // A gold rule on a gold bubble is invisible,
+                                // so the accent flips with the surface.
+                                is_current_user
+                                  ? "border-dark/40 bg-dark/[.08] hover:bg-dark/[.13]"
+                                  : "border-gold bg-black/[.04] hover:bg-black/[.07]"
+                              )}
+                            >
+                              <span
+                                className={clsx(
+                                  "block text-[.65rem] font-bold truncate",
+                                  is_current_user
+                                    ? "text-dark/80"
+                                    : "text-[#7a6320]"
+                                )}
+                              >
+                                {message.reply_to_preview.sender_id ===
+                                currentUser?.id
+                                  ? "You"
+                                  : message.reply_to_preview.sender_name ||
+                                    "Unknown"}
+                              </span>
+                              <span
+                                className={clsx(
+                                  "block text-[.7rem] line-clamp-2",
+                                  is_current_user
+                                    ? "text-dark/75"
+                                    : "text-gray-600",
+                                  message.reply_to_preview.is_deleted &&
+                                    "italic opacity-75"
+                                )}
+                              >
+                                {message.reply_to_preview.is_deleted
+                                  ? "Message deleted"
+                                  : message.reply_to_preview.content ||
+                                    (message.reply_to_preview.has_attachment
+                                      ? "Attachment"
+                                      : "")}
+                              </span>
+                            </button>
+                          )}
+
+                          {/* Quoted message was hard-deleted: reply_to survives
+                              with a null preview (SET_NULL server-side). */}
+                          {!message?.reply_to_preview && message?.reply_to && (
+                            <div className="mb-1.5 border-l-[3px] border-gray-300 bg-black/[.04] rounded px-2 py-1">
+                              <span className="block text-[.7rem] italic text-gray-500">
+                                Message unavailable
+                              </span>
+                            </div>
+                          )}
+                          {editingId === message.id ? (
+                            <div className="flex flex-col gap-1.5">
+                              <textarea
+                                autoFocus
+                                rows={2}
+                                value={editDraft}
+                                onChange={(e) => setEditDraft(e.target.value)}
+                                onKeyDown={(e) => {
+                                  // Enter saves, Shift+Enter newlines, Escape
+                                  // abandons - matching the composer.
+                                  if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    saveEdit(message);
+                                  } else if (e.key === "Escape") {
+                                    cancelEdit();
+                                  }
+                                }}
+                                className="w-full min-w-[200px] resize-y rounded border border-dark/20 bg-white/70 p-1.5 text-sm text-dark outline-none focus:border-dark/40"
+                              />
+                              <div className="flex items-center gap-2 text-[.7rem]">
+                                <button
+                                  type="button"
+                                  disabled={editSaving}
+                                  onClick={() => saveEdit(message)}
+                                  className="font-semibold text-dark disabled:opacity-50"
+                                >
+                                  {editSaving ? "Saving..." : "Save"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={cancelEdit}
+                                  className="text-dark/60 hover:text-dark"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                          <p
+                            className={clsx(
+                              "transition-all duration-300 whitespace-pre-wrap break-words",
+                              is_current_user
+                                ? "text-dark"
+                                : "text-gray-700 hover:text-gray-900"
+                            )}
+                          >
                             {linkifyText(message?.content.substring(0, readMoreLimit))}
                             {message?.content.length > readMoreLimit && (
                               <>
@@ -285,6 +688,7 @@ export default function MessageArea() {
                               </>
                             )}
                           </p>
+                          )}
 
                           {message.audio_file && (
                             <VoiceNotePlayer audioURL={message.audio_file} />
@@ -316,10 +720,23 @@ export default function MessageArea() {
                               {/* <TimeAgo time={message.timestamp} />,{" "} */}
                               {/* {message.timestamp}{" "} */}
 
-                              {`${hourFmt.hour}:${msgDate.getMinutes()} ${
-                                hourFmt.meridiem
-                              }`}
+                              {`${hourFmt.hour}:${hourFmt.minute} ${hourFmt.meridiem}`}
                             </small>
+                            {/* Without this a rewritten message is
+                                indistinguishable from the original, which is
+                                the whole reason the backend records it. */}
+                            {message?.is_edited && (
+                              <small
+                                className="shrink-0 italic"
+                                title={
+                                  message.edited_at
+                                    ? `Edited ${new Date(message.edited_at).toLocaleString()}`
+                                    : "Edited"
+                                }
+                              >
+                                edited
+                              </small>
+                            )}
                             {message?.optimistic ? (
                               <CheckboxIcon className="size-3.5  text-gray-300" />
                             ) : message?.error ? (
@@ -351,6 +768,75 @@ export default function MessageArea() {
                             )}
                           </div>
                         </div>
+                        {/* Message actions.
+                            Absolutely positioned under the bubble rather than
+                            beside it. As flex siblings these three buttons
+                            reserved roughly 60px of the row's max-w-[400px]
+                            whether or not you were hovering, so every bubble
+                            was permanently narrower to make room for controls
+                            that were invisible most of the time. Out of flow
+                            they cost no layout at all, and sitting below keeps
+                            them clear of the text. */}
+                        {(canReply || canEditMessage(message)) &&
+                          editingId !== message.id && (
+                            <div
+                              className={clsx(
+                                // Subtle: no pill, no shadow. A floating
+                                // white capsule read as a control panel
+                                // hovering over the thread. Sitting flush
+                                // under the bubble on its own side, out of
+                                // flow, it stays out of the way until wanted.
+                                "absolute -bottom-0.5 z-10 flex items-center gap-3 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100",
+                                is_current_user ? "right-12" : "left-12"
+                              )}
+                            >
+                              {canReply && (
+                                <button
+                                  type="button"
+                                  onClick={() => setReplyingTo(message)}
+                                  title="Reply"
+                                  aria-label="Reply to this message"
+                                  className="text-gray-300 hover:text-gold transition-colors"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9 17 4 12 9 7" />
+                                    <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                                  </svg>
+                                </button>
+                              )}
+                              {canReply && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setForwardTargets([]);
+                                    setForwardingMessage(message);
+                                  }}
+                                  title="Forward"
+                                  aria-label="Forward this message"
+                                  className="text-gray-300 hover:text-gold transition-colors"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="15 17 20 12 15 7" />
+                                    <path d="M4 18v-2a4 4 0 0 1 4-4h12" />
+                                  </svg>
+                                </button>
+                              )}
+                              {canEditMessage(message) && (
+                                <button
+                                  type="button"
+                                  onClick={() => beginEdit(message)}
+                                  title="Edit"
+                                  aria-label="Edit this message"
+                                  className="text-gray-300 hover:text-gold transition-colors"
+                                >
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          )}
                       </motion.div>
                     );
                   })}

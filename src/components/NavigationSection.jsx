@@ -11,6 +11,8 @@ import { getSession } from "../lib/session";
 import {ButtonWithTooltipIcon} from './ButtonWithTooltipIcon'
 import ReusableModal from "./custom/ResusableModal";
 import LightParagraph from "./ParagraphText";
+import { useQuery } from "@tanstack/react-query";
+import { getProfileViewsSummary } from "../api-services/engagement";
 import { useMessagesStore } from "../stores/messagesStore";
 import { 
   BookOpen, 
@@ -112,7 +114,7 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
   }, [pathname]); // Remove expandedHubItems and expandedSections from dependencies to prevent loops
 
   const navigators = useMemo(
-    () => (isSmallNavigation ? feedNavItems.filter((navItem, index)=> navItem.name === "Home" || navItem.name === "Representatives" || navItem.name === "Companies" || navItem.name === "Market" ) : feedNavItems.filter((navItem) => navItem.name != "Market")),
+    () => (isSmallNavigation ? feedNavItems.filter((navItem, index)=> navItem.name === "Home" || navItem.name === "Connectizers" || navItem.name === "Companies" || navItem.name === "Market" ) : feedNavItems.filter((navItem) => navItem.name != "Market")),
     [isSmallNavigation]
   );
 
@@ -121,6 +123,20 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
     await logOutCurrentUser();
     setLoading(false);
   };
+
+  // Unseen profile views, for the badge on the Profile item. The badge is what
+  // makes "who viewed you" a reason to return - nobody goes looking for a page
+  // they do not know exists. Polled slowly on purpose: a slightly stale count
+  // is fine, a request per render is not.
+  const { data: profileViewsSummary } = useQuery({
+    queryKey: ["profile-views-summary"],
+    queryFn: () => getProfileViewsSummary({ days: 30 }),
+    enabled: Boolean(currentUser?.id),
+    staleTime: 60_000,
+    refetchInterval: 300_000,
+    refetchOnWindowFocus: true,
+  });
+  const unseenProfileViews = profileViewsSummary?.unseen_count || 0;
 
   // Calculate total unread messages
   const lastMessages = useMessagesStore((state) => state.lastMessages);
@@ -256,6 +272,14 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                     {totalUnreadMessages}
                   </Badge>
                 )}
+                {name === "Profile" && unseenProfileViews > 0 && (
+                  <Badge
+                    className="absolute right-0 top-0 !bg-gold !text-[.5rem] !text-dark"
+                    fontSize="xs"
+                  >
+                    {unseenProfileViews}
+                  </Badge>
+                )}
               </Link>
             </li>
           );
@@ -325,6 +349,13 @@ export function NavigationSection({ hasHeader, isSmallNavigation = false }) {
                       // fontSize="xs"
                     >
                       <span>{totalUnreadMessages}</span>
+                    </Badge>
+                  )}
+                  {name === "Profile" && unseenProfileViews > 0 && (
+                    <Badge
+                      className="size-4 !text-[.55rem] !bg-gold !rounded-full !flex !items-center justify-center"
+                    >
+                      <span>{unseenProfileViews}</span>
                     </Badge>
                   )}
                 </Link>

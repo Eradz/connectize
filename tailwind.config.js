@@ -25,6 +25,18 @@ module.exports = {
         background: "#F7F7F7",
         tabs: "#E1E1E1",
         dark: "#242424",
+        // The most-used colour in the Figma file by a wide margin (4,480 uses
+        // against gold's 167) and its primary text/UI slate. In code it only
+        // ever appears hardcoded inside SVG icon fills - 75 literals across 22
+        // files - so it was never named. Tokenised here so new work can reach
+        // for it and the value is documented in one place.
+        //
+        // Deliberately NOT redefining `dark` (#242424) to this: `dark` is the
+        // de-facto text colour in ~400 web and ~1,500 mobile usages, and
+        // #242424 appears nowhere in the design. Which of the two is
+        // authoritative for text is a design decision, not a refactor, so the
+        // two coexist until that is settled. See .claude/skills/connectize-design.
+        slate: "#374957",
         gold: "#F1C644",
         custom_yellow: "#FFCF3F",
         services_yellow: "#f0d77f",

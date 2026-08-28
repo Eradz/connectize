@@ -25,11 +25,31 @@ export const queryClient = new QueryClient({
  * @param {*} hour 24 hours format i.e 0-23 hours not 1-24 hours
  * @returns {{hour:number, meridiem: string}}
  */
-export function converthourTo12hrFormat(hour) {
-  const isPm = hour - 1 >= 12;
+/**
+ * 24-hour clock -> 12-hour parts.
+ *
+ * The previous implementation was wrong for most of the day. `hour - 1 >= 12`
+ * and `hour - 1 - 12` shifted everything by an hour and mishandled the two
+ * boundaries, so:
+ *
+ *   00:29 rendered "0:29 AM"   (should be 12:29 AM)
+ *   12:00 rendered "12:00 AM"  (should be 12:00 PM)
+ *   14:56 rendered "1:56 PM"   (should be 2:56 PM)
+ *   17:38 rendered "4:38 PM"   (should be 5:38 PM)
+ *
+ * Every afternoon message in the web app was stamped an hour early, which is
+ * why web and mobile disagreed on the same message.
+ *
+ * `minute` is returned zero-padded because callers were interpolating
+ * getMinutes() directly and rendering "1:5 PM" for 13:05.
+ */
+export function converthourTo12hrFormat(hour, minute) {
+  const h = Number(hour);
+  const isPm = h >= 12;
   return {
-    hour: isPm ? hour - 1 - 12 : hour,
+    hour: h % 12 || 12,
     meridiem: isPm ? "PM" : "AM",
+    minute: minute == null ? undefined : String(minute).padStart(2, "0"),
   };
 }
 

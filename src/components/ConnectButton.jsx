@@ -5,6 +5,7 @@ import { connectWithCompany } from "../api-services/companies";
 import { connectWithUser } from "../api-services/users";
 import { useAuth } from "../context/userContext";
 import { useGetCurrentCompany } from "../hooks";
+import { isProfileIncompleteError } from "../lib/profileCompletion";
 import PrimaryButton from "./PrimaryButton";
 
 const KNOWN_STATUSES = ["none", "pending_outgoing", "pending_incoming", "connected"];
@@ -133,6 +134,15 @@ export default function ConnectButton({
           ? await connectWithUser(slug, isUnfollowing)
           : await connectWithCompany(slug, isUnfollowing);
 
+      // A successful connect always returns a payload. Anything falsy means the
+      // request did not actually go through - makeApiRequest swallows some
+      // failures and resolves with null rather than throwing - and leaving the
+      // optimistic flip in place there would show "Requested" for a connection
+      // that was never saved. Fall through to the rollback below instead.
+      if (!response) {
+        throw new Error("Connect request did not complete");
+      }
+
       // Reconcile with the backend's authoritative values in case they ever
       // differ from the optimistic guess (e.g. the relationship changed from
       // another tab in between).
@@ -160,7 +170,13 @@ export default function ConnectButton({
       setHasConnected(isUnfollowing);
       setStatus(previousStatus);
       previousEntries.forEach(([key, value]) => queryClient.setQueryData(key, value));
-      toast.error("Something went wrong — please try again");
+      // An incomplete profile has already been reported by the interceptor's
+      // "Complete profile" toast, which then rethrows to get us here for the
+      // rollback above. Toasting again would stack a vague second message on top
+      // of the actionable one and outlive it - the redirect fires in ~1.2s.
+      if (!isProfileIncompleteError(error)) {
+        toast.error("Something went wrong — please try again");
+      }
     } finally {
       setIsSubmitting(false);
     }
