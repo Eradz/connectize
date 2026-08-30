@@ -72,13 +72,29 @@ export default function MessagesPage() {
 
   // Calls this user still owes an answer on. Polled so a call booked while
   // this page is open shows up, and stops showing once answered elsewhere.
-  const { data: pendingCalls = [] } = useQuery({
-    queryKey: ["calls", "pending"],
-    queryFn: () => listCalls({ scope: "pending" }),
+  // "upcoming", not "pending". Pending is only calls awaiting *your* answer,
+  // so the moment both sides accepted, the badge vanished - which is exactly
+  // when a call is most worth showing. Upcoming covers everything still ahead:
+  // proposed, accepted, and in progress.
+  const { data: upcomingCalls = [] } = useQuery({
+    queryKey: ["calls", "upcoming"],
+    queryFn: () => listCalls({ scope: "upcoming" }),
+    // can_join flips five minutes before the start, and nothing else would
+    // notice that moment arriving while this page sits open.
     refetchInterval: 60_000,
     staleTime: 30_000,
   });
-  const pendingCallCount = pendingCalls.length;
+
+  // A call you can walk into right now is a different thing from one booked
+  // for Thursday, and they should not look the same.
+  const joinableNow = upcomingCalls.filter((call) => call.can_join);
+  const awaitingYou = upcomingCalls.filter((call) => call.is_my_turn);
+  const callBadgeCount = joinableNow.length || awaitingYou.length || upcomingCalls.length;
+  const callBadgeLabel = joinableNow.length
+    ? `${joinableNow.length} call${joinableNow.length > 1 ? "s" : ""} you can join now`
+    : awaitingYou.length
+      ? `${awaitingYou.length} awaiting your reply`
+      : `${upcomingCalls.length} upcoming call${upcomingCalls.length > 1 ? "s" : ""}`;
 
   return (
     <>
@@ -90,21 +106,24 @@ export default function MessagesPage() {
         <Link
           to={webRoutes.calls}
           className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 shrink-0"
-          aria-label={
-            pendingCallCount > 0
-              ? `Calls, ${pendingCallCount} awaiting your reply`
-              : "Calls"
-          }
+          aria-label={callBadgeCount > 0 ? `Calls, ${callBadgeLabel}` : "Calls"}
         >
           <VideoCameraOutlined />
           <span>Calls</span>
-          {/* Without this the link looked identical whether or not someone was
-              waiting on your answer, so a proposal sat unanswered until they
-              chased it another way - and the feature only works if two people
-              agree a time. */}
-          {pendingCallCount > 0 && (
-            <span className="ml-0.5 min-w-5 h-5 px-1.5 grid place-items-center rounded-full bg-gold text-black text-xs font-semibold">
-              {pendingCallCount}
+          {/* Without this the link looked identical whether or not a call was
+              booked, so a confirmed call was invisible until you thought to
+              open the page - and a call happening right now looked the same as
+              no call at all. */}
+          {callBadgeCount > 0 && (
+            <span
+              className={`ml-0.5 min-w-5 h-5 px-1.5 grid place-items-center rounded-full text-xs font-semibold ${
+                joinableNow.length
+                  ? "bg-green-600 text-white animate-pulse"
+                  : "bg-gold text-black"
+              }`}
+              title={callBadgeLabel}
+            >
+              {callBadgeCount}
             </span>
           )}
         </Link>
