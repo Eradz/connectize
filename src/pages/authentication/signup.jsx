@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import { authenticationService } from "../../api-services/authentication";
@@ -18,43 +18,87 @@ export const meta = () =>
   });
 
 
-const validationSchema = Yup.object().shape({
-  email: Yup.string()
-    // Keyboards and paste readily add a trailing space, and Yup's email test
-    // rejects whitespace - so a perfectly good address came back as "Invalid
-    // Email Address". Casting trims it before the test runs.
-    .trim()
-    .email("Invalid Email Address")
-    .required("Fill in a valid email address"),
-
-  password: Yup.string()
-    .min(8, "Password should be at least 8 characters long")
-    .matches(
-      /^[a-zA-Z0-9@!#$%^&*()_+|~=`{}[\]:";'<>?,./-]+$/,
-      "Only alphanumeric characters and special characters allowed."
-    )
-    .required("Fill in your password"),
-  confirmPassword: Yup.string()
-    .required("Password confirmation is required")
-    .test(
-      "passwords-match",
-      "Password and confirm password must match",
-      function (value) {
-        return this.parent.password === value;
-      }
-    ),
-  isChecked: Yup.boolean().oneOf(
-    [true],
-    "You must accept the terms and conditions"
-  ),
-});
-
 // Two account types the toggle switches between. Kept outside the
 // component so the array identity is stable across renders.
 const ACCOUNT_TYPES = [
   { key: "user", label: "For Users" },
   { key: "company", label: "For Companies" },
 ];
+
+// Free/consumer email providers. Users must sign up with one of these,
+// companies are blocked from using any of them.
+const GENERIC_EMAIL_DOMAINS = [
+  "gmail.com",
+  "googlemail.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "ymail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "msn.com",
+  "icloud.com",
+  "me.com",
+  "aol.com",
+  "protonmail.com",
+  "proton.me",
+  "mail.com",
+  "zoho.com",
+];
+
+function buildValidationSchema(accountType) {
+  return Yup.object().shape({
+    email: Yup.string()
+      // Keyboards and paste readily add a trailing space, and Yup's email test
+      // rejects whitespace - so a perfectly good address came back as "Invalid
+      // Email Address". Casting trims it before the test runs.
+      .trim()
+      .email("Invalid Email Address")
+      .required("Fill in a valid email address")
+      .test(
+        "account-type-email-domain",
+        "Invalid email for this account type",
+        function (value) {
+          if (!value) return true; // let .required()/.email() report those
+
+          const domain = value.split("@")[1]?.toLowerCase();
+          if (!domain) return true;
+
+          const isGeneric = GENERIC_EMAIL_DOMAINS.includes(domain);
+
+          if (accountType === "company" && isGeneric) {
+            return this.createError({
+              message:
+                "Company accounts need a company email address (e.g. name@yourcompany.com), not a personal provider like Gmail, Yahoo, or Outlook.",
+            });
+          }
+
+          return true;
+        }
+      ),
+
+    password: Yup.string()
+      .min(8, "Password should be at least 8 characters long")
+      .matches(
+        /^[a-zA-Z0-9@!#$%^&*()_+|~=`{}[\]:";'<>?,./-]+$/,
+        "Only alphanumeric characters and special characters allowed."
+      )
+      .required("Fill in your password"),
+    confirmPassword: Yup.string()
+      .required("Password confirmation is required")
+      .test(
+        "passwords-match",
+        "Password and confirm password must match",
+        function (value) {
+          return this.parent.password === value;
+        }
+      ),
+    isChecked: Yup.boolean().oneOf(
+      [true],
+      "You must accept the terms and conditions"
+    ),
+  });
+}
 
 function Signup() {
   const navigate = useNavigate();
@@ -66,6 +110,13 @@ function Signup() {
   // pre-selected tab in the design.
   const [accountType, setAccountType] = useState("user");
   const isCompany = accountType === "company";
+
+  // Recomputed whenever the tab switches, since "valid email" means
+  // something different for users vs. companies.
+  const validationSchema = useMemo(
+    () => buildValidationSchema(accountType),
+    [accountType]
+  );
 
   const formValues = {
     email: invitedEmail || "",
@@ -104,16 +155,25 @@ function Signup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // The email that was valid under one tab may not be under the other,
+    // so re-check it as soon as the person switches.
+    if (formik.values.email) {
+      formik.validateField("email");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountType]);
+
   const fields = [
     {
       name: "email",
       type: "email",
-      label: isCompany ? "Company Email" : "Email",
+      label: isCompany ? "Company Email/Username" : "Email/Username",
       placeholder: isCompany ? "Example@companymail.com" : "Name@example.com",
       validate: true,
       helpText: isCompany
-        ? "Register your company with a professional email address to unlock full company-profile features on Connectize."
-        : "Join Connectize with a professional email address. Accounts created with non-professional emails like example@gmail.com etc. will have limited functionalities on connectize",
+        ? "Use your company's own domain (e.g. name@yourcompany.com). Personal providers like Gmail, Yahoo, or Outlook aren't accepted for company accounts."
+        : "Join Connectize with any valid email address.",
     },
     {
       name: "password",
@@ -148,7 +208,7 @@ function Signup() {
       </div>
 
       {/* Account type toggle: pill-shaped tab switcher */}
-      <div className="flex bg-gray-200 rounded-full p-1">
+      <div className="flex bg-gray-100 rounded-full p-1">
         {ACCOUNT_TYPES.map(({ key, label }) => {
           const active = accountType === key;
           return (
