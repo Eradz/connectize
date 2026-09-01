@@ -198,10 +198,10 @@ function Signup() {
         description="Connect, Collaborate and Thrive with Connectize"
       />
       <div>
-        <HeadingText>
+        {/* <HeadingText>
           Build your professional presence with{" "}
           <span className="text-[#F5A623]">Connectize</span>
-        </HeadingText>
+        </HeadingText> */}
         <p className="text-gray-500 mt-1">
           Create your company profile and connect with the industry.
         </p>
