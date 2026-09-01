@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import { authenticationService } from "../../api-services/authentication";
@@ -49,11 +49,23 @@ const validationSchema = Yup.object().shape({
   ),
 });
 
+// Two account types the toggle switches between. Kept outside the
+// component so the array identity is stable across renders.
+const ACCOUNT_TYPES = [
+  { key: "user", label: "For Users" },
+  { key: "company", label: "For Companies" },
+];
+
 function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get("invite_token");
   const invitedEmail = searchParams.get("email");
+
+  // Which signup flow is active. Defaults to "user" since that's the
+  // pre-selected tab in the design.
+  const [accountType, setAccountType] = useState("user");
+  const isCompany = accountType === "company";
 
   const formValues = {
     email: invitedEmail || "",
@@ -72,6 +84,7 @@ function Signup() {
           username: email,
           password1: password,
           password2: confirmPassword,
+          account_type: accountType,
           ...(inviteToken ? { invite_token: inviteToken } : {}),
         },
         url: "registration",
@@ -95,11 +108,12 @@ function Signup() {
     {
       name: "email",
       type: "email",
-      label: "Company email",
-      placeholder: "Example@companymail.com",
+      label: isCompany ? "Company Email" : "Email",
+      placeholder: isCompany ? "Example@companymail.com" : "Name@example.com",
       validate: true,
-      helpText:
-        "Join Connectize with a professional email address. Accounts created with non-professional emails like example@gmail.com etc. will have limited functionalities on connectize",
+      helpText: isCompany
+        ? "Register your company with a professional email address to unlock full company-profile features on Connectize."
+        : "Join Connectize with a professional email address. Accounts created with non-professional emails like example@gmail.com etc. will have limited functionalities on connectize",
     },
     {
       name: "password",
@@ -112,10 +126,11 @@ function Signup() {
       name: "confirmPassword",
       type: "password",
       label: "Confirm Password",
-      placeholder: "Enter the same password as above",
+      placeholder: "At least 8 characters",
       validate: true,
     },
   ];
+
   return (
     <section className="space-y-4">
       <SEO
@@ -123,8 +138,37 @@ function Signup() {
         description="Connect, Collaborate and Thrive with Connectize"
       />
       <div>
-        <HeadingText>Create new account</HeadingText>
+        <HeadingText>
+          Build your professional presence with{" "}
+          <span className="text-[#F5A623]">Connectize</span>
+        </HeadingText>
+        <p className="text-gray-500 mt-1">
+          Create your company profile and connect with the industry.
+        </p>
       </div>
+
+      {/* Account type toggle: pill-shaped tab switcher */}
+      <div className="flex bg-gray-200 rounded-full p-1">
+        {ACCOUNT_TYPES.map(({ key, label }) => {
+          const active = accountType === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setAccountType(key)}
+              aria-pressed={active}
+              className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-colors ${
+                active
+                  ? "bg-[#F5A623] text-black"
+                  : "bg-transparent text-gray-500"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
       <Form
         formik={formik}
         status={"none"}
@@ -132,7 +176,7 @@ function Signup() {
         bottomCustomComponents={<CheckAgreement formik={formik} />}
         button={{
           type: "submit",
-          text: "Sign up",
+          text: "Signup",
           submitText: "Creating your account...",
           style: "!md:w-[60%] mt-4",
         }}
