@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { getSSOProviders } from "../../api-services/sso";
 import GoogleLoginButton from "./GoogleLoginButton";
 import LinkedInLoginButton from "./LinkedInLoginButton";
@@ -9,11 +8,11 @@ import EnterpriseSSOButton, { startEnterpriseSSOFlow } from "./EnterpriseSSOButt
  * Renders all available SSO login buttons.
  * Fetches provider availability from the backend on mount.
  */
-export default function SSOLoginSection({accountType = "user"}) {
+export default function SSOLoginSection() {
   const [providers, setProviders] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const {pathname} = useLocation();
+
   useEffect(() => {
     getSSOProviders()
       .then(setProviders)
@@ -41,9 +40,6 @@ export default function SSOLoginSection({accountType = "user"}) {
       </div>
 
       <div className="space-y-2">
-        {
-           ( (pathname.includes("/signup") && accountType !== "company") || pathname.includes("/login")) && (
-            <div>
         {providers?.google?.enabled && (
           <GoogleLoginButton
             clientId={providers.google.client_id}
@@ -58,13 +54,7 @@ export default function SSOLoginSection({accountType = "user"}) {
           />
         )}
 
-        
-        </div>
-      ) 
-    }
-    {((pathname.includes("/signup") && accountType === "company") || pathname.includes("/login")) && providers?.enterprise_sso && (
-          <EnterpriseSSOButton onSSODetected={handleSSODetected} />
-        )}
+        <EnterpriseSSOButton onSSODetected={handleSSODetected} />
       </div>
 
       {error && (

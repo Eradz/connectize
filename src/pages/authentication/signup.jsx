@@ -1,8 +1,7 @@
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
-import { User, Building2, ArrowLeft } from "lucide-react";
 import { authenticationService } from "../../api-services/authentication";
 import Form from "../../components/form";
 import CheckAgreement from "../../components/form/checkAgreement";
@@ -17,6 +16,7 @@ export const meta = () =>
     description: "Create your Connectize account and connect with thousands of oil and gas professionals. Network, collaborate, and grow your energy sector career.",
   keywords: "signup, register, oil and gas, energy jobs, professional network, join Connectize",
   });
+
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -49,97 +49,11 @@ const validationSchema = Yup.object().shape({
   ),
 });
 
-function AccountTypeStep({ accountType, setAccountType, onContinue }) {
-  const options = [
-    {
-      value: "user",
-      icon: User,
-      title: "I'm a User",
-      description:
-        "Discover opportunities, network with professionals, and connect with top companies.",
-    },
-    {
-      value: "company",
-      icon: Building2,
-      title: "I'm a Company",
-      description:
-        "Post jobs, manage your team, build your brand, and grow your business.",
-    },
-  ];
-
-  return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-4xl font-extrabold text-black">
-          Which best describe you
-        </h1>
-        <p className="text-gray-500">
-          This helps us personalize your experience and set up your account
-          correctly.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {options.map(({ value, icon: Icon, title, description }) => {
-          const selected = accountType === value;
-          return (
-            <button
-              type="button"
-              key={value}
-              onClick={() => setAccountType(value)}
-              className={`relative text-left rounded-2xl p-5 border transition-colors ${
-                selected
-                  ? "bg-black border-black text-white"
-                  : "bg-white border-gray-200 text-black"
-              }`}
-            >
-              <span
-                className={`absolute top-4 right-4 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                  selected ? "border-white" : "border-gray-300"
-                }`}
-              >
-                {selected && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-white" />
-                )}
-              </span>
-
-              <span className="w-11 h-11 rounded-full bg-amber-400 flex items-center justify-center mb-4">
-                <Icon className="w-5 h-5 text-black" />
-              </span>
-
-              <p className="font-bold text-lg mb-1">{title}</p>
-              <p
-                className={`text-sm ${
-                  selected ? "text-gray-300" : "text-gray-500"
-                }`}
-              >
-                {description}
-              </p>
-            </button>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        disabled={!accountType}
-        onClick={onContinue}
-        className="w-full sm:w-[60%] mt-2 py-3 rounded-lg bg-black text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        Continue
-      </button>
-    </section>
-  );
-}
-
 function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get("invite_token");
   const invitedEmail = searchParams.get("email");
-
-  const [step, setStep] = useState(1);
-  const [accountType, setAccountType] = useState(null);
 
   const formValues = {
     email: invitedEmail || "",
@@ -158,7 +72,6 @@ function Signup() {
           username: email,
           password1: password,
           password2: confirmPassword,
-          account_type: accountType, // "user" | "company"
           ...(inviteToken ? { invite_token: inviteToken } : {}),
         },
         url: "registration",
@@ -203,31 +116,12 @@ function Signup() {
       validate: true,
     },
   ];
-
-  if (step === 1) {
-    return (
-      <AccountTypeStep
-        accountType={accountType}
-        setAccountType={setAccountType}
-        onContinue={() => setStep(2)}
-      />
-    );
-  }
-
   return (
     <section className="space-y-4">
       <SEO
         title="User Registration"
         description="Connect, Collaborate and Thrive with Connectize"
       />
-      <button
-        type="button"
-        onClick={() => setStep(1)}
-        className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-black"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </button>
       <div>
         <HeadingText>Create new account</HeadingText>
       </div>
@@ -251,7 +145,7 @@ function Signup() {
         </Link>
       </p>
 
-      <SSOLoginSection accountType={accountType} />
+      <SSOLoginSection />
     </section>
   );
 }
