@@ -180,7 +180,21 @@ function PeerTile({ peer, isVideo }) {
   return (
     <div className="relative rounded-lg overflow-hidden bg-gray-800 grid place-items-center min-h-[8rem]">
       {showVideo ? (
-        <Video stream={peer.stream} className="w-full h-full object-contain" />
+        // Positioned, not flowed. `place-items-center` on the tile means the
+        // grid item is never stretched, so `w-full h-full` resolved its
+        // percentages against an auto-sized row and collapsed to `auto` - the
+        // video then laid out at its intrinsic resolution, overflowed the tile,
+        // and `overflow-hidden` cropped it. That is the "over-zoomed" caller:
+        // `object-contain` had nothing to do, because the element was already
+        // bigger than the box it was meant to fit inside.
+        //
+        // `absolute inset-0` gives it a definite box from the (relative) tile,
+        // independent of how the grid sizes its items, and object-contain then
+        // fits the frame inside it as intended.
+        <Video
+          stream={peer.stream}
+          className="absolute inset-0 w-full h-full object-contain"
+        />
       ) : (
         <div className="text-center text-white/80 px-4">
           <AvatarTile person={peer.person} className="mb-3" />
