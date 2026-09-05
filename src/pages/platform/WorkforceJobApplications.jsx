@@ -224,6 +224,11 @@ const WorkforceJobApplications = () => {
                     <div>
                       <p className="font-semibold text-gray-900">{name}</p>
                       <p className="text-sm text-gray-500">{email}</p>
+                      {(app.applicant_phone || app.applicant_location) && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {[app.applicant_phone, app.applicant_location].filter(Boolean).join(' • ')}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -236,6 +241,54 @@ const WorkforceJobApplications = () => {
                 {/* Cover letter preview */}
                 {app.cover_letter && (
                   <p className="mt-3 text-sm text-gray-600 line-clamp-2">{app.cover_letter}</p>
+                )}
+
+                {/* Custom question answers */}
+                {Array.isArray(job?.custom_questions) && job.custom_questions.length > 0 && app.custom_answers && (
+                  <div className="mt-3 space-y-1">
+                    {job.custom_questions.map((q) => {
+                      const answer = app.custom_answers?.[q.id];
+                      if (answer === undefined || answer === null || answer === '') return null;
+                      return (
+                        <p key={q.id} className="text-sm text-gray-600">
+                          <span className="font-medium text-gray-700">{q.label}:</span>{' '}
+                          {typeof answer === 'boolean' ? (answer ? 'Yes' : 'No') : String(answer)}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Professional profile summary */}
+                {app.professional_profile && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg border flex items-center justify-between gap-3 flex-wrap">
+                    <div className="text-sm text-gray-700">
+                      <p className="font-medium text-gray-900">
+                        {app.professional_profile.professional_title || 'Professional Profile'}
+                      </p>
+                      <p className="text-gray-500">
+                        {app.professional_profile.years_of_experience != null &&
+                          `${app.professional_profile.years_of_experience} yrs experience`}
+                        {app.professional_profile.hourly_rate &&
+                          ` • ${app.professional_profile.currency || ''} ${app.professional_profile.hourly_rate}/hr`}
+                      </p>
+                      {Array.isArray(app.professional_profile.user_skills) && app.professional_profile.user_skills.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {app.professional_profile.user_skills
+                            .slice(0, 4)
+                            .map((s) => s.skill_name)
+                            .filter(Boolean)
+                            .join(', ')}
+                        </p>
+                      )}
+                    </div>
+                    <Link
+                      to={webRoutes.workforceProfileDetail.replace(':id', app.professional_profile.id)}
+                      className="text-xs px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 whitespace-nowrap"
+                    >
+                      View Profile
+                    </Link>
+                  </div>
                 )}
 
                 {/* Actions row */}

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Save, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, Trash2, Save, AlertCircle, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { workforceAPI } from '../../api-services/workforce';
+import { webRoutes } from '../../lib/webRoutes';
 
 const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDelete, isEditing, setIsEditing }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [jobPosting, setJobPosting] = useState(null);
   const [formData, setFormData] = useState({
     cover_letter: '',
     portfolio_link: '',
@@ -21,6 +24,15 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
         additional_info: application?.additional_info || '',
       });
       setShowDeleteConfirm(false);
+
+      // Fetch the job posting so we can label custom question answers
+      if (application?.job_posting) {
+        workforceAPI.getJob(application.job_posting)
+          .then((res) => setJobPosting(res?.data || res || null))
+          .catch(() => setJobPosting(null));
+      } else {
+        setJobPosting(null);
+      }
     }
   }, [isOpen, application]);
 
@@ -96,6 +108,29 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
 
         {/* Content */}
         <div className="p-6 space-y-6">
+          {/* Applicant Overview */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex items-center gap-4">
+            {application.applicant_avatar ? (
+              <img
+                src={application.applicant_avatar}
+                alt={application.applicant_name || 'Applicant'}
+                className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <User className="w-6 h-6 text-gray-400" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="font-semibold text-gray-900">{application.applicant_name || 'Applicant'}</p>
+              <p className="text-sm text-gray-600">{application.applicant_email}</p>
+              <div className="flex flex-wrap gap-x-3 text-xs text-gray-500 mt-1">
+                {application.applicant_phone && <span>{application.applicant_phone}</span>}
+                {application.applicant_location && <span>{application.applicant_location}</span>}
+              </div>
+            </div>
+          </div>
+
           {/* Application Overview */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Application Summary</h3>
@@ -203,6 +238,61 @@ const ApplicationActionModal = ({ isOpen, onClose, application, onUpdate, onDele
                     {formData.additional_info || 'No additional information provided'}
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom question answers */}
+          {jobPosting?.custom_questions?.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Additional Questions</p>
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 space-y-2">
+                {jobPosting.custom_questions.map((q) => {
+                  const answer = application.custom_answers?.[q.id];
+                  return (
+                    <p key={q.id} className="text-sm text-gray-700">
+                      <span className="font-medium">{q.label}:</span>{' '}
+                      {answer === undefined || answer === null || answer === '' ? (
+                        <span className="text-gray-400 italic">No answer</span>
+                      ) : typeof answer === 'boolean' ? (answer ? 'Yes' : 'No') : String(answer)}
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Professional profile summary */}
+          {application.professional_profile && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Professional Profile</p>
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between gap-3 flex-wrap">
+                <div className="text-sm text-gray-700">
+                  <p className="font-semibold text-gray-900">
+                    {application.professional_profile.professional_title || 'Untitled'}
+                  </p>
+                  <p className="text-gray-500">
+                    {application.professional_profile.years_of_experience != null &&
+                      `${application.professional_profile.years_of_experience} yrs`}
+                    {application.professional_profile.hourly_rate &&
+                      ` • ${application.professional_profile.currency || ''} ${application.professional_profile.hourly_rate}/hr`}
+                  </p>
+                  {Array.isArray(application.professional_profile.user_skills) && application.professional_profile.user_skills.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {application.professional_profile.user_skills
+                        .slice(0, 4)
+                        .map((s) => s.skill_name)
+                        .filter(Boolean)
+                        .join(', ')}
+                    </p>
+                  )}
+                </div>
+                <Link
+                  to={webRoutes.workforceProfileDetail.replace(':id', application.professional_profile.id)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 whitespace-nowrap"
+                >
+                  View Full Profile
+                </Link>
               </div>
             </div>
           )}

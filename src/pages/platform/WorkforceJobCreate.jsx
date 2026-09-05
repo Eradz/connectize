@@ -47,7 +47,11 @@ const WorkforceJobCreate = () => {
     currency: 'USD',
     application_deadline: '',
     remote_allowed: false,
-    travel_required: false
+    travel_required: false,
+    requires_cover_letter: true,
+    requires_portfolio: false,
+    requires_professional_profile: false,
+    custom_questions: []
   });
 
   const [currentSkill, setCurrentSkill] = useState('');
@@ -196,6 +200,32 @@ const WorkforceJobCreate = () => {
     }));
   };
 
+  const generateQuestionId = () => `q_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+
+  const addCustomQuestion = () => {
+    setFormData(prev => ({
+      ...prev,
+      custom_questions: [
+        ...(Array.isArray(prev.custom_questions) ? prev.custom_questions : []),
+        { id: generateQuestionId(), label: '', type: 'text', required: false, options: [] }
+      ]
+    }));
+  };
+
+  const updateCustomQuestion = (id, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      custom_questions: prev.custom_questions.map(q => q.id === id ? { ...q, [field]: value } : q)
+    }));
+  };
+
+  const removeCustomQuestion = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      custom_questions: prev.custom_questions.filter(q => q.id !== id)
+    }));
+  };
+
   const validateStep = (step) => {
     if (step === 1) {
       if (!formData.title.trim()) return toast.error('Job title is required'), false;
@@ -233,7 +263,21 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
         education_requirements_list: formData.education_requirements_list,
         application_deadline: formData.application_deadline || null,
         status: 'active', 
-        required_skills_list: formData.required_skills_list
+        required_skills_list: formData.required_skills_list,
+        requires_cover_letter: !!formData.requires_cover_letter,
+        requires_portfolio: !!formData.requires_portfolio,
+        requires_professional_profile: !!formData.requires_professional_profile,
+        custom_questions: Array.isArray(formData.custom_questions)
+          ? formData.custom_questions
+              .filter(q => q.label && q.label.trim())
+              .map(q => ({
+                id: q.id,
+                label: q.label.trim(),
+                type: q.type,
+                required: !!q.required,
+                ...(q.type === 'select' ? { options: Array.isArray(q.options) ? q.options : [] } : {})
+              }))
+          : []
       };
 
       const response = currentPath.includes("update") ? await workforceAPI.updateJob(updateId, jobData) : await workforceAPI.createJob(jobData);
@@ -318,6 +362,9 @@ const skills = Array.isArray(formData.required_skills_list) ? formData.required_
             setCurrentBenefit={setCurrentBenefit}
             addBenefit={addBenefit}
             removeBenefit={removeBenefit}
+            addCustomQuestion={addCustomQuestion}
+            updateCustomQuestion={updateCustomQuestion}
+            removeCustomQuestion={removeCustomQuestion}
           />
 
           {/* ----------------- BUTTON FOOTER (Refactored) ----------------- */}
