@@ -239,6 +239,9 @@ function extractKnowledgeArticleMeta(article, pageUrl) {
       datePublished: article?.published_at || article?.created_at,
       dateModified: article?.updated_at || article?.published_at || article?.created_at,
       mainEntityOfPage: pageUrl,
+      ...((article?.author?.full_name || article?.author_name)
+        ? { author: { "@type": "Person", name: article.author?.full_name || article.author_name } }
+        : {}),
     },
   };
 }
@@ -357,6 +360,18 @@ function extractWorkforceJobMeta(job, pageUrl) {
         name: job?.company_name || "Connectize employer",
         ...(job?.company_logo ? { logo: absoluteAssetUrl(job.company_logo) } : {}),
       },
+      // Google requires jobLocation (or applicantLocationRequirements for
+      // remote roles) for JobPosting rich result eligibility - without it
+      // the posting silently doesn't qualify even if everything else here
+      // is complete.
+      ...(job?.is_remote
+        ? {
+            jobLocationType: "TELECOMMUTE",
+            applicantLocationRequirements: { "@type": "Country", name: job?.location || "Remote" },
+          }
+        : {
+            jobLocation: { "@type": "Place", address: job?.location },
+          }),
       url: pageUrl,
     },
   };
@@ -482,7 +497,20 @@ function extractLogisticsProviderMeta(provider, pageUrl) {
   return {
     title: `${name} | Connectize Logistics`, description, image, url: pageUrl, type: "profile",
     contentHtml: crawlContent(name, description, [["Services", Array.isArray(provider?.services) ? provider.services.join(", ") : provider?.services], ["Location", provider?.location || provider?.country]]),
-    structuredData: { "@context": "https://schema.org", "@type": "LocalBusiness", name, description, image, url: pageUrl },
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name,
+      description,
+      image,
+      url: pageUrl,
+      // No fixed street address for a service-area business - areaServed is
+      // the schema.org-correct substitute, and service_regions is what the
+      // public logistics-provider endpoint actually returns.
+      ...(Array.isArray(provider?.service_regions) && provider.service_regions.length
+        ? { areaServed: provider.service_regions.map((region) => ({ "@type": "Place", name: region })) }
+        : {}),
+    },
   };
 }
 
