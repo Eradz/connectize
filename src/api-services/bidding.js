@@ -6,6 +6,10 @@ export const biddingAPI = {
   // ==================== BID PROJECTS ====================
   getProjects: (params = {}) => api.get(`${BIDDING_BASE_URL}/bid-projects/`, { params }),
   getProject: (id) => api.get(`${BIDDING_BASE_URL}/bid-projects/${id}/`),
+  // Deliberately narrow, unauthenticated-safe view (no budgets/awards/bids) -
+  // used for logged-out visitors landing here from search instead of
+  // getProject, which 401s without a session.
+  getPublicProject: (id) => api.getPublic(`/api/seo/public/tender/${id}/`),
   getAccessibleCompanies: () => api.get(`${BIDDING_BASE_URL}/bid-projects/accessible-companies/`),
   createProject: (data) => api.post(`${BIDDING_BASE_URL}/bid-projects/`, data),
   updateProject: (id, data) => api.patch(`${BIDDING_BASE_URL}/bid-projects/${id}/`, data),
