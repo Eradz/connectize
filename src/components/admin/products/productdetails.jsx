@@ -225,7 +225,7 @@ function Productdetails({ product }) {
               name={product?.company?.company_name}
             />
             <div className="flex flex-col">
-              <Link to={`/${company?.slug}`} className="font-bold capitalize">
+              <Link to={`/company/${company?.slug}`} className="font-bold capitalize">
                 {product?.company?.company_name || ""}
               </Link>
               <span className="text-gray-400 text-sm">

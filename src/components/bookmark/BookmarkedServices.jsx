@@ -117,7 +117,7 @@ const BookmarkedServicesCard = ({ service, queryClient }) => {
 
         <div className="flex items-center">
           <div className="flex gap-2 items-center flex-1">
-            <Link to={`/${company.slug}`} className="relative">
+            <Link to={`/company/${company.slug}`} className="relative">
               <Avatar
                 src={company.logo || "images/default-company-logo.png"}
                 alt={company.company_name}
@@ -130,7 +130,7 @@ const BookmarkedServicesCard = ({ service, queryClient }) => {
               )}
             </Link>
             <Link
-              to={`/${company?.slug}`}
+              to={`/company/${company?.slug}`}
               className="text-sm font-semibold capitalize line-clamp-1"
             >
               {company.company_name || "West Land Oil"}

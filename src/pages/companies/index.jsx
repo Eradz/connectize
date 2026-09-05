@@ -333,7 +333,7 @@ export const CompaniesArray = ({
                 />
               )}
               {currentUser?.email === company?.profile ? (
-                <Link to={`/${company?.slug}`}>
+                <Link to={`/company/${company?.slug}`}>
                     <PrimaryButton>View Profile</PrimaryButton>
                   </Link>
               ) : (

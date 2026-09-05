@@ -550,7 +550,15 @@ async function buildMetaForPath(requestPath) {
 
   if (isSingleSegmentDetail(requestPath, ["deal-rooms"], ["create", "my-participations"])) {
     const id = decodeURIComponent(pathSegments[1]);
-    const deal = requirePublic(await apiGet(`/api/v1/deals/deal-rooms/${id}/`), { explicit: true });
+    const deal = await apiGet(`/api/v1/deals/deal-rooms/${id}/`);
+    // Deal rooms don't have is_public/visibility/access_type - the API
+    // exposes is_confidential instead. This mirrors the "public" scope in
+    // deal_rooms.views.DealRoomViewSet (status active/negotiating, not confidential).
+    if (deal?.is_confidential !== false || !["active", "negotiating"].includes(String(deal?.status).toLowerCase())) {
+      const error = new Error("Deal room is not public");
+      error.status = 404;
+      throw error;
+    }
     return extractDealRoomMeta(deal, pageUrl);
   }
 
