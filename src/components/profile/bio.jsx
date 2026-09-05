@@ -8,7 +8,7 @@ export const meta = () =>
   });
 
 import { useFormik } from "formik";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import * as Yup from "yup";
 import { useAuth } from "../../context/userContext";
 import useRedirect from "../../hooks/useRedirect";
@@ -52,7 +52,7 @@ const validationSchema = Yup.object().shape({
   social_media_url: Yup.string().trim().optional(),
 });
 
-
+function Bio() {
   const { user: currentUser } = useAuth();
   useRedirect(
     !(Number(localStorage.getItem(currentProfileIndexKey)) >= 3),
