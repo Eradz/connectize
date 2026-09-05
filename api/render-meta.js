@@ -151,6 +151,15 @@ function extractProductMeta(product, pageUrl) {
     image,
     url: pageUrl,
     type: "product",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product?.title || "Connectize Marketplace product",
+      description,
+      image: [image],
+      url: pageUrl,
+      ...(product?.company?.company_name ? { brand: { "@type": "Brand", name: product.company.company_name } } : {}),
+    },
   };
 }
 
@@ -165,6 +174,14 @@ function extractServiceMeta(service, pageUrl) {
     image,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: service?.title || "Connectize service",
+      description,
+      url: pageUrl,
+      provider: { "@type": "Organization", name: service?.company?.company_name || "Connectize" },
+    },
   };
 }
 
@@ -237,6 +254,13 @@ function extractKnowledgeForumMeta(forum, pageUrl) {
     image: DEFAULT_IMAGE,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: forum?.name || "Connectize Knowledge Forum",
+      description,
+      url: pageUrl,
+    },
   };
 }
 
@@ -252,6 +276,17 @@ function extractKnowledgeTopicMeta(topic, pageUrl) {
     image,
     url: pageUrl,
     type: "article",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "DiscussionForumPosting",
+      headline: topic?.title || "Connectize Knowledge Hub discussion",
+      text: description,
+      image: [image],
+      url: pageUrl,
+      datePublished: topic?.created_at,
+      dateModified: topic?.updated_at || topic?.created_at,
+      ...(topic?.author?.full_name ? { author: { "@type": "Person", name: topic.author.full_name } } : {}),
+    },
   };
 }
 
@@ -266,18 +301,33 @@ function extractKnowledgeCategoryMeta(category, pageUrl) {
     image: DEFAULT_IMAGE,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: category?.name || "Connectize Knowledge Category",
+      description,
+      url: pageUrl,
+    },
   };
 }
 
 function extractKnowledgeTagMeta(tag, pageUrl) {
   const tagName = tag?.name || "Knowledge";
+  const description = truncate(stripHtml(tag?.description || `Explore articles and discussions tagged ${tagName} on Connectize Knowledge Hub.`), 200);
 
   return {
     title: `#${tagName} | Knowledge Tag | Connectize`,
-    description: truncate(stripHtml(tag?.description || `Explore articles and discussions tagged ${tagName} on Connectize Knowledge Hub.`), 200),
+    description,
     image: DEFAULT_IMAGE,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: `#${tagName}`,
+      description,
+      url: pageUrl,
+    },
   };
 }
 
@@ -327,6 +377,16 @@ function extractWorkforceProfileMeta(profile, pageUrl) {
     image,
     url: pageUrl,
     type: "profile",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name,
+      description,
+      image,
+      url: pageUrl,
+      jobTitle: profile?.professional_title,
+      ...(profile?.current_location ? { address: { "@type": "PostalAddress", addressLocality: profile.current_location } } : {}),
+    },
   };
 }
 
