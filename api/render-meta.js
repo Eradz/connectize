@@ -140,6 +140,21 @@ function extractPostMeta(post, pageUrl) {
   };
 }
 
+// Catalog entries (Product/Service) have no price of their own - only a
+// MarketplaceListing does. active_marketplace_listing is a nested summary
+// the backend adds when one exists (api/serializers/all_serializer.py).
+function offersFromActiveListing(listing) {
+  if (!listing || listing.price == null) return {};
+  return {
+    offers: {
+      "@type": "Offer",
+      price: listing.price,
+      priceCurrency: listing.currency || "USD",
+      availability: "https://schema.org/InStock",
+    },
+  };
+}
+
 function extractProductMeta(product, pageUrl) {
   const title = product?.title ? `${product.title} | Connectize Marketplace` : "Product | Connectize Marketplace";
   const description = truncate(stripHtml(product?.description || product?.sub_title || "Explore this product on Connectize Marketplace."), 200);
@@ -159,6 +174,7 @@ function extractProductMeta(product, pageUrl) {
       image: [image],
       url: pageUrl,
       ...(product?.company?.company_name ? { brand: { "@type": "Brand", name: product.company.company_name } } : {}),
+      ...offersFromActiveListing(product?.active_marketplace_listing),
     },
   };
 }
@@ -181,6 +197,7 @@ function extractServiceMeta(service, pageUrl) {
       description,
       url: pageUrl,
       provider: { "@type": "Organization", name: service?.company?.company_name || "Connectize" },
+      ...offersFromActiveListing(service?.active_marketplace_listing),
     },
   };
 }
