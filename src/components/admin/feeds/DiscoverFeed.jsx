@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/userContext";
 import { useGetActionableCompanies, useGetCurrentCompany } from "../../../hooks";
 import { CompanyUserType } from "../../../lib/helpers/types";
-import CreatePost from "./CreatePost";
 import DiscoverPosts from "./DiscoverPosts";
 import { webRoutes } from "../../../lib/webRoutes";
 
@@ -30,8 +29,6 @@ const DiscoverFeed = () => {
   const { data: companies = [] } = useGetCurrentCompany();
   const { data: actionableCompanies = [] } =
     useGetActionableCompanies("company_post");
-  const canCreatePost = true;
-    // currentUser?.user_type === CompanyUserType || actionableCompanies.length > 0;
 
   useEffect(() => {
     setUser(currentUser);
@@ -58,7 +55,6 @@ const DiscoverFeed = () => {
             </Link>
           )}
       </section>
-      {canCreatePost && <CreatePost />}
 
       {/* Feed tabs - segmented control matching the mobile app's Discover /
           Following / Trending row, styled like the site's solid-rounded tabs
