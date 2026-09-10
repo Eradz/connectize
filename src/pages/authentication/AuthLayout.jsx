@@ -80,23 +80,22 @@ function AuthLayout({ redirectUrl = "/" }) {
         </section>
 
         <section className="max-lg:hidden !w-[48%] shrink-0">
-          <div className="flex flex-col h-full min-h-[640px] w-full items-center justify-center rounded-[32px] p-10">
-            <div className="w-full max-w-md flex items-center justify-center">
-              <DotLottieReact
-                src="/lottie/authentication.lottie"
-                loop
-                autoplay
-                className="w-full max-w-sm"
+          <div className="flex flex-col h-full min-h-[640px] w-full items-center justify-center rounded-[32px] ">
+            <div className="w-full flex items-center justify-center">
+              <img
+                src="/src/icon/connectizelogo.svg"
+                alt="Connectize Logo"
+                // className="w-full max-w-3xl"
               />
             </div>
             <div className="max-w-md space-y-4 mt-6">
               <div className="space-y-3 text-center">
-                <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
+                {/* <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gold">
                   Connectize Access
                 </span>
                 <h2 className="text-3xl font-bold leading-tight text-gray-900">
                   Secure access for transactions, vendors, and enterprise teams.
-                </h2>
+                </h2> */}
                 <p className="text-sm leading-7 text-gray-500">
                   Sign in once to manage procurement, logistics, marketplace activity, and company collaboration from a single workspace.
                 </p>
