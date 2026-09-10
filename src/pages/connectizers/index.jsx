@@ -9,6 +9,8 @@ import PrimaryButton from "../../components/PrimaryButton";
 import { createSEO } from "../../components/SEO";
 import { usePageination } from "../../hooks/usePagination";
 import { getUserDisplayName, getUserHandle } from "../../lib/userDisplay";
+import UserIcon from "../../icon/UserIcon";
+import { User2Icon, UserCircleIcon } from "lucide-react";
 
 export const meta = () =>
   createSEO({
@@ -99,18 +101,20 @@ const ConnectizerCard = ({ user }) => {
   const extraCount = representations.length - 1;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-gray-100 bg-white p-4">
-      <Link to={`/co/${user?.id}`} className="flex items-center gap-3 min-w-0">
+    <div className="flex md:flex-col md:items-center gap-3 rounded-lg border border-gray-100 bg-white p-4">
+      <Link to={`/co/${user?.id}`} className="flex md:flex-col items-center w-full text-ellipsis gap-3 min-w-0">
         {avatar ? (
           <img
             src={avatar}
             alt=""
-            className="size-11 shrink-0 rounded-full object-cover"
+            className="w-16 h-16 md:w-full md:h-[183px] shrink-0 rounded-full md:rounded-2xl object-cover"
           />
         ) : (
-          <div className="size-11 shrink-0 rounded-full bg-gray-100" />
+          <div className="w-16 h-16 md:w-full md:h-[183px] shrink-0 rounded-full md:rounded-2xl object-cover bg-gray-100" >
+            <UserCircleIcon className="w-full h-full " />
+          </div>
         )}
-        <div className="min-w-0">
+        <div className="max-w-[70%] md:max-w-full md:text-center space-y-3 md:space-y-0">
           <p className="truncate font-semibold text-sm text-gray-900">{name}</p>
           {!!subtitle && (
             <p className="truncate text-xs text-gray-500">{subtitle}</p>

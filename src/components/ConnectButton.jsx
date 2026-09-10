@@ -11,10 +11,10 @@ import PrimaryButton from "./PrimaryButton";
 const KNOWN_STATUSES = ["none", "pending_outgoing", "pending_incoming", "connected"];
 
 const STATUS_LABELS = {
-  none: "Connect",
+  none: "Link Up",
   pending_outgoing: "Requested",
   pending_incoming: "Connect Back",
-  connected: "Unfollow",
+  connected: "Unlink",
 };
 
 // This is a mutual-follow state machine, so the next state after a click is
