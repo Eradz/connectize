@@ -198,9 +198,8 @@ export const JoinedUserCompanyImages = () => {
           </PopoverContent>
         </Popover>
       </div>
-      <ChevronLeft className="absolute -left-1 -bottom-2 -rotate-45 !size-4" />
 
-      <div className="max-md:hidden">
+      <div className="max-md:hidden flex items-center gap-2">
         <ConJoinedImages
           sizeVariant={"sm"}
           size={35}
@@ -214,6 +213,11 @@ export const JoinedUserCompanyImages = () => {
             ...headingImages,
           ]}
         />
+        <Link to={webRoutes.userProfile.replace(":userId", currentUser?.id)} className="text-[10px]">
+          <p className="font-semibold">{currentUserDisplayName}</p>
+          <p>{currentUser?.role || currentUser?.email} </p>
+        </Link>
+      {/* <ChevronLeft className="-left-1 -bottom-2 -rotate-90 !size-6" /> */}
       </div>
     </div>
   );

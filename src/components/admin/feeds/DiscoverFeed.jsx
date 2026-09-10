@@ -35,27 +35,6 @@ const DiscoverFeed = () => {
   }, [currentUser, setUser]);
   return (
     <section className="">
-      <section className="flex items-baseline gap-2 max-sm:px-4 sm:container mt-2">
-        <h1 className="text-2xl font-bold">Discover</h1>
-        {currentUser &&
-          (currentUser?.is_first_time_user || companies.length < 1) && (
-            <Link
-              to={
-                currentUser?.is_first_time_user
-                  ? "/update-profile"
-                  : currentUser && currentUser?.user_type === CompanyUserType
-                  ? webRoutes.createCompany
-                  : ""
-              }
-              className="hover:!no-underline !underline !text-gray-400 hover:!text-black font-semibold text-sm"
-            >
-              {/* {currentUser?.is_first_time_user
-                ? "Complete your profile"
-                : "Create Company"} */}
-            </Link>
-          )}
-      </section>
-
       {/* Feed tabs - segmented control matching the mobile app's Discover /
           Following / Trending row, styled like the site's solid-rounded tabs
           (gold active pill, cf. components/custom/tabs.jsx) */}

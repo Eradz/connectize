@@ -518,11 +518,7 @@ export default function BusinessHubActivities() {
   if (!isLoading && !hasAnyContent) return null;
 
   return (
-    <section className="w-full">
-      <div className="flex items-center gap-2 px-3 sm:px-4 py-2 lg:!px-2">
-        <TrendingUp className="w-4.5 h-4.5 text-gray-700" />
-        <h2 className="text-sm font-bold text-gray-900">Business Hub</h2>
-      </div>
+    <section className="w-full pt-4">
 
       <div className="space-y-3">
         {isLoading ? (

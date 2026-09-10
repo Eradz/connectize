@@ -17,12 +17,12 @@ import { IndicatorBadge, NotificationPopOver } from "../notifications";
 import { JoinedUserCompanyImages } from "../ResponsiveNav";
 import { webRoutes } from "../../lib/webRoutes";
 import { SearchOutlined} from "@ant-design/icons";
-import { SearchIcon } from "lucide-react";
+import { Plus, SearchIcon } from "lucide-react";
 import { useMessagesStore } from "../../stores/messagesStore";
 
 const Navbar = () => {
   const { user: currentUser } = useAuth();
-  const weirdFlex = "flex w-full gap-4 md:!gap-6 items-center";
+  const weirdFlex = "flex gap-4 md:!gap-6 items-center";
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -65,9 +65,15 @@ const Navbar = () => {
           >
             <div className={weirdFlex}>
               <Logo size="50px" />
-              <FeedSearch />
             </div>
 
+            <div className="flex gap-4 md:!gap-6 items-center">
+               <FeedSearch  />
+              <Link to={webRoutes.createPost} className="hidden md:flex  items-center gap-2 text-sm bg-custom_yellow px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity duration-300">
+                <Plus width={14} height={14} />
+                <span>Create Post</span>
+              </Link>
+            </div>
             <div className="flex items-center gap-3 xs:gap-5 md:gap-7 shrink-0">
               <span className="hidden md:flex">
               {currentUser?.user_type === CompanyUserType && <NavbarDropdown />}
