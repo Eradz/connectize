@@ -200,7 +200,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
 
       <div
         className={clsx(
-          type === "company" ? "absolute" : "",
+          type === "company" ? "!bottom-[-40px] md:!-bottom-[80px] absolute" : "",
           "left-[7%] md:left-[3%] group",
           {
             // "bottom-10": !newBanner,
@@ -224,7 +224,8 @@ const Header = ({ banner, name, logo, type = "company" }) => {
             size="xl"
             className={clsx(
               avatarStyle,
-              "!size-[90px] lg:!size-[180px]"
+              "!size-[90px] lg:!size-[180px]",
+              type === "company" && "!rounded-xl"
             )}
           />
         </div>
