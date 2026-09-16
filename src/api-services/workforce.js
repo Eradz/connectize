@@ -474,7 +474,10 @@ const workforce = {
     // Convenience methods for backward compatibility
   getProfiles: function(params) { return this.getWorkforceProfiles(params); },
   getProfile: function(id) { return this.getWorkforceProfile(id); },
-  getMyProfile: function() { return this.getWorkforceProfile('me'); },
+  getMyProfile: async function() {
+    const response = await api.getPublic('/api/v1/workforce/profiles/my_profile/');
+    return response;
+  },
   getApplications: function(params) { return this.getJobApplications(params); },
 };
 

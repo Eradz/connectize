@@ -12,7 +12,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { webRoutes } from "../../lib/webRoutes";
 import { toast } from "sonner";
 import { workforceJobService } from "../../api-services/oilgas";
-import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar, Eye, ClockFading, Edit, Trash2 } from "lucide-react";
+import { MapPin, Clock, DollarSign, Users, BookmarkPlus, Bookmark, Send, ArrowLeft, Building, Calendar, Eye, ClockFading, Edit, Trash2, Info } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { Skeleton } from "../../components/ui/Skeleton";
 import workforce, { workforceAPI } from "../../api-services/workforce";
@@ -36,8 +36,6 @@ export default function WorkforceJobDetail() {
   const [similarLoading, setSimilarLoading] = useState(false);
   const {user} = useAuth()
   // Apply form state
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
   const [coverLetter, setCoverLetter] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
@@ -45,6 +43,9 @@ export default function WorkforceJobDetail() {
   const [showApplicants, setShowApplicants] = useState(false);
   const [applicants, setApplicants] = useState([]);
   const [loadingApplicants, setLoadingApplicants] = useState(false);
+  const [customAnswers, setCustomAnswers] = useState({});
+  const [myProfileId, setMyProfileId] = useState(null);
+  const [checkingMyProfile, setCheckingMyProfile] = useState(false);
   const isApply = pathname.endsWith("/apply");
   const navigate = useNavigate();
 
@@ -72,6 +73,26 @@ export default function WorkforceJobDetail() {
       isMounted = false;
     };
   }, [id]);
+
+  // If this job wants to see the applicant's professional profile, check whether
+  // the current user already has one so we can link to it (or to profile creation).
+  useEffect(() => {
+    if (!job?.requires_professional_profile) return;
+    let isMounted = true;
+    async function checkMyProfile() {
+      try {
+        setCheckingMyProfile(true);
+        const response = await workforceAPI.getMyProfile();
+        if (isMounted) setMyProfileId(response?.data?.id || null);
+      } catch (e) {
+        if (isMounted) setMyProfileId(null);
+      } finally {
+        if (isMounted) setCheckingMyProfile(false);
+      }
+    }
+    checkMyProfile();
+    return () => { isMounted = false; };
+  }, [job?.requires_professional_profile]);
 
   // Load similar jobs once the job is available
   useEffect(() => {
@@ -111,7 +132,7 @@ export default function WorkforceJobDetail() {
     const loadApplicants = async () => {
       try {
         setLoadingApplicants(true);
-        const response = await workforce.getJobApplications();
+        const response = await workforce.getJobApplications({ job_posting: job.id });
         const applicantsData = response?.data?.results || response?.data || [];
         setApplicants(applicantsData);
       } catch (err) {
@@ -476,21 +497,29 @@ export default function WorkforceJobDetail() {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            const missingRequired = (job?.custom_questions || []).some((q) => {
+              if (!q.required) return false;
+              const val = customAnswers[q.id];
+              if (q.type === "checkbox") return !val;
+              return val === undefined || val === null || String(val).trim() === "";
+            });
+            if (missingRequired) {
+              toast.error("Please answer all required questions before submitting.");
+              return;
+            }
             try {
               setSubmitting(true);
               const formData = new FormData();
-              formData.append("full_name", fullName);
-              formData.append("email", email);
               formData.append("cover_letter", coverLetter);
+              formData.append("custom_answers", JSON.stringify(customAnswers));
               if (resume) formData.append("resume", resume);
-              
+
               const response = await workforceJobService.applyToJob(id, formData);
 
               if(response !== null){
-                setFullName("");
-                setEmail("");
                 setCoverLetter("");
                 setResume(null);
+                setCustomAnswers({});
                 setShowApplicationModal(false);
                 toast.success("Application submitted successfully!");
                 navigate(webRoutes.workforceJobDetail.replace(":id", id));
@@ -503,33 +532,15 @@ export default function WorkforceJobDetail() {
           }}
           className="space-y-4"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
-                required
-              />
-            </div>
+          <div className="bg-gray-50 rounded-lg px-4 py-3 text-sm text-gray-700">
+            Applying as{" "}
+            <span className="font-medium text-gray-900">
+              {[user?.first_name, user?.last_name].filter(Boolean).join(" ") || "your Connectize account"}
+            </span>
+            {user?.email && <span className="text-gray-500"> ({user.email})</span>}
+            <span className="text-gray-500"> — pulled from your profile automatically.</span>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Resume/CV
@@ -553,9 +564,105 @@ export default function WorkforceJobDetail() {
               placeholder="Tell us why you're interested in this role and what makes you a great fit..."
               className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
               rows={6}
+              required={!!job?.requires_cover_letter}
             />
           </div>
-          
+
+          {job?.requires_professional_profile && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+              <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-900">
+                <p className="font-medium">This company would like to see your Professional Profile</p>
+                <p className="text-blue-700 mt-1">
+                  It will be shared automatically with your application — no separate upload needed.
+                  {!checkingMyProfile && (
+                    myProfileId ? (
+                      <>
+                        {" "}
+                        <Link
+                          to={webRoutes.workforceProfileDetail.replace(":id", myProfileId)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-medium"
+                        >
+                          View your profile
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        {" "}
+                        <Link
+                          to={webRoutes.workforceProfileCreate}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-medium"
+                        >
+                          Create your professional profile
+                        </Link>
+                      </>
+                    )
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {Array.isArray(job?.custom_questions) && job.custom_questions.length > 0 && (
+            <div className="space-y-4 border-t pt-4">
+              <h4 className="text-sm font-semibold text-gray-900">Additional Questions</h4>
+              {job.custom_questions.map((q) => (
+                <div key={q.id}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {q.label} {q.required && <span className="text-red-500">*</span>}
+                  </label>
+                  {q.type === "textarea" && (
+                    <textarea
+                      value={customAnswers[q.id] || ""}
+                      onChange={(e) => setCustomAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                      className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
+                      rows={4}
+                      required={!!q.required}
+                    />
+                  )}
+                  {q.type === "select" && (
+                    <select
+                      value={customAnswers[q.id] || ""}
+                      onChange={(e) => setCustomAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                      className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
+                      required={!!q.required}
+                    >
+                      <option value="">Select an option</option>
+                      {(q.options || []).map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  )}
+                  {q.type === "checkbox" && (
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={!!customAnswers[q.id]}
+                        onChange={(e) => setCustomAnswers(prev => ({ ...prev, [q.id]: e.target.checked }))}
+                        className="rounded border-gray-300 text-gold focus:ring-gold mr-2"
+                        required={!!q.required}
+                      />
+                      <span className="text-sm text-gray-600">Yes</span>
+                    </div>
+                  )}
+                  {(!q.type || q.type === "text") && (
+                    <input
+                      type="text"
+                      value={customAnswers[q.id] || ""}
+                      onChange={(e) => setCustomAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                      className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-primary-500/30"
+                      required={!!q.required}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
@@ -617,17 +724,30 @@ export default function WorkforceJobDetail() {
                   {applicants.map((applicant) => (
                     <div key={applicant.id} className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
                       <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-gradient-to-br from-gold to-amber-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {(applicant.full_name || applicant.user?.first_name || 'A').charAt(0).toUpperCase()}
-                        </div>
+                        {applicant.applicant_avatar ? (
+                          <img
+                            src={applicant.applicant_avatar}
+                            alt={applicant.applicant_name || 'Applicant'}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-br from-gold to-amber-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            {(applicant.applicant_name || 'A').charAt(0).toUpperCase()}
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-slate-900">{applicant.full_name || applicant.user?.full_name || 'Unknown'}</h4>
+                        <h4 className="font-medium text-slate-900">{applicant.applicant_name || 'Unknown'}</h4>
                         <p className="text-sm text-slate-600">
-                          {applicant.email || applicant.user?.email || 'No email provided'}
+                          {applicant.applicant_email || 'No email provided'}
                         </p>
+                        {(applicant.applicant_phone || applicant.applicant_location) && (
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {[applicant.applicant_phone, applicant.applicant_location].filter(Boolean).join(' • ')}
+                          </p>
+                        )}
                         <p className="text-xs text-slate-500 mt-1">
-                          Applied: {new Date(applicant.created_at).toLocaleDateString('en-US', {
+                          Applied: {new Date(applicant.submitted_at || applicant.created_at).toLocaleDateString('en-US', {
                             weekday: 'short',
                             month: 'short',
                             day: 'numeric',
@@ -638,6 +758,37 @@ export default function WorkforceJobDetail() {
                           <p className="text-sm text-slate-600 mt-2 line-clamp-2 italic">
                             "{applicant.cover_letter}"
                           </p>
+                        )}
+                        {Array.isArray(job?.custom_questions) && job.custom_questions.length > 0 && applicant.custom_answers && (
+                          <div className="mt-2 space-y-0.5">
+                            {job.custom_questions.map((q) => {
+                              const answer = applicant.custom_answers?.[q.id];
+                              if (answer === undefined || answer === null || answer === '') return null;
+                              return (
+                                <p key={q.id} className="text-xs text-slate-600">
+                                  <span className="font-medium text-slate-700">{q.label}:</span>{' '}
+                                  {typeof answer === 'boolean' ? (answer ? 'Yes' : 'No') : String(answer)}
+                                </p>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {applicant.professional_profile && (
+                          <div className="mt-2 flex items-center justify-between gap-2 p-2 bg-white rounded border border-amber-200">
+                            <p className="text-xs text-slate-700">
+                              <span className="font-medium">
+                                {applicant.professional_profile.professional_title || 'Professional Profile'}
+                              </span>
+                              {applicant.professional_profile.years_of_experience != null &&
+                                ` • ${applicant.professional_profile.years_of_experience} yrs`}
+                            </p>
+                            <Link
+                              to={webRoutes.workforceProfileDetail.replace(':id', applicant.professional_profile.id)}
+                              className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 whitespace-nowrap"
+                            >
+                              View Profile
+                            </Link>
+                          </div>
                         )}
                       </div>
                       <div className="flex-shrink-0">

@@ -37,7 +37,7 @@ export default function RepresentativeCard({ user, company, role }) {
         <small className="text-gray-400 capitalize line-clamp-2">{role}</small>
         <small className="text-gray-400 line-clamp-2">
            representative at{" "}
-          <Link to={`/${company?.slug}`} className="!text-black keep-all">
+          <Link to={`/company/${company?.slug}`} className="!text-black keep-all">
             {company?.company_name}
           </Link>
         </small>

@@ -12,6 +12,7 @@ import ResetPasswordPage from "./pages/authentication/reset-password";
 import Signup from "./pages/authentication/signup";
 import VerifyAccount from "./pages/authentication/verify-account";
 import ScrollTop from "./utils/ScrollTop";
+import { getSession } from "./lib/session";
 
 // SSO callback components
 const LinkedInCallback = lazy(() => import("./components/sso/LinkedInLoginButton").then(m => ({ default: m.LinkedInCallback })));
@@ -30,6 +31,14 @@ const PageLoader = () => (
 // Lazy-loaded page components
 const AuthLayout = lazy(() => import("./pages/authentication/AuthLayout"));
 const BiddingProjectDetail = lazy(() => import("./pages/bidding/BiddingProjectDetail"));
+const PublicTenderView = lazy(() => import("./pages/bidding/PublicTenderView"));
+
+// BidProjectViewSet.retrieve requires auth and returns full internal data
+// (budgets, awards, bids) - fine for members, but a logged-out visitor
+// clicking through from search needs the narrow public/seo view instead of
+// a 401.
+const BiddingProjectDetailGate = () =>
+  getSession() ? <BiddingProjectDetail /> : <PublicTenderView />;
 const NotificationItem = lazy(() => import("./components/notifications").then(m => ({ default: m.NotificationItem })));
 const ProfileViewsList = lazy(() => import("./components/profileViews/ProfileViewsList"));
 const MyStats = lazy(() => import("./components/myStats/MyStats"));
@@ -382,7 +391,7 @@ const removeLeadingSlash = (path) => {
           <Route path={removeLeadingSlash(webRoutes.bidding)} element={<BiddingProjects />} />
           <Route path={removeLeadingSlash(webRoutes.biddingCreate)} element={<CreateBiddingProject />} />
           <Route path={removeLeadingSlash(webRoutes.biddingEdit)} element={<CreateBiddingProject />} />
-          <Route path={removeLeadingSlash(webRoutes.biddingDetail)} element={<BiddingProjectDetail />} />
+          <Route path={removeLeadingSlash(webRoutes.biddingDetail)} element={<BiddingProjectDetailGate />} />
           <Route path={removeLeadingSlash(webRoutes.biddingBidDetail)} element={<BidSubmissionDetail />} />
           <Route path={removeLeadingSlash(webRoutes.biddingSubmit)} element={<SubmitBid />} />
           <Route path={removeLeadingSlash(webRoutes.biddingEvaluate)} element={<EvaluationPanel />} />

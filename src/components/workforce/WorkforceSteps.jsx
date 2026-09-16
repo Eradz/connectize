@@ -24,7 +24,7 @@ import CurrencyPicker from "../CurrencyPicker";
     </div>
   );
 
- export  const StepContent = ({employmentTypes, currentStep, formData, handleTextChange, loadingCompanies, userCompanies, experienceLevels, departments, currentSkill, setCurrentSkill, addSkill, removeSkill, currentQualification, setCurrentQualification, addQualification, removeQualification, handleCheckboxChange, currentBenefit, setCurrentBenefit, addBenefit, removeBenefit}) => {
+ export  const StepContent = ({employmentTypes, currentStep, formData, handleTextChange, loadingCompanies, userCompanies, experienceLevels, departments, currentSkill, setCurrentSkill, addSkill, removeSkill, currentQualification, setCurrentQualification, addQualification, removeQualification, handleCheckboxChange, currentBenefit, setCurrentBenefit, addBenefit, removeBenefit, addCustomQuestion, updateCustomQuestion, removeCustomQuestion}) => {
       switch (currentStep) {
         case 1:
           return (
@@ -423,11 +423,157 @@ import CurrencyPicker from "../CurrencyPicker";
                       placeholder="Provide specific instructions for how candidates should apply..."
                     />
                   </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <h4 className="text-md font-semibold text-gray-900 mb-3">Application Requirements</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="requires_cover_letter"
+                          name="requires_cover_letter"
+                          checked={!!formData.requires_cover_letter}
+                          onChange={handleCheckboxChange}
+                          className="rounded border-gray-300 text-gold focus:ring-gold"
+                        />
+                        <label htmlFor="requires_cover_letter" className="ml-2 text-sm font-medium text-gray-700">
+                          Require cover letter
+                        </label>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="requires_portfolio"
+                          name="requires_portfolio"
+                          checked={!!formData.requires_portfolio}
+                          onChange={handleCheckboxChange}
+                          className="rounded border-gray-300 text-gold focus:ring-gold"
+                        />
+                        <label htmlFor="requires_portfolio" className="ml-2 text-sm font-medium text-gray-700">
+                          Require portfolio URL
+                        </label>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="requires_professional_profile"
+                          name="requires_professional_profile"
+                          checked={!!formData.requires_professional_profile}
+                          onChange={handleCheckboxChange}
+                          className="rounded border-gray-300 text-gold focus:ring-gold"
+                        />
+                        <label htmlFor="requires_professional_profile" className="ml-2 text-sm font-medium text-gray-700">
+                          Require professional profile
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-md font-semibold text-gray-900">Custom Application Questions</h4>
+                      <button
+                        type="button"
+                        onClick={addCustomQuestion}
+                        className="flex items-center px-3 py-1.5 bg-gold text-dark rounded-lg text-sm hover:bg-gold/90"
+                      >
+                        <Plus className="w-4 h-4 mr-1" /> Add Question
+                      </button>
+                    </div>
+
+                    {(!formData.custom_questions || formData.custom_questions.length === 0) && (
+                      <p className="text-sm text-gray-500">
+                        No custom questions yet. Add one if you'd like applicants to answer extra screening questions.
+                      </p>
+                    )}
+
+                    <div className="space-y-4">
+                      {formData.custom_questions?.map((question, index) => (
+                        <div key={question.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Question {index + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeCustomQuestion(question.id)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Question label
+                              </label>
+                              <input
+                                type="text"
+                                value={question.label}
+                                onChange={(e) => updateCustomQuestion(question.id, 'label', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
+                                placeholder="e.g., How did you hear about us?"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Answer type
+                              </label>
+                              <select
+                                value={question.type}
+                                onChange={(e) => updateCustomQuestion(question.id, 'type', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
+                              >
+                                <option value="text">Short text</option>
+                                <option value="textarea">Long text</option>
+                                <option value="select">Dropdown</option>
+                                <option value="checkbox">Checkbox</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {question.type === 'select' && (
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Options (comma-separated)
+                              </label>
+                              <input
+                                type="text"
+                                value={(question.options || []).join(', ')}
+                                onChange={(e) => updateCustomQuestion(
+                                  question.id,
+                                  'options',
+                                  e.target.value.split(',').map(o => o.trim()).filter(o => o)
+                                )}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gold focus:border-transparent"
+                                placeholder="e.g., LinkedIn, Referral, Job Board"
+                              />
+                            </div>
+                          )}
+
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id={`required-${question.id}`}
+                              checked={!!question.required}
+                              onChange={(e) => updateCustomQuestion(question.id, 'required', e.target.checked)}
+                              className="rounded border-gray-300 text-gold focus:ring-gold"
+                            />
+                            <label htmlFor={`required-${question.id}`} className="ml-2 text-sm font-medium text-gray-700">
+                              Required
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           );
-  
+
         case 4:
           return (
             <div className="space-y-6">
@@ -550,8 +696,36 @@ import CurrencyPicker from "../CurrencyPicker";
                       </span>
                     )}
                   </div>
+
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Application Requirements:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                        Cover letter {formData.requires_cover_letter ? 'required' : 'optional'}
+                      </span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                        Portfolio {formData.requires_portfolio ? 'required' : 'optional'}
+                      </span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-800">
+                        Professional profile {formData.requires_professional_profile ? 'required' : 'optional'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {formData.custom_questions?.filter(q => q.label && q.label.trim()).length > 0 && (
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Custom Questions:</span>
+                      <ul className="list-disc list-inside text-sm text-gray-900 mt-1 space-y-1">
+                        {formData.custom_questions.filter(q => q.label && q.label.trim()).map((q) => (
+                          <li key={q.id}>
+                            {q.label} {q.required ? '(required)' : '(optional)'}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-  
+
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-start space-x-3">
                     <AlertCircle className="w-5 h-5 text-gold mt-0.5" />

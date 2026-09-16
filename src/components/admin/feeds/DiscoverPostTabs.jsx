@@ -212,7 +212,7 @@ export const PostCard = ({
 
       <div className="flex items-center justify-between gap-4 mt-4 py-3 border-t">
         <div className="flex gap-2 items-center">
-          <Link to={`/${slug || companyName}`} className="relative">
+          <Link to={`/company/${slug || companyName}`} className="relative">
             <Avatar
               src={logo || "images/default-company-logo.png"}
               alt={companyName}
@@ -223,7 +223,7 @@ export const PostCard = ({
             {verified && <VerifiedIcon className="absolute bottom-0 right-0" />}
           </Link>
           <Link
-            to={`/${slug || companyName}`}
+            to={`/company/${slug || companyName}`}
             className="text-sm font-bold capitalize line-clamp-1"
           >
             {companyName || "West Land Oil"}

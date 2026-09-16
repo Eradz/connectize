@@ -90,7 +90,7 @@ function CompanyListItem({ company }) {
 
   return (
     <li className="flex items-center gap-2 pt-2">
-      <Link to={`/${slug}`}>
+      <Link to={`/company/${slug}`}>
         <Avatar
           src={logo}
           name={company_name}

@@ -207,7 +207,10 @@ export default function UserProfile() {
   const { data: paramUser, isLoading } = useQuery({
     queryKey: ["users", userId],
     queryFn: () => getUserById(userId),
-    enabled: !!userId && !!currentUser,
+    // Backend already returns this data (with PII masked) to anonymous
+    // requests, so don't gate the fetch on being logged in - that only
+    // blocked logged-out visitors (e.g. from a Google search result).
+    enabled: !!userId,
     // ✅ Cache profile data for instant display on revisit
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

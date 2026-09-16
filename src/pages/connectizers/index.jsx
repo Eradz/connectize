@@ -130,7 +130,7 @@ const ConnectizerCard = ({ user }) => {
           <span className="truncate text-gray-600">
             {primary.role ? `${primary.role} at ` : "at "}
             <Link
-              to={`/${primary.company_slug || primary.company_id}`}
+              to={`/company/${primary.company_slug || primary.company_id}`}
               className="font-semibold !text-gold"
             >
               {primary.company_name}

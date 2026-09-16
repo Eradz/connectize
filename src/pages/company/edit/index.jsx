@@ -26,7 +26,7 @@ function EditCompanyPage() {
   return (
     <main className="min-h-[80vh] space-y-2">
       <Link
-        to={`/${companyName}`}
+        to={`/company/${companyName}`}
         className="text-sm !text-gray-500 hover:!text-black flex items-center gap-0.5 mb-4"
       >
         <ArrowLeftIcon />

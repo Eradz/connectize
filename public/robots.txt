@@ -23,6 +23,10 @@ Disallow: /subscriptions
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /search
+Disallow: /company/create
+Disallow: /company/information
+Disallow: /company/documents
+Disallow: /company/*/edit-profile
 Disallow: /applications
 Disallow: /inventory
 Disallow: /logistics/inventory

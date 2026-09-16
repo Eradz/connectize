@@ -108,7 +108,7 @@ export default function UserProfileHeadings({
           {company && (
             <div className="flex items-center gap-1.5 text-sm">
               <Avatar size="xs" name={company} className={clsx(avatarStyle)} />
-              <Link to={`/${company}`}>{company}</Link>
+              <Link to={`/company/${company}`}>{company}</Link>
             </div>
           )}
         </div>

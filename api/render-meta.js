@@ -140,6 +140,21 @@ function extractPostMeta(post, pageUrl) {
   };
 }
 
+// Catalog entries (Product/Service) have no price of their own - only a
+// MarketplaceListing does. active_marketplace_listing is a nested summary
+// the backend adds when one exists (api/serializers/all_serializer.py).
+function offersFromActiveListing(listing) {
+  if (!listing || listing.price == null) return {};
+  return {
+    offers: {
+      "@type": "Offer",
+      price: listing.price,
+      priceCurrency: listing.currency || "USD",
+      availability: "https://schema.org/InStock",
+    },
+  };
+}
+
 function extractProductMeta(product, pageUrl) {
   const title = product?.title ? `${product.title} | Connectize Marketplace` : "Product | Connectize Marketplace";
   const description = truncate(stripHtml(product?.description || product?.sub_title || "Explore this product on Connectize Marketplace."), 200);
@@ -151,6 +166,16 @@ function extractProductMeta(product, pageUrl) {
     image,
     url: pageUrl,
     type: "product",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: product?.title || "Connectize Marketplace product",
+      description,
+      image: [image],
+      url: pageUrl,
+      ...(product?.company?.company_name ? { brand: { "@type": "Brand", name: product.company.company_name } } : {}),
+      ...offersFromActiveListing(product?.active_marketplace_listing),
+    },
   };
 }
 
@@ -165,6 +190,15 @@ function extractServiceMeta(service, pageUrl) {
     image,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: service?.title || "Connectize service",
+      description,
+      url: pageUrl,
+      provider: { "@type": "Organization", name: service?.company?.company_name || "Connectize" },
+      ...offersFromActiveListing(service?.active_marketplace_listing),
+    },
   };
 }
 
@@ -222,6 +256,9 @@ function extractKnowledgeArticleMeta(article, pageUrl) {
       datePublished: article?.published_at || article?.created_at,
       dateModified: article?.updated_at || article?.published_at || article?.created_at,
       mainEntityOfPage: pageUrl,
+      ...((article?.author?.full_name || article?.author_name)
+        ? { author: { "@type": "Person", name: article.author?.full_name || article.author_name } }
+        : {}),
     },
   };
 }
@@ -237,6 +274,13 @@ function extractKnowledgeForumMeta(forum, pageUrl) {
     image: DEFAULT_IMAGE,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: forum?.name || "Connectize Knowledge Forum",
+      description,
+      url: pageUrl,
+    },
   };
 }
 
@@ -252,6 +296,17 @@ function extractKnowledgeTopicMeta(topic, pageUrl) {
     image,
     url: pageUrl,
     type: "article",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "DiscussionForumPosting",
+      headline: topic?.title || "Connectize Knowledge Hub discussion",
+      text: description,
+      image: [image],
+      url: pageUrl,
+      datePublished: topic?.created_at,
+      dateModified: topic?.updated_at || topic?.created_at,
+      ...(topic?.author?.full_name ? { author: { "@type": "Person", name: topic.author.full_name } } : {}),
+    },
   };
 }
 
@@ -266,18 +321,33 @@ function extractKnowledgeCategoryMeta(category, pageUrl) {
     image: DEFAULT_IMAGE,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: category?.name || "Connectize Knowledge Category",
+      description,
+      url: pageUrl,
+    },
   };
 }
 
 function extractKnowledgeTagMeta(tag, pageUrl) {
   const tagName = tag?.name || "Knowledge";
+  const description = truncate(stripHtml(tag?.description || `Explore articles and discussions tagged ${tagName} on Connectize Knowledge Hub.`), 200);
 
   return {
     title: `#${tagName} | Knowledge Tag | Connectize`,
-    description: truncate(stripHtml(tag?.description || `Explore articles and discussions tagged ${tagName} on Connectize Knowledge Hub.`), 200),
+    description,
     image: DEFAULT_IMAGE,
     url: pageUrl,
     type: "website",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: `#${tagName}`,
+      description,
+      url: pageUrl,
+    },
   };
 }
 
@@ -307,6 +377,18 @@ function extractWorkforceJobMeta(job, pageUrl) {
         name: job?.company_name || "Connectize employer",
         ...(job?.company_logo ? { logo: absoluteAssetUrl(job.company_logo) } : {}),
       },
+      // Google requires jobLocation (or applicantLocationRequirements for
+      // remote roles) for JobPosting rich result eligibility - without it
+      // the posting silently doesn't qualify even if everything else here
+      // is complete.
+      ...(job?.is_remote
+        ? {
+            jobLocationType: "TELECOMMUTE",
+            applicantLocationRequirements: { "@type": "Country", name: job?.location || "Remote" },
+          }
+        : {
+            jobLocation: { "@type": "Place", address: job?.location },
+          }),
       url: pageUrl,
     },
   };
@@ -327,6 +409,16 @@ function extractWorkforceProfileMeta(profile, pageUrl) {
     image,
     url: pageUrl,
     type: "profile",
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name,
+      description,
+      image,
+      url: pageUrl,
+      jobTitle: profile?.professional_title,
+      ...(profile?.current_location ? { address: { "@type": "PostalAddress", addressLocality: profile.current_location } } : {}),
+    },
   };
 }
 
@@ -422,7 +514,20 @@ function extractLogisticsProviderMeta(provider, pageUrl) {
   return {
     title: `${name} | Connectize Logistics`, description, image, url: pageUrl, type: "profile",
     contentHtml: crawlContent(name, description, [["Services", Array.isArray(provider?.services) ? provider.services.join(", ") : provider?.services], ["Location", provider?.location || provider?.country]]),
-    structuredData: { "@context": "https://schema.org", "@type": "LocalBusiness", name, description, image, url: pageUrl },
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name,
+      description,
+      image,
+      url: pageUrl,
+      // No fixed street address for a service-area business - areaServed is
+      // the schema.org-correct substitute, and service_regions is what the
+      // public logistics-provider endpoint actually returns.
+      ...(Array.isArray(provider?.service_regions) && provider.service_regions.length
+        ? { areaServed: provider.service_regions.map((region) => ({ "@type": "Place", name: region })) }
+        : {}),
+    },
   };
 }
 
@@ -550,7 +655,15 @@ async function buildMetaForPath(requestPath) {
 
   if (isSingleSegmentDetail(requestPath, ["deal-rooms"], ["create", "my-participations"])) {
     const id = decodeURIComponent(pathSegments[1]);
-    const deal = requirePublic(await apiGet(`/api/v1/deals/deal-rooms/${id}/`), { explicit: true });
+    const deal = await apiGet(`/api/v1/deals/deal-rooms/${id}/`);
+    // Deal rooms don't have is_public/visibility/access_type - the API
+    // exposes is_confidential instead. This mirrors the "public" scope in
+    // deal_rooms.views.DealRoomViewSet (status active/negotiating, not confidential).
+    if (deal?.is_confidential !== false || !["active", "negotiating"].includes(String(deal?.status).toLowerCase())) {
+      const error = new Error("Deal room is not public");
+      error.status = 404;
+      throw error;
+    }
     return extractDealRoomMeta(deal, pageUrl);
   }
 
