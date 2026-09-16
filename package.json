@@ -75,10 +75,10 @@
     "zustand": "^5.0.7"
   },
   "scripts": {
-    "dev": "vite",
-    "start": "vite preview",
+    "dev": "node api.js && vite",
+    "start": "node api.js && vite preview",
     "predeploy": "npm run build",
-    "build": "vite build",
+    "build": "node api.js && vite build",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:pdf": "node --test tests/pdf-generation.test.mjs",
