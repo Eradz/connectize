@@ -13,6 +13,8 @@ import { avatarStyle } from "../../ResponsiveNav";
 import SeeMoreLink from "../../SeeMoreLink";
 import Username from "../../Username";
 import BusinessHubActivities from "./BusinessHubActivities";
+import { Link } from "react-router-dom";
+import { webRoutes } from "../../../lib/webRoutes";
 
 const TopServiceSuggestions = () => {
   return (
@@ -151,6 +153,8 @@ function SuggestionListItem({
   role,
   associated = false,
 }) {
+
+  const { user: currentUser } = useAuth();
   // Pick the most relevant badge to show; representatives show their role
   const roleLabel = role
     ? role.charAt(0).toUpperCase() + role.slice(1)
@@ -160,7 +164,8 @@ function SuggestionListItem({
     : (suggestionReasons?.length > 0 ? REASON_LABELS[suggestionReasons[0]] : null);
 
   return (
-    <li className="flex items-center gap-2.5 pt-2" key={id}>
+    <div className="flex items-center justify-between ">
+      <li className="flex items-center gap-2.5 pt-2" key={id}>
       <Avatar
         src={avatar}
         name={full_name ? full_name : hashtag}
@@ -181,7 +186,11 @@ function SuggestionListItem({
         </div>
         <p className="text-sm text-gray-400 -mt-1">{hashtag}</p>
       </div>
-    </li>
+      </li>
+      <Link to={webRoutes.messagesRoom.replace(":", "?") + `=room_${currentUser?.id}_${id ? id : ''}`} className="text-blue-500 text-[12px] bg-gold rounded-2xl p-2 hover:text-blue-700">
+      Message  
+      </Link>
+    </div>
   );
 }
 

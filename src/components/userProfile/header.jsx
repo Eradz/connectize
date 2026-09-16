@@ -16,9 +16,6 @@ import { useAuth } from "../../context/userContext";
 import { useGetCurrentCompany } from "../../hooks";
 import { avatarStyle } from "../ResponsiveNav";
 import { ButtonWithTooltipIcon } from "../ButtonWithTooltipIcon";
-import { Pen, PencilIcon, Trash2 } from "lucide-react";
-
-
 import {
   CoverPhotoPreviewModal,
   ProfilePhotoPreviewModal,
@@ -46,25 +43,6 @@ const Header = ({ banner, name, logo, type = "company" }) => {
   const [newLogo, setNewLogo] = useState(logo);
   const [showBannerModal, setShowBannerModal] = useState(false);
   const [showLogoModal, setShowLogoModal] = useState(false);
-  const [bannerZoom, setBannerZoom] = useState(1);
-  const [logoZoom, setLogoZoom] = useState(1);
-  const [bannerPosition, setBannerPosition] = useState({ x: 0, y: 0 });
-  const [logoPosition, setLogoPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [bannerEditMode, setBannerEditMode] = useState(false);
-  const [logoEditMode, setLogoEditMode] = useState(false);
-  const [bannerTempImage, setBannerTempImage] = useState(null);
-  const [logoTempImage, setLogoTempImage] = useState(null);
-  const [bannerTempFile, setBannerTempFile] = useState(null);
-  const [logoTempFile, setLogoTempFile] = useState(null);
-  const bannerImageRef = useRef(null);
-  const logoImageRef = useRef(null);
-  const bannerCanvasRef = useRef(null);
-  const logoCanvasRef = useRef(null);
-  const bannerUploadInputRef = useRef(null);
-  const logoUploadInputRef = useRef(null);
-
   const { user: currentUser } = useAuth();
   const { data: currentCompany } = useGetCurrentCompany();
   const params = useParams();
@@ -152,223 +130,12 @@ const Header = ({ banner, name, logo, type = "company" }) => {
     setNewLogo(logo);
   }, [banner, logo]);
 
-  // Zoom and pan handlers - Enhanced for better UX
-  const handleWheel = (e, isLogo = false) => {
-    e.preventDefault();
-    const zoomLevel = isLogo ? logoZoom : bannerZoom;
-    // Smoother zoom with smaller increments
-    const delta = e.deltaY > 0 ? 0.05 : -0.05;
-    const newZoom = Math.max(1, Math.min(5, zoomLevel - delta));
-    if (isLogo) {
-      setLogoZoom(Math.round(newZoom * 100) / 100); // Round to 2 decimals
-    } else {
-      setBannerZoom(Math.round(newZoom * 100) / 100);
-    }
-  };
-
-  const handleMouseDown = (e, isLogo = false) => {
-    if (e.button !== 0) return; // Only left click
-    setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleMouseMove = (e, isLogo = false) => {
-    if (!isDragging) return;
-
-    const deltaX = e.clientX - dragStart.x;
-    const deltaY = e.clientY - dragStart.y;
-
-    if (isLogo) {
-      setLogoPosition({
-        x: logoPosition.x + deltaX,
-        y: logoPosition.y + deltaY,
-      });
-    } else {
-      setBannerPosition({
-        x: bannerPosition.x + deltaX,
-        y: bannerPosition.y + deltaY,
-      });
-    }
-
-    setDragStart({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const resetZoom = (isLogo = false) => {
-    if (isLogo) {
-      setLogoZoom(1);
-      setLogoPosition({ x: 0, y: 0 });
-    } else {
-      setBannerZoom(1);
-      setBannerPosition({ x: 0, y: 0 });
-    }
-  };
-
-  // Crop and save edited image with zoom/position applied
-  const cropAndSaveImage = (isLogo = false) => {
-    const imageRef = isLogo ? logoImageRef : bannerImageRef;
-    const canvasRef = isLogo ? logoCanvasRef : bannerCanvasRef;
-    const zoom = isLogo ? logoZoom : bannerZoom;
-    const position = isLogo ? logoPosition : bannerPosition;
-    const formik = isLogo ? logoFormik : bannerFormik;
-    const currentImage = isLogo ? newLogo : newBanner;
-
-    if (!imageRef.current || !currentImage) {
-      toast.error("Image reference not found");
-      return;
-    }
-
-    try {
-      const img = imageRef.current;
-      const canvas = canvasRef.current;
-
-      // Calculate crop dimensions
-      const cropWidth = isLogo ? 300 : 900; // Logo is 1:1, banner is 3:1
-      const cropHeight = isLogo ? 300 : 300;
-
-      // Set canvas size to crop area
-      canvas.width = cropWidth;
-      canvas.height = cropHeight;
-
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        toast.error("Could not get canvas context");
-        return;
-      }
-
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Calculate image dimensions with zoom applied
-      const scaledWidth = img.width * zoom;
-      const scaledHeight = img.height * zoom;
-
-      // Draw the zoomed and positioned image
-      ctx.drawImage(
-        img,
-        position.x, // sourceX
-        position.y, // sourceY
-        cropWidth,
-        cropHeight,
-        0, // destX
-        0, // destY
-        cropWidth,
-        cropHeight
-      );
-
-      // Convert canvas to blob
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            toast.error("Failed to create image blob");
-            return;
-          }
-
-          const file = new File(
-            [blob],
-            `${isLogo ? "logo" : "banner"}-${Date.now()}.png`,
-            { type: "image/png" }
-          );
-
-          formik.setFieldValue(isLogo ? "logo" : "banner", file);
-
-          // Wait a tick for state update then submit
-          setTimeout(() => {
-            formik.submitForm();
-
-            if (isLogo) {
-              setLogoEditMode(false);
-              setShowLogoModal(false);
-              setLogoZoom(1);
-              setLogoPosition({ x: 0, y: 0 });
-              setLogoTempFile(null);
-            } else {
-              setBannerEditMode(false);
-              setShowBannerModal(false);
-              setBannerZoom(1);
-              setBannerPosition({ x: 0, y: 0 });
-              setBannerTempFile(null);
-            }
-          }, 100);
-
-          toast.success("Image prepared successfully. Uploading...");
-        },
-        "image/png",
-        0.95
-      );
-    } catch (error) {
-      console.error("Error processing image:", error);
-      toast.error("Failed to process image: " + error.message);
-    }
-  };
-
-  // Delete image
-  const deleteImage = async (isLogo = false) => {
-    if (!window.confirm(`Delete ${isLogo ? "logo" : "banner"}?`)) return;
-
-    if (isLogo) {
-      setNewLogo(null);
-      setLogoEditMode(false);
-      setShowLogoModal(false);
-      toast.success("Logo deleted");
-    } else {
-      setNewBanner(null);
-      setBannerEditMode(false);
-      setShowBannerModal(false);
-      toast.success("Banner deleted");
-    }
-  };
-
-  // Handle new image upload from modal
-  const handleModalImageUpload = (event, isLogo = false) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file
-    const fileSizeError = file.size > 4 * 1024 * 1024;
-    const fileTypeError = ![
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/avif",
-    ].includes(file.type);
-
-    if (fileSizeError || fileTypeError) {
-      const errorMessage = fileSizeError
-        ? "File size must be less than 4MB"
-        : "Only image files are allowed";
-      toast.error(errorMessage);
-      return;
-    }
-
-    // Create preview and store the file
-    const previewUrl = URL.createObjectURL(file);
-    if (isLogo) {
-      setNewLogo(previewUrl);
-      setLogoTempFile(file);
-      setLogoEditMode(true);
-      setLogoZoom(1);
-      setLogoPosition({ x: 0, y: 0 });
-    } else {
-      setNewBanner(previewUrl);
-      setBannerTempFile(file);
-      setBannerEditMode(true);
-      setBannerZoom(1);
-      setBannerPosition({ x: 0, y: 0 });
-    }
-
-    toast.success("Image loaded. Adjust and save when ready.");
-  };
-
   return (
-    <section className="relative bg-gradient-to-r from-gold to-transparent from-70%">
-      <section className="w-full relative">
+    <section className={type === "company" ? "relative bg-gradient-to-r from-gold to-transparent from-70%" : "w-fit"}>
+      <section className={type === "company" ? "w-full relative" : "hidden"}>
         {/* Banner Display */}
         <div className="w-full h-64 max-h-[45vh] relative overflow-hidden group">
-          {newBanner ? (
+          {newBanner  ? (
             <>
               {/* ONLY image area zooms */}
               <div
@@ -433,11 +200,12 @@ const Header = ({ banner, name, logo, type = "company" }) => {
 
       <div
         className={clsx(
-          "absolute left-[7%] md:left-[3%] group",
+          type === "company" ? "absolute" : "",
+          "left-[7%] md:left-[3%] group",
           {
-            "bottom-10": newBanner,
-            "-bottom-8": !newBanner,
-          }
+            // "bottom-10": !newBanner,
+            "-bottom-8": newBanner,
+          },
         )}
       >
         {/* Clickable Avatar */}
@@ -456,7 +224,7 @@ const Header = ({ banner, name, logo, type = "company" }) => {
             size="xl"
             className={clsx(
               avatarStyle,
-              "!size-[90px] lg:!size-[120px]"
+              "!size-[90px] lg:!size-[180px]"
             )}
           />
         </div>

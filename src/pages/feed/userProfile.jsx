@@ -4,7 +4,7 @@ import {
   PhoneOutlined,
   TagOutlined,
 } from "@ant-design/icons";
-import { Badge } from "@chakra-ui/react";
+import { Badge, Button, IconButton, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
 import { LocationOnOutlined, PersonOutline } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import React, { useRef, useEffect, useMemo, useState } from "react";
@@ -44,6 +44,10 @@ import Scroll from "../../components/Scroll";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import HeadingText from "../../components/HeadingText";
 import DealRoomParticipationCard from "../../components/dealRoom/DealRoomParticipationCard";
+import ConnectButton from "../../components/ConnectButton";
+import BlockUserButton from "../../components/moderation/BlockUserButton";
+import { ChatBubbleIcon, DotsHorizontalIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import ReportModal from "../../components/moderation/ReportModal";
 
 const emptyWord = "Not Added";
 
@@ -56,6 +60,13 @@ const normalizeListResponse = (response) => {
 export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser, loading: authLoading } = useAuth();
+
+  // ✅ All hooks that used to sit after early `return`s are now declared here,
+  // unconditionally, at the top of the component. Hooks must run in the same
+  // order on every render, so nothing that calls a hook can live below a
+  // conditional `return`.
+  const [cachedConnections, setCachedConnections] = useState(undefined);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Record that this profile was viewed, so it can show up in the owner's
   // "who viewed you" list. Only the client knows a profile page was opened, so
@@ -94,44 +105,44 @@ export default function UserProfile() {
   const [createdDeals, setCreatedDeals] = useState([]);
   const [participatingDeals, setParticipatingDeals] = useState([]);
 
-    useEffect(() => {
-      loadMyRegistrations();
-      loadMyCreatedEvents();
-      loadApplications();
-      loadJobs();
-      loadParticipatingDealRooms();
-      loadMyCreatedJobs();
-    }, []);
-  
-    const loadMyRegistrations = async () => {
-      try {
-        setLoading(true);
-        const response = await workforceAPI.getMyEventRegistrations({ userId });
-        setRegistrations(normalizeListResponse(response));
-        setError(null);
-      } catch (err) {
-        console.error('Error loading registrations:', err);
-        setError('Failed to load your event registrations. Please try again.');
-        setRegistrations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
+    loadMyRegistrations();
+    loadMyCreatedEvents();
+    loadApplications();
+    loadJobs();
+    loadParticipatingDealRooms();
+    loadMyCreatedJobs();
+  }, []);
 
-    const loadMyCreatedEvents = async () => {
-      try {
-        setLoading(true);
-        const response = await workforceAPI.getEvents();
-        setCreatedEvents(normalizeListResponse(response).filter(event => event?.organizer == userId));
-        setError(null);
-      } catch (err) {
-        console.error('Error loading created events:', err);
-        setError('Failed to load your created events. Please try again.');
-        setCreatedEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadMyRegistrations = async () => {
+    try {
+      setLoading(true);
+      const response = await workforceAPI.getMyEventRegistrations({ userId });
+      setRegistrations(normalizeListResponse(response));
+      setError(null);
+    } catch (err) {
+      console.error('Error loading registrations:', err);
+      setError('Failed to load your event registrations. Please try again.');
+      setRegistrations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMyCreatedEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await workforceAPI.getEvents();
+      setCreatedEvents(normalizeListResponse(response).filter(event => event?.organizer == userId));
+      setError(null);
+    } catch (err) {
+      console.error('Error loading created events:', err);
+      setError('Failed to load your created events. Please try again.');
+      setCreatedEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadApplications = async () => {
     try {
@@ -203,6 +214,16 @@ export default function UserProfile() {
     refetchOnWindowFocus: false,
   });
 
+  // ✅ cachedConnections used to be initialized as `useState(paramUser?.followers_count)`,
+  // which only works correctly if paramUser is already defined at mount time.
+  // Since paramUser loads asynchronously via useQuery, we sync it here instead,
+  // any time followers_count changes.
+  useEffect(() => {
+    if (paramUser?.followers_count !== undefined) {
+      setCachedConnections(paramUser.followers_count);
+    }
+  }, [paramUser?.followers_count]);
+
   const headerProps = useMemo(
     () => {
       const displayName = getUserDisplayName(paramUser);
@@ -215,6 +236,8 @@ export default function UserProfile() {
     [paramUser]
   );
 
+  // ✅ Early returns now come AFTER every hook call above, so hook order
+  // never changes between renders.
   if (authLoading || isLoading) return <PageLoading hasLogo={false} />;
   if (!paramUser) return (
     <section className="min-h-[70vh] w-full flex flex-col items-center justify-center space-y-3">
@@ -223,13 +246,13 @@ export default function UserProfile() {
         loop
         autoplay
         className="size-10/12 xs:size-1/2 md:size-56 overflow-hidden scale-150 aspect-square"
-      />
+        />
       <HeadingText>User profile not found</HeadingText>
       <div className="flex gap-2">
         <button
           className="bg-gray-200 py-1.5 xs:text-sm px-6 xs:px-10 rounded-full"
           onClick={() => window.history.back()}
-        >
+          >
           Go back
         </button>
         <Link
@@ -283,47 +306,105 @@ export default function UserProfile() {
   }
 
   return (
-    <section className="rounded-md overflow-hidden bg-white px-6">
+    <section className="rounded-md overflow-hidden bg-white md:bg-background px-4">
       <SEO
         title={`${getUserDisplayName(paramUser)} | connectize`}
       />
-      <Header type="user" {...headerProps} />
 
       <section className="mt-8 container !px-0 space-y-6">
-        <UserProfileHeadings {...paramUser} />
-
-        {/* Who viewed you - only on your own profile. Shown even at zero,
-            because gating it on having views makes a brand new feature
-            undiscoverable until someone happens to visit you. */}
-        {currentUser?.id === Number(userId) && (
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-            <Link
-              to={webRoutes.profileViews}
-              className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
-            >
-              <Eye className="size-4 shrink-0" />
-              <span>
-                {profileViewsSummary?.unique_viewers > 0
-                  ? `${profileViewsSummary.unique_viewers} ${
-                      profileViewsSummary.unique_viewers === 1 ? "person" : "people"
-                    } viewed your profile`
-                  : "See who viewed your profile"}
-              </span>
-              {profileViewsSummary?.unseen_count > 0 && (
-                <span className="rounded-full bg-gold px-2 py-0.5 text-[.6rem] font-bold text-dark">
-                  {profileViewsSummary.unseen_count} new
-                </span>
-              )}
-            </Link>
-            <Link
-              to={webRoutes.myStats}
-              className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
-            >
-              <BarChart3 className="size-4 shrink-0" />
-              <span>See your activity</span>
-            </Link>
+        <div className="flex flex-col md:flex-row bg-white p-4 shadow-lg item-start gap-6">
+          <div className="flex item-start md:w-full gap-6">
+            <Header type="user" {...headerProps} />
+            <UserProfileHeadings {...paramUser} />
           </div>
-        )}
+          <div className="flex md:hidden flex-col gap-4 md:ml-auto">
+
+          {/* Who viewed you - only on your own profile. Shown even at zero,
+              because gating it on having views makes a brand new feature
+              undiscoverable until someone happens to visit you. */}
+          {currentUser?.id === Number(userId) && (
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+              <Link
+                to={webRoutes.profileViews}
+                className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
+              >
+                <Eye className="size-4 shrink-0" />
+                <span>
+                  {profileViewsSummary?.unique_viewers > 0
+                    ? `${profileViewsSummary.unique_viewers} ${
+                        profileViewsSummary.unique_viewers === 1 ? "person" : "people"
+                      } viewed your profile`
+                    : "See who viewed your profile"}
+                </span>
+                {profileViewsSummary?.unseen_count > 0 && (
+                  <span className="rounded-full bg-gold px-2 py-0.5 text-[.6rem] font-bold text-dark">
+                    {profileViewsSummary.unseen_count} new
+                  </span>
+                )}
+              </Link>
+              <Link
+                to={webRoutes.myStats}
+                className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-dark underline-offset-4 hover:text-gold hover:underline"
+              >
+                <BarChart3 className="size-4 shrink-0" />
+                <span>See your activity</span>
+              </Link>
+            </div>
+          )}
+          <div className={clsx(" md:hidden items-center gap-2", currentUser?.id === Number(userId) ? "hidden" : "flex")}>
+                    <ConnectButton
+                      id={paramUser?.id}
+                      setCachedConnections={setCachedConnections}
+                      first_name={paramUser?.first_name}
+                      slug={paramUser?.slug}
+                      connection_status={paramUser?.connection_status}
+                    />
+                    {/* Room names are built as room_<viewer>_<other> everywhere else that opens a
+                        DM (Favorites, RoomName, the workforce profile), so reuse that shape rather
+                        than inventing one the messages page would not recognise. */}
+                    <Button
+                      as={Link}
+                      to={`${webRoutes.messages}/?room_name=room_${currentUser?.id}_${paramUser?.id}`}
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<ChatBubbleIcon />}
+                      className="!text-sm bg-background hover:!bg-gray-100 !border-gray-300 !border-[0px]"
+                    >
+                      Message
+                    </Button>
+                    <BlockUserButton
+                      userId={paramUser?.id}
+                      userName={paramUser?.first_name}
+                    />
+                    <Menu>
+                      <MenuButton
+                        as={IconButton}
+                        icon={<DotsHorizontalIcon />}
+                        variant="ghost"
+                        size="sm"
+                        aria-label="More options"
+                      />
+                      <MenuList>
+                        <MenuItem
+                          icon={<ExclamationTriangleIcon />}
+                          onClick={() => setShowReportModal(true)}
+                        >
+                          Report User
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
+                    
+                    <ReportModal
+                      isOpen={showReportModal}
+                      onClose={() => setShowReportModal(false)}
+                      contentType="user"
+                      contentId={paramUser?.id}
+                      reportedUserId={paramUser?.id}
+                    />
+                  </div>
+          </div>
+
+        </div>
 
         {currentUser &&
           currentUser?.companies?.length < 1 &&
@@ -661,7 +742,7 @@ export default function UserProfile() {
           </section>
 
           <div className="h-fit ">
-            <h2 className="text-xl font-semibold mb-4">Quick action</h2>
+            {/* <h2 className="text-xl font-semibold mb-4">Quick action</h2>
             <div className="mb-6">
               <div className="flex gap-3 flex-wrap">
                 <Link to={webRoutes.dealRooms} className="bg-white border border-gray-300 hover:bg-gold px-2 py-2.5 rounded-xl text-sm  flex items-center gap-2 shadow-sm">
@@ -716,8 +797,8 @@ export default function UserProfile() {
                   visit Business hub
                 </Link>
               </div>
-            </div>
-            <ProfileSection title="People Associated">
+            </div> */}
+            <ProfileSection title="Circle">
               <SuggestionList
                 hasSeeMore
                 associated={true}

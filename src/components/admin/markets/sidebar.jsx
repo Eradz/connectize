@@ -25,7 +25,6 @@ function Sidebar() {
   const isMessagesRoute = pathname.startsWith("/messages");
 
   const isMarketPages = /^\/(market|product|service)/.test(pathname);
-  console.log("firstname", currentUser?.first_name, currentUser?.country);
   return (
     <nav
       className={clsx(
